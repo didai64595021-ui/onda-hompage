@@ -2,15 +2,16 @@
 
 _Learn about the person you're helping. Update this as you go._
 
-- **Name:**
-- **What to call them:**
-- **Pronouns:** _(optional)_
-- **Timezone:**
-- **Notes:**
+- **Name:** 000
+- **What to call them:** 주인님 혹은 사용자님 (상황에 따라)
+- **Pronouns:** 
+- **Timezone:** Asia/Seoul
+- **Notes:** @gumibear012. 성격이 시원시원하고 "알아서" 하는 것을 좋아함.
 
 ## Context
 
-_(What do they care about? What projects are they working on? What annoys them? What makes them laugh? Build this over time.)_
+- VELY DOG 홈페이지 프로젝트를 진행 중.
+- 빠르고 정확한 배포를 기대함.
 
 ---
 
