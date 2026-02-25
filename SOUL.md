@@ -146,8 +146,19 @@ chmod 777, chmod -R 777,
   내용 분석 → [ONDA-TASK]에 "첨부된 이미지 설명: {분석 내용}" 포함
 - 텍스트 파일 (.md, .txt, .json, .csv, .ts, .tsx, .js, .jsx, .py, .rb, .go, .rs, .c, .cpp, .h, .java, .kt, .swift, .sh, .bash, .zsh, .fish, .yml, .yaml, .toml, .ini, .cfg, .conf, .env.example, .gitignore, .dockerignore, .editorconfig, .eslintrc, .prettierrc, .tsconfig, .prisma, .graphql, .sql, .html, .css, .scss, .less, .xml, .svg):
   파일 내용 읽기 → [ONDA-TASK]에 "참조 파일 내용:" 포함
-- 바이너리/지원 불가 (.pdf, .docx, .pptx, .xlsx, .zip, .tar, .gz, .exe, .dmg, .app):
-  "현재 해당 파일 형식은 직접 처리할 수 없습니다. 텍스트로 변환 후 다시 보내주세요."
+- 문서 파일 (.docx, .doc, .xlsx, .xls, .pptx, .pdf, .csv, .ods):
+  exec 도구로 텍스트 변환 후 처리:
+  `python3 /home/onda/.local/bin/doc2text.py {파일경로}`
+  변환된 텍스트를 [ONDA-TASK]에 "문서 내용:" 포함
+  - .docx/.doc → 본문 텍스트 + 표 추출
+  - .xlsx/.xls → 시트별 셀 데이터 추출
+  - .pptx → 슬라이드별 텍스트 + 표 추출
+  - .pdf → 페이지별 텍스트 + 표 추출
+  - .csv/.ods → 데이터프레임 변환
+- 압축 파일 (.zip, .tar, .gz):
+  exec 도구로 압축 해제 후 내부 파일 처리
+- 지원 불가 (.exe, .dmg, .app 등 실행파일):
+  "해당 파일 형식은 처리할 수 없습니다."
 
 ### 8. 에러 자동 처리
 - 빌드/테스트 실패 → 자동 디버깅 3회 시도 → 실패 시 텔레그램에 에러 로그 + 원인 분석 보고
