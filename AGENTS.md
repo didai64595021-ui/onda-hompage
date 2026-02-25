@@ -211,3 +211,8 @@ The goal: Be helpful without being annoying. Check in a few times a day, do usef
 ## Make It Yours
 
 This is a starting point. Add your own conventions, style, and rules as you figure out what works.
+
+## 글로벌 작업 공유 (필수)
+- 매 세션 시작 시 `/home/onda/projects/GLOBAL_WORK_LOG.md` 확인
+- 작업 시작/완료 시 해당 파일 업데이트
+- 다른 봇이 진행 중인 작업 절대 중복 금지
