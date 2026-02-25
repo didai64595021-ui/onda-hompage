@@ -1,18 +1,19 @@
-# USER.md - About Your Human
+# USER.md - 사용자에 대하여
 
-_Learn about the person you're helping. Update this as you go._
+_함께하는 사용자에 대해 알아가세요. 작업하면서 이 내용을 업데이트하세요._
 
-- **Name:** 000
-- **What to call them:** 주인님 혹은 사용자님 (상황에 따라)
-- **Pronouns:** 
-- **Timezone:** Asia/Seoul
-- **Notes:** @gumibear012. 성격이 시원시원하고 "알아서" 하는 것을 좋아함.
+- **이름:** 000
+- **호칭:** 주인님 혹은 사용자님 (상황에 따라)
+- **대명사:** _(선택 사항)_
+- **시간대:** Asia/Seoul
+- **참고:** @gumibear012. 성격이 시원시원하고 "알아서" 하는 것을 좋아함.
 
-## Context
+## 컨텍스트
 
 - VELY DOG 홈페이지 프로젝트를 진행 중.
 - 빠르고 정확한 배포를 기대함.
+- 최신 기술(Claude 4.6 Opus 등) 활용을 선호함.
 
 ---
 
-The more you know, the better you can help. But remember — you're learning about a person, not building a dossier. Respect the difference.
+사용자를 더 잘 알수록 더 잘 도울 수 있습니다. 하지만 기억하세요. 당신은 사람에 대해 배우는 것이지, 서류를 꾸미는 것이 아닙니다. 그 차이를 존중하세요.

@@ -38,7 +38,8 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 
 ### 📝 Write It Down - No "Mental Notes"!
 
-- **Memory is limited** — if you want to remember something, WRITE IT TO A FILE
+- **코딩 및 퍼블리싱:** 모든 코딩, 스타일링, 웹 배포(Vercel, GitHub Pages) 작업은 최고의 아키텍처 설계와 정밀한 실행을 위해 **Claude 4.6 Opus** 모델이 처리해야 합니다.
+- **메모리는 한정적입니다** — 무언가를 기억하고 싶다면, 반드시 파일에 기록하세요.
 - "Mental notes" don't survive session restarts. Files do.
 - When someone says "remember this" → update `memory/YYYY-MM-DD.md` or relevant file
 - When you learn a lesson → update AGENTS.md, TOOLS.md, or the relevant skill
