@@ -16,7 +16,18 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+        body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
+
+        /* Hamster Style */
+        .hamster {
+            position: fixed;
+            font-size: 50px;
+            z-index: 9999;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.1s linear;
+            filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.2));
+        }
 
         /* Header */
         header {
@@ -187,6 +198,50 @@
                 header.classList.remove('scrolled');
             }
         };
+
+        // --- Hamster Logic ---
+        const hamsterList = ['🐹', '🐹', '🐹']; // 여러 마리 가능
+        
+        function createHamster(emoji) {
+            const el = document.createElement('div');
+            el.className = 'hamster';
+            el.innerText = emoji;
+            document.body.appendChild(el);
+
+            let x = Math.random() * (window.innerWidth - 60);
+            let y = Math.random() * (window.innerHeight - 60);
+            let dx = (Math.random() - 0.5) * 6;
+            let dy = (Math.random() - 0.5) * 6;
+
+            function move() {
+                x += dx;
+                y += dy;
+
+                if (x + 60 > window.innerWidth || x < 0) {
+                    dx = -dx;
+                }
+                if (y + 60 > window.innerHeight || y < 0) {
+                    dy = -dy;
+                }
+
+                el.style.left = x + 'px';
+                el.style.top = y + 'px';
+                el.style.transform = dx > 0 ? 'scaleX(-1)' : 'scaleX(1)'; // 진행 방향에 따라 반전
+
+                requestAnimationFrame(move);
+            }
+
+            el.addEventListener('click', () => {
+                dx *= 1.5;
+                dy *= 1.5;
+                el.innerText = '🔥'; // 클릭하면 불타는 햄스터!
+                setTimeout(() => el.innerText = emoji, 500);
+            });
+
+            move();
+        }
+
+        hamsterList.forEach(h => createHamster(h));
     </script>
 </body>
 </html>
