@@ -279,7 +279,48 @@ GitHub 리포: didai64595021/{변환된 이름}
 2. `mkdir -p /home/onda/projects/{이름}`
 3. `cd /home/onda/projects/{이름} && git init && git remote add origin git@github.com:didai64595021/{이름}.git`
 4. 기본 파일 생성: index.html, style.css, .gitignore, README.md
-5. `git add . && git commit -m "Initial commit" && git push -u origin main`
+5. **표준 설정 파일 자동 생성 (필수):**
+   - `AGENTS.md` — 현재 서버의 AGENTS.md 복사
+   - `SOUL.md` — 현재 에이전트 SOUL.md 기반 복사 (보안/보고/승인 규칙 포함)
+   - `RULES.md` — 아래 운영 규칙 자동 포함:
+     ```
+     # RULES.md — 프로젝트 운영 규칙 (모든 프로젝트 공통)
+
+     ## 1. 자동복구 로직 (필수)
+     - 모든 API 에러: exponential backoff 재시도 (최대 3회)
+     - BullMQ 작업 실패: 자동 재큐 (최대 3회, backoff)
+     - PM2 자동 재시작: ecosystem.config.js 필수
+     - 헬스체크 엔드포인트: /health
+     - uncaughtException, unhandledRejection 핸들러
+     - DB 연결 끊김: 자동 재연결
+     - 외부 API 호출 실패: circuit breaker 패턴
+     - 에러 로깅: pino 사용
+     - graceful shutdown 처리
+
+     ## 2. 스텝별 실시간 보고 (필수)
+     - 작업 시작 → "🔨 작업 시작: [내용]"
+     - 스텝 완료 → "✅ [스텝명] 완료: [결과]"
+     - 오류 발생 → "⚠️ 오류: [내용] → 복구 중..."
+     - 복구 완료 → "🔄 복구 완료, 재진행"
+     - 배포 완료 → "🚀 배포 완료: [링크]"
+     - 한다고 한 건 끝나면 반드시 결과 보고 (재촉 없이)
+
+     ## 3. 오류 시 자동 이어서 진행
+     - 오류로 멈추면 직전 작업 기억해서 알아서 이어서 진행
+     - 멈춘 채로 방치 금지
+     - 디버깅/해결 방법은 능동적으로 찾아서 해결
+     - "안 된다"고만 보고하지 말고, 해결 후 보고
+
+     ## 4. 코딩 위임
+     - 모든 코딩/배포는 Claude Code (Opus 4.6)에 위임
+     - Claude Code 불가 시 직접 수행 (대안 찾기)
+     - API 키는 .env에서만. 하드코딩 절대 금지
+
+     ## 5. 봇 구동 승인
+     - 관리자(ID: 7383805736) 없는 방에서는 구동 안 됨
+     - 관리자 입장 시 승인 요청 → 승인 후에만 작동
+     ```
+6. `git add . && git commit -m "Initial commit" && git push -u origin main`
 6. openclaw.json에 새 에이전트 바인딩 추가 (현재 그룹 ID 사용)
 7. exec-approvals.json에 새 에이전트 권한 추가
 8. SOUL.md 복사 (현재 에이전트 SOUL.md 기반)
