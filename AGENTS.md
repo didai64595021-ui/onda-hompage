@@ -222,3 +222,9 @@ This is a starting point. Add your own conventions, style, and rules as you figu
 - exec 도구 호출 시 timeout 파라미터 사용 금지 (빌드/배포/테스트 등 긴 작업).
 - 세션 한도 초과 시에만 큐잉 후 리셋 대기.
 - 자동복구 스크립트: /home/onda/scripts/claude-resilient.sh 사용.
+
+## 세션 시작 시 작업 이어가기 (필수)
+- 세션 시작하면 HEARTBEAT.md 읽어라.
+- 미완료 작업이 있으면 git log/status 확인 후 이어서 진행.
+- 이미 완료된 건 건너뛰고, 남은 것만 완료.
+- 끊겼다고 처음부터 다시 하지 마라. 반드시 이어서.
