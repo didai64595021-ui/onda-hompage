@@ -216,3 +216,9 @@ This is a starting point. Add your own conventions, style, and rules as you figu
 - 매 세션 시작 시 `/home/onda/projects/GLOBAL_WORK_LOG.md` 확인
 - 작업 시작/완료 시 해당 파일 업데이트
 - 다른 봇이 진행 중인 작업 절대 중복 금지
+
+## 타임아웃 금지 (전체 프로젝트 공통)
+- Claude Code 실행 시 타임아웃 설정하지 마라. 끝날 때까지 대기.
+- exec 도구 호출 시 timeout 파라미터 사용 금지 (빌드/배포/테스트 등 긴 작업).
+- 세션 한도 초과 시에만 큐잉 후 리셋 대기.
+- 자동복구 스크립트: /home/onda/scripts/claude-resilient.sh 사용.
