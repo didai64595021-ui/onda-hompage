@@ -94,3 +94,10 @@
 - "완료했습니다"만 보내기 금지
 - Claude Code 서브에이전트에도 동일 적용
 - 2026-03-02 관리자 지시로 전 프로젝트 AGENTS.md에 추가 완료
+
+## 컴팩션 자동복구 시스템 (2026-03-02, 영구)
+- 스크립트: `/home/onda/scripts/compaction-recovery.sh`
+- 작업 상태 저장: `/home/onda/logs/active-tasks/<project>.json`
+- Claude Code 투입 시 반드시 register → 완료 시 complete
+- 컴팩션/세션 재시작 시 check → 미완료 있으면 자동 재개
+- 전 프로젝트 AGENTS.md + HEARTBEAT.md에 규칙 추가 완료
