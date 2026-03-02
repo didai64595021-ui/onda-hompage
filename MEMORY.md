@@ -111,3 +111,10 @@
 - Claude Code 투입 시 반드시 register → 완료 시 complete
 - 컴팩션/세션 재시작 시 check → 미완료 있으면 자동 재개
 - 전 프로젝트 AGENTS.md + HEARTBEAT.md에 규칙 추가 완료
+
+## 타임아웃 방지 규칙 (2026-03-02, 영구)
+- OpenClaw timeoutSeconds: 600초
+- 작업 중 5분마다 중간보고 필수 (세션 keepalive)
+- keepalive 모니터: `/home/onda/scripts/keepalive-monitor.sh` (tmux `keepalive` 세션)
+- 30분+ 커밋 없는 세션 → 자동 재시작
+- Claude Code 지시 시 "각 단계 완료마다 echo '[STEP-DONE] 스텝N: 내용'" 포함 필수
