@@ -36,7 +36,7 @@
             padding: 30px 50px; display: flex; justify-content: space-between; align-items: center;
             background: transparent; transition: var(--transition);
         }
-        header.scrolled { background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); padding: 20px 50px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        header.scrolled { background: rgba(255,255,255,0.9); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); padding: 20px 50px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
 
         .logo { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; text-decoration: none; color: var(--text); letter-spacing: -1px; }
         
@@ -102,17 +102,23 @@
             nav { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: rgba(255,255,255,0.95); padding: 20px; text-align: center; }
             nav.open { display: flex; flex-direction: column; gap: 15px; }
             nav a { margin-left: 0; }
+            header.scrolled { padding: 20px; }
             .hero-img { width: 100%; opacity: 0.3; }
             .hero-text h1 { font-size: 3rem; word-break: keep-all; }
             .product-grid { grid-template-columns: 1fr; }
             .feature-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 480px) {
+            .hero-text h1 { font-size: 2rem; }
+            .section-title { font-size: 2rem; }
+            .cta-link { padding: 12px 30px; font-size: 0.9rem; }
         }
     </style>
 </head>
 <body>
     <header id="header">
         <a href="index.html" class="logo">SOFT STEP</a>
-        <div class="menu-toggle" onclick="document.querySelector('nav').classList.toggle('open')" aria-label="메뉴 열기">&#9776;</div>
+        <div class="menu-toggle" role="button" tabindex="0" onclick="document.querySelector('nav').classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.querySelector('nav').classList.toggle('open')}" aria-label="메뉴 열기">&#9776;</div>
         <nav>
             <a href="#collection">COLLECTION</a>
             <a href="#about">STORY</a>
@@ -133,7 +139,7 @@
     <section id="collection" class="container">
         <h2 class="section-title">Essential Collection</h2>
         <div class="product-grid">
-            <div class="product-card" onclick="location.href='product-detail.html'">
+            <a href="product-detail.html" class="product-card" style="text-decoration:none;color:inherit">
                 <div class="product-img">
                     <img src="https://images.unsplash.com/photo-1582966772640-ddd6603f0702?q=80&w=1000&auto=format&fit=crop" alt="Classic Ribbed">
                 </div>
@@ -142,8 +148,8 @@
                     <p>Cream Ivory / Pure White</p>
                     <div class="price">₩ 12,000</div>
                 </div>
-            </div>
-            <div class="product-card" onclick="location.href='product-detail.html'">
+            </a>
+            <a href="product-detail.html" class="product-card" style="text-decoration:none;color:inherit">
                 <div class="product-img">
                     <img src="https://images.unsplash.com/photo-1621065600100-336338e55e51?q=80&w=1000&auto=format&fit=crop" alt="Daily Wool Mix">
                 </div>
@@ -152,8 +158,8 @@
                     <p>Oatmeal / Charcoal / Navy</p>
                     <div class="price">₩ 15,000</div>
                 </div>
-            </div>
-            <div class="product-card" onclick="location.href='product-detail.html'">
+            </a>
+            <a href="product-detail.html" class="product-card" style="text-decoration:none;color:inherit">
                 <div class="product-img">
                     <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=1000&auto=format&fit=crop" alt="Premium Silk Touch">
                 </div>
@@ -162,7 +168,7 @@
                     <p>Deep Black / Forest Green</p>
                     <div class="price">₩ 18,000</div>
                 </div>
-            </div>
+            </a>
         </div>
     </section>
 
@@ -190,21 +196,21 @@
 
     <footer id="contact">
         <div class="container">
-            <a href="#" class="footer-logo">SOFT STEP</a>
+            <a href="index.html" class="footer-logo">SOFT STEP</a>
             <p>Every step you take, we are with you.</p>
             <p style="margin-top: 30px; font-size: 0.8rem;">&copy; 2026 SOFT STEP. All rights reserved.</p>
         </div>
     </footer>
 
     <script>
-        window.onscroll = function() {
+        window.addEventListener('scroll', function() {
             const header = document.getElementById('header');
             if (window.pageYOffset > 50) {
                 header.classList.add('scrolled');
             } else {
                 header.classList.remove('scrolled');
             }
-        };
+        });
 
         // --- Hamster Logic ---
         const hamsterList = ['🐹', '🐹', '🐹']; // 여러 마리 가능

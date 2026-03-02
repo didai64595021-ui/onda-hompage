@@ -12,7 +12,7 @@
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{--neon:#00FF88;--neon-dim:#00cc6a;--bg:#0a0a0a;--card:rgba(255,255,255,.04);--card-border:rgba(0,255,136,.15);--text:#e0e0e0;--text-dim:#888;--glass:rgba(10,10,10,.7)}
 html{scroll-behavior:smooth}
-body{font-family:'Noto Sans KR','Space Grotesk',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.7}
+body{font-family:'Noto Sans KR','Space Grotesk',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.7;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 h1,h2,h3,.counter-num{font-family:'Orbitron','Space Grotesk',sans-serif}
 canvas#matrix{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;opacity:.12;pointer-events:none}
 
@@ -236,6 +236,7 @@ button,a{min-height:44px;min-width:44px}
 }
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important;scroll-behavior:auto!important}
+  .reveal{opacity:1;transform:none}
 }
 </style>
 </head>
@@ -260,7 +261,7 @@ button,a{min-height:44px;min-width:44px}
   <div class="vault-door right"><div class="door-grid"></div></div>
 </div>
 
-<canvas id="matrix"></canvas>
+<canvas id="matrix" aria-hidden="true"></canvas>
 
 <!-- HEADER -->
 <header id="header">
@@ -447,12 +448,12 @@ button,a{min-height:44px;min-width:44px}
     <div>
       <h4 style="color:var(--neon);font-family:'Space Grotesk';font-size:.8rem;letter-spacing:2px;margin-bottom:1rem">문의</h4>
       <a href="https://pf.kakao.com/_xdbJnn/chat" target="_blank" rel="noopener noreferrer" style="display:block;color:var(--text-dim);font-size:.85rem;text-decoration:none;padding:.4rem 0;transition:color .3s"><i class="fas fa-comment" style="color:var(--neon);margin-right:.5rem"></i>카카오톡 상담</a>
-      <a href="mailto:ondadaad@google.com" style="display:block;color:var(--text-dim);font-size:.85rem;text-decoration:none;padding:.4rem 0;transition:color .3s"><i class="fas fa-envelope" style="color:var(--neon);margin-right:.5rem"></i>ondadaad@google.com</a>
+      <a href="mailto:ondadaad@gmail.com" style="display:block;color:var(--text-dim);font-size:.85rem;text-decoration:none;padding:.4rem 0;transition:color .3s"><i class="fas fa-envelope" style="color:var(--neon);margin-right:.5rem"></i>ondadaad@gmail.com</a>
       <a href="contact.html" style="display:block;color:var(--text-dim);font-size:.85rem;text-decoration:none;padding:.4rem 0;transition:color .3s"><i class="fas fa-pen" style="color:var(--neon);margin-right:.5rem"></i>문의하기</a>
     </div>
   </div>
   <div class="footer-bottom">
-    <span>Copyright © 2025 온다마케팅. All rights reserved.</span>
+    <span>Copyright © 2026 온다마케팅. All rights reserved.</span>
     <div class="footer-social">
       <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
       <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
@@ -474,7 +475,7 @@ const chars='アイウエオカキクケコサシスセソタチツテトナニ�
 const fontSize=14,columns=Math.floor(canvas.width/fontSize);
 const drops=Array(columns).fill(1);
 function drawMatrix(){ctx.fillStyle='rgba(10,10,10,.05)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#00FF88';ctx.font=fontSize+'px monospace';for(let i=0;i<drops.length;i++){const t=chars[Math.floor(Math.random()*chars.length)];ctx.fillText(t,i*fontSize,drops[i]*fontSize);if(drops[i]*fontSize>canvas.height&&Math.random()>.975)drops[i]=0;drops[i]++}}
-setInterval(drawMatrix,45);
+if(!window.matchMedia('(prefers-reduced-motion:reduce)').matches)setInterval(drawMatrix,45);
 
 // Typing
 const phrases=["마케팅 성과 분석 중...","500+ 클라이언트 데이터 로딩...","ROI 최적화 알고리즘 실행...","온다마케팅 시스템 준비 완료."];
