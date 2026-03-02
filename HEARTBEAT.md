@@ -12,3 +12,8 @@
 - 프로젝트: /home/onda/projects/onda-youtube-investment
 - **타임아웃 시**: `cd /home/onda/projects/onda-youtube-investment && cat /tmp/onda-major-task.md | claude --dangerously-skip-permissions` 로 재시작
 - **완료 확인**: git log에 Edge TTS 관련 커밋이 있으면 완료
+
+## 워치독 자동복구
+- 오류 발생 시 자동으로 디버깅 + 재시도 (최대 3회)
+- 세션 끊김 시 마지막 작업 이어서 진행
+- 멈춘 채로 방치 금지 — 알아서 해결 후 보고
