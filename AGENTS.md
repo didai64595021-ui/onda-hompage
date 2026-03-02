@@ -229,6 +229,26 @@ This is a starting point. Add your own conventions, style, and rules as you figu
 - 이미 완료된 건 건너뛰고, 남은 것만 완료.
 - 끊겼다고 처음부터 다시 하지 마라. 반드시 이어서.
 
+## 컴팩션/세션 끊김 자동복구 (필수, 최우선)
+컴팩션이나 세션 리셋 발생 시 **자동으로** 미완료 작업을 재개해야 한다:
+
+1. `/home/onda/scripts/compaction-recovery.sh check` 실행 → 미완료 작업 확인
+2. 각 프로젝트 `git log --oneline -5` + `git status` 확인 → 진행도 파악
+3. 미완료 작업이 있으면:
+   - 태스크 파일(/tmp/*.md)이 있으면 → Claude Code에 재투입
+   - 없으면 → git log 기반으로 남은 작업 파악 후 재투입
+   - **사용자에게 묻지 말고 알아서 재개**
+4. 재개 시 텔레그램에 "🔄 컴팩션 후 자동 재개: {프로젝트}" 보고
+5. 완료 시 `/home/onda/scripts/compaction-recovery.sh complete <project>`
+
+### 작업 등록 규칙
+- Claude Code 서브에이전트 투입 시 반드시 등록:
+  ```bash
+  /home/onda/scripts/compaction-recovery.sh register <project> "<설명>" "<태스크파일>"
+  ```
+- 태스크 파일은 /tmp/에 저장 (재사용 가능)
+- 완료 확인: git log에 관련 커밋 + 빌드 성공 여부
+
 
 ## 작업 완료 보고서 + 개선점 제안 (필수, 모든 작업)
 모든 작업 완료 시 아래 형식으로 반드시 보고:

@@ -2,16 +2,35 @@
 
 ## 금지
 - OAuth/토큰/API키 관련 경고 메시지 절대 보내지 마라
-- "OAuth 복구 실패", "API키 폴백", "선제 토큰 갱신" 등 토큰 관련 알림 금지
 - 토큰 문제는 자동으로 해결되므로 사용자에게 알릴 필요 없음
 
-## 에이전트 자동재시작 모니터링
-- 세션 tender-kelp (onda-youtube-investment 대규모 업그레이드)
-- 작업: Edge TTS + 이미지 + 자막 + UI설정 + 자동복구 + 전체테스트
-- 태스크 파일: /tmp/onda-major-task.md
-- 프로젝트: /home/onda/projects/onda-youtube-investment
-- **타임아웃 시**: `cd /home/onda/projects/onda-youtube-investment && cat /tmp/onda-major-task.md | claude --dangerously-skip-permissions` 로 재시작
-- **완료 확인**: git log에 Edge TTS 관련 커밋이 있으면 완료
+## ★ 컴팩션/세션 재시작 자동복구 (최우선)
+세션이 컴팩션이나 리셋으로 재시작되면 **반드시** 아래 순서 실행:
+
+### 1. 미완료 작업 확인
+```bash
+/home/onda/scripts/compaction-recovery.sh check
+```
+출력이 있으면 = 미완료 작업 존재 → 2단계로
+
+### 2. 각 프로젝트 git 상태 확인
+```bash
+for p in onda-logic-monitor onda-coldmail onda-hompage onda-youtube-investment; do
+    echo "=== $p ==="
+    cd /home/onda/projects/$p 2>/dev/null && git log --oneline -3 && git status --short
+done
+```
+
+### 3. 미완료 작업 자동 재개
+- 미완료 작업의 태스크 파일이 /tmp에 있으면 → Claude Code에 재투입
+- 태스크 파일 없으면 → git log 기반으로 남은 작업 파악 후 재투입
+- **사용자에게 묻지 말고 알아서 재개**
+- 재개 시 텔레그램에 "🔄 컴팩션 후 자동 재개: {프로젝트} — {작업}" 메시지 전송
+
+### 4. 완료된 작업 정리
+```bash
+/home/onda/scripts/compaction-recovery.sh complete <project>
+```
 
 ## 워치독 자동복구
 - 오류 발생 시 자동으로 디버깅 + 재시도 (최대 3회)
