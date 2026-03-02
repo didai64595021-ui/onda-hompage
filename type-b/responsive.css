@@ -1,0 +1,301 @@
+/* ============================================
+   ONDA Type-B Cyberpunk — Cross-Device Responsive
+   Galaxy Fold 280px → 4K 3840px
+   ============================================ */
+
+/* === BASE RESPONSIVE FOUNDATIONS === */
+*,*::before,*::after{
+  word-break:keep-all;
+  overflow-wrap:break-word;
+}
+html{
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+}
+body{
+  min-width:280px;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+img,video,svg,canvas{
+  max-width:100%;
+  height:auto;
+}
+table{
+  overflow-x:auto;
+  display:block;
+  max-width:100%;
+}
+
+/* Touch targets */
+a,button,input,select,textarea,
+.nav-cta,.btn-primary,.btn-outline,.filter-btn,.cat-tab,.faq-question{
+  min-height:44px;
+  min-width:44px;
+}
+
+/* Fluid typography & spacing via clamp */
+:root{
+  --fs-hero:clamp(1.6rem,5vw,3.5rem);
+  --fs-section-title:clamp(1.4rem,3.5vw,2.4rem);
+  --fs-body:clamp(0.875rem,1.2vw,1rem);
+  --fs-small:clamp(0.75rem,1vw,0.9rem);
+  --fs-nav:clamp(0.8rem,1vw,0.9rem);
+  --pad-section:clamp(2.5rem,6vw,6rem) clamp(1rem,3vw,2rem);
+  --pad-card:clamp(1.2rem,2.5vw,2rem);
+  --gap-grid:clamp(0.8rem,2vw,1.5rem);
+  --container-max:1200px;
+}
+
+/* Apply fluid sizes */
+section{padding:var(--pad-section)!important}
+.section-title{font-size:var(--fs-section-title)!important}
+.section-sub{font-size:var(--fs-body)!important}
+.container{max-width:var(--container-max);margin:0 auto;width:100%;padding-inline:clamp(0.5rem,2vw,1rem)}
+.hero-title{font-size:var(--fs-hero)!important}
+.hero-sub{font-size:var(--fs-body)!important}
+.service-card,.blog-card,.team-card,.pricing-card,.portfolio-card,.faq-item,.contact-card,.value-card{
+  padding:var(--pad-card)!important;
+  overflow:hidden;
+}
+.nav-links a{font-size:var(--fs-nav)!important}
+
+/* Fluid grids – base */
+.services-grid,.blog-grid,.team-grid,.portfolio-grid,.contact-cards,.values-grid,.pricing-grid{
+  gap:var(--gap-grid)!important;
+}
+.stats-grid{gap:var(--gap-grid)!important}
+.tech-grid{gap:clamp(0.6rem,1.5vw,1.2rem)!important}
+
+/* Overflow safety */
+.terminal-box,.terminal-prompt,pre,code{
+  overflow-x:auto;
+  max-width:100%;
+}
+.comparison-table{
+  display:block;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* === 4K+ (2560px and above) === */
+@media(min-width:2560px){
+  :root{
+    --container-max:1600px;
+  }
+  .hero-title{font-size:4rem!important}
+  .section-title{font-size:3rem!important}
+  .services-grid,.blog-grid,.portfolio-grid{grid-template-columns:repeat(4,1fr)!important}
+  .team-grid{grid-template-columns:repeat(4,1fr)!important}
+  .stats-grid{grid-template-columns:repeat(4,1fr)!important}
+  .pricing-grid{grid-template-columns:repeat(3,1fr)!important}
+  section{padding:8rem 3rem!important}
+  .service-card,.blog-card,.team-card,.portfolio-card{padding:2.5rem!important}
+}
+
+/* === Large desktop 1920px+ === */
+@media(min-width:1920px) and (max-width:2559px){
+  :root{
+    --container-max:1400px;
+  }
+  .services-grid,.blog-grid,.portfolio-grid{grid-template-columns:repeat(3,1fr)!important}
+  .team-grid{grid-template-columns:repeat(3,1fr)!important}
+}
+
+/* === Desktop 1200px+ === */
+@media(min-width:1200px) and (max-width:1919px){
+  :root{
+    --container-max:1200px;
+  }
+}
+
+/* === Tablet landscape / small desktop 1024px–1199px === */
+@media(max-width:1199px) and (min-width:1024px){
+  :root{--container-max:960px}
+  .services-grid,.portfolio-grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))!important}
+  .pricing-grid{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))!important}
+  .about-intro{gap:2rem!important}
+}
+
+/* === Tablet 768px–1023px === */
+@media(max-width:1023px) and (min-width:768px){
+  :root{--container-max:720px}
+  .stats-grid{grid-template-columns:repeat(2,1fr)!important}
+  .services-grid,.blog-grid,.portfolio-grid{grid-template-columns:repeat(2,1fr)!important}
+  .team-grid{grid-template-columns:repeat(2,1fr)!important}
+  .pricing-grid{grid-template-columns:1fr!important}
+  .about-intro{grid-template-columns:1fr!important}
+  .roi-results{grid-template-columns:1fr!important}
+  .tech-grid{grid-template-columns:repeat(3,1fr)!important}
+  .comparison-table th,.comparison-table td{padding:0.7rem 0.5rem!important;font-size:0.85rem!important}
+  .hero-btns{flex-direction:column;align-items:center}
+  .terminal-box{padding:1.2rem!important}
+}
+
+/* === Mobile nav (<=768px) — shared hamburger logic === */
+@media(max-width:768px){
+  .nav-links{
+    display:none;position:absolute;top:100%;left:0;width:100%;
+    background:rgba(10,10,10,.95);flex-direction:column;
+    padding:1.5rem 2rem;gap:1.2rem;
+    border-bottom:1px solid var(--card-border);
+    -webkit-backdrop-filter:blur(20px);
+    backdrop-filter:blur(20px);
+  }
+  .nav-links.open{display:flex}
+  .hamburger{display:flex!important}
+  header{padding:0.8rem 1rem!important}
+  header.scrolled{padding:0.5rem 1rem!important}
+  nav{padding:0!important}
+
+  .stats-grid{grid-template-columns:repeat(2,1fr)!important}
+  .services-grid,.blog-grid,.portfolio-grid,.contact-cards,.values-grid{grid-template-columns:1fr!important}
+  .team-grid{grid-template-columns:1fr!important}
+  .pricing-grid{grid-template-columns:1fr!important}
+  .about-intro{grid-template-columns:1fr!important}
+  .roi-results{grid-template-columns:1fr!important}
+  .tech-grid{grid-template-columns:repeat(2,1fr)!important}
+  .counters-grid{grid-template-columns:repeat(2,1fr)!important}
+  
+  .hero-btns{flex-direction:column;align-items:center}
+  .hero-btns .btn-primary,.hero-btns .btn-outline{width:100%;max-width:320px;justify-content:center}
+  
+  .comparison-table th,.comparison-table td{padding:0.6rem 0.4rem!important;font-size:0.8rem!important}
+  .footer-bottom{flex-direction:column;text-align:center;gap:0.8rem}
+  .terminal-box{padding:1rem!important}
+
+  .page-hero{min-height:40vh!important;padding-top:5rem!important}
+  #hero{padding:5rem 1rem 3rem!important;min-height:90vh!important}
+
+  .filter-bar,.cat-tabs{gap:0.4rem!important}
+  .filter-btn,.cat-tab{padding:0.5rem 1rem!important;font-size:0.8rem!important}
+
+  .faq-question{padding:1rem 1.2rem!important}
+
+  .service-detail-header{flex-direction:column;align-items:flex-start}
+  .service-features{grid-template-columns:1fr!important}
+
+  /* Kakao float adjust */
+  .kakao-float{bottom:1rem!important;right:1rem!important;width:52px!important;height:52px!important}
+}
+
+/* === Small mobile 480px === */
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr 1fr!important;gap:1rem!important}
+  .tech-grid{grid-template-columns:repeat(2,1fr)!important}
+  .counters-grid{grid-template-columns:1fr!important}
+  .team-grid{grid-template-columns:1fr!important}
+  .values-grid{grid-template-columns:1fr!important}
+  
+  .hero-title{font-size:clamp(1.4rem,6vw,2rem)!important}
+  .section-title{font-size:clamp(1.2rem,5vw,1.6rem)!important}
+  .hero-sub{font-size:0.9rem!important;line-height:1.6!important}
+  
+  .btn-primary,.btn-outline{padding:0.8rem 1.5rem!important;font-size:0.9rem!important;width:100%;justify-content:center}
+  .nav-cta{padding:0.5rem 1rem!important;font-size:0.8rem!important}
+  
+  .terminal-box{padding:0.8rem!important;border-radius:8px!important}
+  .terminal-prompt{font-size:0.8rem!important}
+  
+  .logo{font-size:1.1rem!important}
+  
+  .service-card h3,.blog-card h3{font-size:1rem!important}
+  .service-card p,.blog-card p{font-size:0.85rem!important}
+  
+  .comparison-table{font-size:0.75rem!important}
+  
+  .timeline{padding-left:30px!important}
+  .timeline-item::before{left:-22px!important;width:10px!important;height:10px!important}
+  
+  .pricing-card{padding:1.2rem!important}
+
+  .page-hero h1{font-size:clamp(1.4rem,6vw,2rem)!important}
+}
+
+/* === Galaxy Fold / Ultra-narrow 320px === */
+@media(max-width:320px){
+  header{padding:0.5rem 0.6rem!important}
+  .logo{font-size:1rem!important}
+  
+  section{padding:2rem 0.6rem!important}
+  #hero{padding:4rem 0.6rem 2rem!important}
+  .page-hero{padding:4rem 0.6rem 2rem!important}
+  
+  .hero-title{font-size:1.3rem!important}
+  .section-title{font-size:1.1rem!important}
+  .hero-sub{font-size:0.85rem!important}
+  
+  .stats-grid{grid-template-columns:1fr!important}
+  .tech-grid{grid-template-columns:1fr 1fr!important}
+  
+  .terminal-box{padding:0.6rem!important}
+  .terminal-prompt{font-size:0.7rem!important}
+  .terminal-dot{width:8px!important;height:8px!important}
+  
+  .btn-primary,.btn-outline{padding:0.7rem 1rem!important;font-size:0.85rem!important}
+  
+  .nav-links{padding:1rem!important}
+  
+  .faq-question{padding:0.8rem 1rem!important;font-size:0.85rem!important}
+  .faq-answer{padding:0.8rem 1rem!important;font-size:0.8rem!important}
+
+  .comparison-table th,.comparison-table td{padding:0.4rem 0.3rem!important;font-size:0.7rem!important}
+}
+
+/* === Galaxy Fold folded 280px === */
+@media(max-width:280px){
+  body{font-size:13px!important}
+  .hero-title{font-size:1.15rem!important;line-height:1.3!important}
+  .section-title{font-size:1rem!important}
+  header{padding:0.4rem 0.5rem!important}
+  .logo{font-size:0.9rem!important;letter-spacing:-0.5px}
+  section{padding:1.5rem 0.4rem!important}
+  #hero{padding:3.5rem 0.4rem 1.5rem!important}
+  .nav-links{padding:0.8rem!important;gap:0.8rem!important}
+  .btn-primary,.btn-outline{padding:0.6rem 0.8rem!important;font-size:0.8rem!important}
+  .service-card,.blog-card,.team-card,.pricing-card,.portfolio-card,.faq-item,.contact-card{
+    padding:0.8rem!important;
+  }
+}
+
+/* === Orientation: landscape mobile === */
+@media(max-height:500px) and (orientation:landscape){
+  #hero,.page-hero{min-height:auto!important;padding-top:4rem!important;padding-bottom:2rem!important}
+  .loading-overlay{display:none!important}
+  .hero-title{font-size:clamp(1.2rem,3vw,2rem)!important}
+  .hero-sub{font-size:0.85rem!important}
+  section{padding:2rem 1.5rem!important}
+}
+
+/* === Prefers reduced motion === */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:0.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:0.01ms!important;
+    scroll-behavior:auto!important;
+  }
+  canvas#matrix{display:none}
+  .loading-overlay{display:none!important}
+  .reveal,.timeline-item{opacity:1!important;transform:none!important}
+}
+
+/* === High DPI / Retina === */
+@media(-webkit-min-device-pixel-ratio:2),(min-resolution:192dpi){
+  .terminal-dot{border:0.5px solid rgba(255,255,255,.1)}
+}
+
+/* === Print === */
+@media print{
+  header,.hamburger,.kakao-float,canvas#matrix,.loading-overlay{display:none!important}
+  body{background:#fff!important;color:#000!important}
+  section{padding:1rem!important;page-break-inside:avoid}
+}
+
+/* Aspect ratio helpers for portfolio thumbnails */
+.portfolio-thumb{
+  aspect-ratio:16/9;
+  height:auto!important;
+}
+@media(max-width:480px){
+  .portfolio-thumb{aspect-ratio:4/3}
+}

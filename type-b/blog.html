@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>블로그 — 온다마케팅</title>
+<meta name="description" content="온다마케팅 블로그 - 마케팅 인사이트 및 트렌드">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--neon:#00FF88;--neon-dim:#00cc6a;--bg:#0a0a0a;--card:rgba(255,255,255,.04);--card-border:rgba(0,255,136,.15);--text:#e0e0e0;--text-dim:#888}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans KR','Space Grotesk',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.7;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+h1,h2,h3{font-family:'Orbitron','Space Grotesk',sans-serif}
+canvas#matrix{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;opacity:.12;pointer-events:none}
+@media(prefers-reduced-motion:reduce){canvas#matrix{display:none}.reveal{opacity:1!important;transform:none!important;transition:none!important}}
+
+header{position:fixed;top:0;left:0;width:100%;z-index:100;padding:1.2rem 2rem;backdrop-filter:blur(20px);background:rgba(10,10,10,.75);border-bottom:1px solid var(--card-border);transition:all .3s}
+header.scrolled{padding:.6rem 2rem;background:rgba(10,10,10,.92)}
+nav{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;min-height:40px}
+.logo{font-family:'Orbitron';font-weight:900;font-size:clamp(1.1rem,2vw,1.4rem);color:var(--neon);text-shadow:0 0 20px rgba(0,255,136,.4);text-decoration:none;display:flex;align-items:center;line-height:1}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{color:var(--text-dim);text-decoration:none;font-size:.9rem;transition:color .3s;position:relative;min-height:44px;display:flex;align-items:center}
+.nav-links a:hover,.nav-links a.active{color:var(--neon)}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--neon);transition:width .3s;box-shadow:0 0 8px var(--neon)}
+.nav-links a:hover::after,.nav-links a.active::after{width:100%}
+.nav-cta{background:transparent;border:1px solid var(--neon);color:var(--neon);padding:.5rem 1.2rem;border-radius:4px;cursor:pointer;font-size:.85rem;transition:all .3s;text-decoration:none;min-height:44px;display:inline-flex;align-items:center}
+.nav-cta:hover{background:var(--neon);color:var(--bg);box-shadow:0 0 25px rgba(0,255,136,.5)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;min-width:44px;min-height:44px;justify-content:center;align-items:center}
+.hamburger span{width:24px;height:2px;background:var(--neon);transition:all .3s}
+
+section{position:relative;z-index:1;padding:clamp(3rem,6vw,6rem) clamp(1rem,4vw,2rem)}
+.container{max-width:1200px;margin:0 auto}
+.section-title{text-align:center;font-size:clamp(1.6rem,3.5vw,2.4rem);margin-bottom:.8rem}
+.section-title .accent{color:var(--neon);text-shadow:0 0 20px rgba(0,255,136,.3)}
+.section-sub{text-align:center;color:var(--text-dim);margin-bottom:2rem;font-size:clamp(.9rem,1.5vw,1rem)}
+
+.page-hero{min-height:60vh;display:flex;align-items:center;justify-content:center;text-align:center;padding-top:6rem}
+.page-hero h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:900;margin-bottom:1rem}
+.page-hero h1 .accent{color:var(--neon);text-shadow:0 0 30px rgba(0,255,136,.4)}
+.page-hero p{color:var(--text-dim);font-size:clamp(1rem,1.5vw,1.2rem);max-width:700px;margin:0 auto;line-height:1.8}
+
+/* FILTER */
+.filter-bar{display:flex;justify-content:center;gap:.8rem;flex-wrap:wrap;margin-bottom:3rem}
+.filter-btn{background:var(--card);border:1px solid var(--card-border);color:var(--text-dim);padding:.6rem 1.4rem;border-radius:30px;cursor:pointer;font-size:.9rem;transition:all .3s;min-height:44px;font-family:'Noto Sans KR'}
+.filter-btn:hover,.filter-btn.active{background:var(--neon);color:var(--bg);border-color:var(--neon);box-shadow:0 0 20px rgba(0,255,136,.3)}
+
+/* BLOG GRID */
+.blog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:1.5rem}
+.blog-card{background:var(--card);border:1px solid var(--card-border);border-radius:16px;overflow:hidden;transition:all .4s;position:relative}
+.blog-card.hidden{display:none}
+.blog-card:hover{transform:translateY(-6px);box-shadow:0 0 35px rgba(0,255,136,.15);border-color:var(--neon)}
+.blog-header{background:linear-gradient(135deg,rgba(0,255,136,.06),rgba(0,255,136,.02));padding:1.5rem;border-bottom:1px solid var(--card-border)}
+.blog-header .blog-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem;flex-wrap:wrap;gap:.5rem}
+.blog-header .blog-date{color:var(--text-dim);font-size:.8rem;font-family:'Space Grotesk'}
+.blog-header .blog-read-time{color:var(--neon);font-size:.8rem;font-family:'Space Grotesk';display:flex;align-items:center;gap:.3rem}
+.blog-header .blog-cat{display:inline-block;background:rgba(0,255,136,.1);color:var(--neon);font-size:.75rem;padding:.2rem .7rem;border-radius:20px;border:1px solid rgba(0,255,136,.2)}
+.blog-header h3{font-family:'Space Grotesk';font-size:1.1rem;color:#fff;margin-top:.8rem;line-height:1.4}
+.blog-body{padding:1.5rem}
+.blog-body p{color:var(--text-dim);font-size:.9rem;line-height:1.8}
+.blog-body .read-more{display:inline-flex;align-items:center;gap:.4rem;color:var(--neon);font-size:.85rem;margin-top:1rem;text-decoration:none;transition:all .3s}
+.blog-body .read-more:hover{gap:.7rem}
+
+.btn-primary{background:var(--neon);color:var(--bg);padding:.9rem 2.2rem;border:none;border-radius:6px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .3s;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;min-height:44px}
+.btn-primary:hover{box-shadow:0 0 35px rgba(0,255,136,.6);transform:translateY(-2px)}
+
+.cta-section{text-align:center;padding:clamp(4rem,8vw,6rem) 2rem;background:linear-gradient(180deg,transparent,rgba(0,255,136,.03),transparent)}
+.cta-section h2{font-size:clamp(1.6rem,3.5vw,2.4rem);margin-bottom:1rem}
+.cta-section p{color:var(--text-dim);margin-bottom:2rem;font-size:1.05rem}
+
+footer{border-top:1px solid var(--card-border);padding:3rem 2rem;background:rgba(0,0,0,.5);position:relative;z-index:1}
+.footer-inner{max-width:1200px;margin:0 auto}
+.footer-info{color:var(--text-dim);font-size:.82rem;line-height:2.2}
+.footer-info .cmd{color:var(--neon);font-family:'Space Grotesk',monospace}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(0,255,136,.1);flex-wrap:wrap;gap:1rem}
+.footer-bottom span{color:var(--text-dim);font-size:.8rem}
+.footer-social a{color:var(--text-dim);font-size:1.1rem;margin-left:1rem;transition:color .3s;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+.footer-social a:hover{color:var(--neon)}
+
+.kakao-float{position:fixed;bottom:2rem;right:2rem;z-index:999;width:60px;height:60px;border-radius:50%;background:#FEE500;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:all .3s;text-decoration:none}
+.kakao-float:hover{transform:scale(1.1)}
+.kakao-float i{font-size:1.6rem;color:#3C1E1E}
+
+.reveal{opacity:0;transform:translateY(40px);transition:all .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:768px){
+  .nav-links{display:none;position:absolute;top:100%;left:0;width:100%;background:rgba(10,10,10,.95);flex-direction:column;padding:1.5rem 2rem;gap:1.2rem;border-bottom:1px solid var(--card-border);backdrop-filter:blur(20px)}
+  .nav-links.open{display:flex}
+  .hamburger{display:flex}
+  .blog-grid{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;text-align:center}
+}
+/* === CROSS-DEVICE RESPONSIVE GLOBAL === */
+*{word-break:keep-all;overflow-wrap:break-word}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+img,video,iframe{max-width:100%;height:auto}
+button,a{min-height:44px;min-width:44px}
+
+@media(max-width:280px){
+  body{font-size:13px}
+  section{padding:2rem 1rem!important}
+  h1{font-size:1.5rem!important}h2{font-size:1.2rem!important}
+  .stats-grid,.contact-cards{grid-template-columns:1fr!important}
+  .hero-title{font-size:1.5rem!important}
+  .hero-btns{flex-direction:column;width:100%}
+  .hero-btns a{width:100%;justify-content:center}
+  .nav-cta{padding:.4rem .8rem!important;font-size:.8rem!important}
+  .terminal-box{padding:.8rem!important;font-size:.75rem!important}
+}
+@media(max-width:320px){
+  h1{font-size:1.6rem!important}
+  .counter-num{font-size:2rem!important}
+  .kakao-btn{padding:.8rem 1.5rem!important;font-size:.95rem!important}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr 1fr;gap:1.5rem}
+  .hero-btns{flex-direction:column;align-items:center}
+  .comparison-table{font-size:.8rem}
+  .comparison-table th,.comparison-table td{padding:.6rem .4rem}
+}
+@media(min-width:769px) and (max-width:1024px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(min-width:1920px){
+  html{font-size:18px}
+  section{max-width:1400px;margin:0 auto}
+}
+@media(min-width:2560px){
+  html{font-size:20px}
+  .hero-title{font-size:5rem!important}
+}
+@media(max-height:500px) and (orientation:landscape){
+  #hero{min-height:auto;padding:3rem 2rem}
+  .page-hero{min-height:auto;padding:3rem 2rem}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+
+<header id="header">
+<nav>
+  <a href="index.html" class="logo">ONDA_</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="about.html">회사 소개</a></li>
+    <li><a href="services.html">서비스</a></li>
+    <li><a href="portfolio.html">포트폴리오</a></li>
+    <li><a href="blog.html" class="active">블로그</a></li>
+    <li><a href="faq.html">FAQ</a></li>
+    <li><a href="contact.html" class="nav-cta">문의하기</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="메뉴"><span></span><span></span><span></span></button>
+</nav>
+</header>
+
+<section class="page-hero">
+<div class="container">
+  <h1 class="reveal">온다 <span class="accent">블로그</span></h1>
+  <p class="reveal">마케팅 인사이트, 트렌드, 실전 노하우를 공유합니다.</p>
+</div>
+</section>
+
+<section id="blog">
+<div class="container">
+
+  <div class="filter-bar reveal">
+    <button class="filter-btn active" data-filter="all">전체</button>
+    <button class="filter-btn" data-filter="strategy">전략</button>
+    <button class="filter-btn" data-filter="sns">SNS</button>
+    <button class="filter-btn" data-filter="seo">SEO</button>
+    <button class="filter-btn" data-filter="trend">트렌드</button>
+  </div>
+
+  <div class="blog-grid">
+
+    <div class="blog-card reveal" data-category="strategy">
+      <div class="blog-header">
+        <div class="blog-meta">
+          <span class="blog-date">2025.02.15</span>
+          <span class="blog-read-time"><i class="fas fa-clock"></i> 8분</span>
+        </div>
+        <span class="blog-cat">전략</span>
+        <h3>2025년 마케팅 예산, 이렇게 배분하세요 — 업종별 최적 비율 가이드</h3>
+      </div>
+      <div class="blog-body">
+        <p>마케팅 예산을 어디에 얼마나 써야 할지 모르겠다면 이 글을 참고하세요. 요식업, 의료, 뷰티, 교육 등 업종별로 최적의 예산 배분 비율을 데이터 기반으로 분석했습니다. 온다마케팅이 500개 이상의 프로젝트를 통해 검증한 실전 가이드입니다. SNS, 블로그, 광고, 콘텐츠 각 채널별 ROI를 비교하고 예산 대비 최대 효과를 내는 전략을 제안합니다.</p>
+        <a href="#" class="read-more">자세히 보기 <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <div class="blog-card reveal" data-category="sns">
+      <div class="blog-header">
+        <div class="blog-meta">
+          <span class="blog-date">2025.02.08</span>
+          <span class="blog-read-time"><i class="fas fa-clock"></i> 6분</span>
+        </div>
+        <span class="blog-cat">SNS</span>
+        <h3>인스타그램 릴스, 조회수 10만 넘기는 5가지 공식</h3>
+      </div>
+      <div class="blog-body">
+        <p>릴스 조회수가 안 나온다면 알고리즘을 이해하지 못했기 때문입니다. 온다마케팅이 수백 개의 릴스를 운영하며 발견한 5가지 핵심 공식을 공개합니다. 첫 3초의 후킹, 최적의 영상 길이, 해시태그 전략, 업로드 타이밍, 그리고 CTA 배치까지. 이 글 하나면 릴스 성과가 달라집니다. 실제 사례와 수치를 포함하여 설명합니다.</p>
+        <a href="#" class="read-more">자세히 보기 <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <div class="blog-card reveal" data-category="seo">
+      <div class="blog-header">
+        <div class="blog-meta">
+          <span class="blog-date">2025.01.25</span>
+          <span class="blog-read-time"><i class="fas fa-clock"></i> 10분</span>
+        </div>
+        <span class="blog-cat">SEO</span>
+        <h3>네이버 VIEW탭 상위 노출, 2025년 최신 알고리즘 분석</h3>
+      </div>
+      <div class="blog-body">
+        <p>네이버 검색 알고리즘은 계속 변합니다. 2025년 최신 VIEW탭 알고리즘을 분석하고, 상위 노출을 위한 블로그 작성법을 정리했습니다. C-Rank와 D.I.A. 모델의 변화, 체류시간 최적화, 키워드 배치 전략, 이미지 alt태그 활용법까지 실전에서 바로 적용할 수 있는 가이드를 제공합니다. 실제 적용 후 상위 노출에 성공한 사례도 함께 소개합니다.</p>
+        <a href="#" class="read-more">자세히 보기 <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <div class="blog-card reveal" data-category="trend">
+      <div class="blog-header">
+        <div class="blog-meta">
+          <span class="blog-date">2025.01.18</span>
+          <span class="blog-read-time"><i class="fas fa-clock"></i> 7분</span>
+        </div>
+        <span class="blog-cat">트렌드</span>
+        <h3>AI가 마케팅을 바꾼다 — ChatGPT 시대의 콘텐츠 전략</h3>
+      </div>
+      <div class="blog-body">
+        <p>AI 도구의 발전으로 마케팅 업계가 빠르게 변하고 있습니다. ChatGPT, Claude, Midjourney 등 AI 도구를 마케팅에 활용하는 방법과 주의사항을 정리했습니다. AI로 콘텐츠를 생성할 때 빠지기 쉬운 함정, 검색엔진이 AI 콘텐츠를 어떻게 평가하는지, 그리고 AI와 인간 크리에이터의 최적 협업 방식을 실전 경험을 바탕으로 설명합니다.</p>
+        <a href="#" class="read-more">자세히 보기 <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <div class="blog-card reveal" data-category="sns">
+      <div class="blog-header">
+        <div class="blog-meta">
+          <span class="blog-date">2025.01.10</span>
+          <span class="blog-read-time"><i class="fas fa-clock"></i> 5분</span>
+        </div>
+        <span class="blog-cat">SNS</span>
+        <h3>네이버 플레이스 리뷰 관리, 매출로 연결하는 3단계 전략</h3>
+      </div>
+      <div class="blog-body">
+        <p>리뷰는 단순 후기가 아닙니다. 잠재 고객의 의사결정에 직접 영향을 미치는 핵심 요소입니다. 온다마케팅이 200개 이상의 매장을 관리하며 정립한 리뷰 관리 3단계 전략을 공개합니다. 리뷰 수집 자동화, 부정 리뷰 대응 프로토콜, 리뷰를 마케팅 콘텐츠로 재활용하는 방법까지 실무에 바로 적용할 수 있는 가이드입니다.</p>
+        <a href="#" class="read-more">자세히 보기 <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <div class="blog-card reveal" data-category="strategy">
+      <div class="blog-header">
+        <div class="blog-meta">
+          <span class="blog-date">2024.12.28</span>
+          <span class="blog-read-time"><i class="fas fa-clock"></i> 9분</span>
+        </div>
+        <span class="blog-cat">전략</span>
+        <h3>대행사 선택 가이드 — 좋은 마케팅 회사를 구별하는 7가지 기준</h3>
+      </div>
+      <div class="blog-body">
+        <p>마케팅 대행사를 고르는 건 어렵습니다. 영업이 잘한다고 실력이 좋은 건 아니기 때문입니다. 이 글에서는 좋은 대행사를 구별하는 7가지 기준을 제시합니다. 포트폴리오의 진위 확인법, 계약서에서 반드시 확인할 조항, 보고 체계의 투명성 검증법, KPI 설정 방식, 그리고 위험 신호를 감지하는 체크리스트까지 포함됩니다.</p>
+        <a href="#" class="read-more">자세히 보기 <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+  </div>
+</div>
+</section>
+
+<section class="cta-section">
+  <h2 class="reveal">마케팅 고민, <span class="accent">전문가</span>에게 물어보세요</h2>
+  <p class="reveal">10분 무료 상담으로 현재 마케팅의 문제점을 진단받으세요.</p>
+  <a href="contact.html" class="btn-primary reveal"><i class="fas fa-comment-dots"></i> 무료 상담 요청</a>
+</section>
+
+<footer>
+<div class="footer-inner">
+  <div class="footer-info">
+    <span class="cmd">$</span> 온다마케팅 | 대표: 황승현<br>
+    <span class="cmd">$</span> 사업자등록번호: 739-40-01011<br>
+    <span class="cmd">$</span> 이메일: ondadaad@google.com<br>
+    <span class="cmd">$</span> 주소: 서울특별시 강남구 테헤란로82길 15 디아이타워 3층 4호
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 온다마케팅. All rights reserved.</span>
+    <div class="footer-social">
+      <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+      <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+      <a href="#" aria-label="Blog"><i class="fas fa-blog"></i></a>
+    </div>
+  </div>
+</div>
+</footer>
+
+<a href="https://pf.kakao.com/_xdbJnn/chat" target="_blank" rel="noopener noreferrer" class="kakao-float" aria-label="카카오톡 상담"><i class="fas fa-comment"></i></a>
+
+<script>
+const canvas=document.getElementById('matrix'),ctx=canvas.getContext('2d');
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+resizeCanvas();window.addEventListener('resize',resizeCanvas);
+const chars='アイウエオカキクケコ0123456789ONDA';
+const fontSize=14,columns=Math.floor(canvas.width/fontSize);
+const drops=Array(columns).fill(1);
+function drawMatrix(){ctx.fillStyle='rgba(10,10,10,.05)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#00FF88';ctx.font=fontSize+'px monospace';for(let i=0;i<drops.length;i++){const t=chars[Math.floor(Math.random()*chars.length)];ctx.fillText(t,i*fontSize,drops[i]*fontSize);if(drops[i]*fontSize>canvas.height&&Math.random()>.975)drops[i]=0;drops[i]++}}
+if(!window.matchMedia('(prefers-reduced-motion:reduce)').matches)setInterval(drawMatrix,45);
+
+window.addEventListener('scroll',()=>{document.getElementById('header').classList.toggle('scrolled',window.scrollY>50)});
+document.getElementById('hamburger').addEventListener('click',()=>{document.getElementById('navLinks').classList.toggle('open')});
+
+const observer=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}})},{threshold:.15});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// Category Filter
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const filter=btn.dataset.filter;
+    document.querySelectorAll('.blog-card').forEach(card=>{
+      if(filter==='all'||card.dataset.category===filter){
+        card.classList.remove('hidden');
+      }else{
+        card.classList.add('hidden');
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>

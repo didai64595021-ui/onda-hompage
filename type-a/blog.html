@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>블로그 | 온다마케팅</title>
+<meta name="description" content="온다마케팅의 마케팅 인사이트와 트렌드 분석 블로그.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--green:#00C853;--green-light:#69F0AE;--green-dark:#00A844;--green-bg:#E8F5E9;--white:#fff;--gray-50:#FAFAFA;--gray-100:#F5F5F5;--gray-200:#EEE;--gray-400:#BDBDBD;--gray-600:#757575;--gray-800:#424242;--gray-900:#212121;--radius:16px;--radius-sm:10px;--shadow:0 4px 24px rgba(0,200,83,.08);--shadow-lg:0 12px 48px rgba(0,200,83,.12);--transition:all .4s cubic-bezier(.25,.46,.45,.94)}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--gray-900);background:var(--white);overflow-x:hidden;line-height:1.7;padding-top:72px}
+a{text-decoration:none;color:inherit}img{max-width:100%;display:block}
+.header{position:fixed;top:0;left:0;width:100%;z-index:1000;background:rgba(255,255,255,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 1px 20px rgba(0,0,0,.06);padding:14px 0}
+.header .container{display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;padding:0 24px}
+.logo{font-weight:900;font-size:1.5rem;color:var(--green);letter-spacing:-1px}.logo span{color:var(--gray-900)}
+.nav{display:flex;gap:28px;align-items:center}
+.nav a{font-size:.9rem;font-weight:500;color:var(--gray-600);transition:var(--transition);position:relative}
+.nav a:hover,.nav a.active{color:var(--green)}
+.nav a.active::after{content:'';position:absolute;bottom:-4px;left:0;width:100%;height:2px;background:var(--green);border-radius:2px}
+.nav-cta{background:var(--green);color:#fff!important;padding:10px 24px;border-radius:50px;font-weight:700!important;transition:var(--transition)!important}
+.nav-cta:hover{background:var(--green-dark);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,200,83,.3)}
+.nav-cta.active::after{display:none}
+.menu-toggle{display:none;flex-direction:column;gap:5px;cursor:pointer;z-index:1001}
+.menu-toggle span{width:24px;height:2px;background:var(--gray-900);transition:var(--transition)}
+section{padding:clamp(60px,8vw,100px) 0}
+.container{max-width:1200px;margin:0 auto;padding:0 clamp(16px,4vw,24px)}
+.text-center{text-align:center}
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .8s cubic-bezier(.25,.46,.45,.94),transform .8s cubic-bezier(.25,.46,.45,.94)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.page-hero{background:linear-gradient(135deg,var(--green-bg) 0%,#fff 100%);padding:clamp(60px,10vw,100px) 0 clamp(40px,6vw,60px);text-align:center}
+.page-hero h1{font-size:clamp(2rem,4.5vw,3.2rem);font-weight:900;letter-spacing:-2px;margin-bottom:16px}
+.page-hero h1 .accent{color:var(--green)}
+.page-hero p{color:var(--gray-600);font-size:clamp(1rem,1.5vw,1.15rem);max-width:600px;margin:0 auto;line-height:1.8}
+.filter-bar{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:40px}
+.filter-btn{padding:10px 24px;border-radius:50px;border:2px solid var(--gray-200);background:var(--white);font-size:.9rem;font-weight:600;cursor:pointer;transition:var(--transition);font-family:inherit;min-height:44px;color:var(--gray-600)}
+.filter-btn:hover,.filter-btn.active{border-color:var(--green);background:var(--green);color:#fff}
+.blog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:28px}
+.blog-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);overflow:hidden;transition:var(--transition)}
+.blog-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);border-color:var(--green-light)}
+.blog-card[data-visible="false"]{display:none}
+.blog-thumb{aspect-ratio:16/9;background:var(--green-bg);display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative}
+.blog-cat{position:absolute;top:12px;left:12px;background:var(--green);color:#fff;padding:4px 14px;border-radius:50px;font-size:.75rem;font-weight:700}
+.blog-body{padding:24px}
+.blog-body h3{font-size:clamp(1rem,1.5vw,1.15rem);font-weight:800;margin-bottom:8px;line-height:1.4}
+.blog-body p{color:var(--gray-600);font-size:.88rem;line-height:1.7;margin-bottom:16px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.blog-meta{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;color:var(--gray-400)}
+.blog-meta a{color:var(--green);font-weight:600;min-height:44px;display:inline-flex;align-items:center;gap:4px}
+.footer{background:var(--gray-900);color:rgba(255,255,255,.6);padding:60px 0 30px}
+.footer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:40px;margin-bottom:40px}
+.footer h4{color:#fff;font-weight:700;margin-bottom:16px;font-size:.95rem}
+.footer p,.footer a{font-size:.85rem;line-height:1.8;color:rgba(255,255,255,.5)}.footer a:hover{color:var(--green)}
+.footer-logo{font-size:1.3rem;font-weight:900;color:var(--green);margin-bottom:12px}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:24px;text-align:center;font-size:.8rem;color:rgba(255,255,255,.3)}
+@media(max-width:768px){
+.nav{position:fixed;top:0;right:-100%;width:70%;max-width:320px;height:100vh;background:var(--white);flex-direction:column;justify-content:center;padding:40px;gap:24px;transition:right .4s ease;box-shadow:-8px 0 30px rgba(0,0,0,.1)}.nav.open{right:0}.menu-toggle{display:flex}
+}
+@media(max-width:480px){body{padding-top:64px}}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}*{animation-duration:0s!important;transition-duration:0s!important}}
+/* === CROSS-DEVICE RESPONSIVE GLOBAL === */
+*{word-break:keep-all;overflow-wrap:break-word}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom);padding-left:env(safe-area-inset-left)}
+img,video,iframe{max-width:100%;height:auto}
+button,a{min-height:44px;min-width:44px}
+
+/* Galaxy Fold 접힌 상태 */
+@media(max-width:280px){
+  body{font-size:13px}
+  .container{padding:0 12px}
+  h1{font-size:1.5rem!important}
+  h2{font-size:1.25rem!important}
+  .hero h1{font-size:1.6rem!important}
+  .nav-cta{padding:8px 16px!important;font-size:.8rem!important}
+  .services-grid,.why-grid,.stats-grid,.footer-grid,.info-cards,.comparison-table{grid-template-columns:1fr!important}
+  .hero-stats{flex-direction:column;gap:16px}
+  .hero-btns{flex-direction:column}
+  .hero-btns .btn{width:100%;justify-content:center;font-size:.9rem}
+  section{padding:40px 0!important}
+}
+
+/* iPhone SE */
+@media(max-width:320px){
+  .container{padding:0 14px}
+  h1{font-size:1.6rem!important}
+  .stat-item .stat-number{font-size:2rem!important}
+  .service-card{padding:24px!important}
+  .kakao-cta-box,.kakao-cta-card{padding:24px 16px!important}
+}
+
+/* 소형 모바일 */
+@media(max-width:480px){
+  section{padding:48px 0}
+  .hero{min-height:auto;padding:100px 0 48px}
+  .stats-grid{grid-template-columns:1fr 1fr;gap:16px}
+  .stat-item .stat-number{font-size:2.2rem}
+  .comparison-table{grid-template-columns:1fr;gap:16px}
+  .portfolio-slider{aspect-ratio:4/3}
+  .footer-grid{grid-template-columns:1fr;gap:24px}
+}
+
+/* 태블릿 */
+@media(min-width:769px) and (max-width:1024px){
+  .services-grid{grid-template-columns:repeat(2,1fr)}
+  .service-card.large{grid-column:span 2}
+  .why-grid{grid-template-columns:repeat(2,1fr)}
+  .footer-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* 소형 노트북 */
+@media(min-width:1025px) and (max-width:1200px){
+  .container{max-width:960px}
+}
+
+/* FHD+ */
+@media(min-width:1920px){
+  html{font-size:18px}
+  .container{max-width:1400px}
+}
+
+/* 4K */
+@media(min-width:2560px){
+  html{font-size:20px}
+  .container{max-width:1800px}
+  .hero h1{font-size:5rem!important}
+}
+
+/* 가로 모드 모바일 */
+@media(max-height:500px) and (orientation:landscape){
+  .hero{min-height:auto;padding:60px 0}
+  .page-hero{min-height:auto;padding:60px 0}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<header class="header">
+<div class="container">
+<a href="index.html" class="logo">ONDA<span>마케팅</span></a>
+<nav class="nav" id="nav">
+<a href="about.html">회사 소개</a>
+<a href="services.html">서비스</a>
+<a href="portfolio.html">포트폴리오</a>
+<a href="blog.html" class="active">블로그</a>
+<a href="faq.html">FAQ</a>
+<a href="contact.html" class="nav-cta">무료 상담</a>
+</nav>
+<div class="menu-toggle" id="menuToggle"><span></span><span></span><span></span></div>
+</div>
+</header>
+
+<section class="page-hero">
+<div class="container">
+<h1 class="reveal">마케팅 <span class="accent">인사이트</span></h1>
+<p class="reveal">현장에서 얻은 실전 마케팅 지식을 공유합니다.<br>트렌드, 전략, 케이스 스터디까지.</p>
+</div>
+</section>
+
+<section>
+<div class="container">
+<div class="filter-bar reveal">
+<button class="filter-btn active" data-filter="all">전체</button>
+<button class="filter-btn" data-filter="trend">트렌드</button>
+<button class="filter-btn" data-filter="strategy">전략</button>
+<button class="filter-btn" data-filter="case">케이스 스터디</button>
+</div>
+<div class="blog-grid" id="blogGrid">
+<div class="blog-card reveal" data-cat="trend">
+<div class="blog-thumb">📊<div class="blog-cat">트렌드</div></div>
+<div class="blog-body">
+<h3>2025년 인스타그램 알고리즘 변화, 어떻게 대응할까?</h3>
+<p>메타의 최신 알고리즘 업데이트가 비즈니스 계정에 미치는 영향과, 온다마케팅이 실전에서 적용하는 대응 전략을 공유합니다.</p>
+<div class="blog-meta"><span>2025.02.15</span><a href="#">더 읽기 <i class="fas fa-arrow-right"></i></a></div>
+</div>
+</div>
+<div class="blog-card reveal" data-cat="strategy">
+<div class="blog-thumb">🎯<div class="blog-cat">전략</div></div>
+<div class="blog-body">
+<h3>네이버 플레이스 상위 노출, 진짜 되는 방법 5가지</h3>
+<p>200개 매장 운영 경험에서 검증된 네이버 플레이스 상위 노출 전략. 허위 리뷰 없이 정공법으로 1위를 달성하는 실전 가이드.</p>
+<div class="blog-meta"><span>2025.02.08</span><a href="#">더 읽기 <i class="fas fa-arrow-right"></i></a></div>
+</div>
+</div>
+<div class="blog-card reveal" data-cat="case">
+<div class="blog-thumb">💡<div class="blog-cat">케이스 스터디</div></div>
+<div class="blog-body">
+<h3>월 매출 300만원 카페가 3,000만원이 된 비결</h3>
+<p>강남 카페 A의 인스타그램 마케팅 전후 비교. 6개월간의 전략, 콘텐츠, 광고 운영 과정을 상세히 공개합니다.</p>
+<div class="blog-meta"><span>2025.01.28</span><a href="#">더 읽기 <i class="fas fa-arrow-right"></i></a></div>
+</div>
+</div>
+<div class="blog-card reveal" data-cat="trend">
+<div class="blog-thumb">🎬<div class="blog-cat">트렌드</div></div>
+<div class="blog-body">
+<h3>숏폼 콘텐츠가 마케팅의 미래인 이유</h3>
+<p>릴스, 쇼츠, 틱톡 — 숏폼 플랫폼의 성장세와 소상공인이 숏폼을 활용해야 하는 이유, 시작하는 방법을 정리했습니다.</p>
+<div class="blog-meta"><span>2025.01.20</span><a href="#">더 읽기 <i class="fas fa-arrow-right"></i></a></div>
+</div>
+</div>
+<div class="blog-card reveal" data-cat="strategy">
+<div class="blog-thumb">💰<div class="blog-cat">전략</div></div>
+<div class="blog-body">
+<h3>마케팅 예산 월 100만원, 어디에 쓸까?</h3>
+<p>소상공인이 제한된 예산으로 최대 효과를 내는 채널 배분 전략. 업종별 추천 예산 비율과 우선순위를 안내합니다.</p>
+<div class="blog-meta"><span>2025.01.12</span><a href="#">더 읽기 <i class="fas fa-arrow-right"></i></a></div>
+</div>
+</div>
+<div class="blog-card reveal" data-cat="case">
+<div class="blog-thumb">🏥<div class="blog-cat">케이스 스터디</div></div>
+<div class="blog-body">
+<h3>블로그 SEO로 신규 환자 42명을 확보한 치과</h3>
+<p>강서구 치과의 블로그 마케팅 성공 사례. 키워드 리서치부터 콘텐츠 전략, 상위 노출까지의 전 과정을 공개합니다.</p>
+<div class="blog-meta"><span>2025.01.05</span><a href="#">더 읽기 <i class="fas fa-arrow-right"></i></a></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<footer class="footer">
+<div class="container">
+<div class="footer-grid">
+<div><div class="footer-logo">ONDA마케팅</div><p>온라인 광고대행사 온다마케팅<br>대표: 황승현<br>사업자등록번호: 739-40-01011</p><p style="margin-top:8px">서울특별시 강남구 테헤란로82길 15,<br>디아이타워 3층 4호</p></div>
+<div><h4>서비스</h4><p><a href="services.html">인스타그램 마케팅</a></p><p><a href="services.html">네이버 플레이스</a></p><p><a href="services.html">블로그 마케팅</a></p><p><a href="services.html">숏폼 콘텐츠</a></p></div>
+<div><h4>문의</h4><p><a href="mailto:ondadaad@google.com"><i class="fas fa-envelope"></i> ondadaad@google.com</a></p><p><a href="https://pf.kakao.com/_xdbJnn/chat" target="_blank"><i class="fas fa-comment"></i> 카카오톡 상담</a></p><p><a href="contact.html"><i class="fas fa-pen"></i> 문의하기</a></p></div>
+</div>
+<div class="footer-bottom">Copyright © 2025 온다마케팅. All rights reserved.</div>
+</div>
+</footer>
+<a href="https://pf.kakao.com/_xdbJnn/chat" target="_blank" style="position:fixed;bottom:28px;right:28px;z-index:9999;width:60px;height:60px;background:#FEE500;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.2);transition:all .3s ease" onmouseover="this.style.transform='translateY(-4px) scale(1.05)'" onmouseout="this.style.transform=''"><svg width="28" height="28" viewBox="0 0 256 256"><path fill="#3C1E1E" d="M128 36C70.6 36 24 72.7 24 118c0 29.3 19.5 55 48.8 69.5l-10 36.8c-.8 2.8 2.5 5 4.8 3.3l43.6-29c5.5.8 11.2 1.4 17 1.4 57.4 0 104-36.7 104-82s-46.6-82-104.2-82"/></svg></a>
+<script>
+document.getElementById('menuToggle').addEventListener('click',function(){document.getElementById('nav').classList.toggle('open')});
+document.querySelectorAll('.nav a').forEach(a=>a.addEventListener('click',()=>document.getElementById('nav').classList.remove('open')));
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}})},{threshold:.15});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+btn.addEventListener('click',()=>{
+document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+btn.classList.add('active');
+const f=btn.dataset.filter;
+document.querySelectorAll('.blog-card').forEach(card=>{
+card.setAttribute('data-visible',f==='all'||card.dataset.cat===f?'true':'false');
+});
+});
+});
+</script>
+</body>
+</html>
