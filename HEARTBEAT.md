@@ -32,6 +32,13 @@ done
 /home/onda/scripts/compaction-recovery.sh complete <project>
 ```
 
+## /progress 명령어
+사용자가 "/progress" 또는 "진행현황" 입력 시:
+```bash
+/home/onda/scripts/progress-report.sh
+```
+결과를 텔레그램에 전송.
+
 ## 워치독 자동복구
 - 오류 발생 시 자동으로 디버깅 + 재시도 (최대 3회)
 - 세션 끊김 시 마지막 작업 이어서 진행
