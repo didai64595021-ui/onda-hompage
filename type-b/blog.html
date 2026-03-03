@@ -88,7 +88,7 @@ footer{border-top:1px solid var(--card-border);padding:3rem 2rem;background:rgba
 .reveal.visible{opacity:1;transform:translateY(0)}
 
 @media(max-width:768px){
-  .nav-links{display:none;position:absolute;top:100%;left:0;width:100%;background:rgba(10,10,10,.95);flex-direction:column;padding:1.5rem 2rem;gap:1.2rem;border-bottom:1px solid var(--card-border);backdrop-filter:blur(20px)}
+  .nav-links{display:none;position:absolute;top:100%;left:0;width:100%;background:rgba(10,10,10,.95);flex-direction:column;padding:1.5rem 2rem;gap:1.2rem;border-bottom:1px solid var(--card-border);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
   .nav-links.open{display:flex}
   .hamburger{display:flex}
   .blog-grid{grid-template-columns:1fr}
@@ -104,26 +104,10 @@ button,a{min-height:44px;min-width:44px}
   body{font-size:13px}
   section{padding:2rem 1rem!important}
   h1{font-size:1.5rem!important}h2{font-size:1.2rem!important}
-  .stats-grid,.contact-cards{grid-template-columns:1fr!important}
-  .hero-title{font-size:1.5rem!important}
-  .hero-btns{flex-direction:column;width:100%}
-  .hero-btns a{width:100%;justify-content:center}
   .nav-cta{padding:.4rem .8rem!important;font-size:.8rem!important}
-  .terminal-box{padding:.8rem!important;font-size:.75rem!important}
 }
 @media(max-width:320px){
   h1{font-size:1.6rem!important}
-  .counter-num{font-size:2rem!important}
-  .kakao-btn{padding:.8rem 1.5rem!important;font-size:.95rem!important}
-}
-@media(max-width:480px){
-  .stats-grid{grid-template-columns:1fr 1fr;gap:1.5rem}
-  .hero-btns{flex-direction:column;align-items:center}
-  .comparison-table{font-size:.8rem}
-  .comparison-table th,.comparison-table td{padding:.6rem .4rem}
-}
-@media(min-width:769px) and (max-width:1024px){
-  .stats-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(min-width:1920px){
   html{font-size:18px}
@@ -131,10 +115,8 @@ button,a{min-height:44px;min-width:44px}
 }
 @media(min-width:2560px){
   html{font-size:20px}
-  .hero-title{font-size:5rem!important}
 }
 @media(max-height:500px) and (orientation:landscape){
-  #hero{min-height:auto;padding:3rem 2rem}
   .page-hero{min-height:auto;padding:3rem 2rem}
 }
 @media(prefers-reduced-motion:reduce){
@@ -157,7 +139,7 @@ button,a{min-height:44px;min-width:44px}
     <li><a href="faq.html">FAQ</a></li>
     <li><a href="contact.html" class="nav-cta">문의하기</a></li>
   </ul>
-  <button class="hamburger" id="hamburger" aria-label="메뉴"><span></span><span></span><span></span></button>
+  <button class="hamburger" id="hamburger" aria-label="메뉴" aria-expanded="false"><span></span><span></span><span></span></button>
 </nav>
 </header>
 
@@ -313,7 +295,7 @@ function drawMatrix(){ctx.fillStyle='rgba(10,10,10,.05)';ctx.fillRect(0,0,canvas
 if(!window.matchMedia('(prefers-reduced-motion:reduce)').matches)setInterval(drawMatrix,45);
 
 window.addEventListener('scroll',()=>{document.getElementById('header').classList.toggle('scrolled',window.scrollY>50)});
-document.getElementById('hamburger').addEventListener('click',()=>{document.getElementById('navLinks').classList.toggle('open')});
+document.getElementById('hamburger').addEventListener('click',function(){const nav=document.getElementById('navLinks');nav.classList.toggle('open');this.setAttribute('aria-expanded',nav.classList.contains('open'));});
 
 const observer=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}})},{threshold:.15});
 document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));

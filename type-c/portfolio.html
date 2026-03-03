@@ -155,7 +155,7 @@ button,a{min-height:44px;min-width:44px}
 <nav class="nav">
 <a href="about.html">회사소개</a><a href="services.html">서비스</a><a href="portfolio.html" class="active">포트폴리오</a><a href="blog.html">블로그</a><a href="contact.html">문의</a><a href="faq.html">FAQ</a><a href="contact.html" class="nav-cta">무료 진단</a>
 </nav>
-<div class="hamburger" onclick="toggleMobile()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleMobile()}" role="button" aria-label="메뉴" tabindex="0"><span></span><span></span><span></span></div>
+<div class="hamburger" onclick="toggleMobile()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleMobile()}" role="button" aria-label="메뉴" tabindex="0" aria-expanded="false"><span></span><span></span><span></span></div>
 </div>
 </header>
 <div class="mobile-nav" id="mobileNav"><a href="about.html">회사소개</a><a href="services.html">서비스</a><a href="portfolio.html">포트폴리오</a><a href="blog.html">블로그</a><a href="contact.html">문의</a><a href="faq.html">FAQ</a></div>
@@ -338,7 +338,7 @@ button,a{min-height:44px;min-width:44px}
 <script>
 (function(){const c=document.getElementById('particles'),ctx=c.getContext('2d');let w,h,ps=[];function resize(){w=c.width=window.innerWidth;h=c.height=window.innerHeight}window.addEventListener('resize',resize);resize();for(let i=0;i<50;i++)ps.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*2+.5,dx:(Math.random()-.5)*.3,dy:(Math.random()-.5)*.3,o:Math.random()*.4+.1});const mq=window.matchMedia('(prefers-reduced-motion:reduce)');function draw(){ctx.clearRect(0,0,w,h);ps.forEach(p=>{p.x+=p.dx;p.y+=p.dy;if(p.x<0)p.x=w;if(p.x>w)p.x=0;if(p.y<0)p.y=h;if(p.y>h)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(201,169,110,${p.o})`;ctx.fill()});if(!mq.matches)requestAnimationFrame(draw)}if(!mq.matches)draw()})();
 window.addEventListener('scroll',()=>{document.getElementById('header').classList.toggle('scrolled',window.scrollY>50)});
-function toggleMobile(){document.getElementById('mobileNav').classList.toggle('open')}
+function toggleMobile(){const mobileNav=document.getElementById('mobileNav');const hamburger=document.getElementById('hamburger');mobileNav.classList.toggle('open');hamburger.setAttribute('aria-expanded',mobileNav.classList.contains('open'))}
 const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:0.1});document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 document.addEventListener('mousemove',e=>{const g=document.getElementById('cursorGlow');g.style.left=e.clientX+'px';g.style.top=e.clientY+'px'});
 

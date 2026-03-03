@@ -18,7 +18,7 @@ h1,h2,h3{font-family:'Orbitron','Space Grotesk',sans-serif}
 canvas#matrix{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;opacity:.12;pointer-events:none}
 @media(prefers-reduced-motion:reduce){canvas#matrix{display:none}.reveal{opacity:1!important;transform:none!important;transition:none!important}}
 
-header{position:fixed;top:0;left:0;width:100%;z-index:100;padding:1.2rem 2rem;backdrop-filter:blur(20px);background:rgba(10,10,10,.75);border-bottom:1px solid var(--card-border);transition:all .3s}
+header{position:fixed;top:0;left:0;width:100%;z-index:100;padding:1.2rem 2rem;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);background:rgba(10,10,10,.75);border-bottom:1px solid var(--card-border);transition:all .3s}
 header.scrolled{padding:.6rem 2rem;background:rgba(10,10,10,.92)}
 nav{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;min-height:40px}
 .logo{font-family:'Orbitron';font-weight:900;font-size:clamp(1.1rem,2vw,1.4rem);color:var(--neon);text-shadow:0 0 20px rgba(0,255,136,.4);text-decoration:none;display:flex;align-items:center;line-height:1}
@@ -42,7 +42,7 @@ section{position:relative;z-index:1;padding:clamp(3rem,6vw,6rem) clamp(1rem,4vw,
 
 /* KAKAO CTA */
 .kakao-cta-wrap{max-width:600px;margin:0 auto;text-align:center}
-.kakao-cta-card{background:var(--card);border:1px solid var(--card-border);border-radius:20px;padding:clamp(2rem,4vw,3.5rem);backdrop-filter:blur(12px);transition:all .4s}
+.kakao-cta-card{background:var(--card);border:1px solid var(--card-border);border-radius:20px;padding:clamp(2rem,4vw,3.5rem);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);transition:all .4s}
 .kakao-cta-card:hover{border-color:var(--neon);box-shadow:0 0 40px rgba(0,255,136,.15)}
 .kakao-cta-icon{width:80px;height:80px;border-radius:50%;background:#FEE500;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;box-shadow:0 0 30px rgba(254,229,0,.3)}
 .kakao-cta-icon svg{width:40px;height:40px}
@@ -156,7 +156,7 @@ button,a{min-height:44px;min-width:44px}
     <li><a href="faq.html">FAQ</a></li>
     <li><a href="contact.html" class="active nav-cta">문의하기</a></li>
   </ul>
-  <button class="hamburger" id="hamburger" aria-label="메뉴"><span></span><span></span><span></span></button>
+  <button class="hamburger" id="hamburger" aria-label="메뉴" aria-expanded="false"><span></span><span></span><span></span></button>
 </nav>
 </header>
 
@@ -251,7 +251,7 @@ function drawMatrix(){ctx.fillStyle='rgba(10,10,10,.05)';ctx.fillRect(0,0,canvas
 if(!window.matchMedia('(prefers-reduced-motion:reduce)').matches)setInterval(drawMatrix,45);
 
 window.addEventListener('scroll',()=>{document.getElementById('header').classList.toggle('scrolled',window.scrollY>50)});
-document.getElementById('hamburger').addEventListener('click',()=>{document.getElementById('navLinks').classList.toggle('open')});
+document.getElementById('hamburger').addEventListener('click',function(){const nav=document.getElementById('navLinks');nav.classList.toggle('open');this.setAttribute('aria-expanded',nav.classList.contains('open'));});
 
 const observer=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}})},{threshold:.15});
 document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));

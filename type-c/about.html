@@ -24,8 +24,8 @@ body{font-family:var(--sans);background:var(--navy-deep);color:var(--white);line
 ::-webkit-scrollbar-track{background:var(--navy-deep)}
 ::-webkit-scrollbar-thumb{background:var(--gold-dark);border-radius:4px}
 
-.header{position:fixed;top:0;left:0;width:100%;z-index:1000;padding:1.2rem 0;transition:all .4s ease;backdrop-filter:blur(0px)}
-.header.scrolled{background:rgba(13,27,42,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--glass-border);padding:.8rem 0}
+.header{position:fixed;top:0;left:0;width:100%;z-index:1000;padding:1.2rem 0;transition:all .4s ease;-webkit-backdrop-filter:blur(0px);backdrop-filter:blur(0px)}
+.header.scrolled{background:rgba(13,27,42,0.92);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--glass-border);padding:.8rem 0}
 .header-inner{max-width:1200px;margin:0 auto;padding:0 2rem;display:flex;align-items:center;justify-content:space-between}
 .logo{font-family:var(--serif);font-size:1.8rem;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:2px}
 .logo span{color:var(--white)}
@@ -40,7 +40,7 @@ body{font-family:var(--sans);background:var(--navy-deep);color:var(--white);line
 .nav-cta:hover{background:var(--gold)!important;color:var(--navy-deep)!important}
 .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;z-index:1001;min-width:44px;min-height:44px;align-items:center;justify-content:center}
 .hamburger span{width:24px;height:2px;background:var(--gold);transition:all .3s}
-.mobile-nav{display:none;position:fixed;top:0;left:0;width:100%;height:100vh;background:rgba(13,27,42,0.98);backdrop-filter:blur(20px);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:2rem;opacity:0;pointer-events:none;transition:opacity .4s}
+.mobile-nav{display:none;position:fixed;top:0;left:0;width:100%;height:100vh;background:rgba(13,27,42,0.98);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:2rem;opacity:0;pointer-events:none;transition:opacity .4s}
 .mobile-nav.open{opacity:1;pointer-events:all;display:flex}
 .mobile-nav a{color:var(--white);text-decoration:none;font-size:1.3rem;font-family:var(--sans);min-height:44px;display:flex;align-items:center}
 
@@ -50,7 +50,7 @@ body{font-family:var(--sans);background:var(--navy-deep);color:var(--white);line
 .page-hero-gradient{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(201,169,110,0.08) 0%,transparent 60%)}
 #particles{position:absolute;inset:0;z-index:1}
 .page-hero-content{position:relative;z-index:2;text-align:center;padding:0 2rem}
-.page-hero-badge{display:inline-block;border:1px solid var(--glass-border);background:var(--glass);backdrop-filter:blur(10px);padding:.5rem 1.5rem;border-radius:50px;font-size:.8rem;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:1.5rem}
+.page-hero-badge{display:inline-block;border:1px solid var(--glass-border);background:var(--glass);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);padding:.5rem 1.5rem;border-radius:50px;font-size:.8rem;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:1.5rem}
 .page-hero-title{font-family:var(--serif);font-size:clamp(2.2rem,5vw,4rem);font-weight:700;color:var(--white-pure);line-height:1.15;margin-bottom:1rem}
 .page-hero-title .gold{color:var(--gold)}
 .page-hero-sub{font-size:clamp(.95rem,1.8vw,1.15rem);color:rgba(240,236,226,0.7);font-weight:300;max-width:600px;margin:0 auto}
@@ -234,7 +234,7 @@ button,a{min-height:44px;min-width:44px}
 <a href="faq.html">FAQ</a>
 <a href="contact.html" class="nav-cta">무료 진단</a>
 </nav>
-<div class="hamburger" id="hamburger" onclick="toggleMobile()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleMobile()}" role="button" aria-label="메뉴" tabindex="0">
+<div class="hamburger" id="hamburger" onclick="toggleMobile()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleMobile()}" role="button" aria-label="메뉴" tabindex="0" aria-expanded="false">
 <span></span><span></span><span></span>
 </div>
 </div>
@@ -507,7 +507,7 @@ button,a{min-height:44px;min-width:44px}
 /* HEADER */
 window.addEventListener('scroll',()=>{document.getElementById('header').classList.toggle('scrolled',window.scrollY>50)});
 /* MOBILE */
-function toggleMobile(){document.getElementById('mobileNav').classList.toggle('open')}
+function toggleMobile(){const mobileNav=document.getElementById('mobileNav');const hamburger=document.getElementById('hamburger');mobileNav.classList.toggle('open');hamburger.setAttribute('aria-expanded',mobileNav.classList.contains('open'))}
 /* REVEAL */
 const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:0.1});document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 /* COUNTER */
