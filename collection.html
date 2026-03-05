@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SOFT STEP 전체 컬렉션 - 프리미엄 데일리 삭스, 울 믹스, 실크 터치, 캐시미어 블렌드">
+    <meta property="og:title" content="Collection | SOFT STEP">
+    <meta property="og:description" content="SOFT STEP 전체 컬렉션 - 프리미엄 데일리 삭스">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=1200&auto=format&fit=crop">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧦</text></svg>">
+    <title>Collection | SOFT STEP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+        :root {
+            --bg: #f8f8f8;
+            --text: #1a1a1a;
+            --accent: #7d6e5d;
+            --accent-light: #a89888;
+            --transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
+
+        /* Header */
+        header {
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+            padding: 20px 50px; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .logo { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; text-decoration: none; color: var(--text); letter-spacing: -1px; }
+        nav a { text-decoration: none; color: var(--text); margin-left: 40px; font-size: 0.9rem; font-weight: 500; letter-spacing: 1px; position: relative; }
+        nav a::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px; background: var(--accent); transition: width 0.3s; }
+        nav a:hover::after, nav a.active::after { width: 100%; }
+        .menu-toggle { display: none; font-size: 1.5rem; cursor: pointer; z-index: 1001; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
+
+        /* Page Hero */
+        .page-hero {
+            height: 45vh; display: flex; align-items: center; justify-content: center;
+            background: var(--text); text-align: center; color: white;
+        }
+        .page-hero p { letter-spacing: 5px; font-size: 0.85rem; margin-bottom: 15px; opacity: 0.5; }
+        .page-hero h1 { font-family: 'Playfair Display', serif; font-size: 4rem; }
+
+        /* Filter */
+        .container { width: 90%; max-width: 1200px; margin: 0 auto; }
+        .filter-bar { display: flex; justify-content: center; gap: 10px; padding: 40px 0; flex-wrap: wrap; }
+        .filter-btn {
+            padding: 10px 25px; border: 1px solid #ddd; background: white; cursor: pointer;
+            font-size: 0.85rem; font-weight: 500; letter-spacing: 1px; transition: var(--transition);
+            font-family: 'Noto Sans KR', sans-serif; min-height: 44px; min-width: 44px;
+        }
+        .filter-btn:hover, .filter-btn.active { background: var(--text); color: white; border-color: var(--text); }
+
+        /* Product Grid */
+        .product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; padding-bottom: 100px; }
+        .product-card {
+            position: relative; cursor: pointer; transition: var(--transition);
+            text-decoration: none; color: inherit; opacity: 1;
+        }
+        .product-card:hover { transform: translateY(-10px); }
+        .product-card.hidden { display: none; }
+        .product-img { width: 100%; height: 420px; background: #eee; overflow: hidden; margin-bottom: 20px; position: relative; }
+        .product-img img { width: 100%; height: 100%; object-fit: cover; transition: var(--transition); }
+        .product-card:hover .product-img img { transform: scale(1.05); }
+        .product-badge { position: absolute; top: 15px; left: 15px; background: var(--accent); color: white; padding: 5px 12px; font-size: 0.75rem; letter-spacing: 1px; }
+        .product-info h3 { font-size: 1.1rem; margin-bottom: 5px; }
+        .product-info p { color: #888; font-size: 0.9rem; }
+        .price { margin-top: 10px; font-weight: bold; }
+        .product-tag { display: none; }
+
+        /* Fade */
+        .fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+        /* Footer */
+        footer { padding: 60px 0 40px; background: var(--text); color: rgba(255,255,255,0.5); }
+        .footer-content { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 40px; margin-bottom: 40px; }
+        .footer-brand .footer-logo { font-family: 'Playfair Display', serif; color: white; font-size: 2rem; margin-bottom: 15px; display: block; text-decoration: none; }
+        .footer-brand p { max-width: 300px; font-size: 0.85rem; line-height: 1.8; }
+        .footer-links h4 { color: white; font-size: 0.85rem; letter-spacing: 2px; margin-bottom: 15px; }
+        .footer-links a { display: block; color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.85rem; margin-bottom: 10px; transition: color 0.3s; min-height: 44px; line-height: 44px; }
+        .footer-links a:hover { color: white; }
+        .footer-social { display: flex; gap: 15px; margin-top: 10px; }
+        .footer-social a { color: rgba(255,255,255,0.5); font-size: 1.2rem; transition: color 0.3s; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; text-decoration: none; }
+        .footer-social a:hover { color: white; }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; text-align: center; font-size: 0.8rem; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .product-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            header { padding: 15px 20px; }
+            .menu-toggle { display: flex; }
+            nav { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: rgba(255,255,255,0.98); padding: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+            nav.open { display: flex; flex-direction: column; gap: 5px; }
+            nav a { margin-left: 0; display: block; padding: 12px 20px; min-height: 44px; line-height: 20px; }
+            nav a::after { display: none; }
+            .page-hero { height: 35vh; }
+            .page-hero h1 { font-size: 2.5rem; }
+            .product-grid { grid-template-columns: 1fr; }
+            .product-img { height: 350px; }
+            .footer-content { flex-direction: column; text-align: center; align-items: center; }
+            .footer-social { justify-content: center; }
+        }
+        @media (max-width: 480px) {
+            .page-hero h1 { font-size: 2rem; }
+            .filter-btn { padding: 8px 18px; font-size: 0.8rem; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .fade-in { opacity: 1; transform: none; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">SOFT STEP</a>
+        <div class="menu-toggle" role="button" tabindex="0" aria-expanded="false" aria-label="메뉴 열기"
+             onclick="var n=document.querySelector('nav');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}">&#9776;</div>
+        <nav aria-label="주요 내비게이션">
+            <a href="index.html">HOME</a>
+            <a href="about.html">ABOUT</a>
+            <a href="collection.html" class="active">COLLECTION</a>
+            <a href="contact.html">CONTACT</a>
+        </nav>
+    </header>
+
+    <main>
+    <section class="page-hero">
+        <div>
+            <p>PREMIUM SOCKS</p>
+            <h1>Collection</h1>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter="all">ALL</button>
+            <button class="filter-btn" data-filter="cotton">COTTON</button>
+            <button class="filter-btn" data-filter="wool">WOOL</button>
+            <button class="filter-btn" data-filter="silk">SILK</button>
+            <button class="filter-btn" data-filter="cashmere">CASHMERE</button>
+        </div>
+
+        <div class="product-grid" id="productGrid">
+            <a href="product-detail.html" class="product-card fade-in" data-category="cotton">
+                <div class="product-img">
+                    <img loading="lazy" src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=800&auto=format&fit=crop" alt="클래식 리브드 코튼 양말">
+                </div>
+                <div class="product-info">
+                    <h3>클래식 리브드 코튼</h3>
+                    <p>Cream Ivory / Pure White</p>
+                    <div class="price">₩ 12,000</div>
+                </div>
+            </a>
+            <a href="product-detail.html" class="product-card fade-in" data-category="wool">
+                <div class="product-img">
+                    <span class="product-badge">BEST</span>
+                    <img loading="lazy" src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?q=80&w=800&auto=format&fit=crop" alt="데일리 울 믹스 삭스">
+                </div>
+                <div class="product-info">
+                    <h3>데일리 울 믹스 삭스</h3>
+                    <p>Oatmeal / Charcoal / Navy</p>
+                    <div class="price">₩ 15,000</div>
+                </div>
+            </a>
+            <a href="product-detail.html" class="product-card fade-in" data-category="silk">
+                <div class="product-img">
+                    <span class="product-badge">NEW</span>
+                    <img loading="lazy" src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=800&auto=format&fit=crop" alt="프리미엄 실크 터치 양말">
+                </div>
+                <div class="product-info">
+                    <h3>프리미엄 실크 터치</h3>
+                    <p>Deep Black / Forest Green</p>
+                    <div class="price">₩ 18,000</div>
+                </div>
+            </a>
+            <a href="product-detail.html" class="product-card fade-in" data-category="cashmere">
+                <div class="product-img">
+                    <span class="product-badge">PREMIUM</span>
+                    <img loading="lazy" src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=800&auto=format&fit=crop" alt="캐시미어 블렌드 삭스">
+                </div>
+                <div class="product-info">
+                    <h3>캐시미어 블렌드 삭스</h3>
+                    <p>Camel / Light Grey</p>
+                    <div class="price">₩ 22,000</div>
+                </div>
+            </a>
+            <a href="product-detail.html" class="product-card fade-in" data-category="cotton">
+                <div class="product-img">
+                    <img loading="lazy" src="https://images.unsplash.com/photo-1434389677669-e08b4cda3a00?q=80&w=800&auto=format&fit=crop" alt="스포츠 쿠션 삭스">
+                </div>
+                <div class="product-info">
+                    <h3>스포츠 쿠션 삭스</h3>
+                    <p>White / Light Grey</p>
+                    <div class="price">₩ 13,000</div>
+                </div>
+            </a>
+            <a href="product-detail.html" class="product-card fade-in" data-category="wool">
+                <div class="product-img">
+                    <img loading="lazy" src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800&auto=format&fit=crop" alt="메리노 울 하이삭스">
+                </div>
+                <div class="product-info">
+                    <h3>메리노 울 하이삭스</h3>
+                    <p>Burgundy / Dark Brown</p>
+                    <div class="price">₩ 19,000</div>
+                </div>
+            </a>
+            <a href="product-detail.html" class="product-card fade-in" data-category="cotton">
+                <div class="product-img">
+                    <img loading="lazy" src="https://images.unsplash.com/photo-1558171813-4c088753af8f?q=80&w=800&auto=format&fit=crop" alt="오가닉 데일리 앵클삭스">
+                </div>
+                <div class="product-info">
+                    <h3>오가닉 데일리 앵클삭스</h3>
+                    <p>Beige / Sage Green / Sky Blue</p>
+                    <div class="price">₩ 10,000</div>
+                </div>
+            </a>
+            <a href="product-detail.html" class="product-card fade-in" data-category="silk">
+                <div class="product-img">
+                    <img loading="lazy" src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800&auto=format&fit=crop" alt="실크 드레스 삭스">
+                </div>
+                <div class="product-info">
+                    <h3>실크 드레스 삭스</h3>
+                    <p>Midnight Navy / Charcoal</p>
+                    <div class="price">₩ 25,000</div>
+                </div>
+            </a>
+            <a href="product-detail.html" class="product-card fade-in" data-category="cashmere">
+                <div class="product-img">
+                    <img loading="lazy" src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=800&auto=format&fit=crop" alt="캐시미어 라운지 삭스">
+                </div>
+                <div class="product-info">
+                    <h3>캐시미어 라운지 삭스</h3>
+                    <p>Ivory / Powder Pink</p>
+                    <div class="price">₩ 28,000</div>
+                </div>
+            </a>
+        </div>
+    </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="index.html" class="footer-logo">SOFT STEP</a>
+                    <p>Every step you take, we are with you.<br>최고의 소재, 최고의 편안함.</p>
+                    <div class="footer-social">
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>SHOP</h4>
+                    <a href="collection.html">All Collection</a>
+                    <a href="product-detail.html">Bestsellers</a>
+                </div>
+                <div class="footer-links">
+                    <h4>INFO</h4>
+                    <a href="about.html">About Us</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 SOFT STEP. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Filter
+        var filterBtns = document.querySelectorAll('.filter-btn');
+        var cards = document.querySelectorAll('.product-card');
+
+        filterBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                filterBtns.forEach(function(b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                var filter = btn.getAttribute('data-filter');
+                cards.forEach(function(card) {
+                    if (filter === 'all' || card.getAttribute('data-category') === filter) {
+                        card.classList.remove('hidden');
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+            });
+        });
+
+        // Fade
+        var fadeEls = document.querySelectorAll('.fade-in');
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+            });
+        }, { threshold: 0.1 });
+        fadeEls.forEach(function(el) { observer.observe(el); });
+    </script>
+</body>
+</html>

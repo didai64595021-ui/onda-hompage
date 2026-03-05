@@ -12,28 +12,18 @@
     <title>SOFT STEP | 프리미엄 데일리 삭스</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
 
         :root {
             --bg: #f8f8f8;
             --text: #1a1a1a;
-            --accent: #7d6e5d; /* Warm Taupe */
+            --accent: #7d6e5d;
+            --accent-light: #a89888;
             --transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
-
-        /* Hamster Style */
-        .hamster {
-            position: fixed;
-            font-size: 50px;
-            z-index: 9999;
-            cursor: pointer;
-            user-select: none;
-            transition: transform 0.1s linear;
-            filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.2));
-        }
 
         /* Header */
         header {
@@ -41,11 +31,12 @@
             padding: 30px 50px; display: flex; justify-content: space-between; align-items: center;
             background: transparent; transition: var(--transition);
         }
-        header.scrolled { background: rgba(255,255,255,0.9); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); padding: 20px 50px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        header.scrolled { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 20px 50px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
 
         .logo { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; text-decoration: none; color: var(--text); letter-spacing: -1px; }
-        
-        nav a { text-decoration: none; color: var(--text); margin-left: 40px; font-size: 0.9rem; font-weight: 500; letter-spacing: 1px; }
+        nav a { text-decoration: none; color: var(--text); margin-left: 40px; font-size: 0.9rem; font-weight: 500; letter-spacing: 1px; position: relative; }
+        nav a::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px; background: var(--accent); transition: width 0.3s; }
+        nav a:hover::after, nav a.active::after { width: 100%; }
 
         /* Hero */
         #hero {
@@ -55,73 +46,194 @@
         .hero-img {
             position: absolute; right: 0; top: 0; width: 60%; height: 100%;
             background: url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2000&auto=format&fit=crop') no-repeat center center/cover;
+            will-change: transform;
+        }
+        .hero-overlay {
+            position: absolute; inset: 0; background: linear-gradient(90deg, #e5e5e5 35%, transparent 70%);
         }
         .hero-text {
             position: relative; z-index: 10; width: 85%; max-width: 1200px;
         }
-        .hero-text h1 { font-family: 'Playfair Display', serif; font-size: 6rem; line-height: 1; margin-bottom: 30px; }
-        .hero-text p { font-size: 1.2rem; margin-bottom: 40px; color: #555; }
-        .cta-link { 
-            display: inline-block; padding: 15px 40px; background: var(--text); color: white; 
-            text-decoration: none; font-weight: bold; transition: var(--transition);
+        .hero-text .tagline { letter-spacing: 5px; margin-bottom: 20px; font-size: 0.9rem; color: var(--accent); font-weight: 500; }
+        .hero-text h1 { font-family: 'Playfair Display', serif; font-size: 6rem; line-height: 1; margin-bottom: 30px; opacity: 0; transform: translateY(40px); animation: fadeUp 1s 0.3s forwards; }
+        .hero-text .hero-desc { font-size: 1.2rem; margin-bottom: 40px; color: #555; opacity: 0; transform: translateY(30px); animation: fadeUp 1s 0.6s forwards; }
+        .cta-link {
+            display: inline-block; padding: 18px 50px; background: var(--text); color: white;
+            text-decoration: none; font-weight: bold; transition: var(--transition); letter-spacing: 2px; font-size: 0.9rem;
+            opacity: 0; transform: translateY(20px); animation: fadeUp 1s 0.9s forwards;
         }
-        .cta-link:hover { background: var(--accent); transform: translateY(-5px); }
+        .cta-link:hover { background: var(--accent); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
 
-        /* Products */
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 10;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            font-size: 0.75rem; letter-spacing: 2px; color: var(--accent);
+        }
+        .scroll-indicator::after {
+            content: ''; width: 1px; height: 40px; background: var(--accent);
+            animation: scrollBounce 2s infinite;
+        }
+        @keyframes scrollBounce { 0%, 100% { transform: scaleY(1); opacity: 1; } 50% { transform: scaleY(0.5); opacity: 0.5; } }
+
+        /* Sections */
         section { padding: 120px 0; }
         .container { width: 90%; max-width: 1200px; margin: 0 auto; }
-        .section-title { font-family: 'Playfair Display', serif; font-size: 3rem; margin-bottom: 60px; text-align: center; }
+        .section-header { text-align: center; margin-bottom: 60px; }
+        .section-title { font-family: 'Playfair Display', serif; font-size: 3rem; margin-bottom: 15px; }
+        .section-subtitle { color: #888; font-size: 1rem; letter-spacing: 1px; }
 
+        /* Product Grid */
         .product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
-        .product-card { position: relative; cursor: pointer; transition: var(--transition); }
+        .product-card { position: relative; cursor: pointer; transition: var(--transition); text-decoration: none; color: inherit; }
         .product-card:hover { transform: translateY(-10px); }
-        .product-img { width: 100%; height: 450px; background: #eee; overflow: hidden; margin-bottom: 20px; }
+        .product-img { width: 100%; height: 450px; background: #eee; overflow: hidden; margin-bottom: 20px; position: relative; }
         .product-img img { width: 100%; height: 100%; object-fit: cover; transition: var(--transition); }
         .product-card:hover .product-img img { transform: scale(1.05); }
-        
+        .product-badge { position: absolute; top: 15px; left: 15px; background: var(--accent); color: white; padding: 5px 12px; font-size: 0.75rem; letter-spacing: 1px; }
         .product-info h3 { font-size: 1.1rem; margin-bottom: 5px; }
         .product-info p { color: #888; font-size: 0.9rem; }
         .price { margin-top: 10px; font-weight: bold; }
 
+        /* Bestseller Slider */
+        .bestseller { background: #fff; }
+        .slider-wrapper { position: relative; overflow: hidden; }
+        .slider-track { display: flex; gap: 30px; transition: transform 0.5s ease; }
+        .slider-card {
+            min-width: calc(25% - 22.5px); background: var(--bg); padding: 30px; text-align: center;
+            transition: var(--transition); flex-shrink: 0;
+        }
+        .slider-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        .slider-card img { width: 100%; height: 250px; object-fit: cover; margin-bottom: 20px; }
+        .slider-card h4 { margin-bottom: 8px; font-size: 1rem; }
+        .slider-card .price { font-size: 1.1rem; color: var(--accent); }
+        .slider-card .rank { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--accent-light); margin-bottom: 15px; }
+        .slider-nav { display: flex; justify-content: center; gap: 15px; margin-top: 40px; }
+        .slider-btn {
+            width: 50px; height: 50px; border: 1px solid #ddd; background: white; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: var(--transition);
+            font-size: 1.2rem; min-height: 44px; min-width: 44px;
+        }
+        .slider-btn:hover { background: var(--text); color: white; border-color: var(--text); }
+
         /* Features */
         .features { background: #fff; text-align: center; }
         .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 60px; }
+        .feature-item { padding: 40px 20px; }
         .feature-item i { font-size: 2.5rem; color: var(--accent); margin-bottom: 25px; }
         .feature-item h4 { margin-bottom: 15px; font-size: 1.3rem; }
         .feature-item p { color: #666; font-size: 0.95rem; }
 
-        /* Footer */
-        footer { padding: 80px 0; background: var(--text); color: rgba(255,255,255,0.5); text-align: center; }
-        .footer-logo { font-family: 'Playfair Display', serif; color: white; font-size: 2.5rem; margin-bottom: 30px; display: block; text-decoration: none; }
+        /* Reviews */
+        .reviews { background: var(--bg); }
+        .review-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .review-card { background: white; padding: 40px; border-radius: 2px; }
+        .review-stars { color: #e8b730; margin-bottom: 15px; font-size: 0.9rem; }
+        .review-text { color: #555; font-size: 0.95rem; line-height: 1.8; margin-bottom: 20px; font-style: italic; }
+        .review-author { display: flex; align-items: center; gap: 12px; }
+        .review-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.85rem; font-weight: 700; }
+        .review-name { font-weight: 500; font-size: 0.9rem; }
+        .review-date { font-size: 0.8rem; color: #aaa; }
 
-        /* Mobile */
+        /* Instagram Feed */
+        .instagram { text-align: center; }
+        .insta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .insta-item { position: relative; overflow: hidden; aspect-ratio: 1; cursor: pointer; }
+        .insta-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+        .insta-item:hover img { transform: scale(1.1); }
+        .insta-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s; color: white; font-size: 1.5rem;
+        }
+        .insta-item:hover .insta-overlay { opacity: 1; }
+
+        /* Newsletter */
+        .newsletter { background: var(--text); color: white; text-align: center; padding: 100px 0; }
+        .newsletter h2 { font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 15px; }
+        .newsletter p { color: rgba(255,255,255,0.6); margin-bottom: 40px; }
+        .newsletter-form { display: flex; max-width: 500px; margin: 0 auto; gap: 0; }
+        .newsletter-form input {
+            flex: 1; padding: 18px 25px; border: none; font-size: 1rem; font-family: 'Noto Sans KR', sans-serif;
+            background: rgba(255,255,255,0.1); color: white; min-height: 44px;
+        }
+        .newsletter-form input::placeholder { color: rgba(255,255,255,0.4); }
+        .newsletter-form button {
+            padding: 18px 35px; background: var(--accent); color: white; border: none; font-weight: 700;
+            cursor: pointer; transition: var(--transition); letter-spacing: 1px; font-size: 0.85rem;
+            min-height: 44px; min-width: 44px;
+        }
+        .newsletter-form button:hover { background: var(--accent-light); }
+
+        /* Footer */
+        footer { padding: 60px 0 40px; background: var(--text); color: rgba(255,255,255,0.5); }
+        .footer-content { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 40px; margin-bottom: 40px; }
+        .footer-brand .footer-logo { font-family: 'Playfair Display', serif; color: white; font-size: 2rem; margin-bottom: 15px; display: block; text-decoration: none; }
+        .footer-brand p { max-width: 300px; font-size: 0.85rem; line-height: 1.8; }
+        .footer-links h4 { color: white; font-size: 0.85rem; letter-spacing: 2px; margin-bottom: 15px; }
+        .footer-links a { display: block; color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.85rem; margin-bottom: 10px; transition: color 0.3s; min-height: 44px; line-height: 44px; }
+        .footer-links a:hover { color: white; }
+        .footer-social { display: flex; gap: 15px; margin-top: 10px; }
+        .footer-social a { color: rgba(255,255,255,0.5); font-size: 1.2rem; transition: color 0.3s; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
+        .footer-social a:hover { color: white; }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; text-align: center; font-size: 0.8rem; }
+
+        /* Scroll Animations */
+        .fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+        /* Hamster */
+        .hamster {
+            position: fixed; font-size: 50px; z-index: 9999; cursor: pointer; user-select: none;
+            transition: transform 0.1s linear; filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.2));
+        }
+
+        /* Menu Toggle */
+        .menu-toggle { display: none; font-size: 1.5rem; cursor: pointer; z-index: 1001; min-width: 44px; min-height: 44px; display: none; align-items: center; justify-content: center; }
+
+        /* Responsive */
         @media (max-width: 1024px) {
             .hero-text h1 { font-size: 4rem; }
             .product-grid { grid-template-columns: repeat(2, 1fr); }
+            .slider-card { min-width: calc(33.333% - 20px); }
+            .insta-grid { grid-template-columns: repeat(3, 1fr); }
         }
-        /* Menu Toggle */
-        .menu-toggle { display: none; font-size: 1.5rem; cursor: pointer; z-index: 1001; }
         @media (max-width: 768px) {
             header { padding: 20px; }
-            .menu-toggle { display: block; }
-            nav { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: rgba(255,255,255,0.95); padding: 20px; text-align: center; }
+            .menu-toggle { display: flex; }
+            nav { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: rgba(255,255,255,0.98); padding: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
             nav.open { display: flex; flex-direction: column; gap: 5px; }
             nav a { margin-left: 0; display: block; padding: 12px 20px; min-height: 44px; line-height: 20px; }
-            header.scrolled { padding: 20px; }
+            nav a::after { display: none; }
+            header.scrolled { padding: 15px 20px; }
             .hero-img { width: 100%; opacity: 0.3; }
+            .hero-overlay { background: linear-gradient(180deg, rgba(229,229,229,0.8) 0%, rgba(229,229,229,0.5) 100%); }
             .hero-text h1 { font-size: 3rem; word-break: keep-all; }
             .product-grid { grid-template-columns: 1fr; }
-            .feature-grid { grid-template-columns: 1fr; }
+            .product-img { height: 350px; }
+            .feature-grid { grid-template-columns: 1fr; gap: 30px; }
+            .review-grid { grid-template-columns: 1fr; }
+            .slider-card { min-width: calc(50% - 15px); }
+            .insta-grid { grid-template-columns: repeat(2, 1fr); }
+            .footer-content { flex-direction: column; text-align: center; align-items: center; }
+            .footer-brand p { margin: 0 auto; }
+            .footer-social { justify-content: center; }
+            .newsletter-form { flex-direction: column; padding: 0 20px; }
+            .newsletter-form input, .newsletter-form button { width: 100%; }
+            section { padding: 80px 0; }
+            .section-title { font-size: 2.2rem; }
         }
         @media (max-width: 480px) {
             .hero-text h1 { font-size: 2rem; }
-            .section-title { font-size: 2rem; }
-            .cta-link { padding: 12px 30px; font-size: 0.9rem; }
+            .section-title { font-size: 1.8rem; }
+            .cta-link { padding: 14px 35px; font-size: 0.85rem; }
+            .slider-card { min-width: calc(100% - 0px); }
         }
         @media (max-width: 320px) {
             .hero-text h1 { font-size: 1.6rem; }
-            .section-title { font-size: 1.6rem; }
-            .hero-text p { font-size: 0.95rem; }
+            .section-title { font-size: 1.5rem; }
+            .hero-text .hero-desc { font-size: 0.95rem; }
             header { padding: 15px 10px; }
             .logo { font-size: 1.4rem; }
             section { padding: 60px 0; }
@@ -129,82 +241,150 @@
         @media (prefers-reduced-motion: reduce) {
             .hamster { display: none; }
             *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+            .hero-text h1, .hero-text .hero-desc, .cta-link { opacity: 1; transform: none; animation: none; }
+            .fade-in { opacity: 1; transform: none; }
         }
-        .product-card { text-decoration: none; color: inherit; }
     </style>
 </head>
 <body>
     <header id="header">
         <a href="index.html" class="logo">SOFT STEP</a>
-        <div class="menu-toggle" role="button" tabindex="0" aria-expanded="false" onclick="var n=document.querySelector('nav');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();var n=document.querySelector('nav');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))}" aria-label="메뉴 열기">&#9776;</div>
+        <div class="menu-toggle" role="button" tabindex="0" aria-expanded="false" aria-label="메뉴 열기"
+             onclick="var n=document.querySelector('nav');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}">&#9776;</div>
         <nav aria-label="주요 내비게이션">
-            <a href="#collection">COLLECTION</a>
-            <a href="#about">STORY</a>
-            <a href="#contact">CONTACT</a>
+            <a href="index.html" class="active">HOME</a>
+            <a href="about.html">ABOUT</a>
+            <a href="collection.html">COLLECTION</a>
+            <a href="contact.html">CONTACT</a>
         </nav>
     </header>
 
     <main>
+    <!-- Hero -->
     <section id="hero">
-        <div class="hero-img"></div>
+        <div class="hero-img" id="parallax-bg"></div>
+        <div class="hero-overlay"></div>
         <div class="hero-text">
-            <p style="letter-spacing: 5px; margin-bottom: 20px;">ESSENTIALS FOR FOOT</p>
+            <p class="tagline">ESSENTIALS FOR FOOT</p>
             <h1>Walking on<br>Cloud Nine.</h1>
-            <p>최고급 코튼과 섬세한 직조 기술이 만나<br>가장 완벽한 발걸음을 선사합니다.</p>
-            <a href="#collection" class="cta-link">SHOP NOW</a>
+            <p class="hero-desc">최고급 코튼과 섬세한 직조 기술이 만나<br>가장 완벽한 발걸음을 선사합니다.</p>
+            <a href="collection.html" class="cta-link">SHOP NOW</a>
         </div>
+        <div class="scroll-indicator">SCROLL</div>
     </section>
 
-    <section id="collection" class="container">
-        <h2 class="section-title">Essential Collection</h2>
-        <div class="product-grid">
-            <a href="product-detail.html" class="product-card" >
-                <div class="product-img">
-                    <img src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=1000&auto=format&fit=crop" alt="클래식 리브드 코튼 양말 - Cream Ivory / Pure White">
-                </div>
-                <div class="product-info">
-                    <h3>클래식 리브드 코튼</h3>
-                    <p>Cream Ivory / Pure White</p>
-                    <div class="price">₩ 12,000</div>
-                </div>
-            </a>
-            <a href="product-detail.html" class="product-card" >
-                <div class="product-img">
-                    <img src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?q=80&w=1000&auto=format&fit=crop" alt="데일리 울 믹스 양말 - Oatmeal / Charcoal / Navy">
-                </div>
-                <div class="product-info">
-                    <h3>데일리 울 믹스 삭스</h3>
-                    <p>Oatmeal / Charcoal / Navy</p>
-                    <div class="price">₩ 15,000</div>
-                </div>
-            </a>
-            <a href="product-detail.html" class="product-card" >
-                <div class="product-img">
-                    <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=1000&auto=format&fit=crop" alt="프리미엄 실크 터치 양말 - Deep Black / Forest Green">
-                </div>
-                <div class="product-info">
-                    <h3>프리미엄 실크 터치</h3>
-                    <p>Deep Black / Forest Green</p>
-                    <div class="price">₩ 18,000</div>
-                </div>
-            </a>
-        </div>
-    </section>
-
-    <section id="about" class="features">
+    <!-- Collection Preview -->
+    <section id="collection">
         <div class="container">
+            <div class="section-header fade-in">
+                <p class="section-subtitle">OUR COLLECTION</p>
+                <h2 class="section-title">Essential Collection</h2>
+            </div>
+            <div class="product-grid">
+                <a href="product-detail.html" class="product-card fade-in">
+                    <div class="product-img">
+                        <img loading="lazy" src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=800&auto=format&fit=crop" alt="클래식 리브드 코튼 양말 - Cream Ivory / Pure White">
+                    </div>
+                    <div class="product-info">
+                        <h3>클래식 리브드 코튼</h3>
+                        <p>Cream Ivory / Pure White</p>
+                        <div class="price">₩ 12,000</div>
+                    </div>
+                </a>
+                <a href="product-detail.html" class="product-card fade-in">
+                    <div class="product-img">
+                        <span class="product-badge">BEST</span>
+                        <img loading="lazy" src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?q=80&w=800&auto=format&fit=crop" alt="데일리 울 믹스 양말 - Oatmeal / Charcoal / Navy">
+                    </div>
+                    <div class="product-info">
+                        <h3>데일리 울 믹스 삭스</h3>
+                        <p>Oatmeal / Charcoal / Navy</p>
+                        <div class="price">₩ 15,000</div>
+                    </div>
+                </a>
+                <a href="product-detail.html" class="product-card fade-in">
+                    <div class="product-img">
+                        <span class="product-badge">NEW</span>
+                        <img loading="lazy" src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=800&auto=format&fit=crop" alt="프리미엄 실크 터치 양말 - Deep Black / Forest Green">
+                    </div>
+                    <div class="product-info">
+                        <h3>프리미엄 실크 터치</h3>
+                        <p>Deep Black / Forest Green</p>
+                        <div class="price">₩ 18,000</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bestseller Slider -->
+    <section class="bestseller">
+        <div class="container">
+            <div class="section-header fade-in">
+                <p class="section-subtitle">MOST LOVED</p>
+                <h2 class="section-title">Bestsellers</h2>
+            </div>
+            <div class="slider-wrapper fade-in">
+                <div class="slider-track" id="sliderTrack">
+                    <div class="slider-card">
+                        <div class="rank">#1</div>
+                        <img loading="lazy" src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?q=80&w=600&auto=format&fit=crop" alt="데일리 울 믹스 삭스 베스트셀러">
+                        <h4>데일리 울 믹스 삭스</h4>
+                        <div class="price">₩ 15,000</div>
+                    </div>
+                    <div class="slider-card">
+                        <div class="rank">#2</div>
+                        <img loading="lazy" src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=600&auto=format&fit=crop" alt="클래식 리브드 코튼 베스트셀러">
+                        <h4>클래식 리브드 코튼</h4>
+                        <div class="price">₩ 12,000</div>
+                    </div>
+                    <div class="slider-card">
+                        <div class="rank">#3</div>
+                        <img loading="lazy" src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=600&auto=format&fit=crop" alt="프리미엄 실크 터치 베스트셀러">
+                        <h4>프리미엄 실크 터치</h4>
+                        <div class="price">₩ 18,000</div>
+                    </div>
+                    <div class="slider-card">
+                        <div class="rank">#4</div>
+                        <img loading="lazy" src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=600&auto=format&fit=crop" alt="캐시미어 블렌드 삭스 베스트셀러">
+                        <h4>캐시미어 블렌드 삭스</h4>
+                        <div class="price">₩ 22,000</div>
+                    </div>
+                    <div class="slider-card">
+                        <div class="rank">#5</div>
+                        <img loading="lazy" src="https://images.unsplash.com/photo-1434389677669-e08b4cda3a00?q=80&w=600&auto=format&fit=crop" alt="스포츠 쿠션 삭스 베스트셀러">
+                        <h4>스포츠 쿠션 삭스</h4>
+                        <div class="price">₩ 13,000</div>
+                    </div>
+                </div>
+                <div class="slider-nav">
+                    <button class="slider-btn" id="prevBtn" aria-label="이전 슬라이드"><i class="fas fa-arrow-left"></i></button>
+                    <button class="slider-btn" id="nextBtn" aria-label="다음 슬라이드"><i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+        <div class="container">
+            <div class="section-header fade-in">
+                <p class="section-subtitle">WHY SOFT STEP</p>
+                <h2 class="section-title">Our Promise</h2>
+            </div>
             <div class="feature-grid">
-                <div class="feature-item">
+                <div class="feature-item fade-in">
                     <i class="fas fa-feather-alt" aria-hidden="true"></i>
                     <h4>최고급 소재</h4>
                     <p>피부에 닿는 자극을 최소화한<br>친환경 오가닉 코튼을 사용합니다.</p>
                 </div>
-                <div class="feature-item">
+                <div class="feature-item fade-in">
                     <i class="fas fa-fingerprint" aria-hidden="true"></i>
                     <h4>완벽한 핏</h4>
                     <p>수천 번의 테스트를 거쳐 완성된<br>인체공학적 아치 서포트 설계.</p>
                 </div>
-                <div class="feature-item">
+                <div class="feature-item fade-in">
                     <i class="fas fa-magic" aria-hidden="true"></i>
                     <h4>감각적인 컬러</h4>
                     <p>어떤 룩에도 자연스럽게 스며드는<br>소프트 스텝만의 감성 컬러칩.</p>
@@ -213,69 +393,206 @@
         </div>
     </section>
 
+    <!-- Reviews -->
+    <section class="reviews">
+        <div class="container">
+            <div class="section-header fade-in">
+                <p class="section-subtitle">REVIEWS</p>
+                <h2 class="section-title">고객 후기</h2>
+            </div>
+            <div class="review-grid">
+                <div class="review-card fade-in">
+                    <div class="review-stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                    <p class="review-text">"양말 하나로 이렇게 기분이 달라질 수 있다니. 발을 감싸는 감촉이 정말 부드럽고, 하루 종일 신어도 답답하지 않아요."</p>
+                    <div class="review-author">
+                        <div class="review-avatar">JY</div>
+                        <div>
+                            <div class="review-name">김지윤</div>
+                            <div class="review-date">클래식 리브드 코튼 구매</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="review-card fade-in">
+                    <div class="review-stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                    <p class="review-text">"선물용으로 샀는데 포장도 예쁘고 퀄리티도 좋아서 받는 분이 정말 좋아하셨어요. 저도 하나 더 주문할 예정입니다."</p>
+                    <div class="review-author">
+                        <div class="review-avatar">SH</div>
+                        <div>
+                            <div class="review-name">박수현</div>
+                            <div class="review-date">프리미엄 실크 터치 구매</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="review-card fade-in">
+                    <div class="review-stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <p class="review-text">"데일리 울 믹스는 겨울 필수템! 따뜻하면서도 통기성이 좋아서 발이 뻐근하지 않아요. 가격 대비 만족도 최고입니다."</p>
+                    <div class="review-author">
+                        <div class="review-avatar">MJ</div>
+                        <div>
+                            <div class="review-name">이민준</div>
+                            <div class="review-date">데일리 울 믹스 삭스 구매</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Instagram Feed -->
+    <section class="instagram">
+        <div class="container">
+            <div class="section-header fade-in">
+                <p class="section-subtitle">@SOFTSTEP_OFFICIAL</p>
+                <h2 class="section-title">Follow Us</h2>
+            </div>
+        </div>
+        <div class="insta-grid fade-in">
+            <div class="insta-item">
+                <img loading="lazy" src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=400&auto=format&fit=crop" alt="SOFT STEP 인스타그램 - 라이프스타일">
+                <div class="insta-overlay"><i class="fab fa-instagram"></i></div>
+            </div>
+            <div class="insta-item">
+                <img loading="lazy" src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=400&auto=format&fit=crop" alt="SOFT STEP 인스타그램 - 패션">
+                <div class="insta-overlay"><i class="fab fa-instagram"></i></div>
+            </div>
+            <div class="insta-item">
+                <img loading="lazy" src="https://images.unsplash.com/photo-1434389677669-e08b4cda3a00?q=80&w=400&auto=format&fit=crop" alt="SOFT STEP 인스타그램 - 제품">
+                <div class="insta-overlay"><i class="fab fa-instagram"></i></div>
+            </div>
+            <div class="insta-item">
+                <img loading="lazy" src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=400&auto=format&fit=crop" alt="SOFT STEP 인스타그램 - 매장">
+                <div class="insta-overlay"><i class="fab fa-instagram"></i></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="newsletter">
+        <div class="container fade-in">
+            <h2>Stay in Step</h2>
+            <p>신제품 소식과 특별 혜택을 가장 먼저 받아보세요.</p>
+            <form class="newsletter-form" onsubmit="event.preventDefault();this.querySelector('button').textContent='구독 완료!';this.querySelector('input').value='';">
+                <input type="email" placeholder="이메일 주소를 입력하세요" required aria-label="이메일 주소">
+                <button type="submit">SUBSCRIBE</button>
+            </form>
+        </div>
+    </section>
     </main>
 
-    <footer id="contact">
+    <!-- Footer -->
+    <footer>
         <div class="container">
-            <a href="index.html" class="footer-logo">SOFT STEP</a>
-            <p>Every step you take, we are with you.</p>
-            <p style="margin-top: 30px; font-size: 0.8rem;">&copy; 2026 SOFT STEP. All rights reserved.</p>
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="index.html" class="footer-logo">SOFT STEP</a>
+                    <p>Every step you take, we are with you.<br>최고의 소재, 최고의 편안함.</p>
+                    <div class="footer-social">
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>SHOP</h4>
+                    <a href="collection.html">All Collection</a>
+                    <a href="product-detail.html">Bestsellers</a>
+                </div>
+                <div class="footer-links">
+                    <h4>INFO</h4>
+                    <a href="about.html">About Us</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 SOFT STEP. All rights reserved.</p>
+            </div>
         </div>
     </footer>
 
     <script>
+        // Header scroll effect
         window.addEventListener('scroll', function() {
-            const header = document.getElementById('header');
-            if (window.scrollY > 50) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
+            var header = document.getElementById('header');
+            header.classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        // Parallax
+        var parallaxBg = document.getElementById('parallax-bg');
+        window.addEventListener('scroll', function() {
+            if (window.innerWidth > 768) {
+                parallaxBg.style.transform = 'translateY(' + (window.scrollY * 0.3) + 'px)';
             }
         });
 
-        // --- Hamster Logic ---
-        const hamsterList = ['🐹', '🐹', '🐹']; // 여러 마리 가능
-        
+        // Slider
+        (function() {
+            var track = document.getElementById('sliderTrack');
+            var pos = 0;
+            var cardWidth;
+
+            function getCardWidth() {
+                var card = track.querySelector('.slider-card');
+                if (card) cardWidth = card.offsetWidth + 30;
+            }
+            getCardWidth();
+            window.addEventListener('resize', function() { getCardWidth(); pos = 0; track.style.transform = 'translateX(0)'; });
+
+            document.getElementById('nextBtn').addEventListener('click', function() {
+                var maxPos = track.scrollWidth - track.parentElement.offsetWidth;
+                pos = Math.min(pos + cardWidth, maxPos);
+                track.style.transform = 'translateX(-' + pos + 'px)';
+            });
+            document.getElementById('prevBtn').addEventListener('click', function() {
+                pos = Math.max(pos - cardWidth, 0);
+                track.style.transform = 'translateX(-' + pos + 'px)';
+            });
+        })();
+
+        // Scroll animations
+        var fadeEls = document.querySelectorAll('.fade-in');
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        fadeEls.forEach(function(el) { observer.observe(el); });
+
+        // Hamster
+        var hamsterList = ['🐹', '🐹', '🐹'];
         function createHamster(emoji) {
-            const el = document.createElement('div');
+            var el = document.createElement('div');
             el.className = 'hamster';
             el.innerText = emoji;
             document.body.appendChild(el);
-
-            let x = Math.random() * (window.innerWidth - 60);
-            let y = Math.random() * (window.innerHeight - 60);
-            let dx = (Math.random() - 0.5) * 6;
-            let dy = (Math.random() - 0.5) * 6;
-
+            var x = Math.random() * (window.innerWidth - 60);
+            var y = Math.random() * (window.innerHeight - 60);
+            var dx = (Math.random() - 0.5) * 6;
+            var dy = (Math.random() - 0.5) * 6;
             function move() {
-                x += dx;
-                y += dy;
-
-                if (x + 60 > window.innerWidth || x < 0) {
-                    dx = -dx;
-                }
-                if (y + 60 > window.innerHeight || y < 0) {
-                    dy = -dy;
-                }
-
-                el.style.left = x + 'px';
-                el.style.top = y + 'px';
-                el.style.transform = dx > 0 ? 'scaleX(-1)' : 'scaleX(1)'; // 진행 방향에 따라 반전
-
+                x += dx; y += dy;
+                if (x + 60 > window.innerWidth || x < 0) dx = -dx;
+                if (y + 60 > window.innerHeight || y < 0) dy = -dy;
+                el.style.left = x + 'px'; el.style.top = y + 'px';
+                el.style.transform = dx > 0 ? 'scaleX(-1)' : 'scaleX(1)';
                 requestAnimationFrame(move);
             }
-
-            el.addEventListener('click', () => {
-                dx *= 1.5;
-                dy *= 1.5;
-                el.innerText = '🔥'; // 클릭하면 불타는 햄스터!
-                setTimeout(() => el.innerText = emoji, 500);
+            el.addEventListener('click', function() {
+                dx *= 1.5; dy *= 1.5;
+                el.innerText = '🔥';
+                setTimeout(function() { el.innerText = emoji; }, 500);
             });
-
             move();
         }
-
-        hamsterList.forEach(h => createHamster(h));
+        hamsterList.forEach(function(h) { createHamster(h); });
     </script>
 </body>
 </html>

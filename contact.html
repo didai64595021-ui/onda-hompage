@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SOFT STEP 고객센터 - 문의, 교환/반품, 배송 안내, FAQ">
+    <meta property="og:title" content="Contact | SOFT STEP">
+    <meta property="og:description" content="SOFT STEP 고객센터 - 문의사항이 있으시면 언제든 연락주세요">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200&auto=format&fit=crop">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧦</text></svg>">
+    <title>Contact | SOFT STEP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+        :root {
+            --bg: #f8f8f8;
+            --text: #1a1a1a;
+            --accent: #7d6e5d;
+            --accent-light: #a89888;
+            --transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
+
+        /* Header */
+        header {
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+            padding: 20px 50px; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .logo { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; text-decoration: none; color: var(--text); letter-spacing: -1px; }
+        nav a { text-decoration: none; color: var(--text); margin-left: 40px; font-size: 0.9rem; font-weight: 500; letter-spacing: 1px; position: relative; }
+        nav a::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px; background: var(--accent); transition: width 0.3s; }
+        nav a:hover::after, nav a.active::after { width: 100%; }
+        .menu-toggle { display: none; font-size: 1.5rem; cursor: pointer; z-index: 1001; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
+
+        /* Page Hero */
+        .page-hero {
+            height: 45vh; display: flex; align-items: center; justify-content: center;
+            background: var(--text); text-align: center; color: white;
+        }
+        .page-hero p { letter-spacing: 5px; font-size: 0.85rem; margin-bottom: 15px; opacity: 0.5; }
+        .page-hero h1 { font-family: 'Playfair Display', serif; font-size: 4rem; }
+
+        /* Content */
+        section { padding: 100px 0; }
+        .container { width: 90%; max-width: 1200px; margin: 0 auto; }
+        .section-header { text-align: center; margin-bottom: 60px; }
+        .section-title { font-family: 'Playfair Display', serif; font-size: 3rem; margin-bottom: 15px; }
+        .section-subtitle { color: #888; font-size: 1rem; letter-spacing: 1px; }
+
+        /* Contact Layout */
+        .contact-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
+
+        /* Contact Info */
+        .contact-info-list { display: flex; flex-direction: column; gap: 35px; }
+        .contact-info-item { display: flex; gap: 20px; align-items: flex-start; }
+        .contact-icon { width: 50px; height: 50px; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+        .contact-info-item h4 { margin-bottom: 5px; font-size: 1rem; }
+        .contact-info-item p { color: #666; font-size: 0.95rem; }
+
+        /* Contact Form */
+        .contact-form { display: flex; flex-direction: column; gap: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        .form-group label { font-size: 0.85rem; font-weight: 500; letter-spacing: 1px; }
+        .form-group input, .form-group textarea, .form-group select {
+            padding: 15px; border: 1px solid #ddd; background: white; font-size: 1rem;
+            font-family: 'Noto Sans KR', sans-serif; transition: border-color 0.3s; min-height: 44px;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--accent); }
+        .form-group textarea { resize: vertical; min-height: 150px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .submit-btn {
+            padding: 18px; background: var(--text); color: white; border: none; font-size: 1rem;
+            font-weight: 700; cursor: pointer; transition: var(--transition); letter-spacing: 1px;
+            min-height: 44px;
+        }
+        .submit-btn:hover { background: var(--accent); }
+
+        /* FAQ */
+        .faq-section { background: white; }
+        .faq-list { max-width: 800px; margin: 0 auto; }
+        .faq-item { border-bottom: 1px solid #eee; }
+        .faq-question {
+            width: 100%; padding: 25px 0; background: none; border: none; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 1.05rem; font-weight: 500; text-align: left; font-family: 'Noto Sans KR', sans-serif;
+            min-height: 44px; color: var(--text);
+        }
+        .faq-question i { transition: transform 0.3s; color: var(--accent); }
+        .faq-question.open i { transform: rotate(180deg); }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; }
+        .faq-answer.open { max-height: 300px; }
+        .faq-answer p { padding: 0 0 25px; color: #666; font-size: 0.95rem; line-height: 1.8; }
+
+        /* Fade */
+        .fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+        /* Footer */
+        footer { padding: 60px 0 40px; background: var(--text); color: rgba(255,255,255,0.5); }
+        .footer-content { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 40px; margin-bottom: 40px; }
+        .footer-brand .footer-logo { font-family: 'Playfair Display', serif; color: white; font-size: 2rem; margin-bottom: 15px; display: block; text-decoration: none; }
+        .footer-brand p { max-width: 300px; font-size: 0.85rem; line-height: 1.8; }
+        .footer-links h4 { color: white; font-size: 0.85rem; letter-spacing: 2px; margin-bottom: 15px; }
+        .footer-links a { display: block; color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.85rem; margin-bottom: 10px; transition: color 0.3s; min-height: 44px; line-height: 44px; }
+        .footer-links a:hover { color: white; }
+        .footer-social { display: flex; gap: 15px; margin-top: 10px; }
+        .footer-social a { color: rgba(255,255,255,0.5); font-size: 1.2rem; transition: color 0.3s; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; text-decoration: none; }
+        .footer-social a:hover { color: white; }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; text-align: center; font-size: 0.8rem; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header { padding: 15px 20px; }
+            .menu-toggle { display: flex; }
+            nav { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: rgba(255,255,255,0.98); padding: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+            nav.open { display: flex; flex-direction: column; gap: 5px; }
+            nav a { margin-left: 0; display: block; padding: 12px 20px; min-height: 44px; line-height: 20px; }
+            nav a::after { display: none; }
+            .page-hero { height: 35vh; }
+            .page-hero h1 { font-size: 2.5rem; }
+            .contact-layout { grid-template-columns: 1fr; gap: 50px; }
+            .form-row { grid-template-columns: 1fr; }
+            .footer-content { flex-direction: column; text-align: center; align-items: center; }
+            .footer-social { justify-content: center; }
+            section { padding: 80px 0; }
+            .section-title { font-size: 2.2rem; }
+        }
+        @media (max-width: 480px) {
+            .page-hero h1 { font-size: 2rem; }
+            .section-title { font-size: 1.8rem; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .fade-in { opacity: 1; transform: none; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">SOFT STEP</a>
+        <div class="menu-toggle" role="button" tabindex="0" aria-expanded="false" aria-label="메뉴 열기"
+             onclick="var n=document.querySelector('nav');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}">&#9776;</div>
+        <nav aria-label="주요 내비게이션">
+            <a href="index.html">HOME</a>
+            <a href="about.html">ABOUT</a>
+            <a href="collection.html">COLLECTION</a>
+            <a href="contact.html" class="active">CONTACT</a>
+        </nav>
+    </header>
+
+    <main>
+    <section class="page-hero">
+        <div>
+            <p>GET IN TOUCH</p>
+            <h1>Contact</h1>
+        </div>
+    </section>
+
+    <!-- Contact Form + Info -->
+    <section>
+        <div class="container">
+            <div class="contact-layout">
+                <div class="fade-in">
+                    <div class="section-header" style="text-align:left; margin-bottom:40px;">
+                        <p class="section-subtitle">CONTACT US</p>
+                        <h2 class="section-title" style="font-size:2.2rem;">문의하기</h2>
+                    </div>
+                    <form class="contact-form" onsubmit="event.preventDefault();this.querySelector('.submit-btn').textContent='전송 완료!';setTimeout(function(){location.reload()},2000);">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="name">이름</label>
+                                <input type="text" id="name" placeholder="홍길동" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">이메일</label>
+                                <input type="email" id="email" placeholder="example@email.com" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">문의 유형</label>
+                            <select id="subject" required>
+                                <option value="">선택해주세요</option>
+                                <option value="order">주문/결제</option>
+                                <option value="delivery">배송</option>
+                                <option value="exchange">교환/반품</option>
+                                <option value="product">제품 문의</option>
+                                <option value="other">기타</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">메시지</label>
+                            <textarea id="message" placeholder="문의 내용을 입력해주세요" required></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn">SEND MESSAGE</button>
+                    </form>
+                </div>
+
+                <div class="fade-in">
+                    <div class="section-header" style="text-align:left; margin-bottom:40px;">
+                        <p class="section-subtitle">INFORMATION</p>
+                        <h2 class="section-title" style="font-size:2.2rem;">연락처</h2>
+                    </div>
+                    <div class="contact-info-list">
+                        <div class="contact-info-item">
+                            <div class="contact-icon"><i class="fas fa-phone"></i></div>
+                            <div>
+                                <h4>전화</h4>
+                                <p>02-1234-5678<br>평일 10:00 - 18:00 (점심 12:00 - 13:00)</p>
+                            </div>
+                        </div>
+                        <div class="contact-info-item">
+                            <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                            <div>
+                                <h4>이메일</h4>
+                                <p>help@softstep.kr<br>영업일 기준 24시간 이내 답변</p>
+                            </div>
+                        </div>
+                        <div class="contact-info-item">
+                            <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                            <div>
+                                <h4>주소</h4>
+                                <p>서울특별시 강남구 테헤란로 123<br>SOFT STEP 본사</p>
+                            </div>
+                        </div>
+                        <div class="contact-info-item">
+                            <div class="contact-icon"><i class="fas fa-clock"></i></div>
+                            <div>
+                                <h4>운영 시간</h4>
+                                <p>월 - 금: 10:00 - 18:00<br>토/일/공휴일 휴무</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq-section">
+        <div class="container">
+            <div class="section-header fade-in">
+                <p class="section-subtitle">FAQ</p>
+                <h2 class="section-title">자주 묻는 질문</h2>
+            </div>
+            <div class="faq-list fade-in">
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        <span>배송은 얼마나 걸리나요?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>주문 확인 후 1-2 영업일 이내 출고되며, 출고 후 1-2일 이내 수령 가능합니다. 제주 및 도서산간 지역은 1-2일 추가 소요될 수 있습니다. 5만원 이상 구매 시 무료 배송됩니다.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        <span>교환/반품은 어떻게 하나요?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>상품 수령 후 7일 이내, 미착용/미세탁 제품에 한해 교환 및 반품이 가능합니다. 고객센터(02-1234-5678)로 연락 주시면 안내 도와드리겠습니다. 단순 변심에 의한 반품 배송비는 고객 부담입니다.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        <span>양말 사이즈 선택은 어떻게 하나요?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>SOFT STEP은 S(220-235mm), M(235-255mm), L(255-275mm) 세 가지 사이즈를 제공합니다. 평소 신발 사이즈를 기준으로 선택해주세요. 자세한 사이즈 가이드는 각 상품 페이지에서 확인하실 수 있습니다.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        <span>세탁 방법을 알려주세요.</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>30도 이하 찬물에서 중성세제로 손세탁을 권장합니다. 세탁기 사용 시 세탁망에 넣어 울/섬세 코스로 세탁해주세요. 건조기 사용은 피하고, 그늘에서 자연 건조해주세요. 올바른 세탁으로 제품의 수명을 오래 유지할 수 있습니다.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        <span>대량 주문/기업 구매도 가능한가요?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>네, 기업 판촉물, 단체 주문, 패키지 구성 등 대량 주문도 가능합니다. help@softstep.kr로 수량, 제품, 납기일 등을 기재하여 문의해주시면 맞춤 견적을 보내드리겠습니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="index.html" class="footer-logo">SOFT STEP</a>
+                    <p>Every step you take, we are with you.<br>최고의 소재, 최고의 편안함.</p>
+                    <div class="footer-social">
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>SHOP</h4>
+                    <a href="collection.html">All Collection</a>
+                    <a href="product-detail.html">Bestsellers</a>
+                </div>
+                <div class="footer-links">
+                    <h4>INFO</h4>
+                    <a href="about.html">About Us</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 SOFT STEP. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // FAQ Accordion
+        document.querySelectorAll('.faq-question').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var answer = this.nextElementSibling;
+                var isOpen = this.classList.contains('open');
+
+                // Close all
+                document.querySelectorAll('.faq-question').forEach(function(q) {
+                    q.classList.remove('open');
+                    q.setAttribute('aria-expanded', 'false');
+                    q.nextElementSibling.classList.remove('open');
+                });
+
+                // Toggle current
+                if (!isOpen) {
+                    this.classList.add('open');
+                    this.setAttribute('aria-expanded', 'true');
+                    answer.classList.add('open');
+                }
+            });
+        });
+
+        // Fade
+        var fadeEls = document.querySelectorAll('.fade-in');
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+            });
+        }, { threshold: 0.1 });
+        fadeEls.forEach(function(el) { observer.observe(el); });
+    </script>
+</body>
+</html>
