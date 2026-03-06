@@ -9,44 +9,65 @@ const NAVER_CLIENT_SECRET = 'I4fA34bv0e';
 const OUTPUT_DIR = path.join(__dirname, 'output');
 const CSV_PATH = path.join(OUTPUT_DIR, 'prospects.csv');
 const DB_PATH = path.join(OUTPUT_DIR, 'history.json');
-const RATE_LIMIT_MS = 120;
+const API_LOG_PATH = path.join(OUTPUT_DIR, 'api-usage.json');
+const RATE_LIMIT_MS = 100; // 10req/s
 const HOMEPAGE_TIMEOUT = 5000;
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+const DAILY_API_TARGET = 20000; // 하루 2만 API 목표
 
-// ── 업종 (사업계획서 기반 전체) ──
-const CATEGORIES = [
-  // 1차 타깃
-  '성형외과', '피부과', '치과', '안과', '정형외과', '산부인과', '한의원',
-  '영어학원', '수학학원', '코딩학원', '미술학원', '음악학원', '입시학원',
-  '인테리어', '리모델링', '인테리어업체',
-  '법률사무소', '변호사사무소',
-  '부동산', '공인중개사',
-  '웨딩홀', '웨딩업체', '웨딩플래너',
-  '호텔', '펜션', '리조트',
-  '아파트분양', '모델하우스', '분양대행',
-  // 1차 타깃 추가 (사업계획서)
-  '입주청소', '이사청소', '청소업체',
-  '미용실', '헤어샵', '네일샵', '속눈썹',
-  '필라테스', 'PT', '요가', '헬스장',
-  // 2차 타깃
-  '중고차', '자동차매매',
-];
+// ── 업종 (42개 + 세분화 = 120+ 검색어) ──
+const CATEGORY_GROUPS = {
+  '병원': ['성형외과', '피부과', '치과', '안과', '정형외과', '산부인과', '한의원', '이비인후과', '비뇨기과', '내과', '소아과', '정신건강의학과', '재활의학과', '통증의학과'],
+  '학원': ['영어학원', '수학학원', '코딩학원', '미술학원', '음악학원', '입시학원', '보습학원', '태권도', '피아노학원', '유아영어', '성인영어', '토익학원'],
+  '인테리어': ['인테리어', '리모델링', '인테리어업체', '인테리어시공', '주방리모델링', '욕실리모델링', '사무실인테리어', '상가인테리어'],
+  '법률': ['법률사무소', '변호사사무소', '법무사', '세무사', '회계사무소', '노무사', '특허사무소'],
+  '부동산': ['부동산', '공인중개사', '부동산중개', '오피스텔분양', '상가분양'],
+  '웨딩': ['웨딩홀', '웨딩업체', '웨딩플래너', '웨딩촬영', '웨딩드레스', '스튜디오'],
+  '숙박': ['호텔', '펜션', '리조트', '게스트하우스', '모텔'],
+  '분양': ['아파트분양', '모델하우스', '분양대행', '분양사무소', '오피스텔분양'],
+  '뷰티': ['미용실', '헤어샵', '네일샵', '속눈썹', '왁싱', '에스테틱', '두피관리', '탈모클리닉'],
+  '피트니스': ['필라테스', 'PT', '요가', '헬스장', '크로스핏', '수영장', '골프연습장', '복싱'],
+  '청소': ['입주청소', '이사청소', '청소업체', '에어컨청소', '사무실청소', '정리수납'],
+  '자동차': ['중고차', '자동차매매', '수입차정비', '자동차검사', '타이어', '자동차도장'],
+  '반려동물': ['동물병원', '애견미용', '펫호텔', '애견카페'],
+  '교육': ['유치원', '어린이집', '방과후학교', '독서실', '스터디카페'],
+  '음식': ['프랜차이즈본사', '케이터링', '도시락', '단체급식'],
+  '기타서비스': ['이삿짐센터', '인력사무소', '번역사무소', '사진관', '복사인쇄', '꽃집', '장례식장'],
+};
 
-const REGIONS = [
-  '서울', '강남', '서초', '송파', '마포', '홍대', '잠실', '종로', '영등포', '성동',
-  '수원', '성남', '분당', '일산', '부천', '인천', '용인', '화성', '안양', '고양',
-];
+// 전체 검색어 플랫화
+const ALL_CATEGORIES = [];
+Object.values(CATEGORY_GROUPS).forEach(cats => ALL_CATEGORIES.push(...cats));
+
+// ── 지역 (시/구 세분화 = 80+) ──
+const REGIONS = {
+  '서울': ['강남구', '서초구', '송파구', '강동구', '마포구', '용산구', '종로구', '중구', '성동구', '광진구', '동대문구', '중랑구', '성북구', '강북구', '도봉구', '노원구', '은평구', '서대문구', '영등포구', '동작구', '관악구', '금천구', '구로구', '양천구', '강서구'],
+  '경기': ['수원', '성남', '분당', '용인', '화성', '고양', '일산', '부천', '안양', '안산', '평택', '시흥', '파주', '김포', '광명', '하남', '의정부', '남양주', '광주', '이천', '양평'],
+  '인천': ['인천', '부평', '송도', '연수구', '남동구', '서구'],
+  '부산': ['부산', '해운대', '서면', '남포동', '동래'],
+  '대구': ['대구', '수성구', '달서구', '동성로'],
+  '대전': ['대전', '유성구', '둔산동'],
+  '광주': ['광주', '상무지구'],
+  '제주': ['제주', '서귀포'],
+};
+
+const ALL_REGIONS = [];
+Object.entries(REGIONS).forEach(([city, areas]) => {
+  areas.forEach(area => {
+    ALL_REGIONS.push(city === area ? area : `${area}`);
+  });
+});
 
 // ── 제외 도메인 ──
 const EXCLUDED_DOMAINS = [
   'blog.naver.com', 'cafe.naver.com', 'post.naver.com',
-  'blog.daum.net', 'cafe.daum.net',
-  'tistory.com', 'brunch.co.kr',
+  'blog.daum.net', 'cafe.daum.net', 'tistory.com', 'brunch.co.kr',
   'instagram.com', 'facebook.com', 'twitter.com', 'x.com',
   'pf.kakao.com', 'open.kakao.com',
   'youtube.com', 'youtu.be',
   'baemin.com', 'yogiyo.co.kr', 'coupangeats.com',
   'smartstore.naver.com', 'shopping.naver.com',
+  'booking.naver.com', 'map.naver.com',
 ];
 
 function isOwnWebsite(url) {
@@ -58,16 +79,34 @@ function isOwnWebsite(url) {
 }
 
 // ── 히스토리 DB ──
-function loadHistory() {
-  try { return JSON.parse(fs.readFileSync(DB_PATH, 'utf8')); }
-  catch { return { crawled: {}, tm_status: {} }; }
+function loadJSON(p) { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return {}; } }
+function saveJSON(p, d) { fs.writeFileSync(p, JSON.stringify(d, null, 2), 'utf8'); }
+function loadHistory() { const d = loadJSON(DB_PATH); return d.crawled ? d : { crawled: {}, tm_status: {} }; }
+
+// ── API 사용량 추적 ──
+function getApiUsage() {
+  const usage = loadJSON(API_LOG_PATH);
+  const today = new Date().toISOString().slice(0, 10);
+  if (!usage[today]) usage[today] = { calls: 0, started: new Date().toISOString() };
+  return { usage, today };
 }
-function saveHistory(db) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf8');
+function logApiCall() {
+  const { usage, today } = getApiUsage();
+  usage[today].calls++;
+  saveJSON(API_LOG_PATH, usage);
+  return usage[today].calls;
+}
+function getRemainingCalls() {
+  const { usage, today } = getApiUsage();
+  return DAILY_API_TARGET - (usage[today]?.calls || 0);
 }
 
 // ── 네이버 검색 API ──
 async function searchLocal(query, start = 1, display = 5) {
+  if (getRemainingCalls() <= 0) {
+    console.log('  ⛔ 일일 API 한도(2만) 도달. 중단.');
+    return null; // null = 중단 시그널
+  }
   try {
     const res = await axios.get('https://openapi.naver.com/v1/search/local.json', {
       params: { query, display, start, sort: 'random' },
@@ -77,393 +116,334 @@ async function searchLocal(query, start = 1, display = 5) {
       },
       timeout: 10000,
     });
+    logApiCall();
     return res.data.items || [];
   } catch (e) {
     if (e.response?.status === 429) {
-      console.log('  ⏳ API 한도 도달, 1초 대기...');
-      await sleep(1000);
+      console.log('  ⏳ Rate limit, 2초 대기...');
+      await sleep(2000);
       return searchLocal(query, start, display);
     }
-    console.error(`  [API에러] ${query}: ${e.message}`);
+    logApiCall(); // 실패해도 카운트
     return [];
   }
 }
 
-// ── 홈페이지 분석 (반응형 + 연락처 + UI 점수) ──
+// ── 홈페이지 분석 ──
 async function analyzeHomepage(url) {
   const result = {
-    responsive: null,
-    hasPhoneBtn: false,
-    hasKakaoBtn: false,
-    hasContactForm: false,
-    hasMap: false,
-    pageSpeed: null,
-    contacts: [],
-    problems: [],
-    score: 0,
+    responsive: null, hasPhoneBtn: false, hasKakaoBtn: false,
+    hasContactForm: false, hasMap: false, pageSpeed: null,
+    contacts: [], problems: [], score: 0,
   };
-
   try {
     const start = Date.now();
     const res = await axios.get(url, {
       timeout: HOMEPAGE_TIMEOUT,
       headers: { 'User-Agent': USER_AGENT },
-      maxRedirects: 3,
-      validateStatus: s => s < 400,
+      maxRedirects: 3, validateStatus: s => s < 400,
     });
     result.pageSpeed = Date.now() - start;
-
     const html = typeof res.data === 'string' ? res.data : '';
     const $ = cheerio.load(html);
-
-    // ── 반응형 체크 ──
-    const viewportMeta = $('meta[name="viewport"]').attr('content') || '';
-    const hasViewport = viewportMeta.includes('device-width');
-    let hasMediaQuery = false;
-    $('style').each((_, el) => { if ($(el).text().includes('@media')) hasMediaQuery = true; });
-    result.responsive = hasViewport || hasMediaQuery;
-
-    // ── UI 요소 체크 ──
     const htmlLower = html.toLowerCase();
 
-    // 전화 버튼
+    // 반응형
+    const viewport = $('meta[name="viewport"]').attr('content') || '';
+    let hasMedia = false;
+    $('style').each((_, el) => { if ($(el).text().includes('@media')) hasMedia = true; });
+    result.responsive = viewport.includes('device-width') || hasMedia;
+
+    // UI 요소
     result.hasPhoneBtn = $('a[href^="tel:"]').length > 0;
-
-    // 카카오 버튼
-    result.hasKakaoBtn = htmlLower.includes('pf.kakao.com') || htmlLower.includes('kakao') && htmlLower.includes('button');
-
-    // 문의폼
+    result.hasKakaoBtn = htmlLower.includes('pf.kakao.com') || (htmlLower.includes('kakao') && htmlLower.includes('button'));
     result.hasContactForm = $('form').length > 0 || htmlLower.includes('contact') || htmlLower.includes('문의');
+    result.hasMap = htmlLower.includes('map.naver.com') || htmlLower.includes('maps.google') || $('iframe[src*="map"]').length > 0;
 
-    // 지도
-    result.hasMap = htmlLower.includes('map.naver.com') || htmlLower.includes('maps.google') ||
-      htmlLower.includes('kakaomap') || $('iframe[src*="map"]').length > 0;
-
-    // ── 문제점 + 점수 계산 ──
+    // 점수
     if (!result.responsive) { result.problems.push('비반응형(모바일X)'); result.score += 30; }
-    if (!result.hasPhoneBtn) { result.problems.push('전화버튼 없음'); result.score += 20; }
-    if (!result.hasKakaoBtn) { result.problems.push('카톡버튼 없음'); result.score += 15; }
-    if (!result.hasContactForm) { result.problems.push('문의폼 없음'); result.score += 15; }
-    if (!result.hasMap) { result.problems.push('지도 없음'); result.score += 10; }
+    if (!result.hasPhoneBtn) { result.problems.push('전화버튼없음'); result.score += 20; }
+    if (!result.hasKakaoBtn) { result.problems.push('카톡버튼없음'); result.score += 15; }
+    if (!result.hasContactForm) { result.problems.push('문의폼없음'); result.score += 15; }
+    if (!result.hasMap) { result.problems.push('지도없음'); result.score += 10; }
     if (result.pageSpeed > 3000) { result.problems.push(`로딩느림(${(result.pageSpeed/1000).toFixed(1)}초)`); result.score += 10; }
 
-    // ── 연락처 추출 ──
-    // 전화번호
-    const phonePatterns = html.match(/(?:0\d{1,2}[-.\s]?\d{3,4}[-.\s]?\d{4}|1\d{3}[-.\s]?\d{4})/g) || [];
-    phonePatterns.forEach(p => {
-      const cleaned = p.replace(/\s/g, '');
-      if (cleaned.length >= 9 && cleaned.length <= 14) result.contacts.push({ type: '전화', value: cleaned });
+    // 연락처 추출
+    const phones = html.match(/(?:0\d{1,2}[-.\s]?\d{3,4}[-.\s]?\d{4}|1\d{3}[-.\s]?\d{4})/g) || [];
+    phones.forEach(p => {
+      const c = p.replace(/\s/g, '');
+      if (c.length >= 9 && c.length <= 14) result.contacts.push({ type: '전화', value: c });
     });
-
-    // tel: 링크
     $('a[href^="tel:"]').each((_, el) => {
-      const tel = $(el).attr('href').replace('tel:', '').replace(/\s/g, '').trim();
-      if (tel && !result.contacts.find(c => c.value === tel))
-        result.contacts.push({ type: '전화', value: tel });
+      const t = $(el).attr('href').replace('tel:', '').replace(/\s/g, '');
+      if (t && !result.contacts.find(c => c.value === t)) result.contacts.push({ type: '전화', value: t });
     });
-
-    // 이메일
     const emails = html.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g) || [];
     emails.forEach(e => {
-      if (!e.includes('example') && !e.includes('test') && !e.includes('wixpress') && !e.includes('sentry'))
+      if (!/example|test|wixpress|sentry|webpack/.test(e))
         result.contacts.push({ type: '이메일', value: e });
     });
-
-    // mailto:
     $('a[href^="mailto:"]').each((_, el) => {
-      const mail = $(el).attr('href').replace('mailto:', '').split('?')[0].trim();
-      if (mail && !result.contacts.find(c => c.value === mail))
-        result.contacts.push({ type: '이메일', value: mail });
+      const m = $(el).attr('href').replace('mailto:', '').split('?')[0].trim();
+      if (m && !result.contacts.find(c => c.value === m)) result.contacts.push({ type: '이메일', value: m });
     });
-
-    // 카카오톡
-    const kakaoLinks = html.match(/pf\.kakao\.com\/[a-zA-Z0-9_]+/g) || [];
-    kakaoLinks.forEach(k => result.contacts.push({ type: '카카오톡', value: 'https://' + k }));
-
-    // 카카오 오픈채팅
-    const openKakao = html.match(/open\.kakao\.com\/o\/[a-zA-Z0-9]+/g) || [];
-    openKakao.forEach(k => result.contacts.push({ type: '카카오오픈채팅', value: 'https://' + k }));
-
-    // 인스타그램
-    const insta = html.match(/instagram\.com\/([a-zA-Z0-9_.]+)/g) || [];
-    insta.forEach(i => result.contacts.push({ type: '인스타그램', value: 'https://' + i }));
-
-    // 네이버 예약
-    const naverBook = html.match(/booking\.naver\.com\/[^\s"'<>]+/g) || [];
-    naverBook.forEach(b => result.contacts.push({ type: '네이버예약', value: 'https://' + b }));
+    (html.match(/pf\.kakao\.com\/[a-zA-Z0-9_]+/g) || []).forEach(k => result.contacts.push({ type: '카카오톡', value: 'https://' + k }));
+    (html.match(/open\.kakao\.com\/o\/[a-zA-Z0-9]+/g) || []).forEach(k => result.contacts.push({ type: '카카오오픈채팅', value: 'https://' + k }));
+    (html.match(/instagram\.com\/([a-zA-Z0-9_.]+)/g) || []).forEach(i => result.contacts.push({ type: '인스타그램', value: 'https://' + i }));
+    (html.match(/booking\.naver\.com\/[^\s"'<>]+/g) || []).forEach(b => result.contacts.push({ type: '네이버예약', value: 'https://' + b }));
 
     // 중복 제거
     const seen = new Set();
     result.contacts = result.contacts.filter(c => {
-      const key = c.type + c.value;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
+      const k = c.type + c.value; if (seen.has(k)) return false; seen.add(k); return true;
     });
-
-  } catch (e) {
-    result.problems.push('사이트접속불가');
-  }
-
+  } catch { result.problems.push('사이트접속불가'); }
   return result;
 }
 
 // ── 패키지 추천 ──
-function recommendPackage(score, problems) {
+function recommendPackage(score) {
   if (score >= 80) return { name: '풀 리뉴얼 라이트', price: '50~80만원' };
   if (score >= 60) return { name: '모바일 응급팩', price: '29~35만원' };
   if (score >= 40) return { name: '전환형 패키지', price: '19~22만원' };
   return { name: '스타터팩', price: '10~12만원' };
 }
 
-// ── TM 스크립트 자동 생성 ──
-function generateTMScript(name, problems, pkg) {
-  const problemText = problems.slice(0, 2).join(', ');
-  return `안녕하세요 대표님. ${name} 홈페이지 모바일에서 확인해보니 ${problemText} 상태입니다. ${pkg.name}(${pkg.price})로 24시간 내 개선 가능한데, 전후 비교 시안 보내드릴까요?`;
+// ── TM / 문자 / 이메일 템플릿 ──
+function generateTM(name, problems, pkg) {
+  return `안녕하세요 대표님. ${name} 홈페이지 모바일에서 확인해보니 ${problems.slice(0,2).join(', ')} 상태입니다. ${pkg.name}(${pkg.price})로 24시간 내 개선 가능한데, 전후 비교 시안 보내드릴까요?`;
+}
+function generateSMS(name, problems, pkg) {
+  return `[웹사이트 개선] ${name} 대표님, 모바일에서 ${problems.slice(0,2).join(', ')} 확인됐습니다. ${pkg.name} ${pkg.price}으로 24시간 내 개선 가능합니다. 전후비교시안 무료. 문의:010-XXXX-XXXX`;
+}
+function generateEmail(name, problems, pkg, homepage) {
+  return `제목: [${name}] 모바일 홈페이지 무료 진단 결과\n\n${name} 대표님 안녕하세요.\n\n홈페이지(${homepage}) 모바일 점검 결과를 공유드립니다.\n\n📋 발견된 문제:\n${problems.map(p=>'  • '+p).join('\n')}\n\n💡 추천: ${pkg.name} (${pkg.price})\n  - 24~48시간 내 작업 완료\n  - 전후 비교 시안 무료 제공\n\n문의: 010-XXXX-XXXX | 카톡: XXXXX`;
 }
 
-// ── 문자 템플릿 ──
-function generateSMSTemplate(name, problems, pkg, homepage) {
-  const problemText = problems.slice(0, 2).join(', ');
-  return `[웹사이트 개선 안내] ${name} 대표님, 모바일에서 ${problemText} 확인됐습니다. ${pkg.name} ${pkg.price}으로 24시간 내 개선 가능합니다. 전후 비교 시안 무료 제공. 문의: 010-XXXX-XXXX`;
-}
-
-// ── 이메일 템플릿 ──
-function generateEmailTemplate(name, problems, pkg, homepage) {
-  return `제목: [${name}] 모바일 홈페이지 무료 진단 결과
-
-${name} 대표님 안녕하세요.
-
-홈페이지(${homepage}) 모바일 점검 결과를 공유드립니다.
-
-📋 발견된 문제:
-${problems.map(p => `  • ${p}`).join('\n')}
-
-💡 추천 솔루션: ${pkg.name} (${pkg.price})
-  - 24~48시간 내 작업 완료
-  - 전후 비교 시안 무료 제공
-  - 1회 수정 포함
-
-궁금하신 점 있으시면 편하게 연락주세요.
-전화: 010-XXXX-XXXX | 카톡: XXXXX`;
-}
-
-// ── HTML 태그 제거 ──
-function stripHtml(str) {
-  return (str || '').replace(/<[^>]*>/g, '').trim();
-}
-
-// ── 플레이스 링크 ──
+function stripHtml(s) { return (s||'').replace(/<[^>]*>/g, '').trim(); }
 function buildPlaceLink(item) {
-  return `https://map.naver.com/v5/search/${encodeURIComponent(stripHtml(item.title) + ' ' + stripHtml(item.address))}`;
+  return `https://map.naver.com/v5/search/${encodeURIComponent(stripHtml(item.title)+' '+stripHtml(item.address))}`;
+}
+function csvEscape(val) {
+  const s = String(val||'');
+  return (s.includes(',')||s.includes('"')||s.includes('\n')) ? '"'+s.replace(/"/g,'""')+'"' : s;
 }
 
-// ── CSV 이스케이프 ──
-function csvEscape(val) {
-  const s = String(val || '');
-  if (s.includes(',') || s.includes('"') || s.includes('\n'))
-    return '"' + s.replace(/"/g, '""') + '"';
-  return s;
+// ── 검색 조합 생성 (셔플) ──
+function generateSearchCombinations() {
+  const combos = [];
+  for (const cat of ALL_CATEGORIES) {
+    for (const region of ALL_REGIONS) {
+      combos.push({ category: cat, region, query: `${region} ${cat}` });
+    }
+  }
+  // 셔플 (매일 다른 순서로 검색 → 중복 최소화)
+  for (let i = combos.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [combos[i], combos[j]] = [combos[j], combos[i]];
+  }
+  return combos;
 }
 
 // ── 메인 ──
 async function main() {
   const isTest = process.argv.includes('--test');
-  console.log(`🚀 UI 잠재고객 크롤러 v2 시작 ${isTest ? '(테스트 모드)' : ''}`);
-  console.log(`   업종 ${CATEGORIES.length}개 × 지역 ${REGIONS.length}개 = ${CATEGORIES.length * REGIONS.length} 조합\n`);
+  const remaining = getRemainingCalls();
+
+  console.log(`🚀 UI 잠재고객 크롤러 v3 시작 ${isTest ? '(테스트)' : ''}`);
+  console.log(`   검색어: ${ALL_CATEGORIES.length}개 업종 × ${ALL_REGIONS.length}개 지역 = ${ALL_CATEGORIES.length * ALL_REGIONS.length} 조합`);
+  console.log(`   오늘 남은 API: ${remaining}/${DAILY_API_TARGET}\n`);
+
+  if (remaining <= 0 && !isTest) {
+    console.log('⛔ 오늘 API 한도 소진. 내일 다시 실행됩니다.');
+    return;
+  }
 
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
-  // 히스토리 로드
   const history = loadHistory();
-  const existingCount = Object.keys(history.crawled).length;
-  console.log(`📚 기존 DB: ${existingCount}개 업체\n`);
+  console.log(`📚 기존 DB: ${Object.keys(history.crawled).length}개 업체\n`);
 
   const prospects = [];
   const newProspects = [];
-  const seen = new Set();
+  const seen = new Set(Object.keys(history.crawled)); // 기존 DB 전부 seen에 로드
   let apiCalls = 0;
+  let skippedDup = 0;
 
-  const categories = isTest ? CATEGORIES.slice(0, 3) : CATEGORIES;
-  const regions = isTest ? REGIONS.slice(0, 2) : REGIONS;
+  const combos = generateSearchCombinations();
+  const maxCombos = isTest ? 6 : combos.length;
 
-  for (const category of categories) {
-    for (const region of regions) {
-      const query = `${region} ${category}`;
-      console.log(`🔍 검색: ${query}`);
+  // API 예산: 각 조합당 최대 20페이지 (100건) 검색
+  // 2만 API ÷ 20페이지 = 1000조합, 여유 있게 페이지 수 조절
+  const pagesPerCombo = isTest ? 1 : Math.min(20, Math.floor(remaining / Math.min(maxCombos, 1000)));
 
-      const maxPages = isTest ? 1 : 5;
-      for (let page = 1; page <= maxPages; page++) {
-        const start = (page - 1) * 5 + 1;
-        const items = await searchLocal(query, start, 5);
-        apiCalls++;
+  for (let ci = 0; ci < maxCombos; ci++) {
+    const { category, region, query } = combos[ci];
 
-        if (items.length === 0) break;
+    if (getRemainingCalls() <= 0) {
+      console.log('\n⛔ API 한도 도달. 중단.');
+      break;
+    }
 
-        for (const item of items) {
-          const name = stripHtml(item.title);
-          const address = stripHtml(item.address);
-          const dedup = name + '|' + address;
+    // 진행률 (100개마다)
+    if (ci % 100 === 0 && ci > 0) {
+      const { usage, today } = getApiUsage();
+      console.log(`\n📊 진행: ${ci}/${maxCombos} 조합 | API: ${usage[today]?.calls || 0}/${DAILY_API_TARGET} | 수집: ${prospects.length}건 | 신규: ${newProspects.length}건 | 중복스킵: ${skippedDup}건\n`);
+    }
 
-          if (seen.has(dedup)) continue;
-          seen.add(dedup);
+    console.log(`🔍 [${ci+1}/${maxCombos}] ${query}`);
 
-          const homepage = item.link || '';
-          if (!isOwnWebsite(homepage)) continue;
+    for (let page = 1; page <= pagesPerCombo; page++) {
+      const start = (page - 1) * 5 + 1;
+      if (start > 100) break; // 네이버 API 최대 start=100
 
-          // 히스토리 체크
-          const isNew = !history.crawled[dedup];
+      const items = await searchLocal(query, start, 5);
+      if (items === null) break; // API 한도
+      if (items.length === 0) break;
+      apiCalls++;
 
-          console.log(`  ${isNew ? '🆕' : '📋'} ${name} → ${homepage}`);
+      for (const item of items) {
+        const name = stripHtml(item.title);
+        const address = stripHtml(item.address);
+        const dedup = name + '|' + address;
 
-          // 홈페이지 분석
-          const analysis = await analyzeHomepage(homepage);
+        if (seen.has(dedup)) { skippedDup++; continue; }
+        seen.add(dedup);
 
-          // 패키지 추천
-          const pkg = recommendPackage(analysis.score, analysis.problems);
+        const homepage = item.link || '';
+        if (!isOwnWebsite(homepage)) continue;
 
-          // 연락처 분리
-          const contactMap = {};
-          analysis.contacts.forEach(c => {
-            if (!contactMap[c.type]) contactMap[c.type] = [];
-            contactMap[c.type].push(c.value);
-          });
+        const isNew = !history.crawled[dedup];
+        
+        // 홈페이지 분석 (병렬 아닌 순차 — 서버 부하 방지)
+        const analysis = await analyzeHomepage(homepage);
+        const pkg = recommendPackage(analysis.score);
 
-          const phone = (contactMap['전화'] || []).join(' / ');
-          const email = (contactMap['이메일'] || []).join(' / ');
-          const kakao = (contactMap['카카오톡'] || []).join(' / ');
-          const openKakao = (contactMap['카카오오픈채팅'] || []).join(' / ');
-          const insta = (contactMap['인스타그램'] || []).join(' / ');
-          const naverBook = (contactMap['네이버예약'] || []).join(' / ');
+        // 연락처 분리
+        const contactMap = {};
+        analysis.contacts.forEach(c => {
+          if (!contactMap[c.type]) contactMap[c.type] = [];
+          contactMap[c.type].push(c.value);
+        });
 
-          // TM 스크립트
-          const tmScript = analysis.problems.length > 0
-            ? generateTMScript(name, analysis.problems, pkg)
-            : '';
-          const smsTemplate = analysis.problems.length > 0
-            ? generateSMSTemplate(name, analysis.problems, pkg, homepage)
-            : '';
-          const emailTemplate = analysis.problems.length > 0
-            ? generateEmailTemplate(name, analysis.problems, pkg, homepage)
-            : '';
+        const prospect = {
+          category, name, address,
+          placeLink: buildPlaceLink(item),
+          homepage,
+          score: analysis.score,
+          responsive: analysis.responsive === null ? '확인불가' : analysis.responsive ? 'Y' : 'N',
+          problems: analysis.problems.join(' / '),
+          recommendedPkg: `${pkg.name} (${pkg.price})`,
+          phone: (contactMap['전화']||[]).join(' / '),
+          email: (contactMap['이메일']||[]).join(' / '),
+          kakao: (contactMap['카카오톡']||[]).join(' / '),
+          openKakao: (contactMap['카카오오픈채팅']||[]).join(' / '),
+          insta: (contactMap['인스타그램']||[]).join(' / '),
+          naverBook: (contactMap['네이버예약']||[]).join(' / '),
+          tmScript: analysis.problems.length > 0 ? generateTM(name, analysis.problems, pkg) : '',
+          smsTemplate: analysis.problems.length > 0 ? generateSMS(name, analysis.problems, pkg) : '',
+          isNew: isNew ? 'Y' : 'N',
+          crawledAt: new Date().toISOString().slice(0,19).replace('T',' '),
+        };
 
-          const prospect = {
-            category,
-            name,
-            address,
-            placeLink: buildPlaceLink(item),
-            homepage,
-            score: analysis.score,
-            responsive: analysis.responsive === null ? '확인불가' : analysis.responsive ? 'Y' : 'N',
-            problems: analysis.problems.join(' / '),
-            recommendedPkg: `${pkg.name} (${pkg.price})`,
-            phone, email, kakao, openKakao, insta, naverBook,
-            tmScript,
-            smsTemplate,
-            emailTemplate,
-            isNew: isNew ? 'Y' : 'N',
-            crawledAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
-          };
+        prospects.push(prospect);
+        if (isNew) newProspects.push(prospect);
 
-          prospects.push(prospect);
-          if (isNew) newProspects.push(prospect);
-
-          // 히스토리 업데이트
-          history.crawled[dedup] = {
-            name, address, homepage, category,
-            score: analysis.score,
-            firstSeen: history.crawled[dedup]?.firstSeen || new Date().toISOString(),
-            lastSeen: new Date().toISOString(),
-            tmStatus: history.crawled[dedup]?.tmStatus || '미연락',
-          };
+        // 이메일 템플릿 파일
+        if (prospect.email && analysis.problems.length > 0) {
+          const emailDir = path.join(OUTPUT_DIR, 'emails');
+          fs.mkdirSync(emailDir, { recursive: true });
+          const safe = name.replace(/[/\\?%*:|"<>]/g, '_');
+          fs.writeFileSync(path.join(emailDir, `${safe}.txt`), generateEmail(name, analysis.problems, pkg, homepage), 'utf8');
         }
 
-        await sleep(RATE_LIMIT_MS);
+        // 히스토리 업데이트
+        history.crawled[dedup] = {
+          name, address, homepage, category, score: analysis.score,
+          firstSeen: history.crawled[dedup]?.firstSeen || new Date().toISOString(),
+          lastSeen: new Date().toISOString(),
+          tmStatus: history.crawled[dedup]?.tmStatus || '미연락',
+        };
+
+        if (isNew) console.log(`  🆕 [${analysis.score}점] ${name} → ${homepage}`);
       }
+
+      await sleep(RATE_LIMIT_MS);
     }
   }
 
-  // ── 점수 높은 순 정렬 ──
-  prospects.sort((a, b) => b.score - a.score);
-  newProspects.sort((a, b) => b.score - a.score);
+  // ── 점수순 정렬 ──
+  prospects.sort((a,b) => b.score - a.score);
+  newProspects.sort((a,b) => b.score - a.score);
 
-  // ── CSV 저장 (전체) ──
+  // ── CSV 저장 ──
   const BOM = '\ufeff';
   const header = '우선순위점수,업종,업체명,주소,네이버플레이스,홈페이지,반응형,발견된문제,추천패키지,전화,이메일,카카오톡,카카오오픈채팅,인스타그램,네이버예약,TM스크립트,문자템플릿,신규여부,수집일시';
-  const toRow = (p) => [
+  const toRow = p => [
     p.score, p.category, p.name, p.address, p.placeLink, p.homepage,
     p.responsive, p.problems, p.recommendedPkg,
     p.phone, p.email, p.kakao, p.openKakao, p.insta, p.naverBook,
     p.tmScript, p.smsTemplate, p.isNew, p.crawledAt
   ].map(csvEscape).join(',');
 
-  const rows = prospects.map(toRow);
-  fs.writeFileSync(CSV_PATH, BOM + header + '\n' + rows.join('\n'), 'utf8');
-
-  // ── 신규만 별도 CSV ──
-  const today = new Date().toISOString().slice(0, 10);
-  const newCsvPath = path.join(OUTPUT_DIR, `new-${today}.csv`);
-  if (newProspects.length > 0) {
+  // 기존 CSV 유지 + 신규 추가 (append 모드)
+  if (fs.existsSync(CSV_PATH) && newProspects.length > 0) {
+    const existingContent = fs.readFileSync(CSV_PATH, 'utf8');
     const newRows = newProspects.map(toRow);
-    fs.writeFileSync(newCsvPath, BOM + header + '\n' + newRows.join('\n'), 'utf8');
+    fs.writeFileSync(CSV_PATH, existingContent + '\n' + newRows.join('\n'), 'utf8');
+  } else if (!fs.existsSync(CSV_PATH)) {
+    fs.writeFileSync(CSV_PATH, BOM + header + '\n' + prospects.map(toRow).join('\n'), 'utf8');
   }
 
-  // ── 이메일 템플릿 별도 저장 ──
-  const emailDir = path.join(OUTPUT_DIR, 'emails');
-  fs.mkdirSync(emailDir, { recursive: true });
-  newProspects.filter(p => p.email).forEach(p => {
-    const safeName = p.name.replace(/[/\\?%*:|"<>]/g, '_');
-    fs.writeFileSync(path.join(emailDir, `${safeName}.txt`), p.emailTemplate, 'utf8');
+  // 오늘 신규 CSV
+  const today = new Date().toISOString().slice(0,10);
+  const newCsvPath = path.join(OUTPUT_DIR, `new-${today}.csv`);
+  if (newProspects.length > 0) {
+    fs.writeFileSync(newCsvPath, BOM + header + '\n' + newProspects.map(toRow).join('\n'), 'utf8');
+  }
+
+  // 전체 CSV 재생성 (히스토리 기반 — 전체 DB 덤프)
+  const allCsvPath = path.join(OUTPUT_DIR, 'prospects-all.csv');
+  const allRows = Object.entries(history.crawled).map(([key, h]) => {
+    return [h.score||0, h.category, h.name, h.address, '', h.homepage, '', '', '', '', '', '', '', '', '', '', '', h.tmStatus, h.lastSeen].map(csvEscape).join(',');
   });
+  fs.writeFileSync(allCsvPath, BOM + header + '\n' + allRows.join('\n'), 'utf8');
 
-  // ── 히스토리 저장 ──
-  saveHistory(history);
+  // 히스토리 저장
+  saveJSON(DB_PATH, history);
 
-  // ── 결과 요약 ──
+  // ── 결과 ──
+  const { usage, today: td } = getApiUsage();
   console.log('\n' + '='.repeat(60));
-  console.log('📊 크롤링 결과 요약 v2');
+  console.log('📊 크롤링 결과 v3');
   console.log('='.repeat(60));
-  console.log(`총 수집: ${prospects.length}건 (신규: ${newProspects.length}건)`);
-  console.log(`API 호출: ${apiCalls}회`);
+  console.log(`금일 API 사용: ${usage[td]?.calls || 0}/${DAILY_API_TARGET}`);
+  console.log(`신규 수집: ${newProspects.length}건`);
+  console.log(`중복 스킵: ${skippedDup}건`);
   console.log(`DB 누적: ${Object.keys(history.crawled).length}개 업체`);
-  console.log(`CSV 전체: ${CSV_PATH}`);
-  if (newProspects.length > 0) console.log(`CSV 신규: ${newCsvPath}`);
+  console.log(`CSV 신규: ${newCsvPath}`);
+  console.log(`CSV 전체: ${allCsvPath}`);
 
-  // 점수 분포
-  const highScore = prospects.filter(p => p.score >= 60).length;
-  const midScore = prospects.filter(p => p.score >= 30 && p.score < 60).length;
-  const lowScore = prospects.filter(p => p.score < 30).length;
-  console.log(`\n🎯 잠재고객 등급:`);
-  console.log(`  🔴 긴급 (60+점): ${highScore}건 → 풀리뉴얼/응급팩 추천`);
-  console.log(`  🟡 중간 (30~59점): ${midScore}건 → 전환형/스타터팩 추천`);
-  console.log(`  🟢 경미 (0~29점): ${lowScore}건 → 스타터팩 추천`);
+  // 등급
+  const urgent = newProspects.filter(p => p.score >= 60).length;
+  const mid = newProspects.filter(p => p.score >= 30 && p.score < 60).length;
+  const low = newProspects.filter(p => p.score < 30).length;
+  console.log(`\n🎯 신규 잠재고객 등급:`);
+  console.log(`  🔴 긴급: ${urgent}건 | 🟡 중간: ${mid}건 | 🟢 경미: ${low}건`);
 
-  // 업종별
-  const byCategory = {};
-  prospects.forEach(p => { byCategory[p.category] = (byCategory[p.category] || 0) + 1; });
-  console.log('\n📋 업종별:');
-  Object.entries(byCategory).sort((a, b) => b[1] - a[1]).forEach(([cat, cnt]) => {
-    console.log(`  ${cat}: ${cnt}건`);
-  });
+  // 연락 가능
+  const wp = newProspects.filter(p=>p.phone).length;
+  const we = newProspects.filter(p=>p.email).length;
+  const wk = newProspects.filter(p=>p.kakao).length;
+  console.log(`📞 연락가능: 전화 ${wp} | 이메일 ${we} | 카톡 ${wk}`);
 
-  // 연락수단 통계
-  const withPhone = prospects.filter(p => p.phone).length;
-  const withEmail = prospects.filter(p => p.email).length;
-  const withKakao = prospects.filter(p => p.kakao).length;
-  console.log(`\n📞 연락 가능:`);
-  console.log(`  전화: ${withPhone}건`);
-  console.log(`  이메일: ${withEmail}건`);
-  console.log(`  카카오톡: ${withKakao}건`);
-
-  // TOP 5 우선순위
-  console.log('\n🏆 TOP 5 우선 TM 대상:');
-  prospects.slice(0, 5).forEach((p, i) => {
-    console.log(`  ${i + 1}. [${p.score}점] ${p.name} (${p.category}) → ${p.recommendedPkg}`);
-    console.log(`     문제: ${p.problems}`);
-    if (p.phone) console.log(`     전화: ${p.phone}`);
+  // TOP 5
+  console.log('\n🏆 TOP 5 신규:');
+  newProspects.slice(0,5).forEach((p,i) => {
+    console.log(`  ${i+1}. [${p.score}점] ${p.name} (${p.category}) → ${p.recommendedPkg}`);
+    if (p.phone) console.log(`     📞 ${p.phone}`);
   });
 }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-main().catch(e => { console.error('❌ 크롤러 에러:', e); process.exit(1); });
+main().catch(e => { console.error('❌:', e); process.exit(1); });

@@ -1,0 +1,221 @@
+/**
+ * 포트폴리오 사이트 생성기
+ * 전후 비교 + 서비스 소개 + 가격표 + 문의폼
+ * 
+ * node tools/portfolio-site.js
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const OUTPUT_DIR = path.join(__dirname, '..', 'output');
+
+function generatePortfolioSite() {
+  return `<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>웹사이트 모바일 최적화 전문 — 온다</title>
+<meta name="description" content="소상공인 웹사이트 모바일 최적화. 5만원부터, 24시간 내 완료. 전후 비교 시안 무료 제공.">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Pretendard',-apple-system,sans-serif;color:#1e293b;line-height:1.6}
+  
+  /* Hero */
+  .hero{background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#0f172a 100%);color:white;padding:80px 20px;text-align:center}
+  .hero h1{font-size:clamp(28px,5vw,48px);margin-bottom:16px;line-height:1.3}
+  .hero h1 span{color:#60a5fa}
+  .hero p{font-size:18px;opacity:0.8;max-width:600px;margin:0 auto 32px}
+  .hero-cta{display:inline-block;background:#2563eb;color:white;padding:16px 40px;border-radius:8px;text-decoration:none;font-size:18px;font-weight:600;transition:transform 0.2s}
+  .hero-cta:hover{transform:scale(1.05)}
+  .hero-sub{margin-top:16px;font-size:14px;opacity:0.6}
+  
+  /* Stats */
+  .stats{display:flex;justify-content:center;gap:40px;padding:40px 20px;background:#f8fafc;flex-wrap:wrap}
+  .stat{text-align:center}
+  .stat-num{font-size:36px;font-weight:bold;color:#2563eb}
+  .stat-label{font-size:14px;color:#64748b}
+  
+  /* Section */
+  .section{max-width:1000px;margin:0 auto;padding:60px 20px}
+  .section h2{font-size:32px;text-align:center;margin-bottom:40px}
+  .section h2 span{color:#2563eb}
+  
+  /* Problems */
+  .problems{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+  .problem-card{background:#fef2f2;border-radius:12px;padding:24px;border:1px solid #fecaca}
+  .problem-card h3{color:#dc2626;margin-bottom:8px}
+  .problem-card p{font-size:14px;color:#64748b}
+  
+  /* Services */
+  .services{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+  .service-card{background:white;border:2px solid #e2e8f0;border-radius:12px;padding:24px;text-align:center;transition:border-color 0.3s}
+  .service-card:hover{border-color:#2563eb}
+  .service-icon{font-size:40px;margin-bottom:12px}
+  .service-card h3{margin-bottom:8px}
+  .service-card p{font-size:14px;color:#64748b}
+  
+  /* Pricing */
+  .pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+  .price-card{background:white;border:2px solid #e2e8f0;border-radius:12px;padding:28px;text-align:center}
+  .price-card.featured{border-color:#2563eb;position:relative}
+  .price-card.featured::before{content:'인기';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#2563eb;color:white;padding:4px 16px;border-radius:12px;font-size:12px;font-weight:bold}
+  .price-name{font-size:18px;font-weight:600;margin-bottom:8px}
+  .price-amount{font-size:32px;font-weight:bold;color:#2563eb;margin-bottom:16px}
+  .price-amount small{font-size:14px;color:#94a3b8}
+  .price-list{list-style:none;text-align:left;margin-bottom:20px}
+  .price-list li{padding:6px 0;font-size:14px;border-bottom:1px solid #f1f5f9}
+  .price-list li::before{content:'✅ ';margin-right:4px}
+  .price-btn{display:block;padding:12px;background:#2563eb;color:white;text-decoration:none;border-radius:8px;font-weight:600}
+  
+  /* Process */
+  .process{display:flex;justify-content:center;gap:24px;flex-wrap:wrap}
+  .process-step{text-align:center;flex:1;min-width:160px;max-width:200px}
+  .process-num{width:48px;height:48px;background:#2563eb;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px;font-weight:bold}
+  .process-step h3{font-size:16px;margin-bottom:4px}
+  .process-step p{font-size:13px;color:#64748b}
+  
+  /* CTA */
+  .cta-section{background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;padding:60px 20px;text-align:center}
+  .cta-section h2{font-size:28px;margin-bottom:12px}
+  .cta-section p{opacity:0.9;margin-bottom:24px;font-size:16px}
+  .cta-btn{display:inline-block;background:white;color:#2563eb;padding:16px 40px;border-radius:8px;font-size:18px;font-weight:bold;text-decoration:none}
+  
+  /* Contact Form */
+  .contact{background:#f8fafc}
+  .form{max-width:500px;margin:0 auto}
+  .form input,.form textarea,.form select{width:100%;padding:12px 16px;border:2px solid #e2e8f0;border-radius:8px;font-size:15px;margin-bottom:12px;font-family:inherit}
+  .form input:focus,.form textarea:focus{border-color:#2563eb;outline:none}
+  .form button{width:100%;padding:14px;background:#2563eb;color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer}
+  
+  /* Footer */
+  footer{background:#0f172a;color:#94a3b8;padding:40px 20px;text-align:center;font-size:14px}
+  
+  @media(max-width:768px){.stats{gap:20px}.process{flex-direction:column;align-items:center}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>모바일에서 <span>고객이 이탈</span>하고 있다면<br>지금 바로 고쳐드립니다</h1>
+  <p>소상공인 웹사이트 모바일 최적화 전문. 5만원부터, 24시간 내 완료.</p>
+  <a href="#contact" class="hero-cta">무료 진단 받기 →</a>
+  <div class="hero-sub">✅ 전후 비교 시안 무료 | ✅ 24시간 내 완료 | ✅ 1회 수정 포함</div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num">57%</div><div class="stat-label">모바일 비최적화 사이트<br>첫 페이지 이탈률</div></div>
+  <div class="stat"><div class="stat-num">70%</div><div class="stat-label">로컬 검색 중<br>모바일 비중</div></div>
+  <div class="stat"><div class="stat-num">24h</div><div class="stat-label">평균<br>작업 시간</div></div>
+  <div class="stat"><div class="stat-num">5만~</div><div class="stat-label">시작<br>가격</div></div>
+</div>
+
+<div class="section">
+  <h2>이런 <span>문제</span>가 있으신가요?</h2>
+  <div class="problems">
+    <div class="problem-card"><h3>📱 모바일에서 깨짐</h3><p>글자가 작고, 버튼이 안 눌리고, 가로 스크롤이 생겨서 고객이 3초 안에 나갑니다.</p></div>
+    <div class="problem-card"><h3>📞 전화 버튼이 없음</h3><p>고객이 전화하려면 번호를 외워서 수동 입력해야 합니다. 그 사이에 경쟁사로 갑니다.</p></div>
+    <div class="problem-card"><h3>💬 카톡/문의 버튼 없음</h3><p>상담하고 싶은 고객이 연락할 방법을 못 찾으면 그냥 이탈합니다.</p></div>
+    <div class="problem-card"><h3>🐌 로딩이 느림</h3><p>3초 이상 로딩되면 53%의 방문자가 이탈합니다. 이미지 최적화만으로도 개선 가능합니다.</p></div>
+  </div>
+</div>
+
+<div class="section" style="background:#f8fafc">
+  <h2>작업 <span>프로세스</span></h2>
+  <div class="process">
+    <div class="process-step"><div class="process-num">1</div><h3>무료 진단</h3><p>현재 사이트 모바일 문제점 3가지 체크</p></div>
+    <div class="process-step"><div class="process-num">2</div><h3>시안 제공</h3><p>전후 비교 시안 무료 제공</p></div>
+    <div class="process-step"><div class="process-num">3</div><h3>작업 시작</h3><p>선입금 50% 후 24시간 내 작업</p></div>
+    <div class="process-step"><div class="process-num">4</div><h3>완료 배포</h3><p>테스트 + 배포 + 잔금</p></div>
+  </div>
+</div>
+
+<div class="section" id="pricing">
+  <h2><span>가격</span>표</h2>
+  <div class="pricing">
+    <div class="price-card">
+      <div class="price-name">스타터팩</div>
+      <div class="price-amount">11만원 <small>~</small></div>
+      <ul class="price-list">
+        <li>카카오톡 상담 버튼</li>
+        <li>클릭 전화 버튼</li>
+        <li>오시는 길 지도</li>
+        <li>1회 수정 포함</li>
+      </ul>
+      <a href="#contact" class="price-btn">문의하기</a>
+    </div>
+    <div class="price-card featured">
+      <div class="price-name">전환형 패키지</div>
+      <div class="price-amount">20만원 <small>~</small></div>
+      <ul class="price-list">
+        <li>스타터팩 전체 포함</li>
+        <li>온라인 문의폼</li>
+        <li>CTA 버튼 최적화</li>
+        <li>1회 수정 포함</li>
+      </ul>
+      <a href="#contact" class="price-btn">문의하기</a>
+    </div>
+    <div class="price-card">
+      <div class="price-name">모바일 응급팩</div>
+      <div class="price-amount">32만원 <small>~</small></div>
+      <ul class="price-list">
+        <li>메인 페이지 반응형</li>
+        <li>버튼 + 폼 세트</li>
+        <li>GA 추적 코드 설치</li>
+        <li>CTA 배치 최적화</li>
+      </ul>
+      <a href="#contact" class="price-btn">문의하기</a>
+    </div>
+    <div class="price-card">
+      <div class="price-name">풀 리뉴얼 라이트</div>
+      <div class="price-amount">65만원 <small>~</small></div>
+      <ul class="price-list">
+        <li>메인+서브 3페이지</li>
+        <li>전체 CTA 정리</li>
+        <li>GA + Meta Pixel</li>
+        <li>1개월 유지보수</li>
+      </ul>
+      <a href="#contact" class="price-btn">문의하기</a>
+    </div>
+  </div>
+</div>
+
+<div class="cta-section">
+  <h2>지금 무료 진단 받으세요</h2>
+  <p>홈페이지 URL만 알려주시면 24시간 내 진단 리포트를 보내드립니다.</p>
+  <a href="#contact" class="cta-btn">무료 진단 신청 →</a>
+</div>
+
+<div class="section contact" id="contact">
+  <h2>📩 <span>문의</span>하기</h2>
+  <div class="form">
+    <input type="text" placeholder="업체명" required>
+    <input type="text" placeholder="홈페이지 URL" required>
+    <input type="tel" placeholder="연락처 (전화번호)">
+    <input type="email" placeholder="이메일">
+    <select>
+      <option value="">관심 서비스 선택</option>
+      <option>스타터팩 (11만원~)</option>
+      <option>전환형 패키지 (20만원~)</option>
+      <option>모바일 응급팩 (32만원~)</option>
+      <option>풀 리뉴얼 라이트 (65만원~)</option>
+      <option>기타/상담 원함</option>
+    </select>
+    <textarea rows="3" placeholder="추가 요청사항 (선택)"></textarea>
+    <button type="submit">무료 진단 신청하기</button>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 온다 | 소상공인 웹사이트 모바일 최적화 전문</p>
+  <p style="margin-top:8px">📞 010-XXXX-XXXX | 💬 카카오톡: XXXXX</p>
+</footer>
+
+</body>
+</html>`;
+}
+
+const portfolioPath = path.join(OUTPUT_DIR, 'portfolio-site.html');
+fs.writeFileSync(portfolioPath, generatePortfolioSite(), 'utf8');
+console.log(`✅ 포트폴리오 사이트 생성: ${portfolioPath}`);
