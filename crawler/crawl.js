@@ -187,10 +187,56 @@ async function analyzeHomepage(url) {
       const m = $(el).attr('href').replace('mailto:', '').split('?')[0].trim();
       if (m && !result.contacts.find(c => c.value === m)) result.contacts.push({ type: '이메일', value: m });
     });
-    (html.match(/pf\.kakao\.com\/[a-zA-Z0-9_]+/g) || []).forEach(k => result.contacts.push({ type: '카카오톡', value: 'https://' + k }));
+    // 카카오톡 채널
+    (html.match(/pf\.kakao\.com\/[a-zA-Z0-9_]+/g) || []).forEach(k => result.contacts.push({ type: '카카오톡채널', value: 'https://' + k }));
+    // 카카오 오픈채팅
     (html.match(/open\.kakao\.com\/o\/[a-zA-Z0-9]+/g) || []).forEach(k => result.contacts.push({ type: '카카오오픈채팅', value: 'https://' + k }));
-    (html.match(/instagram\.com\/([a-zA-Z0-9_.]+)/g) || []).forEach(i => result.contacts.push({ type: '인스타그램', value: 'https://' + i }));
+    // 카카오톡 1:1 채팅 링크
+    (html.match(/talk\.naver\.com\/[a-zA-Z0-9]+/g) || []).forEach(k => result.contacts.push({ type: '네이버톡톡', value: 'https://' + k }));
+    // 네이버 톡톡
+    (html.match(/talk\.naver\.com\/[^\s"'<>]+/g) || []).forEach(t => result.contacts.push({ type: '네이버톡톡', value: 'https://' + t }));
+    // 네이버 예약
     (html.match(/booking\.naver\.com\/[^\s"'<>]+/g) || []).forEach(b => result.contacts.push({ type: '네이버예약', value: 'https://' + b }));
+    // 인스타그램
+    (html.match(/instagram\.com\/([a-zA-Z0-9_.]+)/g) || []).forEach(i => {
+      if (!/instagram\.com\/(p|reel|explore|accounts|static|about)/.test('https://'+i))
+        result.contacts.push({ type: '인스타그램', value: 'https://' + i });
+    });
+    // 페이스북
+    (html.match(/facebook\.com\/([a-zA-Z0-9_.]+)/g) || []).forEach(f => {
+      if (!/facebook\.com\/(sharer|share|dialog|plugins|tr)/.test('https://'+f))
+        result.contacts.push({ type: '페이스북', value: 'https://' + f });
+    });
+    // 유튜브
+    (html.match(/youtube\.com\/(channel|c|@)[^\s"'<>]+/g) || []).forEach(y => result.contacts.push({ type: '유튜브', value: 'https://' + y }));
+    (html.match(/youtube\.com\/[a-zA-Z0-9_-]{20,}/g) || []).forEach(y => result.contacts.push({ type: '유튜브', value: 'https://' + y }));
+    // 네이버 블로그
+    (html.match(/blog\.naver\.com\/[a-zA-Z0-9_]+/g) || []).forEach(b => result.contacts.push({ type: '네이버블로그', value: 'https://' + b }));
+    // 네이버 카페
+    (html.match(/cafe\.naver\.com\/[a-zA-Z0-9_]+/g) || []).forEach(c => result.contacts.push({ type: '네이버카페', value: 'https://' + c }));
+    // 트위터/X
+    (html.match(/(?:twitter|x)\.com\/([a-zA-Z0-9_]+)/g) || []).forEach(t => {
+      if (!/(?:twitter|x)\.com\/(intent|share|widgets|i)/.test('https://'+t))
+        result.contacts.push({ type: '트위터', value: 'https://' + t });
+    });
+    // 라인
+    (html.match(/line\.me\/[^\s"'<>]+/g) || []).forEach(l => result.contacts.push({ type: '라인', value: 'https://' + l }));
+    // 틱톡
+    (html.match(/tiktok\.com\/@[a-zA-Z0-9_.]+/g) || []).forEach(t => result.contacts.push({ type: '틱톡', value: 'https://' + t }));
+    // 팩스
+    const faxes = html.match(/(?:팩스|FAX|fax|Fax)\s*[:：]?\s*(0\d{1,2}[-.\s]?\d{3,4}[-.\s]?\d{4})/gi) || [];
+    faxes.forEach(f => {
+      const num = f.replace(/(?:팩스|FAX|fax|Fax)\s*[:：]?\s*/i, '').replace(/\s/g,'');
+      if (num.length >= 9) result.contacts.push({ type: '팩스', value: num });
+    });
+    // 네이버 플레이스 (자체 링크)
+    (html.match(/naver\.me\/[a-zA-Z0-9]+/g) || []).forEach(n => result.contacts.push({ type: '네이버플레이스', value: 'https://' + n }));
+    // 카카오맵
+    (html.match(/kko\.to\/[a-zA-Z0-9_-]+/g) || []).forEach(k => result.contacts.push({ type: '카카오맵', value: 'https://' + k }));
+    // 배달의민족/요기요 (참고용)
+    (html.match(/baemin\.com\/[^\s"'<>]+/g) || []).forEach(b => result.contacts.push({ type: '배달의민족', value: 'https://' + b }));
+    // 스마트스토어
+    (html.match(/smartstore\.naver\.com\/[a-zA-Z0-9_-]+/g) || []).forEach(s => result.contacts.push({ type: '스마트스토어', value: 'https://' + s }));
 
     // 중복 제거
     const seen = new Set();
@@ -326,6 +372,9 @@ async function main() {
           contactMap[c.type].push(c.value);
         });
 
+        // 전체 연락매체를 "매체:값" 형태로 통합
+        const allContacts = analysis.contacts.map(c => `[${c.type}] ${c.value}`).join(' | ');
+
         const prospect = {
           category, name, address,
           placeLink: buildPlaceLink(item),
@@ -336,10 +385,21 @@ async function main() {
           recommendedPkg: `${pkg.name} (${pkg.price})`,
           phone: (contactMap['전화']||[]).join(' / '),
           email: (contactMap['이메일']||[]).join(' / '),
-          kakao: (contactMap['카카오톡']||[]).join(' / '),
+          kakao: (contactMap['카카오톡채널']||[]).join(' / '),
           openKakao: (contactMap['카카오오픈채팅']||[]).join(' / '),
           insta: (contactMap['인스타그램']||[]).join(' / '),
+          facebook: (contactMap['페이스북']||[]).join(' / '),
+          youtube: (contactMap['유튜브']||[]).join(' / '),
+          naverBlog: (contactMap['네이버블로그']||[]).join(' / '),
+          naverTalktalk: (contactMap['네이버톡톡']||[]).join(' / '),
           naverBook: (contactMap['네이버예약']||[]).join(' / '),
+          naverCafe: (contactMap['네이버카페']||[]).join(' / '),
+          twitter: (contactMap['트위터']||[]).join(' / '),
+          line: (contactMap['라인']||[]).join(' / '),
+          tiktok: (contactMap['틱톡']||[]).join(' / '),
+          fax: (contactMap['팩스']||[]).join(' / '),
+          smartstore: (contactMap['스마트스토어']||[]).join(' / '),
+          allContacts,
           tmScript: analysis.problems.length > 0 ? generateTM(name, analysis.problems, pkg) : '',
           smsTemplate: analysis.problems.length > 0 ? generateSMS(name, analysis.problems, pkg) : '',
           isNew: isNew ? 'Y' : 'N',
@@ -378,12 +438,14 @@ async function main() {
 
   // ── CSV 저장 ──
   const BOM = '\ufeff';
-  const header = '우선순위점수,업종,업체명,주소,네이버플레이스,홈페이지,반응형,발견된문제,추천패키지,전화,이메일,카카오톡,카카오오픈채팅,인스타그램,네이버예약,TM스크립트,문자템플릿,신규여부,수집일시';
+  const header = '우선순위점수,업종,업체명,주소,네이버플레이스,홈페이지,반응형,발견된문제,추천패키지,전화,이메일,카카오톡채널,카카오오픈채팅,인스타그램,페이스북,유튜브,네이버블로그,네이버톡톡,네이버예약,네이버카페,트위터,라인,틱톡,팩스,스마트스토어,전체연락수단,TM스크립트,문자템플릿,신규여부,수집일시';
   const toRow = p => [
     p.score, p.category, p.name, p.address, p.placeLink, p.homepage,
     p.responsive, p.problems, p.recommendedPkg,
-    p.phone, p.email, p.kakao, p.openKakao, p.insta, p.naverBook,
-    p.tmScript, p.smsTemplate, p.isNew, p.crawledAt
+    p.phone, p.email, p.kakao, p.openKakao, p.insta,
+    p.facebook, p.youtube, p.naverBlog, p.naverTalktalk, p.naverBook,
+    p.naverCafe, p.twitter, p.line, p.tiktok, p.fax, p.smartstore,
+    p.allContacts, p.tmScript, p.smsTemplate, p.isNew, p.crawledAt
   ].map(csvEscape).join(',');
 
   // 기존 CSV 유지 + 신규 추가 (append 모드)
