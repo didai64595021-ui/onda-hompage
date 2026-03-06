@@ -260,11 +260,33 @@ async function main() {
   
   // ── CSV 저장 ──
   const BOM = '\ufeff';
-  const header = '업종,업체명,주소,네이버플레이스링크,홈페이지URL,반응형여부,연락수단,수집일시';
-  const rows = prospects.map(p =>
-    [p.category, p.name, p.address, p.placeLink, p.homepage, p.responsive, p.contacts, p.crawledAt]
-      .map(csvEscape).join(',')
-  );
+  const header = '업종,업체명,주소,네이버플레이스링크,홈페이지URL,전화,이메일,카카오톡,카카오오픈채팅,인스타그램,네이버예약,기타연락수단,수집일시';
+  const rows = prospects.map(p => {
+    // 연락수단을 매체별로 분리
+    const contactMap = {};
+    if (p.contacts) {
+      p.contacts.split(' | ').forEach(c => {
+        const [type, ...rest] = c.split(':');
+        const val = rest.join(':');
+        if (!contactMap[type]) contactMap[type] = [];
+        contactMap[type].push(val);
+      });
+    }
+    const phone = (contactMap['전화'] || []).join(' / ');
+    const email = (contactMap['이메일'] || []).join(' / ');
+    const kakao = (contactMap['카카오톡'] || []).join(' / ');
+    const openKakao = (contactMap['카카오오픈채팅'] || []).join(' / ');
+    const insta = (contactMap['인스타그램'] || []).join(' / ');
+    const naverBook = (contactMap['네이버예약'] || []).join(' / ');
+    // 나머지 기타
+    const knownTypes = ['전화','이메일','카카오톡','카카오오픈채팅','인스타그램','네이버예약'];
+    const etc = Object.entries(contactMap)
+      .filter(([t]) => !knownTypes.includes(t))
+      .map(([t, v]) => `${t}:${v.join('/')}`)
+      .join(' / ');
+    return [p.category, p.name, p.address, p.placeLink, p.homepage, phone, email, kakao, openKakao, insta, naverBook, etc, p.crawledAt]
+      .map(csvEscape).join(',');
+  });
   
   fs.writeFileSync(CSV_PATH, BOM + header + '\n' + rows.join('\n'), 'utf8');
   
