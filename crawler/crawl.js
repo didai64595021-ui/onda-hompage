@@ -70,6 +70,63 @@ const EXCLUDED_DOMAINS = [
   'booking.naver.com', 'map.naver.com',
 ];
 
+// 웹빌더 도메인 감지
+const WEBBUILDER_DOMAINS = [
+  { domain: 'imweb.me', name: '아임웹' },
+  { domain: 'modoo.at', name: '모두' },
+  { domain: 'wixsite.com', name: 'Wix' },
+  { domain: 'wix.com', name: 'Wix' },
+  { domain: 'squarespace.com', name: 'Squarespace' },
+  { domain: 'wordpress.com', name: 'WordPress.com' },
+  { domain: 'cafe24.com', name: '카페24' },
+  { domain: 'cafe24shop.com', name: '카페24' },
+  { domain: 'sixshop.com', name: '식스샵' },
+  { domain: 'shopby.co.kr', name: 'NHN커머스' },
+  { domain: 'godomall.com', name: '고도몰' },
+  { domain: 'makeshop.co.kr', name: '메이크샵' },
+  { domain: 'godpeople.com', name: '갓피플' },
+  { domain: 'creatorlink.net', name: '크리에이터링크' },
+  { domain: 'strikingly.com', name: 'Strikingly' },
+  { domain: 'weebly.com', name: 'Weebly' },
+  { domain: 'dothome.co.kr', name: '닷홈' },
+  { domain: 'qshop.ai', name: 'Qshop' },
+  { domain: 'kmswb.kr', name: 'KMS웹빌더' },
+  { domain: 'alltheway.kr', name: '올더웨이' },
+  { domain: 'my.pr', name: 'MyPR' },
+  { domain: 'oopy.io', name: 'Oopy(노션)' },
+  { domain: 'notion.site', name: 'Notion' },
+  { domain: 'carrd.co', name: 'Carrd' },
+  { domain: 'webflow.io', name: 'Webflow' },
+  { domain: 'framer.app', name: 'Framer' },
+  { domain: 'sites.google.com', name: 'Google Sites' },
+];
+
+// SNS/블로그 도메인 (홈페이지 아닌 것)
+const SNS_DOMAINS = [
+  'blog.naver.com', 'cafe.naver.com', 'post.naver.com',
+  'blog.daum.net', 'cafe.daum.net', 'tistory.com', 'brunch.co.kr',
+  'instagram.com', 'facebook.com', 'twitter.com', 'x.com',
+  'pf.kakao.com', 'open.kakao.com',
+  'youtube.com', 'youtu.be',
+  'baemin.com', 'yogiyo.co.kr', 'coupangeats.com',
+  'smartstore.naver.com', 'shopping.naver.com',
+  'booking.naver.com', 'map.naver.com',
+];
+
+function classifyUrl(url) {
+  if (!url || url.trim() === '') return { type: '홈페이지없음', builder: '' };
+  try {
+    const hostname = new URL(url).hostname.toLowerCase();
+    // SNS/블로그 체크
+    if (SNS_DOMAINS.some(d => hostname.includes(d))) return { type: 'SNS/블로그', builder: '' };
+    // 웹빌더 체크
+    const wb = WEBBUILDER_DOMAINS.find(w => hostname.includes(w.domain));
+    if (wb) return { type: '웹빌더', builder: wb.name };
+    // 자체 홈페이지
+    return { type: '자체홈페이지', builder: '' };
+  } catch { return { type: '홈페이지없음', builder: '' }; }
+}
+
 function isOwnWebsite(url) {
   if (!url || url.trim() === '') return false;
   try {
@@ -168,15 +225,36 @@ async function analyzeHomepage(url) {
     if (!result.hasMap) { result.problems.push('지도없음'); result.score += 10; }
     if (result.pageSpeed > 3000) { result.problems.push(`로딩느림(${(result.pageSpeed/1000).toFixed(1)}초)`); result.score += 10; }
 
-    // 연락처 추출
-    const phones = html.match(/(?:0\d{1,2}[-.\s]?\d{3,4}[-.\s]?\d{4}|1\d{3}[-.\s]?\d{4})/g) || [];
-    phones.forEach(p => {
-      const c = p.replace(/\s/g, '');
-      if (c.length >= 9 && c.length <= 14) result.contacts.push({ type: '전화', value: c });
-    });
+    // 연락처 추출 (전화번호 — 정확도 강화)
+    // tel: 링크 먼저 (가장 정확)
+    const phoneSet = new Set();
     $('a[href^="tel:"]').each((_, el) => {
-      const t = $(el).attr('href').replace('tel:', '').replace(/\s/g, '');
-      if (t && !result.contacts.find(c => c.value === t)) result.contacts.push({ type: '전화', value: t });
+      const t = $(el).attr('href').replace('tel:', '').replace(/[\s+()-]/g, '').trim();
+      if (t && t.length >= 9 && t.length <= 13 && /^0/.test(t)) {
+        phoneSet.add(t);
+        result.contacts.push({ type: '전화', value: t });
+      }
+    });
+    // 텍스트에서 전화번호 (tel: 없는 경우만 보충, 최대 5개)
+    const phoneRegex = /(?:^|[^\d])(0(?:2|[3-6]\d|70)[-.\s]?\d{3,4}[-.\s]?\d{4})(?=[^\d]|$)/g;
+    let phoneMatch;
+    let phoneCount = 0;
+    while ((phoneMatch = phoneRegex.exec(html)) !== null && phoneCount < 5) {
+      const num = phoneMatch[1].replace(/[\s.-]/g, '');
+      if (num.length >= 9 && num.length <= 12 && !phoneSet.has(num)) {
+        phoneSet.add(num);
+        result.contacts.push({ type: '전화', value: phoneMatch[1] });
+        phoneCount++;
+      }
+    }
+    // 대표번호 (1588, 1577, 1600 등)
+    const tollFree = html.match(/(?:^|[^\d])(1[56]\d{2}[-.\s]?\d{4})(?=[^\d]|$)/g) || [];
+    tollFree.slice(0, 3).forEach(p => {
+      const num = p.replace(/[^\d-]/g, '').trim();
+      if (num.length >= 8 && !phoneSet.has(num.replace(/[-]/g, ''))) {
+        phoneSet.add(num.replace(/[-]/g, ''));
+        result.contacts.push({ type: '전화', value: num });
+      }
     });
     const emails = html.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g) || [];
     emails.forEach(e => {
@@ -357,12 +435,17 @@ async function main() {
         seen.add(dedup);
 
         const homepage = item.link || '';
-        if (!isOwnWebsite(homepage)) continue;
+        const urlClass = classifyUrl(homepage);
+        
+        // SNS/블로그만 있는 건 스킵 (자체홈페이지/웹빌더/없음은 수집)
+        if (urlClass.type === 'SNS/블로그') continue;
 
         const isNew = !history.crawled[dedup];
         
-        // 홈페이지 분석 (병렬 아닌 순차 — 서버 부하 방지)
-        const analysis = await analyzeHomepage(homepage);
+        // 홈페이지 분석 (없는 업체는 빈 결과)
+        const analysis = (urlClass.type === '홈페이지없음') 
+          ? { responsive: null, contacts: [], problems: ['홈페이지없음'], score: 0 }
+          : await analyzeHomepage(homepage);
         const pkg = recommendPackage(analysis.score);
 
         // 연락처 분리
@@ -379,6 +462,8 @@ async function main() {
           category, name, address,
           placeLink: buildPlaceLink(item),
           homepage,
+          siteType: urlClass.type,   // 자체홈페이지 / 웹빌더 / 홈페이지없음
+          webBuilder: urlClass.builder, // 아임웹, Wix, 카페24 등
           score: analysis.score,
           responsive: analysis.responsive === null ? '확인불가' : analysis.responsive ? 'Y' : 'N',
           problems: analysis.problems.join(' / '),
@@ -420,12 +505,14 @@ async function main() {
         // 히스토리 업데이트
         history.crawled[dedup] = {
           name, address, homepage, category, score: analysis.score,
+          siteType: urlClass.type, webBuilder: urlClass.builder,
           firstSeen: history.crawled[dedup]?.firstSeen || new Date().toISOString(),
           lastSeen: new Date().toISOString(),
           tmStatus: history.crawled[dedup]?.tmStatus || '미연락',
         };
 
-        if (isNew) console.log(`  🆕 [${analysis.score}점] ${name} → ${homepage}`);
+        const typeEmoji = {'자체홈페이지':'🏠','웹빌더':'🔧','홈페이지없음':'❌'}[urlClass.type]||'';
+        if (isNew) console.log(`  🆕 [${analysis.score}점] ${typeEmoji}${urlClass.builder?'('+urlClass.builder+')':''} ${name} → ${homepage||'없음'}`);
       }
 
       await sleep(RATE_LIMIT_MS);
@@ -438,10 +525,10 @@ async function main() {
 
   // ── CSV 저장 ──
   const BOM = '\ufeff';
-  const header = '우선순위점수,업종,업체명,주소,네이버플레이스,홈페이지,반응형,발견된문제,추천패키지,전화,이메일,카카오톡채널,카카오오픈채팅,인스타그램,페이스북,유튜브,네이버블로그,네이버톡톡,네이버예약,네이버카페,트위터,라인,틱톡,팩스,스마트스토어,전체연락수단,TM스크립트,문자템플릿,신규여부,수집일시';
+  const header = '우선순위점수,업종,업체명,주소,네이버플레이스,홈페이지,사이트분류,웹빌더,반응형,발견된문제,추천패키지,전화,이메일,카카오톡채널,카카오오픈채팅,인스타그램,페이스북,유튜브,네이버블로그,네이버톡톡,네이버예약,네이버카페,트위터,라인,틱톡,팩스,스마트스토어,전체연락수단,TM스크립트,문자템플릿,신규여부,수집일시';
   const toRow = p => [
     p.score, p.category, p.name, p.address, p.placeLink, p.homepage,
-    p.responsive, p.problems, p.recommendedPkg,
+    p.siteType, p.webBuilder, p.responsive, p.problems, p.recommendedPkg,
     p.phone, p.email, p.kakao, p.openKakao, p.insta,
     p.facebook, p.youtube, p.naverBlog, p.naverTalktalk, p.naverBook,
     p.naverCafe, p.twitter, p.line, p.tiktok, p.fax, p.smartstore,
@@ -464,12 +551,27 @@ async function main() {
     fs.writeFileSync(newCsvPath, BOM + header + '\n' + newProspects.map(toRow).join('\n'), 'utf8');
   }
 
-  // 전체 CSV 재생성 (히스토리 기반 — 전체 DB 덤프)
+  // 전체 CSV 재생성 (히스토리 기반)
   const allCsvPath = path.join(OUTPUT_DIR, 'prospects-all.csv');
   const allRows = Object.entries(history.crawled).map(([key, h]) => {
-    return [h.score||0, h.category, h.name, h.address, '', h.homepage, '', '', '', '', '', '', '', '', '', '', '', h.tmStatus, h.lastSeen].map(csvEscape).join(',');
+    return [h.score||0, h.category, h.name, h.address, '', h.homepage, h.siteType||'', h.webBuilder||'', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', h.tmStatus, h.lastSeen].map(csvEscape).join(',');
   });
   fs.writeFileSync(allCsvPath, BOM + header + '\n' + allRows.join('\n'), 'utf8');
+
+  // ── 분류별 CSV 분리 ──
+  const ownSite = prospects.filter(p => p.siteType === '자체홈페이지');
+  const builderSite = prospects.filter(p => p.siteType === '웹빌더');
+  const noSite = prospects.filter(p => p.siteType === '홈페이지없음');
+
+  if (ownSite.length > 0) {
+    fs.writeFileSync(path.join(OUTPUT_DIR, 'type-자체홈페이지.csv'), BOM + header + '\n' + ownSite.map(toRow).join('\n'), 'utf8');
+  }
+  if (builderSite.length > 0) {
+    fs.writeFileSync(path.join(OUTPUT_DIR, 'type-웹빌더.csv'), BOM + header + '\n' + builderSite.map(toRow).join('\n'), 'utf8');
+  }
+  if (noSite.length > 0) {
+    fs.writeFileSync(path.join(OUTPUT_DIR, 'type-홈페이지없음.csv'), BOM + header + '\n' + noSite.map(toRow).join('\n'), 'utf8');
+  }
 
   // 히스토리 저장
   saveJSON(DB_PATH, history);
@@ -486,11 +588,22 @@ async function main() {
   console.log(`CSV 신규: ${newCsvPath}`);
   console.log(`CSV 전체: ${allCsvPath}`);
 
+  // 사이트 분류
+  console.log(`\n🏠 사이트 분류:`);
+  console.log(`  🏠 자체홈페이지: ${ownSite.length}건 → type-자체홈페이지.csv`);
+  console.log(`  🔧 웹빌더: ${builderSite.length}건 → type-웹빌더.csv`);
+  if (builderSite.length > 0) {
+    const builders = {};
+    builderSite.forEach(p => { builders[p.webBuilder] = (builders[p.webBuilder]||0)+1; });
+    Object.entries(builders).sort((a,b)=>b[1]-a[1]).forEach(([b,c]) => console.log(`     ${b}: ${c}건`));
+  }
+  console.log(`  ❌ 홈페이지없음: ${noSite.length}건 → type-홈페이지없음.csv`);
+
   // 등급
   const urgent = newProspects.filter(p => p.score >= 60).length;
   const mid = newProspects.filter(p => p.score >= 30 && p.score < 60).length;
   const low = newProspects.filter(p => p.score < 30).length;
-  console.log(`\n🎯 신규 잠재고객 등급:`);
+  console.log(`\n🎯 신규 잠재고객 등급 (자체홈페이지 기준):`);
   console.log(`  🔴 긴급: ${urgent}건 | 🟡 중간: ${mid}건 | 🟢 경미: ${low}건`);
 
   // 연락 가능
