@@ -53,7 +53,6 @@ done
 
 ## 서버 다운 후 자동 재개 (필수)
 Gateway 복구 감지 시:
-1. `/home/onda/scripts/auto-resume-on-boot.sh` 자동 실행
 2. active-tasks/*.json에서 미완료 작업 확인
 3. WORK_STATE.md 기반 Claude Code 자동 재투입
 4. 텔레그램 재개 보고
