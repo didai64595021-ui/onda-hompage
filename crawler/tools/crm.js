@@ -61,8 +61,8 @@ async function main() {
     return;
   }
 
-  // ── pipeline ──
-  if (cmd === 'pipeline') {
+  // ── pipeline / stats ──
+  if (cmd === 'pipeline' || cmd === 'stats') {
     const clients = Object.values(db.clients);
     console.log('\n📊 파이프라인 현황:\n');
     STATUSES.forEach(s => {
