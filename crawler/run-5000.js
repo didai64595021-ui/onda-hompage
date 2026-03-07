@@ -54,6 +54,17 @@ for (let i = combos.length - 1; i > 0; i--) { const j = Math.floor(Math.random()
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
+// iwinv Place 체커 API (톡톡 버튼 + 플레이스 링크)
+const PLACE_CHECKER_URL = 'http://49.247.137.28:3200/check';
+async function checkPlaceTalktalk(name, address) {
+  try {
+    const r = await axios.post(PLACE_CHECKER_URL, { name, address }, { timeout: 15000 });
+    return r.data; // { place_url, talktalk, talktalk_id }
+  } catch(e) {
+    return { place_url: '', talktalk: null, talktalk_id: '' };
+  }
+}
+
 // 타임아웃 래퍼 — 어떤 Promise든 제한시간 초과 시 reject
 function withTimeout(promise, ms, label='') {
   return Promise.race([
@@ -147,12 +158,14 @@ function saveAll(history, apiLog, stats) {
   
   // CSV
   const BOM = '\ufeff';
-  const header = '우선순위점수,업종,업체명,주소,홈페이지,사이트분류,웹빌더,반응형,발견된문제,추천패키지,전화,이메일,카카오톡채널,카카오오픈채팅,인스타그램,네이버블로그,네이버톡톡,스마트스토어,전체연락수단,TM상태,수집일시';
+  const header = '우선순위점수,업종,업체명,주소,홈페이지,플레이스링크,톡톡버튼,톡톡ID,사이트분류,웹빌더,반응형,발견된문제,추천패키지,전화,이메일,카카오톡채널,카카오오픈채팅,인스타그램,네이버블로그,스마트스토어,전체연락수단,TM상태,수집일시';
   const rows = Object.values(history.crawled).map(h => [
-    h.score||0, h.category, h.name, h.address, h.homepage, h.siteType||'', h.webBuilder||'',
+    h.score||0, h.category, h.name, h.address, h.homepage,
+    h.placeUrl||'', h.talktalkButton||'미확인', h.talktalkId||'',
+    h.siteType||'', h.webBuilder||'',
     h.responsive||'', h.problems||'', h.recommendedPkg||'',
     h.phone||'', h.email||'', h.kakao||'', h.openKakao||'', h.insta||'',
-    h.naverBlog||'', h.naverTalktalk||'', h.smartstore||'',
+    h.naverBlog||'', h.smartstore||'',
     h.allContacts||'', h.tmStatus, h.lastSeen
   ].map(csvEscape).join(','));
   fs.writeFileSync(path.join(OUTPUT_DIR, 'prospects-all.csv'), BOM + header + '\n' + rows.join('\n'), 'utf8');
@@ -243,6 +256,12 @@ process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
           }
         }
 
+        // Place 톡톡 버튼 체크 (iwinv 프록시 경유)
+        let placeData = { place_url: '', talktalk: null, talktalk_id: '' };
+        try {
+          placeData = await withTimeout(checkPlaceTalktalk(name, address), 15000, `place:${name}`);
+        } catch(e) { /* 타임아웃 무시 */ }
+
         const contactMap = {};
         analysis.contacts.forEach(c => { if(!contactMap[c.type])contactMap[c.type]=[]; contactMap[c.type].push(c.value); });
         const allContacts = analysis.contacts.map(c=>`[${c.type}] ${c.value}`).join(' | ');
@@ -250,6 +269,9 @@ process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 
         history.crawled[dedup] = {
           name, address, homepage, category, score: analysis.score,
+          placeUrl: placeData.place_url || '',
+          talktalkButton: placeData.talktalk === true ? 'O' : placeData.talktalk === false ? 'X' : '미확인',
+          talktalkId: placeData.talktalk_id || '',
           siteType: urlClass.type, webBuilder: urlClass.builder,
           responsive: analysis.responsive === null ? '확인불가' : analysis.responsive ? 'Y' : 'N',
           problems: (analysis.problems||[]).join(' / '),
@@ -276,7 +298,8 @@ process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
         else stats[category].low++;
         
         const emoji = analysis.score >= 60 ? '🔴' : analysis.score >= 30 ? '🟡' : '🟢';
-        console.log(`  🆕 [${analysis.score}점] ${emoji} ${name} → ${homepage || '없음'}`);
+        const talkEmoji = placeData.talktalk === true ? '💬O' : placeData.talktalk === false ? '❌X' : '❓';
+        console.log(`  🆕 [${analysis.score}점] ${emoji} ${talkEmoji} ${name} → ${homepage || '없음'}`);
       }
 
       await sleep(RATE_LIMIT_MS);
