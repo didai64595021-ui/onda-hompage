@@ -506,6 +506,26 @@ async function main() {
         history.crawled[dedup] = {
           name, address, homepage, category, score: analysis.score,
           siteType: urlClass.type, webBuilder: urlClass.builder,
+          responsive: prospect.responsive,
+          problems: prospect.problems,
+          recommendedPkg: prospect.recommendedPkg,
+          phone: prospect.phone,
+          email: prospect.email,
+          kakao: prospect.kakao,
+          openKakao: prospect.openKakao,
+          insta: prospect.insta,
+          facebook: prospect.facebook,
+          youtube: prospect.youtube,
+          naverBlog: prospect.naverBlog,
+          naverTalktalk: prospect.naverTalktalk,
+          naverBook: prospect.naverBook,
+          naverCafe: prospect.naverCafe,
+          twitter: prospect.twitter,
+          line: prospect.line,
+          tiktok: prospect.tiktok,
+          fax: prospect.fax,
+          smartstore: prospect.smartstore,
+          allContacts,
           firstSeen: history.crawled[dedup]?.firstSeen || new Date().toISOString(),
           lastSeen: new Date().toISOString(),
           tmStatus: history.crawled[dedup]?.tmStatus || '미연락',
@@ -554,7 +574,7 @@ async function main() {
   // 전체 CSV 재생성 (히스토리 기반)
   const allCsvPath = path.join(OUTPUT_DIR, 'prospects-all.csv');
   const allRows = Object.entries(history.crawled).map(([key, h]) => {
-    return [h.score||0, h.category, h.name, h.address, '', h.homepage, h.siteType||'', h.webBuilder||'', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', h.tmStatus, h.lastSeen].map(csvEscape).join(',');
+    return [h.score||0, h.category, h.name, h.address, '', h.homepage, h.siteType||'', h.webBuilder||'', h.responsive||'', h.problems||'', h.recommendedPkg||'', h.phone||'', h.email||'', h.kakao||'', h.openKakao||'', h.insta||'', h.facebook||'', h.youtube||'', h.naverBlog||'', h.naverTalktalk||'', h.naverBook||'', h.naverCafe||'', h.twitter||'', h.line||'', h.tiktok||'', h.fax||'', h.smartstore||'', h.allContacts||'', '', '', h.tmStatus, h.lastSeen].map(csvEscape).join(',');
   });
   fs.writeFileSync(allCsvPath, BOM + header + '\n' + allRows.join('\n'), 'utf8');
 
