@@ -186,12 +186,26 @@ async function searchLocal(query, start = 1, display = 5) {
   }
 }
 
+// ── 톡톡 활성화 확인 (홈페이지 HTML 기반) ──
+function checkTalkTalkFromHtml(html) {
+  if (!html) return 'X';
+  const lower = html.toLowerCase();
+  // 네이버 톡톡 링크/버튼 패턴
+  if (lower.includes('talk.naver.com')) return 'O';
+  if (lower.includes('네이버톡톡') || lower.includes('naver톡톡')) return 'O';
+  if (lower.includes('톡톡문의') || lower.includes('톡톡상담') || lower.includes('톡톡으로')) return 'O';
+  if (/pf\.kakao\.com/.test(html) === false && lower.includes('톡톡')) return 'O';  // 카카오가 아닌 톡톡
+  if (lower.includes('navertalktalk') || lower.includes('naver_talktalk')) return 'O';
+  if (lower.includes('talk.naver.com/ct/') || lower.includes('talk.naver.com/w/')) return 'O';
+  return 'X';
+}
+
 // ── 홈페이지 분석 ──
 async function analyzeHomepage(url) {
   const result = {
     responsive: null, hasPhoneBtn: false, hasKakaoBtn: false,
     hasContactForm: false, hasMap: false, pageSpeed: null,
-    contacts: [], problems: [], score: 0,
+    contacts: [], problems: [], score: 0, talkTalk: 'X',
   };
   try {
     const start = Date.now();
@@ -216,6 +230,7 @@ async function analyzeHomepage(url) {
     result.hasKakaoBtn = htmlLower.includes('pf.kakao.com') || (htmlLower.includes('kakao') && htmlLower.includes('button'));
     result.hasContactForm = $('form').length > 0 || htmlLower.includes('contact') || htmlLower.includes('문의');
     result.hasMap = htmlLower.includes('map.naver.com') || htmlLower.includes('maps.google') || $('iframe[src*="map"]').length > 0;
+    result.talkTalk = checkTalkTalkFromHtml(html);
 
     // 점수
     if (!result.responsive) { result.problems.push('비반응형(모바일X)'); result.score += 30; }
@@ -464,6 +479,7 @@ async function main() {
           homepage,
           siteType: urlClass.type,   // 자체홈페이지 / 웹빌더 / 홈페이지없음
           webBuilder: urlClass.builder, // 아임웹, Wix, 카페24 등
+          talkTalk: analysis.talkTalk || 'X',  // 톡톡 활성화 O/X
           score: analysis.score,
           responsive: analysis.responsive === null ? '확인불가' : analysis.responsive ? 'Y' : 'N',
           problems: analysis.problems.join(' / '),
@@ -506,6 +522,7 @@ async function main() {
         history.crawled[dedup] = {
           name, address, homepage, category, score: analysis.score,
           siteType: urlClass.type, webBuilder: urlClass.builder,
+          talkTalk: prospect.talkTalk,
           responsive: prospect.responsive,
           problems: prospect.problems,
           recommendedPkg: prospect.recommendedPkg,
@@ -532,7 +549,8 @@ async function main() {
         };
 
         const typeEmoji = {'자체홈페이지':'🏠','웹빌더':'🔧','홈페이지없음':'❌'}[urlClass.type]||'';
-        if (isNew) console.log(`  🆕 [${analysis.score}점] ${typeEmoji}${urlClass.builder?'('+urlClass.builder+')':''} ${name} → ${homepage||'없음'}`);
+        const ttEmoji = prospect.talkTalk === 'O' ? '💬' : '';
+        if (isNew) console.log(`  🆕 [${analysis.score}점] ${typeEmoji}${ttEmoji}${urlClass.builder?'('+urlClass.builder+')':''} ${name} → ${homepage||'없음'}`);
       }
 
       await sleep(RATE_LIMIT_MS);
@@ -545,10 +563,10 @@ async function main() {
 
   // ── CSV 저장 ──
   const BOM = '\ufeff';
-  const header = '우선순위점수,업종,업체명,주소,네이버플레이스,홈페이지,사이트분류,웹빌더,반응형,발견된문제,추천패키지,전화,이메일,카카오톡채널,카카오오픈채팅,인스타그램,페이스북,유튜브,네이버블로그,네이버톡톡,네이버예약,네이버카페,트위터,라인,틱톡,팩스,스마트스토어,전체연락수단,TM스크립트,문자템플릿,신규여부,수집일시';
+  const header = '우선순위점수,업종,업체명,주소,네이버플레이스,홈페이지,사이트분류,웹빌더,톡톡활성화,반응형,발견된문제,추천패키지,전화,이메일,카카오톡채널,카카오오픈채팅,인스타그램,페이스북,유튜브,네이버블로그,네이버톡톡,네이버예약,네이버카페,트위터,라인,틱톡,팩스,스마트스토어,전체연락수단,TM스크립트,문자템플릿,신규여부,수집일시';
   const toRow = p => [
     p.score, p.category, p.name, p.address, p.placeLink, p.homepage,
-    p.siteType, p.webBuilder, p.responsive, p.problems, p.recommendedPkg,
+    p.siteType, p.webBuilder, p.talkTalk, p.responsive, p.problems, p.recommendedPkg,
     p.phone, p.email, p.kakao, p.openKakao, p.insta,
     p.facebook, p.youtube, p.naverBlog, p.naverTalktalk, p.naverBook,
     p.naverCafe, p.twitter, p.line, p.tiktok, p.fax, p.smartstore,
@@ -574,7 +592,7 @@ async function main() {
   // 전체 CSV 재생성 (히스토리 기반)
   const allCsvPath = path.join(OUTPUT_DIR, 'prospects-all.csv');
   const allRows = Object.entries(history.crawled).map(([key, h]) => {
-    return [h.score||0, h.category, h.name, h.address, '', h.homepage, h.siteType||'', h.webBuilder||'', h.responsive||'', h.problems||'', h.recommendedPkg||'', h.phone||'', h.email||'', h.kakao||'', h.openKakao||'', h.insta||'', h.facebook||'', h.youtube||'', h.naverBlog||'', h.naverTalktalk||'', h.naverBook||'', h.naverCafe||'', h.twitter||'', h.line||'', h.tiktok||'', h.fax||'', h.smartstore||'', h.allContacts||'', '', '', h.tmStatus, h.lastSeen].map(csvEscape).join(',');
+    return [h.score||0, h.category, h.name, h.address, '', h.homepage, h.siteType||'', h.webBuilder||'', h.talkTalk||'', h.responsive||'', h.problems||'', h.recommendedPkg||'', h.phone||'', h.email||'', h.kakao||'', h.openKakao||'', h.insta||'', h.facebook||'', h.youtube||'', h.naverBlog||'', h.naverTalktalk||'', h.naverBook||'', h.naverCafe||'', h.twitter||'', h.line||'', h.tiktok||'', h.fax||'', h.smartstore||'', h.allContacts||'', '', '', h.tmStatus, h.lastSeen].map(csvEscape).join(',');
   });
   fs.writeFileSync(allCsvPath, BOM + header + '\n' + allRows.join('\n'), 'utf8');
 
