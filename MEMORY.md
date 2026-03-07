@@ -54,6 +54,12 @@
 4. **코딩은 Claude Opus 4.6에 위임** — 직접 코딩 X, coding-agent 스킬로 위임.
 5. **작업완료 = 테스트+디버깅 완전 완료** — 코드 작성만으로 끝이 아님. 반드시 테스트→디버깅→재테스트 무한 반복 후 완전히 동작 확인된 것만 작업완료. 사용자에게 테스트 떠넘기지 말 것.
 
+## 배포 규칙 (2026-03-06, 영구)
+- **onda-logic-monitor** = 개발/테스트 페이지 (모든 수정사항 여기에 먼저 배포)
+- **place-rank** = 실제 제공 페이지 (관리자가 "place-rank 배포해" 할 때만 배포)
+- place-rank 자동 배포 절대 금지 — 검수 완료 후 수동 지시만
+- 배포 명령: `npx vercel link --yes --token $VERCEL_TOKEN --project place-rank` → `npx vercel --yes --token $VERCEL_TOKEN --prod` → 후 `npx vercel link --yes --token $VERCEL_TOKEN --project onda-logic-monitor`로 원복
+
 ## 프로젝트 현황 (2026-02-28)
 
 ### onda-logic-monitor
@@ -153,6 +159,12 @@
 - "진행할까요?", "확인해주세요", "Y/N" 등 확인 요청 금지
 - 선택지(A vs B)가 있을 때만 물어봐라
 - 3번째 경고임. 다시 물어보면 규칙 위반.
+
+## OCR 검증 규칙 (2026-03-07, 영구)
+- 모든 기능 최종 테스트 시 **OCR로 실제 출력물(HTML/이미지) 확인** 필수
+- 스크린샷 → OCR 텍스트 추출 → 코드 출력값과 일치 여부 검증
+- 숫자/통계/업체명/연락처 등 데이터 정확도 확인
+- "에러 0" + "OCR 일치" = 진짜 완료
 
 ## 완전 디버깅 루프 강화 (2026-03-05, 영구, 최우선)
 - 모든 작업 완료 후 반드시: 전체 API curl 테스트 + 빌드 + 파생오류 확인
