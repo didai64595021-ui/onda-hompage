@@ -1,69 +1,43 @@
 #!/usr/bin/env python3
-"""
-네이버 플레이스 톡톡 버튼 체크 API
-iwinv 서버(한국 IP)에서 실행 — 플레이스 페이지 접속 → 톡톡 버튼 존재 여부 확인
-
-POST /check
-  body: {"name": "업체명", "address": "주소"}
-  response: {"place_url": "...", "talktalk": true/false, "talktalk_id": "..."}
-
-GET /health
-  response: {"status": "ok"}
-"""
-import json
-import re
-import time
+"""Place 톡톡 체커 v3 — place_id + 톡톡O/X만 (frm=pnmb 패턴)"""
+import json, re, time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import quote
 import requests
 
-PORT = 3200
+PORT = 3201
 
 def search_and_check(name, address=""):
-    """
-    네이버 통합검색으로 place_id + talk_id 한번에 추출
-    Place API/Map API 차단 우회 — search.naver.com은 차단 안 됨
-    """
     query = f"{name} {address}".strip()
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    }
-    
-    result = {"place_id": "", "place_url": "", "talktalk": False, "talktalk_id": ""}
-    
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36"}
+    result = {"place_id": "", "place_url": "", "talktalk": False}
     try:
-        url = f"https://search.naver.com/search.naver?where=nexearch&sm=top_hty&query={quote(query)}"
+        url = f"https://search.naver.com/search.naver?where=nexearch&query={quote(query)}"
         r = requests.get(url, headers=headers, timeout=10)
-        
-        if r.status_code == 200:
-            html = r.text
-            
-            # place ID 추출 (place/숫자 또는 place.숫자)
-            place_ids = list(set(re.findall(r'place[/.](\d{5,})', html)))
-            if place_ids:
-                result["place_id"] = place_ids[0]
-                result["place_url"] = f"https://m.place.naver.com/place/{place_ids[0]}"
-            
-            # talk ID 추출 (talk.naver.com/ct/XXX 또는 talk.naver.com/XXX)
-            talk_ids = list(set(re.findall(r'talk\.naver\.com/(?:ct/)?([a-zA-Z0-9]{4,})', html)))
-            # 'ch' 같은 공통 패턴 제외
-            talk_ids = [t for t in talk_ids if t not in ('ch', 'web', 'profile', 'policy')]
-            
-            if talk_ids:
-                result["talktalk"] = True
-                result["talktalk_id"] = talk_ids[0]
-            else:
-                # 톡톡 관련 키워드 체크 (버튼은 있지만 ID 추출 실패)
-                talk_keywords = ['톡톡문의', '톡톡상담', 'naverTalkTalk', 'TALK_TALK', 'talkUrl']
-                for kw in talk_keywords:
-                    if kw in html:
-                        result["talktalk"] = True
-                        break
+        if r.status_code != 200:
+            return result
+        html = r.text
+        # place_id
+        pids = list(set(re.findall(r'place[/.](\d{5,})', html)))
+        if pids:
+            result["place_id"] = pids[0]
+            result["place_url"] = f"https://m.place.naver.com/place/{pids[0]}"
+        # 톡톡: frm=mnmb 또는 frm=pnmb 패턴 = 실제 업체 톡톡
+        # \u002F = escaped / in JSON
+        talk_match = re.search(r'talk\.naver\.com(?:\\u002F|/)([a-zA-Z0-9]+)\?frm=(?:mnmb|pnmb|nmb)', html)
+        if talk_match:
+            result["talktalk"] = True
+        # 백업: talktalkUrl 키워드
+        elif 'talktalkUrl' in html and result["place_id"]:
+            # place_id 주변에 talktalkUrl 있는지
+            idx = html.find(result["place_id"])
+            if idx > 0:
+                block = html[max(0,idx-3000):idx+3000]
+                if 'talktalkUrl' in block:
+                    result["talktalk"] = True
     except Exception as e:
-        print(f"  검색 오류: {e}")
-    
+        print(f"  오류: {e}")
     return result
-
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -71,66 +45,38 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(json.dumps({"status": "ok", "port": PORT}).encode())
+            self.wfile.write(json.dumps({"status":"ok","version":"v3"}).encode())
         else:
             self.send_response(404)
             self.end_headers()
-    
     def do_POST(self):
-        if self.path == "/check":
+        if self.path in ("/check", "/batch"):
             length = int(self.headers.get("Content-Length", 0))
             body = json.loads(self.rfile.read(length)) if length else {}
-            
-            name = body.get("name", "")
-            address = body.get("address", "")
-            
-            if not name:
-                self.send_response(400)
-                self.send_header("Content-Type", "application/json")
+            if self.path == "/check":
+                name = body.get("name","")
+                r = {"name":name, **search_and_check(name, body.get("address",""))}
+                self.send_response(200)
+                self.send_header("Content-Type","application/json")
                 self.end_headers()
-                self.wfile.write(json.dumps({"error": "name required"}).encode())
-                return
-            
-            # 통합검색으로 place + talktalk 한번에 체크
-            check = search_and_check(name, address)
-            result = {"name": name, **check}
-            
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps(result, ensure_ascii=False).encode())
-        
-        elif self.path == "/batch":
-            length = int(self.headers.get("Content-Length", 0))
-            body = json.loads(self.rfile.read(length)) if length else {}
-            items = body.get("items", [])
-            
-            results = []
-            for item in items:
-                name = item.get("name", "")
-                address = item.get("address", "")
-                check = search_and_check(name, address)
-                r = {"name": name, **check}
-                
-                results.append(r)
-                time.sleep(0.5)  # rate limit
-            
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps(results, ensure_ascii=False).encode())
+                self.wfile.write(json.dumps(r, ensure_ascii=False).encode())
+            else:
+                items = body.get("items",[])
+                results = []
+                for item in items:
+                    r = {"name":item.get("name",""), **search_and_check(item.get("name",""), item.get("address",""))}
+                    results.append(r)
+                    time.sleep(0.5)
+                self.send_response(200)
+                self.send_header("Content-Type","application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps(results, ensure_ascii=False).encode())
         else:
             self.send_response(404)
             self.end_headers()
-    
     def log_message(self, format, *args):
         print(f"[{time.strftime('%H:%M:%S')}] {args[0]}")
 
-
 if __name__ == "__main__":
-    print(f"🚀 Place 톡톡 체커 API 시작 — 포트 {PORT}")
-    server = HTTPServer(("0.0.0.0", PORT), Handler)
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        print("\n종료")
+    print(f"🚀 Place 톡톡 체커 v3 — 포트 {PORT}")
+    HTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
