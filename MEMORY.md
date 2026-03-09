@@ -200,3 +200,8 @@
 - timeoutSeconds: 3600 (1시간)
 - runTimeoutSeconds: 3600 (1시간)
 - 절대 300초/900초로 줄이지 마라 — 작업 중단 원인
+
+## UIUX 프로젝트 자동배포 규칙 (2026-03-09, 영구)
+- onda-hompage UIUX 작업 완료 시 항상 git + Vercel 배포까지 자동 진행
+- 컨펌 없이 배포 완료 후 URL과 함께 보고
+- "배포할까요?" 금지
