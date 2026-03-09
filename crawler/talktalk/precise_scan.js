@@ -13,18 +13,30 @@ const https = require('https');
 
 const HISTORY_PATH = path.join(__dirname, '..', 'output', 'history.json');
 const OCR_CHECKER = 'http://49.247.137.28:3300/check';
-const SEARCH_DELAY = 600;   // 검색 간격 (ms)
-const OCR_DELAY = 3000;     // OCR 간격 (ms) — Chrome 안정성
-const SAVE_INTERVAL = 50;
+const SEARCH_DELAY = 400;   // 프록시 검색 간격 (ms) — 한국 IP이므로 CAPTCHA 없음
+const OCR_DELAY = 2000;     // OCR 간격 (ms) — Chrome 안정성
+const SAVE_INTERVAL = 100;
+
+// iwinv 프록시(한국 IP) 경유로 place_id 추출 — 핀란드 직접 요청 시 CAPTCHA 차단됨
+const PROXY_HOST = '49.247.137.28';
+const PROXY_PORT = 3100;
+const PROXY_API_KEY = 'onda-proxy-2026-secret';
 
 function searchPlaceId(name, address) {
   return new Promise((resolve) => {
     const addr = (address||'').split(' ').slice(0,2).join(' ');
-    const query = encodeURIComponent(`${name} ${addr}`.trim());
-    const url = `https://search.naver.com/search.naver?where=nexearch&query=${query}`;
-    const req = https.get(url, {
-      headers: {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0'},
-      timeout: 12000
+    const query = `${name} ${addr}`.trim();
+    const targetUrl = `https://search.naver.com/search.naver?where=nexearch&query=${encodeURIComponent(query)}`;
+    const body = JSON.stringify({ targetUrl });
+    const req = http.request({
+      hostname: PROXY_HOST, port: PROXY_PORT, path: '/proxy',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+        'x-api-key': PROXY_API_KEY
+      },
+      timeout: 20000
     }, (res) => {
       let data = '';
       res.on('data', c => data += c);
@@ -35,6 +47,8 @@ function searchPlaceId(name, address) {
     });
     req.on('error', () => resolve(''));
     req.on('timeout', () => { req.destroy(); resolve(''); });
+    req.write(body);
+    req.end();
   });
 }
 
@@ -70,8 +84,8 @@ async function main() {
   const history = JSON.parse(fs.readFileSync(HISTORY_PATH, 'utf-8'));
   const entries = Object.entries(history.crawled);
   
-  // talktalkVerified가 없는 것만 (OCR 검증 완료 마크)
-  const needScan = entries.filter(([,b]) => !b.talktalkVerified);
+  // talktalkVerified가 없거나 no_pid인 것 재스캔 (프록시로 place_id 재시도)
+  const needScan = entries.filter(([,b]) => !b.talktalkVerified || b.talktalkVerified === 'no_pid');
   
   console.log(`📊 전체: ${entries.length} | OCR 검증 필요: ${needScan.length}`);
   
