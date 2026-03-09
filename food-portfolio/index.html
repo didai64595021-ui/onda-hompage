@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>프레쉬온 - 신선함을 매일, 건강을 식탁에</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --mint-green: #2DD4A8;
@@ -24,6 +24,10 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
@@ -62,8 +66,9 @@
 
         .logo {
             font-size: 1.8rem;
-            font-weight: 700;
+            font-weight: 900;
             color: var(--mint-green);
+            letter-spacing: 0.5px;
         }
 
         .nav-links {
@@ -76,6 +81,7 @@
             text-decoration: none;
             color: var(--charcoal);
             font-weight: 500;
+            letter-spacing: 0.3px;
             transition: color 0.3s;
         }
 
@@ -98,28 +104,51 @@
             color: var(--white);
         }
 
-        /* Hero Section */
+        /* Hero Section with Video Background */
         .hero {
+            position: relative;
             height: 100vh;
-            background: linear-gradient(rgba(26, 26, 46, 0.4), rgba(45, 212, 168, 0.2)),
-                        url('https://images.unsplash.com/photo-1498837167922-ddd27525d352?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            color: var(--white);
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .hero-video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(26,26,46,0.5), rgba(45,212,168,0.15));
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
         }
 
         .hero-content h1 {
             font-size: 3.5rem;
-            font-weight: 700;
+            font-weight: 900;
             margin-bottom: 1rem;
+            letter-spacing: 1px;
             animation: fadeInUp 1s ease-out;
         }
 
         .hero-content p {
             font-size: 1.3rem;
             margin-bottom: 2rem;
+            letter-spacing: 0.5px;
             animation: fadeInUp 1s ease-out 0.3s both;
         }
 
@@ -132,6 +161,7 @@
             text-decoration: none;
             font-weight: 600;
             font-size: 1.1rem;
+            letter-spacing: 0.5px;
             transition: all 0.3s;
             animation: fadeInUp 1s ease-out 0.6s both;
         }
@@ -141,11 +171,61 @@
             transform: translateY(-2px);
         }
 
+        /* Scroll Indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            color: white;
+            font-size: 1.5rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+
+        /* Wave Divider */
+        .wave-divider {
+            position: relative;
+            height: 60px;
+            overflow: hidden;
+        }
+
+        .wave-divider svg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            fill: var(--light-gray);
+        }
+
+        .wave-divider.white svg {
+            fill: var(--white);
+        }
+
         /* Countdown Timer */
         .countdown-section {
             padding: 3rem 2rem;
             background: var(--light-gray);
             text-align: center;
+            position: relative;
+        }
+
+        .countdown-section h2 {
+            font-weight: 900;
+            letter-spacing: 0.5px;
         }
 
         .countdown-timer {
@@ -156,23 +236,48 @@
         }
 
         .timer-item {
-            background: var(--white);
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
             padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             min-width: 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timer-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.2), transparent);
         }
 
         .timer-number {
             font-size: 2rem;
-            font-weight: 700;
+            font-weight: 800;
             color: var(--mint-green);
             display: block;
+            animation: flipIn 0.6s ease-in-out;
+        }
+
+        @keyframes flipIn {
+            0% {
+                transform: rotateY(-90deg);
+                opacity: 0;
+            }
+            100% {
+                transform: rotateY(0);
+                opacity: 1;
+            }
         }
 
         .timer-label {
             font-size: 0.9rem;
             color: var(--dark-gray);
+            letter-spacing: 0.3px;
         }
 
         /* Products Section */
@@ -185,9 +290,10 @@
         .section-title {
             text-align: center;
             font-size: 2.5rem;
-            font-weight: 700;
+            font-weight: 900;
             margin-bottom: 3rem;
             color: var(--charcoal);
+            letter-spacing: 0.8px;
         }
 
         .category-filters {
@@ -207,6 +313,7 @@
             cursor: pointer;
             transition: all 0.3s;
             font-weight: 500;
+            letter-spacing: 0.3px;
         }
 
         .filter-btn.active,
@@ -243,6 +350,11 @@
             background-size: cover;
             background-position: center;
             position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
         }
 
         .discount-badge {
@@ -257,15 +369,47 @@
             font-weight: 600;
         }
 
+        .new-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(45deg, #FF6B35, #F7931E);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(255, 107, 53, 0.3);
+        }
+
         .product-info {
             padding: 1.5rem;
         }
 
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stars {
+            color: #FFD700;
+            font-size: 1rem;
+        }
+
+        .rating-text {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+            font-weight: 500;
+        }
+
         .product-name {
             font-size: 1.2rem;
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 0.5rem;
             color: var(--charcoal);
+            letter-spacing: 0.3px;
         }
 
         .product-price {
@@ -299,6 +443,7 @@
             opacity: 0;
             transform: translateY(10px);
             transition: all 0.3s;
+            letter-spacing: 0.3px;
         }
 
         .product-card:hover .cart-btn {
@@ -343,15 +488,17 @@
 
         .story-text h3 {
             font-size: 2rem;
-            font-weight: 700;
+            font-weight: 800;
             margin-bottom: 1rem;
             color: var(--charcoal);
+            letter-spacing: 0.5px;
         }
 
         .story-text p {
             font-size: 1.1rem;
             line-height: 1.8;
             color: var(--dark-gray);
+            letter-spacing: 0.3px;
         }
 
         .story-image {
@@ -411,14 +558,15 @@
             max-width: 1200px;
             margin: 0 auto;
             text-align: center;
+            position: relative;
         }
 
         .reviews-carousel {
             display: flex;
             gap: 2rem;
-            overflow-x: auto;
+            overflow: hidden;
             padding: 2rem 0;
-            scroll-snap-type: x mandatory;
+            position: relative;
         }
 
         .review-card {
@@ -427,8 +575,8 @@
             padding: 2rem;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            scroll-snap-align: center;
             text-align: left;
+            transition: transform 0.3s ease;
         }
 
         .review-stars {
@@ -442,11 +590,32 @@
             line-height: 1.6;
             margin-bottom: 1rem;
             color: var(--dark-gray);
+            letter-spacing: 0.3px;
         }
 
         .review-author {
             font-weight: 600;
             color: var(--charcoal);
+        }
+
+        .review-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .indicator-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--dark-gray);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .indicator-dot.active {
+            background: var(--mint-green);
         }
 
         /* Subscription Banner */
@@ -455,17 +624,41 @@
             background: linear-gradient(135deg, var(--mint-green), #25B891);
             color: var(--white);
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .subscription-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('https://images.unsplash.com/photo-1498837167922-ddd27525d352?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover;
+            opacity: 0.1;
+            z-index: 0;
+        }
+
+        .subscription-content {
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         .subscription-banner h2 {
             font-size: 2.5rem;
-            font-weight: 700;
+            font-weight: 900;
             margin-bottom: 1rem;
+            letter-spacing: 0.8px;
         }
 
         .subscription-banner p {
             font-size: 1.2rem;
             margin-bottom: 2rem;
+            letter-spacing: 0.3px;
         }
 
         /* Footer */
@@ -479,15 +672,16 @@
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 2rem;
         }
 
         .footer-section h3 {
             font-size: 1.3rem;
-            font-weight: 600;
+            font-weight: 800;
             margin-bottom: 1rem;
             color: var(--mint-green);
+            letter-spacing: 0.5px;
         }
 
         .footer-links {
@@ -501,11 +695,24 @@
         .footer-links a {
             color: var(--white);
             text-decoration: none;
-            transition: color 0.3s;
+            transition: all 0.3s;
+            letter-spacing: 0.3px;
         }
 
         .footer-links a:hover {
             color: var(--mint-green);
+            transform: translateX(5px);
+        }
+
+        .social-links a {
+            display: inline-block;
+            margin-right: 1rem;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .social-links a:hover {
+            transform: scale(1.2) rotate(10deg);
         }
 
         .footer-bottom {
@@ -567,6 +774,19 @@
             box-shadow: 0 10px 30px rgba(45, 212, 168, 0.3);
             transition: all 0.3s;
             z-index: 999;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 10px 30px rgba(45, 212, 168, 0.3);
+            }
+            50% {
+                box-shadow: 0 10px 30px rgba(45, 212, 168, 0.6);
+            }
+            100% {
+                box-shadow: 0 10px 30px rgba(45, 212, 168, 0.3);
+            }
         }
 
         .cart-float:hover {
@@ -587,6 +807,35 @@
             justify-content: center;
             font-size: 0.8rem;
             font-weight: 600;
+        }
+
+        /* TOP Button */
+        .top-button {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(26, 26, 46, 0.8);
+            color: var(--white);
+            border: none;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 998;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .top-button.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .top-button:hover {
+            background: var(--mint-green);
+            transform: translateY(-2px);
         }
 
         /* KakaoTalk Float Button */
@@ -679,6 +928,10 @@
                 grid-template-columns: repeat(2, 1fr);
             }
 
+            .footer-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
             .mobile-nav {
                 display: flex;
             }
@@ -689,6 +942,11 @@
 
             .kakao-float {
                 bottom: 150px;
+            }
+
+            .top-button {
+                bottom: 150px;
+                right: 20px;
             }
 
             body {
@@ -717,6 +975,10 @@
                 padding: 0.6rem 1rem;
                 font-size: 0.9rem;
             }
+
+            .footer-container {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -736,14 +998,28 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
+    <!-- Hero Section with Video Background -->
     <section class="hero" id="home">
+        <video class="hero-video" autoplay muted loop playsinline>
+            <source src="https://videos.pexels.com/video-files/3195394/3195394-uhd_2560_1440_25fps.mp4" type="video/mp4">
+        </video>
+        <div class="hero-overlay"></div>
         <div class="hero-content">
             <h1>프레쉬온</h1>
             <p>신선함을 매일, 건강을 식탁에</p>
             <a href="#products" class="cta-button">지금 주문하기</a>
         </div>
+        <div class="scroll-indicator">
+            🖱️<br>스크롤
+        </div>
     </section>
+
+    <!-- Wave Divider -->
+    <div class="wave-divider">
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
+        </svg>
+    </div>
 
     <!-- Countdown Section -->
     <section class="countdown-section">
@@ -765,6 +1041,13 @@
         </div>
     </section>
 
+    <!-- Wave Divider -->
+    <div class="wave-divider white">
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"></path>
+        </svg>
+    </div>
+
     <!-- Products Section -->
     <section class="products-section" id="products">
         <h2 class="section-title">베스트 상품</h2>
@@ -780,9 +1063,14 @@
         <div class="products-grid" id="productsGrid">
             <div class="product-card fade-in-up" data-category="meal-kit" data-id="1">
                 <div class="product-image" style="background-image: url('https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80')">
+                    <span class="new-badge">NEW</span>
                     <span class="discount-badge">20% 할인</span>
                 </div>
                 <div class="product-info">
+                    <div class="product-rating">
+                        <div class="stars">★★★★★</div>
+                        <span class="rating-text">4.8</span>
+                    </div>
                     <h3 class="product-name">프리미엄 샐러드 밀키트</h3>
                     <div class="product-price">
                         <span class="current-price">10,320원</span>
@@ -794,9 +1082,14 @@
 
             <div class="product-card fade-in-up" data-category="snack" data-id="2">
                 <div class="product-image" style="background-image: url('https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80')">
+                    <span class="new-badge">NEW</span>
                     <span class="discount-badge">15% 할인</span>
                 </div>
                 <div class="product-info">
+                    <div class="product-rating">
+                        <div class="stars">★★★★★</div>
+                        <span class="rating-text">4.8</span>
+                    </div>
                     <h3 class="product-name">고단백 에너지볼</h3>
                     <div class="product-price">
                         <span class="current-price">7,565원</span>
@@ -811,6 +1104,10 @@
                     <span class="discount-badge">10% 할인</span>
                 </div>
                 <div class="product-info">
+                    <div class="product-rating">
+                        <div class="stars">★★★★★</div>
+                        <span class="rating-text">4.8</span>
+                    </div>
                     <h3 class="product-name">오가닉 그래놀라</h3>
                     <div class="product-price">
                         <span class="current-price">8,550원</span>
@@ -825,6 +1122,10 @@
                     <span class="discount-badge">25% 할인</span>
                 </div>
                 <div class="product-info">
+                    <div class="product-rating">
+                        <div class="stars">★★★★★</div>
+                        <span class="rating-text">4.8</span>
+                    </div>
                     <h3 class="product-name">콜드프레스 주스</h3>
                     <div class="product-price">
                         <span class="current-price">4,875원</span>
@@ -839,6 +1140,10 @@
                     <span class="discount-badge">30% 할인</span>
                 </div>
                 <div class="product-info">
+                    <div class="product-rating">
+                        <div class="stars">★★★★★</div>
+                        <span class="rating-text">4.8</span>
+                    </div>
                     <h3 class="product-name">닭가슴살 도시락</h3>
                     <div class="product-price">
                         <span class="current-price">5,530원</span>
@@ -849,6 +1154,13 @@
             </div>
         </div>
     </section>
+
+    <!-- Wave Divider -->
+    <div class="wave-divider">
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
+        </svg>
+    </div>
 
     <!-- Brand Story -->
     <section class="brand-story" id="story">
@@ -881,10 +1193,17 @@
         </div>
     </section>
 
+    <!-- Wave Divider -->
+    <div class="wave-divider white">
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"></path>
+        </svg>
+    </div>
+
     <!-- Instagram Feed -->
     <section class="instagram-feed">
         <h2 class="section-title">프레쉬온과 함께하는 일상</h2>
-        <p style="text-align: center; color: var(--dark-gray); margin-bottom: 1rem;">#프레쉬온 #건강한식탁 #신선함매일</p>
+        <p style="text-align: center; color: var(--dark-gray); margin-bottom: 1rem; letter-spacing: 0.3px;">#프레쉬온 #건강한식탁 #신선함매일</p>
         
         <div class="feed-grid">
             <div class="feed-item" style="background-image: url('https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80')">
@@ -920,12 +1239,19 @@
         </div>
     </section>
 
+    <!-- Wave Divider -->
+    <div class="wave-divider">
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
+        </svg>
+    </div>
+
     <!-- Reviews Section -->
     <section class="reviews-section" id="reviews">
         <div class="reviews-container">
             <h2 class="section-title">고객 후기</h2>
             
-            <div class="reviews-carousel">
+            <div class="reviews-carousel" id="reviewsCarousel">
                 <div class="review-card fade-in-up">
                     <div class="review-stars">★★★★★</div>
                     <p class="review-text">"정말 신선하고 맛있어요! 바쁜 아침에도 5분 만에 건강한 아침식사를 할 수 있어서 너무 좋습니다. 포장도 깔끔하고 배송도 빨라요."</p>
@@ -950,56 +1276,81 @@
                     <p class="review-author">최○○ 고객</p>
                 </div>
             </div>
+
+            <div class="review-indicators">
+                <div class="indicator-dot active"></div>
+                <div class="indicator-dot"></div>
+                <div class="indicator-dot"></div>
+                <div class="indicator-dot"></div>
+            </div>
         </div>
     </section>
 
+    <!-- Wave Divider -->
+    <div class="wave-divider white">
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"></path>
+        </svg>
+    </div>
+
     <!-- Subscription Banner -->
     <section class="subscription-banner">
-        <h2>프레쉬온 정기 구독</h2>
-        <p>매주 신선한 건강식을 정기적으로 받아보세요!</p>
-        <a href="#" class="cta-button" style="background: white; color: var(--mint-green);">구독 신청하기</a>
+        <div class="subscription-content">
+            <h2>프레쉬온 정기 구독</h2>
+            <p>매주 신선한 건강식을 정기적으로 받아보세요!</p>
+            <a href="#" class="cta-button" style="background: white; color: var(--mint-green);">구독 신청하기</a>
+        </div>
     </section>
 
     <!-- Footer -->
     <footer class="footer" id="contact">
         <div class="footer-container">
             <div class="footer-section">
-                <h3>프레쉬온</h3>
-                <p>신선함을 매일, 건강을 식탁에</p>
+                <h3>회사정보</h3>
+                <p style="letter-spacing: 0.3px;">신선함을 매일, 건강을 식탁에</p>
                 <br>
                 <p>📧 hello@freshon.co.kr</p>
                 <p>📞 1588-1234</p>
                 <p>🕐 평일 09:00 - 18:00</p>
+                <p>🏢 서울시 강남구 테헤란로 123</p>
             </div>
             
             <div class="footer-section">
-                <h3>고객 서비스</h3>
+                <h3>고객서비스</h3>
                 <ul class="footer-links">
                     <li><a href="#">주문/배송 조회</a></li>
                     <li><a href="#">취소/반품/교환</a></li>
                     <li><a href="#">FAQ</a></li>
                     <li><a href="#">1:1 문의</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-section">
-                <h3>회사 정보</h3>
-                <ul class="footer-links">
-                    <li><a href="#">회사 소개</a></li>
                     <li><a href="#">이용약관</a></li>
                     <li><a href="#">개인정보처리방침</a></li>
-                    <li><a href="#">제휴 문의</a></li>
                 </ul>
             </div>
             
             <div class="footer-section">
-                <h3>소셜 미디어</h3>
+                <h3>소셜미디어</h3>
+                <div class="social-links">
+                    <a href="#">📷</a>
+                    <a href="#">📘</a>
+                    <a href="#">💬</a>
+                    <a href="#">📺</a>
+                    <a href="#">🐦</a>
+                </div>
                 <ul class="footer-links">
-                    <li><a href="#">📷 Instagram</a></li>
-                    <li><a href="#">📘 Facebook</a></li>
-                    <li><a href="#">📱 카카오톡</a></li>
-                    <li><a href="#">📺 YouTube</a></li>
+                    <li><a href="#">Instagram</a></li>
+                    <li><a href="#">Facebook</a></li>
+                    <li><a href="#">KakaoTalk</a></li>
+                    <li><a href="#">YouTube</a></li>
                 </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>뉴스레터</h3>
+                <p style="letter-spacing: 0.3px;">최신 상품과 특가 정보를<br>가장 먼저 받아보세요!</p>
+                <div style="margin-top: 1rem;">
+                    <input type="email" placeholder="이메일 주소" style="padding: 0.8rem; border: 1px solid #ddd; border-radius: 5px; width: 100%; margin-bottom: 0.5rem;">
+                    <button style="width: 100%; padding: 0.8rem; background: var(--mint-green); color: white; border: none; border-radius: 5px; cursor: pointer;">구독하기</button>
+                </div>
             </div>
         </div>
         
@@ -1032,6 +1383,11 @@
     <button class="cart-float" onclick="location.href='cart.html'">
         🛒
         <span class="cart-badge" id="cartBadge">0</span>
+    </button>
+
+    <!-- TOP Button -->
+    <button class="top-button" id="topButton" onclick="scrollToTop()">
+        ↑
     </button>
 
     <!-- KakaoTalk Float Button -->
@@ -1113,19 +1469,60 @@
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((diff % (1000 * 60)) / 1000);
             
-            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
-            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
-            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+            const hoursElement = document.getElementById('hours');
+            const minutesElement = document.getElementById('minutes');
+            const secondsElement = document.getElementById('seconds');
+            
+            const newHours = hours.toString().padStart(2, '0');
+            const newMinutes = minutes.toString().padStart(2, '0');
+            const newSeconds = seconds.toString().padStart(2, '0');
+            
+            if (hoursElement.textContent !== newHours) {
+                hoursElement.style.animation = 'none';
+                hoursElement.offsetHeight; // Trigger reflow
+                hoursElement.style.animation = 'flipIn 0.6s ease-in-out';
+                hoursElement.textContent = newHours;
+            }
+            
+            if (minutesElement.textContent !== newMinutes) {
+                minutesElement.style.animation = 'none';
+                minutesElement.offsetHeight;
+                minutesElement.style.animation = 'flipIn 0.6s ease-in-out';
+                minutesElement.textContent = newMinutes;
+            }
+            
+            if (secondsElement.textContent !== newSeconds) {
+                secondsElement.style.animation = 'none';
+                secondsElement.offsetHeight;
+                secondsElement.style.animation = 'flipIn 0.6s ease-in-out';
+                secondsElement.textContent = newSeconds;
+            }
         }
 
-        // Navbar scroll effect
+        // Navbar scroll effect and TOP button
         function handleNavbarScroll() {
             const navbar = document.getElementById('navbar');
+            const topButton = document.getElementById('topButton');
+            
             if (window.scrollY > 50) {
                 navbar.classList.add('scrolled');
             } else {
                 navbar.classList.remove('scrolled');
             }
+            
+            if (window.scrollY > 300) {
+                topButton.classList.add('visible');
+            } else {
+                topButton.classList.remove('visible');
+            }
+        }
+
+        // Scroll to top
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
         }
 
         // Dark mode toggle
@@ -1142,6 +1539,30 @@
                 document.getElementById('darkToggle').textContent = '☀️';
                 localStorage.setItem('theme', 'dark');
             }
+        }
+
+        // Reviews carousel
+        let currentReviewIndex = 0;
+        const reviewCards = document.querySelectorAll('.review-card');
+        const indicators = document.querySelectorAll('.indicator-dot');
+
+        function showReview(index) {
+            const carousel = document.getElementById('reviewsCarousel');
+            const cardWidth = 320; // 300px width + 20px gap
+            carousel.style.transform = `translateX(-${index * cardWidth}px)`;
+            
+            indicators.forEach((dot, i) => {
+                if (i === index) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        function nextReview() {
+            currentReviewIndex = (currentReviewIndex + 1) % reviewCards.length;
+            showReview(currentReviewIndex);
         }
 
         // Smooth scrolling for navigation
@@ -1232,6 +1653,14 @@
                 });
             });
 
+            // Setup review indicators
+            indicators.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    currentReviewIndex = index;
+                    showReview(currentReviewIndex);
+                });
+            });
+
             // Initialize everything
             updateCartBadge();
             updateCountdown();
@@ -1240,6 +1669,9 @@
 
             // Start countdown timer
             setInterval(updateCountdown, 1000);
+            
+            // Start review auto-slide
+            setInterval(nextReview, 3000);
         });
     </script>
 </body>
