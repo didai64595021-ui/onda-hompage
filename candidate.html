@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--primary:#1e3a5f;--white:#fff;--gold:#d4a843;--light:#f5f7fa;--dark:#0f1f33;--gray:#6b7b8d;--radius:12px;--shadow:0 4px 24px rgba(30,58,95,.12)}
+:root{--primary:#1e3a5f;--white:#fff;--gold:#d4a843;--light:#f5f7fa;--dark:#0f1f33;--gray:#6b7b8d;--radius:2px;--shadow:0 4px 24px rgba(30,58,95,.12)}
 html{scroll-behavior:smooth}
 body{font-family:'Noto Sans KR',sans-serif;color:#222;background:var(--white);overflow-x:hidden}
 a{text-decoration:none;color:inherit}
@@ -42,7 +42,7 @@ img{max-width:100%;display:block}
 .hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(15,31,51,.82) 0%,rgba(30,58,95,.7) 50%,rgba(15,31,51,.85) 100%);z-index:0}
 .hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:120px;background:linear-gradient(to top,var(--white),transparent);z-index:0}
 .hero-content{position:relative;z-index:1;max-width:700px}
-.hero-badge{display:inline-block;background:var(--gold);color:var(--primary);font-weight:900;font-size:1.1rem;padding:8px 28px;border-radius:50px;margin-bottom:24px;letter-spacing:2px}
+.hero-badge{display:inline-block;background:var(--gold);color:var(--primary);font-weight:900;font-size:1.1rem;padding:8px 28px;border-radius:var(--radius);margin-bottom:24px;letter-spacing:2px}
 .hero h1{font-size:3.5rem;font-weight:900;line-height:1.2;margin-bottom:16px}
 .hero h1 em{font-style:normal;color:var(--gold)}
 .hero-slogan{font-size:1.3rem;font-weight:300;opacity:.9;margin-bottom:40px;line-height:1.6}
@@ -75,36 +75,40 @@ section{padding:100px 24px}
 .timeline-item p{font-size:.9rem;color:var(--gray);line-height:1.5}
 
 /* PLEDGE CARDS */
-.pledges-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.pledges-grid{display:flex;flex-direction:column;gap:20px}
 .pledge-card{background:var(--white);border:1px solid rgba(30,58,95,.08);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:transform .3s}
 .pledge-card:hover{transform:translateY(-4px)}
-.pledge-header{display:flex;align-items:center;gap:16px;padding:20px 24px;cursor:pointer;user-select:none}
-.pledge-num{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--dark));color:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem;flex-shrink:0}
+.pledge-header{display:flex;align-items:center;gap:16px;padding:20px 24px}
+.pledge-num{width:44px;height:44px;border-radius:var(--radius);background:linear-gradient(135deg,var(--primary),var(--dark));color:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem;flex-shrink:0}
 .pledge-header h3{flex:1;font-size:1rem;font-weight:700;color:var(--primary)}
-.pledge-header .toggle-icon{color:var(--gold);transition:transform .3s;font-size:.9rem}
-.pledge-header.active .toggle-icon{transform:rotate(180deg)}
-.pledge-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
 .pledge-body-inner{padding:0 24px 20px;font-size:.9rem;color:var(--gray);line-height:1.7;border-top:1px solid var(--light);padding-top:16px}
+.pledge-link{display:inline-flex;align-items:center;gap:6px;margin-top:12px;color:var(--gold);font-weight:700;font-size:.9rem;transition:color .3s}
+.pledge-link:hover{color:var(--primary)}
 
 /* GALLERY */
 .gallery-section{background:var(--light)}
-.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.gallery-item{position:relative;border-radius:var(--radius);overflow:hidden;aspect-ratio:4/3;background:var(--primary);cursor:pointer}
-.gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
-.gallery-item:hover img{transform:scale(1.08)}
-.gallery-item .overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(15,31,51,.7),transparent);display:flex;align-items:flex-end;padding:16px;opacity:0;transition:opacity .3s}
-.gallery-item:hover .overlay{opacity:1}
-.gallery-item .overlay span{color:var(--white);font-size:.85rem;font-weight:500}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.gallery-item{background:var(--white);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:transform .3s}
+.gallery-item:hover{transform:translateY(-4px)}
+.gallery-img{position:relative;aspect-ratio:4/3;background:var(--primary);overflow:hidden}
+.gallery-img img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.gallery-item:hover .gallery-img img{transform:scale(1.05)}
+.gallery-text{padding:16px 20px}
+.gallery-text h3{font-size:1rem;font-weight:700;color:var(--primary);margin-bottom:6px}
+.gallery-date{font-size:.8rem;color:var(--gold);font-weight:600;display:block;margin-bottom:8px}
+.gallery-text p{font-size:.85rem;color:var(--gray);line-height:1.5;margin-bottom:12px}
+.gallery-link{display:inline-flex;align-items:center;gap:6px;color:var(--gold);font-weight:700;font-size:.85rem;transition:color .3s}
+.gallery-link:hover{color:var(--primary)}
 
 /* GUESTBOOK */
 .guestbook-form{max-width:600px;margin:0 auto 48px;background:var(--light);padding:32px;border-radius:var(--radius)}
 .guestbook-form h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:16px}
 .form-row{display:flex;gap:12px;margin-bottom:12px}
-.form-row input{flex:1;padding:12px 16px;border:1px solid #dde2e8;border-radius:8px;font-size:.9rem;font-family:inherit;outline:none;transition:border-color .3s}
+.form-row input{flex:1;padding:12px 16px;border:1px solid #dde2e8;border-radius:var(--radius);font-size:.9rem;font-family:inherit;outline:none;transition:border-color .3s}
 .form-row input:focus{border-color:var(--gold)}
-.guestbook-form textarea{width:100%;padding:12px 16px;border:1px solid #dde2e8;border-radius:8px;font-size:.9rem;font-family:inherit;outline:none;resize:vertical;min-height:80px;margin-bottom:12px;transition:border-color .3s}
+.guestbook-form textarea{width:100%;padding:12px 16px;border:1px solid #dde2e8;border-radius:var(--radius);font-size:.9rem;font-family:inherit;outline:none;resize:vertical;min-height:80px;margin-bottom:12px;transition:border-color .3s}
 .guestbook-form textarea:focus{border-color:var(--gold)}
-.btn-submit{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--primary),var(--dark));color:var(--white);border:none;padding:12px 32px;border-radius:8px;font-size:.9rem;font-weight:700;font-family:inherit;cursor:pointer;transition:opacity .3s}
+.btn-submit{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--primary),var(--dark));color:var(--white);border:none;padding:12px 32px;border-radius:var(--radius);font-size:.9rem;font-weight:700;font-family:inherit;cursor:pointer;transition:opacity .3s}
 .btn-submit:hover{opacity:.9}
 .guestbook-list{max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
 .guestbook-item{background:var(--white);border-radius:var(--radius);padding:20px 24px;box-shadow:0 2px 12px rgba(0,0,0,.05);border-left:4px solid var(--gold)}
@@ -131,7 +135,6 @@ section{padding:100px 24px}
   .countdown-item{min-width:70px;padding:14px 16px}
   .countdown-item .num{font-size:1.6rem}
   .gallery-grid{grid-template-columns:repeat(2,1fr)}
-  .pledges-grid{grid-template-columns:1fr}
   .form-row{flex-direction:column}
   .timeline{padding-left:32px}
   section{padding:60px 16px}
@@ -230,44 +233,39 @@ section{padding:100px 24px}
     </div>
     <div class="pledges-grid">
       <div class="pledge-card fade-in">
-        <div class="pledge-header" onclick="togglePledge(this)">
+        <div class="pledge-header">
           <div class="pledge-num">1</div>
           <h3>청년 주거 안정 프로젝트</h3>
-          <i class="fa-solid fa-chevron-down toggle-icon"></i>
         </div>
-        <div class="pledge-body"><div class="pledge-body-inner">공공임대 5,000호 확충 및 청년 전세자금 무이자 대출 확대. 역세권 청년주택 건설을 가속화하고, 주거비 부담률을 소득 대비 25% 이하로 낮추겠습니다. 1인 가구 맞춤형 소형 주택 공급도 병행합니다.</div></div>
+        <div class="pledge-body-inner">공공임대 5,000호 확충 및 청년 전세자금 무이자 대출 확대. 역세권 청년주택 건설을 가속화하고, 주거비 부담률을 소득 대비 25% 이하로 낮추겠습니다.<a href="pledge-detail.html?id=1" class="pledge-link">상세 보기 <i class="fa-solid fa-arrow-right"></i></a></div>
       </div>
       <div class="pledge-card fade-in">
-        <div class="pledge-header" onclick="togglePledge(this)">
+        <div class="pledge-header">
           <div class="pledge-num">2</div>
           <h3>소상공인 디지털 전환 지원</h3>
-          <i class="fa-solid fa-chevron-down toggle-icon"></i>
         </div>
-        <div class="pledge-body"><div class="pledge-body-inner">전통시장 및 골목상권 5,000개소에 디지털 결제·마케팅 시스템 무료 구축. AI 매출분석 도구 보급, 온라인 판로 개척 지원금 최대 500만원 지급. 상권 데이터 분석 플랫폼을 통해 실시간 상권 동향을 제공합니다.</div></div>
+        <div class="pledge-body-inner">전통시장 및 골목상권 5,000개소에 디지털 결제·마케팅 시스템 무료 구축. AI 매출분석 도구 보급과 온라인 판로 개척 지원금 최대 500만원을 지급합니다.<a href="pledge-detail.html?id=2" class="pledge-link">상세 보기 <i class="fa-solid fa-arrow-right"></i></a></div>
       </div>
       <div class="pledge-card fade-in">
-        <div class="pledge-header" onclick="togglePledge(this)">
+        <div class="pledge-header">
           <div class="pledge-num">3</div>
           <h3>15분 생활권 교통 혁신</h3>
-          <i class="fa-solid fa-chevron-down toggle-icon"></i>
         </div>
-        <div class="pledge-body"><div class="pledge-body-inner">모든 주거지에서 15분 내 병원·학교·공원·마트 접근 가능한 교통 인프라 구축. 수요응답형 버스(DRT) 전 지역 확대, 자전거 도로 200km 신설, 보행친화 거리 조성으로 시민 이동권을 보장합니다.</div></div>
+        <div class="pledge-body-inner">모든 주거지에서 15분 내 병원·학교·공원·마트 접근 가능한 교통 인프라 구축. 수요응답형 버스(DRT) 전 지역 확대와 자전거 도로 200km를 신설합니다.<a href="pledge-detail.html?id=3" class="pledge-link">상세 보기 <i class="fa-solid fa-arrow-right"></i></a></div>
       </div>
       <div class="pledge-card fade-in">
-        <div class="pledge-header" onclick="togglePledge(this)">
+        <div class="pledge-header">
           <div class="pledge-num">4</div>
           <h3>AI 기반 스마트 행정 구현</h3>
-          <i class="fa-solid fa-chevron-down toggle-icon"></i>
         </div>
-        <div class="pledge-body"><div class="pledge-body-inner">민원 처리 시간 50% 단축을 목표로 AI 행정 시스템 도입. 24시간 AI 민원 상담, 개인 맞춤형 복지 혜택 자동 안내, 블록체인 기반 투명한 예산 집행 공개 시스템을 구축하겠습니다.</div></div>
+        <div class="pledge-body-inner">민원 처리 시간 50% 단축을 목표로 AI 행정 시스템 도입. 24시간 AI 민원 상담과 블록체인 기반 투명한 예산 집행 공개 시스템을 구축하겠습니다.<a href="pledge-detail.html?id=4" class="pledge-link">상세 보기 <i class="fa-solid fa-arrow-right"></i></a></div>
       </div>
       <div class="pledge-card fade-in">
-        <div class="pledge-header" onclick="togglePledge(this)">
+        <div class="pledge-header">
           <div class="pledge-num">5</div>
           <h3>탄소중립 녹색도시 조성</h3>
-          <i class="fa-solid fa-chevron-down toggle-icon"></i>
         </div>
-        <div class="pledge-body"><div class="pledge-body-inner">2030년까지 탄소배출 40% 감축. 도심 숲 100개소 조성, 공공건물 태양광 의무화, 전기차 충전소 2,000기 설치. 시민 탄소포인트 제도를 도입하여 친환경 생활을 실천하는 시민에게 인센티브를 제공합니다.</div></div>
+        <div class="pledge-body-inner">2030년까지 탄소배출 40% 감축. 도심 숲 100개소 조성, 공공건물 태양광 의무화, 전기차 충전소 2,000기 설치로 녹색도시를 실현합니다.<a href="pledge-detail.html?id=5" class="pledge-link">상세 보기 <i class="fa-solid fa-arrow-right"></i></a></div>
       </div>
     </div>
   </div>
@@ -283,28 +281,70 @@ section{padding:100px 24px}
     </div>
     <div class="gallery-grid">
       <div class="gallery-item fade-in">
-        <img src="https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?w=600&h=450&fit=crop" alt="전통시장 방문">
-        <div class="overlay"><span><i class="fa-solid fa-location-dot"></i> 전통시장 현장 방문</span></div>
+        <div class="gallery-img">
+          <img src="https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?w=600&h=450&fit=crop" alt="전통시장 방문" loading="lazy">
+        </div>
+        <div class="gallery-text">
+          <h3><i class="fa-solid fa-store"></i> 전통시장 현장 방문</h3>
+          <span class="gallery-date">2026.01.15</span>
+          <p>남대문시장 상인 200명과 소통하며 디지털 전환 지원 현황을 점검했습니다.</p>
+          <a href="activity-detail.html?id=1" class="gallery-link">자세히 보기 <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
       </div>
       <div class="gallery-item fade-in">
-        <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&h=450&fit=crop" alt="청년 간담회">
-        <div class="overlay"><span><i class="fa-solid fa-location-dot"></i> 청년 정책 간담회</span></div>
+        <div class="gallery-img">
+          <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&h=450&fit=crop" alt="청년 간담회" loading="lazy">
+        </div>
+        <div class="gallery-text">
+          <h3><i class="fa-solid fa-users"></i> 청년 정책 간담회</h3>
+          <span class="gallery-date">2026.02.03</span>
+          <p>관악구 청년센터에서 150명 청년과 주거·일자리 정책을 논의했습니다.</p>
+          <a href="activity-detail.html?id=2" class="gallery-link">자세히 보기 <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
       </div>
       <div class="gallery-item fade-in">
-        <img src="https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a?w=600&h=450&fit=crop" alt="주민 대화">
-        <div class="overlay"><span><i class="fa-solid fa-location-dot"></i> 주민과의 대화</span></div>
+        <div class="gallery-img">
+          <img src="https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a?w=600&h=450&fit=crop" alt="주민 대화" loading="lazy">
+        </div>
+        <div class="gallery-text">
+          <h3><i class="fa-solid fa-comments"></i> 주민과의 대화</h3>
+          <span class="gallery-date">2026.02.14</span>
+          <p>송파구 주민센터에서 300명 주민과 생활 현안을 토론했습니다.</p>
+          <a href="activity-detail.html?id=3" class="gallery-link">자세히 보기 <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
       </div>
       <div class="gallery-item fade-in">
-        <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=450&fit=crop" alt="정책 발표">
-        <div class="overlay"><span><i class="fa-solid fa-location-dot"></i> 공약 발표 현장</span></div>
+        <div class="gallery-img">
+          <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=450&fit=crop" alt="정책 발표" loading="lazy">
+        </div>
+        <div class="gallery-text">
+          <h3><i class="fa-solid fa-bullhorn"></i> 공약 발표 현장</h3>
+          <span class="gallery-date">2026.02.25</span>
+          <p>5대 핵심 공약 공식 발표 기자회견, 200여명이 참석했습니다.</p>
+          <a href="activity-detail.html?id=4" class="gallery-link">자세히 보기 <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
       </div>
       <div class="gallery-item fade-in">
-        <img src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=600&h=450&fit=crop" alt="봉사활동">
-        <div class="overlay"><span><i class="fa-solid fa-location-dot"></i> 지역 봉사활동</span></div>
+        <div class="gallery-img">
+          <img src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=600&h=450&fit=crop" alt="봉사활동" loading="lazy">
+        </div>
+        <div class="gallery-text">
+          <h3><i class="fa-solid fa-hand-holding-heart"></i> 지역 봉사활동</h3>
+          <span class="gallery-date">2026.03.01</span>
+          <p>독거노인 가정 방문 및 생필품 전달, 봉사자 80명과 함께했습니다.</p>
+          <a href="activity-detail.html?id=5" class="gallery-link">자세히 보기 <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
       </div>
       <div class="gallery-item fade-in">
-        <img src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=600&h=450&fit=crop" alt="교육 현장">
-        <div class="overlay"><span><i class="fa-solid fa-location-dot"></i> 교육 격차 해소 토론회</span></div>
+        <div class="gallery-img">
+          <img src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=600&h=450&fit=crop" alt="교육 현장" loading="lazy">
+        </div>
+        <div class="gallery-text">
+          <h3><i class="fa-solid fa-graduation-cap"></i> 교육 격차 해소 토론회</h3>
+          <span class="gallery-date">2026.03.05</span>
+          <p>교육 전문가 30명과 학부모 100명이 참석한 정책 토론회를 개최했습니다.</p>
+          <a href="activity-detail.html?id=6" class="gallery-link">자세히 보기 <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
       </div>
     </div>
   </div>
@@ -327,9 +367,7 @@ section{padding:100px 24px}
       <textarea id="gbMsg" placeholder="응원 메시지를 남겨주세요..." maxlength="200"></textarea>
       <button class="btn-submit" onclick="addGuestbook()"><i class="fa-solid fa-paper-plane"></i> 응원하기</button>
     </div>
-    <div class="guestbook-list" id="guestbookList">
-      <!-- 기본 응원 메시지 -->
-    </div>
+    <div class="guestbook-list" id="guestbookList"></div>
   </div>
 </section>
 
@@ -394,21 +432,6 @@ const observer = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.15 });
 document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-
-/* Pledge accordion */
-function togglePledge(header) {
-  const body = header.nextElementSibling;
-  const isOpen = header.classList.contains('active');
-  // close all
-  document.querySelectorAll('.pledge-header.active').forEach(h => {
-    h.classList.remove('active');
-    h.nextElementSibling.style.maxHeight = null;
-  });
-  if (!isOpen) {
-    header.classList.add('active');
-    body.style.maxHeight = body.scrollHeight + 'px';
-  }
-}
 
 /* Guestbook */
 const defaultMessages = [

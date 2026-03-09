@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>공약 상세 - 기호 7번 김민수</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#1e3a5f;--white:#fff;--gold:#d4a843;--light:#f5f7fa;--dark:#0f1f33;--gray:#6b7b8d;--radius:2px;--shadow:0 4px 24px rgba(30,58,95,.12)}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans KR',sans-serif;color:#222;background:var(--white);overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+img{max-width:100%;display:block}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;width:100%;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);z-index:1000;border-bottom:1px solid rgba(30,58,95,.08);transition:box-shadow .3s}
+.nav.scrolled{box-shadow:0 2px 20px rgba(0,0,0,.1)}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-weight:900;font-size:1.2rem;color:var(--primary)}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:28px;list-style:none}
+.nav-links a{font-size:.9rem;font-weight:500;color:var(--primary);position:relative;transition:color .3s}
+.nav-links a:hover{color:var(--gold)}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--gold);transition:width .3s}
+.nav-links a:hover::after{width:100%}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:8px}
+.hamburger span{display:block;width:24px;height:2px;background:var(--primary);transition:all .3s}
+.hamburger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.active span:nth-child(2){opacity:0}
+.hamburger.active span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+
+/* MOBILE MENU */
+.mobile-menu{display:none;position:fixed;top:64px;left:0;width:100%;background:var(--white);box-shadow:var(--shadow);padding:24px;z-index:999}
+.mobile-menu.open{display:block}
+.mobile-menu a{display:block;padding:14px 0;font-size:1rem;font-weight:500;color:var(--primary);border-bottom:1px solid var(--light)}
+
+/* FADE-IN */
+.fade-in{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* PLEDGE HERO */
+.pledge-hero{padding:120px 24px 60px;background:linear-gradient(135deg,var(--dark) 0%,var(--primary) 100%);color:var(--white);position:relative;overflow:hidden}
+.pledge-hero::before{content:'';position:absolute;top:-50%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(212,168,67,.1) 0%,transparent 70%);pointer-events:none}
+.pledge-hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--gold),var(--primary),var(--gold))}
+.pledge-hero-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:28px}
+.pledge-number{width:72px;height:72px;background:var(--gold);color:var(--dark);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:2rem;border-radius:var(--radius);flex-shrink:0;box-shadow:0 4px 16px rgba(212,168,67,.4)}
+.pledge-hero-text h1{font-size:2.2rem;font-weight:900;line-height:1.3;margin-bottom:8px}
+.pledge-hero-text p{font-size:1rem;font-weight:300;opacity:.8;line-height:1.6}
+
+/* CONTENT SECTIONS */
+.pledge-content{max-width:900px;margin:0 auto;padding:60px 24px 80px}
+.content-section{margin-bottom:48px}
+.content-section:last-child{margin-bottom:0}
+.section-title{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:12px;border-bottom:2px solid var(--light)}
+.section-title .icon-box{width:40px;height:40px;background:linear-gradient(135deg,var(--primary),var(--dark));color:var(--gold);display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-size:1rem;flex-shrink:0}
+.section-title h2{font-size:1.4rem;font-weight:900;color:var(--primary)}
+
+/* STAT CARDS */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.stat-card{background:var(--light);border-left:4px solid var(--gold);padding:20px 24px;border-radius:var(--radius)}
+.stat-card .stat-value{font-size:1.6rem;font-weight:900;color:var(--primary);margin-bottom:4px}
+.stat-card .stat-label{font-size:.85rem;color:var(--gray);line-height:1.5}
+
+/* PROBLEM LIST */
+.problem-list{display:flex;flex-direction:column;gap:12px}
+.problem-item{display:flex;align-items:flex-start;gap:12px;padding:16px 20px;background:var(--white);border:1px solid rgba(30,58,95,.08);border-radius:var(--radius);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.problem-item .problem-icon{width:32px;height:32px;background:#fee2e2;color:#dc2626;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-size:.8rem;flex-shrink:0;margin-top:2px}
+.problem-item .problem-text{font-size:.95rem;color:#333;line-height:1.6}
+.problem-item .problem-text strong{color:var(--primary);font-weight:700}
+
+/* SOLUTION CARDS */
+.solution-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.solution-card{background:var(--white);border:1px solid rgba(30,58,95,.08);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);transition:transform .3s,box-shadow .3s}
+.solution-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(30,58,95,.16)}
+.solution-card .solution-icon{width:48px;height:48px;background:linear-gradient(135deg,var(--primary),var(--dark));color:var(--gold);display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-size:1.2rem;margin-bottom:16px}
+.solution-card h3{font-size:1rem;font-weight:700;color:var(--primary);margin-bottom:8px}
+.solution-card p{font-size:.9rem;color:var(--gray);line-height:1.6}
+
+/* EFFECT LIST */
+.effect-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.effect-card{display:flex;align-items:flex-start;gap:14px;padding:20px;background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1px solid #bbf7d0;border-radius:var(--radius)}
+.effect-card .effect-icon{width:36px;height:36px;background:#16a34a;color:var(--white);display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-size:.85rem;flex-shrink:0;margin-top:2px}
+.effect-card .effect-text{font-size:.95rem;color:#333;line-height:1.6}
+.effect-card .effect-text strong{color:#15803d;font-weight:700}
+
+/* ROADMAP */
+.roadmap{position:relative;padding-left:40px}
+.roadmap::before{content:'';position:absolute;left:15px;top:8px;bottom:8px;width:3px;background:linear-gradient(to bottom,var(--gold),var(--primary))}
+.roadmap-item{position:relative;margin-bottom:28px;padding:20px 24px;background:var(--white);border:1px solid rgba(30,58,95,.08);border-radius:var(--radius);box-shadow:0 2px 12px rgba(0,0,0,.05)}
+.roadmap-item:last-child{margin-bottom:0}
+.roadmap-item::before{content:'';position:absolute;left:-32px;top:24px;width:14px;height:14px;border-radius:50%;background:var(--gold);border:3px solid var(--white);box-shadow:0 0 0 3px var(--gold)}
+.roadmap-item .rm-period{display:inline-block;background:var(--primary);color:var(--white);font-size:.75rem;font-weight:700;padding:4px 12px;border-radius:var(--radius);margin-bottom:8px;letter-spacing:.5px}
+.roadmap-item h3{font-size:1rem;font-weight:700;color:var(--primary);margin-bottom:6px}
+.roadmap-item p{font-size:.9rem;color:var(--gray);line-height:1.6}
+
+/* BACK BUTTON */
+.back-section{text-align:center;padding:0 24px 80px;max-width:900px;margin:0 auto}
+.btn-back{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--primary),var(--dark));color:var(--white);border:none;padding:14px 36px;border-radius:var(--radius);font-size:.95rem;font-weight:700;font-family:inherit;cursor:pointer;transition:opacity .3s,transform .3s;text-decoration:none}
+.btn-back:hover{opacity:.9;transform:translateY(-1px)}
+
+/* FOOTER */
+.footer{background:var(--dark);color:rgba(255,255,255,.6);text-align:center;padding:48px 24px}
+.footer-logo{font-size:1.3rem;font-weight:900;color:var(--white);margin-bottom:8px}
+.footer-logo span{color:var(--gold)}
+.footer p{font-size:.8rem;margin-bottom:4px}
+.footer-links{display:flex;justify-content:center;gap:20px;margin-top:16px}
+.footer-links a{color:rgba(255,255,255,.5);font-size:1.2rem;transition:color .3s}
+.footer-links a:hover{color:var(--gold)}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .nav-links{display:none}
+  .hamburger{display:flex}
+  .pledge-hero{padding:100px 16px 40px}
+  .pledge-hero-inner{flex-direction:column;text-align:center;gap:16px}
+  .pledge-number{width:56px;height:56px;font-size:1.5rem}
+  .pledge-hero-text h1{font-size:1.6rem}
+  .pledge-hero-text p{font-size:.9rem}
+  .pledge-content{padding:40px 16px 60px}
+  .stat-grid{grid-template-columns:1fr}
+  .solution-grid{grid-template-columns:1fr}
+  .effect-grid{grid-template-columns:1fr}
+  .roadmap{padding-left:32px}
+  .section-title h2{font-size:1.2rem}
+  .content-section{margin-bottom:36px}
+}
+@media(max-width:480px){
+  .pledge-hero-text h1{font-size:1.4rem}
+  .stat-card .stat-value{font-size:1.3rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="candidate.html" class="nav-logo">기호7번 <span>김민수</span></a>
+    <ul class="nav-links">
+      <li><a href="candidate.html#profile">프로필</a></li>
+      <li><a href="candidate.html#pledges">공약</a></li>
+      <li><a href="candidate.html#gallery">활동</a></li>
+      <li><a href="candidate.html#guestbook">응원</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="메뉴">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="candidate.html#profile" onclick="closeMenu()">프로필</a>
+  <a href="candidate.html#pledges" onclick="closeMenu()">공약</a>
+  <a href="candidate.html#gallery" onclick="closeMenu()">활동</a>
+  <a href="candidate.html#guestbook" onclick="closeMenu()">응원</a>
+</div>
+
+<!-- PLEDGE HERO -->
+<section class="pledge-hero" id="pledgeHero">
+  <div class="pledge-hero-inner fade-in">
+    <div class="pledge-number" id="pledgeNumber">-</div>
+    <div class="pledge-hero-text">
+      <h1 id="pledgeTitle">공약 상세</h1>
+      <p id="pledgeSubtitle">상세 내용을 확인하세요</p>
+    </div>
+  </div>
+</section>
+
+<!-- PLEDGE CONTENT -->
+<div class="pledge-content">
+
+  <!-- 현황 -->
+  <div class="content-section fade-in">
+    <div class="section-title">
+      <div class="icon-box"><i class="fa-solid fa-chart-line"></i></div>
+      <h2>현황</h2>
+    </div>
+    <div class="stat-grid" id="statusGrid"></div>
+  </div>
+
+  <!-- 문제점 -->
+  <div class="content-section fade-in">
+    <div class="section-title">
+      <div class="icon-box"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <h2>문제점</h2>
+    </div>
+    <div class="problem-list" id="problemList"></div>
+  </div>
+
+  <!-- 해결방안 -->
+  <div class="content-section fade-in">
+    <div class="section-title">
+      <div class="icon-box"><i class="fa-solid fa-lightbulb"></i></div>
+      <h2>해결방안</h2>
+    </div>
+    <div class="solution-grid" id="solutionGrid"></div>
+  </div>
+
+  <!-- 기대효과 -->
+  <div class="content-section fade-in">
+    <div class="section-title">
+      <div class="icon-box"><i class="fa-solid fa-arrow-trend-up"></i></div>
+      <h2>기대효과</h2>
+    </div>
+    <div class="effect-grid" id="effectGrid"></div>
+  </div>
+
+  <!-- 추진 로드맵 -->
+  <div class="content-section fade-in">
+    <div class="section-title">
+      <div class="icon-box"><i class="fa-solid fa-road"></i></div>
+      <h2>추진 로드맵</h2>
+    </div>
+    <div class="roadmap" id="roadmap"></div>
+  </div>
+
+</div>
+
+<!-- BACK BUTTON -->
+<div class="back-section fade-in">
+  <a href="candidate.html#pledges" class="btn-back"><i class="fa-solid fa-arrow-left"></i> 목록으로 돌아가기</a>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-logo">기호7번 <span>김민수</span></div>
+  <p>시민과 함께하는 내일의 변화</p>
+  <p style="margin-top:8px;font-size:.75rem">※ 본 페이지는 포트폴리오용 가상 후보 홍보페이지입니다.</p>
+  <div class="footer-links">
+    <a href="#"><i class="fa-brands fa-youtube"></i></a>
+    <a href="#"><i class="fa-brands fa-instagram"></i></a>
+    <a href="#"><i class="fa-brands fa-facebook"></i></a>
+    <a href="#"><i class="fa-solid fa-blog"></i></a>
+  </div>
+  <p style="margin-top:20px;font-size:.7rem">&copy; 2026 김민수 선거캠프. All rights reserved.</p>
+</footer>
+
+<script>
+/* ===== PLEDGE DATA ===== */
+const pledges = [
+  {
+    id: 1,
+    title: '청년 주거 안정 프로젝트',
+    subtitle: '모든 청년이 안심하고 살 수 있는 주거 환경을 만들겠습니다',
+    icon: 'fa-house-chimney',
+    status: [
+      { value: '38%', label: '서울 청년 주거비 부담률 평균. 소득의 3분의 1 이상을 주거비로 지출하고 있어 생활 안정이 어려운 상황입니다.' },
+      { value: '68만원', label: '1인 가구 월평균 주거비. 전세·월세 비용이 지속적으로 상승하며 청년층의 경제적 부담이 가중되고 있습니다.' },
+      { value: '급증', label: '전세사기 피해 증가. 최근 3년간 전세사기 피해 건수가 전년 대비 2.5배 증가하여 청년 주거 불안이 심화되고 있습니다.' }
+    ],
+    problems: [
+      { text: '<strong>공공임대 대기기간 평균 3년 이상</strong> — 공공임대주택 수요 대비 공급이 절대적으로 부족하여, 신청 후 입주까지 평균 3년 이상 대기해야 하는 실정입니다. 특히 신혼부부와 사회초년생의 대기 기간이 가장 길게 나타나고 있습니다.' },
+      { text: '<strong>청년 전용 주거 정책 부족</strong> — 기존 주거 정책이 가족 단위 중심으로 설계되어 있어 1인 가구 청년을 위한 맞춤형 주거 지원이 사실상 부재합니다. 청년 월세 지원 예산도 전체 주거 복지 예산의 8%에 불과합니다.' },
+      { text: '<strong>주거 사각지대 발생</strong> — 반지하, 옥탑방, 고시원 등 비적정 주거에 거주하는 청년이 약 37만 명에 달하며, 안전과 건강을 위협받고 있습니다. 주거급여 수급 기준에서 벗어나 지원을 받지 못하는 경우도 다수 존재합니다.' }
+    ],
+    solutions: [
+      { icon: 'fa-building', title: '공공임대 5,000호 확충', desc: '역세권 및 대중교통 접근성이 높은 지역을 중심으로 청년 전용 공공임대주택 5,000호를 신규 공급합니다. 시세 대비 50~70% 수준의 저렴한 임대료로 청년의 주거비 부담을 획기적으로 줄이겠습니다.' },
+      { icon: 'fa-hand-holding-dollar', title: '청년 전세자금 무이자 대출', desc: '만 19~39세 청년을 대상으로 최대 1억 원까지 무이자 전세자금 대출을 지원합니다. 소득 기준을 완화하고 심사 절차를 간소화하여 더 많은 청년이 혜택을 받을 수 있도록 하겠습니다.' },
+      { icon: 'fa-train-subway', title: '역세권 청년주택 건설', desc: '지하철역 반경 350m 이내 유휴부지를 활용한 역세권 청년주택을 확대 건설합니다. 공유 라운지, 코워킹 스페이스, 커뮤니티 공간을 갖춘 복합 주거시설로 조성합니다.' },
+      { icon: 'fa-house-user', title: '1인가구 맞춤 소형주택', desc: '전용면적 16~33m2 규모의 1인가구 맞춤형 소형주택을 공급합니다. 풀옵션 가전·가구를 기본 제공하고, 스마트홈 시스템을 적용하여 편리한 주거 환경을 제공합니다.' }
+    ],
+    effects: [
+      { text: '<strong>주거비 부담률 25% 이하 달성</strong> — 현재 38%에 달하는 청년 주거비 부담률을 소득 대비 25% 이하로 낮추어 생활 여유를 확보합니다.' },
+      { text: '<strong>청년 정주율 향상</strong> — 안정적 주거 환경 확보를 통해 지역 내 청년 정주율을 현재 대비 15%p 이상 향상시킵니다.' },
+      { text: '<strong>주거 안정으로 출산율 제고</strong> — 주거 불안 해소가 결혼과 출산의 선결 조건임을 감안, 안정적 주거 확보를 통해 지역 합계출산율 개선에 기여합니다.' }
+    ],
+    roadmap: [
+      { period: '2026년 하반기', title: '청년 주거 실태조사 실시', desc: '지역 내 청년 주거 현황 전수조사 및 수요 분석을 실시합니다. 비적정 주거 실태 파악, 주거 취약계층 DB 구축, 맞춤형 지원 방안을 수립합니다.' },
+      { period: '2027년', title: '부지 선정 및 설계', desc: '역세권 유휴부지 확보 및 청년주택 설계를 진행합니다. 주민 의견 수렴을 통한 커뮤니티 공간 설계, 친환경 건축 기준을 적용합니다.' },
+      { period: '2028년', title: '공공임대주택 착공', desc: '1차 물량 2,000호 착공 및 전세자금 무이자 대출 프로그램을 본격 시행합니다. 소형주택 시범단지 건설을 병행합니다.' },
+      { period: '2029년', title: '입주 시작 및 확대', desc: '1차 입주를 시작하고, 2차 물량 3,000호 착공에 돌입합니다. 입주자 만족도 조사를 통한 개선사항을 반영합니다.' }
+    ]
+  },
+  {
+    id: 2,
+    title: '소상공인 디지털 전환 지원',
+    subtitle: '전통과 기술의 만남으로 골목상권을 살리겠습니다',
+    icon: 'fa-store',
+    status: [
+      { value: '23%', label: '전통시장 디지털 결제 도입률. 전체 전통시장 점포 중 디지털 결제 시스템을 갖춘 곳은 4곳 중 1곳에도 미치지 못하는 실정입니다.' },
+      { value: '증가세', label: '소상공인 폐업률 지속 상승. 최근 3년간 연평균 폐업률이 12%를 넘어서며 골목상권의 위기가 심화되고 있습니다.' },
+      { value: '67%', label: '온라인 전환 어려움 호소 비율. 소상공인 10명 중 7명이 디지털 전환의 필요성을 인식하면서도 방법을 모르거나 비용 부담으로 전환하지 못하고 있습니다.' }
+    ],
+    problems: [
+      { text: '<strong>디지털 역량 부족</strong> — 소상공인의 평균 연령이 52세로, 디지털 도구 활용에 대한 교육 기회가 부족합니다. 키오스크, 배달앱, SNS 마케팅 등 기본적인 디지털 도구조차 활용하지 못하는 사업장이 60%에 달합니다.' },
+      { text: '<strong>초기 비용 부담</strong> — POS 시스템, 키오스크, 온라인 쇼핑몰 구축 등 디지털 전환 초기 비용이 최소 300~500만 원 수준으로, 매출이 불안정한 소상공인에게는 큰 부담입니다. 정부 지원금은 선착순으로 마감되어 혜택을 받지 못하는 경우가 빈번합니다.' },
+      { text: '<strong>컨설팅 접근성 낮음</strong> — 디지털 전환 전문 컨설팅 서비스는 대부분 수도권에 집중되어 있으며, 지역 소상공인이 접근하기 어렵습니다. 일회성 교육에 그쳐 실질적인 정착으로 이어지지 못하는 문제가 있습니다.' }
+    ],
+    solutions: [
+      { icon: 'fa-laptop', title: '5,000개소 디지털 시스템 무료 구축', desc: '전통시장 및 골목상권 5,000개 점포에 POS, 키오스크, 모바일 결제 시스템을 무료로 설치합니다. 유지보수 비용도 2년간 전액 지원하여 안정적인 정착을 도모합니다.' },
+      { icon: 'fa-robot', title: 'AI 매출분석 도구 보급', desc: '인공지능 기반 매출 분석·예측 도구를 개발하여 무료 보급합니다. 요일·시간대별 매출 패턴, 인기 메뉴 분석, 재고 관리 최적화 등 데이터 기반 경영을 지원합니다.' },
+      { icon: 'fa-globe', title: '온라인 판로 지원금 500만원', desc: '온라인 쇼핑몰 입점, 배달앱 등록, SNS 마케팅 등 온라인 판로 개척에 필요한 비용을 1개소당 최대 500만 원까지 지원합니다. 전문 마케터 1:1 매칭 서비스도 함께 제공합니다.' },
+      { icon: 'fa-chalkboard-user', title: '찾아가는 디지털 교육', desc: '각 지역 상권별 전담 디지털 코치를 배치하여 현장 맞춤 교육을 제공합니다. 월 2회 이상 정기 방문, 1:1 실습 교육, 문제 해결 지원까지 3단계 체계적 교육 프로그램을 운영합니다.' }
+    ],
+    effects: [
+      { text: '<strong>매출 평균 20% 증가</strong> — 디지털 전환 완료 사업장의 매출이 평균 20% 이상 증가할 것으로 기대됩니다. 선행 시범사업 결과 실제 22.4% 매출 증가 효과를 확인했습니다.' },
+      { text: '<strong>디지털 결제율 80% 달성</strong> — 현재 23%에 불과한 전통시장 디지털 결제 도입률을 80%까지 끌어올려, 소비자 편의성을 크게 향상시킵니다.' },
+      { text: '<strong>전통시장 활성화</strong> — 디지털 전환을 통해 젊은 소비자층의 전통시장 방문을 유도하고, 온라인 판로 확보로 시장의 영향력을 지역 외로 확대합니다.' }
+    ],
+    roadmap: [
+      { period: '2026년 하반기', title: '시범사업 500개소 실시', desc: '주요 전통시장 및 골목상권 500개소를 선정하여 디지털 전환 시범사업을 실시합니다. 효과 분석 및 개선사항을 도출합니다.' },
+      { period: '2027년', title: '확대 시행 2,000개소', desc: '시범사업 성과를 바탕으로 2,000개소까지 확대 적용합니다. AI 매출분석 도구 베타 버전을 배포하고, 디지털 코치 120명을 양성·배치합니다.' },
+      { period: '2028년', title: '전면 시행 및 고도화', desc: '전체 5,000개소 디지털 전환을 완료하고, AI 도구 정식 버전을 출시합니다. 온라인 판로 지원 프로그램을 상시 운영 체제로 전환합니다.' }
+    ]
+  },
+  {
+    id: 3,
+    title: '15분 생활권 교통 혁신',
+    subtitle: '집에서 15분이면 모든 생활 인프라에 닿는 도시를 만들겠습니다',
+    icon: 'fa-bus',
+    status: [
+      { value: '58분', label: '평균 통근시간. 편도 기준 1시간에 가까운 통근시간은 시민의 삶의 질을 심각하게 저하시키고 있으며, 전국 대도시 평균보다 15분 이상 깁니다.' },
+      { value: '존재', label: '대중교통 사각지대. 버스 정류장까지 도보 15분 이상 소요되는 지역이 전체 면적의 18%에 달하며, 약 12만 명의 주민이 대중교통 이용에 어려움을 겪고 있습니다.' },
+      { value: '부족', label: '자전거 인프라 현황. 전체 도로 대비 자전거 전용도로 비율이 3.2%에 불과하고, 기존 자전거 도로도 단절 구간이 많아 실제 이용률이 저조합니다.' }
+    ],
+    problems: [
+      { text: '<strong>외곽지역 교통 불편</strong> — 도심 중심의 교통 체계로 인해 외곽지역 주민들은 대중교통 이용이 사실상 불가능한 시간대가 존재합니다. 첫차·막차 시간이 제한적이며, 배차간격이 30~40분에 달하는 노선도 다수 있습니다.' },
+      { text: '<strong>노인·장애인 이동권 제한</strong> — 저상버스 도입률이 42%에 그치고, 장애인 콜택시 평균 대기시간이 45분에 달합니다. 교통약자를 위한 이동 지원 서비스가 수요의 35%만 충족하고 있습니다.' },
+      { text: '<strong>교통 혼잡 심화</strong> — 주요 간선도로의 출퇴근 시간 평균 속도가 18km/h까지 떨어지며, 연간 교통 혼잡 비용이 4조 2천억 원에 달합니다. 대중교통 분담률이 정체되면서 자가용 의존도가 여전히 높습니다.' }
+    ],
+    solutions: [
+      { icon: 'fa-van-shuttle', title: 'DRT(수요응답형 교통) 전 지역 확대', desc: '앱 호출 기반 수요응답형 교통(DRT)을 전 지역으로 확대합니다. AI 경로 최적화 알고리즘을 적용하여 평균 대기시간 10분 이내, 목적지까지 15분 이내 도달을 목표로 합니다.' },
+      { icon: 'fa-bicycle', title: '자전거 도로 200km 신설', desc: '간선도로와 연결되는 자전거 전용도로 200km를 신설합니다. 기존 단절 구간을 연결하고, 자전거 주차장 5,000면과 공공자전거 스테이션 300개소를 설치합니다.' },
+      { icon: 'fa-person-walking', title: '보행친화 거리 조성', desc: '주요 상권 및 주거밀집 지역에 보행 우선구역을 조성합니다. 차량 속도 30km/h 제한, 넓은 인도, 그늘목, 벤치 등을 설치하여 걷고 싶은 거리를 만들겠습니다.' },
+      { icon: 'fa-wheelchair-move', title: '교통약자 이동권 보장', desc: '저상버스 도입률을 100%로 높이고, 장애인 콜택시 차량을 2배 확충합니다. 어르신 전용 셔틀버스를 주요 의료기관·복지시설 노선으로 운행합니다.' }
+    ],
+    effects: [
+      { text: '<strong>평균 통근시간 30% 단축</strong> — DRT 운행과 대중교통 노선 최적화를 통해 평균 통근시간을 현재 58분에서 40분 이하로 단축합니다.' },
+      { text: '<strong>교통약자 이동권 보장</strong> — 장애인 콜택시 대기시간 15분 이내, 저상버스 100% 도입으로 누구나 자유롭게 이동할 수 있는 환경을 구현합니다.' },
+      { text: '<strong>탄소배출 감소</strong> — 대중교통·자전거 이용률 향상으로 교통 부문 탄소배출량을 연간 15% 감축하고, 교통 혼잡 비용을 1조 원 이상 절감합니다.' }
+    ],
+    roadmap: [
+      { period: '2026년 하반기', title: '교통 노선 분석 및 수요 조사', desc: '전 지역 교통 이용 패턴을 분석하고, DRT 최적 운행 구역을 선정합니다. 자전거 도로 설계를 위한 기초 조사를 실시합니다.' },
+      { period: '2027년', title: 'DRT 시범운행 시작', desc: '우선 대상 3개 권역에서 DRT 시범운행을 시작합니다. 이용자 피드백을 반영하여 AI 배차 알고리즘을 고도화합니다.' },
+      { period: '2028년', title: '자전거 도로 착공', desc: '자전거 전용도로 200km 중 1차 구간 120km 착공 및 공공자전거 스테이션 설치를 시작합니다. DRT를 전 지역으로 확대합니다.' },
+      { period: '2029년', title: '교통 혁신 완료', desc: '자전거 도로 전 구간 완공, 보행친화 거리 조성 완료, 교통약자 이동 지원 시스템 전면 가동으로 15분 생활권을 실현합니다.' }
+    ]
+  },
+  {
+    id: 4,
+    title: 'AI 기반 스마트 행정 구현',
+    subtitle: '기술로 행정을 혁신하고, 시민에게 신뢰를 돌려드리겠습니다',
+    icon: 'fa-microchip',
+    status: [
+      { value: '7일', label: '민원처리 평균 소요기간. 단순 민원부터 복합 민원까지 평균 7일이 소요되며, 일부 복잡한 민원은 30일 이상 걸리기도 합니다. 시민 불만의 주요 원인입니다.' },
+      { value: '20만명', label: '복지 사각지대 추정 인원. 수급 자격이 있음에도 정보 부족, 신청 절차의 복잡함 등으로 복지 혜택을 받지 못하는 시민이 약 20만 명에 달하는 것으로 추산됩니다.' },
+      { value: '부족', label: '예산 집행 투명성. 전체 예산의 상세 집행 내역이 시민에게 공개되지 않아, 예산 낭비 및 비효율에 대한 시민의 불신이 지속되고 있습니다.' }
+    ],
+    problems: [
+      { text: '<strong>수작업 행정 비효율</strong> — 전체 행정 업무의 45%가 여전히 수작업으로 처리되고 있습니다. 중복 서류 제출, 부서 간 정보 공유 미흡, 수기 기록에 의한 오류 등이 행정 효율을 저해하고 있습니다.' },
+      { text: '<strong>맞춤형 서비스 한계</strong> — 시민 개인의 상황에 맞는 복지·행정 서비스를 선제적으로 안내하는 시스템이 부재합니다. 시민이 직접 해당 서비스를 찾아서 신청해야 하는 구조로, 정보 접근성이 낮은 취약계층일수록 더 불리합니다.' },
+      { text: '<strong>시민 불신</strong> — 예산 집행 과정의 불투명성, 반복되는 행정 착오, 느린 민원 처리 등으로 시민의 행정 신뢰도가 하락하고 있습니다. 최근 행정 신뢰도 조사 결과 "신뢰한다"는 응답이 38%에 불과했습니다.' }
+    ],
+    solutions: [
+      { icon: 'fa-headset', title: 'AI 민원 상담 24시간 운영', desc: '자연어 처리(NLP) 기반 AI 챗봇을 도입하여 365일 24시간 민원 상담을 제공합니다. 단순 민원은 AI가 즉시 처리하고, 복잡한 민원은 담당 공무원에게 자동 연결합니다.' },
+      { icon: 'fa-hand-holding-heart', title: '맞춤형 복지 자동안내', desc: '시민의 소득, 가구 구성, 연령 등 정보를 분석하여 수급 가능한 복지 혜택을 선제적으로 안내합니다. "찾아가는 복지" 개념을 디지털로 구현하여 복지 사각지대를 해소합니다.' },
+      { icon: 'fa-link', title: '블록체인 예산 공개', desc: '모든 예산 집행 내역을 블록체인에 기록하여 위·변조가 불가능한 투명한 재정 관리 체계를 구축합니다. 시민 누구나 실시간으로 예산 사용 현황을 조회할 수 있습니다.' },
+      { icon: 'fa-gears', title: '행정 프로세스 자동화', desc: '반복적 행정 업무를 RPA(로봇 프로세스 자동화)로 전환합니다. 서류 검토, 데이터 입력, 통계 산출 등을 자동화하여 공무원이 정책 기획 등 핵심 업무에 집중할 수 있도록 합니다.' }
+    ],
+    effects: [
+      { text: '<strong>민원처리 시간 50% 단축</strong> — AI 챗봇과 업무 자동화를 통해 평균 민원 처리 시간을 7일에서 3.5일 이하로 단축합니다. 단순 민원은 즉시 처리가 가능해집니다.' },
+      { text: '<strong>복지 사각지대 해소</strong> — 맞춤형 자동안내 시스템으로 복지 사각지대 20만 명을 발굴하고, 해당 시민들이 적절한 복지 서비스를 받을 수 있도록 연결합니다.' },
+      { text: '<strong>행정 신뢰도 향상</strong> — 블록체인 기반 예산 공개와 신속한 민원 처리로 행정 신뢰도를 현재 38%에서 70% 이상으로 끌어올리겠습니다.' }
+    ],
+    roadmap: [
+      { period: '2026년 하반기', title: '스마트 행정 시스템 설계', desc: 'AI 민원 시스템, 복지 자동안내 플랫폼, 블록체인 예산 관리 시스템의 설계 및 요구사항을 분석합니다. 시민 의견 수렴을 통해 우선순위를 결정합니다.' },
+      { period: '2027년', title: 'AI 챗봇 도입', desc: 'AI 민원 상담 챗봇을 개발·배포하고, 시범 운영을 시작합니다. 맞춤형 복지 안내 시스템의 데이터 수집 및 알고리즘 개발을 병행합니다.' },
+      { period: '2028년', title: '블록체인 예산 시스템 구축', desc: '블록체인 기반 예산 공개 플랫폼을 구축하고, 전체 부서 예산 집행 내역을 실시간 공개합니다. 맞춤형 복지 안내 시스템을 전면 시행합니다.' },
+      { period: '2029년', title: '전면 시행 및 고도화', desc: '모든 시스템의 안정화 및 고도화를 완료합니다. AI 정확도 95% 이상, 블록체인 전 부서 적용, 행정 자동화율 80% 달성을 목표로 합니다.' }
+    ]
+  },
+  {
+    id: 5,
+    title: '탄소중립 녹색도시 조성',
+    subtitle: '지속 가능한 환경을 다음 세대에 물려주겠습니다',
+    icon: 'fa-leaf',
+    status: [
+      { value: '4,800만톤', label: '연간 탄소배출량. 산업, 교통, 건물 부문에서 발생하는 탄소배출이 지속적으로 증가하고 있으며, 2030 탄소중립 목표 달성을 위한 적극적 감축이 시급합니다.' },
+      { value: '28%', label: '도심 녹지율. WHO 권고 기준 30%에 미달하는 수준으로, 특히 구도심 지역의 녹지율은 15%에 불과합니다. 도시 열섬 현상과 미세먼지 저감 효과가 부족합니다.' },
+      { value: '증가', label: '미세먼지 나쁨일수. 연간 미세먼지 "나쁨" 이상 일수가 최근 5년간 20% 증가하여, 시민 건강과 실외활동에 심각한 영향을 미치고 있습니다.' }
+    ],
+    problems: [
+      { text: '<strong>노후건물 에너지 효율 낮음</strong> — 30년 이상 된 노후 건물이 전체 건축물의 42%를 차지하며, 이들 건물의 에너지 소비량은 신축 건물 대비 2.3배에 달합니다. 단열 미흡, 노후 설비 등으로 냉·난방 에너지가 낭비되고 있습니다.' },
+      { text: '<strong>전기차 충전 인프라 부족</strong> — 등록 전기차 대비 공용 충전기 비율이 1:8로, 충전 대기 시간이 길고 충전소 접근성이 낮습니다. 특히 공동주택 거주자의 충전 불편이 전기차 보급의 주요 장벽으로 작용하고 있습니다.' },
+      { text: '<strong>시민 참여 미흡</strong> — 환경 정책에 대한 시민의 관심은 높으나, 실제 참여로 이어지는 비율은 12%에 불과합니다. 탄소 감축 실천에 대한 인센티브가 부족하고, 참여 방법이 복잡하여 시민 동기부여가 어렵습니다.' }
+    ],
+    solutions: [
+      { icon: 'fa-tree-city', title: '도심 숲 100개소 조성', desc: '유휴부지, 옥상, 벽면 등을 활용하여 도심 숲 100개소를 조성합니다. 대형 공원 10개소와 소규모 포켓 공원 90개소를 조성하여 시민 누구나 도보 5분 이내 녹지를 이용할 수 있도록 합니다.' },
+      { icon: 'fa-solar-panel', title: '공공건물 태양광 의무화', desc: '모든 공공건물에 태양광 패널 설치를 의무화하고, 민간 건물에도 설치 보조금을 확대합니다. 연간 재생에너지 발전량을 현재 대비 3배로 늘려 에너지 자립률을 높이겠습니다.' },
+      { icon: 'fa-charging-station', title: '전기차 충전소 2,000기 설치', desc: '공공 주차장, 아파트 단지, 대형마트 등에 전기차 충전소 2,000기를 설치합니다. 급속충전기 비율을 50% 이상으로 높여 충전 대기 시간을 획기적으로 줄이겠습니다.' },
+      { icon: 'fa-coins', title: '탄소포인트 제도 도입', desc: '대중교통 이용, 에너지 절약, 분리수거 실천 등 친환경 활동에 탄소포인트를 부여합니다. 적립된 포인트는 지역화폐로 전환하거나 공공시설 이용료 할인에 사용할 수 있습니다.' }
+    ],
+    effects: [
+      { text: '<strong>2030년 탄소 40% 감축</strong> — 태양광 확대, 전기차 보급, 건물 에너지 효율 개선을 통해 2030년까지 탄소배출량을 2018년 대비 40% 감축합니다.' },
+      { text: '<strong>녹지율 35% 달성</strong> — 도심 숲 조성과 옥상 녹화 사업으로 도심 녹지율을 현재 28%에서 35%까지 끌어올려 WHO 권고 기준을 초과 달성합니다.' },
+      { text: '<strong>시민 삶의 질 향상</strong> — 깨끗한 공기, 쾌적한 녹지 공간, 탄소포인트 경제적 혜택 등을 통해 시민의 환경 만족도와 삶의 질을 종합적으로 향상시킵니다.' }
+    ],
+    roadmap: [
+      { period: '2026년 하반기', title: '탄소중립 마스터플랜 수립', desc: '부문별 탄소 배출 현황을 정밀 분석하고, 감축 목표와 실행 전략을 담은 마스터플랜을 수립합니다. 시민 공청회를 통해 의견을 수렴합니다.' },
+      { period: '2027년', title: '도심숲 30개소 착수', desc: '1차 도심 숲 30개소 조성에 착수하고, 탄소포인트 앱을 개발·배포합니다. 공공건물 태양광 설치 시범사업을 시작합니다.' },
+      { period: '2028년', title: '태양광 설치 확대', desc: '공공건물 태양광 전면 설치를 완료하고, 민간 건물 보조금 지원을 확대합니다. 도심 숲 60개소 추가 착수, 전기차 충전소 1,000기 설치를 완료합니다.' },
+      { period: '2029년', title: '충전소 완료 및 성과 점검', desc: '전기차 충전소 2,000기 설치를 완료하고, 도심 숲 100개소 조성을 마무리합니다. 전체 사업의 중간 성과를 점검하고 2030 목표 달성 전략을 보완합니다.' }
+    ]
+  }
+];
+
+/* ===== URL PARAMETER & RENDER ===== */
+function getUrlParam(name) {
+  const params = new URLSearchParams(window.location.search);
+  return params.get(name);
+}
+
+function renderPledge(id) {
+  const pledge = pledges.find(p => p.id === parseInt(id));
+  if (!pledge) {
+    document.querySelector('.pledge-hero-text h1').textContent = '공약을 찾을 수 없습니다';
+    document.querySelector('.pledge-hero-text p').textContent = '올바른 공약 번호를 확인해주세요.';
+    document.querySelector('.pledge-content').innerHTML = '<div style="text-align:center;padding:60px 24px;"><p style="color:var(--gray);font-size:1.1rem;">해당 공약 정보가 존재하지 않습니다.</p><a href="candidate.html#pledges" class="btn-back" style="margin-top:24px;display:inline-flex;"><i class="fa-solid fa-arrow-left"></i> 공약 목록으로</a></div>';
+    return;
+  }
+
+  // Title
+  document.title = pledge.title + ' - 기호 7번 김민수';
+  document.getElementById('pledgeNumber').textContent = pledge.id;
+  document.getElementById('pledgeTitle').textContent = pledge.title;
+  document.getElementById('pledgeSubtitle').textContent = pledge.subtitle;
+
+  // 현황
+  const statusHtml = pledge.status.map(s =>
+    '<div class="stat-card fade-in">' +
+      '<div class="stat-value">' + s.value + '</div>' +
+      '<div class="stat-label">' + s.label + '</div>' +
+    '</div>'
+  ).join('');
+  document.getElementById('statusGrid').innerHTML = statusHtml;
+
+  // 문제점
+  const problemHtml = pledge.problems.map(p =>
+    '<div class="problem-item fade-in">' +
+      '<div class="problem-icon"><i class="fa-solid fa-xmark"></i></div>' +
+      '<div class="problem-text">' + p.text + '</div>' +
+    '</div>'
+  ).join('');
+  document.getElementById('problemList').innerHTML = problemHtml;
+
+  // 해결방안
+  const solutionHtml = pledge.solutions.map(s =>
+    '<div class="solution-card fade-in">' +
+      '<div class="solution-icon"><i class="fa-solid ' + s.icon + '"></i></div>' +
+      '<h3>' + s.title + '</h3>' +
+      '<p>' + s.desc + '</p>' +
+    '</div>'
+  ).join('');
+  document.getElementById('solutionGrid').innerHTML = solutionHtml;
+
+  // 기대효과
+  const effectHtml = pledge.effects.map(e =>
+    '<div class="effect-card fade-in">' +
+      '<div class="effect-icon"><i class="fa-solid fa-check"></i></div>' +
+      '<div class="effect-text">' + e.text + '</div>' +
+    '</div>'
+  ).join('');
+  document.getElementById('effectGrid').innerHTML = effectHtml;
+
+  // 로드맵
+  const roadmapHtml = pledge.roadmap.map(r =>
+    '<div class="roadmap-item fade-in">' +
+      '<span class="rm-period">' + r.period + '</span>' +
+      '<h3>' + r.title + '</h3>' +
+      '<p>' + r.desc + '</p>' +
+    '</div>'
+  ).join('');
+  document.getElementById('roadmap').innerHTML = roadmapHtml;
+
+  // Re-observe fade-in elements
+  document.querySelectorAll('.fade-in:not(.visible)').forEach(el => observer.observe(el));
+}
+
+/* ===== NAV SCROLL ===== */
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+/* ===== HAMBURGER ===== */
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('active');
+  mobileMenu.classList.toggle('open');
+});
+function closeMenu() {
+  hamburger.classList.remove('active');
+  mobileMenu.classList.remove('open');
+}
+
+/* ===== FADE-IN OBSERVER ===== */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+/* ===== INIT ===== */
+const pledgeId = getUrlParam('id') || '1';
+renderPledge(pledgeId);
+</script>
+</body>
+</html>
