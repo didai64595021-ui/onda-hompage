@@ -116,18 +116,41 @@ class NaverTalkTalkSender:
         self.fail_count = 0
         self.skip_count = 0
     
-    def create_driver(self, headless=False):
-        """Chrome 드라이버 생성"""
+    def create_driver(self, headless=False, mode="incognito"):
+        """Chrome 드라이버 생성
+        mode: 'incognito' = 시크릿모드 (쿠키 안 남음)
+              'fresh' = 매번 새 프로필 (완전 초기화)
+              'normal' = 일반모드
+        """
         opts = uc.ChromeOptions()
         if headless:
             opts.add_argument("--headless=new")
+        
+        if mode == "incognito":
+            opts.add_argument("--incognito")
+        elif mode == "fresh":
+            # 임시 프로필 디렉토리 → 매번 새 브라우저
+            import tempfile
+            self._temp_profile = tempfile.mkdtemp(prefix="naver_talk_")
+            opts.add_argument(f"--user-data-dir={self._temp_profile}")
+        
         opts.add_argument("--no-sandbox")
         opts.add_argument("--disable-dev-shm-usage")
         opts.add_argument("--window-size=480,960")
-        opts.add_argument("--user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)")
+        # 모바일 UA 제거 — 데스크톱으로 (모바일 UA가 크롬 꺼짐 원인 가능)
+        # opts.add_argument("--user-agent=...")  
+        
         self.driver = uc.Chrome(options=opts)
         self.driver.set_page_load_timeout(20)
+        self.log(f"🌐 Chrome 시작 (모드: {mode})")
         return self.driver
+    
+    def restart_driver(self, headless=False, mode="incognito"):
+        """Chrome 완전 재시작 — 크래시/꺼짐 방지"""
+        self.log("🔄 Chrome 재시작...")
+        self.close()
+        time.sleep(2)
+        return self.create_driver(headless=headless, mode=mode)
     
     def login_naver(self, username, password):
         """네이버 로그인"""
@@ -354,11 +377,22 @@ class SenderGUI:
         self.entry_per_account.insert(0, "50")
         self.entry_per_account.grid(row=0, column=3, padx=5)
         
+        ttk.Label(set_frame, text="Chrome 모드:").grid(row=1, column=0, pady=(8,0))
+        self.var_chrome_mode = tk.StringVar(value="incognito")
+        mode_frame = ttk.Frame(set_frame)
+        mode_frame.grid(row=1, column=1, columnspan=5, sticky='w', pady=(8,0))
+        ttk.Radiobutton(mode_frame, text="🕶️ 시크릿모드 (추천)", variable=self.var_chrome_mode, value="incognito").pack(side='left', padx=5)
+        ttk.Radiobutton(mode_frame, text="🆕 매번 새 프로필", variable=self.var_chrome_mode, value="fresh").pack(side='left', padx=5)
+        ttk.Radiobutton(mode_frame, text="📂 일반모드", variable=self.var_chrome_mode, value="normal").pack(side='left', padx=5)
+        
         self.var_headless = tk.BooleanVar(value=False)
-        ttk.Checkbutton(set_frame, text="헤드리스 모드", variable=self.var_headless).grid(row=0, column=4, padx=20)
+        ttk.Checkbutton(set_frame, text="헤드리스", variable=self.var_headless).grid(row=2, column=0, pady=(5,0), sticky='w')
         
         self.var_auto_tether = tk.BooleanVar(value=True)
-        ttk.Checkbutton(set_frame, text="자동 테더링 IP변경", variable=self.var_auto_tether).grid(row=0, column=5)
+        ttk.Checkbutton(set_frame, text="자동 테더링 IP변경", variable=self.var_auto_tether).grid(row=2, column=1, pady=(5,0), sticky='w')
+        
+        self.var_restart_chrome = tk.BooleanVar(value=True)
+        ttk.Checkbutton(set_frame, text="계정 교체 시 Chrome 재시작", variable=self.var_restart_chrome).grid(row=2, column=2, columnspan=2, pady=(5,0), sticky='w')
         
         # ── 탭2: 발송 실행 ──
         tab2 = ttk.Frame(notebook)

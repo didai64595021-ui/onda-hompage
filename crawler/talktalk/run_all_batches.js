@@ -6,14 +6,16 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const zlib = require('zlib');
+const {execSync} = require('child_process');
 
 const HISTORY_PATH = path.join(__dirname, '..', 'output', 'history.json');
 const BATCH_SIZE = 500;
 const UA_MOBILE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15';
 const UA_DESKTOP = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
-let SEARCH_DELAY = 600;
-let PLACE_DELAY = 1500;  // 429 방지 — 1.5초 시작
+let SEARCH_DELAY = 400;
+let PLACE_DELAY = 800;  // 429 0건이므로 속도 향상. 429 시 자동 증가.
 
 function cleanName(n) {
   return n.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/[^\w가-힣\s&().·-]/g,' ').replace(/\s+/g,' ').trim();
@@ -65,16 +67,19 @@ async function searchPlaceId(name, address) {
 }
 
 function checkTalkTalk(pid) {
-  return new Promise(async(resolve)=>{
-    const r=await httpsGet(`https://m.place.naver.com/place/${pid}`, UA_MOBILE);
-    if(r.status===429) return resolve({status:429,talktalk:false,talkUrl:'',talkId:''});
-    if(r.status!==200) return resolve({status:r.status,talktalk:false,talkUrl:'',talkId:''});
-    const match=r.data.match(/talktalkUrl"\s*:\s*"(http[^"]+)"/);
-    if(match){
-      const tidMatch=match[1].match(/talk\.naver\.com(?:\\u002F|\/)([a-zA-Z0-9]+)/);
-      resolve({status:200,talktalk:true,talkUrl:match[1].replace(/\\u002F/g,'/'),talkId:tidMatch?tidMatch[1]:''});
-    } else {
-      resolve({status:200,talktalk:false,talkUrl:'',talkId:''});
+  return new Promise((resolve)=>{
+    try{
+      const html=execSync(`curl -sL --compressed -m 10 "https://m.place.naver.com/place/${pid}" -H "User-Agent: ${UA_MOBILE}"`,{maxBuffer:5*1024*1024,timeout:15000}).toString();
+      if(html.length<500) return resolve({status:429,talktalk:false,talkUrl:'',talkId:''});
+      const match=html.match(/talktalkUrl"\s*:\s*"(http[^"]+)"/);
+      if(match){
+        const tidMatch=match[1].match(/talk\.naver\.com(?:\\u002F|\/)([a-zA-Z0-9]+)/);
+        resolve({status:200,talktalk:true,talkUrl:match[1].replace(/\\u002F/g,'/'),talkId:tidMatch?tidMatch[1]:''});
+      } else {
+        resolve({status:200,talktalk:false,talkUrl:'',talkId:''});
+      }
+    }catch(e){
+      resolve({status:0,talktalk:false,talkUrl:'',talkId:''});
     }
   });
 }
@@ -86,7 +91,20 @@ process.on('SIGTERM',()=>{stopping=true;console.log('🛑 SIGTERM');});
 process.on('SIGINT',()=>{stopping=true;});
 
 async function main() {
-  const history = JSON.parse(fs.readFileSync(HISTORY_PATH,'utf-8'));
+  let history;
+  try {
+    history = JSON.parse(fs.readFileSync(HISTORY_PATH,'utf-8'));
+  } catch(e) {
+    // history.json 깨짐 — 백업에서 복구 시도
+    const bak=HISTORY_PATH+'.bak';
+    if(fs.existsSync(bak)){
+      console.log('⚠️ history.json 깨짐 — 백업에서 복구');
+      history = JSON.parse(fs.readFileSync(bak,'utf-8'));
+    } else {
+      console.log('❌ history.json 깨짐, 백업 없음. 종료.');
+      process.exit(1);
+    }
+  }
   const allEntries = Object.entries(history.crawled);
   const totalBatches = Math.ceil(allEntries.length / BATCH_SIZE);
   
@@ -156,7 +174,7 @@ async function main() {
       
       // 100건마다 중간 저장+로그
       if((i+1)%100===0){
-        fs.writeFileSync(HISTORY_PATH,JSON.stringify(history,null,2));
+        fs.copyFileSync(HISTORY_PATH,HISTORY_PATH+".bak");fs.writeFileSync(HISTORY_PATH,JSON.stringify(history,null,2));
         const elapsed=((Date.now()-bStart)/60000).toFixed(1);
         console.log(`  [${i+1}/${entries.length}] O:${bO} X:${bX} ?:${bNoPlace} 429:${b429} | ${elapsed}분`);
       }
@@ -165,7 +183,7 @@ async function main() {
     }
     
     // 배치 완료 — 저장
-    fs.writeFileSync(HISTORY_PATH,JSON.stringify(history,null,2));
+    fs.copyFileSync(HISTORY_PATH,HISTORY_PATH+".bak");fs.writeFileSync(HISTORY_PATH,JSON.stringify(history,null,2));
     
     globalO+=bO; globalX+=bX; globalNoPlace+=bNoPlace; global429+=b429;
     const bElapsed=((Date.now()-bStart)/60000).toFixed(1);

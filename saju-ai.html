@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사주팔자 AI 운세 분석 | ONDA</title>
+<meta name="description" content="생년월일시로 알아보는 사주팔자 분석. 사주 원국, 오행 분포, 운세 해석을 제공합니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0f0f23;--surface:#1a1a2e;--card:#16213e;--border:#2a2a4a;
+  --accent:#6366f1;--accent2:#818cf8;--gold:#fbbf24;--gold2:#f59e0b;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --success:#22c55e;--danger:#ef4444;
+  --wood:#22c55e;--fire:#ef4444;--earth:#f59e0b;--metal:#e2e8f0;--water:#3b82f6;
+  --radius:16px;--radius-sm:10px;
+}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
+a{color:var(--accent2);text-decoration:none}
+.container{max-width:720px;margin:0 auto;padding:20px}
+
+/* Hero */
+.hero{text-align:center;padding:60px 20px 40px;background:linear-gradient(135deg,#0f0f23 0%,#1a1a3e 50%,#0f0f23 100%)}
+.hero h1{font-size:2.2rem;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+.hero p{color:var(--text2);font-size:1rem}
+.hero-icon{font-size:3rem;margin-bottom:16px;color:var(--gold)}
+
+/* Progress Bar */
+.progress-wrap{padding:0 20px;margin-bottom:24px}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:3px;transition:width .4s ease}
+.progress-label{display:flex;justify-content:space-between;margin-top:6px;font-size:.8rem;color:var(--text3)}
+
+/* Wizard Card */
+.wizard-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:32px 24px;margin:0 20px 24px;position:relative;overflow:hidden}
+.wizard-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--gold))}
+.step{display:none;animation:fadeIn .3s ease}
+.step.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.step-title{font-size:1.25rem;font-weight:700;margin-bottom:6px}
+.step-desc{color:var(--text2);font-size:.9rem;margin-bottom:20px}
+
+/* Option Buttons */
+.options{display:grid;gap:10px}
+.options.two-col{grid-template-columns:1fr 1fr}
+.options.three-col{grid-template-columns:1fr 1fr 1fr}
+.options.four-col{grid-template-columns:1fr 1fr 1fr 1fr}
+.opt-btn{
+  background:var(--surface);border:2px solid var(--border);border-radius:var(--radius-sm);
+  padding:14px 16px;min-height:48px;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:.95rem;color:var(--text);font-family:inherit;text-align:center
+}
+.opt-btn:hover{border-color:var(--accent);background:#1e1e3a}
+.opt-btn.selected{border-color:var(--accent);background:rgba(99,102,241,.15);color:var(--accent2)}
+.opt-btn i{font-size:1.1rem}
+
+/* Year Scroll */
+.year-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-height:300px;overflow-y:auto;padding-right:4px}
+.year-grid::-webkit-scrollbar{width:4px}
+.year-grid::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* Nav Buttons */
+.nav-btns{display:flex;gap:10px;margin-top:24px}
+.nav-btn{
+  flex:1;padding:14px;min-height:48px;border:none;border-radius:var(--radius-sm);
+  font-size:1rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s
+}
+.nav-btn.prev{background:var(--surface);color:var(--text2);border:1px solid var(--border)}
+.nav-btn.prev:hover{background:var(--border)}
+.nav-btn.next{background:linear-gradient(135deg,var(--accent),#4f46e5);color:#fff}
+.nav-btn.next:hover{opacity:.9}
+.nav-btn.next:disabled{opacity:.4;cursor:not-allowed}
+.nav-btn.analyze{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#0f0f23;font-weight:700}
+
+/* Result Section */
+#result{display:none;padding:0 20px}
+.result-header{text-align:center;padding:32px 0 24px}
+.result-header h2{font-size:1.5rem;font-weight:700;color:var(--gold)}
+
+.saju-table{width:100%;border-collapse:collapse;margin-bottom:24px;border-radius:var(--radius);overflow:hidden}
+.saju-table th,.saju-table td{padding:14px 8px;text-align:center;border:1px solid var(--border)}
+.saju-table th{background:var(--surface);color:var(--gold);font-size:.85rem;font-weight:500}
+.saju-table td{background:var(--card);font-size:1.3rem;font-weight:700}
+.saju-table .label-row td{font-size:.75rem;color:var(--text2);padding:6px;font-weight:400}
+
+/* Five Elements Chart */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px}
+.chart-card h3{font-size:1.1rem;margin-bottom:16px;color:var(--text)}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.bar-label{width:40px;font-size:.85rem;font-weight:600;text-align:right;flex-shrink:0}
+.bar-track{flex:1;height:24px;background:var(--surface);border-radius:12px;overflow:hidden}
+.bar-fill{height:100%;border-radius:12px;transition:width .6s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:.75rem;font-weight:700;color:#fff;min-width:30px}
+.bar-fill.wood{background:linear-gradient(90deg,#16a34a,#22c55e)}
+.bar-fill.fire{background:linear-gradient(90deg,#dc2626,#ef4444)}
+.bar-fill.earth{background:linear-gradient(90deg,#d97706,#f59e0b)}
+.bar-fill.metal{background:linear-gradient(90deg,#9ca3af,#e5e7eb)}
+.bar-fill.water{background:linear-gradient(90deg,#2563eb,#3b82f6)}
+
+/* Interpretation */
+.interp-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px}
+.interp-card h3{font-size:1.1rem;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.interp-card h3 i{color:var(--gold)}
+.interp-text{color:var(--text2);font-size:.9rem;line-height:1.8}
+.interp-text strong{color:var(--text);font-weight:600}
+
+.retry-btn{
+  display:block;width:100%;padding:16px;margin:24px 0;border:none;border-radius:var(--radius-sm);
+  background:var(--surface);color:var(--accent2);font-size:1rem;font-weight:600;
+  cursor:pointer;font-family:inherit;border:1px solid var(--border)
+}
+.retry-btn:hover{background:var(--border)}
+
+/* Education Section */
+.edu-section{padding:40px 20px 60px}
+.edu-section h2{font-size:1.3rem;font-weight:700;text-align:center;margin-bottom:24px;color:var(--gold)}
+.edu-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.edu-card h3{font-size:1rem;font-weight:600;margin-bottom:10px;color:var(--accent2)}
+.edu-card p,.edu-card li{font-size:.85rem;color:var(--text2);line-height:1.7}
+.edu-card ul{padding-left:18px}
+
+.ref-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.8rem}
+.ref-table th,.ref-table td{padding:8px 6px;text-align:center;border:1px solid var(--border)}
+.ref-table th{background:var(--surface);color:var(--gold);font-weight:500}
+.ref-table td{color:var(--text2)}
+
+/* Accordion */
+.acc-item{border-bottom:1px solid var(--border)}
+.acc-btn{
+  width:100%;background:none;border:none;padding:14px 0;text-align:left;
+  color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;
+  font-family:inherit;display:flex;justify-content:space-between;align-items:center
+}
+.acc-btn i{transition:transform .3s;color:var(--text3)}
+.acc-btn.open i{transform:rotate(180deg)}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.acc-body-inner{padding:0 0 14px;font-size:.85rem;color:var(--text2);line-height:1.7}
+
+/* Footer */
+.footer{text-align:center;padding:30px 20px;color:var(--text3);font-size:.8rem;border-top:1px solid var(--border)}
+
+/* Responsive */
+@media(max-width:640px){
+  .hero h1{font-size:1.7rem}
+  .hero{padding:40px 16px 28px}
+  .wizard-card{margin:0 12px 20px;padding:24px 16px}
+  .options.four-col{grid-template-columns:1fr 1fr 1fr}
+  .year-grid{grid-template-columns:repeat(3,1fr)}
+  .saju-table td{font-size:1.1rem;padding:10px 4px}
+  .container{padding:16px}
+}
+@media(min-width:641px) and (max-width:1024px){
+  .container{max-width:680px}
+}
+@media(min-width:1025px){
+  .container{max-width:720px}
+  .hero h1{font-size:2.5rem}
+}
+
+/* Loading animation */
+.loading-overlay{
+  position:fixed;inset:0;background:rgba(15,15,35,.9);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;z-index:100;gap:20px
+}
+.loading-overlay .spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-overlay p{color:var(--gold);font-size:1rem;font-weight:500}
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-icon"><i class="fas fa-yin-yang fa-spin" style="animation-duration:8s"></i></div>
+  <h1>사주팔자 AI 분석</h1>
+  <p>생년월일시로 알아보는 나의 타고난 운명</p>
+</div>
+
+<!-- Wizard -->
+<div id="wizard">
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:14.28%"></div></div>
+    <div class="progress-label"><span id="stepLabel">1 / 7</span><span id="stepName">달력 선택</span></div>
+  </div>
+
+  <div class="wizard-card">
+    <!-- Step 1: Calendar Type -->
+    <div class="step active" data-step="1">
+      <div class="step-title">달력 유형 선택</div>
+      <div class="step-desc">양력과 음력 중 선택하세요</div>
+      <div class="options two-col">
+        <button class="opt-btn" data-field="calendar" data-value="solar"><i class="fas fa-sun"></i> 양력</button>
+        <button class="opt-btn" data-field="calendar" data-value="lunar"><i class="fas fa-moon"></i> 음력</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Year -->
+    <div class="step" data-step="2">
+      <div class="step-title">출생 연도</div>
+      <div class="step-desc">태어난 해를 선택하세요</div>
+      <div class="options year-grid" id="yearGrid"></div>
+    </div>
+
+    <!-- Step 3: Month -->
+    <div class="step" data-step="3">
+      <div class="step-title">출생 월</div>
+      <div class="step-desc">태어난 달을 선택하세요</div>
+      <div class="options four-col" id="monthGrid"></div>
+    </div>
+
+    <!-- Step 4: Day -->
+    <div class="step" data-step="4">
+      <div class="step-title">출생 일</div>
+      <div class="step-desc">태어난 날을 선택하세요</div>
+      <div class="options" id="dayGrid" style="grid-template-columns:repeat(7,1fr)"></div>
+    </div>
+
+    <!-- Step 5: Hour -->
+    <div class="step" data-step="5">
+      <div class="step-title">출생 시간</div>
+      <div class="step-desc">태어난 시간대를 선택하세요 (12시진)</div>
+      <div class="options three-col" id="hourGrid"></div>
+    </div>
+
+    <!-- Step 6: Gender -->
+    <div class="step" data-step="6">
+      <div class="step-title">성별</div>
+      <div class="step-desc">성별을 선택하세요</div>
+      <div class="options two-col">
+        <button class="opt-btn" data-field="gender" data-value="male"><i class="fas fa-mars"></i> 남성</button>
+        <button class="opt-btn" data-field="gender" data-value="female"><i class="fas fa-venus"></i> 여성</button>
+      </div>
+    </div>
+
+    <!-- Step 7: Analysis Type -->
+    <div class="step" data-step="7">
+      <div class="step-title">분석 유형</div>
+      <div class="step-desc">원하는 분석을 선택하세요</div>
+      <div class="options two-col">
+        <button class="opt-btn" data-field="type" data-value="basic"><i class="fas fa-scroll"></i> 기본 사주</button>
+        <button class="opt-btn" data-field="type" data-value="love"><i class="fas fa-heart"></i> 연애운</button>
+        <button class="opt-btn" data-field="type" data-value="career"><i class="fas fa-briefcase"></i> 직업운</button>
+        <button class="opt-btn" data-field="type" data-value="wealth"><i class="fas fa-coins"></i> 재물운</button>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-btns">
+      <button class="nav-btn prev" id="prevBtn" style="display:none" onclick="prevStep()"><i class="fas fa-arrow-left"></i> 이전</button>
+      <button class="nav-btn next" id="nextBtn" disabled onclick="nextStep()">다음 <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- Result -->
+<div id="result" class="container"></div>
+
+<!-- Education Content -->
+<div class="edu-section container" id="eduSection">
+  <h2><i class="fas fa-book-open"></i> 사주팔자 알아보기</h2>
+
+  <div class="edu-card">
+    <h3><i class="fas fa-info-circle"></i> 사주팔자란?</h3>
+    <p>사주(四柱)는 태어난 연·월·일·시의 네 기둥을 뜻하며, 각 기둥은 천간(天干)과 지지(地支) 두 글자로 이루어져 총 여덟 글자, 곧 팔자(八字)입니다. 동양 철학에서 개인의 타고난 기질과 운명의 흐름을 파악하는 데 활용합니다.</p>
+  </div>
+
+  <div class="edu-card">
+    <h3><i class="fas fa-circle-half-stroke"></i> 천간(天干) 10개</h3>
+    <table class="ref-table">
+      <tr><th>천간</th><th>갑</th><th>을</th><th>병</th><th>정</th><th>무</th><th>기</th><th>경</th><th>신</th><th>임</th><th>계</th></tr>
+      <tr><td>오행</td><td colspan="2">목(木)</td><td colspan="2">화(火)</td><td colspan="2">토(土)</td><td colspan="2">금(金)</td><td colspan="2">수(水)</td></tr>
+      <tr><td>음양</td><td>양</td><td>음</td><td>양</td><td>음</td><td>양</td><td>음</td><td>양</td><td>음</td><td>양</td><td>음</td></tr>
+    </table>
+  </div>
+
+  <div class="edu-card">
+    <h3><i class="fas fa-clock"></i> 지지(地支) 12개</h3>
+    <table class="ref-table">
+      <tr><th>지지</th><th>자</th><th>축</th><th>인</th><th>묘</th><th>진</th><th>사</th><th>오</th><th>미</th><th>신</th><th>유</th><th>술</th><th>해</th></tr>
+      <tr><td>띠</td><td>쥐</td><td>소</td><td>호랑이</td><td>토끼</td><td>용</td><td>뱀</td><td>말</td><td>양</td><td>원숭이</td><td>닭</td><td>개</td><td>돼지</td></tr>
+      <tr><td>시간</td><td>23~01</td><td>01~03</td><td>03~05</td><td>05~07</td><td>07~09</td><td>09~11</td><td>11~13</td><td>13~15</td><td>15~17</td><td>17~19</td><td>19~21</td><td>21~23</td></tr>
+    </table>
+  </div>
+
+  <div class="edu-card">
+    <h3><i class="fas fa-arrows-spin"></i> 오행 상생·상극</h3>
+    <ul>
+      <li><strong>상생:</strong> 목→화→토→금→수→목 (서로 돕는 관계)</li>
+      <li><strong>상극:</strong> 목→토→수→화→금→목 (서로 억제하는 관계)</li>
+    </ul>
+    <p style="margin-top:8px">오행의 균형이 조화를 이루면 길(吉), 한쪽으로 치우치면 보완이 필요합니다.</p>
+  </div>
+
+  <div class="edu-card">
+    <h3><i class="fas fa-users"></i> 십신(十神) 간략표</h3>
+    <table class="ref-table">
+      <tr><th>관계</th><th>양</th><th>음</th><th>의미</th></tr>
+      <tr><td>나와 같음</td><td>비견</td><td>겁재</td><td>형제, 동료, 경쟁</td></tr>
+      <tr><td>내가 생함</td><td>식신</td><td>상관</td><td>표현력, 재능</td></tr>
+      <tr><td>내가 극함</td><td>편재</td><td>정재</td><td>재물, 아버지</td></tr>
+      <tr><td>나를 극함</td><td>편관</td><td>정관</td><td>직장, 규율</td></tr>
+      <tr><td>나를 생함</td><td>편인</td><td>정인</td><td>학문, 어머니</td></tr>
+    </table>
+  </div>
+
+  <!-- FAQ Accordion -->
+  <div class="edu-card" style="padding:0">
+    <div style="padding:20px 20px 0"><h3><i class="fas fa-circle-question"></i> 자주 묻는 질문</h3></div>
+    <div class="acc-item" style="padding:0 20px">
+      <button class="acc-btn" onclick="toggleAcc(this)">사주는 과학적인가요? <i class="fas fa-chevron-down"></i></button>
+      <div class="acc-body"><div class="acc-body-inner">사주명리학은 과학이 아닌 동양 철학·통계 체계입니다. 수천 년간 축적된 경험적 패턴을 기반으로 하며, 참고용으로 활용하는 것이 바람직합니다.</div></div>
+    </div>
+    <div class="acc-item" style="padding:0 20px">
+      <button class="acc-btn" onclick="toggleAcc(this)">시간을 모르면 어떻게 하나요? <i class="fas fa-chevron-down"></i></button>
+      <div class="acc-body"><div class="acc-body-inner">시간을 모를 경우 '모름'을 선택하면 연주·월주·일주 3주만으로 분석합니다. 정확도는 다소 낮아지지만 기본적인 성격과 운세 파악은 가능합니다.</div></div>
+    </div>
+    <div class="acc-item" style="padding:0 20px">
+      <button class="acc-btn" onclick="toggleAcc(this)">양력과 음력 중 어떤 걸 써야 하나요? <i class="fas fa-chevron-down"></i></button>
+      <div class="acc-body"><div class="acc-body-inner">만세력 기준으로는 양력이 정확합니다. 음력 생일만 아는 경우 음력을 선택하면 자동으로 양력 변환 없이 해당 날짜로 계산합니다.</div></div>
+    </div>
+    <div class="acc-item" style="padding:0 20px">
+      <button class="acc-btn" onclick="toggleAcc(this)">같은 사주를 가진 사람은 같은 운명인가요? <i class="fas fa-chevron-down"></i></button>
+      <div class="acc-body"><div class="acc-body-inner">사주는 동일하더라도 성장 환경, 선택, 노력에 따라 삶은 전혀 달라집니다. 사주는 타고난 '기질'과 '흐름'을 보여줄 뿐, 결정론이 아닙니다.</div></div>
+    </div>
+    <div class="acc-item" style="padding:0 20px">
+      <button class="acc-btn" onclick="toggleAcc(this)">이 분석 결과를 어디까지 신뢰해야 하나요? <i class="fas fa-chevron-down"></i></button>
+      <div class="acc-body"><div class="acc-body-inner">본 서비스는 포트폴리오 목적의 간이 분석입니다. 전문 상담을 대체하지 않으며, 재미와 참고용으로 활용해 주세요.</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <p>© 2026 ONDA Marketing · 포트폴리오 목적으로 제작</p>
+  <p style="margin-top:4px">본 분석은 참고용이며 전문 역학 상담을 대체하지 않습니다.</p>
+</div>
+
+<script>
+// ===== Data =====
+const 천간 = ['갑','을','병','정','무','기','경','신','임','계'];
+const 지지 = ['자','축','인','묘','진','사','오','미','신','유','술','해'];
+const 천간행 = ['목','목','화','화','토','토','금','금','수','수'];
+const 지지행 = ['수','토','목','목','토','화','화','토','금','금','토','수'];
+const 행색 = {목:'wood',화:'fire',토:'earth',금:'metal',수:'water'};
+const 행한 = {목:'木',화:'火',토:'土',금:'金',수:'水'};
+const 띠명 = ['쥐','소','호랑이','토끼','용','뱀','말','양','원숭이','닭','개','돼지'];
+const 시진명 = ['자시(23~01)','축시(01~03)','인시(03~05)','묘시(05~07)','진시(07~09)','사시(09~11)','오시(11~13)','미시(13~15)','신시(15~17)','유시(17~19)','술시(19~21)','해시(21~23)'];
+const 월건표 = [[2,3,4,5,6,7,8,9,0,1],[2,3,4,5,6,7,8,9,0,1]]; // 둔간법 시작 인덱스
+const stepNames = ['달력 선택','연도 선택','월 선택','일 선택','시간 선택','성별 선택','분석 유형'];
+
+// ===== State =====
+let current = 1;
+const data = {calendar:null,year:null,month:null,day:null,hour:null,gender:null,type:null};
+
+// ===== Init Grids =====
+function initGrids(){
+  // Years
+  const yg = document.getElementById('yearGrid');
+  const curYear = 2026;
+  for(let y=curYear;y>=1940;y--){
+    const b = document.createElement('button');
+    b.className='opt-btn';b.dataset.field='year';b.dataset.value=y;
+    b.textContent=y+'년';
+    yg.appendChild(b);
+  }
+  // Months
+  const mg = document.getElementById('monthGrid');
+  for(let m=1;m<=12;m++){
+    const b = document.createElement('button');
+    b.className='opt-btn';b.dataset.field='month';b.dataset.value=m;
+    b.textContent=m+'월';
+    mg.appendChild(b);
+  }
+  // Hours
+  const hg = document.getElementById('hourGrid');
+  시진명.forEach((name,i)=>{
+    const b = document.createElement('button');
+    b.className='opt-btn';b.dataset.field='hour';b.dataset.value=i;
+    b.textContent=name;
+    hg.appendChild(b);
+  });
+  const ub = document.createElement('button');
+  ub.className='opt-btn';ub.dataset.field='hour';ub.dataset.value='-1';
+  ub.innerHTML='<i class="fas fa-question"></i> 모름';
+  hg.appendChild(ub);
+}
+
+function buildDayGrid(){
+  const dg = document.getElementById('dayGrid');
+  dg.innerHTML='';
+  let maxDay = 31;
+  if(data.month){
+    const m = parseInt(data.month);
+    if([4,6,9,11].includes(m)) maxDay=30;
+    else if(m===2){
+      const y = parseInt(data.year)||2000;
+      maxDay = (y%4===0 && (y%100!==0||y%400===0))?29:28;
+    }
+  }
+  for(let d=1;d<=maxDay;d++){
+    const b = document.createElement('button');
+    b.className='opt-btn';b.dataset.field='day';b.dataset.value=d;
+    b.textContent=d;b.style.padding='10px 4px';b.style.fontSize='.85rem';b.style.minHeight='40px';
+    dg.appendChild(b);
+  }
+  bindOptions();
+}
+
+// ===== Option Click =====
+function bindOptions(){
+  document.querySelectorAll('.opt-btn').forEach(btn=>{
+    btn.onclick=function(){
+      const field=this.dataset.field, val=this.dataset.value;
+      if(!field) return;
+      data[field]=val;
+      // Visual
+      this.closest('.options').querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));
+      this.classList.add('selected');
+      updateNav();
+    };
+  });
+}
+
+// ===== Navigation =====
+function updateNav(){
+  const fields = ['calendar','year','month','day','hour','gender','type'];
+  const field = fields[current-1];
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.disabled = !data[field];
+  document.getElementById('prevBtn').style.display = current>1?'block':'none';
+  // Update button text for last step
+  if(current===7){
+    nextBtn.innerHTML='<i class="fas fa-magic"></i> 분석 시작';
+    nextBtn.className='nav-btn next analyze';
+  } else {
+    nextBtn.innerHTML='다음 <i class="fas fa-arrow-right"></i>';
+    nextBtn.className='nav-btn next';
+  }
+}
+
+function showStep(n){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.querySelector(`.step[data-step="${n}"]`).classList.add('active');
+  document.getElementById('progressFill').style.width=((n/7)*100)+'%';
+  document.getElementById('stepLabel').textContent=n+' / 7';
+  document.getElementById('stepName').textContent=stepNames[n-1];
+  current=n;
+  if(n===4) buildDayGrid();
+  updateNav();
+}
+
+function nextStep(){
+  if(current===7){analyze();return}
+  showStep(current+1);
+}
+function prevStep(){if(current>1) showStep(current-1)}
+
+// ===== Saju Calculation =====
+function calcSaju(){
+  const year = parseInt(data.year);
+  const month = parseInt(data.month);
+  const day = parseInt(data.day);
+  const hour = parseInt(data.hour);
+
+  // 연주: (year - 4) % 60
+  const ygIdx = ((year-4)%60+60)%60;
+  const yGan = ygIdx%10;
+  const yJi = ygIdx%12;
+
+  // 월주: 둔간법
+  // 연간 기준 월 천간 시작값
+  const 월간시작 = [2,4,6,8,0]; // 갑기→병인, 을경→무인, 병신→경인, 정임→임인, 무계→갑인
+  const ganGroup = yGan%5;
+  const mGan = (월간시작[ganGroup] + (month-1))%10;
+  const mJi = (month+1)%12; // 1월=인(2), 2월=묘(3)...
+
+  // 일주: 기준일 1900-01-31 = 갑자일(0)
+  const baseDate = new Date(1900,0,31);
+  const targetDate = new Date(year, month-1, day);
+  const diffDays = Math.round((targetDate - baseDate)/(1000*60*60*24));
+  const dIdx = ((diffDays%60)+60)%60;
+  const dGan = dIdx%10;
+  const dJi = dIdx%12;
+
+  // 시주
+  let hGan=null, hJi=null;
+  if(hour>=0){
+    hJi = hour; // 자=0, 축=1, ...
+    // 시간 둔간법: 일간 기준
+    const 시간시작 = [0,2,4,6,8]; // 갑기→갑자, 을경→병자, 병신→무자, 정임→경자, 무계→임자
+    const dGanGroup = dGan%5;
+    hGan = (시간시작[dGanGroup] + hour)%10;
+  }
+
+  return {yGan,yJi,mGan,mJi:((month+1)%12),dGan,dJi,hGan,hJi,year};
+}
+
+function getElement(ganIdx){return 천간행[ganIdx]}
+function getJiElement(jiIdx){return 지지행[jiIdx]}
+
+// ===== Five Elements Count =====
+function countElements(saju){
+  const count={목:0,화:0,토:0,금:0,수:0};
+  count[천간행[saju.yGan]]++;
+  count[지지행[saju.yJi]]++;
+  count[천간행[saju.mGan]]++;
+  count[지지행[saju.mJi]]++;
+  count[천간행[saju.dGan]]++;
+  count[지지행[saju.dJi]]++;
+  if(saju.hGan!==null){
+    count[천간행[saju.hGan]]++;
+    count[지지행[saju.hJi]]++;
+  }
+  return count;
+}
+
+// ===== Interpretation =====
+function interpret(saju, elCount){
+  const 일간 = 천간[saju.dGan];
+  const 일간행 = 천간행[saju.dGan];
+  const 띠 = 띠명[saju.yJi];
+  const gender = data.gender==='male'?'남성':'여성';
+
+  // 일간 성격
+  const 일간성격 = {
+    갑:'큰 나무처럼 곧고 정의로운 성품을 지녔습니다. 리더십이 강하고 진취적입니다.',
+    을:'풀과 꽃처럼 유연하고 적응력이 뛰어납니다. 섬세하고 예술적 감성이 있습니다.',
+    병:'태양처럼 밝고 열정적입니다. 활발하고 사교적이며 긍정적 에너지가 넘칩니다.',
+    정:'촛불처럼 은은하고 따뜻합니다. 사려 깊고 배려심이 깊습니다.',
+    무:'큰 산처럼 묵직하고 신뢰감을 줍니다. 안정적이고 포용력이 큽니다.',
+    기:'비옥한 땅처럼 온화하고 다정합니다. 실용적이고 현실 감각이 뛰어납니다.',
+    경:'강철처럼 강인하고 결단력이 있습니다. 의리가 있고 원칙을 중시합니다.',
+    신:'보석처럼 섬세하고 완벽을 추구합니다. 심미안이 있고 분석적입니다.',
+    임:'큰 강처럼 지혜롭고 포용적입니다. 창의적이고 자유로운 영혼입니다.',
+    계:'이슬비처럼 섬세하고 감성적입니다. 직관력이 뛰어나고 영감이 풍부합니다.'
+  };
+
+  // 강한 오행 찾기
+  let maxE='', maxV=0;
+  for(const [k,v] of Object.entries(elCount)){if(v>maxV){maxV=v;maxE=k}}
+
+  const 행운세 = {
+    목:'성장과 발전의 기운이 강합니다. 새로운 시작, 도전에 유리하며 교육·창작 분야에서 두각을 나타낼 수 있습니다.',
+    화:'열정과 명예의 기운이 강합니다. 표현력이 뛰어나고 사람들에게 영향력을 줄 수 있는 분야가 유리합니다.',
+    토:'안정과 신뢰의 기운이 강합니다. 부동산, 중개, 관리 등 사람과 사물을 연결하는 역할이 어울립니다.',
+    금:'결단과 실행의 기운이 강합니다. 금융, 법률, 기술 등 정밀하고 체계적인 분야에서 능력을 발휘합니다.',
+    수:'지혜와 소통의 기운이 강합니다. 연구, 기획, 외교 등 유연한 사고가 필요한 분야가 적합합니다.'
+  };
+
+  // 부족한 오행
+  let minE='',minV=99;
+  for(const [k,v] of Object.entries(elCount)){if(v<minV){minV=v;minE=k}}
+  const 보완조언 = {
+    목:'녹색 계열 색상을 활용하고, 동쪽 방향이 유리합니다. 나무 소재 인테리어가 도움됩니다.',
+    화:'붉은색 계열을 활용하고, 남쪽 방향이 유리합니다. 활발한 사회활동이 보완에 도움됩니다.',
+    토:'노란색·갈색 계열을 활용하고, 중앙이 유리합니다. 안정적 환경 조성이 좋습니다.',
+    금:'흰색·금색 계열을 활용하고, 서쪽 방향이 유리합니다. 규칙적 생활이 도움됩니다.',
+    수:'검정·파랑 계열을 활용하고, 북쪽 방향이 유리합니다. 명상이나 독서가 도움됩니다.'
+  };
+
+  // 분석유형별 추가 문구
+  const typeTexts = {
+    basic:'',
+    love: `\n\n<strong>💕 연애운:</strong> ${일간행==='화'||일간행==='목'?'감정 표현이 솔직하고 로맨틱한 타입입니다. 상대방에게 먼저 다가가는 편이며, 열정적인 연애를 합니다.':'감정을 내면에 간직하는 편이지만, 한번 마음을 열면 깊고 진실한 사랑을 합니다. 신뢰를 바탕으로 한 안정적 관계가 어울립니다.'}`,
+    career: `\n\n<strong>💼 직업운:</strong> ${행운세[maxE]} 특히 ${일간행==='목'?'교육, 출판, 환경':일간행==='화'?'미디어, 엔터, 마케팅':일간행==='토'?'건설, 부동산, 요식업':일간행==='금'?'금융, IT, 법률':'연구, 무역, 물류'} 분야가 유망합니다.`,
+    wealth: `\n\n<strong>💰 재물운:</strong> ${maxE==='금'||maxE==='토'?'재물 축적 능력이 뛰어나며 안정적으로 자산을 불려갈 수 있는 사주입니다. 투자보다는 저축과 꾸준한 수입에 강점이 있습니다.':'창의적 아이디어나 인적 네트워크를 통해 재물이 들어오는 구조입니다. 유동적 수입이 많을 수 있으며, 재테크 공부가 도움됩니다.'}`
+  };
+
+  return {
+    summary: `${data.year}년생 ${gender} · ${띠}띠 · 일간 ${일간}(${행한[일간행]})`,
+    personality: 일간성격[일간],
+    mainElement: `가장 강한 오행은 <strong>${maxE}(${행한[maxE]})</strong>입니다. ${행운세[maxE]}`,
+    supplement: `부족한 오행은 <strong>${minE}(${행한[minE]})</strong>입니다. ${보완조언[minE]}`,
+    typeExtra: typeTexts[data.type]||''
+  };
+}
+
+// ===== Render Result =====
+function analyze(){
+  // Show loading
+  const overlay = document.createElement('div');
+  overlay.className='loading-overlay';
+  overlay.innerHTML='<div class="spinner"></div><p>사주 분석 중...</p>';
+  document.body.appendChild(overlay);
+
+  setTimeout(()=>{
+    overlay.remove();
+    const saju = calcSaju();
+    const elCount = countElements(saju);
+    const interp = interpret(saju, elCount);
+
+    document.getElementById('wizard').style.display='none';
+    const r = document.getElementById('result');
+    r.style.display='block';
+
+    const hasTime = saju.hGan!==null;
+    const total = hasTime?8:6;
+    const maxEl = Math.max(...Object.values(elCount));
+
+    r.innerHTML=`
+      <div class="result-header">
+        <div style="font-size:2rem;margin-bottom:8px"><i class="fas fa-yin-yang" style="color:var(--gold)"></i></div>
+        <h2>사주 분석 결과</h2>
+        <p style="color:var(--text2);margin-top:6px">${interp.summary}</p>
+      </div>
+
+      <table class="saju-table">
+        <tr><th>구분</th><th>시주(時)</th><th>일주(日)</th><th>월주(月)</th><th>연주(年)</th></tr>
+        <tr>
+          <td style="font-size:.8rem;color:var(--text2)">천간</td>
+          <td style="color:var(--${hasTime?행색[천간행[saju.hGan]]:'text3'})">${hasTime?천간[saju.hGan]:'—'}</td>
+          <td style="color:var(--${행색[천간행[saju.dGan]]})">${천간[saju.dGan]}</td>
+          <td style="color:var(--${행색[천간행[saju.mGan]]})">${천간[saju.mGan]}</td>
+          <td style="color:var(--${행색[천간행[saju.yGan]]})">${천간[saju.yGan]}</td>
+        </tr>
+        <tr>
+          <td style="font-size:.8rem;color:var(--text2)">지지</td>
+          <td style="color:var(--${hasTime?행색[지지행[saju.hJi]]:'text3'})">${hasTime?지지[saju.hJi]:'—'}</td>
+          <td style="color:var(--${행색[지지행[saju.dJi]]})">${지지[saju.dJi]}</td>
+          <td style="color:var(--${행색[지지행[saju.mJi]]})">${지지[saju.mJi]}</td>
+          <td style="color:var(--${행색[지지행[saju.yJi]]})">${지지[saju.yJi]}</td>
+        </tr>
+        <tr class="label-row">
+          <td>오행</td>
+          <td>${hasTime?행한[천간행[saju.hGan]]+'/'+행한[지지행[saju.hJi]]:'—'}</td>
+          <td>${행한[천간행[saju.dGan]]}/${행한[지지행[saju.dJi]]}</td>
+          <td>${행한[천간행[saju.mGan]]}/${행한[지지행[saju.mJi]]}</td>
+          <td>${행한[천간행[saju.yGan]]}/${행한[지지행[saju.yJi]]}</td>
+        </tr>
+      </table>
+
+      <div class="chart-card">
+        <h3><i class="fas fa-chart-bar" style="color:var(--gold)"></i> 오행 분포</h3>
+        ${['목','화','토','금','수'].map(e=>{
+          const pct = maxEl>0?Math.round((elCount[e]/total)*100):0;
+          return `<div class="bar-row">
+            <span class="bar-label">${행한[e]} ${e}</span>
+            <div class="bar-track"><div class="bar-fill ${행색[e]}" style="width:${pct}%">${elCount[e]}</div></div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <div class="interp-card">
+        <h3><i class="fas fa-user"></i> 일간 성격</h3>
+        <div class="interp-text">${interp.personality}</div>
+      </div>
+
+      <div class="interp-card">
+        <h3><i class="fas fa-star"></i> 오행 분석</h3>
+        <div class="interp-text">${interp.mainElement}<br><br>${interp.supplement}${interp.typeExtra}</div>
+      </div>
+
+      <button class="retry-btn" onclick="resetWizard()"><i class="fas fa-redo"></i> 다시 분석하기</button>
+    `;
+
+    window.scrollTo({top:0,behavior:'smooth'});
+  }, 1500);
+}
+
+function resetWizard(){
+  Object.keys(data).forEach(k=>data[k]=null);
+  document.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('wizard').style.display='block';
+  document.getElementById('result').style.display='none';
+  showStep(1);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ===== Accordion =====
+function toggleAcc(btn){
+  const body = btn.nextElementSibling;
+  const isOpen = btn.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.acc-btn').forEach(b=>{b.classList.remove('open');b.nextElementSibling.style.maxHeight='0'});
+  if(!isOpen){btn.classList.add('open');body.style.maxHeight=body.scrollHeight+'px'}
+}
+
+// ===== Init =====
+initGrids();
+bindOptions();
+updateNav();
+</script>
+</body>
+</html>
