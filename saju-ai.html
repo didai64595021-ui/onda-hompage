@@ -168,6 +168,75 @@ a{color:var(--accent2);text-decoration:none}
 .loading-overlay .spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-overlay p{color:var(--gold);font-size:1rem;font-weight:500}
+
+/* Sample Section */
+#sampleResult{padding:0 20px;max-width:720px;margin:0 auto}
+.sample-banner{
+  text-align:center;padding:20px;margin-bottom:24px;
+  background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(251,191,36,.1));
+  border:1px solid var(--accent);border-radius:var(--radius);position:relative
+}
+.sample-banner h2{font-size:1.2rem;color:var(--gold);margin-bottom:4px}
+.sample-banner p{font-size:.85rem;color:var(--text2)}
+.sample-badge{
+  display:inline-block;background:var(--accent);color:#fff;font-size:.7rem;
+  padding:3px 10px;border-radius:20px;font-weight:600;margin-bottom:8px
+}
+
+/* Sipsin */
+.sipsin-tag{
+  display:inline-block;padding:4px 10px;border-radius:6px;font-size:.8rem;font-weight:600;margin:2px
+}
+.sipsin-비겁{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
+.sipsin-식상{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+.sipsin-재성{background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3)}
+.sipsin-관성{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+.sipsin-인성{background:rgba(168,85,247,.15);color:#c084fc;border:1px solid rgba(168,85,247,.3)}
+
+/* Sipsin Table */
+.sipsin-table{width:100%;border-collapse:collapse;margin-top:12px}
+.sipsin-table th,.sipsin-table td{padding:10px 8px;text-align:center;border:1px solid var(--border);font-size:.85rem}
+.sipsin-table th{background:var(--surface);color:var(--gold);font-weight:500}
+
+/* 12운성 Grid */
+.uns-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.uns-item{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:12px 8px;text-align:center
+}
+.uns-item .label{font-size:.75rem;color:var(--text3);margin-bottom:4px}
+.uns-item .uns-name{font-size:.85rem;font-weight:700}
+.uns-strong{color:#22c55e}
+.uns-medium{color:#fbbf24}
+.uns-weak{color:#ef4444}
+
+/* Timeline */
+.timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:640px){.timeline{grid-template-columns:repeat(2,1fr)}.uns-grid{grid-template-columns:repeat(2,1fr)}}
+.tl-item{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:14px 12px;text-align:center;position:relative
+}
+.tl-item .age{font-size:.75rem;color:var(--text3);margin-bottom:4px}
+.tl-item .ganji{font-size:1.1rem;font-weight:700;color:var(--accent2)}
+.tl-item.current{border-color:var(--gold);background:rgba(251,191,36,.08)}
+.tl-item.current::after{
+  content:'현재';position:absolute;top:-8px;right:8px;background:var(--gold);color:#0f0f23;
+  font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:700
+}
+
+/* Fortune Cards */
+.fortune-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.fortune-grid{grid-template-columns:1fr}}
+.fortune-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:16px
+}
+.fortune-card h4{font-size:.9rem;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.fortune-card p{font-size:.82rem;color:var(--text2);line-height:1.7}
+.fortune-score{display:flex;gap:3px;margin-bottom:8px}
+.fortune-dot{width:8px;height:8px;border-radius:50%;background:var(--border)}
+.fortune-dot.active{background:var(--gold)}
 </style>
 </head>
 <body>
@@ -254,6 +323,9 @@ a{color:var(--accent2);text-decoration:none}
     </div>
   </div>
 </div>
+
+<!-- Sample Result -->
+<div id="sampleResult" class="container"></div>
 
 <!-- Result -->
 <div id="result" class="container"></div>
@@ -592,6 +664,7 @@ function analyze(){
     const interp = interpret(saju, elCount);
 
     document.getElementById('wizard').style.display='none';
+    document.getElementById('sampleResult').style.display='none';
     const r = document.getElementById('result');
     r.style.display='block';
 
@@ -664,6 +737,7 @@ function resetWizard(){
   document.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));
   document.getElementById('wizard').style.display='block';
   document.getElementById('result').style.display='none';
+  document.getElementById('sampleResult').style.display='block';
   showStep(1);
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -677,10 +751,187 @@ function toggleAcc(btn){
   if(!isOpen){btn.classList.add('open');body.style.maxHeight=body.scrollHeight+'px'}
 }
 
+// ===== Sample Data (1990년 5월 15일 오시 남성 양력) =====
+const sampleData = {
+  info: { year:1990, month:5, day:15, hour:'오시(午時, 11~13시)', gender:'남성', calendar:'양력' },
+  saju: { yGan:6, yJi:6, mGan:7, mJi:5, dGan:0, dJi:4, hGan:6, hJi:6 },
+  elements: { 목:2, 화:3, 토:2, 금:2, 수:1 },
+  ilgan: {
+    char:'갑', hanja:'甲', element:'목', elementHanja:'木',
+    desc:'갑목(甲木)은 큰 나무를 상징합니다. 하늘을 향해 곧게 자라는 거목처럼 곧은 성품과 강한 의지를 지녔습니다. 리더십이 뛰어나고 진취적이며, 정의감이 강합니다. 새로운 것을 개척하는 선구자적 기질이 있으며, 어떤 역경에서도 꿋꿋이 일어서는 강인함을 보여줍니다. 다만 고집이 세고 타협을 어려워하는 면이 있어, 유연성을 기르는 것이 중요합니다.'
+  },
+  sipsin: [
+    { pillar:'년주', gan:'경(庚)', relation:'편관', group:'관성', desc:'권위·통제·도전을 상징. 강한 추진력과 카리스마를 부여' },
+    { pillar:'월주', gan:'신(辛)', relation:'정관', group:'관성', desc:'질서·규율·명예를 상징. 사회적 지위와 안정을 추구' },
+    { pillar:'시주', gan:'경(庚)', relation:'편관', group:'관성', desc:'말년에도 활발한 사회활동이 기대됨' }
+  ],
+  uns12: [
+    { pillar:'년지', ji:'오(午)', name:'사(死)', strength:'weak', desc:'기운 소멸 단계' },
+    { pillar:'월지', ji:'사(巳)', name:'병(病)', strength:'weak', desc:'기운 쇠약 단계' },
+    { pillar:'일지', ji:'진(辰)', name:'쇠(衰)', strength:'medium', desc:'기운 감소 단계' },
+    { pillar:'시지', ji:'오(午)', name:'사(死)', strength:'weak', desc:'기운 소멸 단계' }
+  ],
+  yongsin: {
+    element:'화(火)',
+    desc:'일간 갑목(甲木)이 경금(庚金) 편관 2개에 의해 강하게 극을 받고 있습니다. 화(火)가 금을 제어(화극금)하여 일간을 보호하므로, <strong>화(火)</strong>를 용신으로 판단합니다. 붉은색 계열 색상, 남쪽 방향, 화 관련 직업(미디어, 엔터테인먼트, 요식업 등)이 유리합니다.'
+  },
+  daeun: [
+    { age:'3~12세', ganji:'임오(壬午)', desc:'수화 교차기' },
+    { age:'13~22세', ganji:'계미(癸未)', desc:'학업 성장기' },
+    { age:'23~32세', ganji:'갑신(甲申)', desc:'자아 확립기' },
+    { age:'33~42세', ganji:'을유(乙酉)', desc:'사회 성취기', current:true },
+    { age:'43~52세', ganji:'병술(丙戌)', desc:'안정 발전기' },
+    { age:'53~62세', ganji:'정해(丁亥)', desc:'지혜 원숙기' }
+  ],
+  yearFortune: {
+    year:'2026 병오년(丙午年)',
+    desc:'병오년은 화(火) 기운이 매우 강한 해입니다. 용신인 화를 크게 얻으므로 전반적으로 <strong>좋은 흐름</strong>입니다. 경금 편관의 압박이 화에 의해 제어되어, 그동안 답답했던 일이 풀리고 새로운 기회가 열립니다. 특히 직업적 성취와 사회적 인정을 받을 가능성이 높습니다. 다만 화가 과다해질 수 있으니 과로와 건강 관리에 유의하세요.'
+  },
+  fortunes: {
+    love:{ score:4, icon:'❤️', label:'연애운', color:'#f87171', text:'병오년 화기가 관성(편관)을 제어하여 연애에서 주도권을 가질 수 있습니다. 적극적으로 다가가면 좋은 인연을 만날 확률이 높습니다. 기존 연인이 있다면 관계가 한층 깊어지는 시기입니다.' },
+    wealth:{ score:3, icon:'💰', label:'재물운', color:'#fbbf24', text:'재성이 원국에 드러나지 않아 급격한 재물 증가보다는 꾸준한 수입이 기대됩니다. 투자보다는 본업에 집중하는 것이 유리하며, 하반기에 수입 증가 기회가 있습니다.' },
+    career:{ score:5, icon:'💼', label:'직업운', color:'#60a5fa', text:'용신 화가 세운에서 크게 힘을 얻어 직업운이 가장 강한 해입니다. 승진, 이직, 새 프로젝트 등에서 좋은 성과를 기대할 수 있습니다. 리더십을 발휘할 기회가 많아집니다.' },
+    health:{ score:3, icon:'🏥', label:'건강운', color:'#4ade80', text:'화 과다로 심장, 혈압, 눈 관련 주의가 필요합니다. 과로를 피하고 충분한 휴식을 취하세요. 수(水) 기운 보충을 위해 수분 섭취와 수영 등 수 관련 활동이 도움됩니다.' }
+  }
+};
+
+function renderSample(){
+  const s = sampleData;
+  const saju = s.saju;
+  const el = s.elements;
+  const total = Object.values(el).reduce((a,b)=>a+b,0);
+  const c = document.getElementById('sampleResult');
+
+  const fortuneHtml = ['love','wealth','career','health'].map(k=>{
+    const f = s.fortunes[k];
+    const dots = Array(5).fill(0).map((_,i)=>`<div class="fortune-dot${i<f.score?' active':''}"></div>`).join('');
+    return `<div class="fortune-card">
+      <h4><span style="color:${f.color}">${f.icon}</span> ${f.label}</h4>
+      <div class="fortune-score">${dots}</div>
+      <p>${f.text}</p>
+    </div>`;
+  }).join('');
+
+  c.innerHTML = `
+    <div class="sample-banner">
+      <span class="sample-badge">SAMPLE</span>
+      <h2>사주 분석 예시 결과</h2>
+      <p>${s.info.year}년 ${s.info.month}월 ${s.info.day}일 ${s.info.hour} · ${s.info.gender} · ${s.info.calendar}</p>
+      <p style="font-size:.78rem;color:var(--text3);margin-top:6px">위 위저드에서 직접 입력하면 나만의 분석 결과를 확인할 수 있습니다</p>
+    </div>
+
+    <table class="saju-table">
+      <tr><th>구분</th><th>시주(時)</th><th>일주(日)</th><th>월주(月)</th><th>연주(年)</th></tr>
+      <tr>
+        <td style="font-size:.8rem;color:var(--text2)">천간</td>
+        <td style="color:var(--${행색[천간행[saju.hGan]]})">${천간[saju.hGan]}</td>
+        <td style="color:var(--${행색[천간행[saju.dGan]]})">${천간[saju.dGan]}</td>
+        <td style="color:var(--${행색[천간행[saju.mGan]]})">${천간[saju.mGan]}</td>
+        <td style="color:var(--${행색[천간행[saju.yGan]]})">${천간[saju.yGan]}</td>
+      </tr>
+      <tr>
+        <td style="font-size:.8rem;color:var(--text2)">지지</td>
+        <td style="color:var(--${행색[지지행[saju.hJi]]})">${지지[saju.hJi]}</td>
+        <td style="color:var(--${행색[지지행[saju.dJi]]})">${지지[saju.dJi]}</td>
+        <td style="color:var(--${행색[지지행[saju.mJi]]})">${지지[saju.mJi]}</td>
+        <td style="color:var(--${행색[지지행[saju.yJi]]})">${지지[saju.yJi]}</td>
+      </tr>
+      <tr class="label-row">
+        <td>오행</td>
+        <td>${행한[천간행[saju.hGan]]}/${행한[지지행[saju.hJi]]}</td>
+        <td>${행한[천간행[saju.dGan]]}/${행한[지지행[saju.dJi]]}</td>
+        <td>${행한[천간행[saju.mGan]]}/${행한[지지행[saju.mJi]]}</td>
+        <td>${행한[천간행[saju.yGan]]}/${행한[지지행[saju.yJi]]}</td>
+      </tr>
+    </table>
+
+    <div class="chart-card">
+      <h3><i class="fas fa-chart-bar" style="color:var(--gold)"></i> 오행 분포</h3>
+      ${['목','화','토','금','수'].map(e=>{
+        const pct = Math.round((el[e]/total)*100);
+        return `<div class="bar-row">
+          <span class="bar-label">${행한[e]} ${e}</span>
+          <div class="bar-track"><div class="bar-fill ${행색[e]}" style="width:${pct}%">${el[e]}</div></div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div class="interp-card">
+      <h3><i class="fas fa-user" style="color:var(--gold)"></i> 일간 분석 — ${s.ilgan.char}${s.ilgan.element}(${s.ilgan.hanja}${s.ilgan.elementHanja})</h3>
+      <div class="interp-text">${s.ilgan.desc}</div>
+    </div>
+
+    <div class="interp-card">
+      <h3><i class="fas fa-people-arrows" style="color:var(--gold)"></i> 십신(十神) 관계</h3>
+      <table class="sipsin-table">
+        <tr><th>위치</th><th>천간</th><th>십신</th><th>분류</th></tr>
+        ${s.sipsin.map(ss=>`<tr>
+          <td>${ss.pillar}</td>
+          <td style="font-weight:600">${ss.gan}</td>
+          <td><span class="sipsin-tag sipsin-${ss.group}">${ss.relation}</span></td>
+          <td style="font-size:.8rem;color:var(--text2)">${ss.group}</td>
+        </tr>`).join('')}
+      </table>
+      <div style="margin-top:12px;font-size:.83rem;color:var(--text2);line-height:1.7">
+        <strong style="color:var(--text)">해석:</strong> 편관이 2개, 정관이 1개로 관성이 매우 강합니다. 사회적 성취욕이 크고 조직 내 리더십을 발휘할 수 있는 구조입니다. 다만 관성 과다 시 스트레스와 압박감이 커질 수 있으므로 용신(화)의 도움이 중요합니다.
+      </div>
+    </div>
+
+    <div class="interp-card">
+      <h3><i class="fas fa-circle-notch" style="color:var(--gold)"></i> 12운성(十二運星)</h3>
+      <div style="font-size:.83rem;color:var(--text2);margin-bottom:12px">일간 <strong style="color:var(--text)">갑목(甲木)</strong> 기준 각 지지의 생왕사절 상태</div>
+      <div class="uns-grid">
+        ${s.uns12.map(u=>`<div class="uns-item">
+          <div class="label">${u.pillar}</div>
+          <div style="font-size:.85rem;color:var(--text);margin-bottom:4px">${u.ji}</div>
+          <div class="uns-name uns-${u.strength}">${u.name}</div>
+          <div style="font-size:.7rem;color:var(--text3);margin-top:4px">${u.desc}</div>
+        </div>`).join('')}
+      </div>
+      <div style="margin-top:12px;font-size:.83rem;color:var(--text2);line-height:1.7">
+        <strong style="color:var(--text)">해석:</strong> 12운성이 전반적으로 쇠약한 단계(사·병·쇠)에 위치합니다. 타고난 에너지가 강하지 않아 후천적 노력과 용신의 도움이 중요합니다. 쇠약한 운성은 오히려 섬세함과 지혜를 발달시키는 계기가 됩니다.
+      </div>
+    </div>
+
+    <div class="interp-card">
+      <h3><i class="fas fa-gem" style="color:var(--gold)"></i> 용신(用神) 분석</h3>
+      <div style="text-align:center;margin-bottom:16px">
+        <span style="display:inline-block;background:rgba(239,68,68,.15);color:#f87171;border:2px solid rgba(239,68,68,.4);border-radius:var(--radius-sm);padding:12px 28px;font-size:1.3rem;font-weight:700">
+          ${s.yongsin.element}
+        </span>
+      </div>
+      <div class="interp-text">${s.yongsin.desc}</div>
+    </div>
+
+    <div class="interp-card">
+      <h3><i class="fas fa-road" style="color:var(--gold)"></i> 대운(大運) 흐름</h3>
+      <div style="font-size:.83rem;color:var(--text2);margin-bottom:12px">10년 단위 대운 변화 (남명 순행)</div>
+      <div class="timeline">
+        ${s.daeun.map(d=>`<div class="tl-item${d.current?' current':''}">
+          <div class="age">${d.age}</div>
+          <div class="ganji">${d.ganji}</div>
+          <div style="font-size:.75rem;color:var(--text3);margin-top:4px">${d.desc}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="interp-card">
+      <h3><i class="fas fa-calendar-check" style="color:var(--gold)"></i> ${s.yearFortune.year} 세운</h3>
+      <div class="interp-text">${s.yearFortune.desc}</div>
+    </div>
+
+    <div class="interp-card">
+      <h3><i class="fas fa-wand-magic-sparkles" style="color:var(--gold)"></i> 2026년 상세 운세</h3>
+      <div class="fortune-grid">${fortuneHtml}</div>
+    </div>
+  `;
+}
+
 // ===== Init =====
 initGrids();
 bindOptions();
 updateNav();
+renderSample();
 </script>
 </body>
 </html>
