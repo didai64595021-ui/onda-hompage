@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>공약 상세 — 기호 3번 박서연</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --purple:#7c3aed;--purple-dark:#5b21b6;--yellow:#fbbf24;--yellow-light:#fde68a;
+  --charcoal:#1a1a2e;--white:#ffffff;--gray:#94a3b8;--light-bg:#f8f7ff;
+  --font-display:'Space Grotesk','Noto Sans KR',sans-serif;
+  --font-body:'Noto Sans KR','Space Grotesk',sans-serif;
+}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{font-family:var(--font-body);color:var(--charcoal);background:var(--white);overflow-x:hidden;line-height:1.6}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;border:none;font-family:inherit}
+
+/* ===== NAV ===== */
+.nav{position:fixed;top:0;left:0;right:0;z-index:999;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;transition:background .3s,box-shadow .3s}
+.nav.scrolled{background:rgba(26,26,46,.95);backdrop-filter:blur(12px);box-shadow:0 2px 20px rgba(0,0,0,.2)}
+.nav__logo{font-family:var(--font-display);font-weight:900;font-size:1.15rem;color:var(--white);white-space:nowrap}
+.nav__logo span{color:var(--yellow)}
+.nav__links{display:flex;gap:1.8rem;list-style:none}
+.nav__links a{color:rgba(255,255,255,.8);font-family:var(--font-display);font-weight:600;font-size:.88rem;transition:color .3s;letter-spacing:.02em;min-height:48px;display:flex;align-items:center}
+.nav__links a:hover,.nav__links a.active{color:var(--yellow)}
+.nav__hamburger{display:none;flex-direction:column;gap:5px;background:none;padding:12px;z-index:1001;min-width:48px;min-height:48px;align-items:center;justify-content:center}
+.nav__hamburger span{display:block;width:22px;height:2px;background:var(--white);transition:all .3s;border-radius:2px}
+.nav__hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.nav__hamburger.open span:nth-child(2){opacity:0}
+.nav__hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+.nav__overlay{position:fixed;inset:0;background:rgba(26,26,46,.98);z-index:998;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1rem;opacity:0;pointer-events:none;transition:opacity .3s}
+.nav__overlay.open{opacity:1;pointer-events:all}
+.nav__overlay a{font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--white);padding:1rem 2rem;min-height:48px;display:flex;align-items:center;transition:color .3s}
+.nav__overlay a:hover{color:var(--yellow)}
+
+/* ===== BACK BUTTON ===== */
+.back-bar{padding:5.5rem 2rem 1rem;background:var(--charcoal)}
+.back-bar__link{display:inline-flex;align-items:center;gap:.5rem;color:var(--gray);font-family:var(--font-display);font-weight:600;font-size:.9rem;transition:color .3s;min-height:48px}
+.back-bar__link:hover{color:var(--yellow)}
+.back-bar__link i{transition:transform .3s}
+.back-bar__link:hover i{transform:translateX(-4px)}
+
+/* ===== PLEDGE HERO ===== */
+.pledge-hero{position:relative;min-height:40vh;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--charcoal);overflow:hidden;padding:2rem 1.5rem 4rem}
+.pledge-hero__accent{position:absolute;top:-50%;right:-20%;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.25),transparent 70%);pointer-events:none}
+.pledge-hero__accent--2{position:absolute;bottom:-40%;left:-15%;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(251,191,36,.1),transparent 70%);pointer-events:none}
+.pledge-hero__content{position:relative;z-index:1;max-width:800px}
+.pledge-hero__num{display:inline-block;padding:.5rem 1.5rem;border:2px solid var(--yellow);border-radius:50px;color:var(--yellow);font-family:var(--font-display);font-weight:700;font-size:.9rem;letter-spacing:.05em;margin-bottom:1.5rem}
+.pledge-hero__emoji{font-size:4rem;margin-bottom:1rem;display:block}
+.pledge-hero__title{font-family:var(--font-display);font-size:clamp(2rem,6vw,3.8rem);font-weight:900;line-height:1.15;background:linear-gradient(135deg,#e0d0ff,#ffffff,var(--yellow));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:1rem}
+.pledge-hero__sub{color:var(--gray);font-size:clamp(.95rem,2vw,1.15rem);max-width:600px;margin:0 auto;line-height:1.7}
+
+/* ===== SKEWED DIVIDER ===== */
+.skew-divider{height:80px;margin-top:-1px;position:relative}
+.skew-divider--to-light{background:var(--charcoal)}
+.skew-divider--to-light::after{content:'';position:absolute;inset:0;background:var(--light-bg);clip-path:polygon(0 40%,100% 0,100% 100%,0 100%)}
+.skew-divider--to-white{background:var(--light-bg)}
+.skew-divider--to-white::after{content:'';position:absolute;inset:0;background:var(--white);clip-path:polygon(0 0,100% 40%,100% 100%,0 100%)}
+.skew-divider--to-charcoal{background:var(--white)}
+.skew-divider--to-charcoal::after{content:'';position:absolute;inset:0;background:var(--charcoal);clip-path:polygon(0 40%,100% 0,100% 100%,0 100%)}
+.skew-divider--light-to-white{background:var(--light-bg)}
+.skew-divider--light-to-white::after{content:'';position:absolute;inset:0;background:var(--white);clip-path:polygon(0 40%,100% 0,100% 100%,0 100%)}
+.skew-divider--white-to-light{background:var(--white)}
+.skew-divider--white-to-light::after{content:'';position:absolute;inset:0;background:var(--light-bg);clip-path:polygon(0 0,100% 40%,100% 100%,0 100%)}
+.skew-divider--light-to-charcoal{background:var(--light-bg)}
+.skew-divider--light-to-charcoal::after{content:'';position:absolute;inset:0;background:var(--charcoal);clip-path:polygon(0 0,100% 40%,100% 100%,0 100%)}
+
+/* ===== CONTENT SECTIONS ===== */
+.pledge-section{padding:5rem 1.5rem;max-width:900px;margin:0 auto}
+.pledge-section--light{background:var(--light-bg)}
+.pledge-section--white{background:var(--white)}
+.pledge-section__wrap{max-width:900px;margin:0 auto;padding:5rem 1.5rem}
+.pledge-section__label{font-family:var(--font-display);font-size:.8rem;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem}
+.pledge-section__title{font-family:var(--font-display);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:900;color:var(--charcoal);margin-bottom:2rem;position:relative;padding-bottom:1rem}
+.pledge-section__title::after{content:'';position:absolute;bottom:0;left:0;width:60px;height:4px;background:linear-gradient(90deg,var(--purple),var(--yellow));border-radius:2px}
+.pledge-section__text{color:#475569;font-size:1.05rem;line-height:1.85;margin-bottom:1.5rem}
+.pledge-section__list{list-style:none;display:flex;flex-direction:column;gap:1rem}
+.pledge-section__list li{position:relative;padding-left:2rem;color:#475569;font-size:1.05rem;line-height:1.7}
+.pledge-section__list li::before{content:'';position:absolute;left:0;top:.55rem;width:10px;height:10px;border-radius:50%;background:var(--purple)}
+.pledge-section__list--solutions li::before{background:var(--yellow)}
+.pledge-section__list--impact li::before{background:linear-gradient(135deg,var(--purple),var(--yellow))}
+.pledge-section__list li strong{color:var(--charcoal);font-weight:700}
+
+/* ===== ROADMAP ===== */
+.roadmap{background:var(--white);padding:5rem 1.5rem}
+.roadmap__inner{max-width:900px;margin:0 auto}
+.roadmap__label{font-family:var(--font-display);font-size:.8rem;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem}
+.roadmap__title{font-family:var(--font-display);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:900;color:var(--charcoal);margin-bottom:3rem;position:relative;padding-bottom:1rem}
+.roadmap__title::after{content:'';position:absolute;bottom:0;left:0;width:60px;height:4px;background:linear-gradient(90deg,var(--purple),var(--yellow));border-radius:2px}
+.roadmap__timeline{position:relative;padding-left:3rem}
+.roadmap__timeline::before{content:'';position:absolute;left:11px;top:0;bottom:0;width:3px;background:linear-gradient(to bottom,var(--purple),var(--yellow));border-radius:2px}
+.roadmap__item{position:relative;padding-bottom:2.5rem;opacity:0;transform:translateX(-20px);transition:all .6s}
+.roadmap__item.visible{opacity:1;transform:translateX(0)}
+.roadmap__item:last-child{padding-bottom:0}
+.roadmap__dot{position:absolute;left:-3rem;top:.2rem;width:24px;height:24px;border-radius:50%;background:var(--charcoal);border:3px solid var(--purple);display:flex;align-items:center;justify-content:center;z-index:1}
+.roadmap__dot::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--yellow)}
+.roadmap__item:last-child .roadmap__dot{border-color:var(--yellow);background:var(--yellow)}
+.roadmap__item:last-child .roadmap__dot::after{background:var(--charcoal)}
+.roadmap__year{font-family:var(--font-display);font-weight:900;font-size:1.3rem;color:var(--purple);margin-bottom:.3rem}
+.roadmap__item:last-child .roadmap__year{color:var(--yellow)}
+.roadmap__milestone{font-size:1.05rem;color:#475569;line-height:1.7}
+.roadmap__milestone strong{color:var(--charcoal)}
+
+/* ===== CTA BANNER ===== */
+.cta-banner{background:var(--charcoal);padding:4rem 1.5rem;text-align:center}
+.cta-banner__inner{max-width:700px;margin:0 auto}
+.cta-banner__title{font-family:var(--font-display);font-size:clamp(1.4rem,3vw,2rem);font-weight:900;color:var(--white);margin-bottom:1rem}
+.cta-banner__sub{color:var(--gray);margin-bottom:2rem;font-size:1rem}
+.cta-banner__buttons{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.cta-banner__btn{display:inline-flex;align-items:center;gap:.5rem;padding:1rem 2rem;border-radius:50px;font-family:var(--font-display);font-weight:700;font-size:.95rem;transition:all .3s;min-height:48px}
+.cta-banner__btn--primary{background:var(--purple);color:var(--white)}
+.cta-banner__btn--primary:hover{background:var(--purple-dark);box-shadow:0 0 30px rgba(124,58,237,.4)}
+.cta-banner__btn--secondary{background:transparent;color:var(--yellow);border:2px solid var(--yellow)}
+.cta-banner__btn--secondary:hover{background:var(--yellow);color:var(--charcoal)}
+
+/* ===== PLEDGE NAV (prev/next) ===== */
+.pledge-nav{background:var(--light-bg);padding:3rem 1.5rem}
+.pledge-nav__inner{max-width:900px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.pledge-nav__card{display:flex;flex-direction:column;padding:1.5rem 2rem;background:var(--white);border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.06);transition:transform .3s,box-shadow .3s;min-height:48px}
+.pledge-nav__card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(124,58,237,.12)}
+.pledge-nav__card--next{text-align:right;align-items:flex-end}
+.pledge-nav__dir{font-family:var(--font-display);font-size:.75rem;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem}
+.pledge-nav__name{font-family:var(--font-display);font-weight:700;font-size:1.1rem;color:var(--charcoal)}
+
+/* ===== FOOTER ===== */
+.footer{background:var(--charcoal);color:var(--gray);padding:3rem 1.5rem 2rem;text-align:center;font-size:.85rem;line-height:1.8}
+.footer__name{font-family:var(--font-display);font-weight:700;color:var(--white);font-size:1.1rem;margin-bottom:.5rem}
+.footer__legal{max-width:600px;margin:1rem auto 0;font-size:.75rem;opacity:.6;line-height:1.7}
+
+/* ===== SCROLL ANIMATIONS ===== */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s,transform .7s}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+  .nav__links{display:none}
+  .nav__hamburger{display:flex}
+  .pledge-hero{min-height:35vh;padding:1.5rem 1.5rem 3rem}
+  .pledge-hero__emoji{font-size:3rem}
+  .pledge-section__wrap{padding:3.5rem 1.5rem}
+  .roadmap{padding:3.5rem 1.5rem}
+  .pledge-nav__inner{grid-template-columns:1fr}
+  .cta-banner__buttons{flex-direction:column;align-items:center}
+  .skew-divider{height:50px}
+}
+@media(max-width:480px){
+  .nav{padding:.8rem 1rem}
+  .back-bar{padding:5rem 1rem .8rem}
+  .pledge-hero__title{font-size:clamp(1.6rem,8vw,2.4rem)}
+  .roadmap__timeline{padding-left:2.5rem}
+  .roadmap__dot{left:-2.5rem;width:20px;height:20px}
+  .roadmap__dot::after{width:6px;height:6px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav scrolled" id="mainNav">
+  <a href="candidate-v2.html#hero" class="nav__logo"><span>3</span> 박서연</a>
+  <ul class="nav__links">
+    <li><a href="candidate-v2.html#hero">홈</a></li>
+    <li><a href="candidate-v2.html#about">소개</a></li>
+    <li><a href="candidate-v2.html#vision">비전</a></li>
+    <li><a href="candidate-v2.html#pledges">공약</a></li>
+    <li><a href="candidate-v2.html#field">현장</a></li>
+    <li><a href="candidate-v2.html#join">참여</a></li>
+  </ul>
+  <button class="nav__hamburger" id="navHamburger" aria-label="메뉴 열기">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="nav__overlay" id="navOverlay">
+  <a href="candidate-v2.html#hero">홈</a>
+  <a href="candidate-v2.html#about">소개</a>
+  <a href="candidate-v2.html#vision">비전</a>
+  <a href="candidate-v2.html#pledges">공약</a>
+  <a href="candidate-v2.html#field">현장</a>
+  <a href="candidate-v2.html#join">참여</a>
+</div>
+
+<!-- BACK BUTTON -->
+<div class="back-bar">
+  <a href="candidate-v2.html#pledges" class="back-bar__link">
+    <i class="fas fa-arrow-left"></i> 공약 목록으로 돌아가기
+  </a>
+</div>
+
+<!-- PLEDGE HERO -->
+<section class="pledge-hero" id="pledgeHero">
+  <div class="pledge-hero__accent"></div>
+  <div class="pledge-hero__accent--2"></div>
+  <div class="pledge-hero__content">
+    <span class="pledge-hero__num" id="pledgeNum">공약 01</span>
+    <span class="pledge-hero__emoji" id="pledgeEmoji">🧠</span>
+    <h1 class="pledge-hero__title" id="pledgeTitle">AI 민주화</h1>
+    <p class="pledge-hero__sub" id="pledgeSub"></p>
+  </div>
+</section>
+
+<div class="skew-divider skew-divider--to-light"></div>
+
+<!-- SECTION: 현황 -->
+<div class="pledge-section--light">
+  <div class="pledge-section__wrap reveal" id="sectionStatus">
+    <div class="pledge-section__label">Current Status</div>
+    <h2 class="pledge-section__title">현황</h2>
+    <div id="statusContent"></div>
+  </div>
+</div>
+
+<div class="skew-divider skew-divider--light-to-white"></div>
+
+<!-- SECTION: 문제점 -->
+<div class="pledge-section--white">
+  <div class="pledge-section__wrap reveal" id="sectionProblems">
+    <div class="pledge-section__label">Problems</div>
+    <h2 class="pledge-section__title">문제점</h2>
+    <ul class="pledge-section__list" id="problemsList"></ul>
+  </div>
+</div>
+
+<div class="skew-divider skew-divider--white-to-light"></div>
+
+<!-- SECTION: 해결방안 -->
+<div class="pledge-section--light">
+  <div class="pledge-section__wrap reveal" id="sectionSolutions">
+    <div class="pledge-section__label">Solutions</div>
+    <h2 class="pledge-section__title">해결방안</h2>
+    <ul class="pledge-section__list pledge-section__list--solutions" id="solutionsList"></ul>
+  </div>
+</div>
+
+<div class="skew-divider skew-divider--light-to-white"></div>
+
+<!-- SECTION: 기대효과 -->
+<div class="pledge-section--white">
+  <div class="pledge-section__wrap reveal" id="sectionImpact">
+    <div class="pledge-section__label">Expected Impact</div>
+    <h2 class="pledge-section__title">기대효과</h2>
+    <ul class="pledge-section__list pledge-section__list--impact" id="impactList"></ul>
+  </div>
+</div>
+
+<div class="skew-divider skew-divider--to-charcoal" style="background:var(--white)"></div>
+
+<!-- SECTION: 로드맵 -->
+<div style="background:var(--charcoal)">
+  <div class="skew-divider" style="background:var(--charcoal)"></div>
+</div>
+<div class="roadmap" id="sectionRoadmap">
+  <div class="roadmap__inner">
+    <div class="roadmap__label">Roadmap</div>
+    <h2 class="roadmap__title">실행 로드맵</h2>
+    <div class="roadmap__timeline" id="roadmapTimeline"></div>
+  </div>
+</div>
+
+<!-- CTA BANNER -->
+<div class="cta-banner">
+  <div class="cta-banner__inner">
+    <h2 class="cta-banner__title">이 공약에 공감하시나요?</h2>
+    <p class="cta-banner__sub">함께 만들어가는 정치, 지금 참여해주세요.</p>
+    <div class="cta-banner__buttons">
+      <a href="candidate-v2.html#join" class="cta-banner__btn cta-banner__btn--primary">
+        <i class="fas fa-hand-fist"></i> 캠페인 참여하기
+      </a>
+      <a href="candidate-v2.html#pledges" class="cta-banner__btn cta-banner__btn--secondary">
+        <i class="fas fa-list"></i> 다른 공약 보기
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- PLEDGE NAV (prev/next) -->
+<div class="pledge-nav" id="pledgeNav">
+  <div class="pledge-nav__inner">
+    <a href="#" class="pledge-nav__card pledge-nav__card--prev" id="prevPledge">
+      <span class="pledge-nav__dir"><i class="fas fa-arrow-left"></i> 이전 공약</span>
+      <span class="pledge-nav__name" id="prevName"></span>
+    </a>
+    <a href="#" class="pledge-nav__card pledge-nav__card--next" id="nextPledge">
+      <span class="pledge-nav__dir">다음 공약 <i class="fas fa-arrow-right"></i></span>
+      <span class="pledge-nav__name" id="nextName"></span>
+    </a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer__name">기호 3번 박서연 선거사무소</div>
+  <div>서울특별시 영등포구 의사당대로 1, 캠페인 오피스 3층</div>
+  <div>전화 02-1234-5678 · 이메일 hello@seoyeon2026.kr</div>
+  <div class="footer__legal">
+    본 사이트는 공직선거법을 준수하여 제작되었습니다. 선거일: 2026년 6월 3일.<br>
+    이 광고는 선거관리위원회 홈페이지 또는 선거벽보에서 확인하실 수 있습니다.<br>
+    &copy; 2026 박서연 캠페인. 모든 콘텐츠는 선거 목적으로만 사용됩니다.
+  </div>
+</footer>
+
+<script>
+(function(){
+  // ===== PLEDGE DATA =====
+  var pledges = {
+    1: {
+      num: '공약 01',
+      emoji: '🧠',
+      title: 'AI 민주화',
+      sub: '모든 시민에게 AI 리터러시 교육을 제공하고, 공공 AI 플랫폼을 구축하여 기술 격차를 해소합니다.',
+      status: [
+        '대한민국은 세계적인 IT 인프라를 보유하고 있지만, AI 기술의 혜택은 일부 대기업과 수도권에 집중되어 있습니다. 2025년 기준 국민의 72%가 "AI가 무엇인지 설명할 수 없다"고 답했으며, 60대 이상에서는 그 비율이 91%에 달합니다. 기술 문맹이 새로운 형태의 사회적 불평등으로 자리잡고 있습니다.',
+        '정부는 AI 산업 육성에 연간 2조 원 이상을 투자하고 있으나, 시민 교육과 공공 접근성 확보에 투입되는 예산은 전체의 3%에 불과합니다. 대부분의 AI 서비스는 영어 기반이며, 한국어 특화 공공 AI 플랫폼은 사실상 전무한 상황입니다.',
+        '특히 농어촌 지역, 고령층, 장애인 등 디지털 취약계층은 AI 기술 발전의 사각지대에 놓여 있으며, 이는 정보 접근성의 격차를 넘어 경제적 기회의 격차로 확대되고 있습니다.'
+      ],
+      problems: [
+        '<strong>AI 리터러시 교육 부재:</strong> 초·중·고 교육과정에 AI 관련 필수 교과가 없으며, 성인 대상 체계적 교육 프로그램도 부족합니다. 민간 교육은 비용이 높아 소득 수준에 따라 학습 기회가 극명하게 갈립니다.',
+        '<strong>공공 AI 인프라 전무:</strong> 시민이 무료로 접근할 수 있는 한국어 기반 공공 AI 서비스가 존재하지 않습니다. 행정, 의료, 법률 등 일상 영역에서 AI 지원을 받으려면 민간 유료 서비스에 의존해야 합니다.',
+        '<strong>지역 간 디지털 격차 심화:</strong> 서울·수도권의 AI 관련 일자리가 전체의 84%를 차지하며, 비수도권 청년들의 기술 분야 진입 장벽이 지속적으로 높아지고 있습니다.',
+        '<strong>데이터 주권 문제:</strong> 국민의 개인 데이터가 해외 빅테크 기업에 의해 수집·활용되고 있으나, 이에 대한 시민의 이해와 통제권이 현저히 부족합니다.'
+      ],
+      solutions: [
+        '<strong>전국민 AI 리터러시 교육 프로그램 "AI 시민학교" 운영:</strong> 전국 250개 지자체에 AI 시민학교를 설립하고, 연령·수준별 맞춤형 교육과정을 무상으로 제공합니다. 온라인·오프라인 하이브리드 방식으로 접근성을 극대화합니다.',
+        '<strong>한국형 공공 AI 플랫폼 "국민AI" 구축:</strong> 행정 민원 처리, 건강 상담, 법률 자문, 농업 기상 예측 등 일상에 필요한 AI 서비스를 한국어로 제공하는 공공 플랫폼을 개발합니다. 모든 국민이 무료로 이용할 수 있습니다.',
+        '<strong>AI 교육 필수화 및 교사 역량 강화:</strong> 초등학교 5학년부터 AI 기초 교육을 정규 교과에 편입하고, 현직 교사 5만 명을 대상으로 AI 교수법 연수를 실시합니다.',
+        '<strong>"마이데이터" 시민 주권 플랫폼:</strong> 개인 데이터 이용 현황을 한눈에 확인하고 통제할 수 있는 시민 주권 플랫폼을 구축하여, 데이터 민주주의의 기반을 마련합니다.'
+      ],
+      impact: [
+        '<strong>기술 격차 해소:</strong> 2030년까지 전 국민 AI 기초 리터러시 보유율 60% 달성을 목표로 하여, 디지털 양극화를 획기적으로 완화합니다.',
+        '<strong>공공서비스 혁신:</strong> 공공 AI 플랫폼을 통해 연간 약 2,000만 건의 민원을 자동 처리하고, 행정 비용을 30% 절감할 수 있을 것으로 전망됩니다.',
+        '<strong>신규 일자리 창출:</strong> AI 시민학교 운영 및 공공 AI 플랫폼 관련 직접 고용 1만 2천 명, 간접 일자리 5만 명 이상 창출이 예상됩니다.',
+        '<strong>데이터 주권 확립:</strong> 시민이 자신의 데이터를 주체적으로 관리함으로써, 개인정보 유출 사고를 50% 이상 감소시키고 디지털 신뢰사회의 기틀을 마련합니다.'
+      ],
+      roadmap: [
+        { year: '2026', text: '<strong>기반 구축:</strong> AI 시민학교 시범 운영 50개소 개설, 공공 AI 플랫폼 기본 설계 및 프로토타입 개발, AI 교육과정 표준안 마련' },
+        { year: '2027', text: '<strong>확산 단계:</strong> AI 시민학교 150개소로 확대, 공공 AI 플랫폼 베타 서비스 출시(행정 민원·건강 상담), 초등 AI 교육 시범학교 500개 운영' },
+        { year: '2028', text: '<strong>고도화:</strong> AI 시민학교 250개소 전국 운영, 공공 AI 플랫폼 정식 오픈 및 서비스 영역 확대(법률·농업·교육), 마이데이터 플랫폼 출시' },
+        { year: '2029', text: '<strong>성숙 단계:</strong> AI 리터러시 보유율 45% 달성, 공공 AI 이용자 월 1,000만 명 돌파, AI 교육 정규 교과 전국 시행' },
+        { year: '2030', text: '<strong>목표 달성:</strong> 전 국민 AI 리터러시 60% 달성, 공공 AI 플랫폼 글로벌 수출 모델화, 대한민국을 "AI 민주주의" 선도 국가로 자리매김' }
+      ]
+    },
+    2: {
+      num: '공약 02',
+      emoji: '🏠',
+      title: '디지털 주거권',
+      sub: '스마트 공공주택 1만 호를 건설하고, 메타버스 민원실로 24시간 행정서비스를 제공합니다.',
+      status: [
+        '주거 문제는 대한민국 사회의 가장 근본적인 불평등 요인 중 하나입니다. 2025년 기준 수도권 평균 아파트 가격은 평균 가계소득의 18.6배에 달하며, 청년층의 64%가 "내 집 마련은 불가능하다"고 응답했습니다. 주거 불안은 결혼·출산 기피의 핵심 원인으로 자리잡았습니다.',
+        '동시에 기존 공공주택은 노후화가 심각하며, 에너지 효율이 낮아 관리비 부담이 큽니다. 스마트 기술을 활용한 주거 환경 개선은 시범사업 수준에 머물러 있으며, 대규모 확산은 이루어지지 않고 있습니다.',
+        '또한 행정서비스의 디지털 전환은 웹사이트와 앱 수준에 머물러 있으며, 직관적인 공간 기반 서비스는 부재합니다. 특히 거동이 불편한 고령자나 장애인에게 물리적 관공서 방문은 여전히 큰 부담입니다.'
+      ],
+      problems: [
+        '<strong>공공주택 공급 부족과 품질 저하:</strong> 연간 공공주택 공급량은 수요의 30%에 불과하며, 기존 공공주택의 40%가 준공 후 20년 이상 경과하여 시설 노후화가 심각합니다.',
+        '<strong>주거 에너지 비용 증가:</strong> 노후 공공주택의 에너지 효율 등급은 대부분 5등급 이하로, 입주민의 월평균 관리비가 민간 신축 대비 1.5배 높은 실정입니다.',
+        '<strong>행정서비스 접근성 한계:</strong> 주민센터 평균 대기시간은 35분이며, 65세 이상 고령자의 48%는 온라인 민원 서비스를 이용하지 못합니다. 야간·공휴일 민원 처리는 사실상 불가능합니다.',
+        '<strong>도시-농촌 인프라 격차:</strong> 스마트시티 기술은 대도시 중심으로만 적용되고 있으며, 농어촌 지역은 기본 디지털 인프라조차 부족한 상황입니다.'
+      ],
+      solutions: [
+        '<strong>스마트 공공주택 1만 호 건설:</strong> IoT 센서, AI 에너지 관리, 공기질 자동 조절, 스마트 보안 시스템을 탑재한 차세대 공공주택을 전국 주요 도시에 건설합니다. 에너지 자립률 70% 이상의 제로에너지 건축을 기본으로 합니다.',
+        '<strong>메타버스 민원실 "시민광장" 개설:</strong> 3D 가상공간에서 아바타로 공무원을 만나 민원을 처리할 수 있는 메타버스 행정 플랫폼을 구축합니다. 24시간 운영하며, 음성 인식과 수어 통역 AI를 통해 접근성을 극대화합니다.',
+        '<strong>기존 공공주택 스마트 리모델링:</strong> 노후 공공주택 5만 호에 단열 보강, IoT 에너지 관리 시스템, 스마트 홈 기기를 설치하여 관리비를 40% 이상 절감합니다.',
+        '<strong>디지털 주거 복지 바우처:</strong> 저소득층 가구에 월 5만 원의 디지털 주거 바우처를 지급하여, 스마트 가전·인터넷·IoT 디바이스 비용을 지원합니다.'
+      ],
+      impact: [
+        '<strong>주거비 부담 완화:</strong> 스마트 공공주택 입주 가구의 월평균 관리비를 기존 대비 40% 절감하고, 에너지 비용을 연간 가구당 120만 원 절약할 수 있습니다.',
+        '<strong>행정 효율 혁신:</strong> 메타버스 민원실을 통해 연간 500만 건의 민원을 비대면 처리하고, 시민 만족도를 85% 이상으로 끌어올립니다.',
+        '<strong>탄소 배출 저감:</strong> 스마트 주택과 리모델링을 통해 주거 부문 탄소 배출량을 연간 15만 톤 감축하여, 기후 목표 달성에 기여합니다.',
+        '<strong>지역 균형 발전:</strong> 비수도권 스마트 주택 단지 조성을 통해 청년 유입을 촉진하고, 해당 지역 부동산 가치 상승과 상권 활성화 효과를 유도합니다.'
+      ],
+      roadmap: [
+        { year: '2026', text: '<strong>설계 및 착공:</strong> 스마트 공공주택 설계 표준 수립, 수도권·광역시 5개 지구 1차 착공(2,000호), 메타버스 민원실 프로토타입 개발' },
+        { year: '2027', text: '<strong>확대 착공:</strong> 2차 착공 3,000호(비수도권 포함), 메타버스 민원실 시범 운영(10개 지자체), 기존 공공주택 리모델링 1만 호 착수' },
+        { year: '2028', text: '<strong>1차 입주:</strong> 스마트 공공주택 5,000호 입주 개시, 메타버스 민원실 전국 확대, 디지털 주거 바우처 시범 지급(10만 가구)' },
+        { year: '2029', text: '<strong>완성 단계:</strong> 누적 8,000호 입주, 리모델링 3만 호 완료, 메타버스 민원실 월 이용자 200만 명 달성' },
+        { year: '2030', text: '<strong>목표 완수:</strong> 스마트 공공주택 1만 호 전량 입주, 리모델링 5만 호 완료, 디지털 주거권이 국민 기본권으로 인식되는 사회 실현' }
+      ]
+    },
+    3: {
+      num: '공약 03',
+      emoji: '🌍',
+      title: '기후 테크',
+      sub: '2030 탄소중립을 목표로, 그린 데이터센터와 신재생 에너지 인프라를 확대합니다.',
+      status: [
+        '기후 위기는 더 이상 미래의 문제가 아닙니다. 2025년 한 해 동안 대한민국은 역대 최장 폭염(42일), 집중호우로 인한 수해 피해액 3조 원, 농작물 피해 면적 15만 ha를 기록했습니다. 기상이변이 일상이 된 시대에 진입했습니다.',
+        '대한민국의 탄소 배출량은 OECD 국가 중 5위이며, GDP 대비 배출량은 세계 최상위권입니다. 특히 데이터센터의 전력 소비가 급증하고 있어, 2025년 기준 국가 전체 전력의 4.2%를 차지하고 매년 15%씩 증가하는 추세입니다.',
+        '신재생 에너지 비중은 전체 발전량의 9.8%에 불과하여, EU 평균(38%)이나 일본(22%)에 크게 못 미칩니다. 기후 기술 투자는 증가하고 있으나, 상용화와 대규모 보급에는 여전히 정책적 동력이 부족합니다.'
+      ],
+      problems: [
+        '<strong>높은 탄소 배출 산업 구조:</strong> 철강·석유화학·시멘트 등 탄소 집약 산업이 GDP의 상당 부분을 차지하며, 산업 전환 없이는 탄소중립 달성이 구조적으로 어렵습니다.',
+        '<strong>데이터센터 에너지 블랙홀:</strong> AI·클라우드 수요 폭증으로 데이터센터가 급속히 확대되고 있으나, 대부분이 화석연료 기반 전력에 의존하고 있어 "디지털 탄소 발자국"이 심각합니다.',
+        '<strong>신재생 에너지 인프라 부족:</strong> 태양광·풍력 발전 설비 확충 속도가 목표치의 60% 수준이며, 에너지 저장 장치(ESS) 보급률도 낮아 전력 안정성 문제가 발생하고 있습니다.',
+        '<strong>기후 취약계층 보호 미흡:</strong> 폭염·한파 시 독거노인, 쪽방촌 주민, 농어촌 고령자 등에 대한 체계적 보호 시스템이 부재하여, 기후 재난 사망자의 70%가 취약계층에서 발생합니다.'
+      ],
+      solutions: [
+        '<strong>그린 데이터센터 전환 의무화:</strong> 2028년부터 신규 데이터센터는 신재생 에너지 비율 50% 이상을 의무화하고, 기존 센터는 2030년까지 30% 전환을 달성하도록 지원·규제합니다. 해양 냉각, 폐열 재활용 등 혁신 기술 도입을 위한 세제 혜택을 제공합니다.',
+        '<strong>신재생 에너지 대규모 확충:</strong> 해상풍력 5GW, 태양광 10GW를 추가 설치하고, 전국 ESS 용량을 현재의 3배로 확대합니다. 지역 주민이 투자·수익을 공유하는 "에너지 협동조합" 모델을 확산합니다.',
+        '<strong>탄소중립 산업 전환 지원:</strong> 탄소 집약 산업의 그린 전환을 위한 5조 원 규모의 "기후 전환 기금"을 조성하고, 전환 과정에서 발생하는 실직자에 대한 재교육·재취업을 체계적으로 지원합니다.',
+        '<strong>기후 취약계층 보호 시스템:</strong> AI 기반 기후 재난 조기 경보 시스템을 구축하고, 취약계층 맞춤형 냉·난방 바우처, 주거 단열 지원 프로그램을 전국적으로 확대합니다.'
+      ],
+      impact: [
+        '<strong>탄소 배출 대폭 감축:</strong> 2030년까지 국가 탄소 배출량을 2018년 대비 40% 감축하여, 글로벌 기후 목표 달성에 실질적으로 기여합니다.',
+        '<strong>녹색 일자리 창출:</strong> 그린 데이터센터, 신재생 에너지, 기후 기술 분야에서 30만 개의 녹색 일자리를 창출하여, 기후 전환이 곧 경제 성장의 동력이 되도록 합니다.',
+        '<strong>에너지 자립도 향상:</strong> 신재생 에너지 비중을 25%까지 끌어올려, 해외 에너지 의존도를 낮추고 에너지 안보를 강화합니다.',
+        '<strong>기후 재난 피해 감소:</strong> AI 조기 경보와 취약계층 보호 시스템을 통해 기후 재난 인명 피해를 60% 이상 감소시킵니다.'
+      ],
+      roadmap: [
+        { year: '2026', text: '<strong>법적 기반 마련:</strong> 그린 데이터센터 전환법 제정, 기후 전환 기금 5조 원 조성, 해상풍력 3개 단지 착공, 기후 취약계층 데이터베이스 구축' },
+        { year: '2027', text: '<strong>인프라 확충:</strong> 태양광 4GW 추가 설치, ESS 용량 2배 확대, 그린 데이터센터 시범 전환 10개소, 기후 재난 AI 경보 시스템 시범 운영' },
+        { year: '2028', text: '<strong>전환 가속:</strong> 신규 데이터센터 신재생 50% 의무화 시행, 해상풍력 2GW 가동, 탄소 집약 산업 전환 기업 200개사 지원, 냉·난방 바우처 전국 시행' },
+        { year: '2029', text: '<strong>성과 가시화:</strong> 신재생 에너지 비중 20% 달성, 녹색 일자리 20만 개 창출, 탄소 배출 2018년 대비 30% 감축' },
+        { year: '2030', text: '<strong>탄소중립 로드맵 완성:</strong> 신재생 에너지 25% 달성, 탄소 배출 40% 감축, 그린 데이터센터 전환율 30%, 대한민국을 아시아 기후 기술 허브로 도약' }
+      ]
+    },
+    4: {
+      num: '공약 04',
+      emoji: '💼',
+      title: '플랫폼 노동 보호',
+      sub: '긱 워커 사회안전망을 구축하고, 플랫폼 기업의 공정 수수료 기준을 법제화합니다.',
+      status: [
+        '대한민국의 플랫폼 노동자 수는 2025년 기준 약 220만 명으로, 전체 취업자의 8%를 차지합니다. 배달, 대리운전, 가사서비스, 프리랜서 개발자 등 다양한 직종에서 플랫폼을 매개로 일하고 있지만, 이들 대부분은 "근로자"로 인정받지 못해 기본적인 노동권의 사각지대에 놓여 있습니다.',
+        '특히 배달 플랫폼 종사자의 경우, 월 평균 근무시간이 52시간을 초과하지만 산재보험 가입률은 34%에 불과합니다. 지난해 배달 종사 중 사망한 라이더는 48명에 달하며, 이는 OECD 국가 중 최악의 수준입니다.',
+        '플랫폼 기업들은 높은 수수료를 부과하면서도 노동자의 안전과 복지에 대한 책임은 회피하고 있습니다. 평균 수수료율은 20~30%에 달하며, 알고리즘에 의한 일방적 배차·단가 결정으로 노동자의 자율성이 침해되고 있습니다.'
+      ],
+      problems: [
+        '<strong>법적 보호의 공백:</strong> 현행 근로기준법은 전통적 고용관계를 전제로 설계되어, 플랫폼 노동자를 "자영업자"로 분류합니다. 이에 따라 최저임금, 유급휴가, 해고 보호 등 기본적 노동권이 적용되지 않습니다.',
+        '<strong>사회안전망 배제:</strong> 플랫폼 노동자의 고용보험 가입률은 12%, 산재보험은 34%, 국민연금은 28%에 불과합니다. 사고나 질병 시 소득이 즉시 중단되며, 노후 보장도 전무합니다.',
+        '<strong>불공정 수수료 구조:</strong> 플랫폼 기업의 수수료율은 20~30%로 매우 높으나, 산정 기준이 불투명하고 노동자와의 협의 없이 일방적으로 변경됩니다. 수수료 인상에 항의할 수 있는 구제 절차도 없습니다.',
+        '<strong>알고리즘 통제와 감시:</strong> AI 알고리즘이 배차, 가격, 평가를 결정하지만, 노동자는 그 기준을 알 수 없으며 이의를 제기할 수 없습니다. "별점 테러"와 같은 일방적 평가 시스템은 정신적 스트레스의 주요 원인입니다.'
+      ],
+      solutions: [
+        '<strong>"플랫폼 노동 기본법" 제정:</strong> 플랫폼 종속 노동자를 새로운 법적 카테고리인 "플랫폼 종사자"로 정의하고, 최저보수 보장, 산재보험 의무 가입, 부당 계약 해지 보호 등 기본적 노동권을 법제화합니다.',
+        '<strong>플랫폼 공정 수수료 위원회 설립:</strong> 노동자·기업·정부·시민 대표로 구성된 독립 위원회를 설립하여, 업종별 적정 수수료 상한선을 설정하고 정기 감사를 실시합니다. 수수료 산정 기준의 투명 공개를 의무화합니다.',
+        '<strong>플랫폼 노동자 사회안전망 패키지:</strong> 고용보험·산재보험 전면 적용, 퇴직급여 적립 시스템 도입, 건강검진 및 심리상담 무상 지원 프로그램을 시행합니다. 비용은 플랫폼 기업과 정부가 공동 부담합니다.',
+        '<strong>알고리즘 투명성 법제화:</strong> 배차·평가·가격 결정에 사용되는 알고리즘의 핵심 기준을 노동자에게 공개하도록 의무화하고, 알고리즘 결정에 대한 이의 신청 절차를 마련합니다.'
+      ],
+      impact: [
+        '<strong>220만 노동자 보호:</strong> 플랫폼 종사자 전원이 사회안전망에 편입되어, 사고·질병 시 소득 보장과 노후 준비가 가능해집니다.',
+        '<strong>산업재해 감소:</strong> 산재보험 의무화와 안전 기준 강화를 통해 플랫폼 노동 관련 사망사고를 50% 이상 감소시킵니다.',
+        '<strong>소득 안정화:</strong> 공정 수수료 상한제와 최저보수 보장으로 플랫폼 노동자의 평균 실질소득을 15~20% 향상시킵니다.',
+        '<strong>글로벌 표준 선도:</strong> 대한민국의 플랫폼 노동 법제가 아시아·태평양 지역의 모범 사례가 되어, 국제 노동 기준 수립에 기여합니다.'
+      ],
+      roadmap: [
+        { year: '2026', text: '<strong>법안 추진:</strong> "플랫폼 노동 기본법" 국회 발의 및 통과, 플랫폼 공정 수수료 위원회 출범, 플랫폼 노동 실태 전수조사 실시' },
+        { year: '2027', text: '<strong>제도 시행:</strong> 산재보험 의무 가입 시행, 수수료 상한제 1차 적용(배달·대리운전), 알고리즘 투명성 가이드라인 공표' },
+        { year: '2028', text: '<strong>확대 적용:</strong> 고용보험 전면 적용, 수수료 상한제 전 업종 확대, 퇴직급여 적립 시스템 가동, 알고리즘 이의 신청 제도 시행' },
+        { year: '2029', text: '<strong>안정화:</strong> 플랫폼 노동자 사회보험 가입률 90% 달성, 건강검진·심리상담 프로그램 전국 확대, 산업재해 30% 감소 달성' },
+        { year: '2030', text: '<strong>완성:</strong> 플랫폼 노동 사회안전망 완전 정착, 산업재해 50% 감소, 대한민국형 플랫폼 노동 모델을 OECD에 공유하며 글로벌 스탠다드 선도' }
+      ]
+    },
+    5: {
+      num: '공약 05',
+      emoji: '🎓',
+      title: '교육 혁신',
+      sub: 'AI 튜터를 전국민에게 무상 제공하고, 맞춤형 평생학습 시스템을 구축합니다.',
+      status: [
+        '대한민국의 교육열은 세계 최고 수준이지만, 그 비용은 가계를 압도합니다. 2025년 기준 사교육 시장 규모는 28조 원으로, 월평균 자녀 1인당 사교육비는 55만 원에 달합니다. 소득 상위 20% 가구의 사교육비는 하위 20%의 5.3배로, 교육이 계층 이동의 사다리가 아닌 불평등 고착화의 도구가 되고 있습니다.',
+        '또한 급속한 기술 변화로 직업의 수명이 단축되고 있으며, 평균 직업 전환 횟수는 3.4회로 늘어났습니다. 그러나 성인 대상 재교육·평생학습 체계는 매우 부실하여, 25~64세 성인의 평생교육 참여율은 35%로 OECD 평균(52%)에 크게 못 미칩니다.',
+        '학교 교육 역시 변화에 뒤처져 있습니다. 교사 1인당 학생 수는 OECD 평균보다 높고, 개인 맞춤형 교육은 현실적으로 불가능합니다. 학생들은 획일적인 교육과정 속에서 자신의 재능과 관심사를 발견할 기회를 갖지 못합니다.'
+      ],
+      problems: [
+        '<strong>사교육비 폭증과 교육 양극화:</strong> 연간 28조 원의 사교육 시장은 가계 부담의 핵심이며, 소득에 따른 교육 기회의 극심한 차이를 만들어냅니다. 공교육만으로는 학생의 학습 수요를 충족할 수 없는 구조입니다.',
+        '<strong>획일적 교육과정:</strong> 30명 이상의 대규모 학급에서 교사 한 명이 개인별 수준과 관심사에 맞는 교육을 제공하는 것은 물리적으로 불가능합니다. 학생의 잠재력을 끌어내지 못하고, 학습 흥미를 잃게 만듭니다.',
+        '<strong>평생교육 체계 미비:</strong> 직업 전환이 보편화된 시대에 성인 재교육 기회가 부족합니다. 기업 재직자 교육은 대기업 중심이며, 중소기업 종사자와 자영업자는 교육 기회에서 사실상 소외되어 있습니다.',
+        '<strong>교사 과부하와 행정 업무:</strong> 교사의 실제 수업 시간은 전체 근무 시간의 45%에 불과하며, 나머지는 행정·평가·생활지도에 소모됩니다. 교육의 질을 높이기 위한 시간과 에너지가 구조적으로 부족합니다.'
+      ],
+      solutions: [
+        '<strong>전국민 무상 AI 튜터 "배움이" 서비스:</strong> 학생의 학습 패턴, 강점·약점, 관심사를 분석하여 맞춤형 학습 경로를 제공하는 AI 튜터를 전 국민에게 무상 제공합니다. 초등학생부터 성인 재교육까지 전 연령을 대상으로 하며, 수학·과학·영어·코딩 등 핵심 교과를 시작으로 전 과목 확대합니다.',
+        '<strong>맞춤형 평생학습 플랫폼 "배움터":</strong> AI가 개인의 경력, 역량, 목표를 분석하여 최적의 학습 경로를 설계하는 평생학습 플랫폼을 구축합니다. 대학·기업·공공기관의 교육 콘텐츠를 통합하고, 학습 이력을 블록체인 기반 "학습 포트폴리오"로 관리합니다.',
+        '<strong>교사 AI 보조 시스템:</strong> 출결 관리, 학습 평가, 성적 분석, 학부모 소통 등 반복 업무를 AI가 지원하여 교사의 행정 업무를 60% 절감합니다. 교사가 학생 개인별 멘토링과 창의적 수업에 집중할 수 있는 환경을 만듭니다.',
+        '<strong>학습 바우처 및 재교육 유급휴가:</strong> 전 국민에게 연간 50만 원의 학습 바우처를 지급하고, 직업 전환을 위한 재교육 기간 중 월 150만 원의 학습수당을 최대 6개월간 지원합니다.'
+      ],
+      impact: [
+        '<strong>사교육비 30% 절감:</strong> AI 튜터의 무상 보급으로 가구당 연간 200만 원 이상의 사교육비를 절감하며, 소득에 관계없이 양질의 개인 맞춤 교육을 받을 수 있게 됩니다.',
+        '<strong>학습 성취도 향상:</strong> AI 맞춤형 학습을 통해 학생의 기초학력 미달 비율을 현재 9.1%에서 3% 이하로 줄이고, 상위권 학생의 심화 학습 기회도 대폭 확대합니다.',
+        '<strong>평생교육 참여율 확대:</strong> 성인 평생교육 참여율을 현재 35%에서 55%로 끌어올려, OECD 평균을 상회하는 학습 사회를 구현합니다.',
+        '<strong>교사 만족도 향상:</strong> 행정 업무 60% 절감으로 교사의 수업 집중도와 직무 만족도를 높이고, 교직의 매력을 회복시켜 우수 인재의 교직 진출을 촉진합니다.'
+      ],
+      roadmap: [
+        { year: '2026', text: '<strong>기초 개발:</strong> AI 튜터 "배움이" 프로토타입 개발 및 시범학교 200개교 운영, 평생학습 플랫폼 "배움터" 설계, 교사 AI 보조 시스템 파일럿 50개교 적용' },
+        { year: '2027', text: '<strong>시범 확대:</strong> AI 튜터 시범학교 1,000개교 확대(초·중·고), 배움터 베타 서비스 출시, 학습 바우처 시범 지급(100만 명), 교사 AI 보조 시스템 500개교 확대' },
+        { year: '2028', text: '<strong>전면 보급:</strong> AI 튜터 전국 초·중·고 보급, 배움터 정식 오픈(대학·기업 콘텐츠 500개 기관 연동), 재교육 유급휴가 제도 시행' },
+        { year: '2029', text: '<strong>고도화:</strong> AI 튜터 전 과목 확대 및 성인 버전 출시, 블록체인 학습 포트폴리오 도입, 평생교육 참여율 45% 달성, 교사 행정업무 50% 절감 달성' },
+        { year: '2030', text: '<strong>교육 혁신 완성:</strong> 전 국민 AI 튜터 이용률 70%, 평생교육 참여율 55%, 사교육비 30% 절감, 대한민국을 "세계 최고의 학습 사회"로 도약시킵니다' }
+      ]
+    }
+  };
+
+  // ===== READ URL PARAM =====
+  var params = new URLSearchParams(window.location.search);
+  var id = parseInt(params.get('id')) || 1;
+  if(id < 1 || id > 5) id = 1;
+  var data = pledges[id];
+
+  // ===== UPDATE PAGE TITLE =====
+  document.title = data.title + ' — 기호 3번 박서연 공약 상세';
+
+  // ===== POPULATE HERO =====
+  document.getElementById('pledgeNum').textContent = data.num;
+  document.getElementById('pledgeEmoji').textContent = data.emoji;
+  document.getElementById('pledgeTitle').textContent = data.title;
+  document.getElementById('pledgeSub').textContent = data.sub;
+
+  // ===== POPULATE STATUS =====
+  var statusHTML = '';
+  data.status.forEach(function(p){
+    statusHTML += '<p class="pledge-section__text">' + p + '</p>';
+  });
+  document.getElementById('statusContent').innerHTML = statusHTML;
+
+  // ===== POPULATE LISTS =====
+  function populateList(elId, items){
+    var html = '';
+    items.forEach(function(item){
+      html += '<li>' + item + '</li>';
+    });
+    document.getElementById(elId).innerHTML = html;
+  }
+  populateList('problemsList', data.problems);
+  populateList('solutionsList', data.solutions);
+  populateList('impactList', data.impact);
+
+  // ===== POPULATE ROADMAP =====
+  var rmHTML = '';
+  data.roadmap.forEach(function(item){
+    rmHTML += '<div class="roadmap__item reveal">' +
+      '<div class="roadmap__dot"></div>' +
+      '<div class="roadmap__year">' + item.year + '</div>' +
+      '<div class="roadmap__milestone">' + item.text + '</div>' +
+    '</div>';
+  });
+  document.getElementById('roadmapTimeline').innerHTML = rmHTML;
+
+  // ===== POPULATE PREV/NEXT NAV =====
+  var titles = { 1: '🧠 AI 민주화', 2: '🏠 디지털 주거권', 3: '🌍 기후 테크', 4: '💼 플랫폼 노동 보호', 5: '🎓 교육 혁신' };
+  var prevId = id === 1 ? 5 : id - 1;
+  var nextId = id === 5 ? 1 : id + 1;
+  document.getElementById('prevPledge').href = 'pledge-v2.html?id=' + prevId;
+  document.getElementById('prevName').textContent = titles[prevId];
+  document.getElementById('nextPledge').href = 'pledge-v2.html?id=' + nextId;
+  document.getElementById('nextName').textContent = titles[nextId];
+
+  // ===== NAV SCROLL =====
+  var nav = document.getElementById('mainNav');
+  window.addEventListener('scroll', function(){
+    nav.classList.toggle('scrolled', window.scrollY > 60 || true);
+  });
+
+  // ===== HAMBURGER =====
+  var hamburger = document.getElementById('navHamburger');
+  var overlay = document.getElementById('navOverlay');
+  hamburger.addEventListener('click', function(){
+    hamburger.classList.toggle('open');
+    overlay.classList.toggle('open');
+    document.body.style.overflow = overlay.classList.contains('open') ? 'hidden' : '';
+  });
+  overlay.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', function(){
+      hamburger.classList.remove('open');
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+
+  // ===== SCROLL ANIMATIONS (IntersectionObserver) =====
+  var observerOpts = { threshold: 0.12, rootMargin: '0px 0px -40px 0px' };
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, observerOpts);
+  document.querySelectorAll('.reveal, .roadmap__item').forEach(function(el){
+    observer.observe(el);
+  });
+})();
+</script>
+</body>
+</html>

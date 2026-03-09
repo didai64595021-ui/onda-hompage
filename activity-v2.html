@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>현장활동 — 기호 3번 박서연</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --purple:#7c3aed;--purple-dark:#5b21b6;--yellow:#fbbf24;--yellow-light:#fde68a;
+  --charcoal:#1a1a2e;--white:#ffffff;--gray:#94a3b8;--light-bg:#f8f7ff;
+  --font-display:'Space Grotesk','Noto Sans KR',sans-serif;
+  --font-body:'Noto Sans KR','Space Grotesk',sans-serif;
+}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{font-family:var(--font-body);color:var(--charcoal);background:var(--white);overflow-x:hidden;line-height:1.6}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;border:none;font-family:inherit}
+
+/* ===== NAV ===== */
+.nav{position:fixed;top:0;left:0;right:0;z-index:999;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;transition:background .3s,box-shadow .3s}
+.nav.scrolled{background:rgba(26,26,46,.95);backdrop-filter:blur(12px);box-shadow:0 2px 20px rgba(0,0,0,.2)}
+.nav__logo{font-family:var(--font-display);font-weight:900;font-size:1.15rem;color:var(--white);white-space:nowrap}
+.nav__logo span{color:var(--yellow)}
+.nav__links{display:flex;gap:1.8rem;list-style:none}
+.nav__links a{color:rgba(255,255,255,.8);font-family:var(--font-display);font-weight:600;font-size:.88rem;transition:color .3s;letter-spacing:.02em;min-height:48px;display:flex;align-items:center}
+.nav__links a:hover{color:var(--yellow)}
+.nav__hamburger{display:none;flex-direction:column;gap:5px;background:none;padding:12px;z-index:1001;min-width:48px;min-height:48px;align-items:center;justify-content:center}
+.nav__hamburger span{display:block;width:22px;height:2px;background:var(--white);transition:all .3s;border-radius:2px}
+.nav__hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.nav__hamburger.open span:nth-child(2){opacity:0}
+.nav__hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+.nav__overlay{position:fixed;inset:0;background:rgba(26,26,46,.98);z-index:998;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1rem;opacity:0;pointer-events:none;transition:opacity .3s}
+.nav__overlay.open{opacity:1;pointer-events:all}
+.nav__overlay a{font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--white);padding:1rem 2rem;min-height:48px;display:flex;align-items:center;transition:color .3s}
+.nav__overlay a:hover{color:var(--yellow)}
+
+/* ===== BACK BUTTON ===== */
+.back-link{display:block;padding:6rem 2rem 1.5rem;background:var(--charcoal)}
+.back-link__inner{max-width:1100px;margin:0 auto}
+.back-link__a{display:inline-flex;align-items:center;gap:.5rem;color:var(--yellow);font-family:var(--font-display);font-weight:600;font-size:.95rem;transition:gap .3s,color .3s;min-height:48px}
+.back-link__a:hover{gap:.8rem;color:var(--yellow-light)}
+.back-link__a i{font-size:.85rem}
+
+/* ===== ACTIVITY HERO ===== */
+.activity-hero{position:relative;height:50vh;min-height:340px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+.activity-hero__bg{position:absolute;inset:0;background-size:cover;background-position:center;z-index:0;transition:transform .3s}
+.activity-hero__overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(26,26,46,.85) 0%,rgba(26,26,46,.4) 50%,rgba(26,26,46,.2) 100%);z-index:1}
+.activity-hero__content{position:relative;z-index:2;padding:3rem 2rem;max-width:1100px;margin:0 auto;width:100%}
+.activity-hero__date{font-family:var(--font-display);font-size:.9rem;font-weight:700;color:var(--yellow);letter-spacing:.05em;margin-bottom:.5rem}
+.activity-hero__title{font-family:var(--font-display);font-size:clamp(1.8rem,5vw,3.2rem);font-weight:900;color:var(--white);line-height:1.2}
+
+/* ===== CONTENT SECTION ===== */
+.activity-content{background:var(--light-bg);padding:4rem 2rem}
+.activity-content__inner{max-width:900px;margin:0 auto}
+
+/* ===== META INFO ===== */
+.activity-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:3rem}
+.activity-meta__card{background:var(--white);border-radius:16px;padding:1.5rem 2rem;box-shadow:0 2px 16px rgba(0,0,0,.05);text-align:center;opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s}
+.activity-meta__card.visible{opacity:1;transform:translateY(0)}
+.activity-meta__icon{font-size:1.8rem;color:var(--purple);margin-bottom:.5rem}
+.activity-meta__label{font-family:var(--font-display);font-size:.75rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem}
+.activity-meta__value{font-family:var(--font-display);font-size:1.15rem;font-weight:700;color:var(--charcoal)}
+
+/* ===== DESCRIPTION ===== */
+.activity-desc{margin-bottom:3rem}
+.activity-desc__label{font-family:var(--font-display);font-size:.85rem;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:3px solid var(--purple);display:inline-block}
+.activity-desc__text{margin-bottom:1.5rem;font-size:1.05rem;line-height:1.85;color:#334155}
+.activity-desc__text:last-child{margin-bottom:0}
+
+/* ===== PHOTO GALLERY ===== */
+.activity-gallery{margin-bottom:2rem}
+.activity-gallery__label{font-family:var(--font-display);font-size:.85rem;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1.5rem;padding-bottom:.5rem;border-bottom:3px solid var(--purple);display:inline-block}
+.activity-gallery__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.activity-gallery__item{border-radius:16px;overflow:hidden;position:relative;aspect-ratio:4/3;opacity:0;transform:scale(.95);transition:opacity .6s,transform .6s}
+.activity-gallery__item.visible{opacity:1;transform:scale(1)}
+.activity-gallery__item img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.activity-gallery__item:hover img{transform:scale(1.05)}
+.activity-gallery__item::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(26,26,46,.2),transparent 40%);pointer-events:none;border-radius:16px}
+
+/* ===== NAV BUTTONS ===== */
+.activity-nav{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:2rem 0;border-top:2px solid rgba(124,58,237,.1);margin-top:2rem}
+.activity-nav__btn{display:inline-flex;align-items:center;gap:.5rem;padding:.8rem 1.5rem;border-radius:50px;font-family:var(--font-display);font-weight:700;font-size:.9rem;transition:all .3s;min-height:48px;color:var(--purple);background:var(--white);border:2px solid rgba(124,58,237,.2)}
+.activity-nav__btn:hover{background:var(--purple);color:var(--white);border-color:var(--purple)}
+.activity-nav__btn--disabled{opacity:.3;pointer-events:none}
+.activity-nav__back{padding:.8rem 2rem;border-radius:50px;font-family:var(--font-display);font-weight:700;font-size:.9rem;background:var(--purple);color:var(--white);min-height:48px;display:inline-flex;align-items:center;gap:.5rem;transition:all .3s}
+.activity-nav__back:hover{background:var(--purple-dark);box-shadow:0 0 20px rgba(124,58,237,.3)}
+
+/* ===== FOOTER ===== */
+.footer{background:var(--charcoal);color:var(--gray);padding:3rem 1.5rem 2rem;text-align:center;font-size:.85rem;line-height:1.8}
+.footer__name{font-family:var(--font-display);font-weight:700;color:var(--white);font-size:1.1rem;margin-bottom:.5rem}
+.footer__legal{max-width:600px;margin:1rem auto 0;font-size:.75rem;opacity:.6;line-height:1.7}
+
+/* ===== SCROLL ANIMATIONS ===== */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s,transform .7s}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+  .nav__links{display:none}
+  .nav__hamburger{display:flex}
+  .activity-hero{min-height:280px;height:40vh}
+  .activity-hero__content{padding:2rem 1.5rem}
+  .activity-meta{grid-template-columns:1fr;gap:1rem}
+  .activity-gallery__grid{grid-template-columns:1fr;gap:.8rem}
+  .activity-content{padding:2.5rem 1.5rem}
+  .activity-nav{flex-direction:column;gap:.8rem}
+  .activity-nav__btn,.activity-nav__back{width:100%;justify-content:center}
+}
+@media(max-width:480px){
+  .nav{padding:.8rem 1rem}
+  .activity-hero__content{padding:1.5rem 1rem}
+  .activity-content{padding:2rem 1rem}
+  .back-link{padding:5rem 1rem 1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav scrolled" id="mainNav">
+  <a href="candidate-v2.html#hero" class="nav__logo"><span>3</span> 박서연</a>
+  <ul class="nav__links">
+    <li><a href="candidate-v2.html#hero">홈</a></li>
+    <li><a href="candidate-v2.html#about">소개</a></li>
+    <li><a href="candidate-v2.html#vision">비전</a></li>
+    <li><a href="candidate-v2.html#pledges">공약</a></li>
+    <li><a href="candidate-v2.html#field">현장</a></li>
+    <li><a href="candidate-v2.html#join">참여</a></li>
+  </ul>
+  <button class="nav__hamburger" id="navHamburger" aria-label="메뉴 열기">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="nav__overlay" id="navOverlay">
+  <a href="candidate-v2.html#hero">홈</a>
+  <a href="candidate-v2.html#about">소개</a>
+  <a href="candidate-v2.html#vision">비전</a>
+  <a href="candidate-v2.html#pledges">공약</a>
+  <a href="candidate-v2.html#field">현장</a>
+  <a href="candidate-v2.html#join">참여</a>
+</div>
+
+<!-- BACK LINK -->
+<div class="back-link">
+  <div class="back-link__inner">
+    <a href="candidate-v2.html#field" class="back-link__a"><i class="fas fa-arrow-left"></i> 현장활동 목록으로 돌아가기</a>
+  </div>
+</div>
+
+<!-- ACTIVITY HERO -->
+<section class="activity-hero" id="activityHero">
+  <div class="activity-hero__bg" id="heroBg"></div>
+  <div class="activity-hero__overlay"></div>
+  <div class="activity-hero__content">
+    <div class="activity-hero__date" id="heroDate"></div>
+    <h1 class="activity-hero__title" id="heroTitle"></h1>
+  </div>
+</section>
+
+<!-- CONTENT -->
+<section class="activity-content">
+  <div class="activity-content__inner">
+
+    <!-- META -->
+    <div class="activity-meta" id="activityMeta">
+      <div class="activity-meta__card">
+        <div class="activity-meta__icon"><i class="fas fa-calendar-days"></i></div>
+        <div class="activity-meta__label">날짜</div>
+        <div class="activity-meta__value" id="metaDate"></div>
+      </div>
+      <div class="activity-meta__card">
+        <div class="activity-meta__icon"><i class="fas fa-location-dot"></i></div>
+        <div class="activity-meta__label">장소</div>
+        <div class="activity-meta__value" id="metaLocation"></div>
+      </div>
+      <div class="activity-meta__card">
+        <div class="activity-meta__icon"><i class="fas fa-users"></i></div>
+        <div class="activity-meta__label">참석인원</div>
+        <div class="activity-meta__value" id="metaAttendees"></div>
+      </div>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <div class="activity-desc reveal">
+      <div class="activity-desc__label">Activity Detail</div>
+      <div id="descContainer"></div>
+    </div>
+
+    <!-- GALLERY -->
+    <div class="activity-gallery reveal">
+      <div class="activity-gallery__label">Photo Gallery</div>
+      <div class="activity-gallery__grid" id="galleryGrid"></div>
+    </div>
+
+    <!-- PREV / NEXT NAV -->
+    <div class="activity-nav" id="activityNav"></div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer__name">기호 3번 박서연 선거사무소</div>
+  <div>서울특별시 영등포구 의사당대로 1, 캠페인 오피스 3층</div>
+  <div>전화 02-1234-5678 · 이메일 hello@seoyeon2026.kr</div>
+  <div class="footer__legal">
+    본 사이트는 공직선거법을 준수하여 제작되었습니다. 선거일: 2026년 6월 3일.<br>
+    이 광고는 선거관리위원회 홈페이지 또는 선거벽보에서 확인하실 수 있습니다.<br>
+    &copy; 2026 박서연 캠페인. 모든 콘텐츠는 선거 목적으로만 사용됩니다.
+  </div>
+</footer>
+
+<script>
+(function(){
+
+  // ===== ACTIVITY DATA =====
+  var activities = {
+    1: {
+      title: '청년 타운홀 미팅 개최',
+      date: '2026.02.28',
+      location: '서울 마포구 청년센터',
+      attendees: '500명',
+      heroImg: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&q=80',
+      gallery: [
+        'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800&q=80',
+        'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800&q=80',
+        'https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=800&q=80'
+      ],
+      desc: [
+        '2026년 2월 28일, 서울 마포구 청년센터에서 열린 청년 타운홀 미팅에 500명이 넘는 시민이 참석했습니다. 이번 행사는 AI 시대의 일자리 변화와 청년 정책에 대해 후보와 시민이 직접 대화하는 자리로 기획되었습니다. 참석자들은 플랫폼 경제, 원격 근무, 디지털 역량 교육 등 다양한 주제에 대해 날카로운 질문을 던졌고, 박서연 후보는 구체적인 정책 방향을 제시하며 열띤 토론이 이어졌습니다.',
+        '특히 이날 타운홀에서는 20대~30대 초반의 프리랜서, 스타트업 종사자, 취업 준비생들이 대거 참여하여 현장의 열기가 뜨거웠습니다. "AI가 내 일자리를 대체하면 어떻게 되느냐"는 한 참석자의 질문에 박 후보는 "기술은 위협이 아닌 도구"라며, 전환기 근로자를 위한 리스킬링 프로그램과 AI 협업 역량 교육을 약속했습니다. 실시간 온라인 투표를 통해 참석자들이 직접 우선 정책을 선정하는 실험적 방식도 큰 호응을 얻었습니다.',
+        '행사 이후 참석자들의 만족도 조사에서 94%가 "다시 참석하고 싶다"고 응답했으며, SNS에서 관련 해시태그가 실시간 트렌드에 올랐습니다. 박서연 캠프는 이번 타운홀에서 수렴된 의견을 정책 백서에 반영할 예정이며, 향후 각 지역구별 소규모 타운홀 미팅을 월 2회씩 정례화하겠다고 밝혔습니다. 이번 행사는 기존 정치 집회와 달리 양방향 소통에 집중한 새로운 형태의 시민 참여 모델로 주목받고 있습니다.'
+      ]
+    },
+    2: {
+      title: '코딩 교육 봉사',
+      date: '2026.02.22',
+      location: '영등포 지역아동센터',
+      attendees: '50명',
+      heroImg: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1200&q=80',
+      gallery: [
+        'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80',
+        'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80',
+        'https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?w=800&q=80'
+      ],
+      desc: [
+        '영등포 지역아동센터에서 초등학생 50명을 대상으로 AI 기초 코딩 교실이 진행되었습니다. 박서연 후보가 직접 강사로 나서 스크래치(Scratch)와 간단한 AI 챗봇 만들기를 지도했으며, 아이들의 눈높이에 맞춘 커리큘럼으로 높은 참여도를 이끌어냈습니다. 이번 봉사는 디지털 격차 해소라는 박 후보의 핵심 공약을 현장에서 실천하는 의미 있는 활동이었습니다.',
+        '수업은 총 3시간에 걸쳐 진행되었으며, 전반부에는 컴퓨터 사고력의 기초 개념을, 후반부에는 실습 프로젝트를 통해 아이들이 직접 간단한 게임을 만들어보는 시간을 가졌습니다. 처음에는 코딩이라는 말에 어려워하던 학생들도 블록 코딩의 재미에 금세 빠져들었고, "컴퓨터가 내 말을 듣는 게 신기하다"며 환호하는 모습이 인상적이었습니다. 캠프 자원봉사단 10명이 보조 강사로 참여하여 1:5 밀착 지도를 실현했습니다.',
+        '수업 종료 후 아이들은 자신이 만든 프로그램을 서로 발표하는 미니 발표회를 가졌으며, 우수작을 선정하여 소정의 상품을 전달했습니다. 지역아동센터 관계자는 "정치인이 이렇게 직접 와서 아이들을 가르치는 건 처음"이라며 감사를 표했습니다. 박서연 캠프는 전국 100개 지역아동센터로 이 프로그램을 확대하는 "코드 포 키즈(Code for Kids)" 캠페인을 정식 출범하겠다고 발표했습니다.'
+      ]
+    },
+    3: {
+      title: '전통시장 디지털 전환',
+      date: '2026.02.15',
+      location: '영등포 전통시장',
+      attendees: '200명',
+      heroImg: 'https://images.unsplash.com/photo-1556740758-90de374c12ad?w=1200&q=80',
+      gallery: [
+        'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80',
+        'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80',
+        'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=800&q=80'
+      ],
+      desc: [
+        '영등포 전통시장에서 소상공인 200여 명이 참여한 가운데 "스마트 전통시장 만들기" 현장 간담회가 열렸습니다. 박서연 후보는 시장 상인들과 직접 대화하며 디지털 결제 시스템, 온라인 주문·배달 플랫폼, SNS 마케팅 교육 등 전통시장의 디지털 전환 방안을 논의했습니다. 시장 입구에 설치된 임시 부스에서는 QR코드 결제 체험과 라이브커머스 시연이 이루어져 큰 관심을 모았습니다.',
+        '간담회에서 상인들은 "젊은 손님이 줄어 매출이 계속 감소하고 있다", "키오스크는 설치했지만 사용법을 모르겠다" 등 현장의 어려움을 솔직하게 토로했습니다. 박 후보는 이에 대해 찾아가는 디지털 교육 서비스와 전통시장 전용 배달앱 개발을 약속했으며, 시장 상인회와 "디지털 전환 협약"을 현장에서 체결했습니다. 특히 60대 이상의 고령 상인들에게는 1:1 디지털 도우미를 매칭하는 프로그램을 제안하여 큰 호응을 얻었습니다.',
+        '이날 행사에는 지역 대학교 경영학과 학생 봉사단이 함께 참여하여 상인들의 가게를 촬영하고 SNS 계정 개설을 도왔습니다. 또한 전통시장 안의 먹거리를 온라인으로 주문하는 시범 서비스가 당일 100건 이상의 주문을 기록하며 가능성을 입증했습니다. 박서연 캠프는 이번 영등포 전통시장을 시작으로 전국 50개 전통시장의 디지털 전환을 지원하는 "마켓 4.0" 프로젝트를 단계적으로 추진하겠다고 밝혔습니다.'
+      ]
+    },
+    4: {
+      title: '도시숲 조성 캠페인',
+      date: '2026.02.08',
+      location: '여의도 한강공원 인근',
+      attendees: '300명',
+      heroImg: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200&q=80',
+      gallery: [
+        'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=800&q=80',
+        'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&q=80',
+        'https://images.unsplash.com/photo-1592150621744-aca64f48394a?w=800&q=80'
+      ],
+      desc: [
+        '여의도 한강공원 인근 유휴 부지에서 주민 300명과 함께 미니 도시숲 1호 조성 행사가 열렸습니다. 박서연 후보는 직접 삽을 들고 나무를 심으며 기후 위기 대응의 중요성을 역설했습니다. 이날 행사에서는 느티나무, 소나무, 산벚나무 등 토종 수종 200그루와 관목 500포기가 식재되었으며, 향후 이 공간은 주민 쉼터이자 도심 미세먼지 저감 공간으로 활용될 예정입니다.',
+        '식수 행사와 함께 진행된 "그린 토크" 세미나에서는 도시 열섬 현상과 숲의 환경적 가치에 대한 전문가 강연이 이루어졌습니다. 서울시립대 환경공학과 교수는 "도시숲 1헥타르가 연간 미세먼지 46kg을 흡수하고, 여름 체감 온도를 3~7도 낮출 수 있다"는 연구 결과를 발표하여 참석자들의 공감을 이끌었습니다. 어린이 참가자들을 위한 자연 놀이 체험 프로그램도 동시에 운영되어 가족 단위 참여가 많았습니다.',
+        '박서연 캠프는 당선 시 서울 전역에 50개의 미니 도시숲을 조성하겠다는 "숲의 도시 서울" 프로젝트를 공식 발표했습니다. 이 프로젝트는 유휴 공간, 노후 주차장, 옥상 등을 활용하여 시민 생활권 내 녹지를 확대하는 것을 목표로 합니다. 행사에 참여한 한 주민은 "삭막했던 공터가 이렇게 변할 수 있다니 기대된다"며 "정치가 실질적으로 삶을 바꾸는 경험을 처음 했다"고 소감을 전했습니다.'
+      ]
+    },
+    5: {
+      title: '플랫폼 노동자 간담회',
+      date: '2026.01.30',
+      location: '국회 의원회관',
+      attendees: '100명',
+      heroImg: 'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=1200&q=80',
+      gallery: [
+        'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80',
+        'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=800&q=80',
+        'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80'
+      ],
+      desc: [
+        '국회 의원회관 대회의실에서 배달 라이더, 대리운전 기사, 가사도우미 등 다양한 플랫폼 노동자 100명과 박서연 후보의 간담회가 진행되었습니다. 이번 간담회는 급성장하는 플랫폼 경제 속에서 노동자들의 실질적인 처우 개선 방안을 논의하기 위해 마련되었습니다. 참석자들은 불안정한 소득, 산업재해 보상의 사각지대, 플랫폼 기업의 일방적 수수료 인상 등 현장의 고충을 생생하게 전달했습니다.',
+        '간담회에서 가장 큰 공감을 얻은 주제는 산업재해 보장이었습니다. 한 배달 라이더는 "사고가 나면 치료비도, 쉬는 동안의 수입도 모두 본인 부담"이라며 현실의 어려움을 호소했고, 박 후보는 플랫폼 노동자 전용 산재보험 의무화와 안전장비 지원 제도를 약속했습니다. 또한 알고리즘에 의한 일감 배분의 불투명성 문제에 대해 "알고리즘 공개 의무화"와 "노동자 대표의 알고리즘 감사 참여권"을 보장하겠다는 구체적 공약도 제시했습니다.',
+        '3시간에 걸친 간담회 종료 후, 박서연 캠프는 참석자들의 의견을 종합한 "플랫폼 노동자 권리 장전" 초안을 2주 내에 공개하겠다고 밝혔습니다. 참석 노동자 대표 5인으로 구성된 "플랫폼 노동 정책 자문단"도 공식 출범하여 향후 법안 마련 과정에 직접 참여하게 됩니다. 노동계 전문가들은 이번 간담회를 "플랫폼 노동자의 목소리가 정치권에 제대로 전달된 최초의 사례"라고 평가했습니다.'
+      ]
+    },
+    6: {
+      title: '글로벌 AI 포럼 기조연설',
+      date: '2026.01.20',
+      location: '스위스 다보스 컨벤션센터',
+      attendees: '2,000명',
+      heroImg: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=1200&q=80',
+      gallery: [
+        'https://images.unsplash.com/photo-1587825140708-dfaf18c4e236?w=800&q=80',
+        'https://images.unsplash.com/photo-1560439514-4e9645039924?w=800&q=80',
+        'https://images.unsplash.com/photo-1559223607-a43c990c692c?w=800&q=80'
+      ],
+      desc: [
+        '스위스 다보스에서 열린 글로벌 AI 거버넌스 포럼에서 박서연 후보가 기조연설자로 나서 "공정한 AI, 포용적 기술 미래"를 주제로 연설했습니다. 전 세계 정치인, 기업인, 학자 2,000여 명이 참석한 이 자리에서 박 후보는 한국의 AI 윤리 정책 사례를 소개하고, 국제적 AI 거버넌스 프레임워크의 필요성을 강조했습니다. 20분간의 연설은 세 차례의 기립박수를 받으며 큰 호응을 얻었습니다.',
+        '연설에서 박 후보는 AI 기술의 혜택이 소수에게 집중되는 현실을 지적하며, "기술 주권은 곧 민주주의의 확장"이라는 핵심 메시지를 전달했습니다. 구체적으로 공공 AI 오픈소스 플랫폼 구축, 개발도상국 AI 역량 강화를 위한 국제 기금 조성, AI 알고리즘의 편향성을 감시하는 글로벌 독립기구 설립 등 세 가지 제안을 발표했습니다. 특히 "AI 윤리는 선진국만의 의제가 아닌, 인류 공동의 과제"라는 발언이 각국 미디어에 의해 집중 보도되었습니다.',
+        '연설 이후 진행된 패널 토론에서는 마이크로소프트, 구글 등 글로벌 빅테크 임원들과 AI 규제의 균형점에 대해 활발한 논의가 이어졌습니다. 포럼 주최 측은 박 후보를 "차세대 글로벌 리더"로 소개하며 높이 평가했고, 이 연설 영상은 유튜브에서 일주일 만에 조회수 300만을 기록했습니다. 국내 외교 전문가들은 이번 다보스 연설이 한국의 AI 정책 리더십을 국제무대에 각인시킨 중요한 계기가 되었다고 분석했습니다.'
+      ]
+    }
+  };
+
+  // ===== GET ACTIVITY ID =====
+  var params = new URLSearchParams(window.location.search);
+  var id = parseInt(params.get('id')) || 1;
+  if(id < 1 || id > 6) id = 1;
+  var data = activities[id];
+
+  // ===== SET PAGE TITLE =====
+  document.title = data.title + ' — 기호 3번 박서연';
+
+  // ===== HERO =====
+  document.getElementById('heroBg').style.backgroundImage = "url('" + data.heroImg + "')";
+  document.getElementById('heroDate').textContent = data.date;
+  document.getElementById('heroTitle').textContent = data.title;
+
+  // ===== META =====
+  document.getElementById('metaDate').textContent = data.date;
+  document.getElementById('metaLocation').textContent = data.location;
+  document.getElementById('metaAttendees').textContent = data.attendees;
+
+  // ===== DESCRIPTION =====
+  var descContainer = document.getElementById('descContainer');
+  data.desc.forEach(function(p){
+    var el = document.createElement('p');
+    el.className = 'activity-desc__text';
+    el.textContent = p;
+    descContainer.appendChild(el);
+  });
+
+  // ===== GALLERY =====
+  var galleryGrid = document.getElementById('galleryGrid');
+  data.gallery.forEach(function(src, idx){
+    var item = document.createElement('div');
+    item.className = 'activity-gallery__item';
+    item.style.transitionDelay = (idx * 0.15) + 's';
+    var img = document.createElement('img');
+    img.src = src;
+    img.alt = data.title + ' 사진 ' + (idx + 1);
+    img.loading = 'lazy';
+    item.appendChild(img);
+    galleryGrid.appendChild(item);
+  });
+
+  // ===== PREV / NEXT NAV =====
+  var navContainer = document.getElementById('activityNav');
+  var prevId = id - 1;
+  var nextId = id + 1;
+
+  if(prevId >= 1){
+    var prevData = activities[prevId];
+    navContainer.innerHTML += '<a href="activity-v2.html?id=' + prevId + '" class="activity-nav__btn"><i class="fas fa-arrow-left"></i> ' + prevData.title + '</a>';
+  } else {
+    navContainer.innerHTML += '<span class="activity-nav__btn activity-nav__btn--disabled"><i class="fas fa-arrow-left"></i> 이전 활동</span>';
+  }
+
+  navContainer.innerHTML += '<a href="candidate-v2.html#field" class="activity-nav__back"><i class="fas fa-th-large"></i> 목록</a>';
+
+  if(nextId <= 6){
+    var nextData = activities[nextId];
+    navContainer.innerHTML += '<a href="activity-v2.html?id=' + nextId + '" class="activity-nav__btn">' + nextData.title + ' <i class="fas fa-arrow-right"></i></a>';
+  } else {
+    navContainer.innerHTML += '<span class="activity-nav__btn activity-nav__btn--disabled">다음 활동 <i class="fas fa-arrow-right"></i></span>';
+  }
+
+  // ===== NAV SCROLL =====
+  var nav = document.getElementById('mainNav');
+  window.addEventListener('scroll', function(){
+    nav.classList.toggle('scrolled', window.scrollY > 60 || true);
+  });
+
+  // ===== HAMBURGER =====
+  var hamburger = document.getElementById('navHamburger');
+  var overlay = document.getElementById('navOverlay');
+  hamburger.addEventListener('click', function(){
+    hamburger.classList.toggle('open');
+    overlay.classList.toggle('open');
+    document.body.style.overflow = overlay.classList.contains('open') ? 'hidden' : '';
+  });
+  overlay.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', function(){
+      hamburger.classList.remove('open');
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+
+  // ===== SCROLL ANIMATIONS (IntersectionObserver) =====
+  var observerOpts = { threshold: 0.15, rootMargin: '0px 0px -50px 0px' };
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, observerOpts);
+
+  document.querySelectorAll('.reveal, .activity-meta__card, .activity-gallery__item').forEach(function(el){
+    observer.observe(el);
+  });
+
+})();
+</script>
+</body>
+</html>
