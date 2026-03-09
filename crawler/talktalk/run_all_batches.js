@@ -14,8 +14,8 @@ const BATCH_SIZE = 500;
 const UA_MOBILE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15';
 const UA_DESKTOP = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
-let SEARCH_DELAY = 400;
-let PLACE_DELAY = 800;  // 429 0건이므로 속도 향상. 429 시 자동 증가.
+let SEARCH_DELAY = 300;
+let PLACE_DELAY = 400;  // 90%+ 정확도 확인 — 속도 최대화. 429 시 자동 증가.
 
 function cleanName(n) {
   return n.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/[^\w가-힣\s&().·-]/g,' ').replace(/\s+/g,' ').trim();
