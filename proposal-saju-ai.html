@@ -1,0 +1,2037 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>사주 명리학 AI 리포트 자동화 시스템 | 온다마케팅 제안서</title>
+  <meta name="description" content="사주 명리학 기반 AI 리포트 자동화 시스템 - 온다마케팅 기술 제안서">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    /* ===== CSS Variables ===== */
+    :root {
+      --navy-900: #0a0f1e;
+      --navy-800: #111832;
+      --navy-700: #1a2342;
+      --navy-600: #243056;
+      --navy-500: #2e3d6b;
+      --gold-400: #d4a843;
+      --gold-300: #e8c468;
+      --gold-200: #f0d88a;
+      --gold-100: #faecc8;
+      --white: #ffffff;
+      --gray-100: #f0f2f7;
+      --gray-200: #dde1ec;
+      --gray-300: #b8bfd4;
+      --gray-400: #8892ad;
+      --text-primary: #e8ecf4;
+      --text-secondary: #a0a8c0;
+      --text-muted: #6b7394;
+      --section-gap: 100px;
+      --container-width: 1140px;
+      --radius: 12px;
+      --radius-lg: 20px;
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--navy-900);
+      color: var(--text-primary);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: var(--container-width);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    section {
+      padding: var(--section-gap) 0;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Playfair Display', 'Noto Sans KR', serif;
+      line-height: 1.3;
+    }
+
+    a {
+      color: var(--gold-400);
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+
+    a:hover {
+      color: var(--gold-200);
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* ===== Utility ===== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fade-in-left {
+      opacity: 0;
+      transform: translateX(-40px);
+      transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    }
+
+    .fade-in-left.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .fade-in-right {
+      opacity: 0;
+      transform: translateX(40px);
+      transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    }
+
+    .fade-in-right.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold-400);
+      margin-bottom: 12px;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    .section-title {
+      font-size: 2.4rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--white);
+    }
+
+    .section-desc {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    .gold-line {
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold-400), var(--gold-200));
+      border-radius: 2px;
+      margin-bottom: 24px;
+    }
+
+    /* ===== Navigation ===== */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 16px 0;
+      transition: background var(--transition), box-shadow var(--transition), padding var(--transition);
+    }
+
+    .nav.scrolled {
+      background: rgba(10, 15, 30, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+      padding: 10px 0;
+    }
+
+    .nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .nav-logo span {
+      color: var(--gold-400);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color var(--transition);
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--gold-400);
+      transition: width var(--transition);
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--gold-400);
+    }
+
+    .nav-links a:hover::after,
+    .nav-links a.active::after {
+      width: 100%;
+    }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+      background: none;
+      border: none;
+    }
+
+    .hamburger span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--text-primary);
+      border-radius: 2px;
+      transition: transform var(--transition), opacity var(--transition);
+    }
+
+    .hamburger.active span:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(5px, -5px);
+    }
+
+    /* ===== Hero Section ===== */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding-top: 80px;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(212, 168, 67, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(46, 61, 107, 0.4) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 100%, rgba(10, 15, 30, 1) 0%, transparent 60%);
+      z-index: 1;
+    }
+
+    .hero-bg-pattern {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        radial-gradient(circle at 25% 25%, rgba(212, 168, 67, 0.03) 1px, transparent 1px),
+        radial-gradient(circle at 75% 75%, rgba(212, 168, 67, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    .hero .container {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-content {
+      max-width: 720px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      background: rgba(212, 168, 67, 0.1);
+      border: 1px solid rgba(212, 168, 67, 0.2);
+      border-radius: 40px;
+      font-size: 0.85rem;
+      color: var(--gold-300);
+      margin-bottom: 28px;
+    }
+
+    .hero-badge i {
+      font-size: 0.75rem;
+    }
+
+    .hero h1 {
+      font-size: 3.2rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 24px;
+      color: var(--white);
+    }
+
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, var(--gold-400), var(--gold-200));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-desc {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 40px;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+
+    .hero-stat {
+      text-align: left;
+    }
+
+    .hero-stat-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--gold-400);
+    }
+
+    .hero-stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: 'Noto Sans KR', sans-serif;
+      cursor: pointer;
+      border: none;
+      transition: all var(--transition);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold-400), var(--gold-300));
+      color: var(--navy-900);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(212, 168, 67, 0.3);
+      color: var(--navy-900);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(212, 168, 67, 0.3);
+      color: var(--gold-400);
+    }
+
+    .btn-outline:hover {
+      background: rgba(212, 168, 67, 0.1);
+      border-color: var(--gold-400);
+      transform: translateY(-2px);
+      color: var(--gold-300);
+    }
+
+    .hero-decoration {
+      position: absolute;
+      right: -60px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 500px;
+      height: 500px;
+      z-index: 1;
+    }
+
+    .hero-circle {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(212, 168, 67, 0.1);
+    }
+
+    .hero-circle-1 {
+      width: 400px;
+      height: 400px;
+      top: 50px;
+      left: 50px;
+      animation: rotateCircle 30s linear infinite;
+    }
+
+    .hero-circle-2 {
+      width: 300px;
+      height: 300px;
+      top: 100px;
+      left: 100px;
+      border-color: rgba(212, 168, 67, 0.06);
+      animation: rotateCircle 25s linear infinite reverse;
+    }
+
+    .hero-circle-3 {
+      width: 200px;
+      height: 200px;
+      top: 150px;
+      left: 150px;
+      border-color: rgba(212, 168, 67, 0.15);
+      animation: rotateCircle 20s linear infinite;
+    }
+
+    .hero-circle-dot {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--gold-400);
+      border-radius: 50%;
+      top: -4px;
+      left: 50%;
+    }
+
+    @keyframes rotateCircle {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* ===== Understanding Section ===== */
+    .understanding {
+      background: var(--navy-800);
+    }
+
+    .understanding-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .understanding-card {
+      background: var(--navy-700);
+      border: 1px solid rgba(212, 168, 67, 0.08);
+      border-radius: var(--radius);
+      padding: 32px;
+      transition: all var(--transition);
+    }
+
+    .understanding-card:hover {
+      border-color: rgba(212, 168, 67, 0.2);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .understanding-card .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background: rgba(212, 168, 67, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      color: var(--gold-400);
+      font-size: 1.2rem;
+    }
+
+    .understanding-card h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--white);
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    .understanding-card p {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .understanding-full {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, var(--navy-700), var(--navy-600));
+      border-color: rgba(212, 168, 67, 0.15);
+    }
+
+    .understanding-full h3 {
+      font-size: 1.3rem;
+    }
+
+    .need-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .need-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(212, 168, 67, 0.08);
+      border: 1px solid rgba(212, 168, 67, 0.15);
+      border-radius: 20px;
+      font-size: 0.82rem;
+      color: var(--gold-300);
+    }
+
+    /* ===== Tech Stack Section ===== */
+    .tech-stack-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .tech-card {
+      background: var(--navy-800);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius);
+      padding: 32px;
+      transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tech-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold-400), transparent);
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+
+    .tech-card:hover {
+      border-color: rgba(212, 168, 67, 0.15);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .tech-card:hover::before {
+      opacity: 1;
+    }
+
+    .tech-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .tech-card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(212, 168, 67, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold-400);
+      font-size: 1.1rem;
+    }
+
+    .tech-card-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .tech-card-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--white);
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    .tech-card p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .tech-tag {
+      padding: 4px 10px;
+      background: rgba(212, 168, 67, 0.06);
+      border-radius: 4px;
+      font-size: 0.78rem;
+      color: var(--gold-300);
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ===== Architecture Section ===== */
+    .architecture {
+      background: var(--navy-800);
+    }
+
+    .arch-flow {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      gap: 0;
+      padding: 40px 0;
+      flex-wrap: wrap;
+    }
+
+    .arch-step {
+      flex: 1;
+      min-width: 150px;
+      max-width: 180px;
+      text-align: center;
+      position: relative;
+    }
+
+    .arch-step-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--navy-600), var(--navy-700));
+      border: 2px solid rgba(212, 168, 67, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+      font-size: 1.5rem;
+      color: var(--gold-400);
+      transition: all var(--transition);
+    }
+
+    .arch-step:hover .arch-step-icon {
+      border-color: var(--gold-400);
+      background: linear-gradient(135deg, rgba(212, 168, 67, 0.15), var(--navy-600));
+      transform: scale(1.05);
+    }
+
+    .arch-step-num {
+      font-size: 0.7rem;
+      color: var(--gold-400);
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 6px;
+    }
+
+    .arch-step h4 {
+      font-size: 0.9rem;
+      color: var(--white);
+      margin-bottom: 6px;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    .arch-step p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .arch-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold-400);
+      font-size: 1.2rem;
+      opacity: 0.4;
+      padding: 0 4px;
+      margin-top: -30px;
+    }
+
+    /* ===== Features Section ===== */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--navy-800);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      transition: all var(--transition);
+      text-align: center;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(212, 168, 67, 0.2);
+      transform: translateY(-6px);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+    }
+
+    .feature-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(212, 168, 67, 0.12), rgba(212, 168, 67, 0.04));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 18px;
+      font-size: 1.3rem;
+      color: var(--gold-400);
+    }
+
+    .feature-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--white);
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    .feature-card p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    .feature-method {
+      font-size: 0.78rem;
+      color: var(--gold-400);
+      padding: 6px 12px;
+      background: rgba(212, 168, 67, 0.06);
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    /* ===== MVP Section ===== */
+    .mvp {
+      background: var(--navy-800);
+    }
+
+    .mvp-phases {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+    }
+
+    .phase-card {
+      background: var(--navy-700);
+      border: 1px solid rgba(212, 168, 67, 0.1);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .phase-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--gold-400), var(--gold-200));
+    }
+
+    .phase-card.phase-2::before {
+      background: linear-gradient(90deg, var(--gold-300), rgba(212, 168, 67, 0.3));
+    }
+
+    .phase-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(212, 168, 67, 0.1);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--gold-400);
+      margin-bottom: 16px;
+    }
+
+    .phase-card h3 {
+      font-size: 1.4rem;
+      color: var(--white);
+      margin-bottom: 12px;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    .phase-card > p {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    .phase-items {
+      list-style: none;
+    }
+
+    .phase-items li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .phase-items li:last-child {
+      border-bottom: none;
+    }
+
+    .phase-items li i {
+      color: var(--gold-400);
+      margin-top: 4px;
+      font-size: 0.75rem;
+    }
+
+    .budget-note {
+      margin-top: 24px;
+      padding: 16px 20px;
+      background: rgba(212, 168, 67, 0.06);
+      border-left: 3px solid var(--gold-400);
+      border-radius: 0 8px 8px 0;
+      font-size: 0.85rem;
+      color: var(--gold-300);
+    }
+
+    /* ===== Timeline Section ===== */
+    .timeline-wrapper {
+      position: relative;
+      padding: 20px 0;
+    }
+
+    .timeline-line {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--gold-400), rgba(212, 168, 67, 0.1));
+      transform: translateX(-50%);
+    }
+
+    .timeline-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    .timeline-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .timeline-item:nth-child(odd) {
+      flex-direction: row;
+    }
+
+    .timeline-item:nth-child(even) {
+      flex-direction: row-reverse;
+    }
+
+    .timeline-content {
+      width: calc(50% - 40px);
+      background: var(--navy-800);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: all var(--transition);
+    }
+
+    .timeline-content:hover {
+      border-color: rgba(212, 168, 67, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: 50%;
+      top: 28px;
+      width: 16px;
+      height: 16px;
+      background: var(--gold-400);
+      border-radius: 50%;
+      transform: translateX(-50%);
+      border: 3px solid var(--navy-900);
+      z-index: 2;
+    }
+
+    .timeline-week {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--gold-400);
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .timeline-content h4 {
+      font-size: 1.05rem;
+      color: var(--white);
+      margin-bottom: 6px;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    .timeline-content p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ===== About Section ===== */
+    .about {
+      background: var(--navy-800);
+    }
+
+    .about-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+
+    .about-text h2 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+
+    .about-text > p {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+      line-height: 1.8;
+    }
+
+    .about-strengths {
+      list-style: none;
+    }
+
+    .about-strengths li {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .about-strengths li:last-child {
+      border-bottom: none;
+    }
+
+    .strength-icon {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      border-radius: 10px;
+      background: rgba(212, 168, 67, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold-400);
+      font-size: 0.95rem;
+    }
+
+    .strength-text h4 {
+      font-size: 0.95rem;
+      color: var(--white);
+      margin-bottom: 4px;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    .strength-text p {
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+    }
+
+    .about-visual {
+      position: relative;
+    }
+
+    .about-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .about-stat-card {
+      background: var(--navy-700);
+      border: 1px solid rgba(212, 168, 67, 0.08);
+      border-radius: var(--radius);
+      padding: 28px 20px;
+      text-align: center;
+      transition: all var(--transition);
+    }
+
+    .about-stat-card:hover {
+      border-color: rgba(212, 168, 67, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .about-stat-card .stat-val {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--gold-400);
+      margin-bottom: 4px;
+    }
+
+    .about-stat-card .stat-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* ===== CTA Section ===== */
+    .cta {
+      padding: 80px 0;
+      text-align: center;
+    }
+
+    .cta-box {
+      background: linear-gradient(135deg, var(--navy-700), var(--navy-600));
+      border: 1px solid rgba(212, 168, 67, 0.15);
+      border-radius: var(--radius-lg);
+      padding: 60px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-box::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at center, rgba(212, 168, 67, 0.04) 0%, transparent 60%);
+    }
+
+    .cta-box > * {
+      position: relative;
+    }
+
+    .cta h2 {
+      font-size: 2.2rem;
+      color: var(--white);
+      margin-bottom: 16px;
+    }
+
+    .cta p {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    /* ===== Footer ===== */
+    .footer {
+      background: var(--navy-900);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 40px 0;
+      text-align: center;
+    }
+
+    .footer p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .footer a {
+      color: var(--gold-400);
+    }
+
+    /* ===== Mobile Menu Overlay ===== */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(10, 15, 30, 0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+
+    .mobile-menu.open {
+      display: flex;
+      opacity: 1;
+    }
+
+    .mobile-menu-links {
+      list-style: none;
+      text-align: center;
+    }
+
+    .mobile-menu-links li {
+      margin-bottom: 24px;
+    }
+
+    .mobile-menu-links a {
+      font-size: 1.4rem;
+      color: var(--text-primary);
+      font-weight: 500;
+      transition: color var(--transition);
+    }
+
+    .mobile-menu-links a:hover {
+      color: var(--gold-400);
+    }
+
+    /* ===== Responsive: Tablet ===== */
+    @media (max-width: 1199px) {
+      .hero h1 {
+        font-size: 2.6rem;
+      }
+
+      .hero-decoration {
+        display: none;
+      }
+
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .tech-stack-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .section-title {
+        font-size: 2rem;
+      }
+
+      .arch-flow {
+        gap: 8px;
+      }
+
+      .arch-step {
+        min-width: 120px;
+      }
+    }
+
+    /* ===== Responsive: Mobile ===== */
+    @media (max-width: 767px) {
+      :root {
+        --section-gap: 64px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .hamburger {
+        display: flex;
+      }
+
+      .hero {
+        min-height: auto;
+        padding-top: 120px;
+        padding-bottom: 60px;
+      }
+
+      .hero h1 {
+        font-size: 1.9rem;
+      }
+
+      .hero-desc {
+        font-size: 1rem;
+      }
+
+      .hero-stats {
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .hero-stat {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .hero-stat-value {
+        font-size: 1.6rem;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        justify-content: center;
+        width: 100%;
+      }
+
+      .section-title {
+        font-size: 1.6rem;
+      }
+
+      .section-desc {
+        font-size: 0.95rem;
+      }
+
+      .understanding-grid,
+      .tech-stack-grid,
+      .features-grid,
+      .mvp-phases,
+      .about-content,
+      .about-stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .arch-flow {
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+      }
+
+      .arch-step {
+        max-width: 240px;
+      }
+
+      .arch-arrow {
+        transform: rotate(90deg);
+        margin-top: 0;
+        padding: 8px 0;
+      }
+
+      /* Timeline mobile */
+      .timeline-line {
+        left: 20px;
+      }
+
+      .timeline-item,
+      .timeline-item:nth-child(even) {
+        flex-direction: row;
+        padding-left: 50px;
+      }
+
+      .timeline-content {
+        width: 100%;
+      }
+
+      .timeline-dot {
+        left: 20px;
+      }
+
+      .cta-box {
+        padding: 40px 24px;
+      }
+
+      .cta h2 {
+        font-size: 1.6rem;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+      }
+
+      .about-text {
+        order: 2;
+      }
+
+      .about-visual {
+        order: 1;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 {
+        font-size: 1.6rem;
+      }
+
+      .phase-card {
+        padding: 28px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav" role="navigation" aria-label="메인 네비게이션">
+    <div class="container">
+      <a href="#hero" class="nav-logo" aria-label="온다마케팅 홈">ONDA<span>.</span></a>
+      <ul class="nav-links">
+        <li><a href="#understanding">프로젝트 이해</a></li>
+        <li><a href="#tech">기술 제안</a></li>
+        <li><a href="#architecture">아키텍처</a></li>
+        <li><a href="#features">핵심 기능</a></li>
+        <li><a href="#mvp">MVP 전략</a></li>
+        <li><a href="#timeline">일정</a></li>
+        <li><a href="#about">소개</a></li>
+        <li><a href="#cta" class="btn btn-primary" style="padding:8px 20px;font-size:0.85rem;">문의하기</a></li>
+      </ul>
+      <button class="hamburger" aria-label="메뉴 열기" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" role="dialog" aria-label="모바일 메뉴">
+    <ul class="mobile-menu-links">
+      <li><a href="#understanding">프로젝트 이해</a></li>
+      <li><a href="#tech">기술 제안</a></li>
+      <li><a href="#architecture">아키텍처</a></li>
+      <li><a href="#features">핵심 기능</a></li>
+      <li><a href="#mvp">MVP 전략</a></li>
+      <li><a href="#timeline">일정</a></li>
+      <li><a href="#about">회사 소개</a></li>
+      <li><a href="#cta">문의하기</a></li>
+    </ul>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero" id="hero">
+    <div class="hero-bg-pattern"></div>
+    <div class="hero-decoration" aria-hidden="true">
+      <div class="hero-circle hero-circle-1"><div class="hero-circle-dot"></div></div>
+      <div class="hero-circle hero-circle-2"><div class="hero-circle-dot"></div></div>
+      <div class="hero-circle hero-circle-3"><div class="hero-circle-dot"></div></div>
+    </div>
+    <div class="container">
+      <div class="hero-content fade-in">
+        <div class="hero-badge">
+          <i class="fas fa-star" aria-hidden="true"></i>
+          위시켓 프로젝트 제안서
+        </div>
+        <h1>
+          사주 명리학<br>
+          <span class="highlight">AI 리포트 자동화</span><br>
+          시스템
+        </h1>
+        <p class="hero-desc">
+          전통 명리학의 지혜와 최신 AI 기술을 결합하여,
+          내부 업무를 완전 자동화합니다. 엑셀 기반 수작업에서 벗어나
+          <strong>100페이지 고해상도 PDF 리포트</strong>를 원클릭으로 발행하세요.
+        </p>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-value">100+</div>
+            <div class="hero-stat-label">페이지 PDF 자동 생성</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">90%</div>
+            <div class="hero-stat-label">업무 시간 절감</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">AI</div>
+            <div class="hero-stat-label">LLM 기반 초안 자동 생성</div>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <a href="#cta" class="btn btn-primary">
+            <i class="fas fa-paper-plane" aria-hidden="true"></i>
+            프로젝트 문의하기
+          </a>
+          <a href="#tech" class="btn btn-outline">
+            <i class="fas fa-arrow-down" aria-hidden="true"></i>
+            기술 제안 보기
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Project Understanding -->
+  <section class="understanding" id="understanding">
+    <div class="container">
+      <div class="fade-in">
+        <span class="section-label">Project Understanding</span>
+        <h2 class="section-title">프로젝트 이해도</h2>
+        <div class="gold-line"></div>
+        <p class="section-desc">
+          클라이언트의 핵심 니즈를 정확히 파악하여, 최적의 솔루션을 설계합니다.
+        </p>
+      </div>
+
+      <div class="understanding-grid">
+        <article class="understanding-card fade-in">
+          <div class="card-icon"><i class="fas fa-lock" aria-hidden="true"></i></div>
+          <h3>폐쇄형 내부 시스템</h3>
+          <p>외부 노출 없는 내부 업무 전용 웹 시스템. 관리자 인증 기반으로 데이터 보안을 최우선으로 설계합니다.</p>
+        </article>
+        <article class="understanding-card fade-in">
+          <div class="card-icon"><i class="fas fa-file-excel" aria-hidden="true"></i></div>
+          <h3>엑셀 → 시스템 이식</h3>
+          <p>기존 엑셀 기반 수작업 프로세스를 체계적인 웹 시스템으로 전환하여 업무 효율성을 극대화합니다.</p>
+        </article>
+        <article class="understanding-card fade-in">
+          <div class="card-icon"><i class="fas fa-robot" aria-hidden="true"></i></div>
+          <h3>LLM 초안 생성</h3>
+          <p>GPT-4o / Gemini Pro를 활용해 사주 분석 데이터를 기반으로 리포트 초안을 자동 생성합니다.</p>
+        </article>
+        <article class="understanding-card fade-in">
+          <div class="card-icon"><i class="fas fa-edit" aria-hidden="true"></i></div>
+          <h3>웹 에디터 + PDF 퍼블리싱</h3>
+          <p>AI 초안을 전문가가 웹 에디터로 검수/수정 후, 고해상도 PDF로 최종 퍼블리싱합니다.</p>
+        </article>
+        <article class="understanding-card understanding-full fade-in">
+          <div class="card-icon"><i class="fas fa-bullseye" aria-hidden="true"></i></div>
+          <h3>핵심 목표: 완전 자동화 파이프라인 구축</h3>
+          <p>고객 데이터 입력부터 PDF 출력까지, 최소한의 수동 개입으로 동작하는 End-to-End 자동화 시스템을 구축합니다.</p>
+          <div class="need-tags">
+            <span class="need-tag"><i class="fas fa-check" aria-hidden="true"></i> 데이터 입력 자동화</span>
+            <span class="need-tag"><i class="fas fa-check" aria-hidden="true"></i> 천문 API 연동</span>
+            <span class="need-tag"><i class="fas fa-check" aria-hidden="true"></i> AI 리포트 생성</span>
+            <span class="need-tag"><i class="fas fa-check" aria-hidden="true"></i> WYSIWYG 에디터</span>
+            <span class="need-tag"><i class="fas fa-check" aria-hidden="true"></i> PDF 자동 퍼블리싱</span>
+            <span class="need-tag"><i class="fas fa-check" aria-hidden="true"></i> 대시보드 관리</span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack -->
+  <section class="tech" id="tech">
+    <div class="container">
+      <div class="fade-in">
+        <span class="section-label">Tech Stack</span>
+        <h2 class="section-title">기술 제안</h2>
+        <div class="gold-line"></div>
+        <p class="section-desc">
+          검증된 모던 기술 스택으로 안정성과 확장성을 동시에 확보합니다.
+        </p>
+      </div>
+
+      <div class="tech-stack-grid">
+        <article class="tech-card fade-in">
+          <div class="tech-card-header">
+            <div class="tech-card-icon"><i class="fas fa-desktop" aria-hidden="true"></i></div>
+            <div>
+              <div class="tech-card-label">Frontend</div>
+              <div class="tech-card-name">Next.js 14 + TypeScript</div>
+            </div>
+          </div>
+          <p>App Router 기반 SSR/SSG로 빠른 로딩. TypeScript로 타입 안전성 확보. TailwindCSS로 일관된 디자인 시스템 구축.</p>
+          <div class="tech-tags">
+            <span class="tech-tag">Next.js 14</span>
+            <span class="tech-tag">TypeScript</span>
+            <span class="tech-tag">TailwindCSS</span>
+          </div>
+        </article>
+
+        <article class="tech-card fade-in">
+          <div class="tech-card-header">
+            <div class="tech-card-icon"><i class="fas fa-server" aria-hidden="true"></i></div>
+            <div>
+              <div class="tech-card-label">Backend</div>
+              <div class="tech-card-name">API Routes + Prisma</div>
+            </div>
+          </div>
+          <p>Next.js API Routes로 프론트-백엔드 통합. Prisma ORM으로 타입 안전한 DB 쿼리. PostgreSQL로 안정적 데이터 관리.</p>
+          <div class="tech-tags">
+            <span class="tech-tag">API Routes</span>
+            <span class="tech-tag">Prisma</span>
+            <span class="tech-tag">PostgreSQL</span>
+          </div>
+        </article>
+
+        <article class="tech-card fade-in">
+          <div class="tech-card-header">
+            <div class="tech-card-icon"><i class="fas fa-brain" aria-hidden="true"></i></div>
+            <div>
+              <div class="tech-card-label">AI Engine</div>
+              <div class="tech-card-name">GPT-4o / Gemini Pro</div>
+            </div>
+          </div>
+          <p>명리학 도메인 특화 프롬프트 엔지니어링. 멀티 LLM 지원으로 비용 최적화. 일관된 고품질 리포트 초안 생성.</p>
+          <div class="tech-tags">
+            <span class="tech-tag">OpenAI</span>
+            <span class="tech-tag">Gemini</span>
+            <span class="tech-tag">Prompt Eng.</span>
+          </div>
+        </article>
+
+        <article class="tech-card fade-in">
+          <div class="tech-card-header">
+            <div class="tech-card-icon"><i class="fas fa-file-pdf" aria-hidden="true"></i></div>
+            <div>
+              <div class="tech-card-label">PDF Engine</div>
+              <div class="tech-card-name">Puppeteer + 템플릿 엔진</div>
+            </div>
+          </div>
+          <p>커스텀 HTML/CSS 템플릿 기반 고해상도 PDF 생성. 100페이지 이상 안정 출력. 동양 철학 스타일 디자인 적용.</p>
+          <div class="tech-tags">
+            <span class="tech-tag">Puppeteer</span>
+            <span class="tech-tag">Handlebars</span>
+            <span class="tech-tag">PDF/A</span>
+          </div>
+        </article>
+
+        <article class="tech-card fade-in">
+          <div class="tech-card-header">
+            <div class="tech-card-icon"><i class="fas fa-cloud" aria-hidden="true"></i></div>
+            <div>
+              <div class="tech-card-label">Infrastructure</div>
+              <div class="tech-card-name">Vercel + Supabase</div>
+            </div>
+          </div>
+          <p>Vercel로 무중단 배포 및 자동 스케일링. Supabase로 PostgreSQL + Auth + Storage 통합 관리. 서버리스 아키텍처.</p>
+          <div class="tech-tags">
+            <span class="tech-tag">Vercel</span>
+            <span class="tech-tag">Supabase</span>
+            <span class="tech-tag">Edge Fn</span>
+          </div>
+        </article>
+
+        <article class="tech-card fade-in">
+          <div class="tech-card-header">
+            <div class="tech-card-icon"><i class="fas fa-satellite" aria-hidden="true"></i></div>
+            <div>
+              <div class="tech-card-label">External API</div>
+              <div class="tech-card-name">KASI 천문 API</div>
+            </div>
+          </div>
+          <p>한국천문연구원 API 연동으로 정확한 음양력 변환 및 절기 데이터 산출. 사주 팔자 계산의 천문학적 정확성 보장.</p>
+          <div class="tech-tags">
+            <span class="tech-tag">KASI API</span>
+            <span class="tech-tag">음양력</span>
+            <span class="tech-tag">절기 계산</span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture -->
+  <section class="architecture" id="architecture">
+    <div class="container">
+      <div class="fade-in">
+        <span class="section-label">System Architecture</span>
+        <h2 class="section-title">시스템 아키텍처</h2>
+        <div class="gold-line"></div>
+        <p class="section-desc">
+          데이터 입력부터 PDF 출력까지, End-to-End 자동화 파이프라인을 구축합니다.
+        </p>
+      </div>
+
+      <div class="arch-flow fade-in">
+        <div class="arch-step">
+          <div class="arch-step-icon"><i class="fas fa-user-plus" aria-hidden="true"></i></div>
+          <div class="arch-step-num">STEP 01</div>
+          <h4>고객 데이터 입력</h4>
+          <p>이름, 생년월일, 성별 등 기본 정보 입력</p>
+        </div>
+        <div class="arch-arrow" aria-hidden="true"><i class="fas fa-chevron-right"></i></div>
+        <div class="arch-step">
+          <div class="arch-step-icon"><i class="fas fa-satellite-dish" aria-hidden="true"></i></div>
+          <div class="arch-step-num">STEP 02</div>
+          <h4>KASI API 연동</h4>
+          <p>음양력 변환, 절기 산출, 천문 데이터 수집</p>
+        </div>
+        <div class="arch-arrow" aria-hidden="true"><i class="fas fa-chevron-right"></i></div>
+        <div class="arch-step">
+          <div class="arch-step-icon"><i class="fas fa-cogs" aria-hidden="true"></i></div>
+          <div class="arch-step-num">STEP 03</div>
+          <h4>데이터 정규화</h4>
+          <p>사주 팔자 산출, 오행 분석, 용신 판별</p>
+        </div>
+        <div class="arch-arrow" aria-hidden="true"><i class="fas fa-chevron-right"></i></div>
+        <div class="arch-step">
+          <div class="arch-step-icon"><i class="fas fa-robot" aria-hidden="true"></i></div>
+          <div class="arch-step-num">STEP 04</div>
+          <h4>LLM 초안 생성</h4>
+          <p>GPT-4o 기반 명리학 분석 리포트 초안</p>
+        </div>
+        <div class="arch-arrow" aria-hidden="true"><i class="fas fa-chevron-right"></i></div>
+        <div class="arch-step">
+          <div class="arch-step-icon"><i class="fas fa-pen-fancy" aria-hidden="true"></i></div>
+          <div class="arch-step-num">STEP 05</div>
+          <h4>웹 에디터 검수</h4>
+          <p>전문가 검수 및 내용 수정/보완</p>
+        </div>
+        <div class="arch-arrow" aria-hidden="true"><i class="fas fa-chevron-right"></i></div>
+        <div class="arch-step">
+          <div class="arch-step-icon"><i class="fas fa-file-pdf" aria-hidden="true"></i></div>
+          <div class="arch-step-num">STEP 06</div>
+          <h4>PDF 출력</h4>
+          <p>100+ 페이지 고해상도 PDF 자동 발행</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Features -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="fade-in">
+        <span class="section-label">Core Features</span>
+        <h2 class="section-title">핵심 기능 상세</h2>
+        <div class="gold-line"></div>
+        <p class="section-desc">
+          8가지 핵심 모듈로 구성된 완전한 리포트 자동화 시스템입니다.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <article class="feature-card fade-in">
+          <div class="feature-icon"><i class="fas fa-shield-halved" aria-hidden="true"></i></div>
+          <h3>관리자 인증 시스템</h3>
+          <p>Supabase Auth 기반 안전한 로그인. 역할 기반 접근 제어(RBAC)로 보안 강화.</p>
+          <span class="feature-method">Supabase Auth + JWT</span>
+        </article>
+
+        <article class="feature-card fade-in">
+          <div class="feature-icon"><i class="fas fa-database" aria-hidden="true"></i></div>
+          <h3>고객 데이터 관리</h3>
+          <p>생년월일, 출생시간, 성별 등 고객 정보를 체계적으로 관리하고 검색합니다.</p>
+          <span class="feature-method">Prisma + PostgreSQL</span>
+        </article>
+
+        <article class="feature-card fade-in">
+          <div class="feature-icon"><i class="fas fa-satellite-dish" aria-hidden="true"></i></div>
+          <h3>천문 API 연동</h3>
+          <p>KASI API로 정확한 음양력 변환, 절기 계산, 천문 데이터를 실시간 연동합니다.</p>
+          <span class="feature-method">REST API + 캐싱</span>
+        </article>
+
+        <article class="feature-card fade-in">
+          <div class="feature-icon"><i class="fas fa-gears" aria-hidden="true"></i></div>
+          <h3>데이터 정규화 엔진</h3>
+          <p>천간지지, 오행, 십성, 12운성 등 명리학 데이터를 알고리즘으로 정확히 산출합니다.</p>
+          <span class="feature-method">커스텀 알고리즘</span>
+        </article>
+
+        <article class="feature-card fade-in">
+          <div class="feature-icon"><i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i></div>
+          <h3>AI 리포트 생성</h3>
+          <p>명리학 특화 프롬프트로 GPT-4o/Gemini가 섹션별 분석 초안을 자동 생성합니다.</p>
+          <span class="feature-method">Multi-LLM + Streaming</span>
+        </article>
+
+        <article class="feature-card fade-in">
+          <div class="feature-icon"><i class="fas fa-pen-to-square" aria-hidden="true"></i></div>
+          <h3>WYSIWYG 웹 에디터</h3>
+          <p>TipTap 기반 리치 텍스트 에디터로 AI 초안을 직관적으로 검수하고 수정합니다.</p>
+          <span class="feature-method">TipTap + 자동저장</span>
+        </article>
+
+        <article class="feature-card fade-in">
+          <div class="feature-icon"><i class="fas fa-print" aria-hidden="true"></i></div>
+          <h3>PDF 퍼블리싱</h3>
+          <p>커스텀 템플릿으로 100+페이지 고해상도 PDF를 안정적으로 자동 생성합니다.</p>
+          <span class="feature-method">Puppeteer + 템플릿</span>
+        </article>
+
+        <article class="feature-card fade-in">
+          <div class="feature-icon"><i class="fas fa-chart-line" aria-hidden="true"></i></div>
+          <h3>운영 대시보드</h3>
+          <p>리포트 발행 현황, 고객 통계, AI 사용량 등 핵심 지표를 실시간 모니터링합니다.</p>
+          <span class="feature-method">Recharts + 실시간</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- MVP Strategy -->
+  <section class="mvp" id="mvp">
+    <div class="container">
+      <div class="fade-in">
+        <span class="section-label">MVP Strategy</span>
+        <h2 class="section-title">MVP 제안 및 예산 최적화</h2>
+        <div class="gold-line"></div>
+        <p class="section-desc">
+          핵심 기능 우선 개발로 빠른 가치 검증, 단계적 고도화로 예산을 최적화합니다.
+        </p>
+      </div>
+
+      <div class="mvp-phases">
+        <article class="phase-card fade-in-left">
+          <span class="phase-label"><i class="fas fa-rocket" aria-hidden="true"></i> Phase 1</span>
+          <h3>핵심 파이프라인 구축</h3>
+          <p>데이터 입력부터 PDF 출력까지, 핵심 자동화 플로우를 우선 완성합니다.</p>
+          <ul class="phase-items">
+            <li><i class="fas fa-check-circle" aria-hidden="true"></i> 관리자 로그인 및 인증 시스템</li>
+            <li><i class="fas fa-check-circle" aria-hidden="true"></i> 고객 데이터 CRUD + 엑셀 가져오기</li>
+            <li><i class="fas fa-check-circle" aria-hidden="true"></i> KASI API 연동 + 사주 데이터 정규화</li>
+            <li><i class="fas fa-check-circle" aria-hidden="true"></i> AI 리포트 초안 생성 (GPT-4o)</li>
+            <li><i class="fas fa-check-circle" aria-hidden="true"></i> 기본 웹 에디터 (검수/수정)</li>
+            <li><i class="fas fa-check-circle" aria-hidden="true"></i> PDF 출력 (기본 템플릿 1종)</li>
+          </ul>
+          <div class="budget-note">
+            <i class="fas fa-lightbulb" aria-hidden="true"></i>
+            핵심 워크플로우 완성으로 즉시 업무에 투입 가능
+          </div>
+        </article>
+
+        <article class="phase-card phase-2 fade-in-right">
+          <span class="phase-label"><i class="fas fa-chart-line" aria-hidden="true"></i> Phase 2</span>
+          <h3>고도화 및 확장</h3>
+          <p>Phase 1 피드백을 반영하여 기능을 고도화하고 운영 편의성을 확보합니다.</p>
+          <ul class="phase-items">
+            <li><i class="fas fa-circle" aria-hidden="true"></i> 멀티 LLM 지원 (Gemini Pro 추가)</li>
+            <li><i class="fas fa-circle" aria-hidden="true"></i> PDF 템플릿 다양화 (3종 이상)</li>
+            <li><i class="fas fa-circle" aria-hidden="true"></i> 운영 대시보드 (통계/모니터링)</li>
+            <li><i class="fas fa-circle" aria-hidden="true"></i> 리포트 히스토리 및 버전 관리</li>
+            <li><i class="fas fa-circle" aria-hidden="true"></i> 배치 처리 (다건 동시 생성)</li>
+            <li><i class="fas fa-circle" aria-hidden="true"></i> 에디터 고도화 (이미지/차트 삽입)</li>
+          </ul>
+          <div class="budget-note">
+            <i class="fas fa-lightbulb" aria-hidden="true"></i>
+            실사용 피드백 기반 고도화로 불필요한 개발 비용 절감
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline -->
+  <section class="timeline-section" id="timeline">
+    <div class="container">
+      <div class="fade-in">
+        <span class="section-label">Timeline</span>
+        <h2 class="section-title">개발 일정 제안</h2>
+        <div class="gold-line"></div>
+        <p class="section-desc">
+          약 8~10주 일정으로, 핵심 파이프라인부터 고도화까지 단계적으로 진행합니다.
+        </p>
+      </div>
+
+      <div class="timeline-wrapper">
+        <div class="timeline-line" aria-hidden="true"></div>
+
+        <div class="timeline-item fade-in">
+          <div class="timeline-content">
+            <div class="timeline-week">WEEK 1-2</div>
+            <h4>프로젝트 셋업 & 설계</h4>
+            <p>요구사항 확정, DB 스키마 설계, UI/UX 와이어프레임, 개발 환경 구축, API 설계</p>
+          </div>
+          <div class="timeline-dot" aria-hidden="true"></div>
+        </div>
+
+        <div class="timeline-item fade-in">
+          <div class="timeline-content">
+            <div class="timeline-week">WEEK 3-4</div>
+            <h4>핵심 백엔드 개발</h4>
+            <p>관리자 인증, 고객 데이터 CRUD, KASI API 연동, 사주 데이터 정규화 엔진 구현</p>
+          </div>
+          <div class="timeline-dot" aria-hidden="true"></div>
+        </div>
+
+        <div class="timeline-item fade-in">
+          <div class="timeline-content">
+            <div class="timeline-week">WEEK 5-6</div>
+            <h4>AI 엔진 & 에디터</h4>
+            <p>LLM 프롬프트 엔지니어링, AI 초안 생성 파이프라인, WYSIWYG 웹 에디터 개발</p>
+          </div>
+          <div class="timeline-dot" aria-hidden="true"></div>
+        </div>
+
+        <div class="timeline-item fade-in">
+          <div class="timeline-content">
+            <div class="timeline-week">WEEK 7-8</div>
+            <h4>PDF 엔진 & 통합 테스트</h4>
+            <p>PDF 템플릿 디자인/개발, 100+페이지 안정성 테스트, End-to-End 통합 검증</p>
+          </div>
+          <div class="timeline-dot" aria-hidden="true"></div>
+        </div>
+
+        <div class="timeline-item fade-in">
+          <div class="timeline-content">
+            <div class="timeline-week">WEEK 9-10</div>
+            <h4>고도화 & 배포</h4>
+            <p>대시보드, 배치 처리, 피드백 반영, 운영 매뉴얼 작성, 최종 배포 및 인수인계</p>
+          </div>
+          <div class="timeline-dot" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section class="about" id="about">
+    <div class="container">
+      <div class="about-content">
+        <div class="about-text fade-in-left">
+          <span class="section-label">About Us</span>
+          <h2 class="section-title">온다마케팅</h2>
+          <div class="gold-line"></div>
+          <p>
+            온다마케팅은 AI 기술과 데이터 파이프라인 전문성을 기반으로,
+            비즈니스의 디지털 전환을 가속화하는 기술 파트너입니다.
+          </p>
+          <ul class="about-strengths">
+            <li>
+              <div class="strength-icon"><i class="fas fa-brain" aria-hidden="true"></i></div>
+              <div class="strength-text">
+                <h4>AI 시스템 구축 경험</h4>
+                <p>LLM 기반 자동화 시스템, AI 데이터 분석 파이프라인 다수 구축 경험</p>
+              </div>
+            </li>
+            <li>
+              <div class="strength-icon"><i class="fas fa-database" aria-hidden="true"></i></div>
+              <div class="strength-text">
+                <h4>데이터 파이프라인 전문성</h4>
+                <p>대규모 데이터 수집, 정규화, 분석 시스템 설계 및 운영 노하우</p>
+              </div>
+            </li>
+            <li>
+              <div class="strength-icon"><i class="fas fa-code" aria-hidden="true"></i></div>
+              <div class="strength-text">
+                <h4>풀스택 개발 역량</h4>
+                <p>Next.js, React, Node.js 기반 풀스택 웹 애플리케이션 개발 전문</p>
+              </div>
+            </li>
+            <li>
+              <div class="strength-icon"><i class="fas fa-handshake" aria-hidden="true"></i></div>
+              <div class="strength-text">
+                <h4>긴밀한 커뮤니케이션</h4>
+                <p>주간 스프린트 리뷰, 실시간 진행 상황 공유로 투명한 프로젝트 관리</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="about-visual fade-in-right">
+          <div class="about-stats-grid">
+            <div class="about-stat-card">
+              <div class="stat-val">50+</div>
+              <div class="stat-label">프로젝트 수행</div>
+            </div>
+            <div class="about-stat-card">
+              <div class="stat-val">AI</div>
+              <div class="stat-label">전문 기술 역량</div>
+            </div>
+            <div class="about-stat-card">
+              <div class="stat-val">24h</div>
+              <div class="stat-label">빠른 응답 시간</div>
+            </div>
+            <div class="about-stat-card">
+              <div class="stat-val">100%</div>
+              <div class="stat-label">프로젝트 완수율</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta" id="cta">
+    <div class="container">
+      <div class="cta-box fade-in">
+        <h2>프로젝트를 함께 시작할 준비가 되었습니다</h2>
+        <p>
+          사주 명리학 AI 리포트 자동화 시스템, 온다마케팅이 최적의 기술 파트너입니다.
+          지금 바로 문의해주세요.
+        </p>
+        <div class="cta-buttons">
+          <a href="mailto:contact@ondamarketing.com" class="btn btn-primary">
+            <i class="fas fa-envelope" aria-hidden="true"></i>
+            이메일 문의하기
+          </a>
+          <a href="#hero" class="btn btn-outline">
+            <i class="fas fa-arrow-up" aria-hidden="true"></i>
+            제안서 다시 보기
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <p>&copy; 2026 <a href="#hero">온다마케팅</a>. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    (function() {
+      'use strict';
+
+      // ===== Intersection Observer for Animations =====
+      var observerOptions = {
+        threshold: 0.15,
+        rootMargin: '0px 0px -40px 0px'
+      };
+
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right').forEach(function(el) {
+        observer.observe(el);
+      });
+
+      // ===== Navbar Scroll Effect =====
+      var nav = document.querySelector('.nav');
+      var lastScroll = 0;
+
+      window.addEventListener('scroll', function() {
+        var currentScroll = window.pageYOffset;
+        if (currentScroll > 60) {
+          nav.classList.add('scrolled');
+        } else {
+          nav.classList.remove('scrolled');
+        }
+        lastScroll = currentScroll;
+      }, { passive: true });
+
+      // ===== Active Nav Link =====
+      var sections = document.querySelectorAll('section[id]');
+      var navLinks = document.querySelectorAll('.nav-links a:not(.btn)');
+
+      window.addEventListener('scroll', function() {
+        var scrollY = window.pageYOffset + 100;
+        sections.forEach(function(section) {
+          var top = section.offsetTop;
+          var height = section.offsetHeight;
+          var id = section.getAttribute('id');
+          if (scrollY >= top && scrollY < top + height) {
+            navLinks.forEach(function(link) {
+              link.classList.remove('active');
+              if (link.getAttribute('href') === '#' + id) {
+                link.classList.add('active');
+              }
+            });
+          }
+        });
+      }, { passive: true });
+
+      // ===== Hamburger Menu =====
+      var hamburger = document.querySelector('.hamburger');
+      var mobileMenu = document.querySelector('.mobile-menu');
+      var mobileLinks = document.querySelectorAll('.mobile-menu-links a');
+
+      hamburger.addEventListener('click', function() {
+        var isOpen = hamburger.classList.toggle('active');
+        hamburger.setAttribute('aria-expanded', isOpen);
+        if (isOpen) {
+          mobileMenu.classList.add('open');
+          document.body.style.overflow = 'hidden';
+        } else {
+          mobileMenu.classList.remove('open');
+          document.body.style.overflow = '';
+        }
+      });
+
+      mobileLinks.forEach(function(link) {
+        link.addEventListener('click', function() {
+          hamburger.classList.remove('active');
+          hamburger.setAttribute('aria-expanded', 'false');
+          mobileMenu.classList.remove('open');
+          document.body.style.overflow = '';
+        });
+      });
+
+      // ===== Smooth Scroll for anchor links =====
+      document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+        anchor.addEventListener('click', function(e) {
+          e.preventDefault();
+          var target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            var offset = 70;
+            var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+            window.scrollTo({ top: top, behavior: 'smooth' });
+          }
+        });
+      });
+
+      // ===== Staggered Animation Delay =====
+      var grids = document.querySelectorAll('.features-grid, .tech-stack-grid, .understanding-grid');
+      grids.forEach(function(grid) {
+        var cards = grid.children;
+        for (var i = 0; i < cards.length; i++) {
+          cards[i].style.transitionDelay = (i * 0.1) + 's';
+        }
+      });
+
+    })();
+  </script>
+</body>
+</html>
