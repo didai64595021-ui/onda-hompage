@@ -55,6 +55,11 @@ body.admin-mode [data-cms-section]:hover{outline:1px dashed rgba(0,201,167,.3);o
 body.admin-mode .cms-hidden{opacity:.25;pointer-events:none}
 body.admin-mode .cms-hidden>.section-ctrl{pointer-events:auto;opacity:1}
 body.admin-mode .cms-dragging{opacity:.3}
+/* Image Position Editor */
+.img-pos-editor{position:relative;width:100%;height:220px;border-radius:12px;overflow:hidden;cursor:move;border:2px solid var(--accent);margin-bottom:1rem;background-size:cover;background-repeat:no-repeat;touch-action:none}
+.img-pos-crosshair{position:absolute;width:40px;height:40px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.3),inset 0 0 0 1px rgba(0,0,0,.3);pointer-events:none;transform:translate(-50%,-50%);z-index:2}
+.img-pos-crosshair::after{content:'';position:absolute;top:50%;left:50%;width:8px;height:8px;background:#fff;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 4px rgba(0,0,0,.5)}
+.img-pos-hint{text-align:center;font-size:.72rem;color:var(--text2);margin-bottom:.8rem}
 body.admin-mode .cms-drag-over{box-shadow:0 -4px 0 var(--accent)}
 body.admin-mode .svc-card,body.admin-mode .trust__grid>.fade-in,body.admin-mode .clients__logo,body.admin-mode .nav__menu li{cursor:grab;position:relative}
 body.admin-mode .item-dragging{opacity:.3!important;cursor:grabbing!important}
@@ -736,7 +741,100 @@ function applyBtn(){
   el.style.padding=document.getElementById('btnPad').value;
   closeModal('cmsModal');showToast('✅');
 }
-function applyBgImg(){window._cmsTarget.style.backgroundImage=`url(${document.getElementById('bgUrl').value})`;closeModal('cmsModal');showToast('✅')}
+function applyBgImg(){
+  const url=document.getElementById('bgUrl').value;
+  if(!url){closeModal('cmsModal');return}
+  window._cmsTarget.style.backgroundImage=`url(${url})`;
+  closeModal('cmsModal');
+  openImgPosEditor(window._cmsTarget,'bg');
+}
+
+// === IMAGE POSITION EDITOR ===
+function openImgPosEditor(el,mode){
+  // mode: 'bg' (hero bg div), 'section' (section element), 'card' (card element)
+  let bgImg='';
+  if(mode==='bg')bgImg=el.style.backgroundImage;
+  else bgImg=el.style.background?.includes('url')?el.style.background.match(/url\([^)]+\)/)?.[0]||'':'';
+  if(!bgImg&&el.style.backgroundImage)bgImg=el.style.backgroundImage;
+  const curPos=el.style.backgroundPosition||'center center';
+  const posMatch=curPos.match(/([\d.]+)%?\s*([\d.]+)%?/);
+  let posX=50,posY=50;
+  if(curPos.includes('center'))posX=posY=50;
+  if(posMatch){posX=parseFloat(posMatch[1])||50;posY=parseFloat(posMatch[2])||50}
+
+  const html=`<div class="cms-modal__title">🖼️ 이미지 위치 조절</div>
+  <p class="img-pos-hint">드래그하여 이미지 위치를 조절하세요</p>
+  <div class="img-pos-editor" id="imgPosArea" style="background-image:${bgImg||el.style.backgroundImage};background-position:${posX}% ${posY}%;background-size:cover">
+    <div class="img-pos-crosshair" id="imgPosCross" style="left:${posX}%;top:${posY}%"></div>
+  </div>
+  <div style="display:flex;gap:.5rem;margin-bottom:.8rem">
+    <div style="flex:1"><label class="cms-modal__label">가로 위치 (%)</label><input class="cms-modal__field" id="imgPosX" type="number" min="0" max="100" value="${Math.round(posX)}" oninput="updatePosPreview()"></div>
+    <div style="flex:1"><label class="cms-modal__label">세로 위치 (%)</label><input class="cms-modal__field" id="imgPosY" type="number" min="0" max="100" value="${Math.round(posY)}" oninput="updatePosPreview()"></div>
+  </div>
+  <div style="display:flex;gap:.4rem;margin-bottom:1rem;flex-wrap:wrap">
+    <button onclick="setPosPreset(0,0)" style="padding:.4rem .7rem;border:1px solid #dde1e8;border-radius:6px;cursor:pointer;font-size:.7rem;background:#fff">↖ 좌상</button>
+    <button onclick="setPosPreset(50,0)" style="padding:.4rem .7rem;border:1px solid #dde1e8;border-radius:6px;cursor:pointer;font-size:.7rem;background:#fff">⬆ 상단</button>
+    <button onclick="setPosPreset(100,0)" style="padding:.4rem .7rem;border:1px solid #dde1e8;border-radius:6px;cursor:pointer;font-size:.7rem;background:#fff">↗ 우상</button>
+    <button onclick="setPosPreset(50,50)" style="padding:.4rem .7rem;border:1px solid #dde1e8;border-radius:6px;cursor:pointer;font-size:.7rem;background:var(--accent);color:#fff">◉ 중앙</button>
+    <button onclick="setPosPreset(0,100)" style="padding:.4rem .7rem;border:1px solid #dde1e8;border-radius:6px;cursor:pointer;font-size:.7rem;background:#fff">↙ 좌하</button>
+    <button onclick="setPosPreset(50,100)" style="padding:.4rem .7rem;border:1px solid #dde1e8;border-radius:6px;cursor:pointer;font-size:.7rem;background:#fff">⬇ 하단</button>
+    <button onclick="setPosPreset(100,100)" style="padding:.4rem .7rem;border:1px solid #dde1e8;border-radius:6px;cursor:pointer;font-size:.7rem;background:#fff">↘ 우하</button>
+  </div>
+  <label class="cms-modal__label">확대/축소</label>
+  <select class="cms-modal__field" id="imgPosSize" onchange="updatePosPreview()">
+    <option value="cover" selected>꽉 채우기 (cover)</option>
+    <option value="contain">전체 보기 (contain)</option>
+    <option value="100% auto">가로 맞춤</option>
+    <option value="auto 100%">세로 맞춤</option>
+  </select>
+  <div class="cms-modal__btns"><button class="cms-modal__cancel" onclick="closeModal('cmsModal')">취소</button><button class="cms-modal__save" onclick="applyImgPos()">적용</button></div>`;
+
+  window._imgPosTarget=el;window._imgPosMode=mode;
+  document.getElementById('cmsModalBox').innerHTML=html;document.getElementById('cmsModal').classList.add('active');
+
+  // Drag handler
+  const area=document.getElementById('imgPosArea');
+  let dragging=false;
+  function onMove(e){
+    if(!dragging)return;
+    const rect=area.getBoundingClientRect();
+    const cx=e.clientX||e.touches?.[0]?.clientX||0;
+    const cy=e.clientY||e.touches?.[0]?.clientY||0;
+    let x=Math.max(0,Math.min(100,((cx-rect.left)/rect.width)*100));
+    let y=Math.max(0,Math.min(100,((cy-rect.top)/rect.height)*100));
+    document.getElementById('imgPosX').value=Math.round(x);
+    document.getElementById('imgPosY').value=Math.round(y);
+    updatePosPreview();
+  }
+  area.onmousedown=area.ontouchstart=function(e){e.preventDefault();dragging=true;onMove(e)};
+  document.onmousemove=document.ontouchmove=function(e){if(dragging)onMove(e)};
+  document.onmouseup=document.ontouchend=function(){dragging=false};
+}
+function updatePosPreview(){
+  const x=document.getElementById('imgPosX').value;
+  const y=document.getElementById('imgPosY').value;
+  const size=document.getElementById('imgPosSize').value;
+  const area=document.getElementById('imgPosArea');
+  const cross=document.getElementById('imgPosCross');
+  area.style.backgroundPosition=x+'% '+y+'%';
+  area.style.backgroundSize=size;
+  cross.style.left=x+'%';cross.style.top=y+'%';
+}
+function setPosPreset(x,y){
+  document.getElementById('imgPosX').value=x;
+  document.getElementById('imgPosY').value=y;
+  updatePosPreview();
+}
+function applyImgPos(){
+  pushUndo();
+  const el=window._imgPosTarget;
+  const x=document.getElementById('imgPosX').value;
+  const y=document.getElementById('imgPosY').value;
+  const size=document.getElementById('imgPosSize').value;
+  el.style.backgroundPosition=x+'% '+y+'%';
+  el.style.backgroundSize=size;
+  closeModal('cmsModal');showToast('✅ 이미지 위치 적용');
+}
 
 // === CARD APPLY ===
 function applyCard(){
@@ -757,7 +855,8 @@ function applyCard(){
   // Remove old hover classes
   el.classList.remove('hover-none','hover-lift','hover-scale','hover-shadow');
   el.classList.add('hover-'+hover);
-  closeModal('cmsModal');showToast('✅');
+  if(imgUrl){closeModal('cmsModal');openImgPosEditor(el,'card')}
+  else{closeModal('cmsModal');showToast('✅')}
 }
 function handleCardFile(e){processCardFile(e.target.files[0])}
 function handleCardDrop(e){e.preventDefault();processCardFile(e.dataTransfer.files[0])}
@@ -872,11 +971,14 @@ function applySectionBg2(){
   const grad=document.getElementById('secGrad').value;
   const img=document.getElementById('secImg').value;
   const bg=document.getElementById('secBgH').value;
-  if(grad)sec.style.background=grad;
-  else if(img&&img.startsWith('data:'))sec.style.background=`url(${img}) center/cover no-repeat`;
-  else if(img)sec.style.background=`url(${img}) center/cover`;
-  else sec.style.background=bg;
-  closeModal('cmsModal');showToast('✅');
+  if(grad){sec.style.background=grad;closeModal('cmsModal');showToast('✅')}
+  else if(img){
+    if(img.startsWith('data:'))sec.style.background=`url(${img}) center/cover no-repeat`;
+    else sec.style.background=`url(${img}) center/cover`;
+    sec.style.backgroundSize='cover';sec.style.backgroundPosition='center center';
+    closeModal('cmsModal');openImgPosEditor(sec,'section');
+  }
+  else{sec.style.background=bg;closeModal('cmsModal');showToast('✅')}
 }
 function editSectionSpacing(btn){
   const sec=getSec(btn);
