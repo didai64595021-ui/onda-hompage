@@ -101,7 +101,33 @@ body.admin-mode .gallery-item:hover::after{opacity:1}
 .cms-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:100000;display:none;align-items:center;justify-content:center;cursor:pointer}
 .cms-lightbox.active{display:flex}
 .cms-lightbox img{max-width:90%;max-height:90%;border-radius:8px;object-fit:contain}
-@media(max-width:768px){.gallery-grid.cols-3,.gallery-grid.cols-4{grid-template-columns:repeat(2,1fr)}.pricing-grid{grid-template-columns:1fr}}
+/* Counter Animation */
+.counter-num{display:inline-block}
+/* Sticky Section */
+.cms-sticky{position:sticky;top:76px;z-index:50}
+/* Video Background */
+.video-bg-wrap{position:absolute;inset:0;overflow:hidden;z-index:0}
+.video-bg-wrap iframe,.video-bg-wrap video{width:100%;height:100%;object-fit:cover;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);min-width:100%;min-height:100%;pointer-events:none}
+/* Background Overlay */
+.bg-overlay{position:absolute;inset:0;z-index:1;pointer-events:none}
+/* Cookie Banner */
+.cookie-banner{position:fixed;bottom:0;left:0;right:0;background:#1a1a2e;color:#fff;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;z-index:9998;font-size:.82rem;box-shadow:0 -4px 20px rgba(0,0,0,.15)}
+.cookie-banner button{background:var(--accent);color:#fff;border:none;padding:.5rem 1.2rem;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+/* Popup */
+.cms-popup{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100001;display:none;align-items:center;justify-content:center}
+.cms-popup.active{display:flex}
+.cms-popup__box{background:#fff;border-radius:16px;padding:2.5rem;max-width:500px;width:90%;text-align:center;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.cms-popup__close{position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text2)}
+/* Loading Animation */
+.site-loader{position:fixed;inset:0;background:var(--dark);z-index:999999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;transition:opacity .5s}
+.site-loader.hide{opacity:0;pointer-events:none}
+.loader-spin{width:40px;height:40px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* Responsive Hide */
+.hide-mobile{}.hide-tablet{}.hide-desktop{}
+@media(max-width:768px){.hide-mobile{display:none!important}.gallery-grid.cols-3,.gallery-grid.cols-4{grid-template-columns:repeat(2,1fr)}.pricing-grid{grid-template-columns:1fr}}
+@media(min-width:769px) and (max-width:1024px){.hide-tablet{display:none!important}}
+@media(min-width:1025px){.hide-desktop{display:none!important}}
 body.admin-mode .cms-drag-over{box-shadow:0 -4px 0 var(--accent)}
 body.admin-mode .svc-card,body.admin-mode .trust__grid>.fade-in,body.admin-mode .clients__logo,body.admin-mode .nav__menu li{cursor:grab;position:relative}
 body.admin-mode .item-dragging{opacity:.3!important;cursor:grabbing!important}
@@ -248,6 +274,8 @@ body.admin-mode [data-cms-section]:hover>.spacing-ctrl{display:flex}
       <button onclick="openSEO()">🔍 SEO</button>
       <button onclick="previewDevice()">📱 미리보기</button>
       <button onclick="toggleDarkPreview()">🌙 다크</button>
+      <button onclick="openPopupEditor()">💬 팝업</button>
+      <button onclick="openGlobalSettings()">⚙ 설정</button>
       <button onclick="exportHTML()">📦 내보내기</button>
       <button onclick="resetAll()">↩️ 초기화</button>
       <button class="primary" onclick="saveAll()">💾 저장</button>
@@ -289,6 +317,12 @@ body.admin-mode [data-cms-section]:hover>.spacing-ctrl{display:flex}
   </div>
 </div>
 
+<!-- LOADING -->
+<div class="site-loader" id="siteLoader"><div class="loader-spin"></div><div style="color:rgba(255,255,255,.6);font-size:.8rem">로딩 중...</div></div>
+<!-- COOKIE BANNER -->
+<div class="cookie-banner" id="cookieBanner" style="display:none"><span>🍪 이 웹사이트는 더 나은 경험을 위해 쿠키를 사용합니다.</span><button onclick="acceptCookies()">동의</button></div>
+<!-- POPUP -->
+<div class="cms-popup" id="sitePopup"><div class="cms-popup__box"><button class="cms-popup__close" onclick="closePopup()">✕</button><h3 data-cms="popup-title" style="font-size:1.3rem;font-weight:900;margin-bottom:.8rem">🎉 특별 안내</h3><p data-cms="popup-desc" style="color:var(--text2);margin-bottom:1.2rem">지금 무료 상담 신청하시면 10% 할인!</p><a href="#contact" class="btn btn--primary" data-cms="popup-btn" data-cms-type="button" onclick="closePopup()">무료 상담 신청</a></div></div>
 <div id="mainWrap">
 <!-- NAV -->
 <nav class="nav" id="nav">
@@ -1086,7 +1120,7 @@ function addNewSection(){
   <div class="cms-modal__btns"><button class="cms-modal__cancel" onclick="closeModal('cmsModal')">취소</button></div>`;
   document.getElementById('cmsModalBox').innerHTML=html;document.getElementById('cmsModal').classList.add('active');
 }
-const secCtrl=`<div class="section-ctrl"><button onclick="moveSection(this,-1)" data-tip="위로 이동">⬆️</button><button onclick="moveSection(this,1)" data-tip="아래로 이동">⬇️</button><button onclick="dupSection(this)" data-tip="섹션 복제">📋</button><button onclick="toggleHide(this)" data-tip="숨기기/보이기">👁️</button><button onclick="editSectionBg(this)" data-tip="배경 수정">🖼️</button><button onclick="editSectionSpacing(this)" data-tip="여백 조절">📐</button><button onclick="editSectionAnim(this)" data-tip="애니메이션">✨</button><button class="danger" onclick="delSection(this)" data-tip="섹션 삭제">🗑️</button></div>`;
+const secCtrl=`<div class="section-ctrl"><button onclick="moveSection(this,-1)" data-tip="위로 이동">⬆️</button><button onclick="moveSection(this,1)" data-tip="아래로 이동">⬇️</button><button onclick="dupSection(this)" data-tip="섹션 복제">📋</button><button onclick="toggleHide(this)" data-tip="숨기기/보이기">👁️</button><button onclick="editSectionBg(this)" data-tip="배경 수정">🖼️</button><button onclick="editSectionSpacing(this)" data-tip="여백 조절">📐</button><button onclick="editSectionAnim(this)" data-tip="애니메이션">✨</button><button onclick="toggleSticky(this)" data-tip="고정(Sticky)">📌</button><button onclick="editOverlay(this)" data-tip="오버레이">🎭</button><button onclick="editVisibility(this)" data-tip="기기별 숨김">👁️‍🗨️</button><button onclick="editVideoBg(this)" data-tip="비디오 배경">🎬</button><button class="danger" onclick="delSection(this)" data-tip="섹션 삭제">🗑️</button></div>`;
 function insertSection(type){
   pushUndo();closeModal('cmsModal');
   const id='s_'+Date.now();
@@ -1277,6 +1311,142 @@ function applySns(){
   window._cmsTarget.href=url||'#';
   window._cmsTarget.style.display=url?'':'none';
   closeModal('cmsModal');showToast('✅');
+}
+
+// === STICKY TOGGLE ===
+function toggleSticky(btn){const sec=getSec(btn);sec.classList.toggle('cms-sticky');showToast(sec.classList.contains('cms-sticky')?'📌 고정됨':'📌 고정 해제')}
+
+// === OVERLAY EDITOR ===
+function editOverlay(btn){
+  const sec=getSec(btn);
+  let ov=sec.querySelector('.bg-overlay');
+  const curColor=ov?ov.style.background:'rgba(0,0,0,0.5)';
+  const html=`<div class="cms-modal__title">🎭 배경 오버레이</div>
+  <label class="cms-modal__label">오버레이 색상</label>
+  <div class="cms-modal__row"><input type="color" class="cms-modal__color" id="ovColor" value="#000000"><input class="cms-modal__field" id="ovColorH" value="#000000" style="margin:0"></div>
+  <label class="cms-modal__label">투명도 (0~100%)</label>
+  <input type="range" id="ovOpacity" min="0" max="100" value="${ov?Math.round(parseFloat(ov.style.opacity||.5)*100):50}" style="width:100%;margin-bottom:.5rem">
+  <div style="text-align:center;font-size:.8rem;color:var(--text2)" id="ovOpacityLabel">${ov?Math.round(parseFloat(ov.style.opacity||.5)*100):50}%</div>
+  <div class="cms-modal__btns"><button class="cms-modal__cancel" onclick="closeModal('cmsModal')">취소</button><button onclick="removeOverlay()" style="background:#ef4444;color:#fff;border:none;padding:.5rem 1rem;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700">제거</button><button class="cms-modal__save" onclick="applyOverlay()">적용</button></div>`;
+  document.getElementById('cmsModalBox').innerHTML=html;document.getElementById('cmsModal').classList.add('active');
+  document.getElementById('ovColor').oninput=e=>document.getElementById('ovColorH').value=e.target.value;
+  document.getElementById('ovOpacity').oninput=e=>document.getElementById('ovOpacityLabel').textContent=e.target.value+'%';
+  window._cmsSec=sec;
+}
+function applyOverlay(){
+  const sec=window._cmsSec;let ov=sec.querySelector('.bg-overlay');
+  if(!ov){ov=document.createElement('div');ov.className='bg-overlay';sec.style.position='relative';sec.insertBefore(ov,sec.firstChild)}
+  ov.style.background=document.getElementById('ovColorH').value;
+  ov.style.opacity=document.getElementById('ovOpacity').value/100;
+  closeModal('cmsModal');showToast('✅ 오버레이 적용');
+}
+function removeOverlay(){const ov=window._cmsSec.querySelector('.bg-overlay');if(ov)ov.remove();closeModal('cmsModal');showToast('🎭 오버레이 제거')}
+
+// === VISIBILITY (responsive hide) ===
+function editVisibility(btn){
+  const sec=getSec(btn);
+  const html=`<div class="cms-modal__title">👁️‍🗨️ 기기별 표시 설정</div>
+  <div style="display:flex;flex-direction:column;gap:.8rem;margin-bottom:1rem">
+    <label style="display:flex;align-items:center;gap:.8rem;font-size:.9rem"><input type="checkbox" id="visDesktop" ${sec.classList.contains('hide-desktop')?'':'checked'}> 🖥️ 데스크톱에 표시</label>
+    <label style="display:flex;align-items:center;gap:.8rem;font-size:.9rem"><input type="checkbox" id="visTablet" ${sec.classList.contains('hide-tablet')?'':'checked'}> 📱 태블릿에 표시</label>
+    <label style="display:flex;align-items:center;gap:.8rem;font-size:.9rem"><input type="checkbox" id="visMobile" ${sec.classList.contains('hide-mobile')?'':'checked'}> 📲 모바일에 표시</label>
+  </div>
+  <div class="cms-modal__btns"><button class="cms-modal__cancel" onclick="closeModal('cmsModal')">취소</button><button class="cms-modal__save" onclick="applyVisibility()">적용</button></div>`;
+  document.getElementById('cmsModalBox').innerHTML=html;document.getElementById('cmsModal').classList.add('active');
+  window._cmsSec=sec;
+}
+function applyVisibility(){
+  const sec=window._cmsSec;
+  sec.classList.toggle('hide-desktop',!document.getElementById('visDesktop').checked);
+  sec.classList.toggle('hide-tablet',!document.getElementById('visTablet').checked);
+  sec.classList.toggle('hide-mobile',!document.getElementById('visMobile').checked);
+  closeModal('cmsModal');showToast('✅ 표시 설정 적용');
+}
+
+// === VIDEO BACKGROUND ===
+function editVideoBg(btn){
+  const sec=getSec(btn);
+  const existing=sec.querySelector('.video-bg-wrap iframe');
+  const html=`<div class="cms-modal__title">🎬 비디오 배경</div>
+  <label class="cms-modal__label">YouTube URL</label>
+  <input class="cms-modal__field" id="vidUrl" value="${existing?'':''}" placeholder="https://www.youtube.com/watch?v=...">
+  <div style="background:#EEF2FF;border-radius:8px;padding:8px 12px;margin-bottom:.8rem;font-size:.72rem;color:#4338CA">💡 YouTube 링크를 넣으면 자동 무음 반복 재생됩니다</div>
+  <div class="cms-modal__btns"><button class="cms-modal__cancel" onclick="closeModal('cmsModal')">취소</button><button onclick="removeVideoBg()" style="background:#ef4444;color:#fff;border:none;padding:.5rem 1rem;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700">제거</button><button class="cms-modal__save" onclick="applyVideoBg()">적용</button></div>`;
+  document.getElementById('cmsModalBox').innerHTML=html;document.getElementById('cmsModal').classList.add('active');
+  window._cmsSec=sec;
+}
+function applyVideoBg(){
+  const sec=window._cmsSec;
+  const url=document.getElementById('vidUrl').value;
+  const match=url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if(!match){showToast('❌ 유효한 YouTube URL을 입력하세요');return}
+  let wrap=sec.querySelector('.video-bg-wrap');
+  if(!wrap){wrap=document.createElement('div');wrap.className='video-bg-wrap';sec.style.position='relative';sec.insertBefore(wrap,sec.firstChild)}
+  wrap.innerHTML=`<iframe src="https://www.youtube.com/embed/${match[1]}?autoplay=1&mute=1&loop=1&playlist=${match[1]}&controls=0&showinfo=0" frameborder="0" allow="autoplay" allowfullscreen></iframe>`;
+  // Ensure content is above video
+  sec.querySelectorAll(':scope>*:not(.video-bg-wrap):not(.section-ctrl):not(.bg-overlay)').forEach(el=>el.style.position='relative');
+  closeModal('cmsModal');showToast('🎬 비디오 배경 적용');
+}
+function removeVideoBg(){const w=window._cmsSec.querySelector('.video-bg-wrap');if(w)w.remove();closeModal('cmsModal');showToast('🎬 비디오 배경 제거')}
+
+// === POPUP EDITOR ===
+function openPopupEditor(){
+  const html=`<div class="cms-modal__title">💬 팝업 설정</div>
+  <label class="cms-modal__label">팝업 활성화</label>
+  <div style="display:flex;gap:.5rem;margin-bottom:1rem">
+    <button onclick="document.getElementById('popupEnabled').value='off';this.style.background='var(--accent)';this.style.color='#fff';this.nextElementSibling.style.background='#eee';this.nextElementSibling.style.color='var(--text)'" style="flex:1;padding:.5rem;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-family:inherit;background:#eee">비활성</button>
+    <button onclick="document.getElementById('popupEnabled').value='on';this.style.background='var(--accent)';this.style.color='#fff';this.previousElementSibling.style.background='#eee';this.previousElementSibling.style.color='var(--text)'" style="flex:1;padding:.5rem;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-family:inherit;background:#eee">활성</button>
+  </div>
+  <input type="hidden" id="popupEnabled" value="off">
+  <label class="cms-modal__label">표시 타이밍 (초)</label>
+  <input class="cms-modal__field" id="popupDelay" type="number" value="3" min="0" max="60">
+  <div style="background:#EEF2FF;border-radius:8px;padding:8px 12px;margin-bottom:.8rem;font-size:.72rem;color:#4338CA">💡 팝업 내용은 메인 페이지에서 직접 더블클릭하여 수정</div>
+  <div class="cms-modal__btns"><button class="cms-modal__cancel" onclick="closeModal('cmsModal')">취소</button><button class="cms-modal__save" onclick="applyPopup()">적용</button></div>`;
+  document.getElementById('cmsModalBox').innerHTML=html;document.getElementById('cmsModal').classList.add('active');
+}
+function applyPopup(){
+  const enabled=document.getElementById('popupEnabled').value;
+  const delay=document.getElementById('popupDelay').value;
+  localStorage.setItem('cms4_popup',JSON.stringify({enabled,delay}));
+  closeModal('cmsModal');showToast(enabled==='on'?'💬 팝업 활성화 ('+delay+'초 후)':'💬 팝업 비활성');
+}
+function closePopup(){document.getElementById('sitePopup').classList.remove('active')}
+
+// === GLOBAL SETTINGS (loading, cookie, cursor) ===
+function openGlobalSettings(){
+  const gs=JSON.parse(localStorage.getItem('cms4_global')||'{}');
+  const html=`<div class="cms-modal__title">⚙ 글로벌 설정</div>
+  <label class="cms-modal__label">🔄 로딩 애니메이션</label>
+  <select class="cms-modal__field" id="gsLoading"><option value="on" ${gs.loading!=='off'?'selected':''}>활성</option><option value="off" ${gs.loading==='off'?'selected':''}>비활성</option></select>
+  <label class="cms-modal__label">🍪 쿠키 배너</label>
+  <select class="cms-modal__field" id="gsCookie"><option value="on" ${gs.cookie==='on'?'selected':''}>활성</option><option value="off" ${gs.cookie!=='on'?'selected':''}>비활성</option></select>
+  <label class="cms-modal__label">🖱️ 커스텀 커서</label>
+  <select class="cms-modal__field" id="gsCursor"><option value="default" ${!gs.cursor||gs.cursor==='default'?'selected':''}>기본</option><option value="crosshair" ${gs.cursor==='crosshair'?'selected':''}>십자</option><option value="pointer" ${gs.cursor==='pointer'?'selected':''}>손가락</option><option value="none" ${gs.cursor==='none'?'selected':''}>숨김</option></select>
+  <label class="cms-modal__label">📊 카운터 애니메이션 (Trust 숫자)</label>
+  <select class="cms-modal__field" id="gsCounter"><option value="on" ${gs.counter!=='off'?'selected':''}>활성</option><option value="off" ${gs.counter==='off'?'selected':''}>비활성</option></select>
+  <div class="cms-modal__btns"><button class="cms-modal__cancel" onclick="closeModal('cmsModal')">취소</button><button class="cms-modal__save" onclick="applyGlobalSettings()">적용</button></div>`;
+  document.getElementById('cmsModalBox').innerHTML=html;document.getElementById('cmsModal').classList.add('active');
+}
+function applyGlobalSettings(){
+  const gs={loading:document.getElementById('gsLoading').value,cookie:document.getElementById('gsCookie').value,cursor:document.getElementById('gsCursor').value,counter:document.getElementById('gsCounter').value};
+  localStorage.setItem('cms4_global',JSON.stringify(gs));
+  document.body.style.cursor=gs.cursor==='default'?'':gs.cursor;
+  if(gs.cookie==='on'&&!localStorage.getItem('cms4_cookie_ok'))document.getElementById('cookieBanner').style.display='flex';
+  else document.getElementById('cookieBanner').style.display='none';
+  closeModal('cmsModal');showToast('⚙ 설정 저장');
+}
+function acceptCookies(){localStorage.setItem('cms4_cookie_ok','1');document.getElementById('cookieBanner').style.display='none'}
+
+// === COUNTER ANIMATION ===
+function animateCounters(){
+  document.querySelectorAll('.trust__num').forEach(el=>{
+    const text=el.textContent;
+    const num=parseInt(text.replace(/[^0-9]/g,''));
+    if(isNaN(num)||num===0)return;
+    const suffix=text.replace(/[0-9]/g,'');
+    let current=0;const step=Math.ceil(num/40);
+    const timer=setInterval(()=>{current=Math.min(current+step,num);el.textContent=current+suffix;if(current>=num)clearInterval(timer)},30);
+  });
 }
 
 // === GALLERY IMAGE CLICK ===
@@ -1492,6 +1662,27 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click'
 ['cmsModal','inquiryModal','themeModal'].forEach(id=>{document.getElementById(id).addEventListener('click',e=>{if(e.target.id===id)closeModal(id)})});
 // Init
 loadAll();
+
+// === INIT: Loading, Cookie, Popup, Counter ===
+(function(){
+  const gs=JSON.parse(localStorage.getItem('cms4_global')||'{}');
+  // Loading animation
+  const loader=document.getElementById('siteLoader');
+  if(gs.loading==='off'){loader.style.display='none'}
+  else{setTimeout(()=>loader.classList.add('hide'),800);setTimeout(()=>loader.style.display='none',1300)}
+  // Cookie banner
+  if(gs.cookie==='on'&&!localStorage.getItem('cms4_cookie_ok'))document.getElementById('cookieBanner').style.display='flex';
+  // Cursor
+  if(gs.cursor&&gs.cursor!=='default')document.body.style.cursor=gs.cursor;
+  // Popup
+  const pp=JSON.parse(localStorage.getItem('cms4_popup')||'{}');
+  if(pp.enabled==='on'){setTimeout(()=>{if(!adminMode)document.getElementById('sitePopup').classList.add('active')},((pp.delay||3)*1000))}
+  // Counter animation on scroll
+  if(gs.counter!=='off'){
+    const trustObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){animateCounters();trustObs.disconnect()}})},{threshold:.3});
+    const tg=document.querySelector('.trust__grid');if(tg)trustObs.observe(tg);
+  }
+})();
 </script>
 </body>
 </html>
