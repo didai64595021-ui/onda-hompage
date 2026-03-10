@@ -499,7 +499,7 @@ body.admin-mode [data-cms-section]:hover>.spacing-ctrl{display:flex}
 </footer>
 
 </div><!-- /mainWrap -->
-<button id="adminToggle" onclick="promptAdmin()" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:996;background:var(--dark);color:#fff;border:none;width:48px;height:48px;border-radius:50%;font-size:1.2rem;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.2)">⚙️</button>
+<button id="adminToggle" onclick="toggleAdmin()" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:996;background:var(--dark);color:#fff;border:none;width:48px;height:48px;border-radius:50%;font-size:1.2rem;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.2)">⚙️</button>
 
 <!-- MODALS -->
 <div class="cms-modal" id="cmsModal"><div class="cms-modal__box" id="cmsModalBox"></div></div>
@@ -529,7 +529,7 @@ body.admin-mode [data-cms-section]:hover>.spacing-ctrl{display:flex}
 const CMS_VER='onda_v4';
 const K='cms4_data',IK='cms4_inq',TK='cms4_theme',OK='cms4_order',SK='cms4_styles';
 // Clear old data on version change
-if(localStorage.getItem('cms_version')!==CMS_VER){['cms3_data','cms3_inq','cms3_theme','cms3_order','cms3_styles','cms_v2_data','cms_v2_inquiries','cms_v2_theme','cms_v2_section_order','cms_demo_data','cms_demo_inquiries'].forEach(k=>localStorage.removeItem(k));localStorage.setItem('cms_version',CMS_VER)}
+if(sessionStorage.getItem('cms_version')!==CMS_VER){['cms3_data','cms3_inq','cms3_theme','cms3_order','cms3_styles','cms_v2_data','cms_v2_inquiries','cms_v2_theme','cms_v2_section_order','cms_demo_data','cms_demo_inquiries'].forEach(k=>sessionStorage.removeItem(k));sessionStorage.setItem('cms_version',CMS_VER)}
 let adminMode=false,editingEl=null;
 let undoStack=[],redoStack=[];
 
@@ -561,10 +561,10 @@ function saveAll(){
     if(el.dataset.cmsType==='placeholder')return;
     d[el.dataset.cms]=el.innerHTML;
   });
-  localStorage.setItem(K,JSON.stringify(d));
+  sessionStorage.setItem(K,JSON.stringify(d));
   // Save section order
   const order=[...document.querySelectorAll('[data-cms-section]')].map(s=>s.dataset.cmsSection);
-  localStorage.setItem(OK,JSON.stringify(order));
+  sessionStorage.setItem(OK,JSON.stringify(order));
   // Save inline styles
   const styles={};
   document.querySelectorAll('[data-cms-section]').forEach(s=>{styles[s.dataset.cmsSection]=s.getAttribute('style')||''});
@@ -585,23 +585,23 @@ function saveAll(){
   styles['_menuOrder']=[...document.querySelectorAll('.nav__menu li a')].map(a=>a.dataset.cms).join(',');
   // Save placeholders
   document.querySelectorAll('[data-cms-type="placeholder"]').forEach(el=>{d['ph_'+el.dataset.cms]=el.placeholder||''});
-  localStorage.setItem(SK,JSON.stringify(styles));
+  sessionStorage.setItem(SK,JSON.stringify(styles));
   showToast('✅ 저장 완료!');
 }
 function loadAll(){
-  const d=JSON.parse(localStorage.getItem(K)||'{}');
+  const d=JSON.parse(sessionStorage.getItem(K)||'{}');
   Object.keys(d).forEach(k=>{if(k.startsWith('ph_'))return;const el=document.querySelector(`[data-cms="${k}"]`);if(!el)return;if(el.dataset.cmsType==='placeholder'){el.placeholder=d[k]}else{el.innerHTML=d[k]}});
   // Theme
-  const th=JSON.parse(localStorage.getItem(TK)||'null');
+  const th=JSON.parse(sessionStorage.getItem(TK)||'null');
   if(th){['primary','accent','dark','bg'].forEach(c=>{if(th[c])document.documentElement.style.setProperty('--'+c,th[c])});if(th.font){document.body.style.fontFamily=th.font;const fn=th.font.split("'")[1];if(fn&&!document.querySelector(`link[href*="${fn.replace(/ /g,'+')}"]`)){const l=document.createElement('link');l.rel='stylesheet';l.href=`https://fonts.googleapis.com/css2?family=${fn.replace(/ /g,'+')}:wght@300;400;500;700;900&display=swap`;document.head.appendChild(l)}}}
   // Restore SEO
-  const seo=JSON.parse(localStorage.getItem('cms4_seo')||'null');
+  const seo=JSON.parse(sessionStorage.getItem('cms4_seo')||'null');
   if(seo){if(seo.title)document.title=seo.title;if(seo.desc)setMeta('description',seo.desc);if(seo.keys)setMeta('keywords',seo.keys);if(seo.og){setMeta('og:image',seo.og,'property');setMeta('og:title',seo.title||'','property');setMeta('og:description',seo.desc||'','property')}}
   // Order
-  const order=JSON.parse(localStorage.getItem(OK)||'null');
+  const order=JSON.parse(sessionStorage.getItem(OK)||'null');
   if(order){const footer=document.querySelector('footer');const body=document.body;order.forEach(id=>{const s=document.querySelector(`[data-cms-section="${id}"]`);if(s&&footer)body.insertBefore(s,footer.previousElementSibling?.nextElementSibling||footer)})}
   // Styles
-  const st=JSON.parse(localStorage.getItem(SK)||'{}');
+  const st=JSON.parse(sessionStorage.getItem(SK)||'{}');
   Object.keys(st).forEach(k=>{
     if(k.startsWith('btn_')){const el=document.querySelector(`[data-cms="${k.slice(4)}"]`);if(el)el.setAttribute('style',st[k])}
     else if(k.startsWith('chover_')){const el=document.querySelector(`[data-cms="${k.slice(7)}"]`);if(el){el.dataset.cmsHover=st[k];el.classList.remove('hover-none','hover-lift','hover-scale','hover-shadow');el.classList.add('hover-'+st[k])}}
@@ -619,10 +619,10 @@ function loadAll(){
   if(st['_heroAlign']){const hc=document.querySelector('#heroSection .hero__content');if(hc)hc.setAttribute('style',st['_heroAlign'])}
   if(st['_heroBtns']){const hb=document.querySelector('#heroSection .hero__btns');if(hb)hb.setAttribute('style',st['_heroBtns'])}
 }
-function resetAll(){if(confirm('전부 초기화?')){[K,IK,TK,OK,SK].forEach(k=>localStorage.removeItem(k));location.reload()}}
+function resetAll(){if(confirm('전부 초기화?')){[K,IK,TK,OK,SK].forEach(k=>sessionStorage.removeItem(k));location.reload()}}
 
 // === ADMIN ===
-function promptAdmin(){const pw=prompt('비밀번호 (데모:1234)');if(pw==='1234')toggleAdmin();else if(pw!==null)alert('틀림')}
+function promptAdmin(){toggleAdmin()}
 function toggleAdmin(){
   adminMode=!adminMode;
   document.body.classList.toggle('admin-mode',adminMode);
@@ -1168,7 +1168,7 @@ function initDrag(){
 
 // === THEME ===
 function openTheme(){
-  const th=JSON.parse(localStorage.getItem(TK)||'null')||{primary:'#1B65A6',accent:'#00C9A7',dark:'#0F1724',bg:'#F7F9FC'};
+  const th=JSON.parse(sessionStorage.getItem(TK)||'null')||{primary:'#1B65A6',accent:'#00C9A7',dark:'#0F1724',bg:'#F7F9FC'};
   document.getElementById('thP').value=th.primary;document.getElementById('thPH').value=th.primary;
   document.getElementById('thA').value=th.accent;document.getElementById('thAH').value=th.accent;
   document.getElementById('thD').value=th.dark;document.getElementById('thDH').value=th.dark;
@@ -1187,7 +1187,7 @@ function applyTheme(){
   if(fontName&&!document.querySelector(`link[href*="${fontName.replace(/ /g,'+')}"]`)){
     const link=document.createElement('link');link.rel='stylesheet';link.href=`https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g,'+')}:wght@300;400;500;700;900&display=swap`;document.head.appendChild(link);
   }
-  localStorage.setItem(TK,JSON.stringify(th));closeModal('themeModal');showToast('🎨 테마 적용!');
+  sessionStorage.setItem(TK,JSON.stringify(th));closeModal('themeModal');showToast('🎨 테마 적용!');
 }
 
 // === EXPORT ===
@@ -1209,8 +1209,8 @@ function exportHTML(){
 }
 
 // === CONTACT ===
-function submitForm(e){e.preventDefault();if(adminMode){showToast('관리자 모드에서는 폼 제출 비활성');return}const f=e.target;const inq={company:f[0].value,name:f[1].value,email:f[2].value,phone:f[3].value,message:f[4].value,date:new Date().toLocaleString('ko-KR')};const list=JSON.parse(localStorage.getItem(IK)||'[]');list.unshift(inq);localStorage.setItem(IK,JSON.stringify(list));f.reset();showToast('✅ 문의 접수됨!')}
-function showInquiries(){const list=JSON.parse(localStorage.getItem(IK)||'[]');const c=document.getElementById('inquiryList');c.innerHTML=list.length?list.map(q=>`<div style="border:1px solid #eee;border-radius:10px;padding:.8rem;margin-bottom:.5rem"><div style="display:flex;justify-content:space-between"><strong>${q.company}—${q.name}</strong><span style="color:#999;font-size:.7rem">${q.date}</span></div><div style="color:#666;font-size:.75rem">📧${q.email} ${q.phone?'📞'+q.phone:''}</div><div style="background:#f7f9fc;border-radius:6px;padding:.4rem;font-size:.8rem;margin-top:.3rem">${q.message}</div></div>`).join(''):'<p style="color:#999;text-align:center;padding:2rem">없음</p>';document.getElementById('inquiryModal').classList.add('active')}
+function submitForm(e){e.preventDefault();if(adminMode){showToast('관리자 모드에서는 폼 제출 비활성');return}const f=e.target;const inq={company:f[0].value,name:f[1].value,email:f[2].value,phone:f[3].value,message:f[4].value,date:new Date().toLocaleString('ko-KR')};const list=JSON.parse(sessionStorage.getItem(IK)||'[]');list.unshift(inq);sessionStorage.setItem(IK,JSON.stringify(list));f.reset();showToast('✅ 문의 접수됨!')}
+function showInquiries(){const list=JSON.parse(sessionStorage.getItem(IK)||'[]');const c=document.getElementById('inquiryList');c.innerHTML=list.length?list.map(q=>`<div style="border:1px solid #eee;border-radius:10px;padding:.8rem;margin-bottom:.5rem"><div style="display:flex;justify-content:space-between"><strong>${q.company}—${q.name}</strong><span style="color:#999;font-size:.7rem">${q.date}</span></div><div style="color:#666;font-size:.75rem">📧${q.email} ${q.phone?'📞'+q.phone:''}</div><div style="background:#f7f9fc;border-radius:6px;padding:.4rem;font-size:.8rem;margin-top:.3rem">${q.message}</div></div>`).join(''):'<p style="color:#999;text-align:center;padding:2rem">없음</p>';document.getElementById('inquiryModal').classList.add('active')}
 
 // === UTILS ===
 function closeModal(id){document.getElementById(id).classList.remove('active')}
@@ -1221,7 +1221,7 @@ function openSpacingGlobal(){showToast('각 섹션 hover → 📐 버튼으로 �
 
 // === SEO SETTINGS ===
 function openSEO(){
-  const seo=JSON.parse(localStorage.getItem('cms4_seo')||'{}');
+  const seo=JSON.parse(sessionStorage.getItem('cms4_seo')||'{}');
   const html=`<div class="cms-modal__title">🔍 SEO 설정</div>
   <label class="cms-modal__label">페이지 제목</label><input class="cms-modal__field" id="seoTitle" value="${seo.title||document.title}">
   <label class="cms-modal__label">메타 설명 (검색결과에 표시)</label><textarea class="cms-modal__field" id="seoDesc" rows="3" style="resize:vertical">${seo.desc||''}</textarea>
@@ -1234,7 +1234,7 @@ function applySEO(){
   const seo={title:document.getElementById('seoTitle').value,desc:document.getElementById('seoDesc').value,keys:document.getElementById('seoKeys').value,og:document.getElementById('seoOg').value};
   document.title=seo.title;
   setMeta('description',seo.desc);setMeta('keywords',seo.keys);setMeta('og:title',seo.title,'property');setMeta('og:description',seo.desc,'property');setMeta('og:image',seo.og,'property');
-  localStorage.setItem('cms4_seo',JSON.stringify(seo));closeModal('cmsModal');showToast('✅ SEO 설정 저장');
+  sessionStorage.setItem('cms4_seo',JSON.stringify(seo));closeModal('cmsModal');showToast('✅ SEO 설정 저장');
 }
 function setMeta(name,content,attr='name'){
   let m=document.querySelector(`meta[${attr}="${name}"]`);
@@ -1407,14 +1407,14 @@ function openPopupEditor(){
 function applyPopup(){
   const enabled=document.getElementById('popupEnabled').value;
   const delay=document.getElementById('popupDelay').value;
-  localStorage.setItem('cms4_popup',JSON.stringify({enabled,delay}));
+  sessionStorage.setItem('cms4_popup',JSON.stringify({enabled,delay}));
   closeModal('cmsModal');showToast(enabled==='on'?'💬 팝업 활성화 ('+delay+'초 후)':'💬 팝업 비활성');
 }
 function closePopup(){document.getElementById('sitePopup').classList.remove('active')}
 
 // === GLOBAL SETTINGS (loading, cookie, cursor) ===
 function openGlobalSettings(){
-  const gs=JSON.parse(localStorage.getItem('cms4_global')||'{}');
+  const gs=JSON.parse(sessionStorage.getItem('cms4_global')||'{}');
   const html=`<div class="cms-modal__title">⚙ 글로벌 설정</div>
   <label class="cms-modal__label">🔄 로딩 애니메이션</label>
   <select class="cms-modal__field" id="gsLoading"><option value="on" ${gs.loading!=='off'?'selected':''}>활성</option><option value="off" ${gs.loading==='off'?'selected':''}>비활성</option></select>
@@ -1429,13 +1429,13 @@ function openGlobalSettings(){
 }
 function applyGlobalSettings(){
   const gs={loading:document.getElementById('gsLoading').value,cookie:document.getElementById('gsCookie').value,cursor:document.getElementById('gsCursor').value,counter:document.getElementById('gsCounter').value};
-  localStorage.setItem('cms4_global',JSON.stringify(gs));
+  sessionStorage.setItem('cms4_global',JSON.stringify(gs));
   document.body.style.cursor=gs.cursor==='default'?'':gs.cursor;
-  if(gs.cookie==='on'&&!localStorage.getItem('cms4_cookie_ok'))document.getElementById('cookieBanner').style.display='flex';
+  if(gs.cookie==='on'&&!sessionStorage.getItem('cms4_cookie_ok'))document.getElementById('cookieBanner').style.display='flex';
   else document.getElementById('cookieBanner').style.display='none';
   closeModal('cmsModal');showToast('⚙ 설정 저장');
 }
-function acceptCookies(){localStorage.setItem('cms4_cookie_ok','1');document.getElementById('cookieBanner').style.display='none'}
+function acceptCookies(){sessionStorage.setItem('cms4_cookie_ok','1');document.getElementById('cookieBanner').style.display='none'}
 
 // === COUNTER ANIMATION ===
 function animateCounters(){
@@ -1663,19 +1663,22 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click'
 // Init
 loadAll();
 
+// Auto-enter admin mode on load (demo)
+setTimeout(()=>toggleAdmin(),100);
+
 // === INIT: Loading, Cookie, Popup, Counter ===
 (function(){
-  const gs=JSON.parse(localStorage.getItem('cms4_global')||'{}');
+  const gs=JSON.parse(sessionStorage.getItem('cms4_global')||'{}');
   // Loading animation
   const loader=document.getElementById('siteLoader');
   if(gs.loading==='off'){loader.style.display='none'}
   else{setTimeout(()=>loader.classList.add('hide'),800);setTimeout(()=>loader.style.display='none',1300)}
   // Cookie banner
-  if(gs.cookie==='on'&&!localStorage.getItem('cms4_cookie_ok'))document.getElementById('cookieBanner').style.display='flex';
+  if(gs.cookie==='on'&&!sessionStorage.getItem('cms4_cookie_ok'))document.getElementById('cookieBanner').style.display='flex';
   // Cursor
   if(gs.cursor&&gs.cursor!=='default')document.body.style.cursor=gs.cursor;
   // Popup
-  const pp=JSON.parse(localStorage.getItem('cms4_popup')||'{}');
+  const pp=JSON.parse(sessionStorage.getItem('cms4_popup')||'{}');
   if(pp.enabled==='on'){setTimeout(()=>{if(!adminMode)document.getElementById('sitePopup').classList.add('active')},((pp.delay||3)*1000))}
   // Counter animation on scroll
   if(gs.counter!=='off'){
