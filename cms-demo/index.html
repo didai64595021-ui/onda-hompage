@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>WiseComm — 통합 메시징 솔루션</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#1B65A6;--accent:#00C9A7;--dark:#0F1724;--bg:#F7F9FC;--card:#fff;--text:#1A1F36;--text2:#6B7280;--radius:12px;--shadow:0 2px 16px rgba(0,0,0,.06)}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--text);background:var(--bg);overflow-x:hidden;line-height:1.6}
+
+/* ADMIN BAR */
+.admin-bar{position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#0F1724,#1B3A5C);color:#fff;padding:.5rem 1.5rem;display:none;align-items:center;justify-content:space-between;font-size:.8rem}
+.admin-bar.active{display:flex}
+.admin-bar button{background:var(--accent);color:#fff;border:none;padding:.3rem .8rem;border-radius:6px;font-size:.75rem;cursor:pointer;font-family:inherit;font-weight:700}
+.admin-bar button.secondary{background:rgba(255,255,255,.15)}
+body.admin-mode{padding-top:40px}
+body.admin-mode [data-editable]{outline:2px dashed var(--accent);outline-offset:2px;cursor:pointer;position:relative}
+body.admin-mode [data-editable]:hover{outline-color:#ff6b6b;background:rgba(0,201,167,.05)}
+body.admin-mode [data-editable]:hover::after{content:'✏️ 클릭하여 수정';position:absolute;top:-24px;left:0;background:var(--accent);color:#fff;font-size:.65rem;padding:2px 8px;border-radius:4px;white-space:nowrap;z-index:100}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:998;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);box-shadow:0 1px 12px rgba(0,0,0,.06);transition:top .3s}
+body.admin-mode .nav{top:40px}
+.nav__logo{font-size:1.3rem;font-weight:900;color:var(--primary);text-decoration:none}
+.nav__logo span{color:var(--accent)}
+.nav__menu{display:flex;gap:1.8rem;list-style:none}
+.nav__menu a{color:var(--text);text-decoration:none;font-size:.88rem;font-weight:500;transition:color .3s}
+.nav__menu a:hover{color:var(--primary)}
+.nav__cta{background:var(--primary);color:#fff;padding:.55rem 1.3rem;border-radius:8px;text-decoration:none;font-size:.85rem;font-weight:700;transition:all .3s}
+.nav__cta:hover{background:#154d85}
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:8px}
+.hamburger span{display:block;width:20px;height:2px;background:var(--text);margin:4px 0;border-radius:2px;transition:all .3s}
+.mob-overlay{position:fixed;inset:0;background:rgba(15,23,36,.97);z-index:997;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2rem;opacity:0;pointer-events:none;transition:opacity .3s}
+.mob-overlay.open{opacity:1;pointer-events:auto}
+.mob-overlay a{color:#fff;font-size:1.3rem;text-decoration:none;font-weight:700}
+.mob-close{position:absolute;top:1.2rem;right:1.2rem;background:none;border:none;color:#fff;font-size:1.8rem;cursor:pointer}
+
+/* HERO */
+.hero{padding:140px 2rem 80px;text-align:center;background:linear-gradient(135deg,#0F1724 0%,#1B3A5C 100%);color:#fff;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:80px;background:var(--bg);clip-path:ellipse(55% 100% at 50% 100%)}
+.hero__badge{display:inline-block;background:rgba(0,201,167,.15);color:var(--accent);font-size:.75rem;font-weight:600;padding:.3rem 1rem;border-radius:20px;margin-bottom:1.2rem;border:1px solid rgba(0,201,167,.3)}
+.hero__title{font-size:clamp(1.8rem,4.5vw,3rem);font-weight:900;line-height:1.25;margin-bottom:1rem;max-width:700px;margin-left:auto;margin-right:auto}
+.hero__desc{color:rgba(255,255,255,.7);font-size:clamp(.9rem,2vw,1.05rem);font-weight:300;max-width:550px;margin:0 auto 2rem;line-height:1.7}
+.hero__btns{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+.btn{padding:.75rem 1.8rem;border-radius:10px;font-size:.9rem;font-weight:700;text-decoration:none;transition:all .3s;font-family:inherit;border:none;cursor:pointer}
+.btn--primary{background:var(--accent);color:#fff}
+.btn--primary:hover{background:#00b396;transform:translateY(-2px)}
+.btn--outline{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3)}
+.btn--outline:hover{border-color:#fff}
+
+/* TRUST */
+.trust{padding:50px 2rem;background:var(--bg)}
+.trust__grid{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;text-align:center}
+.trust__num{font-size:clamp(1.5rem,3vw,2.2rem);font-weight:900;color:var(--primary);margin-bottom:.2rem}
+.trust__label{font-size:.78rem;color:var(--text2);font-weight:400}
+
+/* SECTION */
+.section{padding:70px 2rem}
+.section__inner{max-width:1100px;margin:0 auto}
+.section__sub{display:inline-block;color:var(--primary);font-size:.72rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:.6rem}
+.section__title{font-size:clamp(1.4rem,3vw,2rem);font-weight:900;line-height:1.3;margin-bottom:.6rem}
+.section__desc{color:var(--text2);font-size:.9rem;font-weight:300;max-width:500px;line-height:1.8}
+.section__header{text-align:center;margin-bottom:2.5rem}
+
+/* SERVICES */
+.services{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.svc-card{background:var(--card);border-radius:var(--radius);padding:2rem 1.5rem;box-shadow:var(--shadow);transition:all .3s;border:1px solid #eef1f6}
+.svc-card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,.1)}
+.svc-card__icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1rem}
+.svc-card__icon--blue{background:rgba(27,101,166,.1)}
+.svc-card__icon--green{background:rgba(0,201,167,.1)}
+.svc-card__icon--purple{background:rgba(139,92,246,.1)}
+.svc-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+.svc-card__desc{font-size:.82rem;color:var(--text2);font-weight:300;line-height:1.7}
+
+/* CLIENTS */
+.clients{background:var(--card);padding:50px 2rem;text-align:center}
+.clients__logos{display:flex;justify-content:center;align-items:center;gap:3rem;flex-wrap:wrap;max-width:900px;margin:1.5rem auto 0;opacity:.5}
+.clients__logo{font-size:1.1rem;font-weight:700;color:var(--text2)}
+
+/* CTA */
+.cta{background:linear-gradient(135deg,var(--primary),#0D4F8B);padding:60px 2rem;text-align:center;color:#fff;border-radius:0}
+.cta__title{font-size:clamp(1.3rem,3vw,1.8rem);font-weight:900;margin-bottom:.8rem}
+.cta__desc{color:rgba(255,255,255,.7);font-size:.9rem;margin-bottom:1.5rem;font-weight:300}
+
+/* CONTACT */
+.contact__grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;max-width:900px;margin:0 auto}
+.contact__form{display:flex;flex-direction:column;gap:1rem}
+.contact__input,.contact__textarea{padding:.75rem 1rem;border:1px solid #dde1e8;border-radius:8px;font-size:.9rem;font-family:inherit;outline:none;transition:border .3s}
+.contact__input:focus,.contact__textarea:focus{border-color:var(--primary)}
+.contact__textarea{min-height:120px;resize:vertical}
+.contact__info{display:flex;flex-direction:column;gap:1.5rem;justify-content:center}
+.contact__info-item{display:flex;gap:1rem;align-items:flex-start}
+.contact__info-icon{font-size:1.3rem;flex-shrink:0}
+.contact__info-text h4{font-size:.9rem;font-weight:700;margin-bottom:.2rem}
+.contact__info-text p{font-size:.82rem;color:var(--text2);font-weight:300}
+
+/* FOOTER */
+.footer{background:var(--dark);color:rgba(255,255,255,.5);padding:40px 2rem 20px}
+.footer__inner{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.footer__logo{font-size:1rem;font-weight:900;color:#fff}
+.footer__logo span{color:var(--accent)}
+.footer__text{font-size:.72rem}
+
+/* FADE */
+.fade-in{opacity:0;transform:translateY(16px);transition:all .5s ease-out}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* EDIT MODAL */
+.edit-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10000;display:none;align-items:center;justify-content:center}
+.edit-modal.active{display:flex}
+.edit-modal__box{background:#fff;border-radius:16px;padding:2rem;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.edit-modal__title{font-size:1rem;font-weight:700;margin-bottom:1rem}
+.edit-modal__field{width:100%;padding:.75rem;border:1px solid #dde1e8;border-radius:8px;font-size:.9rem;font-family:inherit;outline:none;margin-bottom:1rem;min-height:80px;resize:vertical}
+.edit-modal__btns{display:flex;gap:.5rem;justify-content:flex-end}
+.edit-modal__btns button{padding:.5rem 1.2rem;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit;border:none}
+.edit-modal__save{background:var(--primary);color:#fff}
+.edit-modal__cancel{background:#eee;color:var(--text)}
+
+/* IMAGE EDIT */
+.edit-img-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10000;display:none;align-items:center;justify-content:center}
+.edit-img-modal.active{display:flex}
+.edit-img-modal__box{background:#fff;border-radius:16px;padding:2rem;max-width:400px;width:90%}
+.edit-img-modal__title{font-size:1rem;font-weight:700;margin-bottom:1rem}
+.edit-img-modal__input{width:100%;padding:.75rem;border:1px solid #dde1e8;border-radius:8px;font-size:.85rem;font-family:inherit;outline:none;margin-bottom:1rem}
+.edit-img-modal__btns{display:flex;gap:.5rem;justify-content:flex-end}
+.edit-img-modal__btns button{padding:.5rem 1.2rem;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit;border:none}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .services{grid-template-columns:repeat(2,1fr)}
+  .contact__grid{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .nav__menu,.nav__cta{display:none}
+  .hamburger{display:block}
+  .hero{padding:120px 1.5rem 60px}
+  .trust__grid{grid-template-columns:repeat(2,1fr)}
+  .services{grid-template-columns:1fr}
+  .section{padding:45px 1.5rem}
+  .clients__logos{gap:1.5rem}
+  .footer__inner{flex-direction:column;text-align:center}
+  .hero__title{font-size:1.6rem}
+  .admin-bar{font-size:.7rem;padding:.4rem 1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ADMIN BAR -->
+<div class="admin-bar" id="adminBar">
+  <span>🔧 <strong>관리자 모드</strong> — 텍스트를 클릭하여 수정하세요</span>
+  <div style="display:flex;gap:.5rem">
+    <button class="secondary" onclick="resetAll()">초기화</button>
+    <button onclick="saveAll()">💾 저장</button>
+    <button class="secondary" onclick="toggleAdmin()">나가기</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="#" class="nav__logo" data-editable="logo">Wise<span>Comm</span></a>
+  <ul class="nav__menu">
+    <li><a href="#services">솔루션</a></li>
+    <li><a href="#clients">고객사</a></li>
+    <li><a href="#contact">문의</a></li>
+  </ul>
+  <a href="#contact" class="nav__cta">도입 문의</a>
+  <button class="hamburger" id="hambBtn" aria-label="메뉴"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- MOBILE -->
+<div class="mob-overlay" id="mobOverlay">
+  <button class="mob-close" id="mobClose">✕</button>
+  <a href="#services" onclick="closeMob()">솔루션</a>
+  <a href="#clients" onclick="closeMob()">고객사</a>
+  <a href="#contact" onclick="closeMob()">문의</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <span class="hero__badge" data-editable="hero-badge">No.1 통합 메시징 플랫폼</span>
+  <h1 class="hero__title" data-editable="hero-title">모든 메시지를 하나로,<br>WiseComm</h1>
+  <p class="hero__desc" data-editable="hero-desc">이메일, 문자, 카카오톡, 푸시까지 — 하나의 플랫폼에서 통합 관리. 2004년부터 금융·공공기관이 신뢰한 메시징 솔루션.</p>
+  <div class="hero__btns">
+    <a href="#contact" class="btn btn--primary">무료 상담 신청</a>
+    <a href="#services" class="btn btn--outline">솔루션 보기</a>
+  </div>
+</section>
+
+<!-- TRUST -->
+<section class="trust">
+  <div class="trust__grid">
+    <div class="fade-in"><div class="trust__num" data-editable="trust-1-num">2,000+</div><div class="trust__label" data-editable="trust-1-label">도입 기업</div></div>
+    <div class="fade-in"><div class="trust__num" data-editable="trust-2-num">20년+</div><div class="trust__label" data-editable="trust-2-label">업력</div></div>
+    <div class="fade-in"><div class="trust__num" data-editable="trust-3-num">99.9%</div><div class="trust__label" data-editable="trust-3-label">가용성</div></div>
+    <div class="fade-in"><div class="trust__num" data-editable="trust-4-num">GS인증</div><div class="trust__label" data-editable="trust-4-label">품질 인증</div></div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="section" id="services">
+  <div class="section__inner">
+    <div class="section__header fade-in">
+      <span class="section__sub">SOLUTIONS</span>
+      <h2 class="section__title" data-editable="svc-title">비즈니스에 최적화된<br>메시징 솔루션</h2>
+    </div>
+    <div class="services">
+      <div class="svc-card fade-in">
+        <div class="svc-card__icon svc-card__icon--blue">📧</div>
+        <h3 class="svc-card__title" data-editable="svc-1-title">통합 메시징 (UMS)</h3>
+        <p class="svc-card__desc" data-editable="svc-1-desc">이메일, SMS, MMS, 카카오톡, 푸시를 하나의 시스템에서 통합 발송·관리. API 연동으로 기존 시스템과 원활하게 통합됩니다.</p>
+      </div>
+      <div class="svc-card fade-in">
+        <div class="svc-card__icon svc-card__icon--green">💬</div>
+        <h3 class="svc-card__title" data-editable="svc-2-title">카카오 비즈메시지</h3>
+        <p class="svc-card__desc" data-editable="svc-2-desc">알림톡, 친구톡, 카카오페이 인증까지. 카카오 전략 파트너사로서 안정적인 대량 발송과 높은 도달률을 보장합니다.</p>
+      </div>
+      <div class="svc-card fade-in">
+        <div class="svc-card__icon svc-card__icon--purple">☁️</div>
+        <h3 class="svc-card__title" data-editable="svc-3-title">클라우드 서비스</h3>
+        <p class="svc-card__desc" data-editable="svc-3-desc">별도 시스템 구축 없이 바로 시작. 클라우드 기반 통합 메시지 서비스 캐리엠(CarryM)으로 빠르게 도입하세요.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLIENTS -->
+<section class="clients" id="clients">
+  <div class="section__header fade-in">
+    <span class="section__sub">TRUSTED BY</span>
+    <h2 class="section__title" data-editable="clients-title">2,000+ 기업이 신뢰합니다</h2>
+  </div>
+  <div class="clients__logos fade-in">
+    <span class="clients__logo" data-editable="cl-1">KB국민은행</span>
+    <span class="clients__logo" data-editable="cl-2">신한은행</span>
+    <span class="clients__logo" data-editable="cl-3">삼성SDS</span>
+    <span class="clients__logo" data-editable="cl-4">CJ대한통운</span>
+    <span class="clients__logo" data-editable="cl-5">행정안전부</span>
+    <span class="clients__logo" data-editable="cl-6">국민건강보험</span>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <h2 class="cta__title fade-in" data-editable="cta-title">메시징 고민, 지금 바로 상담하세요</h2>
+  <p class="cta__desc fade-in" data-editable="cta-desc">도입 문의부터 기술 상담까지, 전문 컨설턴트가 답변드립니다</p>
+  <a href="#contact" class="btn btn--primary fade-in">무료 상담 신청</a>
+</section>
+
+<!-- CONTACT -->
+<section class="section" id="contact">
+  <div class="section__inner">
+    <div class="section__header fade-in">
+      <span class="section__sub">CONTACT</span>
+      <h2 class="section__title" data-editable="contact-title">문의하기</h2>
+    </div>
+    <div class="contact__grid fade-in">
+      <form class="contact__form" onsubmit="submitForm(event)">
+        <input class="contact__input" type="text" placeholder="회사명" required>
+        <input class="contact__input" type="text" placeholder="담당자명" required>
+        <input class="contact__input" type="email" placeholder="이메일" required>
+        <input class="contact__input" type="tel" placeholder="연락처">
+        <textarea class="contact__textarea" placeholder="문의 내용을 입력해주세요"></textarea>
+        <button type="submit" class="btn btn--primary" style="width:100%">문의 접수</button>
+      </form>
+      <div class="contact__info">
+        <div class="contact__info-item">
+          <span class="contact__info-icon">📞</span>
+          <div class="contact__info-text"><h4 data-editable="info-phone">02-XXX-XXXX</h4><p>평일 09:00 ~ 18:00</p></div>
+        </div>
+        <div class="contact__info-item">
+          <span class="contact__info-icon">📧</span>
+          <div class="contact__info-text"><h4 data-editable="info-email">contact@wisecomm.co.kr</h4><p>24시간 접수 가능</p></div>
+        </div>
+        <div class="contact__info-item">
+          <span class="contact__info-icon">📍</span>
+          <div class="contact__info-text"><h4 data-editable="info-addr">서울시 서초구 XX로 XX</h4><p>XX빌딩 X층</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer__inner">
+    <div class="footer__logo">Wise<span>Comm</span></div>
+    <div class="footer__text" data-editable="footer-info">© 2026 WiseComm Inc. | 사업자등록번호: XXX-XX-XXXXX | 대표: OOO</div>
+  </div>
+</footer>
+
+<!-- ADMIN LOGIN (floating) -->
+<button id="adminToggle" onclick="promptAdmin()" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:996;background:var(--dark);color:#fff;border:none;width:48px;height:48px;border-radius:50%;font-size:1.2rem;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:all .3s" title="관리자 모드">⚙️</button>
+
+<!-- EDIT MODAL -->
+<div class="edit-modal" id="editModal">
+  <div class="edit-modal__box">
+    <div class="edit-modal__title">✏️ 텍스트 수정</div>
+    <textarea class="edit-modal__field" id="editField"></textarea>
+    <div class="edit-modal__btns">
+      <button class="edit-modal__cancel" onclick="closeEdit()">취소</button>
+      <button class="edit-modal__save" onclick="applyEdit()">적용</button>
+    </div>
+  </div>
+</div>
+
+<!-- INQUIRY LIST MODAL -->
+<div id="inquiryModal" style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10001;display:none;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:2rem;max-width:700px;width:95%;max-height:80vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <h3 style="font-size:1.1rem;font-weight:900">📋 문의 접수 목록</h3>
+      <button onclick="document.getElementById('inquiryModal').style.display='none'" style="background:none;border:none;font-size:1.5rem;cursor:pointer">✕</button>
+    </div>
+    <div id="inquiryList" style="font-size:.85rem"></div>
+  </div>
+</div>
+
+<script>
+// ===== CMS CORE =====
+let adminMode=false;
+let editTarget=null;
+const STORAGE_KEY='cms_demo_data';
+const INQUIRY_KEY='cms_demo_inquiries';
+
+// Load saved data
+function loadData(){
+  const data=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
+  Object.keys(data).forEach(key=>{
+    const el=document.querySelector(`[data-editable="${key}"]`);
+    if(el) el.innerHTML=data[key];
+  });
+}
+
+// Save all editable content
+function saveAll(){
+  const data={};
+  document.querySelectorAll('[data-editable]').forEach(el=>{
+    data[el.dataset.editable]=el.innerHTML;
+  });
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+  showToast('✅ 저장되었습니다!');
+}
+
+// Reset
+function resetAll(){
+  if(confirm('모든 수정사항을 초기화하시겠습니까?')){
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  }
+}
+
+// Admin toggle
+function promptAdmin(){
+  const pw=prompt('관리자 비밀번호를 입력하세요\n(데모: 1234)');
+  if(pw==='1234') toggleAdmin();
+  else if(pw!==null) alert('비밀번호가 틀립니다');
+}
+
+function toggleAdmin(){
+  adminMode=!adminMode;
+  document.body.classList.toggle('admin-mode',adminMode);
+  document.getElementById('adminBar').classList.toggle('active',adminMode);
+  if(adminMode){
+    document.querySelectorAll('[data-editable]').forEach(el=>{
+      el.addEventListener('click',onEditClick);
+    });
+    // Show inquiry button
+    showToast('🔧 관리자 모드 활성화 — 텍스트를 클릭하세요');
+  } else {
+    document.querySelectorAll('[data-editable]').forEach(el=>{
+      el.removeEventListener('click',onEditClick);
+    });
+  }
+}
+
+// Edit click
+function onEditClick(e){
+  e.preventDefault();
+  e.stopPropagation();
+  editTarget=e.currentTarget;
+  document.getElementById('editField').value=editTarget.innerText;
+  document.getElementById('editModal').classList.add('active');
+  document.getElementById('editField').focus();
+}
+
+function applyEdit(){
+  if(editTarget){
+    editTarget.innerText=document.getElementById('editField').value;
+    saveAll();
+  }
+  closeEdit();
+}
+
+function closeEdit(){
+  document.getElementById('editModal').classList.remove('active');
+  editTarget=null;
+}
+
+// Contact form
+function submitForm(e){
+  e.preventDefault();
+  const form=e.target;
+  const inquiry={
+    company:form[0].value,
+    name:form[1].value,
+    email:form[2].value,
+    phone:form[3].value,
+    message:form[4].value,
+    date:new Date().toLocaleString('ko-KR')
+  };
+  const list=JSON.parse(localStorage.getItem(INQUIRY_KEY)||'[]');
+  list.unshift(inquiry);
+  localStorage.setItem(INQUIRY_KEY,JSON.stringify(list));
+  form.reset();
+  showToast('✅ 문의가 접수되었습니다! 담당자 이메일로 알림이 발송됩니다.');
+}
+
+// Show inquiries (admin)
+function showInquiries(){
+  const list=JSON.parse(localStorage.getItem(INQUIRY_KEY)||'[]');
+  const container=document.getElementById('inquiryList');
+  if(!list.length){container.innerHTML='<p style="color:#999;text-align:center;padding:2rem">접수된 문의가 없습니다</p>';} 
+  else {
+    container.innerHTML=list.map((q,i)=>`
+      <div style="border:1px solid #eee;border-radius:10px;padding:1rem;margin-bottom:.8rem">
+        <div style="display:flex;justify-content:space-between;margin-bottom:.5rem">
+          <strong>${q.company} — ${q.name}</strong>
+          <span style="color:#999;font-size:.75rem">${q.date}</span>
+        </div>
+        <div style="color:#666;font-size:.8rem;margin-bottom:.3rem">📧 ${q.email} ${q.phone?'| 📞 '+q.phone:''}</div>
+        <div style="background:#f7f9fc;border-radius:6px;padding:.6rem;font-size:.82rem;margin-top:.5rem">${q.message}</div>
+      </div>
+    `).join('');
+  }
+  document.getElementById('inquiryModal').style.display='flex';
+}
+
+// Admin bar inquiry button
+document.getElementById('adminBar').querySelector('div').insertAdjacentHTML('afterbegin',
+  '<button class="secondary" onclick="showInquiries()" style="margin-right:.5rem">📋 문의목록</button>');
+
+// Toast
+function showToast(msg){
+  const t=document.createElement('div');
+  t.textContent=msg;
+  Object.assign(t.style,{position:'fixed',bottom:'5rem',left:'50%',transform:'translateX(-50%)',background:'var(--dark)',color:'#fff',padding:'.7rem 1.5rem',borderRadius:'10px',fontSize:'.85rem',fontWeight:'600',zIndex:'99999',boxShadow:'0 4px 16px rgba(0,0,0,.2)'});
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2500);
+}
+
+// Mobile
+document.getElementById('hambBtn').addEventListener('click',()=>document.getElementById('mobOverlay').classList.add('open'));
+document.getElementById('mobClose').addEventListener('click',closeMob);
+function closeMob(){document.getElementById('mobOverlay').classList.remove('open')}
+
+// Fade-in
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:.15});
+document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'})})});
+
+// Init
+loadData();
+</script>
+</body>
+</html>
