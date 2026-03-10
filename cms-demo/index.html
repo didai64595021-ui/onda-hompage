@@ -56,9 +56,11 @@ body.admin-mode .cms-hidden{opacity:.25;pointer-events:none}
 body.admin-mode .cms-hidden>.section-ctrl{pointer-events:auto;opacity:1}
 body.admin-mode .cms-dragging{opacity:.3}
 body.admin-mode .cms-drag-over{box-shadow:0 -4px 0 var(--accent)}
-body.admin-mode .svc-card,body.admin-mode .trust__grid>.fade-in,body.admin-mode .clients__logo,body.admin-mode .nav__menu li{cursor:grab}
+body.admin-mode .svc-card,body.admin-mode .trust__grid>.fade-in,body.admin-mode .clients__logo,body.admin-mode .nav__menu li{cursor:grab;position:relative}
 body.admin-mode .item-dragging{opacity:.3!important;cursor:grabbing!important}
 body.admin-mode .item-drag-over{box-shadow:inset 0 0 0 2px var(--accent)!important}
+.cms-item-del{display:none;position:absolute;top:-8px;right:-8px;width:22px;height:22px;background:#ef4444;color:#fff;border:2px solid #fff;border-radius:50%;font-size:.7rem;cursor:pointer;z-index:70;align-items:center;justify-content:center;line-height:1;font-weight:900;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+body.admin-mode .svc-card:hover>.cms-item-del,body.admin-mode .trust__grid>.fade-in:hover>.cms-item-del,body.admin-mode .clients__logo:hover>.cms-item-del,body.admin-mode .nav__menu li:hover>.cms-item-del,body.admin-mode .contact__info-item:hover>.cms-item-del{display:flex}
 .nav--center-logo{justify-content:center!important}
 .nav--center-logo .nav__logo{position:absolute;left:50%;transform:translateX(-50%)}
 
@@ -520,11 +522,13 @@ function toggleAdmin(){
     });
     initDrag();
     initAllItemDrags();
+    injectDeleteBtns();
     showToast('🔧 관리자 모드 — 클릭=수정 | 더블클릭=직접편집 | 드래그=이동');
   } else {
     stopEditing();
     document.querySelectorAll('[data-cms]').forEach(el=>{el.removeEventListener('click',onCmsClick);el.removeEventListener('dblclick',onCmsDblClick);if(el.tagName!=='INPUT'&&el.tagName!=='TEXTAREA')el.contentEditable='false'});
     document.querySelectorAll('[data-cms-section]').forEach(s=>{s.removeAttribute('draggable')});
+    document.querySelectorAll('.cms-item-del').forEach(b=>b.remove());
   }
 }
 
@@ -960,6 +964,20 @@ function rgbHex(rgb){if(!rgb||rgb==='rgba(0, 0, 0, 0)')return'#ffffff';if(rgb.st
 function extractBg(el){const m=(el.style.backgroundImage||'').match(/url\(["']?(.+?)["']?\)/);return m?m[1]:''}
 function showToast(msg){const t=document.createElement('div');t.textContent=msg;Object.assign(t.style,{position:'fixed',bottom:'5rem',left:'50%',transform:'translateX(-50%)',background:'#1a1a2e',color:'#fff',padding:'.6rem 1.3rem',borderRadius:'10px',fontSize:'.82rem',fontWeight:'600',zIndex:'99999',boxShadow:'0 4px 16px rgba(0,0,0,.2)'});document.body.appendChild(t);setTimeout(()=>t.remove(),2000)}
 function openSpacingGlobal(){showToast('각 섹션 hover → 📐 버튼으로 여백 조절')}
+
+// === ITEM DELETE BUTTONS ===
+function injectDeleteBtns(){
+  const sels=['.svc-card','.trust__grid>.fade-in','.clients__logo','.nav__menu li','.contact__info-item'];
+  sels.forEach(sel=>{
+    document.querySelectorAll(sel).forEach(el=>{
+      if(el.querySelector('.cms-item-del'))return;
+      const btn=document.createElement('button');
+      btn.className='cms-item-del';btn.innerHTML='✕';btn.title='삭제';
+      btn.onclick=function(e){e.stopPropagation();e.preventDefault();if(confirm('이 항목을 삭제할까요?')){pushUndo();el.remove();showToast('🗑️ 삭제됨')}};
+      el.appendChild(btn);
+    });
+  });
+}
 
 // === ITEM DRAG (cards, trust blocks, logos, menu items) ===
 function initItemDrag(containerSel, itemSel){
