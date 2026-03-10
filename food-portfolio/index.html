@@ -1,1438 +1,462 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>프레쉬온 (Fresh On) - 신선함을 매일, 건강을 식탁에</title>
-    <meta name="description" content="프리미엄 건강 간편식 D2C. Farm to Table 산지에서 식탁까지, 매일 새벽 배송으로 신선하게.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --mint: #2DD4A8;
-            --charcoal: #16162A;
-            --cream: #FAFAF8;
-            --sub-mint: #E8FBF5;
-            --white: #FFFFFF;
-            --gray-light: #F5F5F5;
-            --gray-medium: #999999;
-            --section-padding: 80px;
-        }
-
-        [data-theme="dark"] {
-            --cream: #1a1a1a;
-            --white: #2a2a2a;
-            --gray-light: #333333;
-            --charcoal: #FAFAF8;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            line-height: 1.6;
-            color: var(--charcoal);
-            background: var(--cream);
-            overflow-x: hidden;
-        }
-
-        /* Header */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            padding: 0;
-            transition: all 0.3s ease;
-        }
-
-        .header.scrolled {
-            background: rgba(22, 22, 42, 0.95);
-            color: white;
-        }
-
-        .header.scrolled .nav-link {
-            color: white;
-        }
-
-        .nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 2rem;
-        }
-
-        .logo {
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: var(--mint);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 2rem;
-        }
-
-        .nav-link {
-            color: var(--charcoal);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .nav-link:hover {
-            color: var(--mint);
-        }
-
-        .nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 50%;
-            transition: background 0.3s ease;
-        }
-
-        .theme-toggle:hover {
-            background: var(--sub-mint);
-        }
-
-        .hamburger {
-            display: none;
-            flex-direction: column;
-            cursor: pointer;
-            gap: 4px;
-        }
-
-        .hamburger span {
-            width: 25px;
-            height: 3px;
-            background: var(--charcoal);
-            transition: all 0.3s ease;
-        }
-
-        /* Hero Section */
-        .hero {
-            position: relative;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: white;
-            overflow: hidden;
-        }
-
-        .hero-video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: -2;
-        }
-
-        .hero-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(22, 22, 42, 0.6);
-            z-index: -1;
-        }
-
-        .hero-content {
-            max-width: 800px;
-            padding: 0 2rem;
-            animation: fadeInUp 1s ease;
-        }
-
-        .hero-subtitle {
-            font-size: 0.85rem;
-            letter-spacing: 3px;
-            color: var(--mint);
-            text-transform: uppercase;
-            margin-bottom: 1rem;
-        }
-
-        .hero-title {
-            font-size: 3rem;
-            font-weight: 900;
-            margin-bottom: 1rem;
-            line-height: 1.2;
-        }
-
-        .hero-description {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            opacity: 0.9;
-        }
-
-        .cta-button {
-            display: inline-block;
-            background: var(--mint);
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            border: 2px solid var(--mint);
-        }
-
-        .cta-button:hover {
-            background: transparent;
-            color: var(--mint);
-        }
-
-        .scroll-indicator {
-            position: absolute;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            animation: bounce 2s infinite;
-        }
-
-        .scroll-arrow {
-            width: 24px;
-            height: 24px;
-            border-right: 2px solid white;
-            border-bottom: 2px solid white;
-            transform: rotate(45deg);
-        }
-
-        /* Section Styling */
-        .section {
-            padding: var(--section-padding) 0;
-            opacity: 0;
-            transform: translateY(50px);
-            transition: all 0.6s ease;
-        }
-
-        .section.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        .section-subtitle {
-            font-size: 0.85rem;
-            letter-spacing: 3px;
-            color: var(--mint);
-            text-transform: uppercase;
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-
-        .section-title {
-            font-size: 2.5rem;
-            font-weight: 900;
-            text-align: center;
-            margin-bottom: 2rem;
-            line-height: 1.2;
-        }
-
-        .section-description {
-            font-size: 1.1rem;
-            text-align: center;
-            margin-bottom: 4rem;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            color: var(--gray-medium);
-        }
-
-        /* Cards */
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 4rem;
-        }
-
-        .card {
-            background: var(--white);
-            border-radius: 16px;
-            padding: 2rem;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .card-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: var(--charcoal);
-        }
-
-        .card-description {
-            color: var(--gray-medium);
-        }
-
-        /* Product Cards */
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-bottom: 4rem;
-        }
-
-        .product-card {
-            background: var(--white);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-            cursor: pointer;
-        }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .product-image {
-            width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-
-        .product-card:hover .product-image {
-            transform: scale(1.05);
-        }
-
-        .product-info {
-            padding: 1.5rem;
-        }
-
-        .product-category {
-            display: inline-block;
-            background: var(--sub-mint);
-            color: var(--mint);
-            padding: 0.25rem 0.75rem;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-
-        .product-name {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: var(--charcoal);
-        }
-
-        .product-price {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .price-original {
-            color: var(--gray-medium);
-            text-decoration: line-through;
-            font-size: 0.9rem;
-        }
-
-        .price-sale {
-            color: var(--mint);
-            font-weight: 700;
-            font-size: 1.2rem;
-        }
-
-        .add-to-cart {
-            width: 100%;
-            background: var(--mint);
-            color: white;
-            border: none;
-            padding: 0.75rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        .add-to-cart:hover {
-            background: #26C49B;
-        }
-
-        /* Process Timeline */
-        .process-timeline {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-bottom: 4rem;
-        }
-
-        .process-step {
-            text-align: center;
-            position: relative;
-        }
-
-        .process-step::after {
-            content: '';
-            position: absolute;
-            top: 50px;
-            left: 100%;
-            width: calc(100% - 50px);
-            height: 2px;
-            background: var(--mint);
-            z-index: -1;
-        }
-
-        .process-step:last-child::after {
-            display: none;
-        }
-
-        .process-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-
-        .process-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: var(--charcoal);
-        }
-
-        .process-description {
-            color: var(--gray-medium);
-            font-size: 0.9rem;
-        }
-
-        /* Reviews */
-        .reviews-container {
-            position: relative;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .reviews-slider {
-            overflow: hidden;
-            border-radius: 16px;
-        }
-
-        .reviews-track {
-            display: flex;
-            transition: transform 0.5s ease;
-        }
-
-        .review-card {
-            min-width: 100%;
-            background: var(--white);
-            padding: 3rem 2rem;
-            text-align: center;
-            position: relative;
-        }
-
-        .review-card::before {
-            content: '"';
-            font-size: 4rem;
-            color: var(--mint);
-            position: absolute;
-            top: 1rem;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0.3;
-        }
-
-        .review-stars {
-            font-size: 1.2rem;
-            color: #FFD700;
-            margin-bottom: 1rem;
-        }
-
-        .review-text {
-            font-size: 1.1rem;
-            margin-bottom: 1.5rem;
-            color: var(--charcoal);
-            font-style: italic;
-        }
-
-        .review-author {
-            font-weight: 700;
-            color: var(--mint);
-        }
-
-        .reviews-dots {
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-top: 2rem;
-        }
-
-        .dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: var(--gray-light);
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        .dot.active {
-            background: var(--mint);
-        }
-
-        /* FAQ */
-        .faq-list {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .faq-item {
-            border-bottom: 1px solid var(--gray-light);
-            margin-bottom: 1rem;
-        }
-
-        .faq-question {
-            width: 100%;
-            background: none;
-            border: none;
-            padding: 1.5rem 0;
-            font-size: 1.1rem;
-            font-weight: 600;
-            text-align: left;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: var(--charcoal);
-        }
-
-        .faq-question:hover {
-            color: var(--mint);
-        }
-
-        .faq-answer {
-            padding: 0 0 1.5rem 0;
-            color: var(--gray-medium);
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .faq-answer.open {
-            display: block;
-        }
-
-        .faq-icon {
-            transition: transform 0.3s ease;
-        }
-
-        .faq-item.open .faq-icon {
-            transform: rotate(45deg);
-        }
-
-        /* Subscription Banner */
-        .subscription {
-            background: linear-gradient(135deg, var(--mint), #26C49B);
-            color: white;
-            text-align: center;
-            border-radius: 16px;
-            margin: 4rem 0;
-        }
-
-        .subscription-content {
-            padding: 4rem 2rem;
-        }
-
-        .subscription-title {
-            font-size: 2rem;
-            font-weight: 900;
-            margin-bottom: 1rem;
-        }
-
-        .subscription-description {
-            font-size: 1.1rem;
-            margin-bottom: 2rem;
-            opacity: 0.9;
-        }
-
-        .subscription-form {
-            display: flex;
-            max-width: 400px;
-            margin: 0 auto;
-            gap: 1rem;
-        }
-
-        .subscription-input {
-            flex: 1;
-            padding: 1rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-        }
-
-        .subscription-button {
-            background: white;
-            color: var(--mint);
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        .subscription-button:hover {
-            background: var(--gray-light);
-        }
-
-        /* Footer */
-        .footer {
-            background: var(--charcoal);
-            color: white;
-            padding: 4rem 0 2rem 0;
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 3rem;
-            margin-bottom: 3rem;
-        }
-
-        .footer-section h3 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: var(--mint);
-        }
-
-        .footer-section ul {
-            list-style: none;
-        }
-
-        .footer-section li {
-            margin-bottom: 0.5rem;
-        }
-
-        .footer-section a {
-            color: #CCCCCC;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .footer-section a:hover {
-            color: var(--mint);
-        }
-
-        .footer-description {
-            color: #CCCCCC;
-            margin-bottom: 1rem;
-        }
-
-        .social-icons {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .social-icon {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            background: var(--mint);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            transition: background 0.3s ease;
-        }
-
-        .social-icon:hover {
-            background: #26C49B;
-        }
-
-        .footer-bottom {
-            border-top: 1px solid #333;
-            padding-top: 2rem;
-            text-align: center;
-            color: #999;
-        }
-
-        /* Floating Elements */
-        .floating-cart {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            background: var(--mint);
-            color: white;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 5px 20px rgba(45, 212, 168, 0.4);
-            z-index: 1000;
-            transition: transform 0.3s ease;
-        }
-
-        .floating-cart:hover {
-            transform: scale(1.1);
-        }
-
-        .cart-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #FF4757;
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        .floating-kakao {
-            position: fixed;
-            bottom: 2rem;
-            left: 2rem;
-            background: #FFE812;
-            color: #3C1E1E;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 5px 20px rgba(255, 232, 18, 0.4);
-            z-index: 1000;
-            transition: transform 0.3s ease;
-        }
-
-        .floating-kakao:hover {
-            transform: scale(1.1);
-        }
-
-        /* Mobile Bottom Navigation */
-        .mobile-nav {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: white;
-            border-top: 1px solid var(--gray-light);
-            z-index: 1000;
-            padding: 1rem 0;
-        }
-
-        .mobile-nav-content {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-        }
-
-        .mobile-nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-decoration: none;
-            color: var(--gray-medium);
-            font-size: 0.8rem;
-            transition: color 0.3s ease;
-        }
-
-        .mobile-nav-item.active {
-            color: var(--mint);
-        }
-
-        .mobile-nav-icon {
-            font-size: 1.5rem;
-            margin-bottom: 0.25rem;
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateX(-50%) translateY(0);
-            }
-            40% {
-                transform: translateX(-50%) translateY(-10px);
-            }
-            60% {
-                transform: translateX(-50%) translateY(-5px);
-            }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-
-            .hamburger {
-                display: flex;
-            }
-
-            .hero-title {
-                font-size: 2rem;
-            }
-
-            .section-title {
-                font-size: 1.8rem;
-            }
-
-            .cards {
-                grid-template-columns: 1fr;
-            }
-
-            .product-grid {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            }
-
-            .process-timeline {
-                grid-template-columns: 1fr;
-            }
-
-            .process-step::after {
-                display: none;
-            }
-
-            .subscription-form {
-                flex-direction: column;
-            }
-
-            .mobile-nav {
-                display: block;
-            }
-
-            .floating-cart,
-            .floating-kakao {
-                bottom: 6rem;
-            }
-
-            :root {
-                --section-padding: 60px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 0 1rem;
-            }
-
-            .hero-content {
-                padding: 0 1rem;
-            }
-
-            .nav {
-                padding: 1rem;
-            }
-
-            .card {
-                padding: 1.5rem;
-            }
-
-            .product-grid {
-                grid-template-columns: 1fr;
-            }
-
-            :root {
-                --section-padding: 40px;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>프레쉬온 — 신선함을 매일, 건강을 식탁에</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--mint:#2DD4A8;--dark:#16162A;--cream:#FAFAF8;--sub-mint:#E8FBF5;--red:#FF6B6B;--gold:#F5C842;--text:#16162A;--text2:#666;--card:#fff;--shadow:0 4px 24px rgba(0,0,0,.06)}
+[data-theme="dark"]{--cream:#111;--card:#1e1e2e;--text:#eee;--text2:#999;--shadow:0 4px 24px rgba(0,0,0,.3)}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--text);background:var(--cream);overflow-x:hidden;line-height:1.6}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:999;padding:1.2rem 2rem;display:flex;justify-content:space-between;align-items:center;transition:all .4s cubic-bezier(.4,0,.2,1)}
+.nav.scrolled{background:rgba(22,22,42,.97);backdrop-filter:blur(12px);box-shadow:0 2px 20px rgba(0,0,0,.2)}
+.nav__logo{font-size:1.5rem;font-weight:900;color:#fff;text-decoration:none;letter-spacing:-.02em}
+.nav__logo span{color:var(--mint)}
+.nav__menu{display:flex;gap:2rem;align-items:center;list-style:none}
+.nav__menu a{color:rgba(255,255,255,.8);text-decoration:none;font-size:.9rem;font-weight:500;transition:color .3s}
+.nav__menu a:hover{color:var(--mint)}
+.nav__icons{display:flex;gap:1rem;align-items:center}
+.nav__icon{background:none;border:none;color:rgba(255,255,255,.8);font-size:1.2rem;cursor:pointer;position:relative;transition:color .3s}
+.nav__icon:hover{color:var(--mint)}
+.nav__badge{position:absolute;top:-6px;right:-8px;background:var(--red);color:#fff;font-size:.6rem;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700}
+.hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px}
+.hamburger span{display:block;width:22px;height:2px;background:#fff;border-radius:2px;transition:all .3s}
+.mob-overlay{position:fixed;inset:0;background:rgba(22,22,42,.98);z-index:998;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2rem;opacity:0;pointer-events:none;transition:opacity .3s}
+.mob-overlay.open{opacity:1;pointer-events:auto}
+.mob-overlay a{color:#fff;font-size:1.5rem;text-decoration:none;font-weight:700}
+
+/* HERO */
+.hero{position:relative;height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+.hero__video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.hero__overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(22,22,42,.6) 0%,rgba(22,22,42,.4) 50%,rgba(22,22,42,.7) 100%);z-index:1}
+.hero__content{position:relative;z-index:2;padding:0 1.5rem;max-width:700px}
+.hero__sub{display:inline-block;color:var(--mint);font-size:.8rem;font-weight:500;letter-spacing:5px;text-transform:uppercase;margin-bottom:1.5rem;border:1px solid rgba(45,212,168,.3);padding:.4rem 1.2rem;border-radius:30px}
+.hero__title{font-size:clamp(2rem,5vw,3.5rem);font-weight:900;color:#fff;line-height:1.2;margin-bottom:1.2rem}
+.hero__desc{color:rgba(255,255,255,.7);font-size:clamp(.9rem,2vw,1.1rem);font-weight:300;margin-bottom:2.5rem}
+.hero__cta{display:inline-block;background:var(--mint);color:#fff;padding:.9rem 2.5rem;border-radius:50px;font-weight:700;font-size:1rem;text-decoration:none;transition:all .3s}
+.hero__cta:hover{background:#25B891;transform:translateY(-2px);box-shadow:0 8px 25px rgba(45,212,168,.3)}
+.hero__scroll{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);z-index:2;color:rgba(255,255,255,.5);font-size:.75rem;display:flex;flex-direction:column;align-items:center;gap:.5rem}
+.hero__scroll-icon{width:24px;height:38px;border:2px solid rgba(255,255,255,.3);border-radius:12px;position:relative}
+.hero__scroll-icon::after{content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);width:3px;height:8px;background:var(--mint);border-radius:3px;animation:scrollDot 2s infinite}
+@keyframes scrollDot{0%{opacity:1;transform:translateX(-50%) translateY(0)}100%{opacity:0;transform:translateX(-50%) translateY(12px)}}
+
+/* TRUST */
+.trust{background:var(--dark);padding:60px 2rem}
+.trust__grid{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;text-align:center}
+.trust__num{font-size:clamp(2rem,4vw,2.8rem);font-weight:900;color:var(--mint);margin-bottom:.3rem}
+.trust__label{color:rgba(255,255,255,.6);font-size:.85rem;font-weight:400}
+
+/* SECTION COMMON */
+.section{padding:80px 2rem}
+.section--dark{background:var(--dark);color:#fff}
+.section--cream{background:var(--cream)}
+.section__inner{max-width:1100px;margin:0 auto}
+.section__sub{display:inline-block;color:var(--mint);font-size:.8rem;font-weight:500;letter-spacing:4px;text-transform:uppercase;margin-bottom:.8rem}
+.section__title{font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:900;line-height:1.3;margin-bottom:1rem}
+.section__desc{color:var(--text2);font-size:1rem;font-weight:300;max-width:550px;line-height:1.8}
+.section__header{text-align:center;margin-bottom:3rem}
+.section--dark .section__desc{color:rgba(255,255,255,.6)}
+.section--dark .section__title{color:#fff}
+
+/* PRODUCTS */
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1.5rem}
+.p-card{background:var(--card);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .35s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow);text-decoration:none;color:inherit;display:block}
+.p-card:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(0,0,0,.12)}
+.p-card__img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;transition:transform .5s}
+.p-card:hover .p-card__img{transform:scale(1.04)}
+.p-card__body{padding:1rem 1rem 1.2rem}
+.p-card__tag{display:inline-block;font-size:.7rem;color:var(--mint);border:1px solid var(--mint);padding:.15rem .6rem;border-radius:20px;margin-bottom:.5rem;font-weight:500}
+.p-card__name{font-size:.95rem;font-weight:700;margin-bottom:.4rem}
+.p-card__price{display:flex;align-items:center;gap:.5rem;margin-bottom:.8rem}
+.p-card__original{font-size:.8rem;color:var(--text2);text-decoration:line-through}
+.p-card__sale{font-size:1.1rem;font-weight:900;color:var(--red)}
+.p-card__btn{width:100%;padding:.6rem;background:var(--mint);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:.85rem;cursor:pointer;transition:background .3s}
+.p-card__btn:hover{background:#25B891}
+
+/* BRAND STORY */
+.story{position:relative;padding:120px 2rem;background:url('https://images.unsplash.com/photo-1498837167922-ddd27525d352?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover fixed;overflow:hidden}
+.story::before{content:'';position:absolute;inset:0;background:rgba(22,22,42,.75)}
+.story__inner{position:relative;z-index:1;max-width:900px;margin:0 auto;text-align:center;color:#fff}
+.story__title{font-size:clamp(1.5rem,4vw,2.5rem);font-weight:900;line-height:1.3;margin-bottom:1rem}
+.story__desc{color:rgba(255,255,255,.7);font-size:1rem;font-weight:300;margin-bottom:3rem;max-width:500px;margin-left:auto;margin-right:auto}
+.story__cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.story__card{background:rgba(255,255,255,.08);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:2rem 1.5rem;text-align:center;transition:transform .3s}
+.story__card:hover{transform:translateY(-4px)}
+.story__card-icon{font-size:2rem;margin-bottom:.8rem}
+.story__card-title{font-weight:700;font-size:.95rem;margin-bottom:.4rem}
+.story__card-desc{font-size:.8rem;color:rgba(255,255,255,.6);font-weight:300}
+
+/* PROCESS */
+.process__timeline{display:flex;justify-content:space-between;align-items:flex-start;position:relative;max-width:900px;margin:0 auto}
+.process__timeline::before{content:'';position:absolute;top:28px;left:60px;right:60px;height:2px;background:linear-gradient(90deg,var(--mint),rgba(45,212,168,.2))}
+.process__step{text-align:center;flex:1;position:relative;z-index:1}
+.process__num{width:56px;height:56px;border-radius:50%;background:var(--mint);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem;margin:0 auto .8rem;box-shadow:0 4px 16px rgba(45,212,168,.3)}
+.process__icon{font-size:1.8rem;margin-bottom:.5rem}
+.process__name{font-weight:700;font-size:.9rem;margin-bottom:.3rem}
+.process__desc{font-size:.75rem;color:var(--text2);max-width:140px;margin:0 auto;font-weight:300}
+
+/* REVIEWS */
+.reviews__slider{position:relative;max-width:700px;margin:0 auto;overflow:hidden}
+.reviews__track{display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1)}
+.reviews__item{min-width:100%;padding:2rem;text-align:center}
+.reviews__quote{font-size:6rem;color:var(--mint);opacity:.15;line-height:1;margin-bottom:-2rem;font-family:Georgia,serif}
+.reviews__text{font-size:1.05rem;line-height:1.9;color:rgba(255,255,255,.85);font-weight:300;margin-bottom:1.5rem;max-width:500px;margin-left:auto;margin-right:auto}
+.reviews__stars{color:var(--gold);font-size:1rem;margin-bottom:.5rem}
+.reviews__name{font-weight:700;font-size:.9rem;color:rgba(255,255,255,.6)}
+.reviews__dots{display:flex;justify-content:center;gap:.5rem;margin-top:1.5rem}
+.reviews__dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.25);border:none;cursor:pointer;transition:all .3s}
+.reviews__dot.active{background:var(--mint);width:24px;border-radius:4px}
+
+/* SUBSCRIBE */
+.subscribe{background:linear-gradient(135deg,#2DD4A8,#1a9e7a);padding:80px 2rem;text-align:center}
+.subscribe__card{max-width:500px;margin:0 auto;background:rgba(255,255,255,.12);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:2.5rem 2rem}
+.subscribe__title{font-size:1.5rem;font-weight:900;color:#fff;margin-bottom:.5rem}
+.subscribe__desc{color:rgba(255,255,255,.8);font-size:.9rem;margin-bottom:2rem;font-weight:300}
+.subscribe__form{display:flex;gap:.5rem}
+.subscribe__input{flex:1;padding:.8rem 1.2rem;border:none;border-radius:10px;font-size:.9rem;font-family:inherit;outline:none}
+.subscribe__btn{padding:.8rem 1.5rem;background:var(--dark);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .3s;white-space:nowrap}
+.subscribe__btn:hover{opacity:.85}
+
+/* FOOTER */
+.footer{background:#0D0D1A;color:rgba(255,255,255,.5);padding:60px 2rem 30px}
+.footer__grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr;gap:2rem;margin-bottom:2rem}
+.footer__title{font-weight:700;color:#fff;font-size:.9rem;margin-bottom:1rem}
+.footer__logo{font-size:1.3rem;font-weight:900;color:#fff;margin-bottom:.8rem}
+.footer__logo span{color:var(--mint)}
+.footer__text{font-size:.8rem;line-height:1.7}
+.footer__links{list-style:none;display:flex;flex-direction:column;gap:.5rem}
+.footer__links a{color:rgba(255,255,255,.5);text-decoration:none;font-size:.8rem;transition:color .3s}
+.footer__links a:hover{color:var(--mint)}
+.footer__bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:1.5rem;text-align:center;font-size:.75rem}
+.footer__sns{display:flex;gap:1rem;margin-top:1rem}
+.footer__sns a{color:rgba(255,255,255,.4);text-decoration:none;font-size:.9rem;transition:color .3s}
+.footer__sns a:hover{color:var(--mint)}
+
+/* FLOATING */
+.floating-cart{position:fixed;bottom:100px;right:1.5rem;width:50px;height:50px;background:var(--mint);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem;cursor:pointer;z-index:900;box-shadow:0 4px 20px rgba(45,212,168,.4);transition:transform .3s;text-decoration:none}
+.floating-cart:hover{transform:scale(1.1)}
+.floating-cart .nav__badge{top:-4px;right:-4px}
+.top-btn{position:fixed;bottom:160px;right:1.5rem;width:40px;height:40px;background:var(--dark);border:1px solid rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem;cursor:pointer;z-index:900;opacity:0;pointer-events:none;transition:all .3s}
+.top-btn.show{opacity:1;pointer-events:auto}
+
+/* MOBILE NAV */
+.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--dark);z-index:999;padding:.6rem 0;box-shadow:0 -2px 20px rgba(0,0,0,.2)}
+.mob-nav__grid{display:grid;grid-template-columns:repeat(4,1fr);text-align:center}
+.mob-nav__item{color:rgba(255,255,255,.5);text-decoration:none;font-size:.65rem;display:flex;flex-direction:column;align-items:center;gap:.2rem;transition:color .3s}
+.mob-nav__item:hover,.mob-nav__item.active{color:var(--mint)}
+.mob-nav__icon{font-size:1.2rem}
+
+/* ANIMATION */
+.fade-in{opacity:0;transform:translateY(30px);transition:all .8s cubic-bezier(.4,0,.2,1)}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .nav__menu{display:none}
+  .hamburger{display:flex}
+  .story__cards{grid-template-columns:1fr}
+  .process__timeline{flex-direction:column;gap:2rem;align-items:center}
+  .process__timeline::before{display:none}
+  .footer__grid{grid-template-columns:1fr 1fr}
+  .products{grid-template-columns:repeat(2,1fr)}
+  .mob-nav{display:block}
+  .floating-cart{bottom:80px}
+  .top-btn{bottom:140px}
+  .trust__grid{grid-template-columns:1fr;gap:1.5rem}
+  .subscribe__form{flex-direction:column}
+}
+@media(max-width:480px){
+  .hero__title{font-size:1.8rem}
+  .products{grid-template-columns:repeat(2,1fr);gap:1rem}
+  .footer__grid{grid-template-columns:1fr}
+  .section{padding:60px 1.2rem}
+}
+</style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <nav class="nav">
-            <a href="#" class="logo">Fresh On</a>
-            <ul class="nav-links">
-                <li><a href="#home" class="nav-link">홈</a></li>
-                <li><a href="#products" class="nav-link">상품</a></li>
-                <li><a href="#about" class="nav-link">브랜드</a></li>
-                <li><a href="#contact" class="nav-link">고객센터</a></li>
-            </ul>
-            <div class="nav-actions">
-                <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
-                <div class="hamburger" onclick="toggleMobileMenu()">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            </div>
-        </nav>
-    </header>
 
-    <!-- Hero Section -->
-    <section class="hero" id="home">
-        <video class="hero-video" autoplay muted loop playsinline>
-            <source src="https://videos.pexels.com/video-files/3195394/3195394-uhd_2560_1440_25fps.mp4" type="video/mp4">
-        </video>
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-            <div class="hero-subtitle">PREMIUM HEALTHY MEAL</div>
-            <h1 class="hero-title">매일의 식탁에,<br>진짜 신선함을 담다.</h1>
-            <p class="hero-description">Farm to Table — 산지에서 식탁까지, 새벽배송으로 매일 신선하게</p>
-            <a href="#products" class="cta-button">지금 구매하기</a>
-        </div>
-        <div class="scroll-indicator">
-            <div class="scroll-arrow"></div>
-        </div>
-    </section>
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <a href="#" class="nav__logo">Fresh<span>On</span></a>
+  <ul class="nav__menu">
+    <li><a href="#products">전체상품</a></li>
+    <li><a href="#story">브랜드스토리</a></li>
+    <li><a href="#reviews">고객후기</a></li>
+  </ul>
+  <div class="nav__icons">
+    <button class="nav__icon" onclick="toggleDark()" id="darkBtn">🌙</button>
+    <a href="cart.html" class="nav__icon" style="text-decoration:none">🛒<span class="nav__badge" id="cartBadge">0</span></a>
+    <button class="hamburger" id="hamburger" onclick="toggleMob()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
 
-    <!-- Why Fresh On -->
-    <section class="section" id="about">
-        <div class="container">
-            <div class="section-subtitle">WHY FRESH ON</div>
-            <h2 class="section-title">우리는 '진짜 음식'을 믿습니다</h2>
-            <p class="section-description">
-                가공식품이 넘치는 시대, 프레쉬온은 원재료 본연의 맛과 영양을 살린 건강 간편식을 만듭니다. 
-                유기농 원료, 무첨가 원칙, 매일 새벽 산지 직송.
-            </p>
-            <div class="cards">
-                <div class="card">
-                    <div class="card-icon">🌱</div>
-                    <h3 class="card-title">100% 유기농 원료</h3>
-                    <p class="card-description">국내산 유기농 채소와 무항생제 닭가슴살만 사용</p>
-                </div>
-                <div class="card">
-                    <div class="card-icon">🚚</div>
-                    <h3 class="card-title">매일 새벽배송</h3>
-                    <p class="card-description">밤 11시 주문, 아침 7시 도착</p>
-                </div>
-                <div class="card">
-                    <div class="card-icon">💚</div>
-                    <h3 class="card-title">무첨가 원칙</h3>
-                    <p class="card-description">방부제, 인공색소, MSG 제로</p>
-                </div>
-            </div>
-        </div>
-    </section>
+<div class="mob-overlay" id="mobOverlay">
+  <a href="#products" onclick="toggleMob()">전체상품</a>
+  <a href="#story" onclick="toggleMob()">브랜드스토리</a>
+  <a href="#reviews" onclick="toggleMob()">고객후기</a>
+  <a href="cart.html" onclick="toggleMob()">장바구니</a>
+</div>
 
-    <!-- Best Seller Products -->
-    <section class="section" id="products">
-        <div class="container">
-            <div class="section-subtitle">BEST SELLER</div>
-            <h2 class="section-title">프레쉬온이 자신있게 추천합니다</h2>
-            <div class="product-grid">
-                <div class="product-card" onclick="goToProduct(1)">
-                    <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&h=500&fit=crop" alt="샐러드밀키트" class="product-image">
-                    <div class="product-info">
-                        <span class="product-category">샐러드</span>
-                        <h3 class="product-name">프리미엄 샐러드밀키트</h3>
-                        <div class="product-price">
-                            <span class="price-original">12,900원</span>
-                            <span class="price-sale">9,900원</span>
-                        </div>
-                        <button class="add-to-cart" onclick="addToCart(1, event)">담기</button>
-                    </div>
-                </div>
-                <div class="product-card" onclick="goToProduct(2)">
-                    <img src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=500&h=500&fit=crop" alt="단백질볼" class="product-image">
-                    <div class="product-info">
-                        <span class="product-category">프로틴</span>
-                        <h3 class="product-name">고단백 닭가슴살볼</h3>
-                        <div class="product-price">
-                            <span class="price-original">8,900원</span>
-                            <span class="price-sale">6,900원</span>
-                        </div>
-                        <button class="add-to-cart" onclick="addToCart(2, event)">담기</button>
-                    </div>
-                </div>
-                <div class="product-card" onclick="goToProduct(3)">
-                    <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&h=500&fit=crop" alt="그래놀라" class="product-image">
-                    <div class="product-info">
-                        <span class="product-category">시리얼</span>
-                        <h3 class="product-name">수제 그래놀라</h3>
-                        <div class="product-price">
-                            <span class="price-original">9,500원</span>
-                            <span class="price-sale">7,500원</span>
-                        </div>
-                        <button class="add-to-cart" onclick="addToCart(3, event)">담기</button>
-                    </div>
-                </div>
-                <div class="product-card" onclick="goToProduct(4)">
-                    <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&h=500&fit=crop" alt="콜드프레스주스" class="product-image">
-                    <div class="product-info">
-                        <span class="product-category">음료</span>
-                        <h3 class="product-name">콜드프레스 주스</h3>
-                        <div class="product-price">
-                            <span class="price-original">6,500원</span>
-                            <span class="price-sale">4,900원</span>
-                        </div>
-                        <button class="add-to-cart" onclick="addToCart(4, event)">담기</button>
-                    </div>
-                </div>
-                <div class="product-card" onclick="goToProduct(5)">
-                    <img src="https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=500&h=500&fit=crop" alt="닭가슴살도시락" class="product-image">
-                    <div class="product-info">
-                        <span class="product-category">도시락</span>
-                        <h3 class="product-name">프리미엄 도시락</h3>
-                        <div class="product-price">
-                            <span class="price-original">7,900원</span>
-                            <span class="price-sale">5,900원</span>
-                        </div>
-                        <button class="add-to-cart" onclick="addToCart(5, event)">담기</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+<!-- HERO -->
+<section class="hero">
+  <video class="hero__video" autoplay muted loop playsinline>
+    <source src="https://videos.pexels.com/video-files/3195394/3195394-uhd_2560_1440_25fps.mp4" type="video/mp4">
+  </video>
+  <div class="hero__overlay"></div>
+  <div class="hero__content">
+    <div class="hero__sub">PREMIUM HEALTHY MEAL</div>
+    <h1 class="hero__title">매일의 식탁에,<br>진짜 신선함을 담다.</h1>
+    <p class="hero__desc">Farm to Table — 새벽 산지직송으로 매일 신선하게</p>
+    <a href="#products" class="hero__cta">지금 쇼핑하기</a>
+  </div>
+  <div class="hero__scroll">
+    <div class="hero__scroll-icon"></div>
+    <span>SCROLL</span>
+  </div>
+</section>
 
-    <!-- For You -->
-    <section class="section">
-        <div class="container">
-            <div class="section-subtitle">FOR YOU</div>
-            <h2 class="section-title">이런 분께 추천합니다</h2>
-            <div class="cards">
-                <div class="card">
-                    <div class="card-icon">🏃</div>
-                    <h3 class="card-title">바쁜 직장인</h3>
-                    <p class="card-description">5분이면 완성되는 건강한 한 끼</p>
-                </div>
-                <div class="card">
-                    <div class="card-icon">💪</div>
-                    <h3 class="card-title">다이어터</h3>
-                    <p class="card-description">칼로리 걱정 없는 고단백 식단</p>
-                </div>
-                <div class="card">
-                    <div class="card-icon">👨‍👩‍👧</div>
-                    <h3 class="card-title">건강한 가족식사</h3>
-                    <p class="card-description">아이도 어른도 안심하고 먹는 무첨가 식품</p>
-                </div>
-                <div class="card">
-                    <div class="card-icon">🧓</div>
-                    <h3 class="card-title">부모님 선물</h3>
-                    <p class="card-description">정성이 담긴 건강 간편식 선물세트</p>
-                </div>
-            </div>
-        </div>
-    </section>
+<!-- TRUST -->
+<section class="trust">
+  <div class="trust__grid">
+    <div class="fade-in"><div class="trust__num" data-count="50000">0</div><div class="trust__label">누적 주문</div></div>
+    <div class="fade-in"><div class="trust__num" data-count="4.9" data-decimal>0</div><div class="trust__label">평균 별점</div></div>
+    <div class="fade-in"><div class="trust__num" data-count="98" data-suffix="%">0</div><div class="trust__label">재구매율</div></div>
+  </div>
+</section>
 
-    <!-- Our Process -->
-    <section class="section">
-        <div class="container">
-            <div class="section-subtitle">OUR PROCESS</div>
-            <h2 class="section-title">산지에서 식탁까지, 48시간</h2>
-            <div class="process-timeline">
-                <div class="process-step">
-                    <div class="process-icon">🌾</div>
-                    <h3 class="process-title">산지 수확</h3>
-                    <p class="process-description">매일 아침 계약 농장에서 수확</p>
-                </div>
-                <div class="process-step">
-                    <div class="process-icon">🔬</div>
-                    <h3 class="process-title">품질 검사</h3>
-                    <p class="process-description">잔류농약 0%, 신선도 AI 검수</p>
-                </div>
-                <div class="process-step">
-                    <div class="process-icon">👨‍🍳</div>
-                    <h3 class="process-title">셰프 조리</h3>
-                    <p class="process-description">전문 셰프의 레시피로 조리</p>
-                </div>
-                <div class="process-step">
-                    <div class="process-icon">🚛</div>
-                    <h3 class="process-title">새벽 배송</h3>
-                    <p class="process-description">냉장 특수포장, 새벽 도착</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Customer Reviews -->
-    <section class="section">
-        <div class="container">
-            <div class="section-subtitle">CUSTOMER REVIEWS</div>
-            <h2 class="section-title">고객 후기</h2>
-            <div class="reviews-container">
-                <div class="reviews-slider">
-                    <div class="reviews-track" id="reviewsTrack">
-                        <div class="review-card">
-                            <div class="review-stars">★★★★★</div>
-                            <p class="review-text">바쁜 아침에 5분이면 건강한 식사 완성! 포장도 깔끔하고 배송도 빨라요.</p>
-                            <div class="review-author">김○○</div>
-                        </div>
-                        <div class="review-card">
-                            <div class="review-stars">★★★★★</div>
-                            <p class="review-text">다이어트 중인데 맛있게 건강한 식단 유지 중. 단백질볼 최고!</p>
-                            <div class="review-author">이○○</div>
-                        </div>
-                        <div class="review-card">
-                            <div class="review-stars">★★★★★</div>
-                            <p class="review-text">부모님께 선물했는데 너무 좋아하세요. 매달 정기배송 신청했어요.</p>
-                            <div class="review-author">박○○</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="reviews-dots">
-                    <span class="dot active" onclick="showReview(0)"></span>
-                    <span class="dot" onclick="showReview(1)"></span>
-                    <span class="dot" onclick="showReview(2)"></span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FAQ -->
-    <section class="section">
-        <div class="container">
-            <div class="section-subtitle">SHOPPING FAQ</div>
-            <h2 class="section-title">구매 전 꼭 읽어주세요</h2>
-            <div class="faq-list">
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        정말 신선한가요?
-                        <span class="faq-icon">+</span>
-                    </button>
-                    <div class="faq-answer">
-                        매일 새벽 산지에서 수확한 원료를 당일 조리, 냉장 특수포장으로 배송합니다. 유통기한이 아닌 '수확일'을 표기합니다.
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        배송은 얼마나 걸리나요?
-                        <span class="faq-icon">+</span>
-                    </button>
-                    <div class="faq-answer">
-                        밤 11시 이전 주문 시 다음날 아침 7시 전 도착(수도권). 전국 익일배송. 제주/도서산간 추가 1일.
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        환불/교환이 가능한가요?
-                        <span class="faq-icon">+</span>
-                    </button>
-                    <div class="faq-answer">
-                        수령 후 24시간 내 고객센터(1544-XXXX) 접수 시 100% 환불. 신선식품 특성상 단순변심 교환은 어려울 수 있습니다.
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Subscription Banner -->
-    <section class="subscription">
-        <div class="container">
-            <div class="subscription-content">
-                <h2 class="subscription-title">매주 신선하게, 정기배송 10% 할인</h2>
-                <p class="subscription-description">첫 구독 시 3,000원 할인 쿠폰 즉시 지급</p>
-                <div class="subscription-form">
-                    <input type="email" class="subscription-input" placeholder="이메일을 입력하세요" id="subscriptionEmail">
-                    <button class="subscription-button" onclick="subscribe()">구독 신청</button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Fresh On</h3>
-                    <p class="footer-description">신선함을 매일, 건강을 식탁에</p>
-                    <div class="social-icons">
-                        <a href="#" class="social-icon">📷</a>
-                        <a href="#" class="social-icon">🎥</a>
-                        <a href="#" class="social-icon">💬</a>
-                        <a href="#" class="social-icon">📝</a>
-                    </div>
-                </div>
-                <div class="footer-section">
-                    <h3>쇼핑</h3>
-                    <ul>
-                        <li><a href="#">전체상품</a></li>
-                        <li><a href="#">베스트</a></li>
-                        <li><a href="#">신상품</a></li>
-                        <li><a href="#">세일</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h3>고객서비스</h3>
-                    <ul>
-                        <li><a href="#">FAQ</a></li>
-                        <li><a href="#">배송안내</a></li>
-                        <li><a href="#">교환반품</a></li>
-                        <li><a href="#">1:1문의</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h3>뉴스레터</h3>
-                    <input type="email" class="subscription-input" placeholder="이메일 주소" style="margin-bottom: 1rem;">
-                    <button class="subscription-button" style="width: 100%;">구독하기</button>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                © 2026 프레쉬온 | 사업자등록번호 XXX-XX-XXXXX | 대표 홍길동
-            </div>
-        </div>
-    </footer>
-
-    <!-- Floating Elements -->
-    <div class="floating-cart" onclick="openCart()">
-        🛒
-        <span class="cart-badge" id="cartBadge">0</span>
+<!-- PRODUCTS -->
+<section class="section section--cream" id="products">
+  <div class="section__inner">
+    <div class="section__header fade-in">
+      <div class="section__sub">BEST SELLER</div>
+      <h2 class="section__title">프레쉬온이 자신있게<br>추천합니다</h2>
     </div>
-    <div class="floating-kakao" onclick="openKakao()">
-        💬
+    <div class="products" id="productsGrid"></div>
+  </div>
+</section>
+
+<!-- STORY -->
+<section class="story" id="story">
+  <div class="story__inner fade-in">
+    <div class="section__sub" style="color:var(--mint)">OUR STORY</div>
+    <h2 class="story__title">우리는 '진짜 음식'을<br>믿습니다.</h2>
+    <p class="story__desc">가공식품이 넘치는 시대, 프레쉬온은 원재료 본연의 맛과 영양을 살린 건강 간편식을 만듭니다.</p>
+    <div class="story__cards">
+      <div class="story__card"><div class="story__card-icon">🌱</div><div class="story__card-title">100% 유기농 원료</div><div class="story__card-desc">국내산 유기농 채소와 무항생제 닭가슴살만 사용합니다</div></div>
+      <div class="story__card"><div class="story__card-icon">🚚</div><div class="story__card-title">매일 새벽배송</div><div class="story__card-desc">밤 11시 주문, 다음날 아침 7시 도착</div></div>
+      <div class="story__card"><div class="story__card-icon">💚</div><div class="story__card-title">무첨가 원칙</div><div class="story__card-desc">방부제, 인공색소, MSG 제로</div></div>
     </div>
+  </div>
+</section>
 
-    <!-- Mobile Bottom Navigation -->
-    <nav class="mobile-nav">
-        <div class="mobile-nav-content">
-            <a href="#home" class="mobile-nav-item active">
-                <span class="mobile-nav-icon">🏠</span>
-                홈
-            </a>
-            <a href="#products" class="mobile-nav-item">
-                <span class="mobile-nav-icon">📦</span>
-                카테고리
-            </a>
-            <a href="#" class="mobile-nav-item" onclick="openCart()">
-                <span class="mobile-nav-icon">🛒</span>
-                장바구니
-            </a>
-            <a href="#" class="mobile-nav-item">
-                <span class="mobile-nav-icon">👤</span>
-                마이
-            </a>
+<!-- PROCESS -->
+<section class="section section--cream">
+  <div class="section__inner">
+    <div class="section__header fade-in">
+      <div class="section__sub">OUR PROCESS</div>
+      <h2 class="section__title">산지에서 식탁까지, 48시간</h2>
+    </div>
+    <div class="process__timeline fade-in">
+      <div class="process__step"><div class="process__num">01</div><div class="process__icon">🌾</div><div class="process__name">산지 수확</div><div class="process__desc">매일 아침 계약 농장에서 수확</div></div>
+      <div class="process__step"><div class="process__num">02</div><div class="process__icon">🔬</div><div class="process__name">품질 검수</div><div class="process__desc">잔류농약 0%, AI 신선도 검수</div></div>
+      <div class="process__step"><div class="process__num">03</div><div class="process__icon">👨‍🍳</div><div class="process__name">셰프 조리</div><div class="process__desc">전문 셰프 레시피로 당일 조리</div></div>
+      <div class="process__step"><div class="process__num">04</div><div class="process__icon">🚛</div><div class="process__name">새벽 배송</div><div class="process__desc">냉장 특수포장, 새벽 도착</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="section section--dark" id="reviews">
+  <div class="section__inner">
+    <div class="section__header fade-in">
+      <div class="section__sub">REVIEWS</div>
+      <h2 class="section__title" style="color:#fff">고객님들의 솔직한 후기</h2>
+    </div>
+    <div class="reviews__slider fade-in">
+      <div class="reviews__track" id="reviewTrack">
+        <div class="reviews__item">
+          <div class="reviews__quote">"</div>
+          <div class="reviews__stars">★★★★★</div>
+          <p class="reviews__text">바쁜 아침에 5분이면 건강한 식사 완성! 포장도 깔끔하고 배송도 빨라요. 매일 먹어도 질리지 않아요.</p>
+          <div class="reviews__name">김○○ 고객</div>
         </div>
-    </nav>
+        <div class="reviews__item">
+          <div class="reviews__quote">"</div>
+          <div class="reviews__stars">★★★★★</div>
+          <p class="reviews__text">다이어트 중인데 맛있게 건강한 식단 유지 중이에요. 단백질볼이 간식으로 정말 완벽합니다!</p>
+          <div class="reviews__name">이○○ 고객</div>
+        </div>
+        <div class="reviews__item">
+          <div class="reviews__quote">"</div>
+          <div class="reviews__stars">★★★★★</div>
+          <p class="reviews__text">부모님께 선물했는데 너무 좋아하세요. 건강하고 맛있다고 매달 정기배송 신청해달라고 하셨어요.</p>
+          <div class="reviews__name">박○○ 고객</div>
+        </div>
+      </div>
+      <div class="reviews__dots" id="reviewDots"></div>
+    </div>
+  </div>
+</section>
 
-    <script>
-        // Dark mode toggle
-        function toggleTheme() {
-            const body = document.body;
-            const themeToggle = document.querySelector('.theme-toggle');
-            
-            if (body.dataset.theme === 'dark') {
-                body.removeAttribute('data-theme');
-                themeToggle.textContent = '🌙';
-                localStorage.setItem('theme', 'light');
-            } else {
-                body.dataset.theme = 'dark';
-                themeToggle.textContent = '☀️';
-                localStorage.setItem('theme', 'dark');
-            }
-        }
+<!-- SUBSCRIBE -->
+<section class="subscribe">
+  <div class="subscribe__card fade-in">
+    <h2 class="subscribe__title">매주 신선하게, 정기배송 10% 할인</h2>
+    <p class="subscribe__desc">첫 구독 시 3,000원 할인 쿠폰 즉시 지급 🎁</p>
+    <form class="subscribe__form" onsubmit="event.preventDefault();alert('구독 완료! 쿠폰이 발급되었습니다.')">
+      <input type="email" class="subscribe__input" placeholder="이메일을 입력하세요" required>
+      <button type="submit" class="subscribe__btn">구독 신청</button>
+    </form>
+  </div>
+</section>
 
-        // Load saved theme
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-            document.body.dataset.theme = 'dark';
-            document.querySelector('.theme-toggle').textContent = '☀️';
-        }
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer__grid">
+    <div>
+      <div class="footer__logo">Fresh<span>On</span></div>
+      <p class="footer__text">프리미엄 건강 간편식 D2C<br>Farm to Table, 매일 새벽 산지직송</p>
+      <div class="footer__sns">
+        <a href="#">Instagram</a><a href="#">YouTube</a><a href="#">Kakao</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer__title">쇼핑</div>
+      <ul class="footer__links">
+        <li><a href="#products">전체상품</a></li><li><a href="#">베스트</a></li><li><a href="#">신상품</a></li><li><a href="#">세일</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer__title">고객서비스</div>
+      <ul class="footer__links">
+        <li><a href="#">FAQ</a></li><li><a href="#">배송안내</a></li><li><a href="#">교환/반품</a></li><li><a href="#">1:1 문의</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer__title">고객센터</div>
+      <p class="footer__text">1544-XXXX<br>평일 09:00 ~ 18:00<br>점심 12:00 ~ 13:00</p>
+    </div>
+  </div>
+  <div class="footer__bottom">© 2026 Fresh On Inc. All Rights Reserved.</div>
+</footer>
 
-        // Mobile menu toggle
-        function toggleMobileMenu() {
-            // Add mobile menu functionality here
-        }
+<!-- FLOATING -->
+<a href="cart.html" class="floating-cart" id="floatingCart">🛒<span class="nav__badge" id="floatingBadge">0</span></a>
+<button class="top-btn" id="topBtn" onclick="window.scrollTo({top:0})">↑</button>
 
-        // Intersection Observer for fade-in animation
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
+<!-- MOBILE NAV -->
+<nav class="mob-nav">
+  <div class="mob-nav__grid">
+    <a href="#" class="mob-nav__item active"><span class="mob-nav__icon">🏠</span>홈</a>
+    <a href="#products" class="mob-nav__item"><span class="mob-nav__icon">🔍</span>검색</a>
+    <a href="cart.html" class="mob-nav__item"><span class="mob-nav__icon">🛒</span>장바구니</a>
+    <a href="#" class="mob-nav__item"><span class="mob-nav__icon">👤</span>마이</a>
+  </div>
+</nav>
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, observerOptions);
+<script>
+const PRODUCTS=[
+  {id:1,name:'샐러드 밀키트',category:'밀키트',price:12900,sale:9900,img:'photo-1512621776951-a57141f2eefd'},
+  {id:2,name:'단백질볼',category:'스낵',price:8900,sale:6900,img:'photo-1490645935967-10de6ba17061'},
+  {id:3,name:'그래놀라',category:'스낵',price:9500,sale:7500,img:'photo-1504674900247-0877df9cc836'},
+  {id:4,name:'콜드프레스 주스',category:'음료',price:6500,sale:4900,img:'photo-1546069901-ba9599a7e63c'},
+  {id:5,name:'닭가슴살 도시락',category:'도시락',price:7900,sale:5900,img:'photo-1484723091739-30a097e8f929'}
+];
 
-        document.querySelectorAll('.section').forEach(section => {
-            observer.observe(section);
-        });
+// Render products
+const grid=document.getElementById('productsGrid');
+PRODUCTS.forEach(p=>{
+  const card=document.createElement('a');
+  card.href=`product.html?id=${p.id}`;
+  card.className='p-card fade-in';
+  card.innerHTML=`
+    <img class="p-card__img" src="https://images.unsplash.com/${p.img}?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="${p.name}" loading="lazy">
+    <div class="p-card__body">
+      <span class="p-card__tag">${p.category}</span>
+      <div class="p-card__name">${p.name}</div>
+      <div class="p-card__price">
+        <span class="p-card__original">${p.price.toLocaleString()}원</span>
+        <span class="p-card__sale">${p.sale.toLocaleString()}원</span>
+      </div>
+      <button class="p-card__btn" onclick="event.preventDefault();event.stopPropagation();addCart(${p.id})">담기</button>
+    </div>`;
+  grid.appendChild(card);
+});
 
-        // Header scroll effect
-        window.addEventListener('scroll', () => {
-            const header = document.querySelector('.header');
-            if (window.scrollY > 100) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
-        });
+// Cart
+function getCart(){try{return JSON.parse(localStorage.getItem('freshon_cart'))||[]}catch{return[]}}
+function saveCart(c){localStorage.setItem('freshon_cart',JSON.stringify(c));updateBadge()}
+function addCart(id){
+  const p=PRODUCTS.find(x=>x.id===id);if(!p)return;
+  let cart=getCart();const exist=cart.find(x=>x.id===id);
+  if(exist)exist.qty++;else cart.push({id:p.id,name:p.name,price:p.sale,qty:1,image:`https://images.unsplash.com/${p.img}?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80`});
+  saveCart(cart);
+  const toast=document.createElement('div');
+  toast.textContent='✓ 장바구니에 담았습니다';
+  toast.style.cssText='position:fixed;bottom:120px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;padding:.7rem 1.5rem;border-radius:10px;z-index:9999;font-size:.85rem;font-weight:500;animation:fadeInUp .3s';
+  document.body.appendChild(toast);setTimeout(()=>toast.remove(),1500);
+}
+function updateBadge(){
+  const n=getCart().reduce((s,x)=>s+(x.qty||1),0);
+  document.querySelectorAll('#cartBadge,#floatingBadge').forEach(b=>b.textContent=n);
+}
+updateBadge();
 
-        // Shopping cart functionality
-        let cart = JSON.parse(localStorage.getItem('freshon_cart')) || [];
+// Dark mode
+function toggleDark(){
+  const d=document.documentElement.dataset.theme==='dark';
+  document.documentElement.dataset.theme=d?'':'dark';
+  document.getElementById('darkBtn').textContent=d?'🌙':'☀️';
+  localStorage.setItem('freshon_dark',d?'':'dark');
+}
+if(localStorage.getItem('freshon_dark')==='dark'){document.documentElement.dataset.theme='dark';document.getElementById('darkBtn').textContent='☀️'}
 
-        function updateCartBadge() {
-            const badge = document.getElementById('cartBadge');
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            badge.textContent = totalItems;
-            badge.style.display = totalItems > 0 ? 'flex' : 'none';
-        }
+// Nav scroll
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('scrolled',window.scrollY>50);
+  document.getElementById('topBtn').classList.toggle('show',window.scrollY>300);
+});
 
-        function addToCart(productId, event) {
-            if (event) {
-                event.stopPropagation();
-            }
-            
-            const products = {
-                1: { name: '프리미엄 샐러드밀키트', price: 9900, image: 'photo-1512621776951-a57141f2eefd' },
-                2: { name: '고단백 닭가슴살볼', price: 6900, image: 'photo-1490645935967-10de6ba17061' },
-                3: { name: '수제 그래놀라', price: 7500, image: 'photo-1504674900247-0877df9cc836' },
-                4: { name: '콜드프레스 주스', price: 4900, image: 'photo-1546069901-ba9599a7e63c' },
-                5: { name: '프리미엄 도시락', price: 5900, image: 'photo-1484723091739-30a097e8f929' }
-            };
+// Mobile menu
+function toggleMob(){document.getElementById('mobOverlay').classList.toggle('open')}
 
-            const existingItem = cart.find(item => item.id === productId);
-            
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                cart.push({
-                    id: productId,
-                    ...products[productId],
-                    quantity: 1
-                });
-            }
+// Intersection Observer
+const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');if(e.target.querySelector('.trust__num'))countUp(e.target)}})},{threshold:.2});
+document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
 
-            localStorage.setItem('freshon_cart', JSON.stringify(cart));
-            updateCartBadge();
-            
-            // Show success message
-            alert('장바구니에 상품이 담겼습니다!');
-        }
+// Count up
+function countUp(el){
+  const num=el.querySelector('.trust__num');if(!num||num.dataset.done)return;num.dataset.done='1';
+  const target=parseFloat(num.dataset.count);const decimal=num.hasAttribute('data-decimal');
+  const suffix=num.dataset.suffix||'';const isLarge=target>1000;
+  const duration=2000;const start=performance.now();
+  function tick(now){
+    const p=Math.min((now-start)/duration,1);const eased=1-Math.pow(1-p,3);
+    let v=eased*target;
+    if(decimal)num.textContent=v.toFixed(1)+suffix;
+    else if(isLarge)num.textContent=Math.floor(v).toLocaleString()+'+';
+    else num.textContent=Math.floor(v)+suffix;
+    if(p<1)requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
 
-        function goToProduct(productId) {
-            window.location.href = `product.html?id=${productId}`;
-        }
+// Review slider
+let reviewIdx=0;const track=document.getElementById('reviewTrack');const items=track.children.length;
+const dots=document.getElementById('reviewDots');
+for(let i=0;i<items;i++){const d=document.createElement('button');d.className='reviews__dot'+(i===0?' active':'');d.onclick=()=>goReview(i);dots.appendChild(d)}
+function goReview(i){reviewIdx=i;track.style.transform=`translateX(-${i*100}%)`;dots.querySelectorAll('.reviews__dot').forEach((d,j)=>d.classList.toggle('active',j===i))}
+setInterval(()=>goReview((reviewIdx+1)%items),4000);
 
-        function openCart() {
-            window.location.href = 'cart.html';
-        }
-
-        function openKakao() {
-            alert('카카오톡 상담을 시작합니다.');
-        }
-
-        // Reviews slider
-        let currentReview = 0;
-        const totalReviews = 3;
-
-        function showReview(index) {
-            const track = document.getElementById('reviewsTrack');
-            const dots = document.querySelectorAll('.dot');
-            
-            currentReview = index;
-            track.style.transform = `translateX(-${index * 100}%)`;
-            
-            dots.forEach((dot, i) => {
-                dot.classList.toggle('active', i === index);
-            });
-        }
-
-        // Auto-slide reviews
-        setInterval(() => {
-            currentReview = (currentReview + 1) % totalReviews;
-            showReview(currentReview);
-        }, 3000);
-
-        // FAQ accordion
-        function toggleFaq(button) {
-            const faqItem = button.parentElement;
-            const answer = faqItem.querySelector('.faq-answer');
-            const isOpen = faqItem.classList.contains('open');
-
-            // Close all FAQ items
-            document.querySelectorAll('.faq-item').forEach(item => {
-                item.classList.remove('open');
-                item.querySelector('.faq-answer').classList.remove('open');
-            });
-
-            // Open current item if it wasn't open
-            if (!isOpen) {
-                faqItem.classList.add('open');
-                answer.classList.add('open');
-            }
-        }
-
-        // Subscription
-        function subscribe() {
-            const email = document.getElementById('subscriptionEmail').value;
-            if (!email) {
-                alert('이메일을 입력해주세요.');
-                return;
-            }
-            if (!/\S+@\S+\.\S+/.test(email)) {
-                alert('올바른 이메일을 입력해주세요.');
-                return;
-            }
-            
-            alert('구독 신청이 완료되었습니다! 3,000원 할인 쿠폰을 발송해드렸습니다.');
-            document.getElementById('subscriptionEmail').value = '';
-        }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            updateCartBadge();
-        });
-    </script>
+// FadeInUp keyframe
+const style=document.createElement('style');style.textContent='@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}';document.head.appendChild(style);
+</script>
 </body>
 </html>
