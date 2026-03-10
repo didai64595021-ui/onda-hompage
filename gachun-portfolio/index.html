@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>가천포크 — Farm to Table, 신선한 돈육의 기준</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--main:#8B1A1A;--green:#2C5F2D;--bg:#FAFAF5;--gold:#D4A574;--text:#1A1A1A;--text2:#666;--card:#fff;--shadow:0 4px 20px rgba(0,0,0,.06)}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--text);background:var(--bg);overflow-x:hidden;line-height:1.6}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:999;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;transition:all .4s}
+.nav.scrolled{background:rgba(255,255,255,.97);backdrop-filter:blur(12px);box-shadow:0 2px 20px rgba(0,0,0,.08)}
+.nav__logo{font-size:1.4rem;font-weight:900;color:#fff;text-decoration:none;letter-spacing:-.02em;transition:color .3s}
+.nav.scrolled .nav__logo{color:var(--main)}
+.nav__logo span{color:var(--gold)}
+.nav__menu{display:flex;gap:2rem;list-style:none}
+.nav__menu a{color:rgba(255,255,255,.85);text-decoration:none;font-size:.9rem;font-weight:500;transition:color .3s}
+.nav__menu a:hover{color:var(--gold)}
+.nav.scrolled .nav__menu a{color:var(--text)}
+.nav.scrolled .nav__menu a:hover{color:var(--main)}
+.nav__icons{display:flex;gap:1rem;align-items:center}
+.nav__icon{background:none;border:none;color:rgba(255,255,255,.85);font-size:1.1rem;cursor:pointer;position:relative;transition:color .3s}
+.nav.scrolled .nav__icon{color:var(--text)}
+.nav__badge{position:absolute;top:-6px;right:-8px;background:var(--main);color:#fff;font-size:.6rem;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700}
+.hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px}
+.hamburger span{display:block;width:22px;height:2px;background:#fff;border-radius:2px;transition:all .3s}
+.nav.scrolled .hamburger span{background:var(--text)}
+.mob-overlay{position:fixed;inset:0;background:rgba(139,26,26,.97);z-index:998;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2rem;opacity:0;pointer-events:none;transition:opacity .3s}
+.mob-overlay.open{opacity:1;pointer-events:auto}
+.mob-overlay a{color:#fff;font-size:1.5rem;text-decoration:none;font-weight:700}
+.mob-close{position:absolute;top:1.5rem;right:1.5rem;background:none;border:none;color:#fff;font-size:2rem;cursor:pointer}
+
+/* HERO */
+.hero{position:relative;height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;background:url('https://images.unsplash.com/photo-1558030006-450675393462?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat}
+.hero::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(26,26,26,.5) 0%,rgba(139,26,26,.3) 50%,rgba(26,26,26,.6) 100%)}
+.hero__content{position:relative;z-index:2;padding:0 1.5rem;max-width:700px}
+.hero__sub{display:inline-block;color:var(--gold);font-size:.8rem;font-weight:500;letter-spacing:5px;text-transform:uppercase;margin-bottom:1.5rem;border:1px solid rgba(212,165,116,.4);padding:.4rem 1.2rem;border-radius:30px}
+.hero__title{font-size:clamp(2rem,5vw,3.2rem);font-weight:900;color:#fff;line-height:1.3;margin-bottom:1.2rem}
+.hero__desc{color:rgba(255,255,255,.75);font-size:clamp(.9rem,2vw,1.1rem);font-weight:300;margin-bottom:2.5rem}
+.hero__cta{display:inline-block;background:var(--main);color:#fff;padding:.9rem 2.5rem;border-radius:50px;font-weight:700;font-size:1rem;text-decoration:none;transition:all .3s}
+.hero__cta:hover{background:#a02020;transform:translateY(-2px);box-shadow:0 8px 25px rgba(139,26,26,.3)}
+.hero__scroll{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);z-index:2;color:rgba(255,255,255,.5);font-size:.75rem;display:flex;flex-direction:column;align-items:center;gap:.5rem}
+.hero__scroll-icon{width:24px;height:38px;border:2px solid rgba(255,255,255,.3);border-radius:12px;position:relative}
+.hero__scroll-icon::after{content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);width:3px;height:8px;background:var(--gold);border-radius:3px;animation:scrollDot 2s infinite}
+@keyframes scrollDot{0%{opacity:1;transform:translateX(-50%) translateY(0)}100%{opacity:0;transform:translateX(-50%) translateY(12px)}}
+
+/* TRUST */
+.trust{background:var(--main);padding:50px 2rem}
+.trust__grid{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;text-align:center}
+.trust__item{padding:1rem 0}
+.trust__num{font-size:clamp(1.8rem,3.5vw,2.5rem);font-weight:900;color:#fff;margin-bottom:.3rem}
+.trust__label{color:rgba(255,255,255,.7);font-size:.8rem;font-weight:400}
+
+/* SECTION */
+.section{padding:70px 2rem}
+.section--dark{background:#1A1A1A;color:#fff}
+.section--cream{background:var(--bg)}
+.section--light{background:#fff}
+.section__inner{max-width:1100px;margin:0 auto}
+.section__sub{display:inline-block;color:var(--main);font-size:.75rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;margin-bottom:.8rem}
+.section__title{font-size:clamp(1.5rem,3.5vw,2.2rem);font-weight:900;line-height:1.3;margin-bottom:.8rem}
+.section__desc{color:var(--text2);font-size:.95rem;font-weight:300;max-width:500px;line-height:1.8}
+.section__header{text-align:center;margin-bottom:2.5rem}
+.section--dark .section__sub{color:var(--gold)}
+.section--dark .section__desc{color:rgba(255,255,255,.6)}
+.section--dark .section__title{color:#fff}
+
+/* CATEGORY */
+.cat__grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;max-width:800px;margin:0 auto}
+.cat__item{background:var(--card);border:1px solid #eee;border-radius:12px;padding:1.2rem .8rem;text-align:center;cursor:pointer;transition:all .3s;text-decoration:none;color:var(--text)}
+.cat__item:hover{border-color:var(--main);transform:translateY(-3px);box-shadow:0 8px 20px rgba(139,26,26,.1)}
+.cat__icon{font-size:2rem;margin-bottom:.5rem}
+.cat__name{font-size:.85rem;font-weight:700}
+
+/* PRODUCTS */
+.products{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.p-card{background:var(--card);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .35s;box-shadow:var(--shadow);text-decoration:none;color:inherit;display:flex;flex-direction:column}
+.p-card:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(0,0,0,.12)}
+.p-card__img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;transition:transform .5s}
+.p-card:hover .p-card__img{transform:scale(1.04)}
+.p-card__body{padding:1rem 1.2rem 1.2rem;flex:1;display:flex;flex-direction:column}
+.p-card__tag{display:inline-block;font-size:.65rem;color:var(--main);border:1px solid var(--main);padding:.15rem .6rem;border-radius:20px;margin-bottom:.5rem;font-weight:600;width:fit-content}
+.p-card__name{font-size:.95rem;font-weight:700;margin-bottom:.4rem}
+.p-card__desc{font-size:.78rem;color:var(--text2);margin-bottom:.6rem;font-weight:300;line-height:1.5}
+.p-card__price{display:flex;align-items:center;gap:.5rem;margin-bottom:.8rem;margin-top:auto}
+.p-card__original{font-size:.8rem;color:var(--text2);text-decoration:line-through}
+.p-card__sale{font-size:1.1rem;font-weight:900;color:var(--main)}
+.p-card__discount{font-size:.75rem;font-weight:700;color:#fff;background:var(--main);padding:.15rem .5rem;border-radius:4px}
+.p-card__btn{width:100%;padding:.6rem;background:var(--main);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:.85rem;cursor:pointer;transition:background .3s;font-family:inherit}
+.p-card__btn:hover{background:#a02020}
+
+/* STORY */
+.story{position:relative;padding:100px 2rem;background:url('https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover fixed;overflow:hidden}
+.story::before{content:'';position:absolute;inset:0;background:rgba(26,26,26,.8)}
+.story__inner{position:relative;z-index:1;max-width:900px;margin:0 auto;text-align:center;color:#fff}
+.story__title{font-size:clamp(1.4rem,3.5vw,2.2rem);font-weight:900;line-height:1.4;margin-bottom:1rem}
+.story__desc{color:rgba(255,255,255,.7);font-size:.95rem;font-weight:300;margin-bottom:2.5rem;max-width:500px;margin-left:auto;margin-right:auto;line-height:1.8}
+.story__cards{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem}
+.story__card{background:rgba(255,255,255,.08);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:1.5rem 1rem;text-align:center;transition:transform .3s}
+.story__card:hover{transform:translateY(-4px)}
+.story__card-icon{font-size:1.8rem;margin-bottom:.6rem}
+.story__card-title{font-weight:700;font-size:.85rem;margin-bottom:.3rem}
+.story__card-desc{font-size:.75rem;color:rgba(255,255,255,.6);font-weight:300}
+
+/* REVIEWS */
+.reviews__slider{position:relative;max-width:700px;margin:0 auto;overflow:hidden}
+.reviews__track{display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1)}
+.reviews__item{min-width:100%;padding:2rem;text-align:center}
+.reviews__quote{font-size:5rem;color:var(--gold);opacity:.2;line-height:1;margin-bottom:-1.5rem;font-family:Georgia,serif}
+.reviews__text{font-size:1rem;line-height:1.9;color:rgba(255,255,255,.85);font-weight:300;margin-bottom:1.2rem;max-width:500px;margin-left:auto;margin-right:auto}
+.reviews__stars{color:#F5C842;font-size:1rem;margin-bottom:.5rem}
+.reviews__name{font-weight:700;font-size:.85rem;color:rgba(255,255,255,.5)}
+.reviews__dots{display:flex;justify-content:center;gap:.5rem;margin-top:1rem}
+.reviews__dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.25);border:none;cursor:pointer;transition:all .3s}
+.reviews__dot.active{background:var(--gold);width:24px;border-radius:4px}
+
+/* DEAL */
+.deal{background:linear-gradient(135deg,#8B1A1A,#5a1010);padding:60px 2rem;text-align:center;color:#fff}
+.deal__timer{display:flex;justify-content:center;gap:1rem;margin-bottom:2rem}
+.deal__time-box{background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border-radius:10px;padding:.8rem 1.2rem;min-width:70px}
+.deal__time-num{font-size:clamp(1.5rem,3vw,2rem);font-weight:900;display:block}
+.deal__time-label{font-size:.65rem;color:rgba(255,255,255,.6)}
+.deal__products{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;max-width:700px;margin:0 auto}
+.deal__card{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:14px;overflow:hidden;transition:transform .3s}
+.deal__card:hover{transform:translateY(-4px)}
+.deal__card img{width:100%;aspect-ratio:4/3;object-fit:cover}
+.deal__card-body{padding:1rem}
+.deal__card-name{font-weight:700;font-size:.95rem;margin-bottom:.3rem}
+.deal__card-price{display:flex;align-items:center;gap:.5rem;justify-content:center}
+.deal__card-original{font-size:.8rem;text-decoration:line-through;color:rgba(255,255,255,.5)}
+.deal__card-sale{font-size:1.2rem;font-weight:900;color:var(--gold)}
+
+/* SUBSCRIBE */
+.subscribe{background:var(--green);padding:60px 2rem;text-align:center}
+.subscribe__card{max-width:500px;margin:0 auto;background:rgba(255,255,255,.12);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:2.5rem 2rem}
+.subscribe__title{font-size:1.4rem;font-weight:900;color:#fff;margin-bottom:.5rem}
+.subscribe__desc{color:rgba(255,255,255,.8);font-size:.85rem;margin-bottom:1.5rem;font-weight:300}
+.subscribe__form{display:flex;gap:.5rem}
+.subscribe__input{flex:1;padding:.75rem 1rem;border:none;border-radius:10px;font-size:.9rem;font-family:inherit;outline:none}
+.subscribe__btn{padding:.75rem 1.5rem;background:var(--main);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .3s;white-space:nowrap}
+.subscribe__btn:hover{opacity:.85}
+
+/* FOOTER */
+.footer{background:#111;color:rgba(255,255,255,.5);padding:50px 2rem 25px}
+.footer__grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr;gap:2rem;margin-bottom:2rem}
+.footer__title{font-weight:700;color:#fff;font-size:.85rem;margin-bottom:.8rem}
+.footer__logo{font-size:1.2rem;font-weight:900;color:#fff;margin-bottom:.6rem}
+.footer__logo span{color:var(--gold)}
+.footer__text{font-size:.78rem;line-height:1.7}
+.footer__links{list-style:none;display:flex;flex-direction:column;gap:.4rem}
+.footer__links a{color:rgba(255,255,255,.5);text-decoration:none;font-size:.78rem;transition:color .3s}
+.footer__links a:hover{color:var(--gold)}
+.footer__badges{display:flex;gap:.8rem;margin-top:1rem;flex-wrap:wrap}
+.footer__badge{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:.4rem .8rem;font-size:.7rem;color:rgba(255,255,255,.6);font-weight:500}
+.footer__bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:1.2rem;text-align:center;font-size:.72rem}
+
+/* FADE-IN */
+.fade-in{opacity:0;transform:translateY(20px);transition:all .6s ease-out}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .trust__grid{grid-template-columns:repeat(2,1fr);gap:1rem}
+  .products{grid-template-columns:repeat(2,1fr)}
+  .story__cards{grid-template-columns:repeat(2,1fr)}
+  .footer__grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  .nav__menu{display:none}
+  .hamburger{display:flex}
+  .trust__grid{grid-template-columns:repeat(2,1fr);gap:.8rem;padding:0 1rem}
+  .trust__num{font-size:1.6rem}
+  .cat__grid{grid-template-columns:repeat(4,1fr);gap:.6rem}
+  .cat__item{padding:.8rem .5rem}
+  .cat__icon{font-size:1.5rem;margin-bottom:.3rem}
+  .cat__name{font-size:.75rem}
+  .products{grid-template-columns:1fr}
+  .p-card{flex-direction:row;max-height:160px}
+  .p-card__img{width:140px;aspect-ratio:1/1;min-height:100%}
+  .p-card__body{padding:.8rem 1rem}
+  .p-card__desc{display:none}
+  .story__cards{grid-template-columns:repeat(2,1fr);gap:.8rem}
+  .story{padding:60px 1.5rem;background-attachment:scroll}
+  .deal__products{grid-template-columns:1fr}
+  .deal__timer{gap:.6rem}
+  .deal__time-box{padding:.6rem .8rem;min-width:55px}
+  .subscribe__form{flex-direction:column}
+  .footer__grid{grid-template-columns:1fr}
+  .section{padding:50px 1.5rem}
+  .hero__title{font-size:1.8rem}
+}
+@media(max-width:380px){
+  .cat__grid{grid-template-columns:repeat(2,1fr)}
+  .trust__grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <a href="#" class="nav__logo">가천<span>포크</span></a>
+  <ul class="nav__menu">
+    <li><a href="#best">베스트</a></li>
+    <li><a href="#category">부위별</a></li>
+    <li><a href="#story">브랜드스토리</a></li>
+    <li><a href="#reviews">고객후기</a></li>
+  </ul>
+  <div class="nav__icons">
+    <button class="nav__icon" aria-label="검색">🔍</button>
+    <button class="nav__icon" aria-label="장바구니">🛒<span class="nav__badge" id="cartBadge">0</span></button>
+  </div>
+  <button class="hamburger" id="hambBtn" aria-label="메뉴"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- MOBILE OVERLAY -->
+<div class="mob-overlay" id="mobOverlay">
+  <button class="mob-close" id="mobClose">✕</button>
+  <a href="#best" onclick="closeMob()">베스트</a>
+  <a href="#category" onclick="closeMob()">부위별</a>
+  <a href="#story" onclick="closeMob()">브랜드스토리</a>
+  <a href="#reviews" onclick="closeMob()">고객후기</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero__content">
+    <span class="hero__sub">FARM TO TABLE</span>
+    <h1 class="hero__title">3대째 이어온 정육의 장인정신,<br>가천포크</h1>
+    <p class="hero__desc">당일 도축, 당일 발송 — 산지에서 식탁까지 48시간 내 신선 배송</p>
+    <a href="#best" class="hero__cta">지금 쇼핑하기</a>
+  </div>
+  <div class="hero__scroll"><div class="hero__scroll-icon"></div>SCROLL</div>
+</section>
+
+<!-- TRUST -->
+<section class="trust">
+  <div class="trust__grid">
+    <div class="trust__item fade-in"><div class="trust__num" data-count="500000">50만+</div><div class="trust__label">누적 판매</div></div>
+    <div class="trust__item fade-in"><div class="trust__num">HACCP</div><div class="trust__label">위생 인증</div></div>
+    <div class="trust__item fade-in"><div class="trust__num">당일</div><div class="trust__label">도축 · 발송</div></div>
+    <div class="trust__item fade-in"><div class="trust__num">4.9</div><div class="trust__label">평균 별점</div></div>
+  </div>
+</section>
+
+<!-- CATEGORY -->
+<section class="section section--cream" id="category">
+  <div class="section__inner">
+    <div class="section__header fade-in">
+      <span class="section__sub">CATEGORY</span>
+      <h2 class="section__title">부위별 쇼핑</h2>
+    </div>
+    <div class="cat__grid">
+      <a href="#best" class="cat__item fade-in"><div class="cat__icon">🥩</div><div class="cat__name">삼겹살</div></a>
+      <a href="#best" class="cat__item fade-in"><div class="cat__icon">🍖</div><div class="cat__name">갈비</div></a>
+      <a href="#best" class="cat__item fade-in"><div class="cat__icon">🥓</div><div class="cat__name">목살</div></a>
+      <a href="#best" class="cat__item fade-in"><div class="cat__icon">🫕</div><div class="cat__name">찌개용</div></a>
+      <a href="#best" class="cat__item fade-in"><div class="cat__icon">🦴</div><div class="cat__name">등뼈</div></a>
+      <a href="#best" class="cat__item fade-in"><div class="cat__icon">🦶</div><div class="cat__name">족발</div></a>
+      <a href="#best" class="cat__item fade-in"><div class="cat__icon">🌭</div><div class="cat__name">순대</div></a>
+      <a href="#best" class="cat__item fade-in"><div class="cat__icon">🫙</div><div class="cat__name">양념육</div></a>
+    </div>
+  </div>
+</section>
+
+<!-- BEST SELLER -->
+<section class="section section--light" id="best">
+  <div class="section__inner">
+    <div class="section__header fade-in">
+      <span class="section__sub">MD PICK</span>
+      <h2 class="section__title">가천포크 베스트셀러</h2>
+      <p class="section__desc" style="margin:0 auto">매주 가장 많이 찾는 인기 상품을 모았습니다</p>
+    </div>
+    <div class="products" id="productsGrid"></div>
+  </div>
+</section>
+
+<!-- BRAND STORY -->
+<section class="story" id="story">
+  <div class="story__inner">
+    <span class="section__sub" style="color:var(--gold)">OUR STORY</span>
+    <h2 class="story__title">산지에서 식탁까지,<br>가천포크의 약속</h2>
+    <p class="story__desc">직접 사육하고, 직접 도축하고, 직접 가공합니다.<br>중간 유통 없이 농장에서 고객님의 식탁까지.</p>
+    <div class="story__cards">
+      <div class="story__card fade-in"><div class="story__card-icon">🐷</div><div class="story__card-title">직접 사육</div><div class="story__card-desc">자체 농장에서 무항생제 사육</div></div>
+      <div class="story__card fade-in"><div class="story__card-icon">🔪</div><div class="story__card-title">당일 도축</div><div class="story__card-desc">HACCP 인증 시설에서 당일 처리</div></div>
+      <div class="story__card fade-in"><div class="story__card-icon">👨‍🍳</div><div class="story__card-title">장인 가공</div><div class="story__card-desc">30년 경력 장인의 손질</div></div>
+      <div class="story__card fade-in"><div class="story__card-icon">🚛</div><div class="story__card-title">냉장 직송</div><div class="story__card-desc">냉장 특수포장 48시간 배송</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="section section--dark" id="reviews">
+  <div class="section__inner">
+    <div class="section__header fade-in">
+      <span class="section__sub">REVIEWS</span>
+      <h2 class="section__title">고객님들의 솔직한 후기</h2>
+    </div>
+    <div class="reviews__slider">
+      <div class="reviews__track" id="reviewTrack">
+        <div class="reviews__item">
+          <div class="reviews__quote">"</div>
+          <div class="reviews__stars">★★★★★</div>
+          <p class="reviews__text">삼겹살 마블링이 진짜 예술이에요. 집에서 구워먹는데 고깃집보다 훨씬 맛있습니다. 앞으로 여기서만 시킬게요!</p>
+          <div class="reviews__name">김○○ 고객</div>
+        </div>
+        <div class="reviews__item">
+          <div class="reviews__quote">"</div>
+          <div class="reviews__stars">★★★★★</div>
+          <p class="reviews__text">족발 양도 푸짐하고 쫄깃쫄깃! 배달 족발이랑 차원이 달라요. 손님 올 때마다 주문합니다.</p>
+          <div class="reviews__name">이○○ 고객</div>
+        </div>
+        <div class="reviews__item">
+          <div class="reviews__quote">"</div>
+          <div class="reviews__stars">★★★★★</div>
+          <p class="reviews__text">보쌈용 돈사태살 주문했는데 부드럽고 잡내 하나 없어요. 역시 당일 도축이라 신선함이 다릅니다.</p>
+          <div class="reviews__name">박○○ 고객</div>
+        </div>
+      </div>
+      <div class="reviews__dots" id="reviewDots"></div>
+    </div>
+  </div>
+</section>
+
+<!-- TODAY'S DEAL -->
+<section class="deal" id="deal">
+  <span class="section__sub" style="color:var(--gold)">TODAY'S DEAL</span>
+  <h2 class="section__title" style="color:#fff;margin-bottom:1.5rem">오늘의 특가</h2>
+  <div class="deal__timer" id="dealTimer">
+    <div class="deal__time-box"><span class="deal__time-num" id="dealH">00</span><span class="deal__time-label">시간</span></div>
+    <div class="deal__time-box"><span class="deal__time-num" id="dealM">00</span><span class="deal__time-label">분</span></div>
+    <div class="deal__time-box"><span class="deal__time-num" id="dealS">00</span><span class="deal__time-label">초</span></div>
+  </div>
+  <div class="deal__products">
+    <div class="deal__card fade-in">
+      <img src="https://images.unsplash.com/photo-1602470520998-f4a52199a3d6?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="스페셜 삼겹살" onerror="this.style.background='#eee'" loading="lazy">
+      <div class="deal__card-body">
+        <div class="deal__card-name">스페셜 삼겹살 1kg</div>
+        <div class="deal__card-price"><span class="deal__card-original">32,000원</span><span class="deal__card-sale">24,900원</span></div>
+      </div>
+    </div>
+    <div class="deal__card fade-in">
+      <img src="https://images.unsplash.com/photo-1544025162-d76694265947?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="양념 돼지갈비" onerror="this.style.background='#eee'" loading="lazy">
+      <div class="deal__card-body">
+        <div class="deal__card-name">양념 돼지갈비 1kg</div>
+        <div class="deal__card-price"><span class="deal__card-original">28,000원</span><span class="deal__card-sale">19,900원</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SUBSCRIBE -->
+<section class="subscribe">
+  <div class="subscribe__card fade-in">
+    <h2 class="subscribe__title">신규 가입 5,000원 쿠폰 🎁</h2>
+    <p class="subscribe__desc">이메일을 등록하시면 신규 가입 쿠폰과 매주 특가 소식을 보내드립니다</p>
+    <form class="subscribe__form" onsubmit="event.preventDefault();alert('쿠폰이 발급되었습니다!')">
+      <input class="subscribe__input" type="email" placeholder="이메일을 입력하세요" required>
+      <button class="subscribe__btn" type="submit">쿠폰 받기</button>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer__grid">
+    <div>
+      <div class="footer__logo">가천<span>포크</span></div>
+      <p class="footer__text">3대째 이어온 정육의 장인정신<br>Farm to Table, 산지에서 식탁까지</p>
+      <div class="footer__badges">
+        <span class="footer__badge">HACCP 인증</span>
+        <span class="footer__badge">무항생제</span>
+        <span class="footer__badge">이력추적</span>
+      </div>
+    </div>
+    <div>
+      <div class="footer__title">쇼핑</div>
+      <ul class="footer__links">
+        <li><a href="#">전체상품</a></li>
+        <li><a href="#">베스트</a></li>
+        <li><a href="#">신상품</a></li>
+        <li><a href="#">특가/세일</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer__title">고객서비스</div>
+      <ul class="footer__links">
+        <li><a href="#">FAQ</a></li>
+        <li><a href="#">배송안내</a></li>
+        <li><a href="#">교환/반품</a></li>
+        <li><a href="#">1:1 문의</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer__title">고객센터</div>
+      <p class="footer__text">1588-XXXX<br>평일 09:00 ~ 18:00<br>점심 12:00 ~ 13:00</p>
+      <p class="footer__text" style="margin-top:.8rem">사업자등록번호: XXX-XX-XXXXX<br>대표: 가천포크<br>주소: 경기도 XX시 XX구</p>
+    </div>
+  </div>
+  <div class="footer__bottom">© 2026 가천포크. All Rights Reserved.</div>
+</footer>
+
+<script>
+// NAV scroll
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>80)});
+
+// Mobile menu
+const hambBtn=document.getElementById('hambBtn'),mobOverlay=document.getElementById('mobOverlay'),mobClose=document.getElementById('mobClose');
+hambBtn.addEventListener('click',()=>mobOverlay.classList.add('open'));
+mobClose.addEventListener('click',closeMob);
+function closeMob(){mobOverlay.classList.remove('open')}
+
+// Products
+const PRODUCTS=[
+  {id:1,name:'스페셜 삼겹살',category:'구이용',price:32000,sale:24900,desc:'두툼한 마블링, 구이의 정석',img:'photo-1602470520998-f4a52199a3d6'},
+  {id:2,name:'눈꽃 삼겹살',category:'구이용',price:35000,sale:28900,desc:'눈꽃처럼 고운 마블링의 프리미엄',img:'photo-1553163147-622ab57be1c7'},
+  {id:3,name:'돼지양념오돌족발',category:'족발',price:28000,sale:22900,desc:'쫄깃한 오돌뼈 + 비법 양념',img:'photo-1544025162-d76694265947'},
+  {id:4,name:'가천 찹쌀순대',category:'순대',price:15000,sale:12900,desc:'100% 찹쌀로 꽉 찬 전통 순대',img:'photo-1529694157872-4e0c0f3b238b'},
+  {id:5,name:'언양식 돼지떡갈비',category:'양념육',price:24000,sale:18900,desc:'달콤짭조름한 전통 떡갈비',img:'photo-1504674900247-0877df9cc836'},
+  {id:6,name:'돈사태살 보쌈',category:'보쌈',price:26000,sale:19900,desc:'부드러운 보쌈의 정석, 잡내 제로',img:'photo-1606728035253-49e8a23146de'}
+];
+
+const grid=document.getElementById('productsGrid');
+PRODUCTS.forEach(p=>{
+  const pct=Math.round((1-p.sale/p.price)*100);
+  const card=document.createElement('div');
+  card.className='p-card fade-in';
+  card.innerHTML=`
+    <img class="p-card__img" src="https://images.unsplash.com/${p.img}?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="${p.name}" loading="lazy" onerror="this.style.background='#eee'">
+    <div class="p-card__body">
+      <span class="p-card__tag">${p.category}</span>
+      <div class="p-card__name">${p.name}</div>
+      <div class="p-card__desc">${p.desc}</div>
+      <div class="p-card__price">
+        <span class="p-card__discount">${pct}%</span>
+        <span class="p-card__original">${p.price.toLocaleString()}원</span>
+        <span class="p-card__sale">${p.sale.toLocaleString()}원</span>
+      </div>
+      <button class="p-card__btn" onclick="addCart(${p.id})">장바구니 담기</button>
+    </div>`;
+  grid.appendChild(card);
+});
+
+// Cart
+let cart=JSON.parse(localStorage.getItem('gachun_cart')||'[]');
+function updateBadge(){document.getElementById('cartBadge').textContent=cart.reduce((s,i)=>s+i.qty,0)}
+function addCart(id){
+  const p=PRODUCTS.find(x=>x.id===id);if(!p)return;
+  const exist=cart.find(c=>c.id===id);
+  if(exist)exist.qty++;else cart.push({id:p.id,name:p.name,price:p.sale,qty:1});
+  localStorage.setItem('gachun_cart',JSON.stringify(cart));
+  updateBadge();
+  showToast(p.name+' 담김!');
+}
+updateBadge();
+
+// Toast
+function showToast(msg){
+  const t=document.createElement('div');
+  t.textContent=msg;
+  Object.assign(t.style,{position:'fixed',bottom:'2rem',left:'50%',transform:'translateX(-50%)',background:'var(--main)',color:'#fff',padding:'.7rem 1.5rem',borderRadius:'10px',fontSize:'.85rem',fontWeight:'700',zIndex:'9999',animation:'fadeUp .3s'});
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2000);
+}
+
+// Reviews slider
+const track=document.getElementById('reviewTrack'),dotsC=document.getElementById('reviewDots');
+const items=track.children.length;let cur=0;
+for(let i=0;i<items;i++){const d=document.createElement('button');d.className='reviews__dot'+(i===0?' active':'');d.addEventListener('click',()=>goSlide(i));dotsC.appendChild(d)}
+function goSlide(i){cur=i;track.style.transform=`translateX(-${i*100}%)`;dotsC.querySelectorAll('.reviews__dot').forEach((d,j)=>d.classList.toggle('active',j===i))}
+setInterval(()=>goSlide((cur+1)%items),5000);
+
+// Deal timer (midnight reset)
+function updateTimer(){
+  const now=new Date(),end=new Date(now);end.setHours(23,59,59,999);
+  const diff=end-now;
+  document.getElementById('dealH').textContent=String(Math.floor(diff/36e5)).padStart(2,'0');
+  document.getElementById('dealM').textContent=String(Math.floor((diff%36e5)/6e4)).padStart(2,'0');
+  document.getElementById('dealS').textContent=String(Math.floor((diff%6e4)/1e3)).padStart(2,'0');
+}
+updateTimer();setInterval(updateTimer,1000);
+
+// Intersection Observer
+const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:.15});
+document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+
+// Smooth anchor
+document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'})})});
+</script>
+</body>
+</html>
