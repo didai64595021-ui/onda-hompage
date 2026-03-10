@@ -559,7 +559,10 @@ function loadAll(){
   Object.keys(d).forEach(k=>{if(k.startsWith('ph_'))return;const el=document.querySelector(`[data-cms="${k}"]`);if(!el)return;if(el.dataset.cmsType==='placeholder'){el.placeholder=d[k]}else{el.innerHTML=d[k]}});
   // Theme
   const th=JSON.parse(localStorage.getItem(TK)||'null');
-  if(th){['primary','accent','dark','bg'].forEach(c=>{if(th[c])document.documentElement.style.setProperty('--'+c,th[c])})}
+  if(th){['primary','accent','dark','bg'].forEach(c=>{if(th[c])document.documentElement.style.setProperty('--'+c,th[c])});if(th.font){document.body.style.fontFamily=th.font;const fn=th.font.split("'")[1];if(fn&&!document.querySelector(`link[href*="${fn.replace(/ /g,'+')}"]`)){const l=document.createElement('link');l.rel='stylesheet';l.href=`https://fonts.googleapis.com/css2?family=${fn.replace(/ /g,'+')}:wght@300;400;500;700;900&display=swap`;document.head.appendChild(l)}}}
+  // Restore SEO
+  const seo=JSON.parse(localStorage.getItem('cms4_seo')||'null');
+  if(seo){if(seo.title)document.title=seo.title;if(seo.desc)setMeta('description',seo.desc);if(seo.keys)setMeta('keywords',seo.keys);if(seo.og){setMeta('og:image',seo.og,'property');setMeta('og:title',seo.title||'','property');setMeta('og:description',seo.desc||'','property')}}
   // Order
   const order=JSON.parse(localStorage.getItem(OK)||'null');
   if(order){const footer=document.querySelector('footer');const body=document.body;order.forEach(id=>{const s=document.querySelector(`[data-cms-section="${id}"]`);if(s&&footer)body.insertBefore(s,footer.previousElementSibling?.nextElementSibling||footer)})}
@@ -1137,6 +1140,7 @@ function openTheme(){
   document.getElementById('thD').value=th.dark;document.getElementById('thDH').value=th.dark;
   document.getElementById('thB').value=th.bg;document.getElementById('thBH').value=th.bg;
   ['P','A','D','B'].forEach(n=>{const c=document.getElementById('th'+n);const h=document.getElementById('th'+n+'H');c.oninput=()=>{h.value=c.value};h.oninput=()=>{c.value=h.value}});
+  if(th.font)document.getElementById('thFont').value=th.font;
   document.getElementById('themeModal').classList.add('active');
 }
 function applyTheme(){
