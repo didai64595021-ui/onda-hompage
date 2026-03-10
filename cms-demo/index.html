@@ -239,7 +239,7 @@ body.admin-mode [data-cms-section]:hover>.spacing-ctrl{display:flex}
   <a href="#contact" class="nav__cta" data-cms="nav-cta" data-cms-type="button">무료 상담</a>
   <button class="hamburger" id="hambBtn"><span></span><span></span><span></span></button>
 </nav>
-<div class="mob-overlay" id="mobOverlay"><button class="mob-close" id="mobClose">✕</button><a href="#services" onclick="closeMob()">서비스</a><a href="#clients" onclick="closeMob()">포트폴리오</a><a href="#contact" onclick="closeMob()">문의하기</a></div>
+<div class="mob-overlay" id="mobOverlay"><button class="mob-close" id="mobClose">✕</button><a href="#services" onclick="if(!adminMode)closeMob()">서비스</a><a href="#clients" onclick="if(!adminMode)closeMob()">포트폴리오</a><a href="#contact" onclick="if(!adminMode)closeMob()">문의하기</a></div>
 
 <!-- HERO -->
 <section class="hero" id="heroSection" data-cms-section="hero" style="background:linear-gradient(135deg,#0F1724,#1B3A5C)">
@@ -260,7 +260,7 @@ body.admin-mode [data-cms-section]:hover>.spacing-ctrl{display:flex}
     <p class="hero__desc" data-cms="hero-desc">텍스트, 이미지, 색상, 레이아웃까지 — 코딩 없이 클릭만으로 직접 수정. 커스텀 디자인의 자유도와 Wix의 편의성을 동시에.</p>
     <div class="hero__btns">
       <a href="#contact" class="btn btn--primary" data-cms="hero-cta" data-cms-type="button">무료 상담 신청</a>
-      <a href="#services" class="btn btn--outline" data-cms="hero-cta2">서비스 보기</a>
+      <a href="#services" class="btn btn--outline" data-cms="hero-cta2" data-cms-type="button">서비스 보기</a>
     </div>
   </div>
 </section>
@@ -600,7 +600,7 @@ function moveSection(btn,dir){
   else if(dir===1&&sec.nextElementSibling?.dataset.cmsSection){sec.nextElementSibling.after(sec)}
   showToast('✅ 이동');
 }
-function dupSection(btn){pushUndo();const sec=getSec(btn);const clone=sec.cloneNode(true);clone.dataset.cmsSection=sec.dataset.cmsSection+'_copy'+Date.now();sec.after(clone);showToast('📋 복제됨')}
+function dupSection(btn){pushUndo();const sec=getSec(btn);const clone=sec.cloneNode(true);clone.dataset.cmsSection=sec.dataset.cmsSection+'_copy'+Date.now();sec.after(clone);clone.querySelectorAll('[data-cms]').forEach(el=>{el.addEventListener('click',onCmsClick);el.addEventListener('dblclick',onCmsDblClick)});if(adminMode)clone.setAttribute('draggable','true');showToast('📋 복제됨')}
 function toggleHide(btn){const sec=getSec(btn);sec.classList.toggle('cms-hidden');showToast(sec.classList.contains('cms-hidden')?'👁️ 숨김':'👁️ 표시')}
 function delSection(btn){if(confirm('이 섹션을 삭제할까요?')){pushUndo();getSec(btn).remove();showToast('🗑️ 삭제됨')}}
 function editSectionBg(btn){
@@ -722,7 +722,7 @@ function exportHTML(){
 }
 
 // === CONTACT ===
-function submitForm(e){e.preventDefault();const f=e.target;const inq={company:f[0].value,name:f[1].value,email:f[2].value,phone:f[3].value,message:f[4].value,date:new Date().toLocaleString('ko-KR')};const list=JSON.parse(localStorage.getItem(IK)||'[]');list.unshift(inq);localStorage.setItem(IK,JSON.stringify(list));f.reset();showToast('✅ 문의 접수됨!')}
+function submitForm(e){e.preventDefault();if(adminMode){showToast('관리자 모드에서는 폼 제출 비활성');return}const f=e.target;const inq={company:f[0].value,name:f[1].value,email:f[2].value,phone:f[3].value,message:f[4].value,date:new Date().toLocaleString('ko-KR')};const list=JSON.parse(localStorage.getItem(IK)||'[]');list.unshift(inq);localStorage.setItem(IK,JSON.stringify(list));f.reset();showToast('✅ 문의 접수됨!')}
 function showInquiries(){const list=JSON.parse(localStorage.getItem(IK)||'[]');const c=document.getElementById('inquiryList');c.innerHTML=list.length?list.map(q=>`<div style="border:1px solid #eee;border-radius:10px;padding:.8rem;margin-bottom:.5rem"><div style="display:flex;justify-content:space-between"><strong>${q.company}—${q.name}</strong><span style="color:#999;font-size:.7rem">${q.date}</span></div><div style="color:#666;font-size:.75rem">📧${q.email} ${q.phone?'📞'+q.phone:''}</div><div style="background:#f7f9fc;border-radius:6px;padding:.4rem;font-size:.8rem;margin-top:.3rem">${q.message}</div></div>`).join(''):'<p style="color:#999;text-align:center;padding:2rem">없음</p>';document.getElementById('inquiryModal').classList.add('active')}
 
 // === UTILS ===
