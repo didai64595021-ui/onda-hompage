@@ -484,10 +484,17 @@ function onCmsClick(e){
   } else if(type==='bg'){
     html=`
       <div class="cms-modal__title">🖼️ ${label}</div>
-      <label class="cms-modal__label">이미지 URL</label>
-      <input class="cms-modal__field" id="editBgUrl" placeholder="https://images.unsplash.com/..." value="${extractBgUrl(currentTarget)}">
+      <label class="cms-modal__label">📎 파일 첨부 (PC에서 이미지 선택)</label>
+      <div style="border:2px dashed #dde1e8;border-radius:10px;padding:1.5rem;text-align:center;margin-bottom:1rem;cursor:pointer;transition:border .3s" id="dropZone" onclick="document.getElementById('fileUpload').click()" ondragover="event.preventDefault();this.style.borderColor='var(--primary)'" ondragleave="this.style.borderColor='#dde1e8'" ondrop="handleDrop(event)">
+        <div style="font-size:2rem;margin-bottom:.5rem">📁</div>
+        <div style="font-size:.85rem;color:var(--text2)">클릭하여 이미지 선택 또는 드래그&드롭</div>
+        <div style="font-size:.7rem;color:#999;margin-top:.3rem">JPG, PNG, WebP (최대 5MB)</div>
+      </div>
+      <input type="file" id="fileUpload" accept="image/*" style="display:none" onchange="handleFileSelect(event)">
       <div class="cms-modal__preview" id="bgPreview" style="background-image:${currentTarget.style.backgroundImage}"></div>
-      <label class="cms-modal__label">또는 Unsplash 검색어</label>
+      <label class="cms-modal__label">또는 이미지 URL 직접 입력</label>
+      <input class="cms-modal__field" id="editBgUrl" placeholder="https://images.unsplash.com/..." value="${extractBgUrl(currentTarget)}">
+      <label class="cms-modal__label">또는 Unsplash 검색</label>
       <div class="cms-modal__row">
         <input class="cms-modal__field" id="unsplashQuery" placeholder="예: office, technology" style="margin:0">
         <button class="cms-modal__save" onclick="searchUnsplash()" style="white-space:nowrap">검색</button>
@@ -556,6 +563,31 @@ function applyBg(){
   saveCMS(currentTarget.dataset.cms,url);
   closeModal('cmsModal');
   showToast('✅ 배경 이미지 수정됨');
+}
+
+// === FILE UPLOAD ===
+function handleFileSelect(e){
+  const file=e.target.files[0];
+  if(file)processFile(file);
+}
+function handleDrop(e){
+  e.preventDefault();
+  e.currentTarget.style.borderColor='#dde1e8';
+  const file=e.dataTransfer.files[0];
+  if(file)processFile(file);
+}
+function processFile(file){
+  if(!file.type.startsWith('image/')){showToast('⚠️ 이미지 파일만 가능합니다');return}
+  if(file.size>5*1024*1024){showToast('⚠️ 5MB 이하만 가능합니다');return}
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const dataUrl=e.target.result;
+    document.getElementById('editBgUrl').value=dataUrl;
+    document.getElementById('bgPreview').style.backgroundImage=`url(${dataUrl})`;
+    document.getElementById('dropZone').innerHTML=`<div style="font-size:1.5rem">✅</div><div style="font-size:.85rem;color:var(--primary);font-weight:700">${file.name}</div><div style="font-size:.7rem;color:#999">${(file.size/1024).toFixed(0)}KB — 클릭하여 변경</div>`;
+    showToast('✅ 이미지 로드 완료! "적용" 버튼을 눌러주세요');
+  };
+  reader.readAsDataURL(file);
 }
 
 // === UNSPLASH SEARCH ===
