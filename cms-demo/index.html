@@ -104,7 +104,10 @@ body.admin-mode .item-drag-over{box-shadow:inset 0 0 0 2px var(--accent)!importa
 
 .services{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
 .svc-card{background:var(--card);border-radius:var(--radius);padding:2rem 1.5rem;box-shadow:var(--shadow);transition:all .3s;border:1px solid #eef1f6}
-.svc-card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,.1)}
+.svc-card:hover,.svc-card.hover-lift:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,.1)}
+.svc-card.hover-none:hover{transform:none;box-shadow:var(--shadow)}
+.svc-card.hover-scale:hover{transform:scale(1.05);box-shadow:0 8px 30px rgba(0,0,0,.1)}
+.svc-card.hover-shadow:hover{transform:none;box-shadow:0 12px 40px rgba(0,0,0,.18)}
 .svc-card__icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1rem;background:rgba(27,101,166,.1)}
 .svc-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
 .svc-card__desc{font-size:.82rem;color:var(--text2);font-weight:300;line-height:1.7}
@@ -454,7 +457,7 @@ function saveAll(){
   const styles={};
   document.querySelectorAll('[data-cms-section]').forEach(s=>{styles[s.dataset.cmsSection]=s.getAttribute('style')||''});
   document.querySelectorAll('[data-cms-type="button"]').forEach(b=>{styles['btn_'+b.dataset.cms]=b.getAttribute('style')||''});
-  document.querySelectorAll('[data-cms-type="card"]').forEach(c=>{styles['card_'+c.dataset.cms]=c.getAttribute('style')||''});
+  document.querySelectorAll('[data-cms-type="card"]').forEach(c=>{styles['card_'+c.dataset.cms]=c.getAttribute('style')||'';if(c.dataset.cmsHover)styles['chover_'+c.dataset.cms]=c.dataset.cmsHover});
   // Save nav settings
   const nav=document.getElementById('nav');
   styles['_nav']=nav.getAttribute('style')||'';
@@ -486,6 +489,7 @@ function loadAll(){
   const st=JSON.parse(localStorage.getItem(SK)||'{}');
   Object.keys(st).forEach(k=>{
     if(k.startsWith('btn_')){const el=document.querySelector(`[data-cms="${k.slice(4)}"]`);if(el)el.setAttribute('style',st[k])}
+    else if(k.startsWith('chover_')){const el=document.querySelector(`[data-cms="${k.slice(7)}"]`);if(el){el.dataset.cmsHover=st[k];el.classList.remove('hover-none','hover-lift','hover-scale','hover-shadow');el.classList.add('hover-'+st[k])}}
     else if(k.startsWith('card_')){const el=document.querySelector(`[data-cms="${k.slice(5)}"]`);if(el)el.setAttribute('style',st[k])}
     else{const el=document.querySelector(`[data-cms-section="${k}"]`);if(el)el.setAttribute('style',st[k])}
   });
@@ -627,6 +631,14 @@ function onCmsClick(e){
     <select class="cms-modal__field" id="cardShadow"><option value="none" ${cs.boxShadow==='none'?'selected':''}>없음</option><option value="0 2px 16px rgba(0,0,0,.06)" ${cs.boxShadow!=='none'?'selected':''}>기본</option><option value="0 8px 30px rgba(0,0,0,.12)">강하게</option><option value="0 4px 20px rgba(0,0,0,.08)">중간</option></select>
     <label class="cms-modal__label">둥글기 (px)</label><input class="cms-modal__field" id="cardRadius" type="number" value="${parseInt(cs.borderRadius)||12}" min="0">
     <label class="cms-modal__label">내부 여백 (px)</label><input class="cms-modal__field" id="cardPadding" value="${cs.padding}">
+    <label class="cms-modal__label">✨ Hover 효과</label>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin-bottom:.8rem">
+      <button onclick="document.getElementById('cardHover').value='none';document.querySelectorAll('.hover-opt').forEach(b=>b.style.background='#eee');this.style.background='var(--accent)';this.style.color='#fff'" class="hover-opt" style="padding:.5rem .3rem;border:none;border-radius:8px;cursor:pointer;font-size:.72rem;font-weight:600;font-family:inherit;background:${el.dataset.cmsHover==='none'?'var(--accent)':'#eee'};color:${el.dataset.cmsHover==='none'?'#fff':'var(--text)'}">없음</button>
+      <button onclick="document.getElementById('cardHover').value='lift';document.querySelectorAll('.hover-opt').forEach(b=>b.style.background='#eee');this.style.background='var(--accent)';this.style.color='#fff'" class="hover-opt" style="padding:.5rem .3rem;border:none;border-radius:8px;cursor:pointer;font-size:.72rem;font-weight:600;font-family:inherit;background:${(!el.dataset.cmsHover||el.dataset.cmsHover==='lift')?'var(--accent)':'#eee'};color:${(!el.dataset.cmsHover||el.dataset.cmsHover==='lift')?'#fff':'var(--text)'}">⬆ 올림</button>
+      <button onclick="document.getElementById('cardHover').value='scale';document.querySelectorAll('.hover-opt').forEach(b=>b.style.background='#eee');this.style.background='var(--accent)';this.style.color='#fff'" class="hover-opt" style="padding:.5rem .3rem;border:none;border-radius:8px;cursor:pointer;font-size:.72rem;font-weight:600;font-family:inherit;background:${el.dataset.cmsHover==='scale'?'var(--accent)':'#eee'};color:${el.dataset.cmsHover==='scale'?'#fff':'var(--text)'}">🔍 확대</button>
+      <button onclick="document.getElementById('cardHover').value='shadow';document.querySelectorAll('.hover-opt').forEach(b=>b.style.background='#eee');this.style.background='var(--accent)';this.style.color='#fff'" class="hover-opt" style="padding:.5rem .3rem;border:none;border-radius:8px;cursor:pointer;font-size:.72rem;font-weight:600;font-family:inherit;background:${el.dataset.cmsHover==='shadow'?'var(--accent)':'#eee'};color:${el.dataset.cmsHover==='shadow'?'#fff':'var(--text)'}">💎 그림자</button>
+    </div>
+    <input type="hidden" id="cardHover" value="${el.dataset.cmsHover||'lift'}">
     <div class="cms-modal__btns"><button class="cms-modal__cancel" onclick="closeModal('cmsModal')">취소</button><button class="cms-modal__save" onclick="applyCard()">적용</button></div>`;
   } else if(type==='logo'){
     const isImg=el.querySelector('img');
@@ -735,6 +747,12 @@ function applyCard(){
   el.style.boxShadow=document.getElementById('cardShadow').value;
   el.style.borderRadius=document.getElementById('cardRadius').value+'px';
   el.style.padding=document.getElementById('cardPadding').value;
+  // Hover effect
+  const hover=document.getElementById('cardHover').value;
+  el.dataset.cmsHover=hover;
+  // Remove old hover classes
+  el.classList.remove('hover-none','hover-lift','hover-scale','hover-shadow');
+  el.classList.add('hover-'+hover);
   closeModal('cmsModal');showToast('✅');
 }
 function handleCardFile(e){processCardFile(e.target.files[0])}
