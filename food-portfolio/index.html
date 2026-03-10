@@ -450,10 +450,13 @@ function addCart(id){
   let cart=getCart();const exist=cart.find(x=>x.id===id);
   if(exist)exist.qty++;else cart.push({id:p.id,name:p.name,price:p.sale,qty:1,image:`https://images.unsplash.com/${p.img}?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80`});
   saveCart(cart);
+  // 배지 bounce
+  document.querySelectorAll('#cartBadge,#floatingBadge').forEach(b=>{b.style.transform='scale(1.5)';setTimeout(()=>b.style.transform='scale(1)',300)});
+  // 토스트
   const toast=document.createElement('div');
-  toast.textContent='✓ 장바구니에 담았습니다';
-  toast.style.cssText='position:fixed;bottom:120px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;padding:.7rem 1.5rem;border-radius:10px;z-index:9999;font-size:.85rem;font-weight:500;animation:fadeInUp .3s';
-  document.body.appendChild(toast);setTimeout(()=>toast.remove(),1500);
+  toast.innerHTML='✓ <b>'+p.name+'</b> 장바구니에 담았습니다';
+  toast.style.cssText='position:fixed;bottom:120px;left:50%;transform:translateX(-50%);background:rgba(22,22,42,.95);color:#fff;padding:.8rem 1.5rem;border-radius:12px;z-index:9999;font-size:.85rem;font-weight:400;animation:fadeInUp .3s;backdrop-filter:blur(8px);box-shadow:0 4px 20px rgba(0,0,0,.3);white-space:nowrap;max-width:90vw;text-align:center';
+  document.body.appendChild(toast);setTimeout(()=>{toast.style.opacity='0';toast.style.transition='opacity .3s';setTimeout(()=>toast.remove(),300)},2000);
 }
 function updateBadge(){
   const n=getCart().reduce((s,x)=>s+(x.qty||1),0);
