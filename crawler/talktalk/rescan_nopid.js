@@ -1,10 +1,16 @@
 #!/usr/bin/env node
 /**
- * no_pid 재스캔 v2: 2단계 분리
- * PHASE 1: iwinv 프록시로 place_id 일괄 추출 (빠름, ~400ms/건)
- * PHASE 2: place_id 확보된 것만 OCR 톡톡 확인 (~2s/건)
- * 
- * 각 단계 10건마다 진행률 출력
+ * rescan_nopid.js v3: 미확인 업체 재스캔
+ *
+ * PHASE 1: placeUrl 없는 업체 → 프록시로 네이버 검색해서 place_id 추출
+ * PHASE 2: placeUrl 있는 업체 → OCR /check로 톡톡 확인
+ * PHASE 3: 최종 잔여분 → no_pid_final 확정
+ *
+ * 개선사항 v3:
+ * - decodeHtmlEntities 강화 (&#숫자; &#x16진수; 패턴)
+ * - 에러 재시도 로직 (최대 3회, exponential backoff)
+ * - 스팸 업체 자동 감지 (이름 50자 초과 → X 확정)
+ * - 최종 통계에 처리율 표시
  */
 const fs = require('fs');
 const path = require('path');
@@ -20,15 +26,25 @@ const OCR_PORT = 3300;
 const SEARCH_DELAY = 500;
 const OCR_DELAY = 2500;
 const SAVE_INTERVAL = 25;
+const SPAM_NAME_LIMIT = 50;
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 let stopping = false;
-process.on('SIGTERM', () => { stopping = true; console.log('🛑 SIGTERM'); });
-process.on('SIGINT', () => { stopping = true; console.log('🛑 SIGINT'); });
+process.on('SIGTERM', () => { stopping = true; console.log('🛑 SIGTERM — 안전 종료 중...'); });
+process.on('SIGINT', () => { stopping = true; console.log('🛑 SIGINT — 안전 종료 중...'); });
 
 function decodeHtmlEntities(str) {
-  return (str || '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&apos;/g, "'");
+  if (!str) return '';
+  return str
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
 }
 
 function searchPlaceId(name, address) {
@@ -62,6 +78,20 @@ function searchPlaceId(name, address) {
   });
 }
 
+function searchPlaceIdWithRetry(name, address, maxRetries = 3) {
+  return new Promise(async (resolve) => {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      const pid = await searchPlaceId(name, address);
+      if (pid) { resolve(pid); return; }
+      if (attempt < maxRetries) {
+        const wait = Math.pow(2, attempt) * 500;
+        await sleep(wait);
+      }
+    }
+    resolve('');
+  });
+}
+
 function ocrCheck(placeId, name) {
   return new Promise((resolve) => {
     const body = JSON.stringify({ place_id: placeId, name });
@@ -84,13 +114,54 @@ function ocrCheck(placeId, name) {
   });
 }
 
+async function ocrWithRetry(placeId, name, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    const result = await ocrCheck(placeId, name);
+
+    if (result && result.status === 'ok') return result;
+
+    if (result && result.status === '429') {
+      console.log(`  ⏸️ 429 — 90초 대기 (시도 ${attempt}/${maxRetries})`);
+      await sleep(90000);
+      continue;
+    }
+
+    if (attempt < maxRetries) {
+      const wait = Math.pow(2, attempt) * 1000;
+      console.log(`  ⚠️ OCR 실패 — ${wait / 1000}초 후 재시도 (${attempt}/${maxRetries})`);
+      await sleep(wait);
+    }
+  }
+  return null;
+}
+
 async function main() {
-  console.log('🔄 no_pid 재스캔 시작...');
+  console.log('🔄 no_pid 재스캔 v3 시작...');
   const history = JSON.parse(fs.readFileSync(HISTORY_PATH, 'utf-8'));
   const entries = Object.entries(history.crawled);
 
-  // no_pid + 미스캔 대상
-  const noPidEntries = entries.filter(([, b]) => b.talktalkVerified === 'no_pid' || !b.talktalkVerified);
+  // ═══ PRE-PHASE: 스팸 업체 자동 감지 ═══
+  console.log(`\n${'═'.repeat(50)}`);
+  console.log('🗑️ PRE-PHASE: 스팸 업체 자동 감지');
+  console.log(`${'═'.repeat(50)}`);
+
+  let spamCount = 0;
+  for (const [, biz] of entries) {
+    if (biz.talktalkVerified === 'spam') continue;
+    if (biz.name && biz.name.length > SPAM_NAME_LIMIT) {
+      biz.talktalkButton = 'X';
+      biz.talktalkVerified = 'spam';
+      spamCount++;
+    }
+  }
+  console.log(`  스팸 처리: ${spamCount}건 (이름 ${SPAM_NAME_LIMIT}자 초과)`);
+  if (spamCount > 0) fs.writeFileSync(HISTORY_PATH, JSON.stringify(history, null, 2));
+
+  // 재스캔 대상: no_pid 또는 미스캔
+  const noPidEntries = entries.filter(([, b]) =>
+    (b.talktalkVerified === 'no_pid' || !b.talktalkVerified) &&
+    b.talktalkVerified !== 'spam'
+  );
   console.log(`📊 전체: ${entries.length} | 재스캔 대상: ${noPidEntries.length}`);
 
   // ═══ PHASE 1: place_id 추출 ═══
@@ -98,7 +169,7 @@ async function main() {
   console.log('📍 PHASE 1: place_id 추출 (iwinv 프록시)');
   console.log(`${'═'.repeat(50)}`);
 
-  let p1Done = 0, p1Found = 0, p1Fail = 0;
+  let p1Done = 0, p1Found = 0, p1Fail = 0, p1Skip = 0;
   const p1Start = Date.now();
 
   for (const [key, biz] of noPidEntries) {
@@ -108,10 +179,11 @@ async function main() {
     const existingPid = biz.placeUrl ? biz.placeUrl.match(/\/(\d{5,})$/)?.[1] : '';
     if (existingPid) {
       p1Done++;
+      p1Skip++;
       continue;
     }
 
-    const pid = await searchPlaceId(biz.name, biz.address || biz.roadAddress);
+    const pid = await searchPlaceIdWithRetry(biz.name, biz.address || biz.roadAddress);
     p1Done++;
 
     if (pid) {
@@ -124,8 +196,9 @@ async function main() {
     if (p1Done % 10 === 0) {
       const elapsed = ((Date.now() - p1Start) / 60000).toFixed(1);
       const rate = (p1Done / ((Date.now() - p1Start) / 1000)).toFixed(2);
-      const eta = ((noPidEntries.length - p1Done) / (p1Done / ((Date.now() - p1Start) / 60000))).toFixed(0);
-      console.log(`  [P1 ${p1Done}/${noPidEntries.length}] 발견:${p1Found} 실패:${p1Fail} | ${elapsed}분 | ${rate}/초 | ETA:${eta}분`);
+      const remaining = noPidEntries.length - p1Done;
+      const eta = (remaining / Math.max(0.01, p1Done / ((Date.now() - p1Start) / 60000))).toFixed(0);
+      console.log(`  [P1 ${p1Done}/${noPidEntries.length}] 발견:${p1Found} 실패:${p1Fail} 스킵:${p1Skip} | ${elapsed}분 | ${rate}/초 | ETA:${eta}분`);
     }
 
     if (p1Done % SAVE_INTERVAL === 0) {
@@ -136,14 +209,13 @@ async function main() {
   }
 
   fs.writeFileSync(HISTORY_PATH, JSON.stringify(history, null, 2));
-  console.log(`\n✅ PHASE 1 완료: ${p1Found}건 place_id 발견, ${p1Fail}건 실패`);
+  console.log(`\n✅ PHASE 1 완료: 발견 ${p1Found} / 실패 ${p1Fail} / 스킵 ${p1Skip}`);
 
-  if (stopping) { console.log('🛑 중단됨'); return; }
+  if (stopping) { console.log('🛑 중단됨 — 저장 완료'); return; }
 
   // ═══ PHASE 2: OCR 톡톡 확인 ═══
-  // place_id가 있고 OCR 미완료인 것만
   const ocrTargets = Object.entries(history.crawled).filter(([, b]) => {
-    if (b.talktalkVerified === 'ocr') return false; // 이미 완료
+    if (b.talktalkVerified === 'ocr' || b.talktalkVerified === 'spam') return false;
     const pid = b.placeUrl ? b.placeUrl.match(/\/(\d{5,})$/)?.[1] : '';
     return !!pid;
   });
@@ -161,7 +233,7 @@ async function main() {
     const pid = biz.placeUrl.match(/\/(\d{5,})$/)?.[1];
     if (!pid) continue;
 
-    const result = await ocrCheck(pid, biz.name);
+    const result = await ocrWithRetry(pid, biz.name);
     p2Done++;
 
     if (result && result.status === 'ok') {
@@ -169,20 +241,6 @@ async function main() {
       biz.talktalkVerified = 'ocr';
       if (result.talk_url) biz.talkUrl = result.talk_url;
       if (result.talktalk) talkO++; else talkX++;
-    } else if (result && result.status === '429') {
-      console.log('  ⏸️ 429 — 90초 대기 후 재시도');
-      await sleep(90000);
-      const retry = await ocrCheck(pid, biz.name);
-      if (retry && retry.status === 'ok') {
-        biz.talktalkButton = retry.talktalk ? 'O' : 'X';
-        biz.talktalkVerified = 'ocr';
-        if (retry.talk_url) biz.talkUrl = retry.talk_url;
-        if (retry.talktalk) talkO++; else talkX++;
-      } else {
-        biz.talktalkButton = '미확인';
-        biz.talktalkVerified = 'ocr_fail';
-        ocrFail++;
-      }
     } else {
       biz.talktalkButton = '미확인';
       biz.talktalkVerified = 'ocr_fail';
@@ -192,7 +250,8 @@ async function main() {
     if (p2Done % 10 === 0) {
       const elapsed = ((Date.now() - p2Start) / 60000).toFixed(1);
       const rate = (p2Done / ((Date.now() - p2Start) / 1000)).toFixed(2);
-      const eta = ((ocrTargets.length - p2Done) / Math.max(1, p2Done / ((Date.now() - p2Start) / 60000))).toFixed(0);
+      const remaining = ocrTargets.length - p2Done;
+      const eta = (remaining / Math.max(0.01, p2Done / ((Date.now() - p2Start) / 60000))).toFixed(0);
       console.log(`  [P2 ${p2Done}/${ocrTargets.length}] 💬O:${talkO} ❌X:${talkX} fail:${ocrFail} | ${elapsed}분 | ${rate}/초 | ETA:${eta}분`);
     }
 
@@ -205,9 +264,9 @@ async function main() {
 
   fs.writeFileSync(HISTORY_PATH, JSON.stringify(history, null, 2));
 
-  // place_id도 못 구한 최종 잔여분 → no_pid 확정
+  // ═══ PHASE 3: 최종 잔여분 no_pid_final 확정 ═══
   const finalNoPid = Object.entries(history.crawled).filter(([, b]) => {
-    if (b.talktalkVerified === 'ocr' || b.talktalkVerified === 'ocr_fail' || b.talktalkVerified === 'html' || b.talktalkVerified === 'blocked') return false;
+    if (['ocr', 'ocr_fail', 'html', 'blocked', 'spam', 'no_pid_final', 'local_check'].includes(b.talktalkVerified)) return false;
     const pid = b.placeUrl ? b.placeUrl.match(/\/(\d{5,})$/)?.[1] : '';
     return !pid;
   });
@@ -222,15 +281,21 @@ async function main() {
   const finalO = all.filter(b => b.talktalkButton === 'O').length;
   const finalX = all.filter(b => b.talktalkButton === 'X').length;
   const finalU = all.filter(b => b.talktalkButton === '미확인').length;
+  const finalSpam = all.filter(b => b.talktalkVerified === 'spam').length;
+  const totalProcessed = finalO + finalX + finalSpam;
 
   console.log(`\n${'═'.repeat(60)}`);
   console.log('✅ 전체 재스캔 완료!');
-  console.log(`📊 최종: 💬O:${finalO} ❌X:${finalX} ?미확인:${finalU}`);
+  console.log(`📊 최종: 💬O:${finalO} ❌X:${finalX} ?미확인:${finalU} 🗑️스팸:${finalSpam}`);
   console.log(`📈 톡톡 보유율: ${(finalO / Math.max(1, finalO + finalX) * 100).toFixed(1)}%`);
-  console.log(`📍 P1 place_id: 발견 ${p1Found} / 실패 ${p1Fail}`);
+  console.log(`📊 처리율: ${(totalProcessed / Math.max(1, all.length) * 100).toFixed(1)}% (${totalProcessed}/${all.length})`);
+  console.log(`📍 P1 place_id: 발견 ${p1Found} / 실패 ${p1Fail} / 스킵 ${p1Skip}`);
   console.log(`🔍 P2 OCR: O:${talkO} X:${talkX} fail:${ocrFail}`);
+  console.log(`🗑️ 스팸: ${spamCount}건 신규 처리`);
+  console.log(`📋 no_pid_final: ${finalNoPid.length}건 확정`);
   console.log(`⏱️ 총 소요: ${((Date.now() - p1Start) / 60000).toFixed(1)}분`);
 
+  // 업종별 통계 TOP 20
   const catStats = {};
   all.forEach(b => {
     const cat = b.category || '기타';
@@ -241,6 +306,8 @@ async function main() {
   const topCats = Object.entries(catStats).filter(([, s]) => s.talk > 0).sort((a, b) => b[1].talk - a[1].talk).slice(0, 20);
   console.log('\n🏆 톡톡O 업종 TOP 20:');
   topCats.forEach(([cat, s]) => console.log(`  ${cat}: ${s.talk}/${s.total} (${(s.talk / s.total * 100).toFixed(0)}%)`));
+
+  console.log('[STEP-DONE] rescan_nopid 완료');
 }
 
 main().catch(console.error);
