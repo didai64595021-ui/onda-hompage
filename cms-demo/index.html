@@ -60,6 +60,48 @@ body.admin-mode .cms-dragging{opacity:.3}
 .img-pos-crosshair{position:absolute;width:40px;height:40px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.3),inset 0 0 0 1px rgba(0,0,0,.3);pointer-events:none;transform:translate(-50%,-50%);z-index:2}
 .img-pos-crosshair::after{content:'';position:absolute;top:50%;left:50%;width:8px;height:8px;background:#fff;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 4px rgba(0,0,0,.5)}
 .img-pos-hint{text-align:center;font-size:.72rem;color:var(--text2);margin-bottom:.8rem}
+/* Device Preview */
+.device-frame{margin:0 auto;background:#fff;transition:all .3s;overflow:hidden;box-shadow:0 0 30px rgba(0,0,0,.15);border-radius:12px}
+/* Animations */
+.anim-fade-left{opacity:0;transform:translateX(-30px);transition:all .6s ease-out}
+.anim-fade-right{opacity:0;transform:translateX(30px);transition:all .6s ease-out}
+.anim-zoom-in{opacity:0;transform:scale(.9);transition:all .6s ease-out}
+.anim-slide-up{opacity:0;transform:translateY(40px);transition:all .6s ease-out}
+.anim-fade-left.visible,.anim-fade-right.visible,.anim-zoom-in.visible,.anim-slide-up.visible{opacity:1;transform:none}
+.anim-none{opacity:1!important;transform:none!important}
+/* Gallery */
+.gallery-grid{display:grid;gap:1rem;max-width:1100px;margin:0 auto}
+.gallery-grid.cols-2{grid-template-columns:repeat(2,1fr)}
+.gallery-grid.cols-3{grid-template-columns:repeat(3,1fr)}
+.gallery-grid.cols-4{grid-template-columns:repeat(4,1fr)}
+.gallery-item{aspect-ratio:4/3;border-radius:var(--radius);overflow:hidden;background:#eee;cursor:pointer;position:relative}
+.gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.gallery-item:hover img{transform:scale(1.05)}
+body.admin-mode .gallery-item::after{content:'📷 클릭하여 변경';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.4);color:#fff;font-size:.8rem;font-weight:600;opacity:0;transition:opacity .2s}
+body.admin-mode .gallery-item:hover::after{opacity:1}
+/* FAQ */
+.faq-item{border:1px solid #eef1f6;border-radius:var(--radius);margin-bottom:.8rem;overflow:hidden}
+.faq-q{padding:1rem 1.2rem;font-weight:700;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:var(--card)}
+.faq-q::after{content:'▼';font-size:.7rem;transition:transform .3s}
+.faq-item.open .faq-q::after{transform:rotate(180deg)}
+.faq-a{padding:0 1.2rem;max-height:0;overflow:hidden;transition:all .3s;font-size:.9rem;color:var(--text2)}
+.faq-item.open .faq-a{padding:0 1.2rem 1rem;max-height:500px}
+/* Pricing */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;max-width:1000px;margin:0 auto}
+.pricing-card{background:var(--card);border-radius:var(--radius);padding:2rem;text-align:center;border:1px solid #eef1f6;transition:all .3s}
+.pricing-card.featured{border-color:var(--primary);box-shadow:0 8px 30px rgba(27,101,166,.15);transform:scale(1.03)}
+.pricing-card__name{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+.pricing-card__price{font-size:2rem;font-weight:900;color:var(--primary);margin-bottom:.5rem}
+.pricing-card__desc{font-size:.8rem;color:var(--text2);margin-bottom:1.2rem;line-height:1.6}
+/* SNS */
+.footer__sns{display:flex;gap:1rem;align-items:center}
+.footer__sns a{color:rgba(255,255,255,.5);text-decoration:none;font-size:1.2rem;transition:color .3s}
+.footer__sns a:hover{color:var(--accent)}
+/* Lightbox */
+.cms-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:100000;display:none;align-items:center;justify-content:center;cursor:pointer}
+.cms-lightbox.active{display:flex}
+.cms-lightbox img{max-width:90%;max-height:90%;border-radius:8px;object-fit:contain}
+@media(max-width:768px){.gallery-grid.cols-3,.gallery-grid.cols-4{grid-template-columns:repeat(2,1fr)}.pricing-grid{grid-template-columns:1fr}}
 body.admin-mode .cms-drag-over{box-shadow:0 -4px 0 var(--accent)}
 body.admin-mode .svc-card,body.admin-mode .trust__grid>.fade-in,body.admin-mode .clients__logo,body.admin-mode .nav__menu li{cursor:grab;position:relative}
 body.admin-mode .item-dragging{opacity:.3!important;cursor:grabbing!important}
@@ -203,6 +245,9 @@ body.admin-mode [data-cms-section]:hover>.spacing-ctrl{display:flex}
       <button onclick="openTheme()">🎨 테마</button>
       <button onclick="openSpacingGlobal()">📐 여백</button>
       <button onclick="openNavEditor()">🧭 네비</button>
+      <button onclick="openSEO()">🔍 SEO</button>
+      <button onclick="previewDevice()">📱 미리보기</button>
+      <button onclick="toggleDarkPreview()">🌙 다크</button>
       <button onclick="exportHTML()">📦 내보내기</button>
       <button onclick="resetAll()">↩️ 초기화</button>
       <button class="primary" onclick="saveAll()">💾 저장</button>
@@ -408,6 +453,12 @@ body.admin-mode [data-cms-section]:hover>.spacing-ctrl{display:flex}
   </div>
   <div class="footer__inner">
     <div class="footer__logo" data-cms="f-logo">ONDA<span> CMS</span></div>
+    <div class="footer__sns">
+      <a href="#" data-cms="sns-insta" data-cms-type="sns" title="Instagram">📷</a>
+      <a href="#" data-cms="sns-youtube" data-cms-type="sns" title="YouTube">▶️</a>
+      <a href="#" data-cms="sns-blog" data-cms-type="sns" title="Blog">📝</a>
+      <a href="#" data-cms="sns-kakao" data-cms-type="sns" title="KakaoTalk">💬</a>
+    </div>
     <div class="footer__text" data-cms="f-info">© 2026 ONDA Marketing | 코딩 없이 홈페이지를 직접 수정하세요</div>
   </div>
 </footer>
@@ -425,6 +476,8 @@ body.admin-mode [data-cms-section]:hover>.spacing-ctrl{display:flex}
   <label class="cms-modal__label">배경 색상</label><div class="cms-modal__row"><input type="color" class="cms-modal__color" id="thB" value="#F7F9FC"><input class="cms-modal__field" id="thBH" value="#F7F9FC" style="margin:0"></div>
   <div class="cms-modal__btns"><button class="cms-modal__cancel" onclick="closeModal('themeModal')">취소</button><button class="cms-modal__save" onclick="applyTheme()">적용</button></div>
 </div></div>
+
+<div class="cms-lightbox" id="cmsLightbox" onclick="this.classList.remove('active')"><img id="lbImg"></div>
 
 <script>
 // ===== CMS ENGINE v3 =====
@@ -1066,6 +1119,102 @@ function rgbHex(rgb){if(!rgb||rgb==='rgba(0, 0, 0, 0)')return'#ffffff';if(rgb.st
 function extractBg(el){const m=(el.style.backgroundImage||'').match(/url\(["']?(.+?)["']?\)/);return m?m[1]:''}
 function showToast(msg){const t=document.createElement('div');t.textContent=msg;Object.assign(t.style,{position:'fixed',bottom:'5rem',left:'50%',transform:'translateX(-50%)',background:'#1a1a2e',color:'#fff',padding:'.6rem 1.3rem',borderRadius:'10px',fontSize:'.82rem',fontWeight:'600',zIndex:'99999',boxShadow:'0 4px 16px rgba(0,0,0,.2)'});document.body.appendChild(t);setTimeout(()=>t.remove(),2000)}
 function openSpacingGlobal(){showToast('각 섹션 hover → 📐 버튼으로 여백 조절')}
+
+// === SEO SETTINGS ===
+function openSEO(){
+  const seo=JSON.parse(localStorage.getItem('cms4_seo')||'{}');
+  const html=`<div class="cms-modal__title">🔍 SEO 설정</div>
+  <label class="cms-modal__label">페이지 제목</label><input class="cms-modal__field" id="seoTitle" value="${seo.title||document.title}">
+  <label class="cms-modal__label">메타 설명 (검색결과에 표시)</label><textarea class="cms-modal__field" id="seoDesc" rows="3" style="resize:vertical">${seo.desc||''}</textarea>
+  <label class="cms-modal__label">키워드 (쉼표 구분)</label><input class="cms-modal__field" id="seoKeys" value="${seo.keys||''}">
+  <label class="cms-modal__label">OG 이미지 URL (SNS 공유 시 썸네일)</label><input class="cms-modal__field" id="seoOg" value="${seo.og||''}" placeholder="https://...">
+  <div class="cms-modal__btns"><button class="cms-modal__cancel" onclick="closeModal('cmsModal')">취소</button><button class="cms-modal__save" onclick="applySEO()">적용</button></div>`;
+  document.getElementById('cmsModalBox').innerHTML=html;document.getElementById('cmsModal').classList.add('active');
+}
+function applySEO(){
+  const seo={title:document.getElementById('seoTitle').value,desc:document.getElementById('seoDesc').value,keys:document.getElementById('seoKeys').value,og:document.getElementById('seoOg').value};
+  document.title=seo.title;
+  setMeta('description',seo.desc);setMeta('keywords',seo.keys);setMeta('og:title',seo.title,'property');setMeta('og:description',seo.desc,'property');setMeta('og:image',seo.og,'property');
+  localStorage.setItem('cms4_seo',JSON.stringify(seo));closeModal('cmsModal');showToast('✅ SEO 설정 저장');
+}
+function setMeta(name,content,attr='name'){
+  let m=document.querySelector(`meta[${attr}="${name}"]`);
+  if(!m){m=document.createElement('meta');m.setAttribute(attr,name);document.head.appendChild(m)}
+  m.setAttribute('content',content);
+}
+
+// === DEVICE PREVIEW ===
+let previewMode=0;
+const devices=[{name:'데스크톱',w:'100%'},{name:'태블릿',w:'768px'},{name:'모바일',w:'375px'}];
+function previewDevice(){
+  previewMode=(previewMode+1)%3;
+  const d=devices[previewMode];
+  document.body.style.maxWidth=d.w;
+  document.body.style.margin=previewMode?'0 auto':'';
+  document.body.style.boxShadow=previewMode?'0 0 30px rgba(0,0,0,.15)':'';
+  showToast('📱 '+d.name+' ('+d.w+')');
+}
+
+// === DARK MODE PREVIEW ===
+let darkPreview=false;
+const lightVars={primary:'',accent:'',dark:'',bg:'',card:'',text:'',text2:''};
+function toggleDarkPreview(){
+  darkPreview=!darkPreview;
+  const r=document.documentElement.style;
+  if(darkPreview){
+    ['primary','accent','dark','bg','card','text','text2'].forEach(k=>lightVars[k]=getComputedStyle(document.documentElement).getPropertyValue('--'+k));
+    r.setProperty('--bg','#1a1a2e');r.setProperty('--card','#252545');r.setProperty('--text','#f0f0f0');r.setProperty('--text2','#a0a0b0');r.setProperty('--dark','#0d0d1a');
+    showToast('🌙 다크모드 미리보기');
+  } else {
+    Object.keys(lightVars).forEach(k=>{if(lightVars[k])r.setProperty('--'+k,lightVars[k]);else r.removeProperty('--'+k)});
+    showToast('☀️ 라이트모드 복원');
+  }
+}
+
+// === SECTION ANIMATION EDITOR ===
+function editSectionAnim(btn){
+  const sec=getSec(btn);
+  const cur=sec.dataset.anim||'fade-up';
+  const anims=[{id:'fade-up',name:'⬆ 위로 페이드',icon:'⬆'},{id:'fade-left',name:'➡ 좌에서',icon:'➡'},{id:'fade-right',name:'⬅ 우에서',icon:'⬅'},{id:'zoom-in',name:'🔍 확대',icon:'🔍'},{id:'slide-up',name:'⤴ 슬라이드',icon:'⤴'},{id:'none',name:'❌ 없음',icon:'❌'}];
+  const html=`<div class="cms-modal__title">✨ 섹션 애니메이션</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem">${anims.map(a=>`<button onclick="document.getElementById('animVal').value='${a.id}';document.querySelectorAll('.anim-opt').forEach(b=>{b.style.background='#eee';b.style.color='var(--text)'});this.style.background='var(--accent)';this.style.color='#fff'" class="anim-opt" style="padding:.7rem .4rem;border:none;border-radius:8px;cursor:pointer;font-size:.75rem;font-weight:600;font-family:inherit;background:${cur===a.id?'var(--accent)':'#eee'};color:${cur===a.id?'#fff':'var(--text)'}">${a.icon} ${a.name}</button>`).join('')}</div>
+  <input type="hidden" id="animVal" value="${cur}">
+  <div class="cms-modal__btns"><button class="cms-modal__cancel" onclick="closeModal('cmsModal')">취소</button><button class="cms-modal__save" onclick="applySectionAnim()">적용</button></div>`;
+  document.getElementById('cmsModalBox').innerHTML=html;document.getElementById('cmsModal').classList.add('active');
+  window._cmsSec=sec;
+}
+function applySectionAnim(){
+  const sec=window._cmsSec;
+  const anim=document.getElementById('animVal').value;
+  sec.dataset.anim=anim;
+  sec.querySelectorAll('.fade-in,.anim-fade-left,.anim-fade-right,.anim-zoom-in,.anim-slide-up,.anim-none').forEach(el=>{
+    el.classList.remove('fade-in','anim-fade-left','anim-fade-right','anim-zoom-in','anim-slide-up','anim-none');
+    if(anim==='fade-up')el.classList.add('fade-in');
+    else if(anim!=='none')el.classList.add('anim-'+anim);
+    else el.classList.add('anim-none');
+  });
+  closeModal('cmsModal');showToast('✨ 애니메이션 적용');
+}
+
+// === SNS LINK EDITOR ===
+function onSnsClick(el){
+  const cur=el.getAttribute('href')||'#';
+  const html=`<div class="cms-modal__title">🔗 SNS 링크 수정</div>
+  <label class="cms-modal__label">${el.title||'SNS'} URL</label>
+  <input class="cms-modal__field" id="snsUrl" value="${cur==='#'?'':cur}" placeholder="https://instagram.com/...">
+  <div style="background:#EEF2FF;border-radius:8px;padding:8px 12px;font-size:.72rem;color:#4338CA;margin-bottom:.8rem">💡 비워두면 자동으로 숨겨집니다</div>
+  <div class="cms-modal__btns"><button class="cms-modal__cancel" onclick="closeModal('cmsModal')">취소</button><button class="cms-modal__save" onclick="applySns()">적용</button></div>`;
+  document.getElementById('cmsModalBox').innerHTML=html;document.getElementById('cmsModal').classList.add('active');
+  window._cmsTarget=el;
+}
+function applySns(){
+  const url=document.getElementById('snsUrl').value;
+  window._cmsTarget.href=url||'#';
+  window._cmsTarget.style.display=url?'':'none';
+  closeModal('cmsModal');showToast('✅');
+}
+
+// === ENHANCED ADD SECTION (templates) ===
 
 // === ITEM DELETE BUTTONS ===
 function injectDeleteBtns(){
