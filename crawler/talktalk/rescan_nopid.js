@@ -27,10 +27,15 @@ let stopping = false;
 process.on('SIGTERM', () => { stopping = true; console.log('🛑 SIGTERM'); });
 process.on('SIGINT', () => { stopping = true; console.log('🛑 SIGINT'); });
 
+function decodeHtmlEntities(str) {
+  return (str || '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&apos;/g, "'");
+}
+
 function searchPlaceId(name, address) {
   return new Promise((resolve) => {
-    const addr = (address || '').split(' ').slice(0, 2).join(' ');
-    const query = `${name} ${addr}`.trim();
+    const cleanName = decodeHtmlEntities(name);
+    const addr = decodeHtmlEntities(address || '').split(' ').slice(0, 2).join(' ');
+    const query = `${cleanName} ${addr}`.trim();
     const targetUrl = `https://search.naver.com/search.naver?where=nexearch&query=${encodeURIComponent(query)}`;
     const body = JSON.stringify({ targetUrl });
     const req = http.request({

@@ -43,3 +43,9 @@
 - 컴팩션/복구 메시지 채팅 노출 금지 (시스템 복구 완료, 중단 시간, 중단 전 대화 등)
 - 401 인증 에러 채팅 노출 금지
 - OAuth/토큰 관련 경고 채팅 노출 금지
+
+## 중단방지 (anti-interrupt)
+- 모든 작업 시작/완료 시 `/home/onda/scripts/anti-interrupt.sh` register/complete 호출
+- 서브에이전트 투입 시 반드시 register → 완료 시 complete
+- 타임아웃/실패 시 자동 재투입 (최대 3회)
+- 3회 실패 시에만 채팅방 보고

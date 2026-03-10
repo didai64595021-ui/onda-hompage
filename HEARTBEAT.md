@@ -56,3 +56,11 @@ Gateway 복구 감지 시:
 2. active-tasks/*.json에서 미완료 작업 확인
 3. WORK_STATE.md 기반 Claude Code 자동 재투입
 4. 텔레그램 재개 보고
+
+## 중단방지 로직 (2026-03-09, 영구)
+- 작업 시작 시: `/home/onda/scripts/anti-interrupt.sh register <project> "<task>"`
+- 작업 완료 시: `/home/onda/scripts/anti-interrupt.sh complete <project>`
+- 5분마다: `/home/onda/scripts/anti-interrupt.sh heartbeat`
+- 컴팩션/재시작 시: `/home/onda/scripts/anti-interrupt.sh check` → 미완료 자동 재개
+- 서브에이전트 타임아웃 시: 최대 3회 자동 재투입
+- 3회 실패 시에만 채팅방 보고
