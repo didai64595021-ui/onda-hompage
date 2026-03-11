@@ -940,5 +940,159 @@
         }
         reveal();
     </script>
+
+    <!-- Enhanced Interactivity -->
+    <script>
+    (function() {
+        'use strict';
+
+        // ========== 1. Mobile Menu Enhancements ==========
+        var mobileMenu = document.getElementById('mobile-menu');
+        var menuBtn = document.getElementById('menu-btn');
+        var closeMenuBtn = document.getElementById('close-menu-btn');
+
+        function openMenu() {
+            mobileMenu.classList.remove('translate-x-full');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeMenu() {
+            mobileMenu.classList.add('translate-x-full');
+            document.body.style.overflow = '';
+        }
+
+        // Override existing listeners with enhanced versions
+        menuBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openMenu();
+        });
+        closeMenuBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            closeMenu();
+        });
+
+        // Close menu when clicking a nav link inside mobile menu
+        var menuLinks = mobileMenu.querySelectorAll('a');
+        menuLinks.forEach(function(link) {
+            link.addEventListener('click', function() {
+                closeMenu();
+            });
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !mobileMenu.classList.contains('translate-x-full')) {
+                closeMenu();
+            }
+        });
+
+        // ========== 2. Dead Link Interception + Toast ==========
+        // Toast container (created once, reused)
+        var toastEl = document.createElement('div');
+        toastEl.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:#1c1917;color:#fff;padding:14px 28px;border-radius:12px;font-size:14px;font-weight:500;z-index:9999;opacity:0;transition:all 0.4s cubic-bezier(0.4,0,0.2,1);pointer-events:none;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.25);';
+        document.body.appendChild(toastEl);
+
+        var toastTimer = null;
+        function showToast(msg) {
+            clearTimeout(toastTimer);
+            toastEl.textContent = msg;
+            // Force reflow for re-trigger animation
+            toastEl.style.opacity = '0';
+            toastEl.style.transform = 'translateX(-50%) translateY(20px)';
+            requestAnimationFrame(function() {
+                toastEl.style.opacity = '1';
+                toastEl.style.transform = 'translateX(-50%) translateY(0)';
+            });
+            toastTimer = setTimeout(function() {
+                toastEl.style.opacity = '0';
+                toastEl.style.transform = 'translateX(-50%) translateY(20px)';
+            }, 2500);
+        }
+
+        // Intercept dead internal links (href starting with "/" that don't point to actual pages)
+        document.addEventListener('click', function(e) {
+            var link = e.target.closest('a[href]');
+            if (!link) return;
+            var href = link.getAttribute('href');
+            // Match internal paths like "/", "/intro", "/dogs" etc.
+            // Exclude external links, anchors (#), javascript:, tel:, mailto:, and relative file links (e.g. dogs.html)
+            if (href && /^\//.test(href) && !href.startsWith('//')) {
+                e.preventDefault();
+                showToast('데모 페이지입니다');
+            }
+        });
+
+        // ========== 3. Scroll-to-Top Button ==========
+        var scrollBtn = document.createElement('button');
+        scrollBtn.setAttribute('aria-label', '맨 위로');
+        scrollBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>';
+        scrollBtn.style.cssText = 'position:fixed;bottom:100px;left:24px;width:48px;height:48px;border-radius:50%;background:#1c1917;color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:50;opacity:0;transform:translateY(16px);transition:all 0.4s cubic-bezier(0.4,0,0.2,1);box-shadow:0 4px 16px rgba(0,0,0,0.2);pointer-events:none;';
+        document.body.appendChild(scrollBtn);
+
+        scrollBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        scrollBtn.addEventListener('mouseenter', function() {
+            scrollBtn.style.background = '#44403c';
+            scrollBtn.style.transform = 'translateY(-2px)';
+        });
+        scrollBtn.addEventListener('mouseleave', function() {
+            scrollBtn.style.background = '#1c1917';
+            if (window.scrollY > 400) scrollBtn.style.transform = 'translateY(0)';
+        });
+
+        var scrollBtnVisible = false;
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 400 && !scrollBtnVisible) {
+                scrollBtnVisible = true;
+                scrollBtn.style.opacity = '1';
+                scrollBtn.style.transform = 'translateY(0)';
+                scrollBtn.style.pointerEvents = 'auto';
+            } else if (window.scrollY <= 400 && scrollBtnVisible) {
+                scrollBtnVisible = false;
+                scrollBtn.style.opacity = '0';
+                scrollBtn.style.transform = 'translateY(16px)';
+                scrollBtn.style.pointerEvents = 'none';
+            }
+        });
+
+        // ========== 4. IntersectionObserver for .reveal elements ==========
+        // Replace the scroll-based reveal with IntersectionObserver for better performance
+        // (The existing scroll listener still works as a fallback)
+        if ('IntersectionObserver' in window) {
+            var observerOptions = {
+                root: null,
+                rootMargin: '0px 0px -100px 0px',
+                threshold: 0.1
+            };
+            var revealObserver = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all reveal elements (including dynamically added ones)
+            function observeRevealElements() {
+                var els = document.querySelectorAll('.reveal:not(.active), .reveal-up:not(.active), .reveal-left:not(.active), .reveal-right:not(.active), .reveal-scale:not(.active)');
+                els.forEach(function(el) {
+                    revealObserver.observe(el);
+                });
+            }
+            // Run after a short delay to catch dynamically rendered elements
+            setTimeout(observeRevealElements, 500);
+            // Also re-observe after dynamic content might be added (reviews re-render, etc.)
+            var origRenderReviews = window.renderReviews;
+            if (typeof origRenderReviews === 'function') {
+                window.renderReviews = function() {
+                    origRenderReviews();
+                    setTimeout(observeRevealElements, 100);
+                };
+            }
+        }
+
+    })();
+    </script>
 </body>
 </html>
