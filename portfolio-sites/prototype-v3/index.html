@@ -1464,6 +1464,135 @@ body.cursor-light .cursor-ring.hovering {
 @media (max-width: 768px) {
   .mobile-menu-btn { display: flex; }
 }
+
+.project-01, .project-02, .project-03, .project-04 { cursor: none; }
+
+/* CONTACT MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.modal.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(26,24,22,0.85);
+}
+
+.modal-content {
+  position: relative;
+  background: var(--cream);
+  padding: clamp(32px, 5vw, 60px);
+  border-radius: 8px;
+  width: min(520px, 90vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: translateY(20px);
+  transition: transform 0.4s var(--ease-out-expo);
+}
+
+.modal.active .modal-content {
+  transform: translateY(0);
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 28px;
+  color: var(--text);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.3s ease;
+  cursor: none;
+}
+
+.modal-close:hover { background: rgba(45,41,38,0.08); }
+
+.modal-content h2 {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3vw, 32px);
+  color: var(--text);
+  margin-bottom: 32px;
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-content input,
+.modal-content textarea {
+  font-family: var(--font-body);
+  font-size: 15px;
+  padding: 14px 16px;
+  border: 1px solid rgba(45,41,38,0.15);
+  border-radius: 4px;
+  background: var(--white);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.3s ease;
+  cursor: none;
+}
+
+.modal-content input:focus,
+.modal-content textarea:focus {
+  border-color: var(--rust);
+}
+
+.modal-content textarea { resize: vertical; }
+
+.modal-content button[type="submit"] {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 16px 32px;
+  background: var(--charcoal);
+  color: var(--cream);
+  border-radius: 4px;
+  transition: background 0.3s ease, transform 0.2s ease;
+  cursor: none;
+  margin-top: 8px;
+}
+
+.modal-content button[type="submit"]:hover {
+  background: var(--rust);
+}
+
+.form-success {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.form-success h3 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.form-success p {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text-light);
+}
 </style>
 </head>
 <body>
@@ -1554,7 +1683,7 @@ body.cursor-light .cursor-ring.hovering {
   </div>
 
   <!-- Project 01: Staggered overlap -->
-  <article class="project-01">
+  <article class="project-01" onclick="location.href='project-aurora.html'" style="cursor:pointer">
     <div class="project-number">01</div>
     <div class="project-image-wrap" data-reveal="clip-bottom">
       <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?w=1000&q=80"
@@ -1569,7 +1698,7 @@ body.cursor-light .cursor-ring.hovering {
   </article>
 
   <!-- Project 02: Right-heavy horizontal -->
-  <article class="project-02">
+  <article class="project-02" onclick="location.href='project-nexus.html'" style="cursor:pointer">
     <div class="project-text">
       <h3>NEXUS</h3>
       <p class="project-sub">모바일 앱</p>
@@ -1585,7 +1714,7 @@ body.cursor-light .cursor-ring.hovering {
   </article>
 
   <!-- Project 03: Full-bleed -->
-  <article class="project-03" id="project03">
+  <article class="project-03" id="project03" onclick="location.href='project-pulse.html'" style="cursor:pointer">
     <div class="project-image-wrap">
       <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1600&q=80"
            alt="PULSE 이커머스" loading="lazy" id="project03Img">
@@ -1603,7 +1732,7 @@ body.cursor-light .cursor-ring.hovering {
   <!-- Dark bleed transition -->
   <div class="dark-bleed">
     <!-- Project 04: Dark begins -->
-    <article class="project-04">
+    <article class="project-04" onclick="location.href='project-terra.html'" style="cursor:pointer">
       <div class="project-04-inner">
         <div class="project-image-wrap" data-reveal="clip-top">
           <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80"
@@ -1682,9 +1811,9 @@ body.cursor-light .cursor-ring.hovering {
 <!-- ========== CONTACT CTA ========== -->
 <section class="contact" id="contact">
   <h2 class="contact-heading" data-reveal="fade-up">다음 프로젝트를<br>이야기해볼까요?</h2>
-  <a href="mailto:hello@ondastudio.kr" class="magnetic-btn" id="magneticBtn" data-magnetic>
+  <button class="magnetic-btn" id="magneticBtn" data-magnetic onclick="openContactModal()">
     <span>대화 시작하기 →</span>
-  </a>
+  </button>
   <p class="contact-email" data-reveal="fade-up">hello@ondastudio.kr</p>
 </section>
 
@@ -1709,6 +1838,23 @@ body.cursor-light .cursor-ring.hovering {
     </div>
   </div>
 </section>
+
+<!-- Contact Modal -->
+<div class="modal" id="contactModal">
+  <div class="modal-backdrop" id="modalBackdrop"></div>
+  <div class="modal-content">
+    <button class="modal-close" id="modalClose" aria-label="닫기">&times;</button>
+    <h2>프로젝트 문의</h2>
+    <form id="contactForm">
+      <input name="company" placeholder="회사명" required>
+      <input name="name" placeholder="담당자명" required>
+      <input name="phone" placeholder="연락처" required>
+      <input name="email" type="email" placeholder="이메일">
+      <textarea name="message" placeholder="프로젝트 내용" rows="4"></textarea>
+      <button type="submit">문의하기 →</button>
+    </form>
+  </div>
+</div>
 
 <!-- ========== FOOTER ========== -->
 <footer class="footer" id="footer">
@@ -2369,6 +2515,39 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       target.scrollIntoView({ behavior: 'smooth' });
     }
   });
+});
+
+/* PROJECT CARD LINKS */
+document.querySelector('.project-01')?.addEventListener('click', () => location.href='project-aurora.html');
+document.querySelector('.project-02')?.addEventListener('click', () => location.href='project-nexus.html');
+document.querySelector('.project-03')?.addEventListener('click', () => location.href='project-pulse.html');
+document.querySelector('.project-04')?.addEventListener('click', () => location.href='project-terra.html');
+
+/* CONTACT MODAL */
+function openContactModal() {
+  const modal = document.getElementById('contactModal');
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeContactModal() {
+  const modal = document.getElementById('contactModal');
+  modal.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('modalBackdrop')?.addEventListener('click', closeContactModal);
+document.getElementById('modalClose')?.addEventListener('click', closeContactModal);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeContactModal();
+});
+
+document.getElementById('contactForm')?.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const content = form.closest('.modal-content');
+  content.innerHTML = '<div class="form-success"><h3>감사합니다</h3><p>빠른 시일 내에 연락드리겠습니다.</p></div>';
+  setTimeout(closeContactModal, 2500);
 });
 </script>
 </body>
