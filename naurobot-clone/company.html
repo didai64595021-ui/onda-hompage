@@ -797,7 +797,7 @@
       <li><a href="contact.html" data-ko="문의" data-en="Contact">문의</a></li>
     </ul>
     <div class="nav-right">
-      <div class="lang-switch" style="cursor:pointer" onclick="document.querySelector('.lang-btn:not(.active)').click()">
+      <div class="lang-switch" style="cursor:pointer" onclick="toggleLang()">
         <button class="lang-btn active" data-lang="ko">KR</button>
         <button class="lang-btn" data-lang="en">EN</button>
       </div>
@@ -811,7 +811,7 @@
 
   <!-- Mobile Menu -->
   <div class="mobile-menu" id="mobileMenu">
-    <div class="mobile-lang-switch" style="cursor:pointer" onclick="document.querySelector('.mobile-lang-btn:not(.active)').click()">
+    <div class="mobile-lang-switch" style="cursor:pointer" onclick="toggleLang()">
       <button class="mobile-lang-btn active" data-lang="ko">KR</button>
       <button class="mobile-lang-btn" data-lang="en">EN</button>
     </div>
@@ -1131,10 +1131,11 @@
     animElements.forEach(el => observer.observe(el));
 
     // ===== Language Switch =====
+    window.toggleLang = function() { var cur = localStorage.getItem("stk-lang") || "ko"; switchLang(cur === "ko" ? "en" : "ko"); };
     (function() {
       var savedLang = localStorage.getItem('stk-lang') || 'ko';
 
-      function switchLang(lang) {
+      window.switchLang = function(lang) {
         document.querySelectorAll('[data-ko]').forEach(function(el) {
           el.style.opacity = '0';
           setTimeout(function() {
@@ -1158,7 +1159,7 @@
       }
 
       document.querySelectorAll('.lang-btn, .mobile-lang-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function(e) { e.stopPropagation();
           switchLang(btn.getAttribute('data-lang'));
         });
       });

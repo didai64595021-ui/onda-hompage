@@ -118,12 +118,12 @@
       <li><a href="contact.html" data-ko="문의" data-en="Contact">문의</a></li>
     </ul>
     <div class="nav-right">
-      <div class="lang-switch" style="cursor:pointer" onclick="document.querySelector('.lang-btn:not(.active)').click()"><button class="lang-btn active" data-lang="ko">KR</button><button class="lang-btn" data-lang="en">EN</button></div>
+      <div class="lang-switch" style="cursor:pointer" onclick="toggleLang()"><button class="lang-btn active" data-lang="ko">KR</button><button class="lang-btn" data-lang="en">EN</button></div>
       <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
     </div>
   </nav>
   <div class="mobile-menu" id="mobileMenu">
-    <div class="mobile-lang-switch" style="cursor:pointer" onclick="document.querySelector('.mobile-lang-btn:not(.active)').click()"><button class="mobile-lang-btn active" data-lang="ko">KR</button><button class="mobile-lang-btn" data-lang="en">EN</button></div>
+    <div class="mobile-lang-switch" style="cursor:pointer" onclick="toggleLang()"><button class="mobile-lang-btn active" data-lang="ko">KR</button><button class="mobile-lang-btn" data-lang="en">EN</button></div>
     <a href="company.html" data-ko="회사소개" data-en="Company">회사소개</a>
     <a href="product-sensor.html" data-ko="제품" data-en="Product">제품</a>
     <a href="business.html" data-ko="사업소개" data-en="Business">사업소개</a>
@@ -199,7 +199,7 @@
     mobileMenu.querySelectorAll('a').forEach(link => { link.addEventListener('click', () => { hamburger.classList.remove('active'); mobileMenu.classList.remove('open'); document.body.style.overflow = ''; }); });
     (function() {
       var savedLang = localStorage.getItem('stk-lang') || 'ko';
-      function switchLang(lang) {
+      window.switchLang = function(lang) {
         document.querySelectorAll('[data-ko]').forEach(function(el) {
           el.style.opacity = '0';
           setTimeout(function() {
@@ -213,7 +213,7 @@
         localStorage.setItem('stk-lang', lang);
         document.documentElement.lang = lang === 'ko' ? 'ko' : 'en';
       }
-      document.querySelectorAll('.lang-btn, .mobile-lang-btn').forEach(function(btn) { btn.addEventListener('click', function() { switchLang(btn.getAttribute('data-lang')); }); });
+      document.querySelectorAll('.lang-btn, .mobile-lang-btn').forEach(function(btn) { btn.addEventListener('click', function(e) { e.stopPropagation(); switchLang(btn.getAttribute('data-lang')); }); });
       if (savedLang !== 'ko') { switchLang(savedLang); }
     })();
   </script>
