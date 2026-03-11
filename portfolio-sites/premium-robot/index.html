@@ -1,0 +1,2427 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXABOT — 산업의 미래를 설계합니다</title>
+<meta name="description" content="NEXABOT은 AI 기반 산업용 로봇과 자동화 솔루션으로 제조업의 미래를 선도합니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Pretendard+Variable:wght@100..900&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --black: #0D0D0D;
+  --blue: #0066FF;
+  --blue-glow: rgba(0, 102, 255, 0.4);
+  --gray: #8892A0;
+  --white: #FFFFFF;
+  --dark-card: #141418;
+  --dark-border: #1E1E24;
+  --font-body: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+}
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+body {
+  font-family: var(--font-body);
+  background: var(--black);
+  color: var(--white);
+  word-break: keep-all;
+  overflow-x: hidden;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+img { max-width: 100%; display: block; }
+ul { list-style: none; }
+input, select, textarea { font-family: inherit; }
+
+/* ===== SCROLL PROGRESS BAR ===== */
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--blue);
+  z-index: 10000;
+  width: 0%;
+  transition: width 0.05s linear;
+  box-shadow: 0 0 8px var(--blue-glow);
+}
+
+/* ===== CUSTOM CURSOR ===== */
+.cursor-dot {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  background: var(--white);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s ease, background 0.2s ease;
+}
+.cursor-ring {
+  position: fixed;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid var(--blue);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+  box-shadow: 0 0 15px rgba(0, 102, 255, 0.2);
+}
+.cursor-ring.expand {
+  width: 56px;
+  height: 56px;
+  background: rgba(0, 102, 255, 0.08);
+  border-color: rgba(0, 102, 255, 0.6);
+}
+@media (pointer: coarse) {
+  .cursor-dot, .cursor-ring { display: none !important; }
+}
+
+/* ===== PRELOADER ===== */
+#preloader {
+  position: fixed;
+  inset: 0;
+  background: var(--black);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+#preloader.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+.preloader-circuit {
+  width: 200px;
+  height: 200px;
+  margin-bottom: 40px;
+}
+.preloader-circuit svg {
+  width: 100%;
+  height: 100%;
+}
+.circuit-line {
+  stroke: var(--blue);
+  stroke-width: 1.5;
+  fill: none;
+  stroke-dasharray: 300;
+  stroke-dashoffset: 300;
+  animation: drawCircuit 2s ease forwards;
+}
+.circuit-line:nth-child(2) { animation-delay: 0.2s; }
+.circuit-line:nth-child(3) { animation-delay: 0.4s; }
+.circuit-line:nth-child(4) { animation-delay: 0.3s; }
+.circuit-line:nth-child(5) { animation-delay: 0.5s; }
+.circuit-line:nth-child(6) { animation-delay: 0.6s; }
+.circuit-line:nth-child(7) { animation-delay: 0.15s; }
+.circuit-line:nth-child(8) { animation-delay: 0.35s; }
+.circuit-dot {
+  fill: var(--blue);
+  opacity: 0;
+  animation: dotAppear 0.3s ease forwards;
+}
+.circuit-dot:nth-child(9) { animation-delay: 0.8s; }
+.circuit-dot:nth-child(10) { animation-delay: 1.0s; }
+.circuit-dot:nth-child(11) { animation-delay: 1.2s; }
+.circuit-dot:nth-child(12) { animation-delay: 0.9s; }
+.circuit-dot:nth-child(13) { animation-delay: 1.1s; }
+.circuit-dot:nth-child(14) { animation-delay: 1.3s; }
+@keyframes drawCircuit {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes dotAppear {
+  to { opacity: 1; }
+}
+.preloader-text {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 700;
+  letter-spacing: 8px;
+  color: var(--white);
+  opacity: 0;
+  animation: preloaderTextReveal 0.8s ease 1.4s forwards;
+  text-shadow: 0 0 30px var(--blue-glow), 0 0 60px rgba(0, 102, 255, 0.15);
+}
+@keyframes preloaderTextReveal {
+  0% { opacity: 0; transform: translateY(10px); filter: blur(8px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+/* ===== NAVIGATION ===== */
+#nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9000;
+  padding: 0 clamp(20px, 4vw, 60px);
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(13, 13, 13, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: transform 0.3s ease;
+}
+#nav.nav-hidden { transform: translateY(-100%); }
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--white);
+}
+.nav-logo span { color: var(--blue); }
+.nav-links {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+.nav-links a {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray);
+  transition: color 0.3s ease;
+  letter-spacing: 0.5px;
+}
+.nav-links a:hover { color: var(--white); }
+.nav-cta {
+  padding: 10px 24px;
+  background: var(--blue);
+  color: var(--white) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  border-radius: 6px;
+  transition: box-shadow 0.3s ease, transform 0.3s ease !important;
+}
+.nav-cta:hover {
+  box-shadow: 0 0 20px var(--blue-glow);
+  transform: translateY(-1px);
+}
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  width: 28px;
+  cursor: pointer;
+  z-index: 9001;
+}
+.nav-hamburger span {
+  display: block;
+  height: 2px;
+  background: var(--white);
+  border-radius: 2px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.nav-hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.nav-hamburger.active span:nth-child(2) { opacity: 0; }
+.nav-hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+.nav-mobile {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 13, 13, 0.97);
+  z-index: 8999;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.nav-mobile.open { opacity: 1; visibility: visible; }
+.nav-mobile a {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--white);
+  letter-spacing: 1px;
+}
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .nav-hamburger { display: flex; }
+  .nav-mobile { display: flex; }
+}
+
+/* ===== REVEAL ANIMATION ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+
+/* ===== SECTION COMMON ===== */
+.section-pad {
+  padding: clamp(60px, 10vw, 140px) clamp(20px, 5vw, 80px);
+  max-width: 1440px;
+  margin: 0 auto;
+}
+.section-label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 16px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 20px;
+  letter-spacing: -0.5px;
+}
+.section-desc {
+  color: var(--gray);
+  font-size: clamp(15px, 1.6vw, 18px);
+  line-height: 1.8;
+  max-width: 560px;
+}
+.blue-line {
+  width: 48px;
+  height: 3px;
+  background: var(--blue);
+  margin-bottom: 24px;
+  border-radius: 2px;
+}
+
+/* ===== HERO ===== */
+#hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  contain: layout style;
+}
+.hero-grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(0, 102, 255, 0.15) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: gridPulse 4s ease-in-out infinite;
+  z-index: 1;
+}
+@keyframes gridPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+.hero-bg-images {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.hero-bg-images::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(13,13,13,0.7) 0%, rgba(13,13,13,0.5) 50%, rgba(13,13,13,0.95) 100%);
+  z-index: 1;
+}
+.hero-bg-img {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  animation: heroFade 15s ease-in-out infinite;
+}
+.hero-bg-img:nth-child(1) {
+  background-image: url('https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=1920&q=80');
+  animation-delay: 0s;
+}
+.hero-bg-img:nth-child(2) {
+  background-image: url('https://images.unsplash.com/photo-1563203369-26f2e4a5ccf7?w=1920&q=80');
+  animation-delay: 5s;
+}
+.hero-bg-img:nth-child(3) {
+  background-image: url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1920&q=80');
+  animation-delay: 10s;
+}
+@keyframes heroFade {
+  0%, 25% { opacity: 0; }
+  8%, 20% { opacity: 1; }
+}
+.hero-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+}
+.particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: rgba(0, 102, 255, 0.5);
+  border-radius: 50%;
+  animation: particleFloat linear infinite;
+}
+@keyframes particleFloat {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-100vh) translateX(40px); opacity: 0; }
+}
+.hero-content {
+  position: relative;
+  z-index: 3;
+  padding: 0 clamp(20px, 5vw, 80px);
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+  padding-top: 100px;
+}
+.hero-overline {
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--blue);
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+.hero-title-wrap {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 24px;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(56px, 10vw, 140px);
+  font-weight: 700;
+  letter-spacing: -2px;
+  line-height: 1;
+  position: relative;
+  color: var(--white);
+}
+.hero-title .glitch {
+  position: relative;
+  display: inline-block;
+}
+.hero-title .glitch::before,
+.hero-title .glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+.hero-title .glitch::before {
+  color: var(--white);
+  text-shadow: -2px 0 #ff0040;
+  animation: glitch1 4s infinite;
+}
+.hero-title .glitch::after {
+  color: var(--white);
+  text-shadow: 2px 0 #0066ff;
+  animation: glitch2 4s infinite;
+}
+@keyframes glitch1 {
+  0%, 88%, 100% { opacity: 0; clip-path: inset(0 0 100% 0); }
+  89% { opacity: 0.8; clip-path: inset(20% 0 40% 0); transform: translate(-3px, 0); }
+  90% { opacity: 0.8; clip-path: inset(60% 0 10% 0); transform: translate(3px, 0); }
+  91% { opacity: 0.8; clip-path: inset(10% 0 70% 0); transform: translate(-2px, 0); }
+  92% { opacity: 0; clip-path: inset(0 0 100% 0); transform: translate(0); }
+}
+@keyframes glitch2 {
+  0%, 90%, 100% { opacity: 0; clip-path: inset(0 0 100% 0); }
+  91% { opacity: 0.8; clip-path: inset(50% 0 20% 0); transform: translate(3px, 0); }
+  92% { opacity: 0.8; clip-path: inset(10% 0 60% 0); transform: translate(-3px, 0); }
+  93% { opacity: 0.8; clip-path: inset(70% 0 5% 0); transform: translate(2px, 0); }
+  94% { opacity: 0; clip-path: inset(0 0 100% 0); transform: translate(0); }
+}
+.hero-tagline {
+  font-size: clamp(18px, 2.5vw, 28px);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 48px;
+  overflow: hidden;
+}
+.hero-tagline .typing {
+  display: inline-block;
+  border-right: 2px solid var(--blue);
+  animation: blink 0.8s step-end infinite;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 100%;
+  animation: typing 2s steps(14, end) 0.5s both, blink 0.8s step-end infinite;
+}
+@keyframes typing {
+  from { max-width: 0; }
+  to { max-width: 100%; }
+}
+@keyframes blink {
+  50% { border-color: transparent; }
+}
+.hero-stats {
+  display: flex;
+  gap: clamp(24px, 4vw, 60px);
+  padding-top: 40px;
+  border-top: 2px solid var(--blue);
+  flex-wrap: wrap;
+}
+.hero-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.hero-stat-value {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 700;
+  color: var(--white);
+}
+.hero-stat-label {
+  font-size: 14px;
+  color: var(--gray);
+  letter-spacing: 0.5px;
+}
+.hero-scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--gray);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+.hero-scroll-indicator .scroll-line {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, var(--blue), transparent);
+  animation: scrollBounce 2s ease-in-out infinite;
+}
+@keyframes scrollBounce {
+  0%, 100% { transform: scaleY(1); opacity: 1; }
+  50% { transform: scaleY(0.5); opacity: 0.5; }
+}
+
+/* ===== ABOUT ===== */
+#about {
+  position: relative;
+  overflow: hidden;
+}
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 6vw, 80px);
+  align-items: center;
+  margin-bottom: 80px;
+}
+.about-left .about-eng-title {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 60px);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 24px;
+  letter-spacing: -1px;
+}
+.about-left .about-eng-title span { color: var(--blue); }
+.about-left p {
+  color: var(--gray);
+  font-size: clamp(15px, 1.5vw, 17px);
+  line-height: 1.9;
+}
+.about-image {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 4/3;
+}
+.about-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.about-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(0, 102, 255, 0.15);
+  border-radius: 12px;
+}
+.about-counters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  padding-top: 60px;
+  border-top: 1px solid var(--dark-border);
+}
+.about-counter {
+  text-align: center;
+}
+.about-counter-value {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+.about-counter-value .counter-suffix {
+  font-size: 0.5em;
+  color: var(--blue);
+}
+.about-counter-label {
+  font-size: 15px;
+  color: var(--gray);
+}
+.about-counter::after {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--blue);
+  margin: 16px auto 0;
+}
+@media (max-width: 768px) {
+  .about-grid { grid-template-columns: 1fr; }
+  .about-counters { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+}
+
+/* ===== SOLUTIONS ===== */
+#solutions {
+  background: linear-gradient(180deg, var(--black) 0%, #080810 100%);
+}
+.solutions-header {
+  text-align: center;
+  margin-bottom: 64px;
+}
+.solutions-header .section-desc { margin: 0 auto; }
+.solutions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+.solution-card {
+  position: relative;
+  background: var(--dark-card);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--dark-border);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  cursor: pointer;
+  contain: layout style;
+}
+.solution-card:hover {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 102, 255, 0.08);
+}
+.solution-card-image {
+  position: relative;
+  height: 240px;
+  overflow: hidden;
+}
+.solution-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+.solution-card:hover .solution-card-image img {
+  transform: scale(1.08);
+}
+.solution-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 102, 255, 0.7) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.solution-card:hover .solution-card-overlay { opacity: 1; }
+.solution-card-body {
+  padding: 28px;
+}
+.solution-card-tag {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 12px;
+}
+.solution-card-title {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2vw, 24px);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.solution-card-kr {
+  font-size: 15px;
+  color: var(--gray);
+  margin-bottom: 16px;
+  line-height: 1.7;
+}
+.solution-card-specs {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease, opacity 0.4s ease;
+  opacity: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.8;
+}
+.solution-card:hover .solution-card-specs {
+  max-height: 120px;
+  opacity: 1;
+}
+.solution-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--blue);
+  margin-top: 16px;
+  transition: gap 0.3s ease;
+}
+.solution-card-cta:hover { gap: 12px; }
+@media (max-width: 1024px) {
+  .solutions-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .solutions-grid { grid-template-columns: 1fr; }
+}
+
+/* ===== SOLUTION MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+  padding: 20px;
+}
+.modal-overlay.active { opacity: 1; visibility: visible; }
+.modal {
+  background: #161620;
+  border-radius: 20px;
+  max-width: 640px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  border: 1px solid var(--dark-border);
+  transform: translateY(30px) scale(0.96);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+.modal-overlay.active .modal {
+  transform: translateY(0) scale(1);
+}
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--white);
+  font-size: 20px;
+  z-index: 2;
+  transition: background 0.3s ease;
+}
+.modal-close:hover { background: rgba(255, 255, 255, 0.12); }
+.modal-image {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  border-radius: 20px 20px 0 0;
+}
+.modal-body {
+  padding: 36px;
+}
+.modal-body .section-label { margin-bottom: 8px; }
+.modal-body h2 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.modal-body .modal-kr-title {
+  font-size: 18px;
+  color: var(--blue);
+  margin-bottom: 20px;
+}
+.modal-body p {
+  color: var(--gray);
+  line-height: 1.9;
+  font-size: 15px;
+  margin-bottom: 24px;
+}
+.modal-specs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.modal-spec-item {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.modal-spec-item .spec-label {
+  font-size: 12px;
+  color: var(--gray);
+  margin-bottom: 4px;
+}
+.modal-spec-item .spec-value {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+/* ===== TECHNOLOGY ===== */
+#technology {
+  position: relative;
+  padding: clamp(60px, 10vw, 140px) 0;
+  overflow: hidden;
+}
+.tech-header {
+  padding: 0 clamp(20px, 5vw, 80px);
+  max-width: 1440px;
+  margin: 0 auto 48px;
+}
+.tech-scroll-container {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  display: flex;
+  gap: 0;
+  padding: 0 clamp(20px, 5vw, 80px);
+}
+.tech-scroll-container::-webkit-scrollbar { display: none; }
+.tech-card {
+  min-width: 80vw;
+  max-width: 420px;
+  flex-shrink: 0;
+  scroll-snap-align: center;
+  background: var(--dark-card);
+  border-radius: 20px;
+  padding: clamp(32px, 4vw, 48px);
+  margin-right: 24px;
+  border: 1px solid var(--dark-border);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+.tech-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--blue), transparent);
+}
+.tech-icon {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 24px;
+  position: relative;
+}
+.tech-icon-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: rgba(0, 102, 255, 0.1);
+  border: 1px solid rgba(0, 102, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tech-icon svg {
+  width: 28px;
+  height: 28px;
+  stroke: var(--blue);
+  fill: none;
+  stroke-width: 1.5;
+}
+.tech-card-title {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.5vw, 28px);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.tech-card-kr {
+  font-size: 15px;
+  color: var(--blue);
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+.tech-card-desc {
+  color: var(--gray);
+  font-size: 15px;
+  line-height: 1.8;
+  margin-bottom: 32px;
+  flex-grow: 1;
+}
+.tech-metric {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.tech-metric-value {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 48px);
+  font-weight: 700;
+  color: var(--white);
+}
+.tech-metric-unit {
+  font-size: 16px;
+  color: var(--gray);
+}
+.tech-progress {
+  display: flex;
+  gap: 8px;
+  margin-top: 48px;
+  padding: 0 clamp(20px, 5vw, 80px);
+  max-width: 1440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.tech-progress-dot {
+  width: 32px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.3s ease, width 0.3s ease;
+  cursor: pointer;
+}
+.tech-progress-dot.active {
+  background: var(--blue);
+  width: 48px;
+}
+@media (min-width: 1024px) {
+  .tech-card { min-width: 340px; }
+}
+
+/* ===== CASE STUDIES ===== */
+#cases {
+  background: linear-gradient(180deg, #080810 0%, var(--black) 100%);
+}
+.cases-header {
+  margin-bottom: 48px;
+}
+.cases-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: auto auto;
+  gap: 24px;
+}
+.case-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--dark-card);
+  border: 1px solid var(--dark-border);
+  cursor: pointer;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  perspective: 1000px;
+  contain: layout style;
+}
+.case-card:hover {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+.case-card.large {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+.case-card-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.6s ease;
+}
+.case-card:hover .case-card-bg { transform: scale(1.06); }
+.case-card-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(13, 13, 13, 0.95) 0%, rgba(13, 13, 13, 0.4) 50%, rgba(13, 13, 13, 0.2) 100%);
+  transition: background 0.4s ease;
+}
+.case-card:hover .case-card-bg::after {
+  background: linear-gradient(to top, rgba(13, 13, 13, 0.98) 0%, rgba(13, 13, 13, 0.7) 50%, rgba(13, 13, 13, 0.5) 100%);
+}
+.case-card-content {
+  position: relative;
+  z-index: 1;
+  padding: clamp(24px, 3vw, 36px);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 200px;
+}
+.case-card.large .case-card-content { min-height: 360px; }
+.case-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--blue);
+  background: rgba(0, 102, 255, 0.1);
+  padding: 4px 12px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  width: fit-content;
+}
+.case-company {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2.5vw, 28px);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.case-desc {
+  font-size: 14px;
+  color: var(--gray);
+  margin-bottom: 12px;
+}
+.case-metric {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2.5vw, 28px);
+  font-weight: 700;
+  color: var(--blue);
+}
+.case-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease, margin 0.3s ease;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.7;
+}
+.case-card:hover .case-detail {
+  max-height: 80px;
+  margin-top: 12px;
+}
+@media (max-width: 768px) {
+  .cases-grid {
+    grid-template-columns: 1fr;
+  }
+  .case-card.large {
+    grid-column: span 1;
+    grid-row: span 1;
+  }
+  .case-card.large .case-card-content { min-height: 240px; }
+}
+
+/* ===== PARTNERS ===== */
+#partners {
+  padding: clamp(60px, 8vw, 100px) 0;
+  overflow: hidden;
+  position: relative;
+}
+#partners::before, #partners::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 120px;
+  z-index: 2;
+}
+#partners::before {
+  left: 0;
+  background: linear-gradient(to right, var(--black), transparent);
+}
+#partners::after {
+  right: 0;
+  background: linear-gradient(to left, var(--black), transparent);
+}
+.partners-title {
+  font-family: var(--font-display);
+  font-size: clamp(11px, 1.2vw, 13px);
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--gray);
+  text-align: center;
+  margin-bottom: 48px;
+  font-weight: 600;
+}
+.marquee-row {
+  display: flex;
+  width: max-content;
+  margin-bottom: 24px;
+}
+.marquee-row:first-of-type .marquee-track {
+  animation: marqueeLeft 30s linear infinite;
+}
+.marquee-row:last-of-type .marquee-track {
+  animation: marqueeRight 35s linear infinite;
+}
+.marquee-track {
+  display: flex;
+  gap: 60px;
+  align-items: center;
+}
+@keyframes marqueeLeft {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes marqueeRight {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+.partner-logo {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2vw, 24px);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+  padding: 16px 24px;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+  letter-spacing: 2px;
+  user-select: none;
+}
+.partner-logo:hover {
+  color: rgba(255, 255, 255, 0.5);
+  text-shadow: 0 0 30px rgba(0, 102, 255, 0.3);
+}
+
+/* ===== NEWS ===== */
+#news {
+  background: linear-gradient(180deg, var(--black) 0%, #080810 100%);
+}
+.news-header {
+  margin-bottom: 48px;
+}
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+.news-card {
+  background: var(--dark-card);
+  border-radius: 16px;
+  padding: 32px;
+  border: 1px solid var(--dark-border);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  cursor: pointer;
+}
+.news-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+.news-date {
+  font-size: 13px;
+  color: var(--gray);
+  margin-bottom: 12px;
+  font-family: var(--font-display);
+}
+.news-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+.news-badge.industry { background: rgba(0, 102, 255, 0.15); color: var(--blue); }
+.news-badge.company { background: rgba(52, 211, 153, 0.15); color: #34D399; }
+.news-badge.technology { background: rgba(167, 139, 250, 0.15); color: #A78BFA; }
+.news-title {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2vw, 22px);
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+.news-excerpt {
+  font-size: 14px;
+  color: var(--gray);
+  line-height: 1.7;
+}
+@media (max-width: 768px) {
+  .news-grid { grid-template-columns: 1fr; }
+}
+
+/* ===== CONTACT ===== */
+#contact {
+  background: linear-gradient(180deg, #080810 0%, #111827 100%);
+  position: relative;
+}
+.contact-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 6vw, 80px);
+  align-items: start;
+}
+.contact-heading {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+.contact-sub {
+  color: var(--gray);
+  font-size: 16px;
+  line-height: 1.8;
+  margin-bottom: 40px;
+}
+.contact-info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  color: var(--gray);
+  font-size: 15px;
+}
+.contact-info-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(0, 102, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.contact-info-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--blue);
+  fill: none;
+  stroke-width: 2;
+}
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.form-group { position: relative; }
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 14px 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--white);
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-bottom-color: var(--blue);
+}
+.form-group select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238892A0' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  padding-right: 24px;
+}
+.form-group select option {
+  background: #1a1a24;
+  color: var(--white);
+}
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+.submit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 40px;
+  background: var(--blue);
+  color: var(--white);
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 10px;
+  transition: box-shadow 0.4s ease, transform 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  width: fit-content;
+}
+.submit-btn:hover {
+  box-shadow: 0 0 30px var(--blue-glow), 0 8px 30px rgba(0, 102, 255, 0.3);
+  transform: scale(1.03);
+}
+.submit-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+.submit-btn:hover::after { transform: translateX(100%); }
+@media (max-width: 768px) {
+  .contact-inner { grid-template-columns: 1fr; }
+}
+
+/* ===== SUCCESS MODAL ===== */
+.success-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+.success-overlay.active { opacity: 1; visibility: visible; }
+.success-modal {
+  background: #161620;
+  border-radius: 20px;
+  padding: 48px;
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+  border: 1px solid var(--dark-border);
+  transform: scale(0.9);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.success-overlay.active .success-modal { transform: scale(1); }
+.success-check {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(0, 102, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+.success-check svg {
+  width: 28px;
+  height: 28px;
+  stroke: var(--blue);
+  fill: none;
+  stroke-width: 2.5;
+}
+.success-modal h3 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.success-modal p {
+  color: var(--gray);
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 28px;
+}
+.success-close-btn {
+  padding: 12px 32px;
+  background: var(--blue);
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: box-shadow 0.3s ease;
+}
+.success-close-btn:hover {
+  box-shadow: 0 0 20px var(--blue-glow);
+}
+
+/* ===== FOOTER ===== */
+#footer {
+  background: #111111;
+  border-top: 2px solid var(--blue);
+  padding: 60px clamp(20px, 5vw, 80px) 40px;
+}
+.footer-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+.footer-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 40px;
+  margin-bottom: 48px;
+  flex-wrap: wrap;
+}
+.footer-logo {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: var(--white);
+  margin-bottom: 12px;
+}
+.footer-logo span { color: var(--blue); }
+.footer-tagline {
+  font-size: 14px;
+  color: var(--gray);
+}
+.footer-nav {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+.footer-nav a {
+  font-size: 14px;
+  color: var(--gray);
+  transition: color 0.3s ease;
+}
+.footer-nav a:hover { color: var(--white); }
+.footer-social {
+  display: flex;
+  gap: 16px;
+}
+.footer-social a {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease, border-color 0.3s ease;
+  color: var(--gray);
+  font-size: 16px;
+}
+.footer-social a:hover {
+  background: rgba(0, 102, 255, 0.1);
+  border-color: rgba(0, 102, 255, 0.2);
+  color: var(--blue);
+}
+.footer-bottom {
+  padding-top: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.footer-copy {
+  font-size: 13px;
+  color: var(--gray);
+  font-family: var(--font-display);
+}
+.footer-legal {
+  display: flex;
+  gap: 24px;
+}
+.footer-legal a {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.3);
+  transition: color 0.3s ease;
+}
+.footer-legal a:hover { color: var(--gray); }
+
+/* ===== MAGNETIC BUTTON ===== */
+.magnetic-wrap {
+  display: inline-block;
+  position: relative;
+}
+
+/* ===== FLUID TYPOGRAPHY EXTRAS ===== */
+@media (max-width: 375px) {
+  html { font-size: 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SCROLL PROGRESS -->
+<div id="scroll-progress"></div>
+
+<!-- CUSTOM CURSOR -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- PRELOADER -->
+<div id="preloader">
+  <div class="preloader-circuit">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <!-- Circuit lines -->
+      <polyline class="circuit-line" points="20,100 60,100 70,80 100,80"/>
+      <polyline class="circuit-line" points="100,80 130,80 140,100 180,100"/>
+      <polyline class="circuit-line" points="40,60 80,60 90,40 140,40"/>
+      <polyline class="circuit-line" points="60,140 90,140 100,120 140,120"/>
+      <polyline class="circuit-line" points="100,80 100,40"/>
+      <polyline class="circuit-line" points="140,120 140,160 180,160"/>
+      <polyline class="circuit-line" points="40,160 70,160 80,140"/>
+      <polyline class="circuit-line" points="140,40 170,40 180,60"/>
+      <!-- Circuit dots (nodes) -->
+      <circle class="circuit-dot" cx="100" cy="80" r="4"/>
+      <circle class="circuit-dot" cx="60" cy="100" r="3"/>
+      <circle class="circuit-dot" cx="140" cy="120" r="4"/>
+      <circle class="circuit-dot" cx="80" cy="60" r="3"/>
+      <circle class="circuit-dot" cx="100" cy="40" r="3"/>
+      <circle class="circuit-dot" cx="180" cy="160" r="3"/>
+    </svg>
+  </div>
+  <div class="preloader-text">NEXABOT</div>
+</div>
+
+<!-- NAVIGATION -->
+<nav id="nav">
+  <div class="nav-logo">NEXA<span>BOT</span></div>
+  <div class="nav-links">
+    <a href="#about">회사소개</a>
+    <a href="#solutions">솔루션</a>
+    <a href="#technology">기술</a>
+    <a href="#cases">프로젝트</a>
+    <a href="#news">뉴스</a>
+    <a href="#contact" class="nav-cta">문의하기</a>
+  </div>
+  <div class="nav-hamburger" id="navHamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+<div class="nav-mobile" id="navMobile">
+  <a href="#about" class="nav-mobile-link">회사소개</a>
+  <a href="#solutions" class="nav-mobile-link">솔루션</a>
+  <a href="#technology" class="nav-mobile-link">기술</a>
+  <a href="#cases" class="nav-mobile-link">프로젝트</a>
+  <a href="#news" class="nav-mobile-link">뉴스</a>
+  <a href="#contact" class="nav-mobile-link">문의하기</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-images">
+    <div class="hero-bg-img"></div>
+    <div class="hero-bg-img"></div>
+    <div class="hero-bg-img"></div>
+  </div>
+  <div class="hero-grid-bg"></div>
+  <div class="hero-particles" id="heroParticles"></div>
+  <div class="hero-content">
+    <div class="hero-overline reveal">Industrial Robotics & Automation</div>
+    <div class="hero-title-wrap reveal reveal-delay-1">
+      <h1 class="hero-title"><span class="glitch" data-text="NEXABOT">NEXABOT</span></h1>
+    </div>
+    <div class="hero-tagline reveal reveal-delay-2">
+      <span class="typing">산업의 미래를 설계합니다</span>
+    </div>
+    <div class="hero-stats reveal reveal-delay-3">
+      <div class="hero-stat">
+        <div class="hero-stat-value"><span class="counter" data-target="12">0</span>년</div>
+        <div class="hero-stat-label">업력</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value"><span class="counter" data-target="340">0</span>+</div>
+        <div class="hero-stat-label">납품 실적</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value"><span class="counter" data-target="99.7" data-decimal="1">0</span>%</div>
+        <div class="hero-stat-label">가동률</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll-indicator">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="section-pad">
+  <div class="about-grid">
+    <div class="about-left reveal">
+      <div class="section-label">About Us</div>
+      <div class="blue-line"></div>
+      <div class="about-eng-title">ENGINEERING<br><span>TOMORROW</span></div>
+      <p>2014년 창업 이래, NEXABOT은 대한민국 산업 자동화의 최전선에서 혁신을 선도해왔습니다. AI 비전 시스템과 정밀 로봇 제어 기술을 결합하여, 제조업의 패러다임을 근본적으로 변화시키고 있습니다. 우리의 기술은 단순한 자동화를 넘어, 공장의 지능화를 실현합니다.</p>
+    </div>
+    <div class="about-image reveal reveal-delay-2">
+      <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80" alt="NEXABOT 로봇 엔지니어링" loading="lazy">
+    </div>
+  </div>
+  <div class="about-counters">
+    <div class="about-counter reveal">
+      <div class="about-counter-value"><span class="counter" data-target="280">0</span><span class="counter-suffix">+</span></div>
+      <div class="about-counter-label">전문 엔지니어</div>
+    </div>
+    <div class="about-counter reveal reveal-delay-1">
+      <div class="about-counter-value"><span class="counter" data-target="45">0</span><span class="counter-suffix">+</span></div>
+      <div class="about-counter-label">등록 특허</div>
+    </div>
+    <div class="about-counter reveal reveal-delay-2">
+      <div class="about-counter-value"><span class="counter" data-target="12">0</span><span class="counter-suffix">개국</span></div>
+      <div class="about-counter-label">글로벌 수출</div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTIONS -->
+<section id="solutions" class="section-pad">
+  <div class="solutions-header">
+    <div class="section-label reveal">Solutions</div>
+    <div class="section-title reveal reveal-delay-1">산업별 맞춤 솔루션</div>
+    <div class="section-desc reveal reveal-delay-2">고객의 생산 환경에 최적화된 자동화 솔루션을 설계하고, 도입부터 운영까지 전 과정을 지원합니다.</div>
+  </div>
+  <div class="solutions-grid">
+    <!-- Card 1 -->
+    <div class="solution-card reveal tilt-card" data-modal="modal-robot">
+      <div class="solution-card-image">
+        <img src="https://images.unsplash.com/photo-1565043666747-69f6646db940?w=600&q=80" alt="산업용 로봇 암" loading="lazy">
+        <div class="solution-card-overlay"></div>
+      </div>
+      <div class="solution-card-body">
+        <div class="solution-card-tag">Manufacturing</div>
+        <h3 class="solution-card-title">Industrial Robot Arm</h3>
+        <p class="solution-card-kr">제조 자동화를 위한 6축 다관절 로봇 암으로 용접, 조립, 팔레타이징 등 다양한 공정에 적용됩니다.</p>
+        <div class="solution-card-specs">
+          가반하중: 최대 210kg | 도달 거리: 2,850mm<br>
+          반복 정밀도: ±0.05mm | 축 수: 6축
+        </div>
+        <button class="solution-card-cta" type="button">자세히 보기 <span>&rarr;</span></button>
+      </div>
+    </div>
+    <!-- Card 2 -->
+    <div class="solution-card reveal reveal-delay-1 tilt-card" data-modal="modal-vision">
+      <div class="solution-card-image">
+        <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80" alt="비전 검사 시스템" loading="lazy">
+        <div class="solution-card-overlay"></div>
+      </div>
+      <div class="solution-card-body">
+        <div class="solution-card-tag">Inspection</div>
+        <h3 class="solution-card-title">Vision Inspection</h3>
+        <p class="solution-card-kr">AI 딥러닝 기반 비전 검사 시스템으로 불량률을 획기적으로 줄이고 품질을 보장합니다.</p>
+        <div class="solution-card-specs">
+          검출 정확도: 99.9% | 처리 속도: 0.02초/개<br>
+          해상도: 25MP | AI 모델: 자체 학습 엔진
+        </div>
+        <button class="solution-card-cta" type="button">자세히 보기 <span>&rarr;</span></button>
+      </div>
+    </div>
+    <!-- Card 3 -->
+    <div class="solution-card reveal reveal-delay-2 tilt-card" data-modal="modal-conveyor">
+      <div class="solution-card-image">
+        <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&q=80" alt="스마트 물류 시스템" loading="lazy">
+        <div class="solution-card-overlay"></div>
+      </div>
+      <div class="solution-card-body">
+        <div class="solution-card-tag">Logistics</div>
+        <h3 class="solution-card-title">Smart Conveyor</h3>
+        <p class="solution-card-kr">IoT 센서와 AI 경로 최적화가 결합된 차세대 스마트 물류 시스템입니다.</p>
+        <div class="solution-card-specs">
+          처리 용량: 시간당 3,000개 | 에너지 절감: 40%<br>
+          자동 경로 최적화 | 실시간 모니터링
+        </div>
+        <button class="solution-card-cta" type="button">자세히 보기 <span>&rarr;</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION MODALS -->
+<div class="modal-overlay" id="modal-robot">
+  <div class="modal">
+    <button class="modal-close" type="button">&times;</button>
+    <img class="modal-image" src="https://images.unsplash.com/photo-1565043666747-69f6646db940?w=800&q=80" alt="Industrial Robot Arm" loading="lazy">
+    <div class="modal-body">
+      <div class="section-label">Manufacturing Automation</div>
+      <h2>Industrial Robot Arm</h2>
+      <div class="modal-kr-title">제조 자동화 솔루션</div>
+      <p>NEXABOT의 산업용 로봇 암은 자동차, 전자, 식품 등 다양한 산업 분야에서 용접, 조립, 도장, 팔레타이징 등 핵심 공정을 자동화합니다. 자체 개발한 6축 정밀 제어 알고리즘으로 인간 작업자 수준의 정밀도와 그 이상의 속도, 일관성을 제공합니다. 24시간 무중단 가동이 가능하며, 직관적인 티칭 시스템으로 비전문가도 쉽게 프로그래밍할 수 있습니다.</p>
+      <div class="modal-specs-grid">
+        <div class="modal-spec-item">
+          <div class="spec-label">가반하중</div>
+          <div class="spec-value">210kg</div>
+        </div>
+        <div class="modal-spec-item">
+          <div class="spec-label">도달 거리</div>
+          <div class="spec-value">2,850mm</div>
+        </div>
+        <div class="modal-spec-item">
+          <div class="spec-label">반복 정밀도</div>
+          <div class="spec-value">±0.05mm</div>
+        </div>
+        <div class="modal-spec-item">
+          <div class="spec-label">최대 속도</div>
+          <div class="spec-value">2.5m/s</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-vision">
+  <div class="modal">
+    <button class="modal-close" type="button">&times;</button>
+    <img class="modal-image" src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80" alt="Vision Inspection System" loading="lazy">
+    <div class="modal-body">
+      <div class="section-label">Quality Inspection</div>
+      <h2>Vision Inspection System</h2>
+      <div class="modal-kr-title">AI 비전 검사 시스템</div>
+      <p>NEXABOT의 AI 비전 검사 시스템은 딥러닝 기반 이미지 분석으로 미세 결함까지 검출합니다. 반도체, 디스플레이, 배터리 등 정밀 부품 검사에 특화되어 있으며, 자체 개발한 학습 엔진으로 새로운 불량 유형도 빠르게 학습합니다. 기존 육안 검사 대비 정확도는 높이고, 검사 시간은 1/10로 단축합니다.</p>
+      <div class="modal-specs-grid">
+        <div class="modal-spec-item">
+          <div class="spec-label">검출 정확도</div>
+          <div class="spec-value">99.9%</div>
+        </div>
+        <div class="modal-spec-item">
+          <div class="spec-label">처리 속도</div>
+          <div class="spec-value">0.02초</div>
+        </div>
+        <div class="modal-spec-item">
+          <div class="spec-label">카메라 해상도</div>
+          <div class="spec-value">25MP</div>
+        </div>
+        <div class="modal-spec-item">
+          <div class="spec-label">AI 학습 시간</div>
+          <div class="spec-value">2시간</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-conveyor">
+  <div class="modal">
+    <button class="modal-close" type="button">&times;</button>
+    <img class="modal-image" src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&q=80" alt="Smart Conveyor System" loading="lazy">
+    <div class="modal-body">
+      <div class="section-label">Smart Logistics</div>
+      <h2>Smart Conveyor System</h2>
+      <div class="modal-kr-title">스마트 물류 자동화</div>
+      <p>IoT 센서 네트워크와 AI 경로 최적화 알고리즘이 결합된 차세대 스마트 물류 시스템입니다. 실시간 물류 흐름을 분석하여 최적의 이송 경로를 자동으로 결정하고, 병목 구간을 사전에 예측하여 처리량을 극대화합니다. 에너지 효율 모드로 비가동 시 자동 절전하여 운영비를 절감합니다.</p>
+      <div class="modal-specs-grid">
+        <div class="modal-spec-item">
+          <div class="spec-label">시간당 처리량</div>
+          <div class="spec-value">3,000개</div>
+        </div>
+        <div class="modal-spec-item">
+          <div class="spec-label">에너지 절감</div>
+          <div class="spec-value">40%</div>
+        </div>
+        <div class="modal-spec-item">
+          <div class="spec-label">최대 이송 속도</div>
+          <div class="spec-value">120m/min</div>
+        </div>
+        <div class="modal-spec-item">
+          <div class="spec-label">IoT 센서</div>
+          <div class="spec-value">256개</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TECHNOLOGY -->
+<section id="technology">
+  <div class="tech-header">
+    <div class="section-label reveal">Technology</div>
+    <div class="section-title reveal reveal-delay-1">핵심 기술</div>
+    <div class="section-desc reveal reveal-delay-2">NEXABOT만의 독자적 기술력이 산업 현장의 생산성을 혁신합니다.</div>
+  </div>
+  <div class="tech-scroll-container" id="techScroll">
+    <!-- Tech 1 -->
+    <div class="tech-card reveal">
+      <div class="tech-icon">
+        <div class="tech-icon-circle">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        </div>
+      </div>
+      <h3 class="tech-card-title">AI Vision</h3>
+      <div class="tech-card-kr">인공지능 비전 시스템</div>
+      <p class="tech-card-desc">자체 개발한 딥러닝 비전 엔진으로 미세 결함까지 실시간 검출합니다. 연속 학습으로 새로운 불량 패턴을 자동으로 인식하며, 인간 검사원 대비 100배 빠른 속도를 제공합니다.</p>
+      <div class="tech-metric">
+        <span class="tech-metric-value"><span class="counter" data-target="99.9" data-decimal="1">0</span></span>
+        <span class="tech-metric-unit">% 정확도</span>
+      </div>
+    </div>
+    <!-- Tech 2 -->
+    <div class="tech-card reveal reveal-delay-1">
+      <div class="tech-icon">
+        <div class="tech-icon-circle">
+          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+      </div>
+      <h3 class="tech-card-title">6-Axis Control</h3>
+      <div class="tech-card-kr">6축 정밀 제어</div>
+      <p class="tech-card-desc">독자적 모션 제어 알고리즘으로 6개 축을 동시에 정밀 제어합니다. 복잡한 곡선 경로도 부드럽게 추종하며, 진동 억제 기술로 업계 최고 수준의 정밀도를 달성합니다.</p>
+      <div class="tech-metric">
+        <span class="tech-metric-value">&plusmn;<span class="counter" data-target="0.01" data-decimal="2">0</span></span>
+        <span class="tech-metric-unit">mm 정밀도</span>
+      </div>
+    </div>
+    <!-- Tech 3 -->
+    <div class="tech-card reveal reveal-delay-2">
+      <div class="tech-icon">
+        <div class="tech-icon-circle">
+          <svg viewBox="0 0 24 24"><path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10"/><path d="M22 12l-4 4-4-4"/><path d="M18 16V8"/></svg>
+        </div>
+      </div>
+      <h3 class="tech-card-title">Predictive Maintenance</h3>
+      <div class="tech-card-kr">예측 유지보수</div>
+      <p class="tech-card-desc">IoT 센서 데이터와 AI 분석을 결합하여 장비 고장을 사전에 예측합니다. 비계획 정지 시간을 85% 이상 절감하여 생산 라인의 가동률을 극대화합니다.</p>
+      <div class="tech-metric">
+        <span class="tech-metric-value">-<span class="counter" data-target="85">0</span></span>
+        <span class="tech-metric-unit">% 다운타임</span>
+      </div>
+    </div>
+    <!-- Tech 4 -->
+    <div class="tech-card reveal reveal-delay-3">
+      <div class="tech-icon">
+        <div class="tech-icon-circle">
+          <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"/></svg>
+        </div>
+      </div>
+      <h3 class="tech-card-title">Edge Computing</h3>
+      <div class="tech-card-kr">엣지 컴퓨팅</div>
+      <p class="tech-card-desc">현장에서 직접 데이터를 처리하는 엣지 컴퓨팅으로 1ms 이하의 초저지연 제어를 구현합니다. 클라우드 의존성 없이 실시간 의사결정이 가능하며, 보안성도 한층 강화됩니다.</p>
+      <div class="tech-metric">
+        <span class="tech-metric-value">&lt;<span class="counter" data-target="1">0</span></span>
+        <span class="tech-metric-unit">ms 지연시간</span>
+      </div>
+    </div>
+  </div>
+  <div class="tech-progress" id="techProgress">
+    <div class="tech-progress-dot active" data-index="0"></div>
+    <div class="tech-progress-dot" data-index="1"></div>
+    <div class="tech-progress-dot" data-index="2"></div>
+    <div class="tech-progress-dot" data-index="3"></div>
+  </div>
+</section>
+
+<!-- CASE STUDIES -->
+<section id="cases" class="section-pad">
+  <div class="cases-header">
+    <div class="section-label reveal">Case Studies</div>
+    <div class="section-title reveal reveal-delay-1">성공 사례</div>
+    <div class="section-desc reveal reveal-delay-2">대한민국 대표 기업들과 함께 만들어온 자동화 혁신의 기록입니다.</div>
+  </div>
+  <div class="cases-grid">
+    <!-- Large 1 -->
+    <div class="case-card large reveal tilt-card">
+      <div class="case-card-bg" style="background-image:url('https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=80')"></div>
+      <div class="case-card-content">
+        <div class="case-tag">Semiconductor</div>
+        <div class="case-company">삼성전자</div>
+        <div class="case-desc">반도체 라인 전공정 자동화</div>
+        <div class="case-metric">매출 <span class="counter" data-target="30">0</span>% 증가</div>
+        <div class="case-detail">클린룸 환경에 최적화된 로봇 시스템을 도입하여 웨이퍼 핸들링 자동화율을 95%로 끌어올렸습니다. 인적 오류를 제거하고 수율을 크게 향상시켰습니다.</div>
+      </div>
+    </div>
+    <!-- Small 1 -->
+    <div class="case-card reveal reveal-delay-1 tilt-card">
+      <div class="case-card-bg" style="background-image:url('https://images.unsplash.com/photo-1537462715879-360eeb61a0ad?w=600&q=80')"></div>
+      <div class="case-card-content">
+        <div class="case-tag">Automotive</div>
+        <div class="case-company">현대자동차</div>
+        <div class="case-desc">용접 로봇 최적화</div>
+        <div class="case-metric">불량률 <span class="counter" data-target="0.01" data-decimal="2">0</span>%</div>
+        <div class="case-detail">AI 비전 가이드 용접으로 정밀도를 극대화하고 불량률을 업계 최저 수준으로 감소시켰습니다.</div>
+      </div>
+    </div>
+    <!-- Small 2 -->
+    <div class="case-card reveal reveal-delay-2 tilt-card">
+      <div class="case-card-bg" style="background-image:url('https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=600&q=80')"></div>
+      <div class="case-card-content">
+        <div class="case-tag">Battery</div>
+        <div class="case-company">LG화학</div>
+        <div class="case-desc">배터리 검사 시스템</div>
+        <div class="case-metric">생산성 <span class="counter" data-target="2">0</span>배</div>
+        <div class="case-detail">AI 비전 검사로 배터리 셀 전수 검사를 자동화하여 검사 인력을 80% 절감하고 생산성을 2배로 높였습니다.</div>
+      </div>
+    </div>
+    <!-- Large 2 -->
+    <div class="case-card large reveal reveal-delay-3 tilt-card">
+      <div class="case-card-bg" style="background-image:url('https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80')"></div>
+      <div class="case-card-content">
+        <div class="case-tag">Logistics</div>
+        <div class="case-company">SK하이닉스</div>
+        <div class="case-desc">물류 자동화 시스템</div>
+        <div class="case-metric">인건비 <span class="counter" data-target="45">0</span>% 절감</div>
+        <div class="case-detail">스마트 컨베이어와 AGV를 통합한 물류 자동화로 인건비를 대폭 절감하고, 물류 처리량을 3배 이상 증가시켰습니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARTNERS -->
+<section id="partners">
+  <div class="partners-title">Trusted by Industry Leaders</div>
+  <div class="marquee-row">
+    <div class="marquee-track">
+      <span class="partner-logo">SAMSUNG</span>
+      <span class="partner-logo">HYUNDAI</span>
+      <span class="partner-logo">LG</span>
+      <span class="partner-logo">SK</span>
+      <span class="partner-logo">POSCO</span>
+      <span class="partner-logo">DOOSAN</span>
+      <span class="partner-logo">HANWHA</span>
+      <span class="partner-logo">KIA</span>
+      <span class="partner-logo">SAMSUNG</span>
+      <span class="partner-logo">HYUNDAI</span>
+      <span class="partner-logo">LG</span>
+      <span class="partner-logo">SK</span>
+      <span class="partner-logo">POSCO</span>
+      <span class="partner-logo">DOOSAN</span>
+      <span class="partner-logo">HANWHA</span>
+      <span class="partner-logo">KIA</span>
+    </div>
+  </div>
+  <div class="marquee-row">
+    <div class="marquee-track">
+      <span class="partner-logo">NAVER</span>
+      <span class="partner-logo">KAKAO</span>
+      <span class="partner-logo">COUPANG</span>
+      <span class="partner-logo">CELLTRION</span>
+      <span class="partner-logo">HYOSUNG</span>
+      <span class="partner-logo">LS</span>
+      <span class="partner-logo">KOLON</span>
+      <span class="partner-logo">LOTTE</span>
+      <span class="partner-logo">NAVER</span>
+      <span class="partner-logo">KAKAO</span>
+      <span class="partner-logo">COUPANG</span>
+      <span class="partner-logo">CELLTRION</span>
+      <span class="partner-logo">HYOSUNG</span>
+      <span class="partner-logo">LS</span>
+      <span class="partner-logo">KOLON</span>
+      <span class="partner-logo">LOTTE</span>
+    </div>
+  </div>
+</section>
+
+<!-- NEWS -->
+<section id="news" class="section-pad">
+  <div class="news-header">
+    <div class="section-label reveal">News & Insights</div>
+    <div class="section-title reveal reveal-delay-1">최신 소식</div>
+  </div>
+  <div class="news-grid">
+    <div class="news-card reveal">
+      <div class="news-date">2026.03.01</div>
+      <div class="news-badge industry">Industry</div>
+      <h3 class="news-title">2026 스마트팩토리 트렌드 리포트</h3>
+      <p class="news-excerpt">AI와 로봇 기술이 주도하는 2026년 스마트팩토리 핵심 트렌드 5가지를 분석합니다. 디지털 트윈과 예측 유지보수가 새로운 표준으로 자리잡고 있습니다.</p>
+    </div>
+    <div class="news-card reveal reveal-delay-1">
+      <div class="news-date">2026.01.15</div>
+      <div class="news-badge company">Company</div>
+      <h3 class="news-title">NEXABOT, CES 2026 혁신상 수상</h3>
+      <p class="news-excerpt">라스베이거스에서 열린 CES 2026에서 NEXABOT의 AI 비전 검사 시스템이 '최고 혁신상(Best of Innovation)'을 수상했습니다.</p>
+    </div>
+    <div class="news-card reveal reveal-delay-2">
+      <div class="news-date">2025.12.20</div>
+      <div class="news-badge technology">Technology</div>
+      <h3 class="news-title">AI 비전 검사 기술 백서 발간</h3>
+      <p class="news-excerpt">NEXABOT R&D 센터가 자체 개발한 딥러닝 비전 검사 알고리즘의 기술 백서를 발간했습니다. 반도체 분야 적용 사례와 성능 벤치마크를 포함합니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="section-pad">
+  <div class="contact-inner">
+    <div class="reveal">
+      <div class="section-label">Contact</div>
+      <div class="blue-line"></div>
+      <h2 class="contact-heading">다음 혁신을<br>함께 만들어갑니다</h2>
+      <p class="contact-sub">자동화 도입을 검토 중이시거나 기술 상담이 필요하시면 언제든 연락해주십시오. 전문 엔지니어가 최적의 솔루션을 제안합니다.</p>
+      <div class="contact-info-item">
+        <div class="contact-info-icon">
+          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        </div>
+        <span>02-6220-1004</span>
+      </div>
+      <div class="contact-info-item">
+        <div class="contact-info-icon">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <span>contact@nexabot.co.kr</span>
+      </div>
+      <div class="contact-info-item">
+        <div class="contact-info-icon">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <span>서울특별시 강남구 테헤란로 152, 넥사봇 타워</span>
+      </div>
+    </div>
+    <div class="reveal reveal-delay-2">
+      <form class="contact-form" id="contactForm">
+        <div class="form-group">
+          <label for="company">회사명</label>
+          <input type="text" id="company" name="company" placeholder="귀사의 이름을 입력해주세요" required>
+        </div>
+        <div class="form-group">
+          <label for="name">담당자명</label>
+          <input type="text" id="name" name="name" placeholder="성함을 입력해주세요" required>
+        </div>
+        <div class="form-group">
+          <label for="phone">연락처</label>
+          <input type="tel" id="phone" name="phone" placeholder="010-0000-0000">
+        </div>
+        <div class="form-group">
+          <label for="inquiry">문의 유형</label>
+          <select id="inquiry" name="inquiry" required>
+            <option value="" disabled selected>문의 유형을 선택해주세요</option>
+            <option value="manufacturing">제조 자동화</option>
+            <option value="vision">비전 검사</option>
+            <option value="logistics">물류 시스템</option>
+            <option value="other">기타 문의</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="message">문의 내용</label>
+          <textarea id="message" name="message" placeholder="프로젝트에 대해 간략히 설명해주세요"></textarea>
+        </div>
+        <div class="magnetic-wrap">
+          <button type="submit" class="submit-btn">문의 보내기 <span>&rarr;</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- SUCCESS MODAL -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-modal">
+    <div class="success-check">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h3>문의가 접수되었습니다</h3>
+    <p>담당 엔지니어가 확인 후 1영업일 이내에 연락드리겠습니다. 감사합니다.</p>
+    <button class="success-close-btn" type="button" id="successCloseBtn">확인</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer id="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">NEXA<span>BOT</span></div>
+        <div class="footer-tagline">Engineering Tomorrow.</div>
+      </div>
+      <div class="footer-nav">
+        <a href="#about">회사소개</a>
+        <a href="#solutions">솔루션</a>
+        <a href="#technology">기술</a>
+        <a href="#cases">프로젝트</a>
+        <a href="#news">뉴스</a>
+        <a href="#contact">문의</a>
+      </div>
+      <div class="footer-social">
+        <a href="#" aria-label="LinkedIn" title="LinkedIn">&#x1F310;</a>
+        <a href="#" aria-label="YouTube" title="YouTube">&#x25B6;</a>
+        <a href="#" aria-label="Blog" title="Blog">&#x270E;</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">&copy; 2026 NEXABOT. Engineering Tomorrow.</div>
+      <div class="footer-legal">
+        <a href="#">개인정보처리방침</a>
+        <a href="#">이용약관</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ===== PRELOADER ===== */
+(function() {
+  const preloader = document.getElementById('preloader');
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      preloader.classList.add('hidden');
+      document.body.style.overflow = '';
+    }, 2600);
+  });
+  document.body.style.overflow = 'hidden';
+})();
+
+/* ===== CUSTOM CURSOR ===== */
+(function() {
+  if (window.matchMedia('(pointer: coarse)').matches) return;
+  const dot = document.getElementById('cursorDot');
+  const ring = document.getElementById('cursorRing');
+  let mouseX = 0, mouseY = 0;
+  let ringX = 0, ringY = 0;
+
+  document.addEventListener('mousemove', function(e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    dot.style.left = mouseX + 'px';
+    dot.style.top = mouseY + 'px';
+  });
+
+  function animateRing() {
+    ringX += (mouseX - ringX) * 0.15;
+    ringY += (mouseY - ringY) * 0.15;
+    ring.style.left = ringX + 'px';
+    ring.style.top = ringY + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  // Expand on clickable
+  const clickables = document.querySelectorAll('a, button, .solution-card, .case-card, .news-card, .tilt-card, input, select, textarea');
+  clickables.forEach(function(el) {
+    el.addEventListener('mouseenter', function() { ring.classList.add('expand'); });
+    el.addEventListener('mouseleave', function() { ring.classList.remove('expand'); });
+  });
+})();
+
+/* ===== SCROLL PROGRESS ===== */
+(function() {
+  const progressBar = document.getElementById('scroll-progress');
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      requestAnimationFrame(function() {
+        const scrollTop = window.pageYOffset;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        progressBar.style.width = progress + '%';
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+})();
+
+/* ===== NAV HIDE ON SCROLL ===== */
+(function() {
+  const nav = document.getElementById('nav');
+  let lastScroll = 0;
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      requestAnimationFrame(function() {
+        const currentScroll = window.pageYOffset;
+        if (currentScroll > lastScroll && currentScroll > 100) {
+          nav.classList.add('nav-hidden');
+        } else {
+          nav.classList.remove('nav-hidden');
+        }
+        lastScroll = currentScroll;
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+})();
+
+/* ===== MOBILE NAV ===== */
+(function() {
+  const hamburger = document.getElementById('navHamburger');
+  const mobileNav = document.getElementById('navMobile');
+  const mobileLinks = mobileNav.querySelectorAll('a');
+
+  hamburger.addEventListener('click', function() {
+    hamburger.classList.toggle('active');
+    mobileNav.classList.toggle('open');
+    document.body.style.overflow = mobileNav.classList.contains('open') ? 'hidden' : '';
+  });
+  mobileLinks.forEach(function(link) {
+    link.addEventListener('click', function() {
+      hamburger.classList.remove('active');
+      mobileNav.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+})();
+
+/* ===== HERO PARTICLES ===== */
+(function() {
+  const container = document.getElementById('heroParticles');
+  if (!container) return;
+  var count = window.innerWidth < 768 ? 12 : 30;
+  for (var i = 0; i < count; i++) {
+    var p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.top = (60 + Math.random() * 40) + '%';
+    p.style.animationDuration = (6 + Math.random() * 10) + 's';
+    p.style.animationDelay = (Math.random() * 8) + 's';
+    p.style.width = (2 + Math.random() * 2) + 'px';
+    p.style.height = p.style.width;
+    p.style.opacity = (0.2 + Math.random() * 0.5);
+    container.appendChild(p);
+  }
+})();
+
+/* ===== SCROLL REVEAL ===== */
+(function() {
+  var reveals = document.querySelectorAll('.reveal');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  reveals.forEach(function(el) { observer.observe(el); });
+})();
+
+/* ===== COUNTER ANIMATION ===== */
+(function() {
+  var counters = document.querySelectorAll('.counter');
+  var animated = new Set();
+
+  function animateCounter(el) {
+    var target = parseFloat(el.getAttribute('data-target'));
+    var decimal = parseInt(el.getAttribute('data-decimal')) || 0;
+    var duration = 2000;
+    var start = 0;
+    var startTime = null;
+
+    function step(timestamp) {
+      if (!startTime) startTime = timestamp;
+      var progress = Math.min((timestamp - startTime) / duration, 1);
+      // ease out quad
+      var eased = 1 - (1 - progress) * (1 - progress);
+      var current = start + (target - start) * eased;
+      el.textContent = current.toFixed(decimal);
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        el.textContent = target.toFixed(decimal);
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting && !animated.has(entry.target)) {
+        animated.add(entry.target);
+        animateCounter(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  counters.forEach(function(el) { observer.observe(el); });
+})();
+
+/* ===== 3D TILT CARDS ===== */
+(function() {
+  if (window.matchMedia('(pointer: coarse)').matches) return;
+  var cards = document.querySelectorAll('.tilt-card');
+  cards.forEach(function(card) {
+    card.addEventListener('mousemove', function(e) {
+      var rect = card.getBoundingClientRect();
+      var x = e.clientX - rect.left;
+      var y = e.clientY - rect.top;
+      var centerX = rect.width / 2;
+      var centerY = rect.height / 2;
+      var rotateX = ((y - centerY) / centerY) * -6;
+      var rotateY = ((x - centerX) / centerX) * 6;
+      card.style.transform = 'perspective(1000px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) scale(1.02)';
+    });
+    card.addEventListener('mouseleave', function() {
+      card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+      card.style.transition = 'transform 0.5s ease';
+    });
+    card.addEventListener('mouseenter', function() {
+      card.style.transition = 'transform 0.1s ease';
+    });
+  });
+})();
+
+/* ===== SOLUTION MODALS ===== */
+(function() {
+  var cards = document.querySelectorAll('.solution-card[data-modal]');
+  cards.forEach(function(card) {
+    var ctaBtn = card.querySelector('.solution-card-cta');
+    var modalId = card.getAttribute('data-modal');
+    var modal = document.getElementById(modalId);
+    if (!modal) return;
+
+    function openModal(e) {
+      e.stopPropagation();
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    ctaBtn.addEventListener('click', openModal);
+
+    var closeBtn = modal.querySelector('.modal-close');
+    closeBtn.addEventListener('click', function() {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    });
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+  });
+})();
+
+/* ===== TECHNOLOGY HORIZONTAL SCROLL PROGRESS ===== */
+(function() {
+  var scrollContainer = document.getElementById('techScroll');
+  var dots = document.querySelectorAll('#techProgress .tech-progress-dot');
+  if (!scrollContainer || !dots.length) return;
+
+  function updateProgress() {
+    var scrollLeft = scrollContainer.scrollLeft;
+    var maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+    if (maxScroll <= 0) return;
+    var ratio = scrollLeft / maxScroll;
+    var activeIndex = Math.round(ratio * (dots.length - 1));
+    dots.forEach(function(dot, i) {
+      dot.classList.toggle('active', i === activeIndex);
+    });
+  }
+
+  var ticking = false;
+  scrollContainer.addEventListener('scroll', function() {
+    if (!ticking) {
+      requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  dots.forEach(function(dot) {
+    dot.addEventListener('click', function() {
+      var index = parseInt(dot.getAttribute('data-index'));
+      var cards = scrollContainer.querySelectorAll('.tech-card');
+      if (cards[index]) {
+        var cardRect = cards[index].getBoundingClientRect();
+        var containerRect = scrollContainer.getBoundingClientRect();
+        var offset = cardRect.left - containerRect.left + scrollContainer.scrollLeft - (containerRect.width - cardRect.width) / 2;
+        scrollContainer.scrollTo({ left: offset, behavior: 'smooth' });
+      }
+    });
+  });
+})();
+
+/* ===== MAGNETIC BUTTONS ===== */
+(function() {
+  if (window.matchMedia('(pointer: coarse)').matches) return;
+  var wraps = document.querySelectorAll('.magnetic-wrap');
+  wraps.forEach(function(wrap) {
+    var btn = wrap.querySelector('button, a');
+    if (!btn) return;
+
+    wrap.addEventListener('mousemove', function(e) {
+      var rect = wrap.getBoundingClientRect();
+      var x = e.clientX - rect.left - rect.width / 2;
+      var y = e.clientY - rect.top - rect.height / 2;
+      var dist = Math.sqrt(x * x + y * y);
+      if (dist < 80) {
+        btn.style.transform = 'translate(' + (x * 0.25) + 'px, ' + (y * 0.25) + 'px)';
+      }
+    });
+    wrap.addEventListener('mouseleave', function() {
+      btn.style.transform = 'translate(0, 0)';
+      btn.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+    });
+    wrap.addEventListener('mouseenter', function() {
+      btn.style.transition = 'transform 0.15s ease';
+    });
+  });
+})();
+
+/* ===== CONTACT FORM SUBMIT ===== */
+(function() {
+  var form = document.getElementById('contactForm');
+  var overlay = document.getElementById('successOverlay');
+  var closeBtn = document.getElementById('successCloseBtn');
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    form.reset();
+  });
+
+  closeBtn.addEventListener('click', function() {
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  });
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) {
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  });
+})();
+
+/* ===== KEYBOARD ESCAPE TO CLOSE MODALS ===== */
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.active, .success-overlay.active').forEach(function(m) {
+      m.classList.remove('active');
+      document.body.style.overflow = '';
+    });
+  }
+});
+</script>
+</body>
+</html>
