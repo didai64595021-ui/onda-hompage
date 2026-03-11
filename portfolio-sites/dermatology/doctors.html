@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>의료진 소개 — 글로우스킨클리닉</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:wght@300;400;700;900&family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ---- Director Section ---- */
+    .director-section {
+      background: var(--bg-pink);
+      padding: var(--section-pad) 0;
+    }
+    .director-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(40px, 6vw, 80px);
+      align-items: center;
+    }
+    .director-photo-wrap {
+      position: relative;
+    }
+    .director-photo {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+      border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+      transition: border-radius 0.8s var(--ease-out);
+      box-shadow: var(--shadow-lg);
+    }
+    .director-photo-wrap:hover .director-photo {
+      border-radius: 40% 60% 70% 30% / 30% 70% 40% 60%;
+    }
+    .director-badge {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: var(--accent-rose);
+      color: var(--white);
+      padding: 12px 28px;
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: var(--fs-small);
+      box-shadow: var(--shadow-md);
+    }
+    .director-info h2 {
+      font-size: var(--fs-h2);
+      margin-bottom: 8px;
+    }
+    .director-title {
+      font-size: var(--fs-h4);
+      color: var(--accent-rose);
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+    .director-greeting {
+      font-family: var(--font-heading);
+      font-size: var(--fs-h3);
+      font-style: italic;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      line-height: 1.6;
+      border-left: 3px solid var(--accent-rose);
+      padding-left: 24px;
+    }
+    .director-bio {
+      color: var(--text-secondary);
+      line-height: 2;
+      margin-bottom: 32px;
+    }
+    .cert-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .cert-tag {
+      padding: 8px 20px;
+      border-radius: 100px;
+      background: var(--white);
+      font-size: var(--fs-small);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-light);
+    }
+
+    /* ---- Specialists ---- */
+    .specialists-section {
+      padding: var(--section-pad) 0;
+    }
+    .specialists-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(24px, 3vw, 40px);
+      margin-top: 60px;
+    }
+    .specialist-card {
+      background: var(--white);
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+      transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
+    }
+    .specialist-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-lg);
+    }
+    .specialist-photo-wrap {
+      padding: 32px 32px 0;
+    }
+    .specialist-photo {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      transition: border-radius 0.6s var(--ease-out);
+    }
+    .specialist-card:hover .specialist-photo {
+      border-radius: 40% 60% 60% 40% / 50% 40% 60% 50%;
+    }
+    .specialist-info {
+      padding: 28px 32px 36px;
+    }
+    .specialist-name {
+      font-size: var(--fs-h3);
+      margin-bottom: 4px;
+    }
+    .specialist-role {
+      font-size: var(--fs-small);
+      color: var(--accent-rose);
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .specialist-detail {
+      font-size: var(--fs-small);
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .specialist-detail dt {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-top: 12px;
+    }
+    .specialist-detail dd {
+      margin-left: 0;
+    }
+
+    /* ---- Career Timeline ---- */
+    .career-section {
+      background: var(--bg-lavender);
+      padding: var(--section-pad) 0;
+    }
+    .career-timeline {
+      max-width: 800px;
+      margin: 60px auto 0;
+    }
+    .career-item {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 32px;
+      align-items: flex-start;
+    }
+    .career-year {
+      flex-shrink: 0;
+      width: 80px;
+      font-family: var(--font-heading);
+      font-size: var(--fs-h4);
+      font-weight: 600;
+      color: var(--accent-lavender);
+    }
+    .career-dot {
+      flex-shrink: 0;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent-rose);
+      margin-top: 8px;
+      position: relative;
+    }
+    .career-dot::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      width: 2px;
+      height: 48px;
+      background: rgba(233, 30, 99, 0.2);
+      transform: translateX(-50%);
+    }
+    .career-item:last-child .career-dot::after { display: none; }
+    .career-text {
+      color: var(--text-secondary);
+      padding-top: 2px;
+    }
+    .career-text strong {
+      color: var(--text-primary);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* ---- Media Section ---- */
+    .media-section {
+      padding: var(--section-pad) 0;
+    }
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      margin-top: 60px;
+    }
+    .media-card {
+      background: var(--white);
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+      transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
+    }
+    .media-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+    .media-card-img {
+      width: 100%;
+      aspect-ratio: 16/10;
+      object-fit: cover;
+    }
+    .media-card-body {
+      padding: 20px 24px 24px;
+    }
+    .media-card-source {
+      font-size: var(--fs-small);
+      color: var(--accent-rose);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .media-card-title {
+      font-family: var(--font-heading);
+      font-size: var(--fs-h4);
+      margin-bottom: 8px;
+    }
+    .media-card-date {
+      font-size: var(--fs-small);
+      color: var(--text-muted);
+    }
+
+    /* ---- Papers Section ---- */
+    .papers-section {
+      background: var(--bg-mint);
+      padding: var(--section-pad) 0;
+    }
+    .papers-list {
+      max-width: 800px;
+      margin: 48px auto 0;
+    }
+    .paper-item {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .paper-number {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--accent-lavender);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: var(--fs-small);
+    }
+    .paper-info h4 {
+      font-size: var(--fs-body);
+      font-family: var(--font-body);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .paper-meta {
+      font-size: var(--fs-small);
+      color: var(--text-muted);
+    }
+
+    /* ---- Doctor CTA ---- */
+    .doctor-cta {
+      background: linear-gradient(135deg, var(--bg-lavender), var(--bg-pink));
+      padding: var(--section-pad) 0;
+      text-align: center;
+    }
+    .doctor-cta h2 {
+      font-size: var(--fs-h2);
+      margin-bottom: 16px;
+    }
+    .doctor-cta p {
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 1024px) {
+      .media-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .director-grid { grid-template-columns: 1fr; gap: 40px; }
+      .specialists-grid { grid-template-columns: 1fr; max-width: 420px; margin-left: auto; margin-right: auto; }
+      .media-grid { grid-template-columns: 1fr; max-width: 420px; margin-left: auto; margin-right: auto; }
+      .career-item { flex-wrap: wrap; }
+      .career-year { width: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Navigation ===== -->
+  <nav class="nav-pill" id="mainNav">
+    <span class="nav-logo">글로우스킨</span>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">홈</a>
+      <a href="treatments.html">시술안내</a>
+      <a href="doctors.html" class="active">의료진</a>
+      <a href="gallery.html">비포/애프터</a>
+      <a href="about.html">병원소개</a>
+      <a href="contact.html" class="nav-cta">상담예약</a>
+    </div>
+    <div class="nav-mobile-toggle" id="navToggle" aria-label="메뉴 열기">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+
+  <!-- ===== Page Hero ===== -->
+  <section class="page-hero">
+    <div class="page-hero-bg">
+      <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=1600&q=80" alt="의료진" loading="eager">
+    </div>
+    <div class="page-hero-overlay"></div>
+    <div class="page-hero-content">
+      <p class="section-label reveal">Our Doctors</p>
+      <h1 class="section-title reveal" style="font-size:var(--fs-h1);">최고의 전문의가<br>함께합니다</h1>
+      <p class="section-desc centered reveal" style="margin-top:16px;">대학병원 출신 피부과 전문의들이 환자 한 분 한 분에게<br>최적의 진료를 제공합니다.</p>
+    </div>
+  </section>
+
+  <!-- ===== Wave Divider ===== -->
+  <div class="wave-divider">
+    <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
+      <path fill="#FDE8E8" d="M0,40 C360,100 720,0 1080,60 C1260,80 1380,40 1440,50 L1440,100 L0,100 Z"/>
+    </svg>
+  </div>
+
+  <!-- ===== Director Section ===== -->
+  <section class="director-section">
+    <div class="container">
+      <div class="director-grid">
+        <div class="director-photo-wrap reveal">
+          <img class="director-photo" src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=800&q=80" alt="김서연 원장">
+          <span class="director-badge">대표원장</span>
+        </div>
+        <div class="director-info">
+          <p class="section-label reveal">Director</p>
+          <h2 class="reveal">김서연 원장</h2>
+          <p class="director-title reveal">피부과 전문의 · 의학박사</p>
+          <blockquote class="director-greeting reveal">
+            "환자의 피부를 내 피부처럼 소중히 여기며,<br>
+            과학적 근거에 기반한 정직한 진료를<br>
+            약속드립니다."
+          </blockquote>
+          <p class="director-bio reveal">
+            서울대학교 의과대학을 졸업하고 서울대병원 피부과에서 전공의 수련을 마쳤습니다.
+            미국 하버드 의과대학 피부과에서 연수를 거쳐, 레이저 피부과학과 미용 시술 분야에서
+            15년 이상의 풍부한 경험을 보유하고 있습니다. 대한피부과학회 정회원이자
+            미국피부과학회 국제회원으로 활동하며, 국내외 학술지에 다수의 논문을 발표하였습니다.
+          </p>
+          <div class="cert-list reveal">
+            <span class="cert-tag">피부과 전문의</span>
+            <span class="cert-tag">의학박사</span>
+            <span class="cert-tag">레이저학회 인증의</span>
+            <span class="cert-tag">대한피부과학회 정회원</span>
+            <span class="cert-tag">하버드 의대 연수</span>
+            <span class="cert-tag">울쎄라 공인 시술의</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Specialists ===== -->
+  <section class="specialists-section">
+    <div class="container">
+      <div class="text-center">
+        <p class="section-label reveal">Specialists</p>
+        <h2 class="section-title reveal">각 분야 최고의 전문의</h2>
+        <p class="section-desc centered reveal">
+          피부 타입과 고민에 맞는 최적의 전문의가 1:1로 상담하고 시술합니다.
+        </p>
+      </div>
+
+      <div class="specialists-grid">
+        <!-- Specialist 1 -->
+        <div class="specialist-card reveal">
+          <div class="specialist-photo-wrap">
+            <img class="specialist-photo" src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=600&q=80" alt="이준호 전문의">
+          </div>
+          <div class="specialist-info">
+            <h3 class="specialist-name">이준호</h3>
+            <p class="specialist-role">레이저 · 피부재생 전문</p>
+            <dl class="specialist-detail">
+              <dt>학력</dt>
+              <dd>연세대학교 의과대학 졸업</dd>
+              <dt>경력</dt>
+              <dd>세브란스병원 피부과 전공의<br>레이저 피부과학회 정회원<br>피코레이저 공인 시술의</dd>
+              <dt>전문 분야</dt>
+              <dd>레이저토닝, 피코레이저, 색소질환, 흉터 치료</dd>
+            </dl>
+          </div>
+        </div>
+
+        <!-- Specialist 2 -->
+        <div class="specialist-card reveal reveal-delay-1">
+          <div class="specialist-photo-wrap">
+            <img class="specialist-photo" src="https://images.unsplash.com/photo-1594824476967-48c8b964f137?w=600&q=80" alt="박지민 전문의">
+          </div>
+          <div class="specialist-info">
+            <h3 class="specialist-name">박지민</h3>
+            <p class="specialist-role">안티에이징 · 리프팅 전문</p>
+            <dl class="specialist-detail">
+              <dt>학력</dt>
+              <dd>고려대학교 의과대학 졸업</dd>
+              <dt>경력</dt>
+              <dd>삼성서울병원 피부과 전공의<br>울쎄라 마스터 클래스 수료<br>보톡스/필러 10,000+ 케이스</dd>
+              <dt>전문 분야</dt>
+              <dd>울쎄라, 써마지, 보톡스, 필러, 실리프팅</dd>
+            </dl>
+          </div>
+        </div>
+
+        <!-- Specialist 3 -->
+        <div class="specialist-card reveal reveal-delay-2">
+          <div class="specialist-photo-wrap">
+            <img class="specialist-photo" src="https://images.unsplash.com/photo-1651008376811-b90baee60c1f?w=600&q=80" alt="최은서 전문의">
+          </div>
+          <div class="specialist-info">
+            <h3 class="specialist-name">최은서</h3>
+            <p class="specialist-role">여드름 · 스킨케어 전문</p>
+            <dl class="specialist-detail">
+              <dt>학력</dt>
+              <dd>성균관대학교 의과대학 졸업</dd>
+              <dt>경력</dt>
+              <dd>서울아산병원 피부과 전공의<br>대한여드름학회 정회원<br>스킨부스터 전문 시술의</dd>
+              <dt>전문 분야</dt>
+              <dd>여드름, 모공, 스킨부스터, 피부장벽 관리</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Wave Divider ===== -->
+  <div class="wave-divider">
+    <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
+      <path fill="#EDE9FE" d="M0,60 C240,20 480,80 720,40 C960,0 1200,60 1440,30 L1440,100 L0,100 Z"/>
+    </svg>
+  </div>
+
+  <!-- ===== Career Timeline ===== -->
+  <section class="career-section">
+    <div class="container">
+      <div class="text-center">
+        <p class="section-label reveal">Career Timeline</p>
+        <h2 class="section-title reveal">글로우스킨의 발자취</h2>
+        <p class="section-desc centered reveal">
+          끊임없는 연구와 시술 혁신으로 환자분들의 아름다운 피부를 위해 노력합니다.
+        </p>
+      </div>
+
+      <div class="career-timeline">
+        <div class="career-item reveal">
+          <span class="career-year">2024</span>
+          <span class="career-dot"></span>
+          <div class="career-text">
+            <strong>누적 시술 35,000건 달성</strong>
+            연간 재방문율 89% 기록, 대한피부과학회 우수 클리닉 인증
+          </div>
+        </div>
+        <div class="career-item reveal">
+          <span class="career-year">2022</span>
+          <span class="career-dot"></span>
+          <div class="career-text">
+            <strong>최신 장비 도입 — 울쎄라 4세대, 피코슈어 프로</strong>
+            글로벌 최신 레이저 장비 풀라인업 구축
+          </div>
+        </div>
+        <div class="career-item reveal">
+          <span class="career-year">2020</span>
+          <span class="career-dot"></span>
+          <div class="career-text">
+            <strong>스킨케어 전문 센터 오픈</strong>
+            1:1 맞춤 스킨케어 프로그램 론칭, 전담 피부관리사 10명 배치
+          </div>
+        </div>
+        <div class="career-item reveal">
+          <span class="career-year">2018</span>
+          <span class="career-dot"></span>
+          <div class="career-text">
+            <strong>강남 본원 확장 이전</strong>
+            400평 규모 프리미엄 클리닉으로 리뉴얼 오픈
+          </div>
+        </div>
+        <div class="career-item reveal">
+          <span class="career-year">2015</span>
+          <span class="career-dot"></span>
+          <div class="career-text">
+            <strong>SCI 논문 다수 발표</strong>
+            레이저 색소치료 관련 국제 학술지 논문 5편 게재
+          </div>
+        </div>
+        <div class="career-item reveal">
+          <span class="career-year">2012</span>
+          <span class="career-dot"></span>
+          <div class="career-text">
+            <strong>하버드 의과대학 연수</strong>
+            김서연 원장 미국 하버드 피부과 레이저 펠로우십 수료
+          </div>
+        </div>
+        <div class="career-item reveal">
+          <span class="career-year">2010</span>
+          <span class="career-dot"></span>
+          <div class="career-text">
+            <strong>글로우스킨클리닉 개원</strong>
+            "과학적이고 정직한 피부과"를 모토로 강남에서 첫 진료 시작
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Wave Divider ===== -->
+  <div class="wave-divider">
+    <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
+      <path fill="#FEFBFB" d="M0,30 C360,80 720,20 1080,60 C1260,80 1380,30 1440,40 L1440,100 L0,100 Z"/>
+    </svg>
+  </div>
+
+  <!-- ===== Media Section ===== -->
+  <section class="media-section">
+    <div class="container">
+      <div class="text-center">
+        <p class="section-label reveal">Media</p>
+        <h2 class="section-title reveal">미디어 출연 & 기고</h2>
+        <p class="section-desc centered reveal">
+          다양한 방송과 매거진에서 글로우스킨클리닉의 전문성을 인정받고 있습니다.
+        </p>
+      </div>
+
+      <div class="media-grid">
+        <div class="media-card reveal">
+          <img class="media-card-img" src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=600&q=80" alt="SBS 방송">
+          <div class="media-card-body">
+            <p class="media-card-source">SBS 생활경제</p>
+            <h4 class="media-card-title">"봄철 피부 관리, 레이저토닝의 모든 것"</h4>
+            <p class="media-card-date">2024.03.15 방영</p>
+          </div>
+        </div>
+
+        <div class="media-card reveal reveal-delay-1">
+          <img class="media-card-img" src="https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?w=600&q=80" alt="KBS 방송">
+          <div class="media-card-body">
+            <p class="media-card-source">KBS 건강365</p>
+            <h4 class="media-card-title">"안전한 필러 시술, 전문의가 답하다"</h4>
+            <p class="media-card-date">2024.01.22 방영</p>
+          </div>
+        </div>
+
+        <div class="media-card reveal reveal-delay-2">
+          <img class="media-card-img" src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&q=80" alt="얼루어 코리아">
+          <div class="media-card-body">
+            <p class="media-card-source">얼루어 코리아</p>
+            <h4 class="media-card-title">"2024 베스트 피부과 클리닉 TOP 10 선정"</h4>
+            <p class="media-card-date">2024년 2월호</p>
+          </div>
+        </div>
+
+        <div class="media-card reveal reveal-delay-3">
+          <img class="media-card-img" src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=600&q=80" alt="보그 코리아">
+          <div class="media-card-body">
+            <p class="media-card-source">보그 코리아</p>
+            <h4 class="media-card-title">"피부 노화 예방, 올바른 안티에이징 가이드"</h4>
+            <p class="media-card-date">2023년 11월호</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Wave Divider ===== -->
+  <div class="wave-divider">
+    <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
+      <path fill="#F0FDF4" d="M0,50 C180,80 360,20 540,50 C720,80 900,20 1080,50 C1260,80 1380,40 1440,60 L1440,100 L0,100 Z"/>
+    </svg>
+  </div>
+
+  <!-- ===== Papers Section ===== -->
+  <section class="papers-section">
+    <div class="container">
+      <div class="text-center">
+        <p class="section-label reveal">Research</p>
+        <h2 class="section-title reveal">학회 활동 & 논문</h2>
+        <p class="section-desc centered reveal">
+          끊임없는 연구와 학술 활동을 통해 최신 의학 지식을 진료에 반영합니다.
+        </p>
+      </div>
+
+      <div class="papers-list">
+        <div class="paper-item reveal">
+          <span class="paper-number">01</span>
+          <div class="paper-info">
+            <h4>피코초 레이저를 이용한 아시아인 기미 치료의 임상적 효과 연구</h4>
+            <p class="paper-meta">Journal of Dermatological Science, 2023 · 김서연, 이준호</p>
+          </div>
+        </div>
+        <div class="paper-item reveal">
+          <span class="paper-number">02</span>
+          <div class="paper-info">
+            <h4>고주파 에너지 기반 비침습적 리프팅의 장기 추적 관찰</h4>
+            <p class="paper-meta">대한피부과학회지, 2023 · 박지민, 김서연</p>
+          </div>
+        </div>
+        <div class="paper-item reveal">
+          <span class="paper-number">03</span>
+          <div class="paper-info">
+            <h4>성인 여드름에서의 복합 레이저 치료 프로토콜</h4>
+            <p class="paper-meta">Archives of Dermatological Research, 2022 · 최은서, 김서연</p>
+          </div>
+        </div>
+        <div class="paper-item reveal">
+          <span class="paper-number">04</span>
+          <div class="paper-info">
+            <h4>히알루론산 필러의 안전성 및 환자 만족도 분석: 후향적 연구</h4>
+            <p class="paper-meta">Journal of Cosmetic Dermatology, 2022 · 박지민</p>
+          </div>
+        </div>
+        <div class="paper-item reveal">
+          <span class="paper-number">05</span>
+          <div class="paper-info">
+            <h4>스킨부스터 시술 후 피부 수분도 변화에 대한 객관적 평가</h4>
+            <p class="paper-meta">대한미용피부과학회지, 2021 · 최은서, 이준호, 김서연</p>
+          </div>
+        </div>
+        <div class="paper-item reveal">
+          <span class="paper-number">06</span>
+          <div class="paper-info">
+            <h4>IPL 광선 치료와 혈관 레이저의 홍조 개선 비교 연구</h4>
+            <p class="paper-meta">Lasers in Surgery and Medicine, 2021 · 이준호, 김서연</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Philosophy Section ===== -->
+  <section style="padding:var(--section-pad) 0;">
+    <div class="container">
+      <div class="text-center">
+        <p class="section-label reveal">Philosophy</p>
+        <h2 class="section-title reveal">의료진이 지키는 약속</h2>
+        <p class="section-desc centered reveal">
+          글로우스킨클리닉의 모든 의료진이 공유하는 진료 원칙입니다.
+        </p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:60px;" class="promise-grid">
+        <div class="reveal" style="background:var(--bg-pink); border-radius:24px; padding:40px 32px; text-align:center; transition:transform 0.4s var(--ease-out);"
+             onmouseenter="this.style.transform='translateY(-8px)'" onmouseleave="this.style.transform=''">
+          <div style="width:64px; height:64px; border-radius:50%; background:var(--white); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:1.8rem;">🔬</div>
+          <h3 style="font-size:var(--fs-h4); margin-bottom:12px;">근거 중심 진료</h3>
+          <p style="color:var(--text-secondary); line-height:1.8; font-size:var(--fs-small);">
+            모든 시술은 SCI 논문과 임상 데이터로 검증된 프로토콜을 기반으로 합니다. 
+            유행이 아닌 과학이 저희 진료의 기준입니다.
+          </p>
+        </div>
+        <div class="reveal reveal-delay-1" style="background:var(--bg-lavender); border-radius:24px; padding:40px 32px; text-align:center; transition:transform 0.4s var(--ease-out);"
+             onmouseenter="this.style.transform='translateY(-8px)'" onmouseleave="this.style.transform=''">
+          <div style="width:64px; height:64px; border-radius:50%; background:var(--white); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:1.8rem;">💬</div>
+          <h3 style="font-size:var(--fs-h4); margin-bottom:12px;">정직한 상담</h3>
+          <p style="color:var(--text-secondary); line-height:1.8; font-size:var(--fs-small);">
+            불필요한 시술은 절대 권하지 않습니다. 환자에게 꼭 필요한 치료만 
+            솔직하게 안내하며, 기대 효과와 한계를 투명하게 설명합니다.
+          </p>
+        </div>
+        <div class="reveal reveal-delay-2" style="background:var(--bg-mint); border-radius:24px; padding:40px 32px; text-align:center; transition:transform 0.4s var(--ease-out);"
+             onmouseenter="this.style.transform='translateY(-8px)'" onmouseleave="this.style.transform=''">
+          <div style="width:64px; height:64px; border-radius:50%; background:var(--white); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:1.8rem;">🤝</div>
+          <h3 style="font-size:var(--fs-h4); margin-bottom:12px;">사후 책임</h3>
+          <p style="color:var(--text-secondary); line-height:1.8; font-size:var(--fs-small);">
+            시술로 끝나지 않습니다. 정기적인 경과 체크, 부작용 발생 시 즉각 대응, 
+            결과가 불만족스러우면 재시술까지 — 끝까지 책임집니다.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Education & Certifications ===== -->
+  <section style="padding:var(--section-pad) 0; background:var(--bg-pink);">
+    <div class="container">
+      <div class="text-center">
+        <p class="section-label reveal">Education</p>
+        <h2 class="section-title reveal">지속적인 교육과 연수</h2>
+        <p class="section-desc centered reveal">
+          글로우스킨클리닉 의료진은 매년 국내외 학회에 참석하고 최신 기술을 습득합니다.
+        </p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:24px; margin-top:48px; max-width:900px; margin-left:auto; margin-right:auto;" class="edu-grid">
+        <div class="reveal" style="background:var(--white); border-radius:20px; padding:28px; border:1px solid var(--border-light);">
+          <p style="font-size:var(--fs-small); color:var(--accent-rose); font-weight:600; margin-bottom:8px;">2024</p>
+          <h4 style="font-size:var(--fs-body); margin-bottom:8px;">미국피부과학회 AAD Annual Meeting</h4>
+          <p style="color:var(--text-muted); font-size:var(--fs-small);">샌디에이고, 미국 · 김서연, 박지민 참석</p>
+        </div>
+        <div class="reveal reveal-delay-1" style="background:var(--white); border-radius:20px; padding:28px; border:1px solid var(--border-light);">
+          <p style="font-size:var(--fs-small); color:var(--accent-rose); font-weight:600; margin-bottom:8px;">2024</p>
+          <h4 style="font-size:var(--fs-body); margin-bottom:8px;">울쎄라 아시아 마스터클래스 2024</h4>
+          <p style="color:var(--text-muted); font-size:var(--fs-small);">싱가포르 · 박지민 수료</p>
+        </div>
+        <div class="reveal" style="background:var(--white); border-radius:20px; padding:28px; border:1px solid var(--border-light);">
+          <p style="font-size:var(--fs-small); color:var(--accent-rose); font-weight:600; margin-bottom:8px;">2023</p>
+          <h4 style="font-size:var(--fs-body); margin-bottom:8px;">대한피부과학회 추계학술대회 구연 발표</h4>
+          <p style="color:var(--text-muted); font-size:var(--fs-small);">서울 · 이준호 발표</p>
+        </div>
+        <div class="reveal reveal-delay-1" style="background:var(--white); border-radius:20px; padding:28px; border:1px solid var(--border-light);">
+          <p style="font-size:var(--fs-small); color:var(--accent-rose); font-weight:600; margin-bottom:8px;">2023</p>
+          <h4 style="font-size:var(--fs-body); margin-bottom:8px;">갈더마 아카데미 필러 심화 과정</h4>
+          <p style="color:var(--text-muted); font-size:var(--fs-small);">파리, 프랑스 · 김서연 수료</p>
+        </div>
+        <div class="reveal" style="background:var(--white); border-radius:20px; padding:28px; border:1px solid var(--border-light);">
+          <p style="font-size:var(--fs-small); color:var(--accent-rose); font-weight:600; margin-bottom:8px;">2023</p>
+          <h4 style="font-size:var(--fs-body); margin-bottom:8px;">여드름 국제 학술 심포지엄 ISAD 2023</h4>
+          <p style="color:var(--text-muted); font-size:var(--fs-small);">도쿄, 일본 · 최은서 참석</p>
+        </div>
+        <div class="reveal reveal-delay-1" style="background:var(--white); border-radius:20px; padding:28px; border:1px solid var(--border-light);">
+          <p style="font-size:var(--fs-small); color:var(--accent-rose); font-weight:600; margin-bottom:8px;">2022</p>
+          <h4 style="font-size:var(--fs-body); margin-bottom:8px;">사이노슈어 피코슈어 프로 인증 교육</h4>
+          <p style="color:var(--text-muted); font-size:var(--fs-small);">서울 · 이준호 수료</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Doctor CTA ===== -->
+  <section class="doctor-cta">
+    <div class="container">
+      <p class="section-label reveal">Consultation</p>
+      <h2 class="reveal">전문의에게<br>직접 상담받으세요</h2>
+      <p class="reveal">
+        피부 고민에 맞는 전문의를 매칭해 드립니다.<br>
+        무료 1:1 상담으로 최적의 시술 계획을 세워보세요.
+      </p>
+      <a href="contact.html" class="btn-pill btn-rose reveal">무료 상담 예약하기</a>
+    </div>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>글로우스킨클리닉</h4>
+          <p>서울특별시 강남구 테헤란로 152<br>글로우타워 3층</p>
+          <p style="margin-top:12px;">Tel. 02-555-0123</p>
+          <p>Email. hello@glowskin.kr</p>
+        </div>
+        <div class="footer-col">
+          <h4>시술 안내</h4>
+          <a href="treatments.html">레이저토닝</a>
+          <a href="treatments.html">보톡스/필러</a>
+          <a href="treatments.html">울쎄라/써마지</a>
+          <a href="treatments.html">스킨부스터</a>
+          <a href="treatments.html">여드름 치료</a>
+        </div>
+        <div class="footer-col">
+          <h4>소셜 미디어</h4>
+          <a href="#">인스타그램</a>
+          <a href="#">유튜브</a>
+          <a href="#">카카오톡 채널</a>
+          <a href="#">네이버 블로그</a>
+        </div>
+        <div class="footer-col">
+          <h4>진료 시간</h4>
+          <p>평일 10:00 – 19:00</p>
+          <p>토요일 10:00 – 16:00</p>
+          <p>일요일·공휴일 휴진</p>
+          <p style="margin-top:12px; font-size:0.75rem;">점심시간 13:00 – 14:00</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2024 글로우스킨클리닉. All rights reserved.</span>
+        <span>사업자등록번호: 123-45-67890 | 대표자: 김서연</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== Scripts ===== -->
+  <script>
+    // Nav scroll effect
+    const nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+    }, { passive: true });
+
+    // Mobile nav toggle
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+    navToggle.addEventListener('click', () => {
+      navToggle.classList.toggle('active');
+      navLinks.classList.toggle('open');
+    });
+
+    // Scroll reveal
+    const revealEls = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(el => revealObserver.observe(el));
+
+    // Mouse ripple
+    document.addEventListener('click', (e) => {
+      const ripple = document.createElement('div');
+      ripple.className = 'ripple-circle';
+      ripple.style.left = e.clientX + 'px';
+      ripple.style.top = e.clientY + 'px';
+      document.body.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+    });
+  </script>
+
+</body>
+</html>

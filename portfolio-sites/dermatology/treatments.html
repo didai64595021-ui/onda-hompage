@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>시술 안내 — 글로우스킨클리닉</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:wght@300;400;700;900&family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ---- Treatments Hero ---- */
+    .treat-hero {
+      min-height: 50vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: clamp(120px, 15vw, 200px) 20px var(--section-pad);
+      background: linear-gradient(135deg, var(--bg-mint) 0%, var(--bg-lavender) 50%, var(--bg-pink) 100%);
+      background-size: 300% 300%;
+      animation: gradientMorph 8s ease infinite;
+    }
+
+    /* ---- Treatment Cards ---- */
+    .treat-section {
+      padding: var(--section-pad) 0 60px;
+    }
+    .treat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: clamp(24px, 3vw, 40px);
+      margin-top: 48px;
+    }
+    .treat-card {
+      background: var(--white);
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+      transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
+    }
+    .treat-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-lg);
+    }
+    .treat-card.hidden { display: none; }
+    .treat-card-img {
+      width: 100%;
+      aspect-ratio: 16/10;
+      object-fit: cover;
+    }
+    .treat-card-body {
+      padding: clamp(24px, 3vw, 36px);
+    }
+    .treat-card-name {
+      font-family: var(--font-heading);
+      font-size: var(--fs-h3);
+      margin-bottom: 12px;
+    }
+    .treat-card-desc {
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 20px;
+      font-size: var(--fs-small);
+    }
+    .treat-card-meta {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .treat-meta-item {
+      padding: 12px 16px;
+      background: var(--bg-main);
+      border-radius: 12px;
+    }
+    .treat-meta-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-rose);
+      margin-bottom: 2px;
+    }
+    .treat-meta-value {
+      font-size: var(--fs-small);
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    /* ---- Process Timeline ---- */
+    .process-section {
+      background: var(--bg-lavender);
+      padding: var(--section-pad) 0;
+    }
+    .process-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      margin-top: 60px;
+      position: relative;
+    }
+    .process-steps::before {
+      content: '';
+      position: absolute;
+      top: 36px;
+      left: 12.5%;
+      right: 12.5%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-rose), var(--accent-lavender));
+      border-radius: 2px;
+    }
+    .process-step {
+      text-align: center;
+      position: relative;
+      padding: 0 16px;
+    }
+    .process-dot {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 3px solid var(--accent-rose);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 1.5rem;
+      position: relative;
+      z-index: 1;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+    }
+    .process-step:hover .process-dot {
+      transform: scale(1.1);
+      box-shadow: var(--shadow-md);
+    }
+    .process-step h4 {
+      font-size: var(--fs-h4);
+      margin-bottom: 8px;
+    }
+    .process-step p {
+      font-size: var(--fs-small);
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* ---- FAQ ---- */
+    .faq-section {
+      padding: var(--section-pad) 0;
+    }
+    .faq-list {
+      max-width: 800px;
+      margin: 48px auto 0;
+    }
+
+    /* ---- Treat CTA ---- */
+    .treat-cta {
+      background: linear-gradient(135deg, var(--bg-pink), var(--bg-lavender));
+      padding: var(--section-pad) 0;
+      text-align: center;
+    }
+    .treat-cta h2 {
+      font-size: var(--fs-h2);
+      margin-bottom: 16px;
+    }
+    .treat-cta p {
+      color: var(--text-secondary);
+      max-width: 500px;
+      margin: 0 auto 40px;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 1024px) {
+      .process-steps { grid-template-columns: repeat(2, 1fr); gap: 40px; }
+      .process-steps::before { display: none; }
+    }
+    @media (max-width: 768px) {
+      .treat-grid { grid-template-columns: 1fr; }
+      .process-steps { grid-template-columns: 1fr; max-width: 360px; margin-left: auto; margin-right: auto; }
+      .treat-card-meta { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Navigation ===== -->
+  <nav class="nav-pill" id="mainNav">
+    <span class="nav-logo">글로우스킨</span>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">홈</a>
+      <a href="treatments.html" class="active">시술안내</a>
+      <a href="doctors.html">의료진</a>
+      <a href="gallery.html">비포/애프터</a>
+      <a href="about.html">병원소개</a>
+      <a href="contact.html" class="nav-cta">상담예약</a>
+    </div>
+    <div class="nav-mobile-toggle" id="navToggle" aria-label="메뉴 열기">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+
+  <!-- ===== Hero ===== -->
+  <section class="treat-hero">
+    <div class="page-hero-content">
+      <p class="section-label reveal">Treatments</p>
+      <h1 class="section-title reveal" style="font-size:var(--fs-h1);">맞춤 시술 프로그램</h1>
+      <p class="section-desc centered reveal" style="margin-top:16px;">
+        과학적 근거에 기반한 시술로 건강하고 아름다운 피부를 되찾으세요.<br>
+        전문의가 1:1로 맞춤 시술 계획을 설계합니다.
+      </p>
+    </div>
+  </section>
+
+  <!-- ===== Wave Divider ===== -->
+  <div class="wave-divider">
+    <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
+      <path fill="#FEFBFB" d="M0,40 C360,100 720,0 1080,60 C1260,80 1380,40 1440,50 L1440,100 L0,100 Z"/>
+    </svg>
+  </div>
+
+  <!-- ===== Treatments ===== -->
+  <section class="treat-section">
+    <div class="container">
+      <!-- Filter Tabs -->
+      <div class="filter-tabs" id="filterTabs">
+        <button class="filter-tab active" data-filter="all">전체</button>
+        <button class="filter-tab" data-filter="laser">레이저</button>
+        <button class="filter-tab" data-filter="injection">주사</button>
+        <button class="filter-tab" data-filter="lifting">리프팅</button>
+        <button class="filter-tab" data-filter="skincare">스킨케어</button>
+        <button class="filter-tab" data-filter="body">바디</button>
+      </div>
+
+      <div class="treat-grid" id="treatGrid">
+
+        <!-- 1. 레이저토닝 -->
+        <div class="treat-card reveal" data-category="laser">
+          <img class="treat-card-img" src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&q=80" alt="레이저토닝" loading="lazy">
+          <div class="treat-card-body">
+            <h3 class="treat-card-name">레이저토닝</h3>
+            <p class="treat-card-desc">
+              1064nm Nd:YAG 레이저를 이용한 색소 치료의 대표 시술입니다.
+              기미, 잡티, 색소침착을 균일하게 개선하며, 피부 전체적인 톤업 효과를 제공합니다.
+              시술 후 즉시 일상생활이 가능한 'No Downtime' 시술입니다.
+            </p>
+            <div class="treat-card-meta">
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">시술 시간</p>
+                <p class="treat-meta-value">20~30분</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">회복 기간</p>
+                <p class="treat-meta-value">즉시 일상 가능</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">권장 횟수</p>
+                <p class="treat-meta-value">8~12회</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">적합 대상</p>
+                <p class="treat-meta-value">기미·잡티·색소</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. 피코레이저 -->
+        <div class="treat-card reveal" data-category="laser">
+          <img class="treat-card-img" src="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=800&q=80" alt="피코레이저" loading="lazy">
+          <div class="treat-card-body">
+            <h3 class="treat-card-name">피코레이저</h3>
+            <p class="treat-card-desc">
+              피코초(1조분의 1초) 단위의 초단파 레이저로 색소를 미세하게 파괴합니다.
+              기존 나노초 레이저 대비 치료 횟수가 적고, 주변 조직 손상을 최소화합니다.
+              주근깨, 오타반점, 문신 제거에도 효과적입니다.
+            </p>
+            <div class="treat-card-meta">
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">시술 시간</p>
+                <p class="treat-meta-value">15~30분</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">회복 기간</p>
+                <p class="treat-meta-value">1~3일</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">권장 횟수</p>
+                <p class="treat-meta-value">3~5회</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">적합 대상</p>
+                <p class="treat-meta-value">주근깨·깊은색소</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. IPL -->
+        <div class="treat-card reveal" data-category="laser">
+          <img class="treat-card-img" src="https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?w=800&q=80" alt="IPL" loading="lazy">
+          <div class="treat-card-body">
+            <h3 class="treat-card-name">IPL 광선치료</h3>
+            <p class="treat-card-desc">
+              다파장 광선을 이용해 홍조, 혈관확장, 잔주름, 색소를 동시에 개선합니다.
+              OPT 기술로 에너지를 균일하게 전달하여 안전성을 높였습니다.
+              전체적인 피부 톤과 결 개선에 효과적인 종합 광치료입니다.
+            </p>
+            <div class="treat-card-meta">
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">시술 시간</p>
+                <p class="treat-meta-value">20~40분</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">회복 기간</p>
+                <p class="treat-meta-value">즉시~2일</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">권장 횟수</p>
+                <p class="treat-meta-value">4~6회</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">적합 대상</p>
+                <p class="treat-meta-value">홍조·혈관·톤</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. 보톡스 -->
+        <div class="treat-card reveal" data-category="injection">
+          <img class="treat-card-img" src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=800&q=80" alt="보톡스" loading="lazy">
+          <div class="treat-card-body">
+            <h3 class="treat-card-name">보톡스</h3>
+            <p class="treat-card-desc">
+              보툴리눔 톡신을 이용해 표정 주름을 효과적으로 개선합니다.
+              이마, 미간, 눈가(까마귀발) 주름뿐만 아니라, 사각턱 축소, 종아리 슬리밍에도 활용됩니다.
+              FDA 승인 정품만 사용하며, 자연스러운 결과를 추구합니다.
+            </p>
+            <div class="treat-card-meta">
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">시술 시간</p>
+                <p class="treat-meta-value">10~15분</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">회복 기간</p>
+                <p class="treat-meta-value">즉시 일상 가능</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">권장 횟수</p>
+                <p class="treat-meta-value">3~6개월마다</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">적합 대상</p>
+                <p class="treat-meta-value">주름·사각턱</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. 필러 -->
+        <div class="treat-card reveal" data-category="injection">
+          <img class="treat-card-img" src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80" alt="필러" loading="lazy">
+          <div class="treat-card-body">
+            <h3 class="treat-card-name">필러</h3>
+            <p class="treat-card-desc">
+              히알루론산 기반 필러로 볼륨 감소, 주름, 윤곽을 자연스럽게 개선합니다.
+              팔자주름, 이마, 턱끝, 코, 입술 등 다양한 부위에 적용 가능합니다.
+              갈더마, 앨러간 등 글로벌 정품 필러만 사용합니다.
+            </p>
+            <div class="treat-card-meta">
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">시술 시간</p>
+                <p class="treat-meta-value">15~30분</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">회복 기간</p>
+                <p class="treat-meta-value">1~3일 (부기)</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">권장 횟수</p>
+                <p class="treat-meta-value">12~18개월마다</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">적합 대상</p>
+                <p class="treat-meta-value">볼륨·주름·윤곽</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. 울쎄라 -->
+        <div class="treat-card reveal" data-category="lifting">
+          <img class="treat-card-img" src="https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=800&q=80" alt="울쎄라" loading="lazy">
+          <div class="treat-card-body">
+            <h3 class="treat-card-name">울쎄라</h3>
+            <p class="treat-card-desc">
+              집속 초음파(HIFU) 에너지로 피부 깊은 SMAS 층까지 도달하여 리프팅합니다.
+              유일한 FDA 승인 비침습 리프팅 장비로, 실시간 초음파 이미징으로 정확한 시술이 가능합니다.
+              시술 후 점진적으로 콜라겐이 재생되어 3~6개월간 효과가 지속됩니다.
+            </p>
+            <div class="treat-card-meta">
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">시술 시간</p>
+                <p class="treat-meta-value">60~90분</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">회복 기간</p>
+                <p class="treat-meta-value">즉시~1일</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">권장 횟수</p>
+                <p class="treat-meta-value">연 1~2회</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">적합 대상</p>
+                <p class="treat-meta-value">처짐·턱선·탄력</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. 써마지 -->
+        <div class="treat-card reveal" data-category="lifting">
+          <img class="treat-card-img" src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&q=80" alt="써마지" loading="lazy">
+          <div class="treat-card-body">
+            <h3 class="treat-card-name">써마지 FLX</h3>
+            <p class="treat-card-desc">
+              고주파(RF) 에너지로 콜라겐을 리모델링하여 피부 탄력을 개선합니다.
+              4세대 FLX는 AccuREP 기술로 시술 시간을 단축하고 편안함을 높였습니다.
+              모공 축소, 피부결 개선, 전체적인 타이트닝에 효과적입니다.
+            </p>
+            <div class="treat-card-meta">
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">시술 시간</p>
+                <p class="treat-meta-value">45~60분</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">회복 기간</p>
+                <p class="treat-meta-value">즉시 일상 가능</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">권장 횟수</p>
+                <p class="treat-meta-value">연 1~2회</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">적합 대상</p>
+                <p class="treat-meta-value">탄력·모공·피부결</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. 스킨부스터 -->
+        <div class="treat-card reveal" data-category="skincare">
+          <img class="treat-card-img" src="https://images.unsplash.com/photo-1560750588-73b555dce5d7?w=800&q=80" alt="스킨부스터" loading="lazy">
+          <div class="treat-card-body">
+            <h3 class="treat-card-name">스킨부스터</h3>
+            <p class="treat-card-desc">
+              비가교 히알루론산을 피부 진피층에 직접 주입하여 수분과 광채를 회복합니다.
+              쥬베룩, 리쥬란, 볼벨라 등 피부 상태에 맞는 제품을 선택하여 시술합니다.
+              건조함, 잔주름, 칙칙함이 고민인 분들에게 추천합니다.
+            </p>
+            <div class="treat-card-meta">
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">시술 시간</p>
+                <p class="treat-meta-value">20~30분</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">회복 기간</p>
+                <p class="treat-meta-value">1~3일</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">권장 횟수</p>
+                <p class="treat-meta-value">3~5회</p>
+              </div>
+              <div class="treat-meta-item">
+                <p class="treat-meta-label">적합 대상</p>
+                <p class="treat-meta-value">건조·광채·잔주름</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Wave Divider ===== -->
+  <div class="wave-divider">
+    <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
+      <path fill="#EDE9FE" d="M0,60 C240,20 480,80 720,40 C960,0 1200,60 1440,30 L1440,100 L0,100 Z"/>
+    </svg>
+  </div>
+
+  <!-- ===== Process Timeline ===== -->
+  <section class="process-section">
+    <div class="container">
+      <div class="text-center">
+        <p class="section-label reveal">Process</p>
+        <h2 class="section-title reveal">시술 과정 안내</h2>
+        <p class="section-desc centered reveal">
+          체계적인 4단계 프로세스로 최적의 결과를 약속합니다.
+        </p>
+      </div>
+
+      <div class="process-steps">
+        <div class="process-step reveal">
+          <div class="process-dot">🗓️</div>
+          <h4>1단계 — 상담</h4>
+          <p>전문의가 피부 분석 장비를 활용해 객관적으로 피부 상태를 진단하고, 환자의 기대에 맞는 시술을 추천합니다.</p>
+        </div>
+        <div class="process-step reveal reveal-delay-1">
+          <div class="process-dot">🔬</div>
+          <h4>2단계 — 진단</h4>
+          <p>비지아 3D 피부 분석, 우드램프 검사 등으로 정밀 진단합니다. 시술 전 사진 촬영으로 비교 자료를 확보합니다.</p>
+        </div>
+        <div class="process-step reveal reveal-delay-2">
+          <div class="process-dot">✨</div>
+          <h4>3단계 — 시술</h4>
+          <p>검증된 프로토콜에 따라 안전하게 시술합니다. 마취, 냉각 등 통증 최소화 시스템을 적용합니다.</p>
+        </div>
+        <div class="process-step reveal reveal-delay-3">
+          <div class="process-dot">💚</div>
+          <h4>4단계 — 사후관리</h4>
+          <p>시술 후 주의사항 안내, 홈케어 가이드 제공, 정기 경과 체크로 최적의 결과를 유지합니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Wave Divider ===== -->
+  <div class="wave-divider">
+    <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
+      <path fill="#FEFBFB" d="M0,30 C360,80 720,20 1080,60 C1260,80 1380,30 1440,40 L1440,100 L0,100 Z"/>
+    </svg>
+  </div>
+
+  <!-- ===== Combination Treatment ===== -->
+  <section style="padding:var(--section-pad) 0;">
+    <div class="container">
+      <div class="text-center">
+        <p class="section-label reveal">Combination</p>
+        <h2 class="section-title reveal">인기 복합 프로그램</h2>
+        <p class="section-desc centered reveal">
+          단일 시술보다 효과적인 복합 프로그램으로 시너지를 극대화합니다.
+        </p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:48px;" class="combo-grid">
+        <div class="reveal" style="background:linear-gradient(135deg, var(--bg-pink), var(--bg-lavender)); border-radius:24px; padding:36px 28px; transition:transform 0.4s var(--ease-out);"
+             onmouseenter="this.style.transform='translateY(-6px)'" onmouseleave="this.style.transform=''">
+          <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent-rose); margin-bottom:12px;">Best Seller</p>
+          <h3 style="font-size:var(--fs-h4); margin-bottom:12px;">글로우 톤업</h3>
+          <p style="color:var(--text-secondary); font-size:var(--fs-small); line-height:1.8; margin-bottom:20px;">
+            레이저토닝 + IPL + 스킨부스터를 조합한 종합 톤업 프로그램.
+            색소, 홍조, 수분을 한 번에 개선합니다.
+          </p>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <span style="padding:6px 14px; border-radius:100px; background:var(--white); font-size:0.75rem; font-weight:500;">레이저토닝 5회</span>
+            <span style="padding:6px 14px; border-radius:100px; background:var(--white); font-size:0.75rem; font-weight:500;">IPL 3회</span>
+            <span style="padding:6px 14px; border-radius:100px; background:var(--white); font-size:0.75rem; font-weight:500;">스킨부스터 3회</span>
+          </div>
+        </div>
+
+        <div class="reveal reveal-delay-1" style="background:linear-gradient(135deg, var(--bg-lavender), var(--bg-mint)); border-radius:24px; padding:36px 28px; transition:transform 0.4s var(--ease-out);"
+             onmouseenter="this.style.transform='translateY(-6px)'" onmouseleave="this.style.transform=''">
+          <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent-lavender); margin-bottom:12px;">Anti-Aging</p>
+          <h3 style="font-size:var(--fs-h4); margin-bottom:12px;">리프팅 올인원</h3>
+          <p style="color:var(--text-secondary); font-size:var(--fs-small); line-height:1.8; margin-bottom:20px;">
+            울쎄라 + 써마지 + 보톡스로 처짐, 탄력, 주름을 종합적으로 개선.
+            비수술 안티에이징의 정석입니다.
+          </p>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <span style="padding:6px 14px; border-radius:100px; background:var(--white); font-size:0.75rem; font-weight:500;">울쎄라 1회</span>
+            <span style="padding:6px 14px; border-radius:100px; background:var(--white); font-size:0.75rem; font-weight:500;">써마지 1회</span>
+            <span style="padding:6px 14px; border-radius:100px; background:var(--white); font-size:0.75rem; font-weight:500;">보톡스 1회</span>
+          </div>
+        </div>
+
+        <div class="reveal reveal-delay-2" style="background:linear-gradient(135deg, var(--bg-mint), var(--bg-pink)); border-radius:24px; padding:36px 28px; transition:transform 0.4s var(--ease-out);"
+             onmouseenter="this.style.transform='translateY(-6px)'" onmouseleave="this.style.transform=''">
+          <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#10b981; margin-bottom:12px;">Skin Care</p>
+          <h3 style="font-size:var(--fs-h4); margin-bottom:12px;">워터 글로우</h3>
+          <p style="color:var(--text-secondary); font-size:var(--fs-small); line-height:1.8; margin-bottom:20px;">
+            스킨부스터 + 아쿠아필 + LED 광치료. 
+            건조하고 지친 피부에 깊은 수분과 광채를 선사합니다.
+          </p>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <span style="padding:6px 14px; border-radius:100px; background:var(--white); font-size:0.75rem; font-weight:500;">스킨부스터 3회</span>
+            <span style="padding:6px 14px; border-radius:100px; background:var(--white); font-size:0.75rem; font-weight:500;">아쿠아필 5회</span>
+            <span style="padding:6px 14px; border-radius:100px; background:var(--white); font-size:0.75rem; font-weight:500;">LED 5회</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Wave Divider ===== -->
+  <div class="wave-divider">
+    <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
+      <path fill="#FEFBFB" d="M0,50 C180,80 360,20 540,50 C720,80 900,20 1080,50 C1260,80 1380,40 1440,60 L1440,100 L0,100 Z"/>
+    </svg>
+  </div>
+
+  <!-- ===== FAQ ===== -->
+  <section class="faq-section">
+    <div class="container">
+      <div class="text-center">
+        <p class="section-label reveal">FAQ</p>
+        <h2 class="section-title reveal">자주 묻는 질문</h2>
+      </div>
+
+      <div class="faq-list">
+        <div class="accordion-item reveal">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <span>시술이 아프진 않나요?</span>
+            <span class="accordion-icon"></span>
+          </div>
+          <div class="accordion-body">
+            <div class="accordion-body-inner">
+              대부분의 시술은 마취 크림을 도포한 후 진행하여 통증을 최소화합니다. 보톡스·필러는 미세한 따끔함 정도이며, 레이저 시술은 냉각 시스템을 병행합니다. 울쎄라의 경우 개인에 따라 약간의 열감을 느낄 수 있으나, 마취와 진통제로 관리합니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item reveal">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <span>시술 후 세안이나 화장은 언제부터 가능한가요?</span>
+            <span class="accordion-icon"></span>
+          </div>
+          <div class="accordion-body">
+            <div class="accordion-body-inner">
+              시술 종류에 따라 다릅니다. 레이저토닝, 보톡스는 당일 세안과 가벼운 화장이 가능합니다. 피코레이저, 필러는 24시간 후부터 세안을, 48시간 후부터 화장을 권장합니다. 시술 후 구체적인 가이드를 별도로 안내해 드립니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item reveal">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <span>효과가 얼마나 지속되나요?</span>
+            <span class="accordion-icon"></span>
+          </div>
+          <div class="accordion-body">
+            <div class="accordion-body-inner">
+              보톡스는 3~6개월, 필러는 12~18개월, 울쎄라·써마지는 6~12개월 지속됩니다. 레이저 시술은 자외선 차단과 피부 관리를 병행하면 장기간 효과를 유지할 수 있습니다. 정기적인 유지 시술을 통해 최상의 상태를 유지하시길 권장합니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item reveal">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <span>여러 시술을 같은 날 받을 수 있나요?</span>
+            <span class="accordion-icon"></span>
+          </div>
+          <div class="accordion-body">
+            <div class="accordion-body-inner">
+              네, 일부 시술은 병행이 가능합니다. 예를 들어 보톡스+필러, 레이저토닝+스킨부스터 등은 같은 날 시술할 수 있습니다. 다만 시술 조합에 따라 전문의 판단이 필요하므로, 상담 시 함께 논의하시면 최적의 조합을 안내해 드리겠습니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item reveal">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <span>예민한 피부인데 레이저 시술이 가능한가요?</span>
+            <span class="accordion-icon"></span>
+          </div>
+          <div class="accordion-body">
+            <div class="accordion-body-inner">
+              예민한 피부도 시술이 가능합니다. 먼저 피부 장벽 상태를 정확히 진단한 후, 레이저 강도와 종류를 조절하여 시술합니다. 필요시 피부 장벽 강화 치료를 먼저 진행한 후 레이저 시술을 시작할 수도 있습니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item reveal">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <span>임산부나 수유 중에도 시술 가능한가요?</span>
+            <span class="accordion-icon"></span>
+          </div>
+          <div class="accordion-body">
+            <div class="accordion-body-inner">
+              임산부의 경우 대부분의 시술을 권장하지 않습니다. 수유 중에는 일부 시술(보톡스, 필러 등)은 제한되나, 외용 치료나 LED 광치료 등은 가능한 경우가 있습니다. 반드시 전문의 상담을 통해 안전한 시술 여부를 확인해 주세요.
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item reveal">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <span>정품 장비와 약품을 사용하나요?</span>
+            <span class="accordion-icon"></span>
+          </div>
+          <div class="accordion-body">
+            <div class="accordion-body-inner">
+              글로우스킨클리닉은 FDA/KFDA 승인된 정품 장비와 약품만 사용합니다. 보톡스(앨러간 보톡스, 메디톡신), 필러(쥬비덤, 레스틸렌), 레이저(피코슈어, 울쎄라, 써마지) 등 모두 공식 인증 제품입니다. 시술 전 환자분께 정품 확인을 해드립니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item reveal">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <span>부작용이 생기면 어떻게 하나요?</span>
+            <span class="accordion-icon"></span>
+          </div>
+          <div class="accordion-body">
+            <div class="accordion-body-inner">
+              시술 후 이상 반응이 발생하면 즉시 연락해 주세요 (02-555-0123). 24시간 응급 연락 체계를 운영하며, 전문의가 신속하게 대응합니다. 일시적인 붉어짐이나 부기는 정상 반응이며, 대부분 1~3일 내 자연스럽게 사라집니다.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Treat CTA ===== -->
+  <section class="treat-cta">
+    <div class="container">
+      <p class="section-label reveal">Consultation</p>
+      <h2 class="reveal">나에게 맞는 시술이<br>궁금하신가요?</h2>
+      <p class="reveal">
+        전문의가 피부 상태를 정확히 분석하고<br>
+        최적의 시술 계획을 무료로 설계해 드립니다.
+      </p>
+      <a href="contact.html" class="btn-pill btn-rose reveal">무료 상담 예약하기</a>
+    </div>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>글로우스킨클리닉</h4>
+          <p>서울특별시 강남구 테헤란로 152<br>글로우타워 3층</p>
+          <p style="margin-top:12px;">Tel. 02-555-0123</p>
+          <p>Email. hello@glowskin.kr</p>
+        </div>
+        <div class="footer-col">
+          <h4>시술 안내</h4>
+          <a href="treatments.html">레이저토닝</a>
+          <a href="treatments.html">보톡스/필러</a>
+          <a href="treatments.html">울쎄라/써마지</a>
+          <a href="treatments.html">스킨부스터</a>
+          <a href="treatments.html">여드름 치료</a>
+        </div>
+        <div class="footer-col">
+          <h4>소셜 미디어</h4>
+          <a href="#">인스타그램</a>
+          <a href="#">유튜브</a>
+          <a href="#">카카오톡 채널</a>
+          <a href="#">네이버 블로그</a>
+        </div>
+        <div class="footer-col">
+          <h4>진료 시간</h4>
+          <p>평일 10:00 – 19:00</p>
+          <p>토요일 10:00 – 16:00</p>
+          <p>일요일·공휴일 휴진</p>
+          <p style="margin-top:12px; font-size:0.75rem;">점심시간 13:00 – 14:00</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2024 글로우스킨클리닉. All rights reserved.</span>
+        <span>사업자등록번호: 123-45-67890 | 대표자: 김서연</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== Scripts ===== -->
+  <script>
+    // Nav scroll
+    const nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+    }, { passive: true });
+
+    // Mobile nav
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+    navToggle.addEventListener('click', () => {
+      navToggle.classList.toggle('active');
+      navLinks.classList.toggle('open');
+    });
+
+    // Scroll reveal
+    const revealEls = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(el => revealObserver.observe(el));
+
+    // Filter tabs
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    const treatCards = document.querySelectorAll('.treat-card[data-category]');
+    filterTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        filterTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const filter = tab.dataset.filter;
+        treatCards.forEach(card => {
+          if (filter === 'all' || card.dataset.category === filter) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+      });
+    });
+
+    // Accordion
+    function toggleAccordion(header) {
+      const item = header.parentElement;
+      const body = header.nextElementSibling;
+      const wasActive = item.classList.contains('active');
+
+      // Close all
+      document.querySelectorAll('.accordion-item.active').forEach(i => {
+        i.classList.remove('active');
+        i.querySelector('.accordion-body').style.maxHeight = null;
+      });
+
+      // Open clicked (if wasn't active)
+      if (!wasActive) {
+        item.classList.add('active');
+        body.style.maxHeight = body.scrollHeight + 'px';
+      }
+    }
+
+    // Mouse ripple
+    document.addEventListener('click', (e) => {
+      const ripple = document.createElement('div');
+      ripple.className = 'ripple-circle';
+      ripple.style.left = e.clientX + 'px';
+      ripple.style.top = e.clientY + 'px';
+      document.body.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+    });
+  </script>
+
+</body>
+</html>
