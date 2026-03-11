@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>입지환경 — 한강 르셀 | Premium Location</title>
+<meta name="description" content="한강 르셀의 프리미엄 입지환경. 강남역 8분, 한강공원 도보 3분, 서울 최고의 생활 인프라를 누리세요.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+/* =============================================
+   CSS CUSTOM PROPERTIES
+   ============================================= */
+:root {
+  --bg-primary: #0C0C0C;
+  --bg-surface: #161614;
+  --bg-light: #F7F4F0;
+  --accent: #C8A97D;
+  --accent-light: #E2D1B5;
+  --text-primary: #E8E4DF;
+  --text-secondary: #8A8580;
+  --text-dark: #2A2A2A;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Pretendard Variable', -apple-system, sans-serif;
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* =============================================
+   RESET & BASE
+   ============================================= */
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  word-break: keep-all;
+  line-height: 1.7;
+  cursor: none;
+}
+
+img { display: block; max-width: 100%; }
+a { text-decoration: none; color: inherit; }
+button { border: none; background: none; cursor: none; font-family: inherit; }
+
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+@media (min-width: 768px) { .container { padding: 0 48px; } }
+@media (min-width: 1440px) { .container { padding: 0 80px; } }
+
+/* =============================================
+   GRAIN TEXTURE OVERLAY
+   ============================================= */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+  pointer-events: none;
+  opacity: 0.04;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
+}
+
+/* =============================================
+   SCROLL PROGRESS BAR
+   ============================================= */
+#scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 0%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  z-index: 99998;
+  transition: width 0.1s linear;
+}
+
+/* =============================================
+   CUSTOM CURSOR
+   ============================================= */
+#cursor-dot {
+  position: fixed;
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s var(--ease-expo), opacity 0.3s;
+}
+
+#cursor-ring {
+  position: fixed;
+  width: 36px; height: 36px;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s var(--ease-expo), height 0.4s var(--ease-expo), border-color 0.3s, opacity 0.3s;
+}
+
+#cursor-ring.expanded {
+  width: 56px; height: 56px;
+  border-color: var(--accent-light);
+}
+
+@media (pointer: coarse) {
+  #cursor-dot, #cursor-ring { display: none; }
+  body { cursor: auto; }
+  button { cursor: pointer; }
+}
+
+/* =============================================
+   NAVIGATION
+   ============================================= */
+#nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 24px 0;
+  transition: background 0.4s var(--ease-expo), padding 0.4s var(--ease-expo);
+}
+
+#nav.scrolled {
+  background: rgba(12, 12, 12, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(200, 169, 125, 0.12);
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  position: relative;
+  z-index: 1001;
+}
+
+.nav-links {
+  display: flex;
+  gap: 40px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  transition: color 0.3s;
+  position: relative;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 0; height: 1px;
+  background: var(--accent);
+  transition: width 0.4s var(--ease-expo);
+}
+
+.nav-links a:hover { color: var(--accent); }
+.nav-links a:hover::after { width: 100%; }
+.nav-links a.active { color: var(--accent); }
+.nav-links a.active::after { width: 100%; }
+
+.nav-cta {
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 10px 24px;
+  transition: background 0.3s, color 0.3s;
+}
+
+.nav-cta:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 1001;
+  position: relative;
+  padding: 8px;
+}
+
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 1.5px;
+  background: var(--text-primary);
+  transition: transform 0.4s var(--ease-expo), opacity 0.3s;
+  transform-origin: center;
+}
+
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(4.5px, 4.5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(4.5px, -4.5px); }
+
+/* Mobile Nav Overlay */
+#mobile-nav {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 12, 12, 0.97);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s var(--ease-expo), visibility 0.5s;
+}
+
+#mobile-nav.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.mobile-nav-links {
+  list-style: none;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.mobile-nav-links li {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.5s var(--ease-expo), transform 0.5s var(--ease-expo);
+}
+
+#mobile-nav.open .mobile-nav-links li:nth-child(1) { opacity:1; transform:translateY(0); transition-delay:0.1s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(2) { opacity:1; transform:translateY(0); transition-delay:0.15s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(3) { opacity:1; transform:translateY(0); transition-delay:0.2s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(4) { opacity:1; transform:translateY(0); transition-delay:0.25s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(5) { opacity:1; transform:translateY(0); transition-delay:0.3s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(6) { opacity:1; transform:translateY(0); transition-delay:0.35s; }
+
+.mobile-nav-links a {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 6vw, 48px);
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+  transition: color 0.3s;
+}
+
+.mobile-nav-links a:hover { color: var(--accent); }
+.mobile-nav-links a.active { color: var(--accent); }
+
+@media (max-width: 900px) {
+  .nav-links, .nav-cta { display: none; }
+  .hamburger { display: flex; }
+}
+
+/* =============================================
+   HERO SECTION
+   ============================================= */
+#hero {
+  position: relative;
+  height: 60vh;
+  min-height: 480px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero-bg img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  animation: kenBurns 18s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+@keyframes kenBurns {
+  0%   { transform: scale(1) translate(0, 0); }
+  100% { transform: scale(1.08) translate(-1%, -1%); }
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(12,12,12,0.4) 0%,
+    rgba(12,12,12,0.55) 40%,
+    rgba(12,12,12,0.85) 100%
+  );
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  padding-top: 80px;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 8vw, 120px);
+  line-height: 1;
+  color: var(--accent);
+  margin-bottom: 24px;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateY(32px);
+  animation: heroFadeUp 1s var(--ease-expo) 0.3s forwards;
+}
+
+.hero-subtitle {
+  font-size: clamp(15px, 2vw, 22px);
+  color: var(--text-primary);
+  font-weight: 300;
+  line-height: 1.7;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: heroFadeUp 0.8s var(--ease-expo) 0.6s forwards;
+}
+
+@keyframes heroFadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* =============================================
+   SECTION COMMON
+   ============================================= */
+section { overflow: hidden; }
+
+.section-dark { background: var(--bg-primary); }
+.section-surface { background: var(--bg-surface); }
+.section-light { background: var(--bg-light); }
+
+.section-tag {
+  font-size: 11px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 64px;
+}
+
+/* =============================================
+   REVEAL ANIMATIONS
+   ============================================= */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s var(--ease-expo), transform 0.8s var(--ease-expo);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-clip {
+  clip-path: inset(100% 0 0 0);
+  transition: clip-path 1s var(--ease-expo);
+}
+
+.reveal-clip.visible {
+  clip-path: inset(0% 0 0 0);
+}
+
+/* Safety net */
+.revealed, .reveal.revealed, .reveal-clip.revealed, .stagger.revealed {
+  opacity: 1 !important;
+  transform: none !important;
+  clip-path: none !important;
+}
+.revealed > *, .stagger.revealed > * {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.stagger > * {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s var(--ease-expo), transform 0.7s var(--ease-expo);
+}
+
+.stagger.visible > *:nth-child(1) { opacity:1; transform:translateY(0); transition-delay:0s; }
+.stagger.visible > *:nth-child(2) { opacity:1; transform:translateY(0); transition-delay:0.1s; }
+.stagger.visible > *:nth-child(3) { opacity:1; transform:translateY(0); transition-delay:0.15s; }
+.stagger.visible > *:nth-child(4) { opacity:1; transform:translateY(0); transition-delay:0.2s; }
+.stagger.visible > *:nth-child(5) { opacity:1; transform:translateY(0); transition-delay:0.25s; }
+.stagger.visible > *:nth-child(6) { opacity:1; transform:translateY(0); transition-delay:0.3s; }
+
+/* =============================================
+   SECTION 1 — MAP & DISTANCE DATA
+   ============================================= */
+#map-section {
+  background: var(--bg-primary);
+  padding: 120px 0;
+}
+
+@media (max-width: 768px) { #map-section { padding: 80px 0; } }
+
+.map-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .map-layout { grid-template-columns: 1fr; gap: 48px; }
+}
+
+.map-visual {
+  aspect-ratio: 1;
+  position: relative;
+}
+
+.map-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.map-content {}
+
+.distance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 48px;
+}
+
+.distance-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  opacity: 0;
+  transform: translateX(24px);
+  transition: opacity 0.7s var(--ease-expo), transform 0.7s var(--ease-expo);
+}
+
+.distance-item.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.distance-item:nth-child(1) { transition-delay: 0s; }
+.distance-item:nth-child(2) { transition-delay: 0.08s; }
+.distance-item:nth-child(3) { transition-delay: 0.16s; }
+.distance-item:nth-child(4) { transition-delay: 0.24s; }
+.distance-item:nth-child(5) { transition-delay: 0.32s; }
+.distance-item:nth-child(6) { transition-delay: 0.4s; }
+
+.distance-label {
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.distance-value {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--accent);
+  font-weight: 500;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.distance-number {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.distance-unit {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--accent);
+  opacity: 0.7;
+}
+
+/* Pulsing animation for map center pin */
+@keyframes mapPulse {
+  0%, 100% { r: 16; opacity: 0.4; }
+  50% { r: 22; opacity: 0.15; }
+}
+
+@keyframes mapPulseOuter {
+  0%, 100% { r: 28; opacity: 0.15; }
+  50% { r: 36; opacity: 0.05; }
+}
+
+.pulse-ring {
+  animation: mapPulse 2.5s ease-in-out infinite;
+}
+
+.pulse-ring-outer {
+  animation: mapPulseOuter 2.5s ease-in-out infinite;
+}
+
+/* =============================================
+   SECTION 2 — NEARBY FACILITIES GRID
+   ============================================= */
+#facilities {
+  background: var(--bg-surface);
+  padding: 120px 0;
+}
+
+@media (max-width: 768px) { #facilities { padding: 80px 0; } }
+
+.facilities-header {
+  margin-bottom: 64px;
+}
+
+.facilities-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 1024px) {
+  .facilities-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 560px) {
+  .facilities-grid { grid-template-columns: 1fr; }
+}
+
+.facility-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(200,169,125,0.08);
+  padding: 40px 32px;
+  transition: transform 0.5s var(--ease-expo), border-color 0.4s, box-shadow 0.4s;
+  position: relative;
+  overflow: hidden;
+}
+
+.facility-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(200,169,125,0.06) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.facility-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(200,169,125,0.25);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+}
+
+.facility-card:hover::before {
+  opacity: 1;
+}
+
+.facility-icon {
+  font-size: 36px;
+  margin-bottom: 20px;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+.facility-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.facility-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  position: relative;
+  z-index: 1;
+}
+
+/* =============================================
+   SECTION 3 — FULL-BLEED NIGHT VIEW
+   ============================================= */
+#night-view {
+  position: relative;
+  height: 70vh;
+  min-height: 500px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.night-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.night-bg img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  animation: kenBurnsSlow 24s ease-in-out infinite alternate;
+  transform-origin: center bottom;
+}
+
+@keyframes kenBurnsSlow {
+  0%   { transform: scale(1); }
+  100% { transform: scale(1.06); }
+}
+
+.night-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(12,12,12,0.9) 0%,
+    rgba(12,12,12,0.3) 50%,
+    rgba(12,12,12,0.15) 100%
+  );
+  z-index: 1;
+}
+
+.night-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding-bottom: 80px;
+  max-width: 800px;
+}
+
+.night-text {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 56px);
+  font-weight: 500;
+  color: #FFFFFF;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  text-shadow: 0 4px 40px rgba(0,0,0,0.5);
+}
+
+.night-text em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+/* =============================================
+   SECTION 4 — TRANSPORTATION SUMMARY
+   ============================================= */
+#transport {
+  background: var(--bg-primary);
+  padding: 120px 0;
+  text-align: center;
+}
+
+@media (max-width: 768px) { #transport { padding: 80px 0; } }
+
+.transport-heading {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 80px;
+}
+
+.transport-stats {
+  display: flex;
+  justify-content: center;
+  gap: 80px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .transport-stats { gap: 48px; }
+}
+
+.transport-stat {
+  text-align: center;
+}
+
+.transport-number {
+  font-family: var(--font-display);
+  font-size: clamp(64px, 10vw, 100px);
+  font-weight: 500;
+  color: var(--accent);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+}
+
+.transport-number .counter-value {
+  font-family: var(--font-display);
+}
+
+.transport-number .counter-unit {
+  font-size: 0.45em;
+  color: var(--accent-light);
+  opacity: 0.7;
+}
+
+.transport-label {
+  font-size: 14px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-top: 16px;
+}
+
+.transport-divider {
+  width: 1px;
+  height: 80px;
+  background: rgba(200,169,125,0.2);
+  align-self: center;
+}
+
+@media (max-width: 560px) {
+  .transport-divider { display: none; }
+  .transport-stats { flex-direction: column; align-items: center; }
+}
+
+/* =============================================
+   FOOTER
+   ============================================= */
+#footer {
+  background: var(--bg-primary);
+  padding: 120px 0 64px;
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.footer-mega {
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: clamp(80px, 15vw, 200px);
+  font-weight: 700;
+  color: var(--text-primary);
+  opacity: 0.05;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  line-height: 0.85;
+}
+
+.footer-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 64px;
+  margin-bottom: 64px;
+}
+
+@media (max-width: 768px) {
+  .footer-inner { grid-template-columns: 1fr; gap: 40px; }
+}
+
+.footer-brand {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.footer-tagline {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.footer-col-title {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+}
+
+.footer-info {
+  font-size: 13px;
+  line-height: 2;
+  color: var(--text-secondary);
+}
+
+.footer-bottom {
+  position: relative;
+  z-index: 1;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-legal {
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.5;
+  line-height: 1.7;
+  max-width: 600px;
+}
+
+.footer-copy {
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.4;
+  letter-spacing: 0.1em;
+}
+
+/* =============================================
+   MAGNETIC BUTTON BASE
+   ============================================= */
+.magnetic { transition: transform 0.5s var(--ease-expo); }
+
+</style>
+</head>
+<body>
+
+<!-- Scroll Progress Bar -->
+<div id="scroll-progress"></div>
+
+<!-- Custom Cursor -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- ============================================================
+     NAVIGATION
+     ============================================================ -->
+<nav id="nav">
+  <div class="container">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo magnetic">한강 르셀</a>
+      <ul class="nav-links">
+        <li><a href="overview.html">사업개요</a></li>
+        <li><a href="units.html">세대안내</a></li>
+        <li><a href="location.html" class="active">입지환경</a></li>
+        <li><a href="amenities.html">커뮤니티</a></li>
+        <li><a href="contact.html">관심고객등록</a></li>
+      </ul>
+      <a href="contact.html" class="nav-cta magnetic">관심고객등록</a>
+      <button class="hamburger magnetic" id="hamburger" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Nav Overlay -->
+<div id="mobile-nav">
+  <ul class="mobile-nav-links">
+    <li><a href="overview.html" onclick="closeMobileNav()">사업개요</a></li>
+    <li><a href="units.html" onclick="closeMobileNav()">세대안내</a></li>
+    <li><a href="location.html" class="active" onclick="closeMobileNav()">입지환경</a></li>
+    <li><a href="amenities.html" onclick="closeMobileNav()">커뮤니티</a></li>
+    <li><a href="contact.html" onclick="closeMobileNav()">관심고객등록</a></li>
+  </ul>
+</div>
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section id="hero">
+  <div class="hero-bg">
+    <img
+      src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1920&q=80"
+      alt="서울 도심 항공 전경"
+      fetchpriority="high"
+    >
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content container">
+    <h1 class="hero-title">Premium Location</h1>
+    <p class="hero-subtitle">서울 최고의 입지를 소유하다</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION 1 — MAP & DISTANCE DATA
+     ============================================================ -->
+<section id="map-section" class="section-dark">
+  <div class="container">
+    <div class="map-layout">
+
+      <!-- Left — Abstract Map SVG -->
+      <div class="map-visual reveal">
+        <svg class="map-svg" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Concentric rings -->
+          <circle cx="200" cy="200" r="180" stroke="rgba(200,169,125,0.06)" stroke-width="1"/>
+          <circle cx="200" cy="200" r="120" stroke="rgba(200,169,125,0.10)" stroke-width="1"/>
+          <circle cx="200" cy="200" r="60" stroke="rgba(200,169,125,0.16)" stroke-width="1"/>
+
+          <!-- Grid roads -->
+          <line x1="200" y1="20" x2="200" y2="380" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+          <line x1="20" y1="200" x2="380" y2="200" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+          <line x1="60" y1="60" x2="340" y2="340" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+          <line x1="340" y1="60" x2="60" y2="340" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+          <line x1="100" y1="20" x2="100" y2="380" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+          <line x1="300" y1="20" x2="300" y2="380" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+          <line x1="20" y1="100" x2="380" y2="100" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+          <line x1="20" y1="300" x2="380" y2="300" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+
+          <!-- Han River — thick primary stroke -->
+          <path d="M10 225 Q80 195 150 215 Q220 238 280 218 Q340 198 395 215"
+            stroke="rgba(200,169,125,0.35)" stroke-width="10" fill="none" stroke-linecap="round"/>
+          <!-- Han River — thinner parallel -->
+          <path d="M10 240 Q80 210 150 230 Q220 252 280 232 Q340 212 395 228"
+            stroke="rgba(200,169,125,0.15)" stroke-width="5" fill="none" stroke-linecap="round"/>
+
+          <!-- Location pin — pulsing rings -->
+          <circle class="pulse-ring-outer" cx="200" cy="195" r="28" stroke="var(--accent)" stroke-width="1" opacity="0.15" fill="none"/>
+          <circle class="pulse-ring" cx="200" cy="195" r="16" stroke="var(--accent)" stroke-width="1.5" opacity="0.4" fill="none"/>
+          <!-- Center dot -->
+          <circle cx="200" cy="195" r="8" fill="var(--accent)" opacity="0.95"/>
+
+          <!-- Label -->
+          <text x="200" y="170" fill="#C8A97D" font-size="11" text-anchor="middle" font-family="Georgia, serif" letter-spacing="2" font-weight="600" opacity="0.9">한강 르셀</text>
+
+          <!-- Landmark dots and labels -->
+          <circle cx="290" cy="270" r="4" fill="rgba(255,255,255,0.35)"/>
+          <text x="306" y="274" fill="rgba(255,255,255,0.45)" font-size="9" font-family="sans-serif">강남역</text>
+
+          <circle cx="115" cy="245" r="4" fill="rgba(255,255,255,0.35)"/>
+          <text x="80" y="237" fill="rgba(255,255,255,0.45)" font-size="9" font-family="sans-serif">여의도</text>
+
+          <circle cx="210" cy="310" r="4" fill="rgba(255,255,255,0.35)"/>
+          <text x="228" y="315" fill="rgba(255,255,255,0.45)" font-size="9" font-family="sans-serif">한강공원</text>
+
+          <circle cx="250" cy="160" r="4" fill="rgba(255,255,255,0.35)"/>
+          <text x="268" y="164" fill="rgba(255,255,255,0.45)" font-size="9" font-family="sans-serif">반포대교</text>
+        </svg>
+      </div>
+
+      <!-- Right — Distance Data -->
+      <div class="map-content">
+        <p class="section-tag reveal">Location</p>
+        <h2 class="section-title reveal" style="color:var(--text-primary);">
+          모든 것이<br>가까운 곳
+        </h2>
+        <div class="distance-list">
+          <div class="distance-item">
+            <span class="distance-label">강남역</span>
+            <span class="distance-value">
+              <span class="distance-number counter" data-target="8">0</span>
+              <span class="distance-unit">분</span>
+            </span>
+          </div>
+          <div class="distance-item">
+            <span class="distance-label">한강공원</span>
+            <span class="distance-value">
+              <span class="distance-unit" style="margin-right:4px;">도보</span>
+              <span class="distance-number counter" data-target="3">0</span>
+              <span class="distance-unit">분</span>
+            </span>
+          </div>
+          <div class="distance-item">
+            <span class="distance-label">올림픽대로</span>
+            <span class="distance-value">
+              <span class="distance-number counter" data-target="2">0</span>
+              <span class="distance-unit">분</span>
+            </span>
+          </div>
+          <div class="distance-item">
+            <span class="distance-label">반포대교</span>
+            <span class="distance-value">
+              <span class="distance-number counter" data-target="5">0</span>
+              <span class="distance-unit">분</span>
+            </span>
+          </div>
+          <div class="distance-item">
+            <span class="distance-label">여의도 업무지구</span>
+            <span class="distance-value">
+              <span class="distance-number counter" data-target="10">0</span>
+              <span class="distance-unit">분</span>
+            </span>
+          </div>
+          <div class="distance-item">
+            <span class="distance-label">김포공항</span>
+            <span class="distance-value">
+              <span class="distance-number counter" data-target="25">0</span>
+              <span class="distance-unit">분</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION 2 — NEARBY FACILITIES GRID
+     ============================================================ -->
+<section id="facilities" class="section-surface">
+  <div class="container">
+    <div class="facilities-header">
+      <p class="section-tag reveal">Neighborhood</p>
+      <h2 class="section-title reveal">풍요로운 생활 인프라</h2>
+    </div>
+
+    <div class="facilities-grid stagger">
+      <div class="facility-card">
+        <span class="facility-icon" role="img" aria-label="교육">&#127891;</span>
+        <h3 class="facility-name">교육</h3>
+        <p class="facility-desc">반포초, 세화여중, 서울고 등 명문 학군</p>
+      </div>
+      <div class="facility-card">
+        <span class="facility-icon" role="img" aria-label="의료">&#127973;</span>
+        <h3 class="facility-name">의료</h3>
+        <p class="facility-desc">서울성모병원, 강남세브란스 인접</p>
+      </div>
+      <div class="facility-card">
+        <span class="facility-icon" role="img" aria-label="쇼핑">&#128717;&#65039;</span>
+        <h3 class="facility-name">쇼핑</h3>
+        <p class="facility-desc">신세계백화점, 고속터미널 지하상가</p>
+      </div>
+      <div class="facility-card">
+        <span class="facility-icon" role="img" aria-label="공원">&#127795;</span>
+        <h3 class="facility-name">공원</h3>
+        <p class="facility-desc">반포한강공원, 서래마을 산책로</p>
+      </div>
+      <div class="facility-card">
+        <span class="facility-icon" role="img" aria-label="문화">&#127917;</span>
+        <h3 class="facility-name">문화</h3>
+        <p class="facility-desc">국립중앙도서관, 예술의전당</p>
+      </div>
+      <div class="facility-card">
+        <span class="facility-icon" role="img" aria-label="교통">&#128647;</span>
+        <h3 class="facility-name">교통</h3>
+        <p class="facility-desc">9호선, 3호선, 올림픽대로 직접 연결</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION 3 — FULL-BLEED NIGHT VIEW
+     ============================================================ -->
+<section id="night-view">
+  <div class="night-bg">
+    <img
+      src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1920&q=80"
+      alt="한강 야경"
+      loading="lazy"
+    >
+  </div>
+  <div class="night-overlay"></div>
+  <div class="night-content reveal">
+    <p class="night-text">한강이 선사하는 야경,<br><em>매일의 특권</em></p>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION 4 — TRANSPORTATION SUMMARY
+     ============================================================ -->
+<section id="transport" class="section-dark">
+  <div class="container">
+    <h2 class="transport-heading reveal">도심 어디든, 빠르게</h2>
+
+    <div class="transport-stats reveal">
+      <div class="transport-stat">
+        <div class="transport-number">
+          <span class="counter-value counter" data-target="3">0</span>
+          <span class="counter-unit">분</span>
+        </div>
+        <p class="transport-label">한강공원</p>
+      </div>
+
+      <div class="transport-divider"></div>
+
+      <div class="transport-stat">
+        <div class="transport-number">
+          <span class="counter-value counter" data-target="8">0</span>
+          <span class="counter-unit">분</span>
+        </div>
+        <p class="transport-label">강남역</p>
+      </div>
+
+      <div class="transport-divider"></div>
+
+      <div class="transport-stat">
+        <div class="transport-number">
+          <span class="counter-value counter" data-target="25">0</span>
+          <span class="counter-unit">분</span>
+        </div>
+        <p class="transport-label">김포공항</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer id="footer">
+  <div class="footer-mega" aria-hidden="true">한강 르셀</div>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">한강 르셀</div>
+        <p class="footer-tagline">서울의 마지막 한강변<br>프라이빗 레지던스.</p>
+      </div>
+      <div>
+        <p class="footer-col-title">Contact</p>
+        <div class="footer-info">
+          <p>02-1234-5678</p>
+          <p>info@hangang-leciel.kr</p>
+          <p>월-토 10:00-18:00</p>
+        </div>
+      </div>
+      <div>
+        <p class="footer-col-title">Location</p>
+        <div class="footer-info">
+          <p>서울특별시 영등포구</p>
+          <p>한강변로 123</p>
+          <p>한강 르셀 분양사무소</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-legal">본 홈페이지의 이미지, 조감도, 배치도 등은 이해를 돕기 위한 것으로 실제와 다를 수 있습니다.</p>
+      <p class="footer-copy">&copy; 2027 한강 르셀. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+(function () {
+  'use strict';
+
+  /* ──────────────────────────────────────────
+     SCROLL PROGRESS BAR
+  ────────────────────────────────────────── */
+  var progressBar = document.getElementById('scroll-progress');
+  function updateProgress() {
+    var scrollTop = window.pageYOffset;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    progressBar.style.width = pct + '%';
+  }
+
+  /* ──────────────────────────────────────────
+     CUSTOM CURSOR
+  ────────────────────────────────────────── */
+  var cursorDot = document.getElementById('cursor-dot');
+  var cursorRing = document.getElementById('cursor-ring');
+  var mouseX = 0, mouseY = 0;
+  var ringX = 0, ringY = 0;
+
+  document.addEventListener('mousemove', function (e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    cursorDot.style.left = mouseX + 'px';
+    cursorDot.style.top = mouseY + 'px';
+  });
+
+  function animateCursor() {
+    ringX += (mouseX - ringX) * 0.12;
+    ringY += (mouseY - ringY) * 0.12;
+    cursorRing.style.left = ringX + 'px';
+    cursorRing.style.top = ringY + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+
+  // Expand ring on interactive elements
+  document.querySelectorAll('a, button, .facility-card').forEach(function (el) {
+    el.addEventListener('mouseenter', function () { cursorRing.classList.add('expanded'); });
+    el.addEventListener('mouseleave', function () { cursorRing.classList.remove('expanded'); });
+  });
+
+  /* ──────────────────────────────────────────
+     NAV SCROLL
+  ────────────────────────────────────────── */
+  var nav = document.getElementById('nav');
+  function updateNav() {
+    if (window.pageYOffset > 80) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
+    }
+  }
+
+  /* ──────────────────────────────────────────
+     MOBILE NAV
+  ────────────────────────────────────────── */
+  var hamburger = document.getElementById('hamburger');
+  var mobileNav = document.getElementById('mobile-nav');
+  var isNavOpen = false;
+
+  hamburger.addEventListener('click', function () {
+    isNavOpen = !isNavOpen;
+    hamburger.classList.toggle('open', isNavOpen);
+    mobileNav.classList.toggle('open', isNavOpen);
+    document.body.style.overflow = isNavOpen ? 'hidden' : '';
+  });
+
+  window.closeMobileNav = function () {
+    isNavOpen = false;
+    hamburger.classList.remove('open');
+    mobileNav.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  /* ──────────────────────────────────────────
+     COUNTER ANIMATION
+  ────────────────────────────────────────── */
+  var countedEls = new Set();
+
+  function animateCounter(el) {
+    if (countedEls.has(el)) return;
+    countedEls.add(el);
+    var target = parseInt(el.dataset.target, 10);
+    var duration = 2000;
+    var startTime = null;
+
+    function easeOutExpo(t) {
+      return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+    }
+
+    function step(timestamp) {
+      if (!startTime) startTime = timestamp;
+      var elapsed = timestamp - startTime;
+      var progress = Math.min(elapsed / duration, 1);
+      var eased = easeOutExpo(progress);
+      el.textContent = Math.round(eased * target);
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        el.textContent = target;
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ──────────────────────────────────────────
+     INTERSECTION OBSERVER — REVEAL
+  ────────────────────────────────────────── */
+  var revealObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        var el = entry.target;
+        el.classList.add('visible');
+
+        if (el.classList.contains('stagger')) {
+          el.classList.add('visible');
+        }
+
+        // Counters inside revealed elements
+        el.querySelectorAll('.counter').forEach(animateCounter);
+
+        revealObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.reveal, .reveal-clip, .stagger').forEach(function (el) {
+    revealObserver.observe(el);
+  });
+
+  // Distance items — individual observer with stagger
+  var distanceObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        // Animate counters inside this distance item
+        entry.target.querySelectorAll('.counter').forEach(animateCounter);
+        distanceObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  document.querySelectorAll('.distance-item').forEach(function (el) {
+    distanceObserver.observe(el);
+  });
+
+  /* ──────────────────────────────────────────
+     MAGNETIC BUTTONS
+  ────────────────────────────────────────── */
+  document.querySelectorAll('.magnetic').forEach(function (el) {
+    el.addEventListener('mousemove', function (e) {
+      var rect = el.getBoundingClientRect();
+      var x = e.clientX - rect.left - rect.width / 2;
+      var y = e.clientY - rect.top - rect.height / 2;
+      el.style.transform = 'translate(' + (x * 0.25) + 'px, ' + (y * 0.25) + 'px)';
+    });
+
+    el.addEventListener('mouseleave', function () {
+      el.style.transform = 'translate(0, 0)';
+    });
+  });
+
+  /* ──────────────────────────────────────────
+     SCROLL HANDLER
+  ────────────────────────────────────────── */
+  var ticking = false;
+  function onScroll() {
+    if (!ticking) {
+      requestAnimationFrame(function () {
+        updateProgress();
+        updateNav();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  updateProgress();
+  updateNav();
+
+  /* ──────────────────────────────────────────
+     SAFETY NET — Force reveal after 2s
+  ────────────────────────────────────────── */
+  setTimeout(function () {
+    document.querySelectorAll('.reveal, .reveal-clip, .stagger, .distance-item').forEach(function (el) {
+      if (!el.classList.contains('visible')) {
+        el.classList.add('visible', 'revealed');
+        el.querySelectorAll('.counter').forEach(animateCounter);
+      }
+    });
+  }, 2000);
+
+})();
+</script>
+</body>
+</html>

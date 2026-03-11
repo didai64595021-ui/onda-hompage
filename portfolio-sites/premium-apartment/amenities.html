@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>커뮤니티 시설 — 한강 르셀</title>
+<meta name="description" content="한강 르셀 프리미엄 커뮤니티 시설. 스카이 라운지, 인피니티 풀, 프라이빗 라이브러리, 피트니스 센터 등 호텔을 넘어선 라이프스타일.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+/* =============================================
+   CSS CUSTOM PROPERTIES
+   ============================================= */
+:root {
+  --bg-primary: #0C0C0C;
+  --bg-surface: #161614;
+  --bg-light: #F7F4F0;
+  --accent: #C8A97D;
+  --accent-light: #E2D1B5;
+  --text-primary: #E8E4DF;
+  --text-secondary: #8A8580;
+  --text-dark: #2A2A2A;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Pretendard Variable', -apple-system, sans-serif;
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* =============================================
+   RESET & BASE
+   ============================================= */
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  word-break: keep-all;
+  line-height: 1.7;
+  cursor: none;
+}
+
+img { display: block; max-width: 100%; }
+a { text-decoration: none; color: inherit; }
+button { border: none; background: none; cursor: none; font-family: inherit; }
+
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+@media (min-width: 768px) { .container { padding: 0 48px; } }
+@media (min-width: 1440px) { .container { padding: 0 80px; } }
+
+/* =============================================
+   GRAIN OVERLAY
+   ============================================= */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99990;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* =============================================
+   SCROLL PROGRESS BAR
+   ============================================= */
+#scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 0%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  z-index: 99998;
+  transition: width 0.1s linear;
+}
+
+/* =============================================
+   CUSTOM CURSOR
+   ============================================= */
+#cursor-dot {
+  position: fixed;
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s var(--ease-expo), opacity 0.3s;
+}
+
+#cursor-ring {
+  position: fixed;
+  width: 36px; height: 36px;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s var(--ease-expo), height 0.4s var(--ease-expo), border-color 0.3s, opacity 0.3s;
+}
+
+#cursor-ring.expanded {
+  width: 56px; height: 56px;
+  border-color: var(--accent-light);
+}
+
+@media (pointer: coarse) {
+  #cursor-dot, #cursor-ring { display: none; }
+  body { cursor: auto; }
+  button { cursor: pointer; }
+}
+
+/* =============================================
+   NAVIGATION
+   ============================================= */
+#nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 24px 0;
+  transition: background 0.4s var(--ease-expo), padding 0.4s var(--ease-expo);
+}
+
+#nav.scrolled {
+  background: rgba(12, 12, 12, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(200, 169, 125, 0.12);
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  position: relative;
+  z-index: 1001;
+}
+
+.nav-links {
+  display: flex;
+  gap: 40px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  transition: color 0.3s;
+  position: relative;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 0; height: 1px;
+  background: var(--accent);
+  transition: width 0.4s var(--ease-expo);
+}
+
+.nav-links a:hover { color: var(--accent); }
+.nav-links a:hover::after { width: 100%; }
+.nav-links a.active { color: var(--accent); }
+.nav-links a.active::after { width: 100%; }
+
+.nav-cta {
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 10px 24px;
+  transition: background 0.3s, color 0.3s;
+}
+
+.nav-cta:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 1001;
+  position: relative;
+  padding: 8px;
+}
+
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 1.5px;
+  background: var(--text-primary);
+  transition: transform 0.4s var(--ease-expo), opacity 0.3s;
+  transform-origin: center;
+}
+
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(4.5px, 4.5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(4.5px, -4.5px); }
+
+/* Mobile Nav Overlay */
+#mobile-nav {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 12, 12, 0.97);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s var(--ease-expo), visibility 0.5s;
+}
+
+#mobile-nav.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.mobile-nav-links {
+  list-style: none;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.mobile-nav-links li {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.5s var(--ease-expo), transform 0.5s var(--ease-expo);
+}
+
+#mobile-nav.open .mobile-nav-links li:nth-child(1) { opacity:1; transform:translateY(0); transition-delay:0.1s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(2) { opacity:1; transform:translateY(0); transition-delay:0.15s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(3) { opacity:1; transform:translateY(0); transition-delay:0.2s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(4) { opacity:1; transform:translateY(0); transition-delay:0.25s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(5) { opacity:1; transform:translateY(0); transition-delay:0.3s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(6) { opacity:1; transform:translateY(0); transition-delay:0.35s; }
+
+.mobile-nav-links a {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 6vw, 48px);
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+  transition: color 0.3s;
+}
+
+.mobile-nav-links a:hover { color: var(--accent); }
+.mobile-nav-links a.active { color: var(--accent); }
+
+@media (max-width: 900px) {
+  .nav-links, .nav-cta { display: none; }
+  .hamburger { display: flex; }
+}
+
+/* =============================================
+   HERO SECTION (60vh)
+   ============================================= */
+#hero {
+  position: relative;
+  height: 60vh;
+  min-height: 400px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero-bg img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  animation: kenBurns 18s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+@keyframes kenBurns {
+  0%   { transform: scale(1) translate(0, 0); }
+  100% { transform: scale(1.08) translate(-1%, -1%); }
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(12,12,12,0.35) 0%,
+    rgba(12,12,12,0.55) 40%,
+    rgba(12,12,12,0.80) 100%
+  );
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding-top: 80px;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 7vw, 96px);
+  line-height: 1.1;
+  color: var(--accent);
+  margin-bottom: 20px;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateY(32px);
+  animation: heroFadeUp 0.8s var(--ease-expo) 0.3s forwards;
+}
+
+.hero-subtitle {
+  font-size: clamp(14px, 1.8vw, 20px);
+  color: var(--text-primary);
+  font-weight: 300;
+  line-height: 1.7;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: heroFadeUp 0.8s var(--ease-expo) 0.6s forwards;
+}
+
+@keyframes heroFadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* =============================================
+   SECTION COMMON
+   ============================================= */
+section { overflow: hidden; }
+
+.section-dark { background: var(--bg-primary); }
+.section-surface { background: var(--bg-surface); }
+.section-light { background: var(--bg-light); }
+
+/* =============================================
+   REVEAL ANIMATIONS
+   ============================================= */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s var(--ease-expo), transform 0.8s var(--ease-expo);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-clip {
+  clip-path: inset(100% 0 0 0);
+  transition: clip-path 1s var(--ease-expo);
+}
+
+.reveal-clip.visible {
+  clip-path: inset(0% 0 0 0);
+}
+
+/* Safety net — forced reveal */
+.revealed, .reveal.revealed, .reveal-clip.revealed, .stagger.revealed {
+  opacity: 1 !important;
+  transform: none !important;
+  clip-path: none !important;
+}
+.revealed > *, .stagger.revealed > * {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.stagger > * {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s var(--ease-expo), transform 0.7s var(--ease-expo);
+}
+
+.stagger.visible > *:nth-child(1) { opacity:1; transform:translateY(0); transition-delay:0s; }
+.stagger.visible > *:nth-child(2) { opacity:1; transform:translateY(0); transition-delay:0.1s; }
+.stagger.visible > *:nth-child(3) { opacity:1; transform:translateY(0); transition-delay:0.2s; }
+.stagger.visible > *:nth-child(4) { opacity:1; transform:translateY(0); transition-delay:0.3s; }
+.stagger.visible > *:nth-child(5) { opacity:1; transform:translateY(0); transition-delay:0.4s; }
+.stagger.visible > *:nth-child(6) { opacity:1; transform:translateY(0); transition-delay:0.5s; }
+
+/* =============================================
+   SECTION TAG & TITLE
+   ============================================= */
+.section-tag {
+  font-size: 11px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 64px;
+}
+
+/* =============================================
+   BENTO GRID AMENITIES
+   ============================================= */
+#amenities-section {
+  background: var(--bg-primary);
+  padding: 120px 0;
+}
+
+@media (max-width: 768px) { #amenities-section { padding: 96px 0; } }
+
+.amenities-header { margin-bottom: 64px; }
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto auto;
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .bento-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .bento-card.wide { grid-column: span 1; }
+  .bento-card.tall { grid-row: span 1; }
+}
+
+@media (max-width: 560px) {
+  .bento-grid { grid-template-columns: 1fr; }
+}
+
+.bento-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--text-dark);
+  cursor: none;
+  transform-style: preserve-3d;
+}
+
+.bento-card.wide { grid-column: span 2; }
+.bento-card.tall { grid-row: span 2; }
+
+.bento-card-inner {
+  position: relative;
+  height: 320px;
+  overflow: hidden;
+}
+
+.bento-card.tall .bento-card-inner { height: 100%; min-height: 656px; }
+.bento-card.wide .bento-card-inner { height: 320px; }
+
+@media (max-width: 768px) {
+  .bento-card.tall .bento-card-inner { min-height: 320px; }
+}
+
+.bento-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s var(--ease-expo);
+  clip-path: inset(100% 0 0 0);
+}
+
+.bento-img.visible { clip-path: inset(0); }
+
+.bento-card:hover .bento-img { transform: scale(1.06); }
+
+.bento-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(12,12,12,0.85) 0%, rgba(12,12,12,0.3) 50%, transparent 100%);
+  transition: background 0.4s;
+}
+
+.bento-card:hover .bento-overlay {
+  background: linear-gradient(to top, rgba(12,12,12,0.9) 0%, rgba(12,12,12,0.4) 50%, rgba(12,12,12,0.1) 100%);
+}
+
+.bento-info {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 32px;
+  z-index: 1;
+}
+
+.bento-icon {
+  font-size: 28px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.bento-name {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2vw, 24px);
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.bento-desc {
+  font-size: 13px;
+  color: var(--accent-light);
+  line-height: 1.6;
+}
+
+/* =============================================
+   FULL-WIDTH LIFESTYLE IMAGE
+   ============================================= */
+#lifestyle {
+  background: var(--bg-light);
+  position: relative;
+  overflow: hidden;
+}
+
+.lifestyle-wrap {
+  position: relative;
+  height: 60vh;
+  min-height: 400px;
+  overflow: hidden;
+}
+
+.lifestyle-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lifestyle-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(12,12,12,0.65) 0%,
+    rgba(12,12,12,0.2) 40%,
+    transparent 100%
+  );
+}
+
+.lifestyle-text {
+  position: absolute;
+  bottom: 64px;
+  left: 0; right: 0;
+  text-align: center;
+  z-index: 1;
+  padding: 0 24px;
+}
+
+.lifestyle-text p {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3.5vw, 48px);
+  font-weight: 500;
+  color: #FFFFFF;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  text-shadow: 0 2px 32px rgba(0,0,0,0.4);
+}
+
+/* =============================================
+   SERVICE HIGHLIGHTS
+   ============================================= */
+#services {
+  background: var(--bg-surface);
+  padding: 120px 0;
+}
+
+@media (max-width: 768px) { #services { padding: 96px 0; } }
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+@media (max-width: 900px) {
+  .services-grid { grid-template-columns: 1fr; gap: 24px; }
+}
+
+.service-card {
+  border: 1px solid rgba(200, 169, 125, 0.12);
+  padding: 48px 36px;
+  transition: border-color 0.4s var(--ease-expo), transform 0.4s var(--ease-expo), box-shadow 0.4s;
+  position: relative;
+  background: rgba(200, 169, 125, 0.02);
+}
+
+.service-card:hover {
+  border-color: rgba(200, 169, 125, 0.35);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+}
+
+.service-icon {
+  width: 56px;
+  height: 56px;
+  border: 1px solid rgba(200, 169, 125, 0.25);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+  font-size: 22px;
+  transition: border-color 0.3s, background 0.3s;
+}
+
+.service-card:hover .service-icon {
+  border-color: var(--accent);
+  background: rgba(200, 169, 125, 0.08);
+}
+
+.service-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: var(--accent);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.service-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+}
+
+.service-desc {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+
+/* =============================================
+   FOOTER
+   ============================================= */
+#footer {
+  background: var(--bg-primary);
+  padding: 120px 0 64px;
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.footer-mega {
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: clamp(80px, 15vw, 200px);
+  font-weight: 700;
+  color: var(--text-primary);
+  opacity: 0.05;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  line-height: 0.85;
+}
+
+.footer-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 64px;
+  margin-bottom: 64px;
+}
+
+@media (max-width: 768px) {
+  .footer-inner { grid-template-columns: 1fr; gap: 40px; }
+}
+
+.footer-brand {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.footer-tagline {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.footer-col-title {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+}
+
+.footer-info {
+  font-size: 13px;
+  line-height: 2;
+  color: var(--text-secondary);
+}
+
+.footer-bottom {
+  position: relative;
+  z-index: 1;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-legal {
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.5;
+  line-height: 1.7;
+  max-width: 600px;
+}
+
+.footer-copy {
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.4;
+  letter-spacing: 0.1em;
+}
+
+/* =============================================
+   MAGNETIC BUTTON BASE
+   ============================================= */
+.magnetic { transition: transform 0.5s var(--ease-expo); }
+
+</style>
+</head>
+<body>
+
+<!-- Scroll Progress Bar -->
+<div id="scroll-progress"></div>
+
+<!-- Custom Cursor -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- ============================================================
+     NAVIGATION
+     ============================================================ -->
+<nav id="nav">
+  <div class="container">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo magnetic">한강 르셀</a>
+      <ul class="nav-links">
+        <li><a href="overview.html">사업개요</a></li>
+        <li><a href="units.html">세대안내</a></li>
+        <li><a href="location.html">입지환경</a></li>
+        <li><a href="amenities.html" class="active">커뮤니티</a></li>
+        <li><a href="contact.html">관심고객등록</a></li>
+      </ul>
+      <a href="contact.html" class="nav-cta magnetic">상담 예약</a>
+      <button class="hamburger magnetic" id="hamburger" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Nav Overlay -->
+<div id="mobile-nav">
+  <ul class="mobile-nav-links">
+    <li><a href="overview.html" onclick="closeMobileNav()">사업개요</a></li>
+    <li><a href="units.html" onclick="closeMobileNav()">세대안내</a></li>
+    <li><a href="location.html" onclick="closeMobileNav()">입지환경</a></li>
+    <li><a href="amenities.html" class="active" onclick="closeMobileNav()">커뮤니티</a></li>
+    <li><a href="contact.html" onclick="closeMobileNav()">관심고객등록</a></li>
+    <li><a href="contact.html" onclick="closeMobileNav()">상담 예약</a></li>
+  </ul>
+</div>
+
+<!-- ============================================================
+     HERO (60vh)
+     ============================================================ -->
+<section id="hero">
+  <div class="hero-bg">
+    <img
+      src="https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1920&q=80"
+      alt="한강 르셀 럭셔리 풀"
+      fetchpriority="high"
+    >
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content container">
+    <h1 class="hero-title">일상 속의 리조트</h1>
+    <p class="hero-subtitle">호텔을 넘어선 라이프스타일</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION 1 — BENTO GRID AMENITIES (dark bg)
+     ============================================================ -->
+<section id="amenities-section" class="section-dark">
+  <div class="container">
+    <div class="amenities-header">
+      <p class="section-tag reveal">Amenities</p>
+      <h2 class="section-title reveal">프리미엄 커뮤니티 시설</h2>
+    </div>
+
+    <div class="bento-grid stagger">
+
+      <!-- 1. Sky Lounge (49F) — WIDE -->
+      <div class="bento-card wide tilt-card">
+        <div class="bento-card-inner">
+          <img
+            class="bento-img"
+            src="https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?w=900&q=80"
+            alt="스카이 라운지"
+            loading="lazy"
+          >
+          <div class="bento-overlay"></div>
+          <div class="bento-info">
+            <span class="bento-icon" aria-hidden="true">&#x1F942;</span>
+            <h3 class="bento-name">스카이 라운지</h3>
+            <p class="bento-desc">49층, 서울 스카이라인과 한강을 한눈에. 프라이빗 파티와 비즈니스 미팅을 위한 최고의 공간.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Infinity Pool — TALL -->
+      <div class="bento-card tall tilt-card">
+        <div class="bento-card-inner">
+          <img
+            class="bento-img"
+            src="https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=600&q=80"
+            alt="인피니티 풀"
+            loading="lazy"
+          >
+          <div class="bento-overlay"></div>
+          <div class="bento-info">
+            <span class="bento-icon" aria-hidden="true">&#x1F3CA;</span>
+            <h3 class="bento-name">인피니티 풀</h3>
+            <p class="bento-desc">한강을 바라보는 49층 루프탑 인피니티 풀. 사계절 항온 시스템.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Private Library — normal -->
+      <div class="bento-card tilt-card">
+        <div class="bento-card-inner">
+          <img
+            class="bento-img"
+            src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=600&q=80"
+            alt="프라이빗 라이브러리"
+            loading="lazy"
+          >
+          <div class="bento-overlay"></div>
+          <div class="bento-info">
+            <span class="bento-icon" aria-hidden="true">&#x1F4DA;</span>
+            <h3 class="bento-name">프라이빗 라이브러리</h3>
+            <p class="bento-desc">2,000권 큐레이션 장서와 독서 라운지</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Golf Range — normal -->
+      <div class="bento-card tilt-card">
+        <div class="bento-card-inner">
+          <img
+            class="bento-img"
+            src="https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?w=600&q=80"
+            alt="골프 레인지"
+            loading="lazy"
+          >
+          <div class="bento-overlay"></div>
+          <div class="bento-info">
+            <span class="bento-icon" aria-hidden="true">&#x26F3;</span>
+            <h3 class="bento-name">골프 레인지</h3>
+            <p class="bento-desc">최신 스크린골프 시뮬레이터와 퍼팅 연습장</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Kids Academy — normal -->
+      <div class="bento-card tilt-card">
+        <div class="bento-card-inner">
+          <img
+            class="bento-img"
+            src="https://images.unsplash.com/photo-1587654780291-39c9404d7dd0?w=600&q=80"
+            alt="키즈 아카데미"
+            loading="lazy"
+          >
+          <div class="bento-overlay"></div>
+          <div class="bento-info">
+            <span class="bento-icon" aria-hidden="true">&#x1F476;</span>
+            <h3 class="bento-name">키즈 아카데미</h3>
+            <p class="bento-desc">전문 교육 프로그램과 안전한 놀이 공간</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Fitness Center — normal -->
+      <div class="bento-card tilt-card">
+        <div class="bento-card-inner">
+          <img
+            class="bento-img"
+            src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80"
+            alt="피트니스 센터"
+            loading="lazy"
+          >
+          <div class="bento-overlay"></div>
+          <div class="bento-info">
+            <span class="bento-icon" aria-hidden="true">&#x1F4AA;</span>
+            <h3 class="bento-name">피트니스 센터</h3>
+            <p class="bento-desc">퍼스널 트레이닝 스튜디오와 최첨단 기구</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION 2 — FULL-WIDTH LIFESTYLE IMAGE (light bg)
+     ============================================================ -->
+<section id="lifestyle" class="section-light">
+  <div class="lifestyle-wrap">
+    <img
+      class="lifestyle-img reveal-clip"
+      src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80"
+      alt="일상의 모든 순간이 특별해지는 공간"
+      loading="lazy"
+    >
+    <div class="lifestyle-gradient"></div>
+    <div class="lifestyle-text">
+      <p class="reveal">일상의 모든 순간이 특별해지는 공간</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION 3 — SERVICE HIGHLIGHTS (surface bg)
+     ============================================================ -->
+<section id="services" class="section-surface">
+  <div class="container">
+    <div class="services-grid stagger">
+
+      <!-- 24시간 컨시어지 -->
+      <div class="service-card">
+        <div class="service-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="none"/>
+            <circle cx="12" cy="10" r="3" fill="none"/>
+            <path d="M6.5 19.5c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5" fill="none"/>
+          </svg>
+        </div>
+        <h3 class="service-title">24시간 컨시어지</h3>
+        <p class="service-desc">전담 컨시어지가 입주민의 모든 요청에 응대합니다</p>
+      </div>
+
+      <!-- 발레 파킹 -->
+      <div class="service-card">
+        <div class="service-icon">
+          <svg viewBox="0 0 24 24">
+            <rect x="1" y="3" width="15" height="13" rx="2" fill="none"/>
+            <path d="M16 8h4l3 5v4h-7V8z" fill="none"/>
+            <circle cx="5.5" cy="18.5" r="2.5" fill="none"/>
+            <circle cx="18.5" cy="18.5" r="2.5" fill="none"/>
+          </svg>
+        </div>
+        <h3 class="service-title">발레 파킹</h3>
+        <p class="service-desc">전문 발레 파킹 서비스로 편안한 귀가</p>
+      </div>
+
+      <!-- 하우스키핑 -->
+      <div class="service-card">
+        <div class="service-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z" fill="none"/>
+            <polyline points="9 22 9 12 15 12 15 22" fill="none"/>
+          </svg>
+        </div>
+        <h3 class="service-title">하우스키핑</h3>
+        <p class="service-desc">정기적인 하우스키핑 및 세탁 서비스</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer id="footer">
+  <div class="footer-mega" aria-hidden="true">한강 르셀</div>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">한강 르셀</div>
+        <p class="footer-tagline">서울의 마지막 한강변<br>프라이빗 레지던스.</p>
+      </div>
+      <div>
+        <p class="footer-col-title">Contact</p>
+        <div class="footer-info">
+          <p>02-1234-5678</p>
+          <p>info@hangang-leciel.kr</p>
+          <p>월-토 10:00-18:00</p>
+        </div>
+      </div>
+      <div>
+        <p class="footer-col-title">Location</p>
+        <div class="footer-info">
+          <p>서울특별시 영등포구</p>
+          <p>한강변로 123</p>
+          <p>한강 르셀 분양사무소</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-legal">본 홈페이지의 이미지, 조감도, 배치도 등은 이해를 돕기 위한 것으로 실제와 다를 수 있습니다.</p>
+      <p class="footer-copy">&copy; 2027 한강 르셀. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+(function () {
+  'use strict';
+
+  /* ──────────────────────────────────────────
+     CUSTOM CURSOR
+  ────────────────────────────────────────── */
+  var dot = document.getElementById('cursor-dot');
+  var ring = document.getElementById('cursor-ring');
+  var mx = -100, my = -100;
+  var rx = -100, ry = -100;
+
+  document.addEventListener('mousemove', function (e) {
+    mx = e.clientX;
+    my = e.clientY;
+    dot.style.left = mx + 'px';
+    dot.style.top = my + 'px';
+  });
+
+  function animateRing() {
+    rx += (mx - rx) * 0.15;
+    ry += (my - ry) * 0.15;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  // Expand cursor on interactive elements
+  document.querySelectorAll('a, button, .bento-card, .service-card').forEach(function (el) {
+    el.addEventListener('mouseenter', function () { ring.classList.add('expanded'); });
+    el.addEventListener('mouseleave', function () { ring.classList.remove('expanded'); });
+  });
+
+  /* ──────────────────────────────────────────
+     SCROLL PROGRESS BAR
+  ────────────────────────────────────────── */
+  var scrollProgress = document.getElementById('scroll-progress');
+
+  function updateProgress() {
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    scrollProgress.style.width = progress + '%';
+  }
+
+  /* ──────────────────────────────────────────
+     NAV SCROLL
+  ────────────────────────────────────────── */
+  var nav = document.getElementById('nav');
+  function updateNav() {
+    if (window.pageYOffset > 80) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
+    }
+  }
+
+  /* ──────────────────────────────────────────
+     MOBILE NAV
+  ────────────────────────────────────────── */
+  var hamburger = document.getElementById('hamburger');
+  var mobileNav = document.getElementById('mobile-nav');
+  var isNavOpen = false;
+
+  hamburger.addEventListener('click', function () {
+    isNavOpen = !isNavOpen;
+    hamburger.classList.toggle('open', isNavOpen);
+    mobileNav.classList.toggle('open', isNavOpen);
+    document.body.style.overflow = isNavOpen ? 'hidden' : '';
+  });
+
+  window.closeMobileNav = function () {
+    isNavOpen = false;
+    hamburger.classList.remove('open');
+    mobileNav.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  /* ──────────────────────────────────────────
+     INTERSECTION OBSERVER — REVEAL
+  ────────────────────────────────────────── */
+  var revealObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        var el = entry.target;
+        el.classList.add('visible');
+        revealObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.reveal, .reveal-clip, .stagger').forEach(function (el) {
+    revealObserver.observe(el);
+  });
+
+  /* ──────────────────────────────────────────
+     BENTO IMAGES — CLIP REVEAL ON SCROLL
+  ────────────────────────────────────────── */
+  var bentoObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        bentoObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.bento-img').forEach(function (el) {
+    bentoObserver.observe(el);
+  });
+
+  /* ──────────────────────────────────────────
+     MAGNETIC BUTTONS
+  ────────────────────────────────────────── */
+  var magneticBtns = document.querySelectorAll('.magnetic');
+
+  magneticBtns.forEach(function (btn) {
+    btn.addEventListener('mousemove', function (e) {
+      var rect = btn.getBoundingClientRect();
+      var bx = rect.left + rect.width / 2;
+      var by = rect.top + rect.height / 2;
+      var dx = e.clientX - bx;
+      var dy = e.clientY - by;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+      var radius = 80;
+      if (dist < radius) {
+        var strength = (1 - dist / radius) * 0.4;
+        btn.style.transform = 'translate(' + dx * strength + 'px, ' + dy * strength + 'px)';
+      }
+    });
+    btn.addEventListener('mouseleave', function () {
+      btn.style.transform = 'translate(0, 0)';
+      btn.style.transition = 'transform 0.6s cubic-bezier(0.16,1,0.3,1)';
+    });
+    btn.addEventListener('mouseenter', function () {
+      btn.style.transition = 'transform 0.2s cubic-bezier(0.16,1,0.3,1)';
+    });
+  });
+
+  /* ──────────────────────────────────────────
+     3D TILT — BENTO CARDS
+  ────────────────────────────────────────── */
+  document.querySelectorAll('.tilt-card').forEach(function (card) {
+    card.addEventListener('mousemove', function (e) {
+      var rect = card.getBoundingClientRect();
+      var cx = rect.left + rect.width / 2;
+      var cy = rect.top + rect.height / 2;
+      var dx = (e.clientX - cx) / (rect.width / 2);
+      var dy = (e.clientY - cy) / (rect.height / 2);
+      var rx = -dy * 8;
+      var ry = dx * 8;
+      card.style.transform = 'perspective(800px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) scale(1.02)';
+      card.style.boxShadow = (ry * 2) + 'px ' + (rx * 2) + 'px 32px rgba(0,0,0,0.4)';
+    });
+    card.addEventListener('mouseleave', function () {
+      card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) scale(1)';
+      card.style.boxShadow = '';
+      card.style.transition = 'transform 0.6s cubic-bezier(0.16,1,0.3,1), box-shadow 0.6s';
+    });
+    card.addEventListener('mouseenter', function () {
+      card.style.transition = 'transform 0.15s ease, box-shadow 0.15s';
+    });
+  });
+
+  /* ──────────────────────────────────────────
+     MAIN SCROLL HANDLER
+  ────────────────────────────────────────── */
+  var ticking = false;
+
+  function onScroll() {
+    if (!ticking) {
+      requestAnimationFrame(function () {
+        updateProgress();
+        updateNav();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // Initial call
+  updateProgress();
+  updateNav();
+
+  /* ──────────────────────────────────────────
+     SAFETY NET — Force all reveals visible
+  ────────────────────────────────────────── */
+  setTimeout(function () {
+    document.querySelectorAll('.reveal, .reveal-clip, .stagger, [class*="reveal"]').forEach(function (el) {
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+      el.style.clipPath = 'none';
+      el.classList.add('visible');
+      el.classList.add('revealed');
+    });
+    document.querySelectorAll('.bento-img').forEach(function (el) {
+      el.classList.add('visible');
+    });
+  }, 2000);
+
+})();
+</script>
+
+</body>
+</html>

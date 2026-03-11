@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사업개요 — 한강 르셀</title>
+<meta name="description" content="한강 르셀 사업개요. 서울 영등포구 한강변 최고급 프라이빗 레지던스, 지하4층~지상49층, 156세대, 2027년 입주 예정.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+/* =============================================
+   CSS CUSTOM PROPERTIES
+   ============================================= */
+:root {
+  --bg-primary: #0C0C0C;
+  --bg-surface: #161614;
+  --bg-light: #F7F4F0;
+  --accent: #C8A97D;
+  --accent-light: #E2D1B5;
+  --text-primary: #E8E4DF;
+  --text-secondary: #8A8580;
+  --text-dark: #2A2A2A;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Pretendard Variable', -apple-system, sans-serif;
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* =============================================
+   RESET & BASE
+   ============================================= */
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  word-break: keep-all;
+  line-height: 1.7;
+  cursor: none;
+}
+
+/* Grain texture overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+img { display: block; max-width: 100%; }
+a { text-decoration: none; color: inherit; }
+button { border: none; background: none; cursor: none; font-family: inherit; }
+
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+@media (min-width: 768px) { .container { padding: 0 48px; } }
+@media (min-width: 1440px) { .container { padding: 0 80px; } }
+
+/* =============================================
+   SCROLL PROGRESS BAR
+   ============================================= */
+#scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 0%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  z-index: 99998;
+  transition: width 0.1s linear;
+}
+
+/* =============================================
+   CUSTOM CURSOR
+   ============================================= */
+#cursor-dot {
+  position: fixed;
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s var(--ease-expo), opacity 0.3s;
+}
+
+#cursor-ring {
+  position: fixed;
+  width: 36px; height: 36px;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s var(--ease-expo), height 0.4s var(--ease-expo), border-color 0.3s, opacity 0.3s;
+}
+
+#cursor-ring.expanded {
+  width: 56px; height: 56px;
+  border-color: var(--accent-light);
+}
+
+@media (pointer: coarse) {
+  #cursor-dot, #cursor-ring { display: none; }
+  body { cursor: auto; }
+  button { cursor: pointer; }
+}
+
+/* =============================================
+   NAVIGATION
+   ============================================= */
+#nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 24px 0;
+  transition: background 0.4s var(--ease-expo), padding 0.4s var(--ease-expo);
+}
+
+#nav.scrolled {
+  background: rgba(12, 12, 12, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(200, 169, 125, 0.12);
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  position: relative;
+  z-index: 1001;
+}
+
+.nav-links {
+  display: flex;
+  gap: 40px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  transition: color 0.3s;
+  position: relative;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 0; height: 1px;
+  background: var(--accent);
+  transition: width 0.4s var(--ease-expo);
+}
+
+.nav-links a:hover { color: var(--accent); }
+.nav-links a:hover::after { width: 100%; }
+.nav-links a.active { color: var(--accent); }
+.nav-links a.active::after { width: 100%; }
+
+.nav-cta {
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 10px 24px;
+  transition: background 0.3s, color 0.3s;
+  display: inline-block;
+}
+
+.nav-cta:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 1001;
+  position: relative;
+  padding: 8px;
+}
+
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 1.5px;
+  background: var(--text-primary);
+  transition: transform 0.4s var(--ease-expo), opacity 0.3s;
+  transform-origin: center;
+}
+
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(4.5px, 4.5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(4.5px, -4.5px); }
+
+/* Mobile Nav Overlay */
+#mobile-nav {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 12, 12, 0.97);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s var(--ease-expo), visibility 0.5s;
+}
+
+#mobile-nav.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.mobile-nav-links {
+  list-style: none;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.mobile-nav-links li {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.5s var(--ease-expo), transform 0.5s var(--ease-expo);
+}
+
+#mobile-nav.open .mobile-nav-links li:nth-child(1) { opacity:1; transform:translateY(0); transition-delay:0.1s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(2) { opacity:1; transform:translateY(0); transition-delay:0.15s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(3) { opacity:1; transform:translateY(0); transition-delay:0.2s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(4) { opacity:1; transform:translateY(0); transition-delay:0.25s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(5) { opacity:1; transform:translateY(0); transition-delay:0.3s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(6) { opacity:1; transform:translateY(0); transition-delay:0.35s; }
+
+.mobile-nav-links a {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 6vw, 48px);
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+  transition: color 0.3s;
+}
+
+.mobile-nav-links a:hover { color: var(--accent); }
+.mobile-nav-links a.active { color: var(--accent); }
+
+@media (max-width: 900px) {
+  .nav-links, .nav-cta { display: none; }
+  .hamburger { display: flex; }
+}
+
+/* =============================================
+   HERO SECTION
+   ============================================= */
+#hero {
+  position: relative;
+  height: 75vh;
+  min-height: 500px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero-bg img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  animation: kenBurns 18s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+@keyframes kenBurns {
+  0%   { transform: scale(1) translate(0, 0); }
+  100% { transform: scale(1.08) translate(-1%, -1%); }
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(12,12,12,0.3) 0%,
+    rgba(12,12,12,0.45) 40%,
+    rgba(12,12,12,0.85) 100%
+  );
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  padding-bottom: 80px;
+}
+
+.hero-label {
+  font-size: 11px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: heroFadeUp 0.8s var(--ease-expo) 0.3s forwards;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(56px, 9vw, 140px);
+  line-height: 0.95;
+  color: var(--accent);
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+  opacity: 0;
+  transform: translateY(32px);
+  animation: heroFadeUp 0.8s var(--ease-expo) 0.5s forwards;
+}
+
+.hero-subtitle {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2.5vw, 32px);
+  color: var(--text-primary);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: heroFadeUp 0.8s var(--ease-expo) 0.7s forwards;
+}
+
+@keyframes heroFadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* =============================================
+   SECTION COMMON
+   ============================================= */
+section { overflow: hidden; }
+
+.section-dark { background: var(--bg-primary); }
+.section-surface { background: var(--bg-surface); }
+.section-light { background: var(--bg-light); }
+
+.section-tag {
+  font-size: 11px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 64px;
+}
+
+.section-title-dark {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 500;
+  color: var(--text-dark);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 64px;
+}
+
+/* =============================================
+   REVEAL ANIMATIONS
+   ============================================= */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s var(--ease-expo), transform 0.8s var(--ease-expo);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-clip {
+  clip-path: inset(100% 0 0 0);
+  transition: clip-path 1s var(--ease-expo);
+}
+
+.reveal-clip.visible {
+  clip-path: inset(0% 0 0 0);
+}
+
+/* Safety net — forced reveal */
+.revealed, .reveal.revealed, .reveal-clip.revealed, .stagger.revealed {
+  opacity: 1 !important;
+  transform: none !important;
+  clip-path: none !important;
+}
+.revealed > *, .stagger.revealed > * {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.stagger > * {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s var(--ease-expo), transform 0.7s var(--ease-expo);
+}
+
+.stagger.visible > *:nth-child(1) { opacity:1; transform:translateY(0); transition-delay:0s; }
+.stagger.visible > *:nth-child(2) { opacity:1; transform:translateY(0); transition-delay:0.1s; }
+.stagger.visible > *:nth-child(3) { opacity:1; transform:translateY(0); transition-delay:0.2s; }
+.stagger.visible > *:nth-child(4) { opacity:1; transform:translateY(0); transition-delay:0.3s; }
+.stagger.visible > *:nth-child(5) { opacity:1; transform:translateY(0); transition-delay:0.4s; }
+.stagger.visible > *:nth-child(6) { opacity:1; transform:translateY(0); transition-delay:0.5s; }
+.stagger.visible > *:nth-child(7) { opacity:1; transform:translateY(0); transition-delay:0.6s; }
+
+/* =============================================
+   PROJECT SUMMARY TABLE
+   ============================================= */
+#project-summary {
+  background: var(--bg-primary);
+  padding: 120px 0;
+}
+
+@media (max-width: 768px) { #project-summary { padding: 96px 0; } }
+
+.summary-table {
+  max-width: 800px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 24px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  gap: 24px;
+}
+
+.summary-label {
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  flex-shrink: 0;
+  min-width: 100px;
+}
+
+.summary-value {
+  font-family: var(--font-display);
+  font-size: clamp(16px, 2vw, 20px);
+  color: var(--text-primary);
+  font-weight: 400;
+  text-align: right;
+}
+
+.summary-value-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-weight: 400;
+  margin-left: 8px;
+}
+
+@media (max-width: 560px) {
+  .summary-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .summary-value {
+    text-align: left;
+  }
+}
+
+/* =============================================
+   BIG NUMBERS / "THE DATA"
+   ============================================= */
+#the-data {
+  background: var(--bg-surface);
+  padding: 120px 0;
+}
+
+@media (max-width: 768px) { #the-data { padding: 96px 0; } }
+
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .data-grid {
+    grid-template-columns: 1fr;
+    gap: 64px;
+  }
+}
+
+.data-item {
+  position: relative;
+}
+
+.data-number {
+  font-family: var(--font-display);
+  font-size: clamp(80px, 10vw, 120px);
+  font-weight: 500;
+  color: var(--accent);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  margin-bottom: 16px;
+}
+
+.data-number.breathing {
+  animation: breathing 3s ease-in-out infinite;
+}
+
+@keyframes breathing {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.data-label {
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.data-divider {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 80px;
+  background: rgba(200,169,125,0.2);
+}
+
+@media (max-width: 768px) {
+  .data-divider { display: none; }
+}
+
+.data-item:last-child .data-divider { display: none; }
+
+/* =============================================
+   BRAND STORY
+   ============================================= */
+#brand-story {
+  background: var(--bg-primary);
+  padding: 120px 0;
+  position: relative;
+}
+
+@media (max-width: 768px) { #brand-story { padding: 96px 0; } }
+
+.story-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .story-layout {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+}
+
+.story-content {}
+
+.story-body {
+  font-size: clamp(15px, 1.5vw, 18px);
+  line-height: 1.9;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.word-reveal .word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s var(--ease-expo), transform 0.6s var(--ease-expo);
+}
+
+.word-reveal.visible .word {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.story-image {
+  position: relative;
+  overflow: hidden;
+}
+
+.story-image img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4/5;
+  object-fit: cover;
+}
+
+.story-image-border {
+  position: absolute;
+  inset: 16px;
+  border: 1px solid rgba(200,169,125,0.3);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* =============================================
+   KEY DIFFERENTIATORS
+   ============================================= */
+#differentiators {
+  background: var(--bg-light);
+  padding: 120px 0;
+}
+
+@media (max-width: 768px) { #differentiators { padding: 96px 0; } }
+
+.diff-tag {
+  font-size: 11px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--text-dark);
+  opacity: 0.5;
+  margin-bottom: 24px;
+}
+
+.diff-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+@media (max-width: 900px) {
+  .diff-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+.tilt-card {
+  background: #FFFFFF;
+  padding: 48px 40px;
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition: transform 0.4s var(--ease-expo), box-shadow 0.4s;
+  cursor: none;
+}
+
+.tilt-card:hover {
+  box-shadow: 0 24px 64px rgba(0,0,0,0.08);
+}
+
+.tilt-card-icon {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tilt-card-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.tilt-card-title {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.2vw, 28px);
+  font-weight: 500;
+  color: var(--text-dark);
+  margin-bottom: 16px;
+  line-height: 1.3;
+}
+
+.tilt-card-desc {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text-dark);
+  opacity: 0.6;
+}
+
+.tilt-card-accent {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s var(--ease-expo);
+}
+
+.tilt-card:hover .tilt-card-accent {
+  transform: scaleX(1);
+}
+
+/* =============================================
+   FULL-WIDTH IMAGE SECTION
+   ============================================= */
+#fullwidth-image {
+  position: relative;
+  height: 60vh;
+  min-height: 400px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fullwidth-bg {
+  position: absolute;
+  inset: 0;
+}
+
+.fullwidth-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fullwidth-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(12,12,12,0.4) 0%,
+    rgba(12,12,12,0.6) 50%,
+    rgba(12,12,12,0.4) 100%
+  );
+  z-index: 1;
+}
+
+.fullwidth-text {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 0 24px;
+}
+
+.fullwidth-text h2 {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4.5vw, 56px);
+  font-weight: 500;
+  color: #FFFFFF;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 40px rgba(0,0,0,0.4);
+}
+
+/* =============================================
+   FOOTER
+   ============================================= */
+#footer {
+  background: var(--bg-primary);
+  padding: 120px 0 64px;
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.footer-mega {
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: clamp(80px, 15vw, 200px);
+  font-weight: 700;
+  color: var(--text-primary);
+  opacity: 0.05;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  line-height: 0.85;
+}
+
+.footer-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 64px;
+  margin-bottom: 64px;
+}
+
+@media (max-width: 768px) {
+  .footer-inner { grid-template-columns: 1fr; gap: 40px; }
+}
+
+.footer-brand {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.footer-tagline {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.footer-col-title {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+}
+
+.footer-info {
+  font-size: 13px;
+  line-height: 2;
+  color: var(--text-secondary);
+}
+
+.footer-bottom {
+  position: relative;
+  z-index: 1;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-legal {
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.5;
+  line-height: 1.7;
+  max-width: 600px;
+}
+
+.footer-copy {
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.4;
+  letter-spacing: 0.1em;
+}
+
+/* =============================================
+   MAGNETIC BUTTON BASE
+   ============================================= */
+.magnetic { transition: transform 0.5s var(--ease-expo); }
+
+</style>
+</head>
+<body>
+
+<!-- Scroll Progress Bar -->
+<div id="scroll-progress"></div>
+
+<!-- Custom Cursor -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- ============================================================
+     NAVIGATION
+     ============================================================ -->
+<nav id="nav">
+  <div class="container">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo magnetic">한강 르셀</a>
+      <ul class="nav-links">
+        <li><a href="overview.html" class="active">사업개요</a></li>
+        <li><a href="units.html">세대안내</a></li>
+        <li><a href="location.html">입지환경</a></li>
+        <li><a href="amenities.html">커뮤니티</a></li>
+        <li><a href="contact.html">관심고객등록</a></li>
+      </ul>
+      <a href="contact.html" class="nav-cta magnetic">상담 예약</a>
+      <button class="hamburger magnetic" id="hamburger" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Nav Overlay -->
+<div id="mobile-nav">
+  <ul class="mobile-nav-links">
+    <li><a href="overview.html" class="active" onclick="closeMobileNav()">사업개요</a></li>
+    <li><a href="units.html" onclick="closeMobileNav()">세대안내</a></li>
+    <li><a href="location.html" onclick="closeMobileNav()">입지환경</a></li>
+    <li><a href="amenities.html" onclick="closeMobileNav()">커뮤니티</a></li>
+    <li><a href="contact.html" onclick="closeMobileNav()">관심고객등록</a></li>
+    <li><a href="contact.html" onclick="closeMobileNav()">상담 예약</a></li>
+  </ul>
+</div>
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section id="hero">
+  <div class="hero-bg">
+    <img
+      src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=80"
+      alt="한강 르셀 건축 렌더링"
+      fetchpriority="high"
+    >
+  </div>
+  <div class="hero-overlay"></div>
+
+  <div class="hero-content container">
+    <p class="hero-label">Hangang Le Ciel</p>
+    <h1 class="hero-title">한강 르셀</h1>
+    <p class="hero-subtitle">사업개요</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     PROJECT SUMMARY TABLE
+     ============================================================ -->
+<section id="project-summary" class="section-dark">
+  <div class="container">
+    <p class="section-tag reveal">Project Overview</p>
+    <h2 class="section-title reveal">프로젝트 개요</h2>
+
+    <div class="summary-table stagger">
+      <div class="summary-row">
+        <span class="summary-label">사업명</span>
+        <span class="summary-value">한강 르셀 <span class="summary-value-sub">Hangang Le Ciel</span></span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">위치</span>
+        <span class="summary-value">서울특별시 영등포구 한강변로 123</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">규모</span>
+        <span class="summary-value">지하4층 ~ 지상49층, 1개동</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">세대수</span>
+        <span class="summary-value">총 156세대</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">시행사</span>
+        <span class="summary-value">㈜한강개발</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">시공사</span>
+        <span class="summary-value">대한건설</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">입주예정</span>
+        <span class="summary-value">2027년 하반기</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     BIG NUMBERS / "THE DATA"
+     ============================================================ -->
+<section id="the-data" class="section-surface">
+  <div class="container">
+    <div class="data-grid">
+      <div class="data-item reveal">
+        <div class="data-number" id="counter-156"><span class="counter" data-target="156">0</span></div>
+        <div class="data-label">세대</div>
+        <div class="data-divider"></div>
+      </div>
+      <div class="data-item reveal">
+        <div class="data-number" id="counter-49"><span class="counter" data-target="49">0</span><span style="font-size: 0.5em; vertical-align: baseline;">F</span></div>
+        <div class="data-label">지상 최고층</div>
+        <div class="data-divider"></div>
+      </div>
+      <div class="data-item reveal">
+        <div class="data-number" id="counter-2027"><span class="counter" data-target="2027">0</span></div>
+        <div class="data-label">입주 예정</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     BRAND STORY
+     ============================================================ -->
+<section id="brand-story" class="section-dark">
+  <div class="container">
+    <p class="section-tag reveal">Brand Story</p>
+    <h2 class="section-title reveal">당신의 삶을 재정의하는 선언</h2>
+
+    <div class="story-layout">
+      <div class="story-content">
+        <p class="story-body word-reveal reveal">
+          한강 르셀은 단순한 주거 공간이 아닙니다.
+          서울의 심장부, 한강이 흐르는 바로 그 자리에서
+          삶의 새로운 기준을 제시합니다.
+          156개의 독립된 세계, 각각의 공간은
+          오직 주인만을 위한 한강 파노라마를 품고 있습니다.
+        </p>
+        <p class="story-body word-reveal reveal">
+          세계적인 건축가의 철학과 최고급 소재의 만남,
+          그리고 시간이 지날수록 빛나는 공간 설계.
+          완벽한 프라이버시와 럭셔리의 교차점에서 탄생한
+          한강 르셀은 다음 세대로 전해질 유산이자,
+          당신의 라이프스타일 그 자체입니다.
+        </p>
+      </div>
+      <div class="story-image reveal-clip">
+        <img
+          src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80"
+          alt="한강 르셀 럭셔리 인테리어"
+          loading="lazy"
+        >
+        <div class="story-image-border"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     KEY DIFFERENTIATORS
+     ============================================================ -->
+<section id="differentiators" class="section-light">
+  <div class="container">
+    <p class="diff-tag reveal">Key Differentiators</p>
+    <h2 class="section-title-dark reveal">한강 르셀만의 가치</h2>
+
+    <div class="diff-grid">
+      <div class="tilt-card reveal">
+        <div class="tilt-card-icon">
+          <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M28 4L4 20v24l24 8 24-8V20L28 4z" stroke="#C8A97D" stroke-width="1.5" fill="none"/>
+            <path d="M28 12L12 22v16l16 6 16-6V22L28 12z" stroke="#C8A97D" stroke-width="1" opacity="0.5" fill="none"/>
+            <line x1="28" y1="4" x2="28" y2="52" stroke="#C8A97D" stroke-width="0.75" opacity="0.3"/>
+            <circle cx="28" cy="28" r="3" fill="#C8A97D" opacity="0.6"/>
+          </svg>
+        </div>
+        <h3 class="tilt-card-title">한강 조망</h3>
+        <p class="tilt-card-desc">156세대 전 세대 한강 조망이 가능한 독보적 배치 설계. 거실, 침실, 주방 어디서든 한강의 사계절을 누리세요.</p>
+        <div class="tilt-card-accent"></div>
+      </div>
+
+      <div class="tilt-card reveal">
+        <div class="tilt-card-icon">
+          <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="8" y="8" width="40" height="40" rx="2" stroke="#C8A97D" stroke-width="1.5" fill="none"/>
+            <rect x="16" y="16" width="24" height="24" rx="1" stroke="#C8A97D" stroke-width="1" opacity="0.5" fill="none"/>
+            <rect x="24" y="24" width="8" height="8" fill="#C8A97D" opacity="0.3"/>
+            <line x1="28" y1="8" x2="28" y2="16" stroke="#C8A97D" stroke-width="0.75" opacity="0.4"/>
+            <line x1="28" y1="40" x2="28" y2="48" stroke="#C8A97D" stroke-width="0.75" opacity="0.4"/>
+            <line x1="8" y1="28" x2="16" y2="28" stroke="#C8A97D" stroke-width="0.75" opacity="0.4"/>
+            <line x1="40" y1="28" x2="48" y2="28" stroke="#C8A97D" stroke-width="0.75" opacity="0.4"/>
+          </svg>
+        </div>
+        <h3 class="tilt-card-title">프라이빗</h3>
+        <p class="tilt-card-desc">독보적 프라이버시 설계. 각 세대 간 완벽한 독립성과 전용 엘리베이터, 프라이빗 로비 시스템을 제공합니다.</p>
+        <div class="tilt-card-accent"></div>
+      </div>
+
+      <div class="tilt-card reveal">
+        <div class="tilt-card-icon">
+          <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="28" y1="4" x2="28" y2="52" stroke="#C8A97D" stroke-width="1.5"/>
+            <rect x="18" y="10" width="20" height="38" stroke="#C8A97D" stroke-width="1" opacity="0.4" fill="none"/>
+            <line x1="18" y1="18" x2="38" y2="18" stroke="#C8A97D" stroke-width="0.5" opacity="0.3"/>
+            <line x1="18" y1="26" x2="38" y2="26" stroke="#C8A97D" stroke-width="0.5" opacity="0.3"/>
+            <line x1="18" y1="34" x2="38" y2="34" stroke="#C8A97D" stroke-width="0.5" opacity="0.3"/>
+            <line x1="18" y1="42" x2="38" y2="42" stroke="#C8A97D" stroke-width="0.5" opacity="0.3"/>
+            <circle cx="28" cy="6" r="2" fill="#C8A97D" opacity="0.8"/>
+            <line x1="10" y1="48" x2="46" y2="48" stroke="#C8A97D" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <h3 class="tilt-card-title">49층 랜드마크</h3>
+        <p class="tilt-card-desc">서울 스카이라인의 새로운 아이콘. 지상 49층의 압도적 스케일이 한강변의 새로운 랜드마크를 완성합니다.</p>
+        <div class="tilt-card-accent"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FULL-WIDTH IMAGE
+     ============================================================ -->
+<section id="fullwidth-image">
+  <div class="fullwidth-bg">
+    <img
+      src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1920&q=80"
+      alt="한강 르셀 전경"
+      loading="lazy"
+    >
+  </div>
+  <div class="fullwidth-overlay"></div>
+  <div class="fullwidth-text reveal">
+    <h2>한강의 숨결을 담은<br>프라이빗 레지던스</h2>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer id="footer">
+  <div class="footer-mega" aria-hidden="true">한강 르셀</div>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">한강 르셀</div>
+        <p class="footer-tagline">서울의 마지막 한강변<br>프라이빗 레지던스.</p>
+      </div>
+      <div>
+        <p class="footer-col-title">Contact</p>
+        <div class="footer-info">
+          <p>02-1234-5678</p>
+          <p>info@hangang-leciel.kr</p>
+          <p>월–토 10:00–18:00</p>
+        </div>
+      </div>
+      <div>
+        <p class="footer-col-title">Location</p>
+        <div class="footer-info">
+          <p>서울특별시 영등포구</p>
+          <p>한강변로 123</p>
+          <p>한강 르셀 분양사무소</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-legal">본 홈페이지의 이미지, 조감도, 배치도 등은 이해를 돕기 위한 것으로 실제와 다를 수 있습니다. 입주 시기, 세대수, 주요 사양 등은 인허가 과정에서 변경될 수 있으며 사업 승인 후 확정됩니다.</p>
+      <p class="footer-copy">&copy; 2027 한강 르셀. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+(function() {
+  'use strict';
+
+  /* ===========================================
+     CUSTOM CURSOR
+     =========================================== */
+  const dot = document.getElementById('cursor-dot');
+  const ring = document.getElementById('cursor-ring');
+  let mouseX = -100, mouseY = -100;
+  let ringX = -100, ringY = -100;
+
+  document.addEventListener('mousemove', function(e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    dot.style.left = mouseX + 'px';
+    dot.style.top = mouseY + 'px';
+  });
+
+  function animateRing() {
+    ringX += (mouseX - ringX) * 0.12;
+    ringY += (mouseY - ringY) * 0.12;
+    ring.style.left = ringX + 'px';
+    ring.style.top = ringY + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  // Expand ring on interactive elements
+  document.querySelectorAll('a, button').forEach(function(el) {
+    el.addEventListener('mouseenter', function() { ring.classList.add('expanded'); });
+    el.addEventListener('mouseleave', function() { ring.classList.remove('expanded'); });
+  });
+
+  /* ===========================================
+     NAV SCROLL BEHAVIOR
+     =========================================== */
+  var nav = document.getElementById('nav');
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 80) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
+    }
+  }, { passive: true });
+
+  /* ===========================================
+     SCROLL PROGRESS BAR
+     =========================================== */
+  var progressBar = document.getElementById('scroll-progress');
+  window.addEventListener('scroll', function() {
+    var winH = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = winH > 0 ? (window.scrollY / winH) * 100 : 0;
+    progressBar.style.width = pct + '%';
+  }, { passive: true });
+
+  /* ===========================================
+     HAMBURGER TOGGLE
+     =========================================== */
+  var hamburger = document.getElementById('hamburger');
+  var mobileNav = document.getElementById('mobile-nav');
+
+  hamburger.addEventListener('click', function() {
+    hamburger.classList.toggle('open');
+    mobileNav.classList.toggle('open');
+    document.body.style.overflow = mobileNav.classList.contains('open') ? 'hidden' : '';
+  });
+
+  window.closeMobileNav = function() {
+    hamburger.classList.remove('open');
+    mobileNav.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  /* ===========================================
+     INTERSECTION OBSERVER — REVEAL ANIMATIONS
+     =========================================== */
+  var revealElements = document.querySelectorAll('.reveal, .reveal-clip, .stagger');
+
+  var revealObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.15,
+    rootMargin: '0px 0px -60px 0px'
+  });
+
+  revealElements.forEach(function(el) {
+    revealObserver.observe(el);
+  });
+
+  /* ===========================================
+     WORD REVEAL ANIMATION
+     =========================================== */
+  document.querySelectorAll('.word-reveal').forEach(function(el) {
+    var text = el.textContent.trim();
+    var words = text.split(/\s+/);
+    el.innerHTML = words.map(function(word, i) {
+      return '<span class="word" style="transition-delay:' + (i * 0.04) + 's">' + word + '</span> ';
+    }).join('');
+  });
+
+  /* ===========================================
+     COUNTER ANIMATION
+     =========================================== */
+  function easeOutExpo(t) {
+    return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+  }
+
+  function animateCounter(el) {
+    var target = parseInt(el.getAttribute('data-target'), 10);
+    var duration = 2000;
+    var start = performance.now();
+    var parentNumber = el.closest('.data-number');
+
+    function update(now) {
+      var elapsed = now - start;
+      var progress = Math.min(elapsed / duration, 1);
+      var easedProgress = easeOutExpo(progress);
+      var current = Math.round(easedProgress * target);
+      el.textContent = current;
+
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      } else {
+        el.textContent = target;
+        // Add breathing animation after count completes
+        if (parentNumber) {
+          parentNumber.classList.add('breathing');
+        }
+      }
+    }
+    requestAnimationFrame(update);
+  }
+
+  var counterElements = document.querySelectorAll('.counter');
+  var counterObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        animateCounter(entry.target);
+        counterObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  counterElements.forEach(function(el) {
+    counterObserver.observe(el);
+  });
+
+  /* ===========================================
+     3D TILT EFFECT ON CARDS
+     =========================================== */
+  document.querySelectorAll('.tilt-card').forEach(function(card) {
+    card.addEventListener('mousemove', function(e) {
+      var rect = card.getBoundingClientRect();
+      var x = e.clientX - rect.left;
+      var y = e.clientY - rect.top;
+      var centerX = rect.width / 2;
+      var centerY = rect.height / 2;
+      var rotateX = ((y - centerY) / centerY) * -8;
+      var rotateY = ((x - centerX) / centerX) * 8;
+      card.style.transform = 'perspective(800px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) scale3d(1.02, 1.02, 1.02)';
+    });
+
+    card.addEventListener('mouseleave', function() {
+      card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+    });
+  });
+
+  /* ===========================================
+     MAGNETIC BUTTON EFFECT
+     =========================================== */
+  document.querySelectorAll('.magnetic').forEach(function(btn) {
+    btn.addEventListener('mousemove', function(e) {
+      var rect = btn.getBoundingClientRect();
+      var x = e.clientX - rect.left - rect.width / 2;
+      var y = e.clientY - rect.top - rect.height / 2;
+      btn.style.transform = 'translate(' + (x * 0.3) + 'px, ' + (y * 0.3) + 'px)';
+    });
+
+    btn.addEventListener('mouseleave', function() {
+      btn.style.transform = 'translate(0, 0)';
+    });
+  });
+
+  /* ===========================================
+     SAFETY NET — FORCE ALL REVEALS VISIBLE
+     =========================================== */
+  setTimeout(function() {
+    document.querySelectorAll('.reveal, .reveal-clip, .stagger').forEach(function(el) {
+      el.classList.add('revealed');
+    });
+  }, 2000);
+
+})();
+</script>
+</body>
+</html>
