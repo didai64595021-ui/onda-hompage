@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>사업소개 | SmartTech Korea</title>
+  <meta name="description" content="스마트테크 코리아 사업소개 - 스마트팩토리, IoT 플랫폼, AI 품질관리 솔루션">
+  <meta property="og:title" content="사업소개 | SmartTech Korea">
+  <meta property="og:description" content="스마트테크 코리아 - 스마트팩토리 구축, IoT 플랫폼, AI 품질관리">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      color: #fff;
+      background: #0a0f1a;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+    img { max-width: 100%; display: block; }
+
+    /* ===== CSS VARIABLES ===== */
+    :root {
+      --primary: #00b4d8;
+      --primary-dark: #0077b6;
+      --accent: #00e5ff;
+      --bg-dark: #0a0f1a;
+      --bg-section: #0f1628;
+      --bg-card: #141c30;
+      --text-primary: #ffffff;
+      --text-secondary: #a0aec0;
+      --text-muted: #6b7a90;
+      --max-width: 1280px;
+      --nav-height: 80px;
+    }
+
+    /* ===== UTILITY ===== */
+    .container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .section-subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: clamp(0.95rem, 2vw, 1.1rem);
+      margin-bottom: 60px;
+      font-weight: 300;
+    }
+    .section-label {
+      display: inline-block;
+      color: var(--primary);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      text-align: center;
+      width: 100%;
+    }
+
+    /* ===== SCROLL ANIMATIONS ===== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .fade-in-left {
+      opacity: 0;
+      transform: translateX(-60px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .fade-in-left.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .fade-in-right {
+      opacity: 0;
+      transform: translateX(60px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .fade-in-right.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* ===== NAVIGATION ===== */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      padding: 0 40px;
+      height: var(--nav-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+    .nav.scrolled {
+      background: rgba(10, 15, 26, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    }
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-logo span { color: var(--primary); }
+    .nav-logo .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: #0a0f1a;
+    }
+    .nav-menu { display: flex; gap: 36px; align-items: center; }
+    .nav-menu a {
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.8);
+      position: relative;
+      padding: 4px 0;
+      transition: color 0.3s;
+    }
+    .nav-menu a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      transition: width 0.3s;
+    }
+    .nav-menu a:hover { color: #fff; }
+    .nav-menu a:hover::after { width: 100%; }
+    .nav-menu a.active { color: #fff; }
+    .nav-menu a.active::after { width: 100%; }
+
+    /* Hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      z-index: 1001;
+      padding: 8px;
+    }
+    .hamburger span {
+      display: block;
+      width: 28px;
+      height: 2px;
+      background: #fff;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .hamburger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .hamburger.active span:nth-child(2) { opacity: 0; }
+    .hamburger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+    /* Mobile Menu */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 100%;
+      height: 100vh;
+      background: rgba(10, 15, 26, 0.98);
+      backdrop-filter: blur(20px);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      transition: right 0.4s ease;
+    }
+    .mobile-menu.open { right: 0; }
+    .mobile-menu a {
+      font-size: 1.4rem;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.8);
+      transition: color 0.3s;
+    }
+    .mobile-menu a:hover { color: var(--primary); }
+    .mobile-menu a.active { color: var(--primary); }
+
+    /* ===== HERO (SUB-PAGE) ===== */
+    .hero-sub {
+      position: relative;
+      width: 100%;
+      height: 60vh;
+      min-height: 400px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-image: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1920');
+      background-size: cover;
+      background-position: center;
+    }
+    .hero-sub::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(10,15,26,0.6) 0%, rgba(10,15,26,0.8) 60%, rgba(10,15,26,1) 100%);
+    }
+    .hero-sub-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding-top: var(--nav-height);
+    }
+    .hero-sub-content h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .hero-sub-content h1 .highlight { color: var(--primary); }
+    .hero-sub-content p {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--text-secondary);
+      font-weight: 300;
+    }
+
+    /* ===== BUSINESS CARDS SECTION ===== */
+    .business-section {
+      padding: 120px 0;
+      background: var(--bg-section);
+      position: relative;
+      overflow: hidden;
+    }
+    .business-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0,180,216,0.06) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .business-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+    .business-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.05);
+      overflow: hidden;
+      transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.3s ease;
+    }
+    .business-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+      border-color: rgba(0,180,216,0.3);
+    }
+    .business-card-img {
+      position: relative;
+      width: 100%;
+      height: 240px;
+      overflow: hidden;
+    }
+    .business-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+    .business-card:hover .business-card-img img {
+      transform: scale(1.1);
+    }
+    .business-card-img::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, transparent 40%, rgba(20,28,48,0.8) 100%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .business-card:hover .business-card-img::after {
+      opacity: 1;
+    }
+    .business-card-body {
+      padding: 32px 28px;
+    }
+    .business-card-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      background: rgba(0,180,216,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      border: 1px solid rgba(0,180,216,0.2);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .business-card:hover .business-card-icon {
+      background: rgba(0,180,216,0.2);
+      border-color: var(--primary);
+    }
+    .business-card-icon svg {
+      width: 28px;
+      height: 28px;
+      fill: var(--primary);
+    }
+    .business-card-body h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+    .business-card-body .card-subtitle {
+      font-size: 0.9rem;
+      color: var(--primary);
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+    .business-card-body p {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    /* ===== PARTNER/CLIENTS SECTION ===== */
+    .partner-section {
+      padding: 120px 0;
+      background: var(--bg-dark);
+      position: relative;
+    }
+    .partner-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 24px;
+    }
+    .partner-logo {
+      background: var(--bg-card);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.05);
+      padding: 32px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.3s ease;
+      min-height: 120px;
+    }
+    .partner-logo:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+      border-color: rgba(0,180,216,0.3);
+    }
+    .partner-logo-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .partner-logo-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(0,180,216,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(0,180,216,0.15);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .partner-logo:hover .partner-logo-icon {
+      background: rgba(0,180,216,0.15);
+      border-color: var(--primary);
+    }
+    .partner-logo-icon svg {
+      width: 22px;
+      height: 22px;
+      fill: var(--primary);
+      opacity: 0.8;
+    }
+    .partner-logo span {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      letter-spacing: 0.5px;
+      transition: color 0.3s;
+    }
+    .partner-logo:hover span {
+      color: var(--text-primary);
+    }
+
+    /* ===== STATS SECTION ===== */
+    .stats-section {
+      padding: 120px 0;
+      background: var(--bg-section);
+      position: relative;
+      overflow: hidden;
+    }
+    .stats-section::before {
+      content: '';
+      position: absolute;
+      bottom: -40%;
+      left: -10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(0,180,216,0.05) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .stats-section::after {
+      content: '';
+      position: absolute;
+      top: -30%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(0,229,255,0.04) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      position: relative;
+      z-index: 1;
+    }
+    .stat-card {
+      text-align: center;
+      padding: 48px 32px;
+      background: var(--bg-card);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .stat-card:hover::before {
+      opacity: 1;
+    }
+    .stat-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+      border-color: rgba(0,180,216,0.3);
+    }
+    .stat-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(0,180,216,0.1);
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid rgba(0,180,216,0.2);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .stat-card:hover .stat-icon {
+      background: rgba(0,180,216,0.2);
+      border-color: var(--primary);
+    }
+    .stat-icon svg {
+      width: 28px;
+      height: 28px;
+      fill: var(--primary);
+    }
+    .stat-number {
+      font-size: clamp(2.2rem, 5vw, 3rem);
+      font-weight: 900;
+      color: var(--primary);
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .stat-number .suffix {
+      font-size: 0.5em;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .stat-label {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      padding: 60px 0 30px;
+      background: #060a14;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+    .footer-brand .footer-logo {
+      font-size: 1.3rem;
+      font-weight: 900;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .footer-brand .footer-logo span { color: var(--primary); }
+    .footer-brand p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+    .footer-social {
+      display: flex;
+      gap: 12px;
+    }
+    .footer-social a {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+      font-size: 0.85rem;
+    }
+    .footer-social a:hover { background: var(--primary); }
+    .footer-col h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .footer-col ul li { margin-bottom: 12px; }
+    .footer-col ul li a {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      transition: color 0.3s;
+    }
+    .footer-col ul li a:hover { color: var(--primary); }
+    .footer-bottom {
+      padding-top: 30px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-bottom p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .business-grid { grid-template-columns: repeat(2, 1fr); }
+      .partner-grid { grid-template-columns: repeat(3, 1fr); }
+      .stats-grid { grid-template-columns: repeat(3, 1fr); }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      :root { --nav-height: 64px; }
+      .nav { padding: 0 20px; }
+      .nav-menu { display: none; }
+      .hamburger { display: flex; }
+      .mobile-menu { display: flex; }
+
+      .hero-sub { height: 50vh; min-height: 320px; }
+      .hero-sub-content h1 { font-size: clamp(1.5rem, 6vw, 2.2rem); }
+
+      .business-grid { grid-template-columns: 1fr; max-width: 520px; margin-left: auto; margin-right: auto; }
+      .business-card-img { height: 200px; }
+      .business-card-body { padding: 24px 20px; }
+
+      .partner-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      .partner-logo { padding: 24px 12px; min-height: 100px; }
+      .partner-logo span { font-size: 0.8rem; }
+
+      .stats-grid { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
+      .stat-card { padding: 36px 24px; }
+
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+      .footer-bottom { flex-direction: column; text-align: center; }
+
+      .section-title { margin-bottom: 12px; }
+      .section-subtitle { margin-bottom: 40px; }
+    }
+
+    @media (max-width: 480px) {
+      .business-card-img { height: 180px; }
+      .partner-grid { grid-template-columns: repeat(2, 1fr); }
+      .partner-logo { padding: 20px 10px; min-height: 90px; }
+      .partner-logo-icon { width: 40px; height: 40px; }
+      .partner-logo-icon svg { width: 18px; height: 18px; }
+      .partner-logo span { font-size: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVIGATION ===== -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-icon">ST</div>
+      Smart<span>Tech</span>
+    </a>
+    <ul class="nav-menu">
+      <li><a href="company.html">Company</a></li>
+      <li><a href="product-sensor.html">Product</a></li>
+      <li><a href="business.html" class="active">Business</a></li>
+      <li><a href="news.html">News</a></li>
+      <li><a href="video.html">Video</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <div class="hamburger" id="hamburger" aria-label="메뉴 열기" role="button" tabindex="0">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="company.html">Company</a>
+    <a href="product-sensor.html">Product</a>
+    <a href="business.html" class="active">Business</a>
+    <a href="news.html">News</a>
+    <a href="video.html">Video</a>
+    <a href="contact.html">Contact</a>
+  </div>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="hero-sub">
+    <div class="hero-sub-content">
+      <h1>OUR <span class="highlight">BUSINESS</span></h1>
+      <p>스마트 제조 혁신을 위한 토탈 솔루션을 제공합니다</p>
+    </div>
+  </section>
+
+  <!-- ===== 사업 영역 SECTION ===== -->
+  <section class="business-section" id="business-area">
+    <div class="container">
+      <span class="section-label">Business Area</span>
+      <h2 class="section-title fade-in">사업 영역</h2>
+      <p class="section-subtitle fade-in">스마트테크 코리아의 핵심 사업 분야를 소개합니다</p>
+      <div class="business-grid">
+
+        <!-- Card 1: 스마트팩토리 구축 -->
+        <div class="business-card fade-in">
+          <div class="business-card-img">
+            <img src="https://images.unsplash.com/photo-1565043666747-69f6646db940?w=800" alt="스마트팩토리 구축" loading="lazy">
+          </div>
+          <div class="business-card-body">
+            <div class="business-card-icon">
+              <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+            </div>
+            <h3>스마트팩토리 구축</h3>
+            <div class="card-subtitle">공장 자동화 토탈 솔루션</div>
+            <p>생산 라인 설계부터 MES(제조실행시스템), ERP 연동, 로봇 자동화까지 공장 전체의 디지털 전환을 원스톱으로 제공합니다. IoT 센서 네트워크와 클라우드 기반 데이터 수집을 통해 실시간 생산 현황을 파악하고, 예지보전 시스템으로 설비 가동률을 극대화합니다.</p>
+          </div>
+        </div>
+
+        <!-- Card 2: IoT 플랫폼 -->
+        <div class="business-card fade-in">
+          <div class="business-card-img">
+            <img src="https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?w=800" alt="IoT 플랫폼" loading="lazy">
+          </div>
+          <div class="business-card-body">
+            <div class="business-card-icon">
+              <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+            </div>
+            <h3>IoT 플랫폼</h3>
+            <div class="card-subtitle">실시간 모니터링 대시보드</div>
+            <p>자체 개발한 IoT 플랫폼을 통해 수천 개의 센서 데이터를 실시간으로 수집, 분석, 시각화합니다. 웹 기반 대시보드로 공장 내 온도, 습도, 진동, 전력 소비 등 핵심 지표를 한눈에 모니터링하고, 이상 징후 발생 시 즉각적인 알림을 제공하여 선제적 대응이 가능합니다.</p>
+          </div>
+        </div>
+
+        <!-- Card 3: AI 품질관리 -->
+        <div class="business-card fade-in">
+          <div class="business-card-img">
+            <img src="https://images.unsplash.com/photo-1555255707-c07966088b7b?w=800" alt="AI 품질관리" loading="lazy">
+          </div>
+          <div class="business-card-body">
+            <div class="business-card-icon">
+              <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+            </div>
+            <h3>AI 품질관리</h3>
+            <div class="card-subtitle">딥러닝 기반 불량 검출</div>
+            <p>최신 딥러닝 알고리즘과 고해상도 비전 카메라를 결합한 AI 품질관리 시스템으로, 미세 스크래치부터 형상 불량까지 99.8% 이상의 정확도로 실시간 검출합니다. 학습 데이터 자동 수집과 모델 업데이트로 지속적으로 검사 정확도가 향상되며, 불량률 감소와 생산성 향상을 동시에 달성합니다.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 파트너/고객사 SECTION ===== -->
+  <section class="partner-section" id="partners">
+    <div class="container">
+      <span class="section-label">Partners & Clients</span>
+      <h2 class="section-title fade-in">파트너 & 고객사</h2>
+      <p class="section-subtitle fade-in">스마트테크 코리아와 함께하는 주요 파트너사</p>
+      <div class="partner-grid">
+        <div class="partner-logo fade-in">
+          <div class="partner-logo-inner">
+            <div class="partner-logo-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+            </div>
+            <span>삼성전자</span>
+          </div>
+        </div>
+        <div class="partner-logo fade-in">
+          <div class="partner-logo-inner">
+            <div class="partner-logo-icon">
+              <svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+            </div>
+            <span>현대자동차</span>
+          </div>
+        </div>
+        <div class="partner-logo fade-in">
+          <div class="partner-logo-inner">
+            <div class="partner-logo-icon">
+              <svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM9.5 15l-3.5-4 2.5-3L12 12l3-4 4 5H5z"/></svg>
+            </div>
+            <span>LG전자</span>
+          </div>
+        </div>
+        <div class="partner-logo fade-in">
+          <div class="partner-logo-inner">
+            <div class="partner-logo-icon">
+              <svg viewBox="0 0 24 24"><path d="M15 9H9v6h6V9zm-2 4h-2v-2h2v2zm8-2V9h-2V7c0-1.1-.9-2-2-2h-2V3h-2v2h-2V3H9v2H7c-1.1 0-2 .9-2 2v2H3v2h2v2H3v2h2v2c0 1.1.9 2 2 2h2v2h2v-2h2v2h2v-2h2c1.1 0 2-.9 2-2v-2h2v-2h-2v-2h2zm-4 6H7V7h10v10z"/></svg>
+            </div>
+            <span>SK하이닉스</span>
+          </div>
+        </div>
+        <div class="partner-logo fade-in">
+          <div class="partner-logo-inner">
+            <div class="partner-logo-icon">
+              <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+            </div>
+            <span>포스코</span>
+          </div>
+        </div>
+        <div class="partner-logo fade-in">
+          <div class="partner-logo-inner">
+            <div class="partner-logo-icon">
+              <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2s.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56-1.84-.63-3.37-1.9-4.33-3.56zm2.95-8H5.08c.96-1.66 2.49-2.93 4.33-3.56C8.81 5.55 8.35 6.75 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2s.07-1.35.16-2h4.68c.09.65.16 1.32.16 2s-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95c-.96 1.65-2.49 2.93-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2s-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"/></svg>
+            </div>
+            <span>한화솔루션</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 실적 숫자 SECTION ===== -->
+  <section class="stats-section" id="stats">
+    <div class="container">
+      <span class="section-label">Performance</span>
+      <h2 class="section-title fade-in">주요 실적</h2>
+      <p class="section-subtitle fade-in">숫자로 보는 스마트테크 코리아의 성과</p>
+      <div class="stats-grid">
+        <div class="stat-card fade-in">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          </div>
+          <div class="stat-number" data-target="120">0<span class="suffix">+</span></div>
+          <div class="stat-label">누적 프로젝트</div>
+        </div>
+        <div class="stat-card fade-in">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+          </div>
+          <div class="stat-number" data-target="320">0<span class="suffix">+</span></div>
+          <div class="stat-label">누적 고객사</div>
+        </div>
+        <div class="stat-card fade-in">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM10 17l-3.5-3.5 1.41-1.41L10 14.17l4.59-4.59L16 11l-6 6z"/></svg>
+          </div>
+          <div class="stat-number" data-target="99.7">0<span class="suffix">%</span></div>
+          <div class="stat-label">시스템 가동률</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">Smart<span>Tech</span> Korea</div>
+          <p>서울특별시 강남구 테헤란로 123, 스마트빌딩 15층<br>TEL: 02-1234-5678 | FAX: 02-1234-5679<br>E-mail: info@smarttechkorea.co.kr</p>
+          <div class="footer-social">
+            <a href="#">YT</a><a href="#">BL</a><a href="#">IG</a><a href="#">IN</a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="company.html">회사소개</a></li>
+            <li><a href="company.html#ceo">CEO 인사말</a></li>
+            <li><a href="company.html#history">연혁</a></li>
+            <li><a href="company.html#location">오시는 길</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="product-sensor.html">스마트센서 ST-100</a></li>
+            <li><a href="product-vision.html">AI 비전검사 ST-V</a></li>
+            <li><a href="product-conveyor.html">컨베이어 ST-C</a></li>
+            <li><a href="business.html">사업소개</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="news.html">뉴스</a></li>
+            <li><a href="video.html">영상</a></li>
+            <li><a href="contact.html">문의하기</a></li>
+            <li><a href="contact.html">견적문의</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 SmartTech Korea Co., Ltd. All rights reserved.</p>
+        <p>이 사이트는 데모 목적으로 제작되었습니다.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script>
+    // ===== Navigation scroll effect =====
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 50);
+    });
+    if (window.scrollY > 50) navbar.classList.add('scrolled');
+
+    // ===== Hamburger menu =====
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active');
+      mobileMenu.classList.toggle('open');
+      document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+    });
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        mobileMenu.classList.remove('open');
+        document.body.style.overflow = '';
+      });
+    });
+
+    // ===== Scroll animations (IntersectionObserver) =====
+    const animElements = document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right');
+    const observerOptions = { threshold: 0.15, rootMargin: '0px 0px -50px 0px' };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    animElements.forEach(el => observer.observe(el));
+
+    // ===== Count-up animation for stats =====
+    const statNumbers = document.querySelectorAll('.stat-number[data-target]');
+    const statsObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const el = entry.target;
+          const target = parseFloat(el.getAttribute('data-target'));
+          const suffix = el.querySelector('.suffix');
+          const suffixText = suffix ? suffix.textContent : '';
+          const isDecimal = target % 1 !== 0;
+          const duration = 2000;
+          const startTime = performance.now();
+
+          function updateCount(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easeOut = 1 - Math.pow(1 - progress, 3);
+            const current = target * easeOut;
+
+            if (isDecimal) {
+              el.innerHTML = current.toFixed(1) + '<span class="suffix">' + suffixText + '</span>';
+            } else {
+              el.innerHTML = Math.floor(current) + '<span class="suffix">' + suffixText + '</span>';
+            }
+
+            if (progress < 1) {
+              requestAnimationFrame(updateCount);
+            } else {
+              if (isDecimal) {
+                el.innerHTML = target.toFixed(1) + '<span class="suffix">' + suffixText + '</span>';
+              } else {
+                el.innerHTML = target + '<span class="suffix">' + suffixText + '</span>';
+              }
+            }
+          }
+
+          requestAnimationFrame(updateCount);
+          statsObserver.unobserve(el);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    statNumbers.forEach(el => statsObserver.observe(el));
+  </script>
+
+</body>
+</html>

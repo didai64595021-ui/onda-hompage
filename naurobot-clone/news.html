@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>뉴스/공지 | SmartTech Korea</title>
+  <meta name="description" content="스마트테크 코리아 뉴스 및 공지사항 - 최신 소식과 업데이트를 확인하세요.">
+  <meta property="og:title" content="뉴스/공지 | SmartTech Korea">
+  <meta property="og:description" content="스마트테크 코리아 - 최신 뉴스 및 공지사항">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1504711434969-e33886168d6c?w=1200">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      color: #fff;
+      background: #0a0f1a;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+    img { max-width: 100%; display: block; }
+
+    /* ===== CSS VARIABLES ===== */
+    :root {
+      --primary: #00b4d8;
+      --primary-dark: #0077b6;
+      --accent: #00e5ff;
+      --bg-dark: #0a0f1a;
+      --bg-section: #0f1628;
+      --bg-card: #141c30;
+      --text-primary: #ffffff;
+      --text-secondary: #a0aec0;
+      --text-muted: #6b7a90;
+      --max-width: 1280px;
+      --nav-height: 80px;
+    }
+
+    /* ===== UTILITY ===== */
+    .container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .section-subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: clamp(0.95rem, 2vw, 1.1rem);
+      margin-bottom: 60px;
+      font-weight: 300;
+    }
+    .section-label {
+      display: inline-block;
+      color: var(--primary);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      text-align: center;
+      width: 100%;
+    }
+
+    /* ===== SCROLL ANIMATIONS ===== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .fade-in-left {
+      opacity: 0;
+      transform: translateX(-60px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .fade-in-left.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .fade-in-right {
+      opacity: 0;
+      transform: translateX(60px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .fade-in-right.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* ===== NAVIGATION ===== */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      padding: 0 40px;
+      height: var(--nav-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+    .nav.scrolled {
+      background: rgba(10, 15, 26, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    }
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-logo span { color: var(--primary); }
+    .nav-logo .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: #0a0f1a;
+    }
+    .nav-menu { display: flex; gap: 36px; align-items: center; }
+    .nav-menu a {
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.8);
+      position: relative;
+      padding: 4px 0;
+      transition: color 0.3s;
+    }
+    .nav-menu a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      transition: width 0.3s;
+    }
+    .nav-menu a:hover { color: #fff; }
+    .nav-menu a:hover::after { width: 100%; }
+    .nav-menu a.active { color: #fff; }
+    .nav-menu a.active::after { width: 100%; }
+
+    /* Hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      z-index: 1001;
+      padding: 8px;
+    }
+    .hamburger span {
+      display: block;
+      width: 28px;
+      height: 2px;
+      background: #fff;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .hamburger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .hamburger.active span:nth-child(2) { opacity: 0; }
+    .hamburger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+    /* Mobile Menu */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 100%;
+      height: 100vh;
+      background: rgba(10, 15, 26, 0.98);
+      backdrop-filter: blur(20px);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      transition: right 0.4s ease;
+    }
+    .mobile-menu.open { right: 0; }
+    .mobile-menu a {
+      font-size: 1.4rem;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.8);
+      transition: color 0.3s;
+    }
+    .mobile-menu a:hover { color: var(--primary); }
+    .mobile-menu a.active { color: var(--primary); }
+
+    /* ===== HERO (SUB-PAGE) ===== */
+    .hero-sub {
+      position: relative;
+      width: 100%;
+      height: 60vh;
+      min-height: 400px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-image: url('https://images.unsplash.com/photo-1504711434969-e33886168d6c?w=1920');
+      background-size: cover;
+      background-position: center;
+    }
+    .hero-sub::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(10,15,26,0.6) 0%, rgba(10,15,26,0.8) 60%, rgba(10,15,26,1) 100%);
+    }
+    .hero-sub-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding-top: var(--nav-height);
+    }
+    .hero-sub-content h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .hero-sub-content h1 .highlight { color: var(--primary); }
+    .hero-sub-content p {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--text-secondary);
+      font-weight: 300;
+    }
+
+    /* ===== NEWS SECTION ===== */
+    .news-section {
+      padding: 120px 0;
+      background: var(--bg-section);
+      position: relative;
+    }
+    .news-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -20%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0,180,216,0.06) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+    }
+    .news-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.05);
+      overflow: hidden;
+      transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.3s ease;
+      cursor: pointer;
+    }
+    .news-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+      border-color: rgba(0,180,216,0.3);
+    }
+    .news-card-image {
+      width: 100%;
+      height: 220px;
+      overflow: hidden;
+      position: relative;
+    }
+    .news-card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .news-card:hover .news-card-image img {
+      transform: scale(1.08);
+    }
+    .news-card-date {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(0,180,216,0.9);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(4px);
+    }
+    .news-card-body {
+      padding: 28px 24px;
+    }
+    .news-card-body h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      line-height: 1.5;
+      color: var(--text-primary);
+      transition: color 0.3s;
+    }
+    .news-card:hover .news-card-body h3 {
+      color: var(--primary);
+    }
+    .news-card-body p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .news-card-more {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 16px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--primary);
+      transition: gap 0.3s;
+    }
+    .news-card:hover .news-card-more {
+      gap: 10px;
+    }
+    .news-card-more svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--primary);
+      transition: transform 0.3s;
+    }
+    .news-card:hover .news-card-more svg {
+      transform: translateX(4px);
+    }
+
+    /* ===== PAGINATION ===== */
+    .pagination-section {
+      padding: 0 0 120px;
+      background: var(--bg-section);
+    }
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-top: 60px;
+    }
+    .pagination-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    .pagination-btn:hover {
+      border-color: rgba(0,180,216,0.4);
+      color: var(--primary);
+      background: rgba(0,180,216,0.08);
+    }
+    .pagination-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #0a0f1a;
+      border-color: transparent;
+      font-weight: 700;
+      cursor: default;
+    }
+    .pagination-btn.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .pagination-btn.disabled:hover {
+      border-color: rgba(255,255,255,0.1);
+      color: var(--text-secondary);
+      background: var(--bg-card);
+    }
+    .pagination-dots {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      letter-spacing: 2px;
+      padding: 0 4px;
+    }
+    .pagination-arrow {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: var(--bg-card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .pagination-arrow:hover {
+      border-color: rgba(0,180,216,0.4);
+      background: rgba(0,180,216,0.08);
+    }
+    .pagination-arrow svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--text-secondary);
+      transition: fill 0.3s;
+    }
+    .pagination-arrow:hover svg {
+      fill: var(--primary);
+    }
+    .pagination-arrow.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .pagination-arrow.disabled:hover {
+      border-color: rgba(255,255,255,0.1);
+      background: var(--bg-card);
+    }
+    .pagination-arrow.disabled:hover svg {
+      fill: var(--text-secondary);
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      padding: 60px 0 30px;
+      background: #060a14;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+    .footer-brand .footer-logo {
+      font-size: 1.3rem;
+      font-weight: 900;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .footer-brand .footer-logo span { color: var(--primary); }
+    .footer-brand p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+    .footer-social {
+      display: flex;
+      gap: 12px;
+    }
+    .footer-social a {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+      font-size: 0.85rem;
+    }
+    .footer-social a:hover { background: var(--primary); }
+    .footer-col h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .footer-col ul li { margin-bottom: 12px; }
+    .footer-col ul li a {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      transition: color 0.3s;
+    }
+    .footer-col ul li a:hover { color: var(--primary); }
+    .footer-bottom {
+      padding-top: 30px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-bottom p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .news-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      :root { --nav-height: 64px; }
+      .nav { padding: 0 20px; }
+      .nav-menu { display: none; }
+      .hamburger { display: flex; }
+      .mobile-menu { display: flex; }
+
+      .hero-sub { height: 50vh; min-height: 320px; }
+      .hero-sub-content h1 { font-size: clamp(1.5rem, 6vw, 2.2rem); }
+
+      .news-grid { grid-template-columns: 1fr; max-width: 600px; margin-left: auto; margin-right: auto; }
+      .news-card-image { height: 200px; }
+
+      .pagination { gap: 6px; }
+      .pagination-btn { width: 40px; height: 40px; font-size: 0.85rem; }
+      .pagination-arrow { width: 40px; height: 40px; }
+
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+      .footer-bottom { flex-direction: column; text-align: center; }
+
+      .section-title { margin-bottom: 12px; }
+      .section-subtitle { margin-bottom: 40px; }
+    }
+
+    @media (max-width: 480px) {
+      .news-grid { max-width: 100%; }
+      .news-card-image { height: 180px; }
+      .news-card-body { padding: 20px 18px; }
+      .news-card-body h3 { font-size: 1rem; }
+
+      .pagination-btn { width: 36px; height: 36px; font-size: 0.8rem; border-radius: 8px; }
+      .pagination-arrow { width: 36px; height: 36px; border-radius: 8px; }
+      .pagination-arrow svg { width: 16px; height: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVIGATION ===== -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-icon">ST</div>
+      Smart<span>Tech</span>
+    </a>
+    <ul class="nav-menu">
+      <li><a href="company.html">Company</a></li>
+      <li><a href="product-sensor.html">Product</a></li>
+      <li><a href="business.html">Business</a></li>
+      <li><a href="news.html" class="active">News</a></li>
+      <li><a href="video.html">Video</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <div class="hamburger" id="hamburger" aria-label="메뉴 열기" role="button" tabindex="0">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="company.html">Company</a>
+    <a href="product-sensor.html">Product</a>
+    <a href="business.html">Business</a>
+    <a href="news.html" class="active">News</a>
+    <a href="video.html">Video</a>
+    <a href="contact.html">Contact</a>
+  </div>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="hero-sub">
+    <div class="hero-sub-content">
+      <h1>NEWS & <span class="highlight">NOTICE</span></h1>
+      <p>스마트테크 코리아의 최신 소식과 공지사항</p>
+    </div>
+  </section>
+
+  <!-- ===== NEWS LIST SECTION ===== -->
+  <section class="news-section">
+    <div class="container">
+      <span class="section-label">Latest News</span>
+      <h2 class="section-title fade-in">뉴스 & 공지사항</h2>
+      <p class="section-subtitle fade-in">스마트테크 코리아의 주요 소식을 확인하세요</p>
+
+      <div class="news-grid">
+        <!-- News Card 1 -->
+        <div class="news-card fade-in">
+          <div class="news-card-image">
+            <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=600" alt="한양로보틱스 통합 법인 출범" loading="lazy">
+            <div class="news-card-date">2026.02.02</div>
+          </div>
+          <div class="news-card-body">
+            <h3>한양로보틱스 경영권 인수 후 통합 법인 출범</h3>
+            <p>스마트테크 코리아와 한양로보틱스가 통합 법인으로 새 출발합니다.</p>
+            <div class="news-card-more">
+              자세히 보기
+              <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- News Card 2 -->
+        <div class="news-card fade-in">
+          <div class="news-card-image">
+            <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600" alt="한양로보틱스 인수 계약 체결" loading="lazy">
+            <div class="news-card-date">2026.01.15</div>
+          </div>
+          <div class="news-card-body">
+            <h3>한양로보틱스 인수 계약 체결</h3>
+            <p>글로벌 로봇 자동화 기업으로 도약을 위한 첫 걸음.</p>
+            <div class="news-card-more">
+              자세히 보기
+              <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- News Card 3 -->
+        <div class="news-card fade-in">
+          <div class="news-card-image">
+            <img src="https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?w=600" alt="인천시장상 수상" loading="lazy">
+            <div class="news-card-date">2025.12.30</div>
+          </div>
+          <div class="news-card-body">
+            <h3>인천시장상 수상</h3>
+            <p>스마트 제조 혁신 기여로 인천시장상을 수상했습니다.</p>
+            <div class="news-card-more">
+              자세히 보기
+              <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- News Card 4 -->
+        <div class="news-card fade-in">
+          <div class="news-card-image">
+            <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600" alt="2025 로봇월드 참가 후기" loading="lazy">
+            <div class="news-card-date">2025.11.20</div>
+          </div>
+          <div class="news-card-body">
+            <h3>2025 로봇월드 참가 후기</h3>
+            <p>국내 최대 로봇 전시회에서 최신 솔루션을 선보였습니다.</p>
+            <div class="news-card-more">
+              자세히 보기
+              <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- News Card 5 -->
+        <div class="news-card fade-in">
+          <div class="news-card-image">
+            <img src="https://images.unsplash.com/photo-1555255707-c07966088b7b?w=600" alt="AI 비전검사 신제품 출시" loading="lazy">
+            <div class="news-card-date">2025.10.15</div>
+          </div>
+          <div class="news-card-body">
+            <h3>AI 비전검사 신제품 출시</h3>
+            <p>딥러닝 기반 비전검사 시스템 ST-V Pro를 출시합니다.</p>
+            <div class="news-card-more">
+              자세히 보기
+              <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- News Card 6 -->
+        <div class="news-card fade-in">
+          <div class="news-card-image">
+            <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600" alt="정부 스마트공장 지원사업 선정" loading="lazy">
+            <div class="news-card-date">2025.09.01</div>
+          </div>
+          <div class="news-card-body">
+            <h3>정부 스마트공장 지원사업 선정</h3>
+            <p>중소벤처기업부 스마트공장 구축 지원사업에 선정되었습니다.</p>
+            <div class="news-card-more">
+              자세히 보기
+              <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGINATION ===== -->
+  <section class="pagination-section">
+    <div class="container">
+      <div class="pagination fade-in">
+        <div class="pagination-arrow disabled" aria-label="이전 페이지">
+          <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        </div>
+        <button class="pagination-btn active" aria-current="page">1</button>
+        <button class="pagination-btn disabled">2</button>
+        <button class="pagination-btn disabled">3</button>
+        <span class="pagination-dots">...</span>
+        <button class="pagination-btn disabled">5</button>
+        <div class="pagination-arrow disabled" aria-label="다음 페이지">
+          <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">Smart<span>Tech</span> Korea</div>
+          <p>서울특별시 강남구 테헤란로 123, 스마트빌딩 15층<br>TEL: 02-1234-5678 | FAX: 02-1234-5679<br>E-mail: info@smarttechkorea.co.kr</p>
+          <div class="footer-social">
+            <a href="#">YT</a><a href="#">BL</a><a href="#">IG</a><a href="#">IN</a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="company.html">회사소개</a></li>
+            <li><a href="company.html#ceo">CEO 인사말</a></li>
+            <li><a href="company.html#history">연혁</a></li>
+            <li><a href="company.html#location">오시는 길</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="product-sensor.html">스마트센서 ST-100</a></li>
+            <li><a href="product-vision.html">AI 비전검사 ST-V</a></li>
+            <li><a href="product-conveyor.html">컨베이어 ST-C</a></li>
+            <li><a href="business.html">사업소개</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="news.html">뉴스</a></li>
+            <li><a href="video.html">영상</a></li>
+            <li><a href="contact.html">문의하기</a></li>
+            <li><a href="contact.html">견적문의</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 SmartTech Korea Co., Ltd. All rights reserved.</p>
+        <p>이 사이트는 데모 목적으로 제작되었습니다.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script>
+    // ===== Navigation scroll effect =====
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 50);
+    });
+    if (window.scrollY > 50) navbar.classList.add('scrolled');
+
+    // ===== Hamburger menu =====
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active');
+      mobileMenu.classList.toggle('open');
+      document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+    });
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        mobileMenu.classList.remove('open');
+        document.body.style.overflow = '';
+      });
+    });
+
+    // ===== Scroll animations (IntersectionObserver) =====
+    const animElements = document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right');
+    const observerOptions = { threshold: 0.15, rootMargin: '0px 0px -50px 0px' };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    animElements.forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>
