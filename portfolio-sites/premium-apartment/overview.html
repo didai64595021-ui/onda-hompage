@@ -58,7 +58,7 @@ body::after {
   inset: 0;
   z-index: 9990;
   pointer-events: none;
-  opacity: 0.04;
+  opacity: 0.03;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 256px 256px;
@@ -117,7 +117,7 @@ button { border: none; background: none; cursor: none; font-family: inherit; }
 }
 
 #cursor-ring.expanded {
-  width: 56px; height: 56px;
+  width: 64px; height: 64px;
   border-color: var(--accent-light);
 }
 
@@ -419,7 +419,7 @@ section { overflow: hidden; }
   transition: opacity 0.8s var(--ease-expo), transform 0.8s var(--ease-expo);
 }
 
-.reveal.visible {
+.reveal.revealed {
   opacity: 1;
   transform: translateY(0);
 }
@@ -429,7 +429,7 @@ section { overflow: hidden; }
   transition: clip-path 1s var(--ease-expo);
 }
 
-.reveal-clip.visible {
+.reveal-clip.revealed {
   clip-path: inset(0% 0 0 0);
 }
 
@@ -450,13 +450,13 @@ section { overflow: hidden; }
   transition: opacity 0.7s var(--ease-expo), transform 0.7s var(--ease-expo);
 }
 
-.stagger.visible > *:nth-child(1) { opacity:1; transform:translateY(0); transition-delay:0s; }
-.stagger.visible > *:nth-child(2) { opacity:1; transform:translateY(0); transition-delay:0.1s; }
-.stagger.visible > *:nth-child(3) { opacity:1; transform:translateY(0); transition-delay:0.2s; }
-.stagger.visible > *:nth-child(4) { opacity:1; transform:translateY(0); transition-delay:0.3s; }
-.stagger.visible > *:nth-child(5) { opacity:1; transform:translateY(0); transition-delay:0.4s; }
-.stagger.visible > *:nth-child(6) { opacity:1; transform:translateY(0); transition-delay:0.5s; }
-.stagger.visible > *:nth-child(7) { opacity:1; transform:translateY(0); transition-delay:0.6s; }
+.stagger.revealed > *:nth-child(1) { opacity:1; transform:translateY(0); transition-delay:0s; }
+.stagger.revealed > *:nth-child(2) { opacity:1; transform:translateY(0); transition-delay:0.1s; }
+.stagger.revealed > *:nth-child(3) { opacity:1; transform:translateY(0); transition-delay:0.2s; }
+.stagger.revealed > *:nth-child(4) { opacity:1; transform:translateY(0); transition-delay:0.3s; }
+.stagger.revealed > *:nth-child(5) { opacity:1; transform:translateY(0); transition-delay:0.4s; }
+.stagger.revealed > *:nth-child(6) { opacity:1; transform:translateY(0); transition-delay:0.5s; }
+.stagger.revealed > *:nth-child(7) { opacity:1; transform:translateY(0); transition-delay:0.6s; }
 
 /* =============================================
    PROJECT SUMMARY TABLE
@@ -627,7 +627,7 @@ section { overflow: hidden; }
   transition: opacity 0.6s var(--ease-expo), transform 0.6s var(--ease-expo);
 }
 
-.word-reveal.visible .word {
+.word-reveal.revealed .word {
   opacity: 1;
   transform: translateY(0);
 }
@@ -827,7 +827,7 @@ section { overflow: hidden; }
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 64px;
   margin-bottom: 64px;
 }
@@ -864,6 +864,10 @@ section { overflow: hidden; }
   color: var(--text-secondary);
 }
 
+.footer-links { display: flex; flex-direction: column; gap: 12px; }
+.footer-links a { font-size: 13px; color: var(--text-secondary); transition: color 0.3s; line-height: 1.7; }
+.footer-links a:hover { color: var(--accent); }
+
 .footer-bottom {
   position: relative;
   z-index: 1;
@@ -895,6 +899,52 @@ section { overflow: hidden; }
    MAGNETIC BUTTON BASE
    ============================================= */
 .magnetic { transition: transform 0.5s var(--ease-expo); }
+
+#back-to-top {
+  position: fixed;
+  bottom: 32px; right: 32px;
+  width: 48px; height: 48px;
+  border: 1px solid rgba(200,169,125,0.3);
+  background: rgba(12,12,12,0.8);
+  backdrop-filter: blur(8px);
+  color: var(--accent);
+  font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 990;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.4s var(--ease-expo), visibility 0.4s, transform 0.4s var(--ease-expo), border-color 0.3s;
+  cursor: none;
+}
+#back-to-top.visible { opacity: 1; visibility: visible; }
+#back-to-top:hover { border-color: var(--accent); transform: translateY(-4px); }
+
+#lightbox {
+  position: fixed; inset: 0; z-index: 99995;
+  background: rgba(0,0,0,0.92);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.4s, visibility 0.4s;
+}
+#lightbox.active { opacity: 1; visibility: visible; }
+#lightbox img { max-width: 90vw; max-height: 85vh; object-fit: contain; border-radius: 2px; }
+#lightbox-close {
+  position: absolute; top: 24px; right: 24px;
+  font-size: 32px; color: #fff; background: none; border: none;
+  cursor: pointer; z-index: 99996;
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+}
+#lightbox-prev, #lightbox-next {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  font-size: 36px; color: #fff;
+  background: rgba(255,255,255,0.1); border: none;
+  cursor: pointer; width: 56px; height: 56px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.3s;
+}
+#lightbox-prev:hover, #lightbox-next:hover { background: rgba(255,255,255,0.2); }
+#lightbox-prev { left: 16px; }
+#lightbox-next { right: 16px; }
 
 </style>
 </head>
@@ -1009,17 +1059,17 @@ section { overflow: hidden; }
   <div class="container">
     <div class="data-grid">
       <div class="data-item reveal">
-        <div class="data-number" id="counter-156"><span class="counter" data-target="156">0</span></div>
-        <div class="data-label">세대</div>
+        <div class="data-number" data-count-to="156" data-count-suffix="세대">0</div>
+        <div class="data-label">총 세대수</div>
         <div class="data-divider"></div>
       </div>
       <div class="data-item reveal">
-        <div class="data-number" id="counter-49"><span class="counter" data-target="49">0</span><span style="font-size: 0.5em; vertical-align: baseline;">F</span></div>
+        <div class="data-number" data-count-to="49" data-count-suffix="F">0</div>
         <div class="data-label">지상 최고층</div>
         <div class="data-divider"></div>
       </div>
       <div class="data-item reveal">
-        <div class="data-number" id="counter-2027"><span class="counter" data-target="2027">0</span></div>
+        <div class="data-number" data-count-to="2027">0</div>
         <div class="data-label">입주 예정</div>
       </div>
     </div>
@@ -1153,28 +1203,39 @@ section { overflow: hidden; }
         <p class="footer-tagline">서울의 마지막 한강변<br>프라이빗 레지던스.</p>
       </div>
       <div>
-        <p class="footer-col-title">Contact</p>
-        <div class="footer-info">
-          <p>02-1234-5678</p>
-          <p>info@hangang-leciel.kr</p>
-          <p>월–토 10:00–18:00</p>
+        <p class="footer-col-title">Navigation</p>
+        <div class="footer-links">
+          <a href="overview.html">사업개요</a>
+          <a href="units.html">세대안내</a>
+          <a href="location.html">입지환경</a>
+          <a href="amenities.html">커뮤니티</a>
+          <a href="contact.html">관심고객등록</a>
         </div>
       </div>
       <div>
-        <p class="footer-col-title">Location</p>
+        <p class="footer-col-title">Contact</p>
         <div class="footer-info">
-          <p>서울특별시 영등포구</p>
-          <p>한강변로 123</p>
-          <p>한강 르셀 분양사무소</p>
+          <p>분양문의: 1800-1234</p>
+          <p>info@hangang-leciel.kr</p>
+          <p>서울특별시 영등포구 한강변로 123</p>
         </div>
       </div>
     </div>
     <div class="footer-bottom">
-      <p class="footer-legal">본 홈페이지의 이미지, 조감도, 배치도 등은 이해를 돕기 위한 것으로 실제와 다를 수 있습니다. 입주 시기, 세대수, 주요 사양 등은 인허가 과정에서 변경될 수 있으며 사업 승인 후 확정됩니다.</p>
+      <p class="footer-legal">본 홈페이지의 이미지, 조감도, 배치도 등은 이해를 돕기 위한 것으로 실제와 다를 수 있습니다.</p>
       <p class="footer-copy">&copy; 2027 한강 르셀. All rights reserved.</p>
     </div>
   </div>
 </footer>
+
+<button id="back-to-top" aria-label="맨 위로">&#8593;</button>
+
+<div id="lightbox">
+  <button id="lightbox-close" aria-label="닫기">&times;</button>
+  <button id="lightbox-prev" aria-label="이전">&#8249;</button>
+  <img id="lightbox-img" src="" alt="">
+  <button id="lightbox-next" aria-label="다음">&#8250;</button>
+</div>
 
 <!-- ============================================================
      JAVASCRIPT
@@ -1366,6 +1427,59 @@ section { overflow: hidden; }
     btn.addEventListener('mouseleave', function() {
       btn.style.transform = 'translate(0, 0)';
     });
+  });
+
+  /* ===========================================
+     BACK TO TOP
+     =========================================== */
+  var backToTop = document.getElementById('back-to-top');
+  window.addEventListener('scroll', function() {
+    if (window.pageYOffset > 500) { backToTop.classList.add('visible'); }
+    else { backToTop.classList.remove('visible'); }
+  }, { passive: true });
+  backToTop.addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  /* ===========================================
+     LIGHTBOX
+     =========================================== */
+  var lightboxImages = [];
+  var lightboxIndex = 0;
+  var lightbox = document.getElementById('lightbox');
+  var lightboxImg = document.getElementById('lightbox-img');
+
+  document.querySelectorAll('.story-image img, .fullwidth-bg img').forEach(function(img) {
+    img.style.cursor = 'pointer';
+    img.addEventListener('click', function() { openLightbox(img.src); });
+  });
+
+  function collectImages() {
+    lightboxImages = [];
+    document.querySelectorAll('.story-image img, .fullwidth-bg img').forEach(function(img) { lightboxImages.push(img.src); });
+  }
+
+  function openLightbox(src) {
+    collectImages();
+    lightboxIndex = lightboxImages.indexOf(src);
+    if (lightboxIndex === -1) lightboxIndex = 0;
+    lightboxImg.src = src;
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  window.closeLightbox = function() { lightbox.classList.remove('open'); document.body.style.overflow = ''; };
+
+  window.lightboxNav = function(dir) {
+    if (!lightboxImages.length) return;
+    lightboxIndex = (lightboxIndex + dir + lightboxImages.length) % lightboxImages.length;
+    lightboxImg.src = lightboxImages[lightboxIndex];
+  };
+
+  lightbox.addEventListener('click', function(e) { if (e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', function(e) {
+    if (!lightbox.classList.contains('open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') lightboxNav(-1);
+    if (e.key === 'ArrowRight') lightboxNav(1);
   });
 
   /* ===========================================

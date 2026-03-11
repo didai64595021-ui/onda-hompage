@@ -74,7 +74,7 @@ body::after {
   inset: 0;
   pointer-events: none;
   z-index: 9990;
-  opacity: 0.04;
+  opacity: 0.03;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 128px 128px;
@@ -119,7 +119,7 @@ body::after {
 }
 
 #cursor-ring.expanded {
-  width: 56px; height: 56px;
+  width: 64px; height: 64px;
   border-color: var(--accent-light);
 }
 
@@ -698,7 +698,7 @@ body::after {
 
 .footer-inner {
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
   gap: 40px;
   margin-bottom: 60px;
 }
@@ -759,6 +759,57 @@ body::after {
   color: var(--text-secondary);
   opacity: 0.4;
 }
+
+#back-to-top {
+  position: fixed;
+  bottom: 32px; right: 32px;
+  width: 48px; height: 48px;
+  border: 1px solid rgba(200,169,125,0.3);
+  background: rgba(12,12,12,0.8);
+  backdrop-filter: blur(8px);
+  color: var(--accent);
+  font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 990;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.4s var(--ease-expo), visibility 0.4s, transform 0.4s var(--ease-expo), border-color 0.3s;
+  cursor: none;
+}
+#back-to-top.visible { opacity: 1; visibility: visible; }
+#back-to-top:hover { border-color: var(--accent); transform: translateY(-4px); }
+
+/* =============================================
+   LIGHTBOX
+   ============================================= */
+#lightbox {
+  position: fixed; inset: 0; z-index: 9995;
+  background: rgba(0,0,0,0.9);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.4s var(--ease-expo), visibility 0.4s;
+  cursor: none;
+}
+#lightbox.open { opacity: 1; visibility: visible; }
+#lightbox img { max-width: 90vw; max-height: 85vh; object-fit: contain; }
+.lightbox-close {
+  position: absolute; top: 24px; right: 24px;
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 28px;
+  cursor: none; z-index: 1;
+  transition: color 0.3s;
+}
+.lightbox-close:hover { color: var(--accent); }
+.lightbox-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 24px; cursor: none;
+  transition: color 0.3s;
+}
+.lightbox-nav:hover { color: var(--accent); }
+.lightbox-prev { left: 24px; }
+.lightbox-next { right: 24px; }
 </style>
 </head>
 <body>
@@ -1192,9 +1243,19 @@ body::after {
         <p class="footer-col-title">Location</p>
         <div class="footer-info"><p>서울특별시 영등포구</p><p>한강변로 123</p><p>한강 르셀 분양사무소</p></div>
       </div>
+      <div>
+        <p class="footer-col-title">Navigation</p>
+        <div class="footer-info">
+          <p><a href="overview.html">사업개요</a></p>
+          <p><a href="units.html">세대안내</a></p>
+          <p><a href="location.html">입지환경</a></p>
+          <p><a href="amenities.html">커뮤니티</a></p>
+          <p><a href="contact.html">관심고객등록</a></p>
+        </div>
+      </div>
     </div>
     <div class="footer-bottom">
-      <p class="footer-legal">본 홈페이지의 이미지, 조감도, 배치도 등은 이해를 돕기 위한 것으로 실제와 다를 수 있습니다.</p>
+      <p class="footer-legal">본 홈페이지의 이미지, 조감도, 배치도 등은 이해를 돕기 위한 것으로 실제와 다를 수 있습니다. 분양문의: 02-1234-5678</p>
       <p class="footer-copy">&copy; 2027 한강 르셀. All rights reserved.</p>
     </div>
   </div>
@@ -1465,8 +1526,75 @@ body::after {
     });
   }, 2000);
 
+  /* ──────────────────────────────────────────
+     BACK TO TOP BUTTON
+  ────────────────────────────────────────── */
+  var backToTop = document.getElementById('back-to-top');
+  window.addEventListener('scroll', function() {
+    if (window.pageYOffset > 500) { backToTop.classList.add('visible'); }
+    else { backToTop.classList.remove('visible'); }
+  }, { passive: true });
+  backToTop.addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  /* ──────────────────────────────────────────
+     LIGHTBOX
+  ────────────────────────────────────────── */
+  var lightboxImages = [];
+  var lightboxIndex = 0;
+  var lightbox = document.getElementById('lightbox');
+  var lightboxImg = document.getElementById('lightbox-img');
+
+  document.querySelectorAll('.floor-visual img, .floor-visual svg, .lifestyle-bg img').forEach(function(img) {
+    if (img.src) {
+      img.style.cursor = 'pointer';
+      img.addEventListener('click', function() { openLightbox(img.src); });
+    }
+  });
+
+  function collectImages() {
+    lightboxImages = [];
+    document.querySelectorAll('.lifestyle-bg img').forEach(function(img) { if (img.src) lightboxImages.push(img.src); });
+  }
+
+  function openLightbox(src) {
+    collectImages();
+    lightboxIndex = lightboxImages.indexOf(src);
+    if (lightboxIndex === -1) { lightboxImages = [src]; lightboxIndex = 0; }
+    lightboxImg.src = src;
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  window.closeLightbox = function() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  window.lightboxNav = function(dir) {
+    if (!lightboxImages.length) return;
+    lightboxIndex = (lightboxIndex + dir + lightboxImages.length) % lightboxImages.length;
+    lightboxImg.src = lightboxImages[lightboxIndex];
+  };
+
+  lightbox.addEventListener('click', function(e) { if (e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', function(e) {
+    if (!lightbox.classList.contains('open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') lightboxNav(-1);
+    if (e.key === 'ArrowRight') lightboxNav(1);
+  });
+
 })();
 </script>
+
+<button id="back-to-top" aria-label="맨 위로">&#8593;</button>
+
+<div id="lightbox">
+  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <button class="lightbox-nav lightbox-prev" onclick="lightboxNav(-1)">&#10094;</button>
+  <img id="lightbox-img" src="" alt="">
+  <button class="lightbox-nav lightbox-next" onclick="lightboxNav(1)">&#10095;</button>
+</div>
 
 </body>
 </html>

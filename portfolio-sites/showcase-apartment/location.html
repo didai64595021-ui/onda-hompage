@@ -1,0 +1,2626 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>입지환경 — 리버사이드 파크</title>
+<meta name="description" content="리버사이드 파크 입지환경. 여의도 중심, 한강 직선거리 200m. 교통·교육·생활 인프라를 한눈에.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+/* =============================================
+   CSS CUSTOM PROPERTIES
+   ============================================= */
+:root {
+  --bg: #0C0C0C;
+  --bg-surface: #161614;
+  --bg-light: #F7F4F0;
+  --accent: #C8A97D;
+  --accent-light: #E2D1B5;
+  --text: #E8E4DF;
+  --text-dim: #8A8580;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Pretendard Variable', -apple-system, sans-serif;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --grid: 8px;
+}
+
+/* =============================================
+   RESET & BASE
+   ============================================= */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  word-break: keep-all;
+  line-height: 1.7;
+  cursor: none;
+}
+
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+button { font: inherit; border: none; background: none; cursor: none; }
+
+/* =============================================
+   CUSTOM CURSOR
+   ============================================= */
+.cursor-dot {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10001;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s, opacity 0.2s;
+}
+.cursor-ring {
+  position: fixed;
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  transform: translate(-50%, -50%);
+  transition: transform 0.25s var(--ease), opacity 0.2s, width 0.3s var(--ease), height 0.3s var(--ease);
+  mix-blend-mode: difference;
+}
+.cursor-dot.hide, .cursor-ring.hide { opacity: 0; }
+.cursor-ring.hover {
+  width: 56px;
+  height: 56px;
+  background: rgba(200,169,125,0.08);
+}
+
+/* =============================================
+   SCROLL PROGRESS
+   ============================================= */
+.scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  z-index: 9999;
+  transform-origin: left;
+  transform: scaleX(0);
+  width: 100%;
+}
+
+/* =============================================
+   GRAIN OVERLAY
+   ============================================= */
+.grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px;
+}
+
+/* =============================================
+   PRELOADER
+   ============================================= */
+.preloader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 10002;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s var(--ease), visibility 0.6s;
+}
+.preloader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+
+.preloader-line {
+  width: 48px;
+  height: 1px;
+  background: var(--accent);
+  margin-bottom: calc(var(--grid) * 4);
+  transform: scaleX(0);
+  animation: preloaderLine 1.2s var(--ease) forwards;
+}
+
+.preloader-text {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 4vw, 32px);
+  color: var(--accent);
+  letter-spacing: 0.2em;
+  overflow: hidden;
+}
+.preloader-text span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(100%);
+  animation: letterReveal 0.6s var(--ease) forwards;
+}
+
+@keyframes preloaderLine {
+  to { transform: scaleX(1); }
+}
+@keyframes letterReveal {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* =============================================
+   HEADER
+   ============================================= */
+.header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 900;
+  padding: calc(var(--grid) * 3) calc(var(--grid) * 5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.4s, padding 0.4s var(--ease), backdrop-filter 0.4s;
+}
+.header.solid {
+  background: rgba(12,12,12,0.92);
+  backdrop-filter: blur(16px);
+  padding: calc(var(--grid) * 2) calc(var(--grid) * 5);
+}
+
+.header-logo {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+
+.header-nav { display: flex; gap: calc(var(--grid) * 4); }
+.header-nav a {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  position: relative;
+  transition: color 0.3s;
+}
+.header-nav a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 100%; height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s var(--ease);
+}
+.header-nav a:hover { color: var(--text); }
+.header-nav a:hover::after { transform: scaleX(1); transform-origin: left; }
+.header-nav a.active { color: var(--accent); }
+.header-nav a.active::after { transform: scaleX(1); transform-origin: left; }
+
+/* Hamburger */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  z-index: 1001;
+}
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 1.5px;
+  background: var(--text);
+  transition: transform 0.4s var(--ease), opacity 0.3s;
+}
+.hamburger.active span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+.hamburger.active span:nth-child(2) { opacity: 0; }
+.hamburger.active span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+/* Mobile overlay */
+.mobile-nav {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 899;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--grid) * 5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s var(--ease), visibility 0.5s;
+}
+.mobile-nav.open { opacity: 1; visibility: visible; }
+.mobile-nav a {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 5vw, 40px);
+  color: var(--text);
+  letter-spacing: 0.06em;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.4s var(--ease), transform 0.5s var(--ease), color 0.3s;
+}
+.mobile-nav.open a {
+  opacity: 1;
+  transform: translateY(0);
+}
+.mobile-nav a:hover { color: var(--accent); }
+
+/* =============================================
+   PAGE HERO (HALF HEIGHT)
+   ============================================= */
+.page-hero {
+  position: relative;
+  height: 60vh;
+  min-height: 400px;
+  max-height: 640px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: calc(var(--grid) * 10) calc(var(--grid) * 5) calc(var(--grid) * 8);
+  overflow: hidden;
+}
+
+.page-hero-bg {
+  position: absolute;
+  inset: 0;
+  background: url('https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=1600&q=80') center/cover no-repeat;
+  animation: heroKen 25s ease-in-out infinite alternate;
+}
+.page-hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    var(--bg) 0%,
+    rgba(12,12,12,0.7) 30%,
+    rgba(12,12,12,0.3) 60%,
+    rgba(12,12,12,0.4) 100%
+  );
+}
+
+@keyframes heroKen {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.06); }
+}
+
+.page-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.page-hero-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: calc(var(--grid) * 2);
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.page-hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: calc(var(--grid) * 2);
+  opacity: 0;
+  transform: translateY(32px);
+}
+
+.page-hero-sub {
+  font-family: var(--font-display);
+  font-size: clamp(14px, 2vw, 20px);
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.page-hero-line {
+  width: 48px;
+  height: 1px;
+  background: var(--accent);
+  margin-top: calc(var(--grid) * 4);
+  transform: scaleX(0);
+  transform-origin: left;
+  opacity: 0;
+}
+
+/* =============================================
+   SCROLL REVEAL
+   ============================================= */
+.reveal {
+  opacity: 0;
+  transform: translateY(48px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-48px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.reveal-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+.reveal-right {
+  opacity: 0;
+  transform: translateX(48px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.reveal-scale.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* =============================================
+   SECTION COMMON
+   ============================================= */
+.section {
+  position: relative;
+  padding: calc(var(--grid) * 16) calc(var(--grid) * 5);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: calc(var(--grid) * 2);
+}
+
+.section-heading {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: calc(var(--grid) * 3);
+}
+.section-heading em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.section-desc {
+  font-size: clamp(14px, 1.2vw, 16px);
+  color: var(--text-dim);
+  max-width: 560px;
+  line-height: 1.9;
+}
+
+.section-divider {
+  width: 48px;
+  height: 1px;
+  background: var(--accent);
+  margin: calc(var(--grid) * 4) 0;
+}
+
+/* =============================================
+   LOCATION INTRO
+   ============================================= */
+.location-intro {
+  position: relative;
+  padding: calc(var(--grid) * 20) calc(var(--grid) * 5);
+  overflow: hidden;
+}
+
+.location-intro-mega {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: clamp(80px, 16vw, 240px);
+  font-weight: 700;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200,169,125,0.06);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+.location-intro-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--grid) * 10);
+  align-items: center;
+}
+
+.location-intro-left {}
+
+.location-intro-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--grid) * 1.5);
+  padding: calc(var(--grid) * 1) calc(var(--grid) * 2.5);
+  border: 1px solid rgba(200,169,125,0.2);
+  border-radius: 100px;
+  margin-bottom: calc(var(--grid) * 4);
+}
+.location-intro-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.location-intro-badge-text {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.location-intro-heading {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4.5vw, 56px);
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: calc(var(--grid) * 4);
+}
+.location-intro-heading em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.location-intro-text {
+  font-size: clamp(14px, 1.2vw, 16px);
+  color: var(--text-dim);
+  line-height: 1.9;
+  margin-bottom: calc(var(--grid) * 6);
+}
+
+.location-intro-highlights {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--grid) * 3);
+}
+
+.location-highlight {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--grid) * 2);
+  padding: calc(var(--grid) * 2.5) calc(var(--grid) * 3);
+  background: var(--bg-surface);
+  border-radius: 8px;
+  border: 1px solid rgba(200,169,125,0.08);
+  transition: border-color 0.3s, transform 0.3s var(--ease);
+}
+.location-highlight:hover {
+  border-color: rgba(200,169,125,0.2);
+  transform: translateY(-2px);
+}
+
+.location-highlight-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: rgba(200,169,125,0.08);
+}
+.location-highlight-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--accent);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.location-highlight-content {}
+.location-highlight-value {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1.2;
+}
+.location-highlight-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.02em;
+}
+
+.location-intro-right {
+  position: relative;
+}
+
+.location-intro-image {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 4/5;
+}
+.location-intro-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s var(--ease);
+}
+.location-intro-image:hover img {
+  transform: scale(1.03);
+}
+.location-intro-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(12,12,12,0.4) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+.location-intro-float {
+  position: absolute;
+  bottom: calc(var(--grid) * 4);
+  left: calc(var(--grid) * -4);
+  background: var(--bg-surface);
+  border: 1px solid rgba(200,169,125,0.15);
+  border-radius: 12px;
+  padding: calc(var(--grid) * 3);
+  backdrop-filter: blur(12px);
+  z-index: 3;
+}
+.location-intro-float-label {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: calc(var(--grid) * 1);
+}
+.location-intro-float-value {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3vw, 36px);
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.1;
+}
+.location-intro-float-unit {
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+/* =============================================
+   DISTANCE INFOGRAPHIC
+   ============================================= */
+.infographic-section {
+  position: relative;
+  padding: calc(var(--grid) * 20) calc(var(--grid) * 5);
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
+.infographic-header {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto calc(var(--grid) * 10);
+}
+
+.infographic-container {
+  position: relative;
+  max-width: 720px;
+  margin: 0 auto;
+  aspect-ratio: 1/1;
+}
+
+.infographic-rings {
+  position: absolute;
+  inset: 0;
+}
+
+.infographic-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(200,169,125,0.12);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 1.2s var(--ease), opacity 0.8s;
+  opacity: 0;
+}
+.infographic-ring.ring-1 {
+  width: 30%;
+  height: 30%;
+  border-color: rgba(200,169,125,0.2);
+}
+.infographic-ring.ring-2 {
+  width: 52%;
+  height: 52%;
+  border-color: rgba(200,169,125,0.15);
+}
+.infographic-ring.ring-3 {
+  width: 74%;
+  height: 74%;
+  border-color: rgba(200,169,125,0.1);
+}
+.infographic-ring.ring-4 {
+  width: 96%;
+  height: 96%;
+  border-color: rgba(200,169,125,0.06);
+}
+
+.infographic-ring.expanded {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+.infographic-ring-label {
+  position: absolute;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.ring-1 .infographic-ring-label { top: -18px; left: 50%; transform: translateX(-50%); }
+.ring-2 .infographic-ring-label { top: -18px; left: 50%; transform: translateX(-50%); }
+.ring-3 .infographic-ring-label { top: -18px; left: 50%; transform: translateX(-50%); }
+.ring-4 .infographic-ring-label { top: -18px; left: 50%; transform: translateX(-50%); }
+
+.infographic-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  text-align: center;
+}
+
+.infographic-center-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin: 0 auto calc(var(--grid) * 1.5);
+  box-shadow: 0 0 0 4px rgba(200,169,125,0.15), 0 0 0 8px rgba(200,169,125,0.06);
+  animation: centerPulse 3s ease-in-out infinite;
+}
+@keyframes centerPulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(200,169,125,0.15), 0 0 0 8px rgba(200,169,125,0.06); }
+  50% { box-shadow: 0 0 0 8px rgba(200,169,125,0.2), 0 0 0 16px rgba(200,169,125,0.08); }
+}
+.infographic-center-name {
+  font-family: var(--font-display);
+  font-size: clamp(12px, 1.4vw, 16px);
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.infographic-center-sub {
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+/* Infographic markers */
+.infographic-marker {
+  position: absolute;
+  z-index: 4;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+}
+.infographic-marker.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.infographic-marker-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  margin: 0 auto calc(var(--grid) * 0.5);
+  position: relative;
+}
+.infographic-marker-dot::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid rgba(200,169,125,0.3);
+}
+
+.infographic-marker-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  text-align: center;
+}
+.infographic-marker-time {
+  font-size: 10px;
+  color: var(--accent);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Marker positions */
+.marker-yeouido-stn { top: 32%; left: 22%; }
+.marker-yeoui-naru { top: 24%; left: 50%; }
+.marker-olympic { top: 14%; left: 72%; }
+.marker-bridge { bottom: 25%; left: 18%; }
+.marker-gangnam { bottom: 10%; left: 48%; }
+.marker-gimpo { bottom: 15%; right: 12%; }
+
+/* =============================================
+   TRANSPORTATION SECTION
+   ============================================= */
+.transport-section {
+  position: relative;
+  padding: calc(var(--grid) * 20) calc(var(--grid) * 5);
+}
+
+.transport-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.transport-header {
+  margin-bottom: calc(var(--grid) * 8);
+}
+
+.transport-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: calc(var(--grid) * 3);
+}
+
+.transport-card {
+  background: var(--bg-surface);
+  border: 1px solid rgba(200,169,125,0.08);
+  border-radius: 12px;
+  padding: calc(var(--grid) * 4);
+  transition: transform 0.4s var(--ease), border-color 0.3s, box-shadow 0.4s;
+  position: relative;
+  overflow: hidden;
+}
+.transport-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s var(--ease);
+}
+.transport-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(200,169,125,0.2);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+}
+.transport-card:hover::before {
+  transform: scaleX(1);
+}
+
+.transport-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(200,169,125,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: calc(var(--grid) * 3);
+}
+.transport-card-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: var(--accent);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.transport-card-name {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: calc(var(--grid) * 0.5);
+  color: var(--text);
+}
+
+.transport-card-detail {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: calc(var(--grid) * 3);
+  line-height: 1.5;
+}
+
+.transport-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: calc(var(--grid) * 2);
+  border-top: 1px solid rgba(200,169,125,0.08);
+}
+
+.transport-card-time {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.transport-card-time-value {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1;
+}
+.transport-card-time-unit {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.transport-card-distance {
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.02em;
+}
+
+.transport-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.badge-walk {
+  background: rgba(200,169,125,0.1);
+  color: var(--accent);
+}
+.badge-drive {
+  background: rgba(139,171,200,0.1);
+  color: #8BABC8;
+}
+
+/* =============================================
+   EDUCATION SECTION
+   ============================================= */
+.education-section {
+  position: relative;
+  padding: calc(var(--grid) * 20) calc(var(--grid) * 5);
+  background: var(--bg-surface);
+}
+
+.education-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.education-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: calc(var(--grid) * 8);
+}
+
+.education-list {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--grid) * 2);
+}
+
+.education-item {
+  display: grid;
+  grid-template-columns: 1fr 160px 120px 80px;
+  align-items: center;
+  gap: calc(var(--grid) * 3);
+  padding: calc(var(--grid) * 3) calc(var(--grid) * 4);
+  border-radius: 12px;
+  border: 1px solid rgba(200,169,125,0.06);
+  background: rgba(12,12,12,0.4);
+  transition: background 0.3s, border-color 0.3s;
+}
+.education-item:hover {
+  background: rgba(200,169,125,0.03);
+  border-color: rgba(200,169,125,0.15);
+}
+
+.education-item-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: calc(var(--grid) * 1.5);
+}
+
+.education-item-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(200,169,125,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.education-item-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--accent);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.education-item-bar {
+  position: relative;
+  height: 4px;
+  background: rgba(200,169,125,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.education-item-bar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1.2s var(--ease);
+}
+.education-item-bar-fill.animated {
+  transform: scaleX(1);
+}
+
+.education-item-time {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+  text-align: right;
+}
+
+.education-item-method {
+  font-size: 12px;
+  color: var(--text-dim);
+  text-align: right;
+}
+
+/* =============================================
+   LIVING SECTION
+   ============================================= */
+.living-section {
+  position: relative;
+  padding: calc(var(--grid) * 20) calc(var(--grid) * 5);
+}
+
+.living-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.living-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--grid) * 8);
+  margin-top: calc(var(--grid) * 8);
+}
+
+.living-list {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--grid) * 1);
+}
+
+.living-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(var(--grid) * 3) 0;
+  border-bottom: 1px solid rgba(200,169,125,0.06);
+  transition: padding-left 0.3s var(--ease);
+}
+.living-item:hover {
+  padding-left: calc(var(--grid) * 2);
+}
+
+.living-item-left {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--grid) * 2);
+}
+
+.living-item-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.living-item-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.living-item-right {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--grid) * 2);
+}
+
+.living-item-time {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.living-item-badge {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 100px;
+  background: rgba(200,169,125,0.08);
+  color: var(--text-dim);
+}
+
+.living-visual {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.living-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: 4/3;
+  transition: transform 0.6s var(--ease);
+}
+.living-visual:hover img {
+  transform: scale(1.03);
+}
+.living-visual::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(12,12,12,0.5) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.living-visual-overlay {
+  position: absolute;
+  bottom: calc(var(--grid) * 4);
+  left: calc(var(--grid) * 4);
+  z-index: 2;
+}
+.living-visual-overlay-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.living-visual-overlay-sub {
+  font-size: 13px;
+  color: var(--accent-light);
+}
+
+/* =============================================
+   NATURE & RIVER SECTION
+   ============================================= */
+.nature-section {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.nature-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.nature-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.nature-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(12,12,12,0.92) 0%,
+    rgba(12,12,12,0.7) 40%,
+    rgba(12,12,12,0.4) 100%
+  );
+}
+
+.nature-content {
+  position: relative;
+  z-index: 2;
+  padding: calc(var(--grid) * 16) calc(var(--grid) * 5);
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.nature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--grid) * 10);
+  align-items: center;
+}
+
+.nature-left {}
+
+.nature-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: calc(var(--grid) * 3);
+}
+
+.nature-heading {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4.5vw, 56px);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: calc(var(--grid) * 4);
+}
+.nature-heading em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.nature-text {
+  font-size: clamp(14px, 1.2vw, 16px);
+  color: var(--text-dim);
+  line-height: 1.9;
+  margin-bottom: calc(var(--grid) * 6);
+  max-width: 480px;
+}
+
+.nature-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--grid) * 3);
+}
+
+.nature-stat {
+  background: rgba(200,169,125,0.04);
+  border: 1px solid rgba(200,169,125,0.1);
+  border-radius: 12px;
+  padding: calc(var(--grid) * 3) calc(var(--grid) * 3);
+  text-align: center;
+  transition: transform 0.3s var(--ease), border-color 0.3s;
+}
+.nature-stat:hover {
+  transform: translateY(-3px);
+  border-color: rgba(200,169,125,0.25);
+}
+
+.nature-stat-value {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.5vw, 40px);
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+.nature-stat-value .countup {
+  display: inline;
+}
+
+.nature-stat-unit {
+  font-size: 14px;
+  color: var(--accent-light);
+}
+
+.nature-stat-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+
+.nature-right {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--grid) * 3);
+}
+
+.nature-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--grid) * 3);
+  padding: calc(var(--grid) * 3);
+  background: rgba(200,169,125,0.03);
+  border: 1px solid rgba(200,169,125,0.08);
+  border-radius: 12px;
+  transition: border-color 0.3s, transform 0.3s var(--ease);
+}
+.nature-feature:hover {
+  border-color: rgba(200,169,125,0.2);
+  transform: translateX(4px);
+}
+
+.nature-feature-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(200,169,125,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.nature-feature-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--accent);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.nature-feature-content {}
+.nature-feature-title {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+.nature-feature-desc {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+/* =============================================
+   MARQUEE BAND
+   ============================================= */
+.marquee-band {
+  position: relative;
+  padding: calc(var(--grid) * 5) 0;
+  background: var(--bg-surface);
+  border-top: 1px solid rgba(200,169,125,0.06);
+  border-bottom: 1px solid rgba(200,169,125,0.06);
+  overflow: hidden;
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 30s linear infinite;
+}
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marqueeScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.marquee-item {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 4vw, 48px);
+  font-weight: 700;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200,169,125,0.2);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  padding: 0 calc(var(--grid) * 5);
+  user-select: none;
+}
+
+.marquee-separator {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 4vw, 48px);
+  color: var(--accent);
+  opacity: 0.3;
+  padding: 0 calc(var(--grid) * 2);
+  user-select: none;
+}
+
+/* =============================================
+   CTA SECTION
+   ============================================= */
+.cta-section {
+  position: relative;
+  padding: calc(var(--grid) * 20) calc(var(--grid) * 5);
+  text-align: center;
+  overflow: hidden;
+}
+
+.cta-mega {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: clamp(80px, 16vw, 220px);
+  font-weight: 700;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200,169,125,0.04);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+.cta-content {
+  position: relative;
+  z-index: 2;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.cta-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: calc(var(--grid) * 3);
+}
+
+.cta-heading {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: calc(var(--grid) * 3);
+}
+.cta-heading em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.cta-desc {
+  font-size: clamp(14px, 1.2vw, 16px);
+  color: var(--text-dim);
+  line-height: 1.8;
+  margin-bottom: calc(var(--grid) * 6);
+}
+
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--grid) * 1.5);
+  padding: calc(var(--grid) * 2) calc(var(--grid) * 5);
+  border: 1px solid var(--accent);
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  transition: background 0.4s var(--ease), color 0.3s, transform 0.3s var(--ease);
+  position: relative;
+  overflow: hidden;
+}
+.cta-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s var(--ease);
+  border-radius: 100px;
+}
+.cta-btn:hover::before {
+  transform: scaleX(1);
+}
+.cta-btn:hover {
+  color: var(--bg);
+  transform: translateY(-2px);
+}
+.cta-btn span {
+  position: relative;
+  z-index: 2;
+}
+.cta-btn svg {
+  position: relative;
+  z-index: 2;
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.3s var(--ease);
+}
+.cta-btn:hover svg {
+  transform: translateX(4px);
+}
+
+/* =============================================
+   FOOTER
+   ============================================= */
+.footer {
+  position: relative;
+  padding: calc(var(--grid) * 16) calc(var(--grid) * 5) calc(var(--grid) * 6);
+  overflow: hidden;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-mega {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 12vw, 160px);
+  font-weight: 700;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200,169,125,0.08);
+  letter-spacing: 0.05em;
+  line-height: 1;
+  text-align: center;
+  margin-bottom: calc(var(--grid) * 8);
+  user-select: none;
+}
+
+.footer-nav {
+  display: flex;
+  justify-content: center;
+  gap: calc(var(--grid) * 5);
+  margin-bottom: calc(var(--grid) * 6);
+  flex-wrap: wrap;
+}
+.footer-nav a {
+  font-size: 13px;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  transition: color 0.3s;
+}
+.footer-nav a:hover { color: var(--accent); }
+
+.footer-divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(200,169,125,0.08);
+  margin-bottom: calc(var(--grid) * 4);
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-copy {
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+
+.footer-brand {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+
+/* =============================================
+   RESPONSIVE — 1440px+
+   ============================================= */
+@media (min-width: 1440px) {
+  .header { padding: calc(var(--grid) * 4) calc(var(--grid) * 10); }
+  .header.solid { padding: calc(var(--grid) * 2.5) calc(var(--grid) * 10); }
+  .page-hero { padding: calc(var(--grid) * 12) calc(var(--grid) * 10) calc(var(--grid) * 10); }
+  .location-intro { padding: calc(var(--grid) * 24) calc(var(--grid) * 10); }
+  .infographic-section { padding: calc(var(--grid) * 24) calc(var(--grid) * 10); }
+  .transport-section { padding: calc(var(--grid) * 24) calc(var(--grid) * 10); }
+  .education-section { padding: calc(var(--grid) * 24) calc(var(--grid) * 10); }
+  .living-section { padding: calc(var(--grid) * 24) calc(var(--grid) * 10); }
+  .nature-content { padding: calc(var(--grid) * 20) calc(var(--grid) * 10); }
+  .cta-section { padding: calc(var(--grid) * 24) calc(var(--grid) * 10); }
+  .footer { padding: calc(var(--grid) * 20) calc(var(--grid) * 10) calc(var(--grid) * 8); }
+}
+
+/* =============================================
+   RESPONSIVE — 1024px
+   ============================================= */
+@media (max-width: 1024px) {
+  .transport-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .location-intro-inner {
+    grid-template-columns: 1fr;
+    gap: calc(var(--grid) * 6);
+  }
+  .location-intro-float {
+    left: calc(var(--grid) * 3);
+  }
+
+  .nature-grid {
+    grid-template-columns: 1fr;
+    gap: calc(var(--grid) * 8);
+  }
+
+  .living-content {
+    grid-template-columns: 1fr;
+    gap: calc(var(--grid) * 6);
+  }
+
+  .education-item {
+    grid-template-columns: 1fr 120px 80px 60px;
+  }
+}
+
+/* =============================================
+   RESPONSIVE — 768px
+   ============================================= */
+@media (max-width: 768px) {
+  .header-nav { display: none; }
+  .hamburger { display: flex; }
+
+  .page-hero {
+    height: 50vh;
+    padding: calc(var(--grid) * 8) calc(var(--grid) * 3) calc(var(--grid) * 6);
+  }
+
+  .location-intro { padding: calc(var(--grid) * 14) calc(var(--grid) * 3); }
+  .location-intro-highlights { grid-template-columns: 1fr; }
+  .location-intro-image { aspect-ratio: 3/2; }
+
+  .infographic-section { padding: calc(var(--grid) * 14) calc(var(--grid) * 3); }
+  .infographic-container { max-width: 400px; }
+  .infographic-marker-label { font-size: 10px; }
+  .infographic-marker-time { font-size: 9px; }
+
+  .transport-section { padding: calc(var(--grid) * 14) calc(var(--grid) * 3); }
+  .transport-grid { grid-template-columns: 1fr; }
+
+  .education-section { padding: calc(var(--grid) * 14) calc(var(--grid) * 3); }
+  .education-header { flex-direction: column; align-items: flex-start; gap: calc(var(--grid) * 2); }
+  .education-item {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: calc(var(--grid) * 1) calc(var(--grid) * 2);
+    padding: calc(var(--grid) * 2.5) calc(var(--grid) * 3);
+  }
+  .education-item-bar { grid-column: 1 / -1; }
+  .education-item-method { display: none; }
+
+  .living-section { padding: calc(var(--grid) * 14) calc(var(--grid) * 3); }
+
+  .nature-content { padding: calc(var(--grid) * 12) calc(var(--grid) * 3); }
+  .nature-stats { grid-template-columns: 1fr 1fr; gap: calc(var(--grid) * 2); }
+
+  .cta-section { padding: calc(var(--grid) * 14) calc(var(--grid) * 3); }
+
+  .footer { padding: calc(var(--grid) * 12) calc(var(--grid) * 3) calc(var(--grid) * 5); }
+  .footer-bottom { flex-direction: column; gap: calc(var(--grid) * 2); text-align: center; }
+  .footer-nav { gap: calc(var(--grid) * 3); }
+
+  .mobile-nav a { transition-delay: calc(var(--i, 0) * 0.06s); }
+}
+
+/* =============================================
+   RESPONSIVE — 375px
+   ============================================= */
+@media (max-width: 375px) {
+  .page-hero-title { font-size: 40px; }
+
+  .location-intro-heading { font-size: 28px; }
+
+  .infographic-container { max-width: 300px; }
+  .infographic-center-name { font-size: 11px; }
+
+  .transport-card { padding: calc(var(--grid) * 3); }
+  .transport-card-time-value { font-size: 24px; }
+
+  .nature-heading { font-size: 28px; }
+  .nature-stats { grid-template-columns: 1fr; }
+  .nature-stat-value { font-size: 28px; }
+
+  .marquee-item { font-size: 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Grain overlay -->
+<div class="grain"></div>
+
+<!-- Custom cursor -->
+<div class="cursor-dot hide"></div>
+<div class="cursor-ring hide"></div>
+
+<!-- Scroll progress -->
+<div class="scroll-progress"></div>
+
+<!-- Preloader -->
+<div class="preloader">
+  <div class="preloader-line"></div>
+  <div class="preloader-text" aria-label="입지환경"></div>
+</div>
+
+<!-- Header -->
+<header class="header">
+  <a href="index.html" class="header-logo">RIVERSIDE PARK</a>
+  <nav class="header-nav">
+    <a href="overview.html">사업개요</a>
+    <a href="floorplan.html">평면안내</a>
+    <a href="amenities.html">커뮤니티</a>
+    <a href="location.html" class="active">입지환경</a>
+    <a href="contact.html">관심고객</a>
+  </nav>
+  <button class="hamburger" aria-label="메뉴 열기">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- Mobile nav overlay -->
+<nav class="mobile-nav">
+  <a href="overview.html" style="--i:0">사업개요</a>
+  <a href="floorplan.html" style="--i:1">평면안내</a>
+  <a href="amenities.html" style="--i:2">커뮤니티</a>
+  <a href="location.html" style="--i:3">입지환경</a>
+  <a href="contact.html" style="--i:4">관심고객</a>
+</nav>
+
+<!-- =============================================
+     SECTION 1: PAGE HERO
+     ============================================= -->
+<section class="page-hero">
+  <div class="page-hero-bg"></div>
+  <div class="page-hero-content">
+    <p class="page-hero-label">Location</p>
+    <h1 class="page-hero-title">입지환경</h1>
+    <p class="page-hero-sub">PREMIUM LOCATION IN YEOUIDO</p>
+    <div class="page-hero-line"></div>
+  </div>
+</section>
+
+<!-- =============================================
+     SECTION 2: LOCATION INTRO
+     ============================================= -->
+<section class="location-intro">
+  <div class="location-intro-mega">YEOUIDO</div>
+  <div class="location-intro-inner">
+    <div class="location-intro-left">
+      <div class="location-intro-badge reveal">
+        <div class="location-intro-badge-dot"></div>
+        <span class="location-intro-badge-text">서울시 영등포구 여의도동</span>
+      </div>
+      <h2 class="location-intro-heading reveal" style="transition-delay: 0.1s;">
+        서울의 중심,<br><em>한강의 품</em>에서
+      </h2>
+      <p class="location-intro-text reveal" style="transition-delay: 0.2s;">
+        대한민국 금융과 정치의 중심 여의도. 그 한복판에서 한강을 품에 안은 리버사이드 파크는 비즈니스와 자연, 교육과 문화가 완벽하게 조화를 이루는 최상의 주거 입지를 자랑합니다. 도심 속 자연을 매일 누리는 특별한 일상이 시작됩니다.
+      </p>
+      <div class="location-intro-highlights">
+        <div class="location-highlight reveal" style="transition-delay: 0.3s;">
+          <div class="location-highlight-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          </div>
+          <div class="location-highlight-content">
+            <div class="location-highlight-value">더블역세권</div>
+            <div class="location-highlight-label">5호선 · 9호선</div>
+          </div>
+        </div>
+        <div class="location-highlight reveal" style="transition-delay: 0.4s;">
+          <div class="location-highlight-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div class="location-highlight-content">
+            <div class="location-highlight-value">한강 200m</div>
+            <div class="location-highlight-label">직선거리</div>
+          </div>
+        </div>
+        <div class="location-highlight reveal" style="transition-delay: 0.5s;">
+          <div class="location-highlight-icon">
+            <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 10 3 12 0v-5"/></svg>
+          </div>
+          <div class="location-highlight-content">
+            <div class="location-highlight-value">명문학군</div>
+            <div class="location-highlight-label">초·중·고 도보권</div>
+          </div>
+        </div>
+        <div class="location-highlight reveal" style="transition-delay: 0.6s;">
+          <div class="location-highlight-icon">
+            <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 00-8 0v2"/></svg>
+          </div>
+          <div class="location-highlight-content">
+            <div class="location-highlight-value">IFC몰</div>
+            <div class="location-highlight-label">도보 10분</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="location-intro-right reveal-scale" style="transition-delay: 0.3s;">
+      <div class="location-intro-image">
+        <img src="https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1200&q=80" alt="여의도 야경 스카이라인" loading="lazy">
+      </div>
+      <div class="location-intro-float">
+        <div class="location-intro-float-label">한강까지</div>
+        <div class="location-intro-float-value">200<span class="location-intro-float-unit">m</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================
+     SECTION 3: DISTANCE INFOGRAPHIC
+     ============================================= -->
+<section class="infographic-section">
+  <div class="infographic-header">
+    <p class="section-eyebrow reveal">Distance Infographic</p>
+    <h2 class="section-heading reveal" style="transition-delay: 0.1s;">
+      리버사이드 파크를 <em>중심으로</em>
+    </h2>
+    <p class="section-desc reveal" style="transition-delay: 0.2s; margin: 0 auto;">
+      도보 5분 이내 지하철, 차량 15분 이내 강남까지. 모든 것이 가까운 프리미엄 입지.
+    </p>
+  </div>
+
+  <div class="infographic-container reveal-scale" id="infographic">
+    <div class="infographic-rings">
+      <div class="infographic-ring ring-1">
+        <span class="infographic-ring-label">도보 5분</span>
+      </div>
+      <div class="infographic-ring ring-2">
+        <span class="infographic-ring-label">도보 10분</span>
+      </div>
+      <div class="infographic-ring ring-3">
+        <span class="infographic-ring-label">차량 5분</span>
+      </div>
+      <div class="infographic-ring ring-4">
+        <span class="infographic-ring-label">차량 15–20분</span>
+      </div>
+    </div>
+
+    <div class="infographic-center">
+      <div class="infographic-center-dot"></div>
+      <div class="infographic-center-name">리버사이드 파크</div>
+      <div class="infographic-center-sub">RIVERSIDE PARK</div>
+    </div>
+
+    <!-- Markers -->
+    <div class="infographic-marker marker-yeoui-naru">
+      <div class="infographic-marker-dot"></div>
+      <div class="infographic-marker-label">여의나루역</div>
+      <div class="infographic-marker-time">도보 5분</div>
+    </div>
+    <div class="infographic-marker marker-yeouido-stn">
+      <div class="infographic-marker-dot"></div>
+      <div class="infographic-marker-label">여의도역</div>
+      <div class="infographic-marker-time">도보 8분</div>
+    </div>
+    <div class="infographic-marker marker-olympic">
+      <div class="infographic-marker-dot"></div>
+      <div class="infographic-marker-label">올림픽대로</div>
+      <div class="infographic-marker-time">차량 3분</div>
+    </div>
+    <div class="infographic-marker marker-bridge">
+      <div class="infographic-marker-dot"></div>
+      <div class="infographic-marker-label">서강대교·마포대교</div>
+      <div class="infographic-marker-time">차량 5분</div>
+    </div>
+    <div class="infographic-marker marker-gangnam">
+      <div class="infographic-marker-dot"></div>
+      <div class="infographic-marker-label">강남역</div>
+      <div class="infographic-marker-time">차량 15분</div>
+    </div>
+    <div class="infographic-marker marker-gimpo">
+      <div class="infographic-marker-dot"></div>
+      <div class="infographic-marker-label">김포공항</div>
+      <div class="infographic-marker-time">차량 20분</div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================
+     SECTION 4: TRANSPORTATION
+     ============================================= -->
+<section class="transport-section">
+  <div class="transport-inner">
+    <div class="transport-header">
+      <p class="section-eyebrow reveal">Transportation</p>
+      <h2 class="section-heading reveal" style="transition-delay: 0.1s;">
+        사통팔달 <em>프리미엄</em> 교통망
+      </h2>
+      <p class="section-desc reveal" style="transition-delay: 0.2s;">
+        더블 역세권의 편리한 지하철 접근성과 올림픽대로를 통한 빠른 도심 이동.
+      </p>
+    </div>
+
+    <div class="transport-grid">
+      <!-- Card 1: 여의나루역 -->
+      <div class="transport-card reveal" style="transition-delay: 0.1s;">
+        <div class="transport-card-icon">
+          <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="12" y1="3" x2="12" y2="15"/><circle cx="8" cy="19" r="1"/><circle cx="16" cy="19" r="1"/></svg>
+        </div>
+        <div class="transport-card-name">여의나루역</div>
+        <div class="transport-card-detail">5호선 · 한강공원 바로 연결</div>
+        <div class="transport-card-bottom">
+          <div class="transport-card-time">
+            <span class="transport-card-time-value countup" data-target="5">0</span>
+            <span class="transport-card-time-unit">분</span>
+          </div>
+          <span class="transport-card-badge badge-walk">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><path d="M10 22l2-7 3 3v6M10 10l-2 4h5"/></svg>
+            도보 350m
+          </span>
+        </div>
+      </div>
+
+      <!-- Card 2: 여의도역 -->
+      <div class="transport-card reveal" style="transition-delay: 0.2s;">
+        <div class="transport-card-icon">
+          <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="12" y1="3" x2="12" y2="15"/><circle cx="8" cy="19" r="1"/><circle cx="16" cy="19" r="1"/></svg>
+        </div>
+        <div class="transport-card-name">여의도역</div>
+        <div class="transport-card-detail">5호선 · 9호선 더블역세권</div>
+        <div class="transport-card-bottom">
+          <div class="transport-card-time">
+            <span class="transport-card-time-value countup" data-target="8">0</span>
+            <span class="transport-card-time-unit">분</span>
+          </div>
+          <span class="transport-card-badge badge-walk">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><path d="M10 22l2-7 3 3v6M10 10l-2 4h5"/></svg>
+            도보 600m
+          </span>
+        </div>
+      </div>
+
+      <!-- Card 3: 올림픽대로 -->
+      <div class="transport-card reveal" style="transition-delay: 0.3s;">
+        <div class="transport-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+        <div class="transport-card-name">올림픽대로 진입</div>
+        <div class="transport-card-detail">동서 간선도로 직결</div>
+        <div class="transport-card-bottom">
+          <div class="transport-card-time">
+            <span class="transport-card-time-value countup" data-target="3">0</span>
+            <span class="transport-card-time-unit">분</span>
+          </div>
+          <span class="transport-card-badge badge-drive">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="7" width="22" height="10" rx="2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+            차량
+          </span>
+        </div>
+      </div>
+
+      <!-- Card 4: 서강대교·마포대교 -->
+      <div class="transport-card reveal" style="transition-delay: 0.4s;">
+        <div class="transport-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M2 18h20M5 18c0-3 2-6 7-6s7 3 7 6"/><line x1="5" y1="18" x2="5" y2="14"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="19" y1="18" x2="19" y2="14"/></svg>
+        </div>
+        <div class="transport-card-name">서강대교 · 마포대교</div>
+        <div class="transport-card-detail">강북 주요 지역 빠른 연결</div>
+        <div class="transport-card-bottom">
+          <div class="transport-card-time">
+            <span class="transport-card-time-value countup" data-target="5">0</span>
+            <span class="transport-card-time-unit">분</span>
+          </div>
+          <span class="transport-card-badge badge-drive">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="7" width="22" height="10" rx="2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+            차량
+          </span>
+        </div>
+      </div>
+
+      <!-- Card 5: 강남역 -->
+      <div class="transport-card reveal" style="transition-delay: 0.5s;">
+        <div class="transport-card-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        </div>
+        <div class="transport-card-name">강남역</div>
+        <div class="transport-card-detail">10.2km · 9호선 환승 가능</div>
+        <div class="transport-card-bottom">
+          <div class="transport-card-time">
+            <span class="transport-card-time-value countup" data-target="15">0</span>
+            <span class="transport-card-time-unit">분</span>
+          </div>
+          <span class="transport-card-badge badge-drive">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="7" width="22" height="10" rx="2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+            차량 10.2km
+          </span>
+        </div>
+      </div>
+
+      <!-- Card 6: 김포공항 -->
+      <div class="transport-card reveal" style="transition-delay: 0.6s;">
+        <div class="transport-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.4-.1.9.3 1.2L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.2.3l.5-.3c.4-.2.6-.6.5-1.1z"/></svg>
+        </div>
+        <div class="transport-card-name">김포공항</div>
+        <div class="transport-card-detail">12km · 올림픽대로 직결</div>
+        <div class="transport-card-bottom">
+          <div class="transport-card-time">
+            <span class="transport-card-time-value countup" data-target="20">0</span>
+            <span class="transport-card-time-unit">분</span>
+          </div>
+          <span class="transport-card-badge badge-drive">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="7" width="22" height="10" rx="2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+            차량 12km
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================
+     SECTION 5: EDUCATION
+     ============================================= -->
+<section class="education-section">
+  <div class="education-inner">
+    <div class="education-header">
+      <div>
+        <p class="section-eyebrow reveal">Education</p>
+        <h2 class="section-heading reveal" style="transition-delay: 0.1s;">
+          명문학군, <em>도보 통학권</em>
+        </h2>
+      </div>
+      <p class="section-desc reveal" style="transition-delay: 0.2s;">
+        여의도 명문 학군 초·중·고와 영어유치원이 모두 도보권 내에 위치합니다.
+      </p>
+    </div>
+
+    <div class="education-list">
+      <!-- 여의도초등학교 -->
+      <div class="education-item reveal" style="transition-delay: 0.1s;">
+        <div class="education-item-name">
+          <div class="education-item-icon">
+            <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 10 3 12 0v-5"/></svg>
+          </div>
+          여의도초등학교
+        </div>
+        <div class="education-item-bar">
+          <div class="education-item-bar-fill" style="width: 58%;"></div>
+        </div>
+        <div class="education-item-time">도보 7분</div>
+        <div class="education-item-method">약 500m</div>
+      </div>
+
+      <!-- 여의도중학교 -->
+      <div class="education-item reveal" style="transition-delay: 0.2s;">
+        <div class="education-item-name">
+          <div class="education-item-icon">
+            <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 10 3 12 0v-5"/></svg>
+          </div>
+          여의도중학교
+        </div>
+        <div class="education-item-bar">
+          <div class="education-item-bar-fill" style="width: 75%;"></div>
+        </div>
+        <div class="education-item-time">도보 10분</div>
+        <div class="education-item-method">약 750m</div>
+      </div>
+
+      <!-- 여의도고등학교 -->
+      <div class="education-item reveal" style="transition-delay: 0.3s;">
+        <div class="education-item-name">
+          <div class="education-item-icon">
+            <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 10 3 12 0v-5"/></svg>
+          </div>
+          여의도고등학교
+        </div>
+        <div class="education-item-bar">
+          <div class="education-item-bar-fill" style="width: 90%;"></div>
+        </div>
+        <div class="education-item-time">도보 12분</div>
+        <div class="education-item-method">약 900m</div>
+      </div>
+
+      <!-- 영어유치원 -->
+      <div class="education-item reveal" style="transition-delay: 0.4s;">
+        <div class="education-item-name">
+          <div class="education-item-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          영어유치원 (3곳)
+        </div>
+        <div class="education-item-bar">
+          <div class="education-item-bar-fill" style="width: 70%;"></div>
+        </div>
+        <div class="education-item-time">도보 10분 이내</div>
+        <div class="education-item-method">반경 700m</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================
+     SECTION 6: LIVING
+     ============================================= -->
+<section class="living-section">
+  <div class="living-inner">
+    <div>
+      <p class="section-eyebrow reveal">Living Amenities</p>
+      <h2 class="section-heading reveal" style="transition-delay: 0.1s;">
+        일상이 <em>풍요로운</em> 생활 인프라
+      </h2>
+      <p class="section-desc reveal" style="transition-delay: 0.2s;">
+        쇼핑, 여가, 의료까지 — 생활의 모든 것이 가까이에.
+      </p>
+    </div>
+
+    <div class="living-content">
+      <div class="living-list">
+        <div class="living-item reveal" style="transition-delay: 0.1s;">
+          <div class="living-item-left">
+            <div class="living-item-dot"></div>
+            <span class="living-item-name">IFC몰</span>
+          </div>
+          <div class="living-item-right">
+            <span class="living-item-badge">도보</span>
+            <span class="living-item-time">10분</span>
+          </div>
+        </div>
+        <div class="living-item reveal" style="transition-delay: 0.15s;">
+          <div class="living-item-left">
+            <div class="living-item-dot"></div>
+            <span class="living-item-name">여의도 한강공원</span>
+          </div>
+          <div class="living-item-right">
+            <span class="living-item-badge">도보</span>
+            <span class="living-item-time">3분</span>
+          </div>
+        </div>
+        <div class="living-item reveal" style="transition-delay: 0.2s;">
+          <div class="living-item-left">
+            <div class="living-item-dot"></div>
+            <span class="living-item-name">63빌딩</span>
+          </div>
+          <div class="living-item-right">
+            <span class="living-item-badge">도보</span>
+            <span class="living-item-time">12분</span>
+          </div>
+        </div>
+        <div class="living-item reveal" style="transition-delay: 0.25s;">
+          <div class="living-item-left">
+            <div class="living-item-dot"></div>
+            <span class="living-item-name">여의도공원</span>
+          </div>
+          <div class="living-item-right">
+            <span class="living-item-badge">도보</span>
+            <span class="living-item-time">8분</span>
+          </div>
+        </div>
+        <div class="living-item reveal" style="transition-delay: 0.3s;">
+          <div class="living-item-left">
+            <div class="living-item-dot"></div>
+            <span class="living-item-name">세브란스병원</span>
+          </div>
+          <div class="living-item-right">
+            <span class="living-item-badge">차량</span>
+            <span class="living-item-time">10분</span>
+          </div>
+        </div>
+        <div class="living-item reveal" style="transition-delay: 0.35s;">
+          <div class="living-item-left">
+            <div class="living-item-dot"></div>
+            <span class="living-item-name">여의도 벚꽃길</span>
+          </div>
+          <div class="living-item-right">
+            <span class="living-item-badge">도보</span>
+            <span class="living-item-time">5분</span>
+          </div>
+        </div>
+      </div>
+      <div class="living-visual reveal-scale" style="transition-delay: 0.2s;">
+        <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=1200&q=80" alt="여의도 도시 전경" loading="lazy">
+        <div class="living-visual-overlay">
+          <div class="living-visual-overlay-title">여의도 라이프스타일</div>
+          <div class="living-visual-overlay-sub">금융·쇼핑·자연이 어우러진 일상</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================
+     SECTION 7: NATURE & RIVER
+     ============================================= -->
+<section class="nature-section">
+  <div class="nature-bg" id="natureBg">
+    <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200&q=80" alt="한강 자연경관" loading="lazy">
+  </div>
+  <div class="nature-content">
+    <div class="nature-grid">
+      <div class="nature-left">
+        <p class="nature-eyebrow reveal">Nature & River</p>
+        <h2 class="nature-heading reveal" style="transition-delay: 0.1s;">
+          한강이 <em>일상</em>이<br>되는 곳
+        </h2>
+        <p class="nature-text reveal" style="transition-delay: 0.2s;">
+          리버사이드 파크에서 한강까지 직선거리 200m. 9.4km의 한강공원 산책로와 밤섬 생태공원 조망, 봄이면 여의도 벚꽃길까지 — 자연이 곧 생활이 됩니다.
+        </p>
+        <div class="nature-stats">
+          <div class="nature-stat reveal" style="transition-delay: 0.3s;">
+            <div class="nature-stat-value">
+              <span class="countup" data-target="200">0</span><span class="nature-stat-unit">m</span>
+            </div>
+            <div class="nature-stat-label">한강 직선거리</div>
+          </div>
+          <div class="nature-stat reveal" style="transition-delay: 0.4s;">
+            <div class="nature-stat-value">
+              <span class="countup" data-target="9.4" data-decimals="1">0</span><span class="nature-stat-unit">km</span>
+            </div>
+            <div class="nature-stat-label">한강공원 산책로</div>
+          </div>
+          <div class="nature-stat reveal" style="transition-delay: 0.5s;">
+            <div class="nature-stat-value">
+              <span class="countup" data-target="5">0</span><span class="nature-stat-unit">분</span>
+            </div>
+            <div class="nature-stat-label">벚꽃길 도보</div>
+          </div>
+          <div class="nature-stat reveal" style="transition-delay: 0.6s;">
+            <div class="nature-stat-value">
+              <span class="countup" data-target="365">0</span><span class="nature-stat-unit">일</span>
+            </div>
+            <div class="nature-stat-label">자연과 함께하는 일상</div>
+          </div>
+        </div>
+      </div>
+      <div class="nature-right">
+        <div class="nature-feature reveal-right" style="transition-delay: 0.2s;">
+          <div class="nature-feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div class="nature-feature-content">
+            <div class="nature-feature-title">여의도 한강공원</div>
+            <div class="nature-feature-desc">9.4km 산책로, 자전거도로, 수상레저까지 — 도보 3분이면 도착하는 도심 속 자연 낙원</div>
+          </div>
+        </div>
+        <div class="nature-feature reveal-right" style="transition-delay: 0.3s;">
+          <div class="nature-feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 22c-4.97 0-9-2.69-9-6v-4c0-3.31 4.03-6 9-6s9 2.69 9 6v4c0 3.31-4.03 6-9 6z"/><path d="M12 6c4.97 0 9 2.69 9 6"/><path d="M3 12c0-3.31 4.03-6 9-6"/></svg>
+          </div>
+          <div class="nature-feature-content">
+            <div class="nature-feature-title">밤섬 생태공원 조망</div>
+            <div class="nature-feature-desc">천연기념물 서식지 밤섬의 사계절을 거실에서 감상하는 특별한 조망권</div>
+          </div>
+        </div>
+        <div class="nature-feature reveal-right" style="transition-delay: 0.4s;">
+          <div class="nature-feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+          </div>
+          <div class="nature-feature-content">
+            <div class="nature-feature-title">여의도 벚꽃길</div>
+            <div class="nature-feature-desc">매년 봄, 1,886그루의 벚나무가 만개하는 국내 대표 벚꽃 명소 도보 5분</div>
+          </div>
+        </div>
+        <div class="nature-feature reveal-right" style="transition-delay: 0.5s;">
+          <div class="nature-feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div class="nature-feature-content">
+            <div class="nature-feature-title">여의도공원</div>
+            <div class="nature-feature-desc">23만m2 규모 도심형 공원. 문화마당, 잔디마당, 자연생태숲으로 구성</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================
+     SECTION 8: MARQUEE BAND
+     ============================================= -->
+<div class="marquee-band">
+  <div class="marquee-track">
+    <span class="marquee-item">YEOUIDO</span>
+    <span class="marquee-separator">&middot;</span>
+    <span class="marquee-item">RIVERSIDE</span>
+    <span class="marquee-separator">&middot;</span>
+    <span class="marquee-item">PREMIUM LOCATION</span>
+    <span class="marquee-separator">&middot;</span>
+    <span class="marquee-item">HAN RIVER</span>
+    <span class="marquee-separator">&middot;</span>
+    <span class="marquee-item">DOUBLE STATION</span>
+    <span class="marquee-separator">&middot;</span>
+    <span class="marquee-item">YEOUIDO</span>
+    <span class="marquee-separator">&middot;</span>
+    <span class="marquee-item">RIVERSIDE</span>
+    <span class="marquee-separator">&middot;</span>
+    <span class="marquee-item">PREMIUM LOCATION</span>
+    <span class="marquee-separator">&middot;</span>
+    <span class="marquee-item">HAN RIVER</span>
+    <span class="marquee-separator">&middot;</span>
+    <span class="marquee-item">DOUBLE STATION</span>
+    <span class="marquee-separator">&middot;</span>
+  </div>
+</div>
+
+<!-- =============================================
+     SECTION 9: CTA
+     ============================================= -->
+<section class="cta-section">
+  <div class="cta-mega">CONTACT</div>
+  <div class="cta-content">
+    <p class="cta-eyebrow reveal">Register Your Interest</p>
+    <h2 class="cta-heading reveal" style="transition-delay: 0.1s;">
+      여의도의 중심에서<br><em>새로운 시작</em>을 함께
+    </h2>
+    <p class="cta-desc reveal" style="transition-delay: 0.2s;">
+      리버사이드 파크의 프리미엄 입지를 직접 확인하세요.<br>관심고객 사전등록을 통해 특별한 혜택을 받으실 수 있습니다.
+    </p>
+    <a href="contact.html" class="cta-btn reveal" style="transition-delay: 0.3s;">
+      <span>관심고객 등록</span>
+      <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- =============================================
+     SECTION 10: FOOTER
+     ============================================= -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-mega reveal">RIVERSIDE PARK</div>
+    <nav class="footer-nav reveal" style="transition-delay: 0.1s;">
+      <a href="index.html">메인</a>
+      <a href="overview.html">사업개요</a>
+      <a href="floorplan.html">평면안내</a>
+      <a href="amenities.html">커뮤니티</a>
+      <a href="location.html">입지환경</a>
+      <a href="contact.html">관심고객</a>
+    </nav>
+    <div class="footer-divider reveal" style="transition-delay: 0.15s;"></div>
+    <div class="footer-bottom reveal" style="transition-delay: 0.2s;">
+      <p class="footer-copy">&copy; 2026 리버사이드 파크. All Rights Reserved. 본 사이트의 내용은 분양 광고이며, 실제와 차이가 있을 수 있습니다.</p>
+      <span class="footer-brand">RIVERSIDE PARK</span>
+    </div>
+  </div>
+</footer>
+
+<!-- =============================================
+     JAVASCRIPT
+     ============================================= -->
+<script>
+(function() {
+  'use strict';
+
+  /* =========================================
+     PRELOADER
+     ========================================= */
+  var preloaderText = document.querySelector('.preloader-text');
+  var preloader = document.querySelector('.preloader');
+  var letters = '입지환경';
+
+  letters.split('').forEach(function(ch, i) {
+    var span = document.createElement('span');
+    span.textContent = ch === ' ' ? '\u00A0' : ch;
+    span.style.animationDelay = (0.6 + i * 0.1) + 's';
+    preloaderText.appendChild(span);
+  });
+
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      preloader.classList.add('done');
+      animateHero();
+    }, 1600);
+  });
+
+  /* =========================================
+     HERO ENTRANCE
+     ========================================= */
+  function animateHero() {
+    var els = ['.page-hero-label', '.page-hero-title', '.page-hero-sub', '.page-hero-line'];
+    els.forEach(function(sel, i) {
+      var el = document.querySelector(sel);
+      if (!el) return;
+      setTimeout(function() {
+        el.style.transition = 'opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1)';
+        el.style.opacity = '1';
+        el.style.transform = sel === '.page-hero-line' ? 'scaleX(1)' : 'translateY(0)';
+      }, i * 180);
+    });
+  }
+
+  /* =========================================
+     HEADER — SOLID ON SCROLL
+     ========================================= */
+  var header = document.querySelector('.header');
+
+  function onScroll() {
+    var y = window.scrollY || window.pageYOffset;
+
+    if (y > 80) {
+      header.classList.add('solid');
+    } else {
+      header.classList.remove('solid');
+    }
+
+    // Scroll progress
+    var docH = document.documentElement.scrollHeight - window.innerHeight;
+    var progress = docH > 0 ? y / docH : 0;
+    document.querySelector('.scroll-progress').style.transform = 'scaleX(' + progress + ')';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  /* =========================================
+     MOBILE NAV TOGGLE
+     ========================================= */
+  var hamburger = document.querySelector('.hamburger');
+  var mobileNav = document.querySelector('.mobile-nav');
+
+  hamburger.addEventListener('click', function() {
+    hamburger.classList.toggle('active');
+    mobileNav.classList.toggle('open');
+    document.body.style.overflow = mobileNav.classList.contains('open') ? 'hidden' : '';
+  });
+
+  mobileNav.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() {
+      hamburger.classList.remove('active');
+      mobileNav.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+
+  /* =========================================
+     SCROLL REVEAL (IntersectionObserver)
+     ========================================= */
+  var revealSelectors = '.reveal, .reveal-left, .reveal-right, .reveal-scale';
+  var reveals = document.querySelectorAll(revealSelectors);
+
+  if ('IntersectionObserver' in window) {
+    var revealObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    reveals.forEach(function(el) { revealObserver.observe(el); });
+  } else {
+    reveals.forEach(function(el) { el.classList.add('visible'); });
+  }
+
+  /* =========================================
+     INFOGRAPHIC — RING EXPANSION
+     ========================================= */
+  var infographic = document.getElementById('infographic');
+  var rings = document.querySelectorAll('.infographic-ring');
+  var markers = document.querySelectorAll('.infographic-marker');
+
+  if (infographic && 'IntersectionObserver' in window) {
+    var infographicObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          // Expand rings one by one
+          rings.forEach(function(ring, i) {
+            setTimeout(function() {
+              ring.classList.add('expanded');
+            }, i * 300);
+          });
+
+          // Show markers after rings
+          markers.forEach(function(marker, i) {
+            setTimeout(function() {
+              marker.classList.add('visible');
+            }, 1200 + i * 200);
+          });
+
+          infographicObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    infographicObserver.observe(infographic);
+  }
+
+  /* =========================================
+     COUNTUP ANIMATION
+     ========================================= */
+  var countupElements = document.querySelectorAll('.countup');
+
+  function animateCountUp(el) {
+    var target = parseFloat(el.getAttribute('data-target'));
+    var decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
+    var duration = 2000;
+    var startTime = null;
+
+    function step(timestamp) {
+      if (!startTime) startTime = timestamp;
+      var elapsed = timestamp - startTime;
+      var progress = Math.min(elapsed / duration, 1);
+
+      // Ease out cubic
+      var eased = 1 - Math.pow(1 - progress, 3);
+      var current = eased * target;
+
+      el.textContent = decimals > 0 ? current.toFixed(decimals) : Math.round(current);
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        el.textContent = decimals > 0 ? target.toFixed(decimals) : target;
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  if ('IntersectionObserver' in window) {
+    var countObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          animateCountUp(entry.target);
+          countObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    countupElements.forEach(function(el) { countObserver.observe(el); });
+  }
+
+  /* =========================================
+     EDUCATION BAR ANIMATION
+     ========================================= */
+  var eduBars = document.querySelectorAll('.education-item-bar-fill');
+
+  if ('IntersectionObserver' in window) {
+    var barObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animated');
+          barObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    eduBars.forEach(function(bar) { barObserver.observe(bar); });
+  }
+
+  /* =========================================
+     NATURE SECTION — PARALLAX
+     ========================================= */
+  var natureBg = document.getElementById('natureBg');
+  var natureSection = document.querySelector('.nature-section');
+
+  function handleParallax() {
+    if (!natureSection || !natureBg) return;
+    var rect = natureSection.getBoundingClientRect();
+    var windowH = window.innerHeight;
+
+    if (rect.top < windowH && rect.bottom > 0) {
+      var progress = (windowH - rect.top) / (windowH + rect.height);
+      var offset = (progress - 0.5) * 60;
+      var img = natureBg.querySelector('img');
+      if (img) {
+        img.style.transform = 'translateY(' + offset + 'px) scale(1.08)';
+      }
+    }
+  }
+
+  window.addEventListener('scroll', handleParallax, { passive: true });
+
+  /* =========================================
+     CUSTOM CURSOR (DOT + RING)
+     ========================================= */
+  var cursorDot = document.querySelector('.cursor-dot');
+  var cursorRing = document.querySelector('.cursor-ring');
+  var mouseX = 0, mouseY = 0;
+  var ringX = 0, ringY = 0;
+  var cursorVisible = false;
+
+  document.addEventListener('mousemove', function(e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+
+    if (!cursorVisible) {
+      cursorDot.classList.remove('hide');
+      cursorRing.classList.remove('hide');
+      cursorVisible = true;
+    }
+
+    cursorDot.style.left = mouseX + 'px';
+    cursorDot.style.top = mouseY + 'px';
+  });
+
+  // Smooth ring follow
+  function animateRing() {
+    ringX += (mouseX - ringX) * 0.15;
+    ringY += (mouseY - ringY) * 0.15;
+    cursorRing.style.left = ringX + 'px';
+    cursorRing.style.top = ringY + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.addEventListener('mouseleave', function() {
+    cursorDot.classList.add('hide');
+    cursorRing.classList.add('hide');
+    cursorVisible = false;
+  });
+
+  document.querySelectorAll('a, button, .transport-card, .nature-feature, .location-highlight').forEach(function(el) {
+    el.addEventListener('mouseenter', function() { cursorRing.classList.add('hover'); });
+    el.addEventListener('mouseleave', function() { cursorRing.classList.remove('hover'); });
+  });
+
+  // Hide cursor on touch devices
+  if ('ontouchstart' in window) {
+    cursorDot.style.display = 'none';
+    cursorRing.style.display = 'none';
+    document.body.style.cursor = 'auto';
+    document.querySelectorAll('a, button').forEach(function(el) { el.style.cursor = 'pointer'; });
+  }
+
+  /* =========================================
+     MARQUEE — DUPLICATE FOR SEAMLESS SCROLL
+     ========================================= */
+  var marqueeTrack = document.querySelector('.marquee-track');
+  if (marqueeTrack) {
+    var clone = marqueeTrack.innerHTML;
+    marqueeTrack.innerHTML = clone + clone;
+  }
+
+})();
+</script>
+</body>
+</html>

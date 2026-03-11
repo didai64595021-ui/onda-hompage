@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>평면안내 — 리버사이드 파크</title>
+<meta name="description" content="리버사이드 파크 평면안내. 59A·84B·105C 3개 타입별 평면도와 프리미엄 인테리어 사양을 확인하세요.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+/* =============================================
+   CSS CUSTOM PROPERTIES
+   ============================================= */
+:root {
+  --bg: #0C0C0C;
+  --bg-surface: #161614;
+  --bg-light: #F7F4F0;
+  --accent: #C8A97D;
+  --accent-light: #E2D1B5;
+  --text: #E8E4DF;
+  --text-dim: #8A8580;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Pretendard Variable', -apple-system, sans-serif;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --grid: 8px;
+}
+
+/* =============================================
+   RESET & BASE
+   ============================================= */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  word-break: keep-all;
+  line-height: 1.7;
+  cursor: none;
+}
+
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+button { font: inherit; border: none; background: none; cursor: none; }
+
+/* =============================================
+   CUSTOM CURSOR
+   ============================================= */
+.cursor-dot {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10001;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s;
+}
+.cursor-ring {
+  position: fixed;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  transform: translate(-50%, -50%);
+  transition: transform 0.25s var(--ease), opacity 0.2s, width 0.3s var(--ease), height 0.3s var(--ease);
+  mix-blend-mode: difference;
+}
+.cursor-ring.hide, .cursor-dot.hide { opacity: 0; }
+.cursor-ring.hover {
+  width: 64px;
+  height: 64px;
+  background: rgba(200,169,125,0.08);
+}
+
+/* =============================================
+   SCROLL PROGRESS
+   ============================================= */
+.scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  z-index: 9999;
+  transform-origin: left;
+  transform: scaleX(0);
+  width: 100%;
+}
+
+/* =============================================
+   GRAIN OVERLAY
+   ============================================= */
+.grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px;
+}
+
+/* =============================================
+   HEADER
+   ============================================= */
+.header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 900;
+  padding: calc(var(--grid) * 3) calc(var(--grid) * 5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.4s, padding 0.4s var(--ease), backdrop-filter 0.4s;
+}
+.header.solid {
+  background: rgba(12,12,12,0.92);
+  backdrop-filter: blur(16px);
+  padding: calc(var(--grid) * 2) calc(var(--grid) * 5);
+}
+
+.header-logo {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+
+.header-nav { display: flex; gap: calc(var(--grid) * 4); }
+.header-nav a {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  position: relative;
+  transition: color 0.3s;
+}
+.header-nav a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 100%; height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s var(--ease);
+}
+.header-nav a:hover { color: var(--text); }
+.header-nav a:hover::after { transform: scaleX(1); transform-origin: left; }
+.header-nav a.active { color: var(--accent); }
+.header-nav a.active::after { transform: scaleX(1); transform-origin: left; }
+
+/* Hamburger */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  z-index: 1001;
+}
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 1.5px;
+  background: var(--text);
+  transition: transform 0.4s var(--ease), opacity 0.3s;
+}
+.hamburger.active span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+.hamburger.active span:nth-child(2) { opacity: 0; }
+.hamburger.active span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+/* Mobile overlay */
+.mobile-nav {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--grid) * 5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s var(--ease), visibility 0.5s;
+}
+.mobile-nav.open { opacity: 1; visibility: visible; }
+.mobile-nav a {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 5vw, 40px);
+  color: var(--text);
+  letter-spacing: 0.06em;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.4s var(--ease), transform 0.5s var(--ease), color 0.3s;
+}
+.mobile-nav.open a {
+  opacity: 1;
+  transform: translateY(0);
+}
+.mobile-nav a:hover { color: var(--accent); }
+
+/* =============================================
+   PAGE HERO (HALF HEIGHT)
+   ============================================= */
+.page-hero {
+  position: relative;
+  height: 56vh;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: calc(var(--grid) * 10) calc(var(--grid) * 5) calc(var(--grid) * 8);
+  overflow: hidden;
+}
+
+.page-hero-bg {
+  position: absolute;
+  inset: 0;
+  background: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&q=80') center/cover no-repeat;
+  animation: kenBurns 20s ease-in-out infinite alternate;
+}
+.page-hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--bg) 0%, rgba(12,12,12,0.5) 50%, rgba(12,12,12,0.3) 100%);
+}
+
+@keyframes kenBurns {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.06); }
+}
+
+.page-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.page-hero-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: calc(var(--grid) * 2);
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.page-hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  opacity: 0;
+  transform: translateY(32px);
+}
+
+.page-hero-subtitle {
+  font-family: var(--font-display);
+  font-size: clamp(14px, 2vw, 20px);
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  margin-top: calc(var(--grid) * 2);
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+/* =============================================
+   SECTION COMMON
+   ============================================= */
+.section {
+  padding: calc(var(--grid) * 16) calc(var(--grid) * 5);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.section-surface {
+  background: var(--bg-surface);
+  max-width: none;
+}
+.section-surface .section-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.section-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: calc(var(--grid) * 2);
+}
+
+.section-heading {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.5vw, 48px);
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: calc(var(--grid) * 2);
+}
+.section-heading em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.section-desc {
+  font-size: clamp(14px, 1.2vw, 16px);
+  color: var(--text-dim);
+  max-width: 560px;
+  line-height: 1.8;
+  margin-bottom: calc(var(--grid) * 8);
+}
+
+/* =============================================
+   SCROLL REVEAL
+   ============================================= */
+.reveal {
+  opacity: 0;
+  transform: translateY(48px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+/* =============================================
+   TAB NAVIGATION
+   ============================================= */
+.tab-nav-wrap {
+  position: sticky;
+  top: 56px;
+  z-index: 50;
+  background: var(--bg);
+  border-bottom: 1px solid rgba(200,169,125,0.1);
+  transition: top 0.4s var(--ease);
+}
+.tab-nav {
+  display: flex;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 calc(var(--grid) * 5);
+}
+.tab-btn {
+  position: relative;
+  padding: calc(var(--grid) * 3) calc(var(--grid) * 4);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  transition: color 0.4s var(--ease);
+  white-space: nowrap;
+}
+.tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: calc(var(--grid) * 2); right: calc(var(--grid) * 2);
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transition: transform 0.5s var(--ease);
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active {
+  color: var(--accent);
+}
+.tab-btn.active::after {
+  transform: scaleX(1);
+}
+.tab-btn-area {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-dim);
+  margin-top: 2px;
+  letter-spacing: 0.02em;
+}
+.tab-btn.active .tab-btn-area { color: var(--accent-light); }
+
+/* =============================================
+   TAB CONTENT (FADE TRANSITIONS)
+   ============================================= */
+.tab-panels {
+  position: relative;
+}
+.tab-panel {
+  display: none;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+}
+.tab-panel.active {
+  display: block;
+}
+.tab-panel.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =============================================
+   FLOOR PLAN SCHEMATIC
+   ============================================= */
+.floorplan-display {
+  padding: calc(var(--grid) * 10) calc(var(--grid) * 5);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.floorplan-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--grid) * 8);
+  align-items: start;
+}
+
+/* CSS Floor plan schematic */
+.floorplan-schematic {
+  position: relative;
+  background: var(--bg-surface);
+  border: 1px solid rgba(200,169,125,0.12);
+  border-radius: 4px;
+  padding: calc(var(--grid) * 4);
+  aspect-ratio: 4/3;
+  overflow: hidden;
+}
+.floorplan-schematic::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(200,169,125,0.04) 39px, rgba(200,169,125,0.04) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(200,169,125,0.04) 39px, rgba(200,169,125,0.04) 40px);
+  pointer-events: none;
+}
+.floorplan-schematic-label {
+  position: absolute;
+  top: calc(var(--grid) * 2);
+  left: calc(var(--grid) * 2);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+.floorplan-schematic-scale {
+  position: absolute;
+  bottom: calc(var(--grid) * 2);
+  right: calc(var(--grid) * 2);
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+}
+
+/* Room blocks */
+.fp-grid {
+  position: absolute;
+  inset: calc(var(--grid) * 5);
+  display: grid;
+  gap: 2px;
+}
+
+/* Type 59A grid */
+.fp-grid-59 {
+  grid-template-columns: 1fr 1.2fr 0.8fr;
+  grid-template-rows: 1fr 0.6fr 1fr;
+}
+
+/* Type 84B grid */
+.fp-grid-84 {
+  grid-template-columns: 1fr 1.4fr 0.7fr 0.9fr;
+  grid-template-rows: 1fr 0.5fr 0.8fr 0.7fr;
+}
+
+/* Type 105C grid */
+.fp-grid-105 {
+  grid-template-columns: 0.8fr 1fr 1.2fr 0.6fr 0.8fr;
+  grid-template-rows: 1fr 0.5fr 0.8fr 0.6fr;
+}
+
+.fp-room {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(200,169,125,0.25);
+  background: rgba(200,169,125,0.04);
+  transition: background 0.4s var(--ease), border-color 0.4s var(--ease);
+  overflow: hidden;
+}
+.fp-room:hover {
+  background: rgba(200,169,125,0.1);
+  border-color: rgba(200,169,125,0.5);
+}
+.fp-room-name {
+  font-size: clamp(9px, 1vw, 13px);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  text-align: center;
+  line-height: 1.2;
+}
+.fp-room-size {
+  font-size: clamp(7px, 0.7vw, 10px);
+  color: var(--text-dim);
+  margin-top: 2px;
+  letter-spacing: 0.04em;
+}
+.fp-room-accent {
+  background: rgba(200,169,125,0.08);
+  border-color: rgba(200,169,125,0.35);
+}
+.fp-room-dark {
+  background: rgba(12,12,12,0.5);
+  border-color: rgba(200,169,125,0.15);
+}
+.fp-room-highlight {
+  background: rgba(200,169,125,0.12);
+  border-color: var(--accent);
+}
+.fp-room-highlight .fp-room-name { color: var(--accent); }
+
+/* Compass indicator */
+.fp-compass {
+  position: absolute;
+  top: calc(var(--grid) * 5);
+  right: calc(var(--grid) * 2);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fp-compass::before {
+  content: 'N';
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+}
+.fp-compass::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  width: 1px;
+  height: 10px;
+  background: var(--accent);
+}
+
+/* =============================================
+   TYPE DETAIL INFO
+   ============================================= */
+.type-detail {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--grid) * 5);
+}
+.type-detail-header {
+  border-bottom: 1px solid rgba(200,169,125,0.15);
+  padding-bottom: calc(var(--grid) * 4);
+}
+.type-detail-name {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 600;
+  line-height: 1.1;
+  margin-bottom: calc(var(--grid) * 1);
+}
+.type-detail-name span {
+  color: var(--accent);
+  font-style: italic;
+}
+.type-detail-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-top: calc(var(--grid) * 2);
+}
+.type-detail-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.type-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--grid) * 3);
+}
+.type-info-card {
+  background: var(--bg-surface);
+  border: 1px solid rgba(200,169,125,0.08);
+  border-radius: 4px;
+  padding: calc(var(--grid) * 3);
+  transition: border-color 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.type-info-card:hover {
+  border-color: rgba(200,169,125,0.25);
+  transform: translateY(-2px);
+}
+.type-info-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: calc(var(--grid) * 1);
+}
+.type-info-value {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2vw, 28px);
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+}
+.type-info-value small {
+  font-size: 0.55em;
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: var(--text-dim);
+  margin-left: 4px;
+}
+
+.type-features {
+  margin-top: calc(var(--grid) * 2);
+}
+.type-features-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  margin-bottom: calc(var(--grid) * 2);
+}
+.type-features-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--grid) * 1.5);
+}
+.type-features-list li {
+  font-size: 14px;
+  color: var(--text-dim);
+  padding-left: calc(var(--grid) * 3);
+  position: relative;
+  line-height: 1.6;
+}
+.type-features-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 12px;
+  height: 1px;
+  background: var(--accent);
+}
+
+/* =============================================
+   COMPARISON TABLE
+   ============================================= */
+.comparison-section {
+  padding: calc(var(--grid) * 16) calc(var(--grid) * 5);
+  background: var(--bg-surface);
+}
+.comparison-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.comparison-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: calc(var(--grid) * 6);
+}
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+.comparison-table thead th {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  text-align: center;
+  padding: calc(var(--grid) * 3) calc(var(--grid) * 3);
+  border-bottom: 2px solid var(--accent);
+}
+.comparison-table thead th:first-child {
+  text-align: left;
+  color: var(--text-dim);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.comparison-table tbody tr {
+  border-bottom: 1px solid rgba(200,169,125,0.08);
+  transition: background 0.3s var(--ease);
+}
+.comparison-table tbody tr:hover {
+  background: rgba(200,169,125,0.04);
+}
+.comparison-table tbody td {
+  padding: calc(var(--grid) * 2.5) calc(var(--grid) * 3);
+  font-size: 14px;
+  text-align: center;
+  color: var(--text);
+  vertical-align: middle;
+}
+.comparison-table tbody td:first-child {
+  text-align: left;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+.comparison-table tbody td strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+.comparison-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--bg);
+  background: var(--accent);
+  padding: 2px 8px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  margin-left: 6px;
+}
+
+/* =============================================
+   INTERIOR GALLERY
+   ============================================= */
+.gallery-section {
+  padding: calc(var(--grid) * 16) calc(var(--grid) * 5);
+}
+.gallery-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: calc(var(--grid) * 3);
+  margin-top: calc(var(--grid) * 6);
+}
+.gallery-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  aspect-ratio: 4/3;
+}
+.gallery-item:first-child {
+  grid-column: 1 / -1;
+  aspect-ratio: 21/9;
+}
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s var(--ease);
+}
+.gallery-item:hover img {
+  transform: scale(1.06);
+}
+.gallery-item-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(12,12,12,0.7) 0%, transparent 50%);
+  display: flex;
+  align-items: flex-end;
+  padding: calc(var(--grid) * 3);
+  opacity: 0;
+  transition: opacity 0.5s var(--ease);
+}
+.gallery-item:hover .gallery-item-overlay { opacity: 1; }
+.gallery-item-caption {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--text);
+}
+.gallery-item-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 4px;
+  letter-spacing: 0.04em;
+}
+
+/* =============================================
+   PREMIUM FINISHES
+   ============================================= */
+.finishes-section {
+  padding: calc(var(--grid) * 16) calc(var(--grid) * 5);
+  background: var(--bg-surface);
+}
+.finishes-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.finishes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: calc(var(--grid) * 4);
+  margin-top: calc(var(--grid) * 6);
+}
+.finish-card {
+  position: relative;
+  background: var(--bg);
+  border: 1px solid rgba(200,169,125,0.08);
+  border-radius: 4px;
+  padding: calc(var(--grid) * 5) calc(var(--grid) * 4);
+  transition: border-color 0.4s var(--ease), transform 0.4s var(--ease);
+  overflow: hidden;
+}
+.finish-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  transform: scaleX(0);
+  transition: transform 0.6s var(--ease);
+}
+.finish-card:hover {
+  border-color: rgba(200,169,125,0.2);
+  transform: translateY(-4px);
+}
+.finish-card:hover::before {
+  transform: scaleX(1);
+}
+.finish-number {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 700;
+  color: rgba(200,169,125,0.12);
+  line-height: 1;
+  margin-bottom: calc(var(--grid) * 2);
+}
+.finish-title {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  margin-bottom: calc(var(--grid) * 1.5);
+}
+.finish-desc {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+/* =============================================
+   CTA SECTION
+   ============================================= */
+.cta-section {
+  position: relative;
+  padding: calc(var(--grid) * 20) calc(var(--grid) * 5);
+  text-align: center;
+  overflow: hidden;
+}
+.cta-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(200,169,125,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cta-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.cta-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: calc(var(--grid) * 3);
+}
+.cta-title em {
+  font-style: italic;
+  color: var(--accent);
+}
+.cta-desc {
+  font-size: clamp(14px, 1.2vw, 16px);
+  color: var(--text-dim);
+  line-height: 1.8;
+  margin-bottom: calc(var(--grid) * 6);
+}
+.cta-link {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--grid) * 2);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--bg);
+  background: var(--accent);
+  padding: calc(var(--grid) * 2.5) calc(var(--grid) * 6);
+  border-radius: 2px;
+  transition: background 0.4s var(--ease), transform 0.3s var(--ease), letter-spacing 0.4s var(--ease);
+}
+.cta-link:hover {
+  background: var(--accent-light);
+  transform: translateY(-2px);
+  letter-spacing: 0.16em;
+}
+.cta-link svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.4s var(--ease);
+}
+.cta-link:hover svg { transform: translateX(4px); }
+
+/* =============================================
+   FOOTER
+   ============================================= */
+.footer {
+  position: relative;
+  padding: calc(var(--grid) * 16) calc(var(--grid) * 5) calc(var(--grid) * 6);
+  overflow: hidden;
+}
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.footer-mega {
+  font-family: var(--font-display);
+  font-size: clamp(60px, 14vw, 200px);
+  font-weight: 700;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200,169,125,0.1);
+  letter-spacing: 0.05em;
+  line-height: 1;
+  text-align: center;
+  margin-bottom: calc(var(--grid) * 8);
+  user-select: none;
+}
+.footer-nav {
+  display: flex;
+  justify-content: center;
+  gap: calc(var(--grid) * 5);
+  margin-bottom: calc(var(--grid) * 6);
+  flex-wrap: wrap;
+}
+.footer-nav a {
+  font-size: 13px;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  transition: color 0.3s;
+}
+.footer-nav a:hover { color: var(--accent); }
+.footer-divider {
+  width: 48px;
+  height: 1px;
+  background: rgba(200,169,125,0.2);
+  margin: 0 auto calc(var(--grid) * 4);
+}
+.footer-copy {
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  text-align: center;
+  line-height: 1.8;
+}
+
+/* =============================================
+   RESPONSIVE — 1440px+
+   ============================================= */
+@media (min-width: 1440px) {
+  .header { padding: calc(var(--grid) * 4) calc(var(--grid) * 10); }
+  .header.solid { padding: calc(var(--grid) * 2.5) calc(var(--grid) * 10); }
+  .page-hero { padding: calc(var(--grid) * 12) calc(var(--grid) * 10) calc(var(--grid) * 10); }
+  .section { padding: calc(var(--grid) * 20) calc(var(--grid) * 10); }
+  .comparison-section,
+  .finishes-section { padding: calc(var(--grid) * 20) calc(var(--grid) * 10); }
+  .gallery-section { padding: calc(var(--grid) * 20) calc(var(--grid) * 10); }
+  .cta-section { padding: calc(var(--grid) * 24) calc(var(--grid) * 10); }
+  .footer { padding: calc(var(--grid) * 20) calc(var(--grid) * 10) calc(var(--grid) * 8); }
+}
+
+/* =============================================
+   RESPONSIVE — 1024px
+   ============================================= */
+@media (max-width: 1024px) {
+  .floorplan-layout {
+    grid-template-columns: 1fr;
+    gap: calc(var(--grid) * 6);
+  }
+  .floorplan-schematic {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .finishes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .type-info-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* =============================================
+   RESPONSIVE — 768px
+   ============================================= */
+@media (max-width: 768px) {
+  .header-nav { display: none; }
+  .hamburger { display: flex; }
+
+  .page-hero {
+    height: 50vh;
+    min-height: 360px;
+    padding: calc(var(--grid) * 8) calc(var(--grid) * 3) calc(var(--grid) * 6);
+  }
+
+  .tab-nav-wrap { top: 48px; }
+  .tab-nav { padding: 0 calc(var(--grid) * 2); }
+  .tab-btn {
+    padding: calc(var(--grid) * 2.5) calc(var(--grid) * 2);
+    font-size: 13px;
+  }
+  .tab-btn-area { font-size: 10px; }
+
+  .floorplan-display {
+    padding: calc(var(--grid) * 6) calc(var(--grid) * 3);
+  }
+  .floorplan-layout {
+    grid-template-columns: 1fr;
+  }
+  .floorplan-schematic {
+    aspect-ratio: 5/4;
+  }
+  .type-info-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .gallery-grid {
+    grid-template-columns: 1fr;
+    gap: calc(var(--grid) * 2);
+  }
+  .gallery-item:first-child {
+    aspect-ratio: 16/10;
+  }
+  .gallery-item { aspect-ratio: 16/10; }
+
+  .finishes-grid {
+    grid-template-columns: 1fr;
+    gap: calc(var(--grid) * 3);
+  }
+
+  .comparison-section { padding: calc(var(--grid) * 12) calc(var(--grid) * 3); }
+  .gallery-section { padding: calc(var(--grid) * 12) calc(var(--grid) * 3); }
+  .finishes-section { padding: calc(var(--grid) * 12) calc(var(--grid) * 3); }
+  .section { padding: calc(var(--grid) * 12) calc(var(--grid) * 3); }
+
+  .mobile-nav a { transition-delay: calc(var(--i, 0) * 0.06s); }
+}
+
+/* =============================================
+   RESPONSIVE — 375px
+   ============================================= */
+@media (max-width: 375px) {
+  .page-hero-title { font-size: 40px; }
+  .type-detail-name { font-size: 28px; }
+  .type-info-grid { grid-template-columns: 1fr; }
+  .tab-btn { font-size: 12px; padding: calc(var(--grid) * 2) calc(var(--grid) * 1.5); }
+  .cta-title { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Grain overlay -->
+<div class="grain"></div>
+
+<!-- Custom cursor -->
+<div class="cursor-dot hide"></div>
+<div class="cursor-ring hide"></div>
+
+<!-- Scroll progress -->
+<div class="scroll-progress"></div>
+
+<!-- Header -->
+<header class="header">
+  <a href="index.html" class="header-logo">RIVERSIDE PARK</a>
+  <nav class="header-nav">
+    <a href="overview.html">사업개요</a>
+    <a href="floorplan.html" class="active">평면안내</a>
+    <a href="amenities.html">커뮤니티</a>
+    <a href="location.html">입지환경</a>
+    <a href="contact.html">관심고객</a>
+  </nav>
+  <button class="hamburger" aria-label="메뉴 열기">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- Mobile nav overlay -->
+<nav class="mobile-nav">
+  <a href="overview.html" style="--i:0">사업개요</a>
+  <a href="floorplan.html" style="--i:1">평면안내</a>
+  <a href="amenities.html" style="--i:2">커뮤니티</a>
+  <a href="location.html" style="--i:3">입지환경</a>
+  <a href="contact.html" style="--i:4">관심고객</a>
+</nav>
+
+<!-- =============================================
+     PAGE HERO
+     ============================================= -->
+<section class="page-hero">
+  <div class="page-hero-bg"></div>
+  <div class="page-hero-content">
+    <p class="page-hero-eyebrow">Floor Plan Guide</p>
+    <h1 class="page-hero-title">평면안내</h1>
+    <p class="page-hero-subtitle">FLOOR PLAN</p>
+  </div>
+</section>
+
+<!-- =============================================
+     TAB NAVIGATION
+     ============================================= -->
+<div class="tab-nav-wrap">
+  <div class="tab-nav" role="tablist">
+    <button class="tab-btn active" role="tab" aria-selected="true" data-tab="type59">
+      59A타입
+      <span class="tab-btn-area">전용 59.97m&sup2;</span>
+    </button>
+    <button class="tab-btn" role="tab" aria-selected="false" data-tab="type84">
+      84B타입
+      <span class="tab-btn-area">전용 84.89m&sup2;</span>
+    </button>
+    <button class="tab-btn" role="tab" aria-selected="false" data-tab="type105">
+      105C타입
+      <span class="tab-btn-area">전용 105.42m&sup2;</span>
+    </button>
+  </div>
+</div>
+
+<!-- =============================================
+     TAB PANELS
+     ============================================= -->
+<div class="tab-panels">
+
+  <!-- ======= 59A TYPE ======= -->
+  <div class="tab-panel active visible" id="type59" role="tabpanel">
+    <div class="floorplan-display">
+      <div class="floorplan-layout">
+
+        <!-- Floor plan schematic -->
+        <div class="floorplan-schematic">
+          <span class="floorplan-schematic-label">59A Type</span>
+          <div class="fp-compass"></div>
+          <span class="floorplan-schematic-scale">Scale 1:100</span>
+          <div class="fp-grid fp-grid-59">
+            <!-- Row 1 -->
+            <div class="fp-room fp-room-accent" style="grid-column:1/2;grid-row:1/2;">
+              <span class="fp-room-name">방 1</span>
+              <span class="fp-room-size">11.2m&sup2;</span>
+            </div>
+            <div class="fp-room fp-room-highlight" style="grid-column:2/3;grid-row:1/3;">
+              <span class="fp-room-name">거실</span>
+              <span class="fp-room-size">22.8m&sup2;</span>
+            </div>
+            <div class="fp-room fp-room-dark" style="grid-column:3/4;grid-row:1/2;">
+              <span class="fp-room-name">욕실 1</span>
+              <span class="fp-room-size">3.6m&sup2;</span>
+            </div>
+            <!-- Row 2 -->
+            <div class="fp-room" style="grid-column:1/2;grid-row:2/3;">
+              <span class="fp-room-name">현관</span>
+              <span class="fp-room-size">2.4m&sup2;</span>
+            </div>
+            <div class="fp-room fp-room-dark" style="grid-column:3/4;grid-row:2/3;">
+              <span class="fp-room-name">욕실 2</span>
+              <span class="fp-room-size">4.1m&sup2;</span>
+            </div>
+            <!-- Row 3 -->
+            <div class="fp-room fp-room-accent" style="grid-column:1/2;grid-row:3/4;">
+              <span class="fp-room-name">방 2</span>
+              <span class="fp-room-size">9.8m&sup2;</span>
+            </div>
+            <div class="fp-room" style="grid-column:2/4;grid-row:3/4;">
+              <span class="fp-room-name">주방 / 식당</span>
+              <span class="fp-room-size">12.4m&sup2;</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Type detail info -->
+        <div class="type-detail">
+          <div class="type-detail-header">
+            <h2 class="type-detail-name">59A <span>Type</span></h2>
+            <div class="type-detail-badge">총 80세대</div>
+          </div>
+
+          <div class="type-info-grid">
+            <div class="type-info-card">
+              <div class="type-info-label">전용면적</div>
+              <div class="type-info-value">59.97<small>m&sup2;</small></div>
+            </div>
+            <div class="type-info-card">
+              <div class="type-info-label">공급면적</div>
+              <div class="type-info-value">84.92<small>m&sup2;</small></div>
+            </div>
+            <div class="type-info-card">
+              <div class="type-info-label">방 / 욕실</div>
+              <div class="type-info-value">2<small>Room</small> / 2<small>Bath</small></div>
+            </div>
+            <div class="type-info-card">
+              <div class="type-info-label">추천 가구</div>
+              <div class="type-info-value">2~3<small>인 가구</small></div>
+            </div>
+          </div>
+
+          <div class="type-features">
+            <div class="type-features-title">특화 설계</div>
+            <ul class="type-features-list">
+              <li>남향 중심의 채광 최적화 거실 배치</li>
+              <li>주방-거실 오픈형 구조로 개방감 극대화</li>
+              <li>독립 욕실 2개로 프라이버시 확보</li>
+              <li>효율적 수납 공간 설계 (팬트리 포함)</li>
+              <li>세탁실 별도 구획으로 생활 동선 분리</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= 84B TYPE ======= -->
+  <div class="tab-panel" id="type84" role="tabpanel">
+    <div class="floorplan-display">
+      <div class="floorplan-layout">
+
+        <!-- Floor plan schematic -->
+        <div class="floorplan-schematic">
+          <span class="floorplan-schematic-label">84B Type</span>
+          <div class="fp-compass"></div>
+          <span class="floorplan-schematic-scale">Scale 1:100</span>
+          <div class="fp-grid fp-grid-84">
+            <!-- Row 1 -->
+            <div class="fp-room fp-room-accent" style="grid-column:1/2;grid-row:1/2;">
+              <span class="fp-room-name">방 1</span>
+              <span class="fp-room-size">12.6m&sup2;</span>
+            </div>
+            <div class="fp-room fp-room-highlight" style="grid-column:2/4;grid-row:1/3;">
+              <span class="fp-room-name">거실</span>
+              <span class="fp-room-size">31.2m&sup2;</span>
+            </div>
+            <div class="fp-room fp-room-accent" style="grid-column:4/5;grid-row:1/2;">
+              <span class="fp-room-name">방 2</span>
+              <span class="fp-room-size">10.8m&sup2;</span>
+            </div>
+            <!-- Row 2 -->
+            <div class="fp-room fp-room-dark" style="grid-column:1/2;grid-row:2/3;">
+              <span class="fp-room-name">욕실 1</span>
+              <span class="fp-room-size">4.2m&sup2;</span>
+            </div>
+            <div class="fp-room fp-room-dark" style="grid-column:4/5;grid-row:2/3;">
+              <span class="fp-room-name">욕실 2</span>
+              <span class="fp-room-size">4.8m&sup2;</span>
+            </div>
+            <!-- Row 3 -->
+            <div class="fp-room" style="grid-column:1/2;grid-row:3/4;">
+              <span class="fp-room-name">현관</span>
+              <span class="fp-room-size">3.2m&sup2;</span>
+            </div>
+            <div class="fp-room" style="grid-column:2/4;grid-row:3/5;">
+              <span class="fp-room-name">주방 / 식당</span>
+              <span class="fp-room-size">16.8m&sup2;</span>
+            </div>
+            <div class="fp-room fp-room-accent" style="grid-column:4/5;grid-row:3/5;">
+              <span class="fp-room-name">드레스룸</span>
+              <span class="fp-room-size">5.4m&sup2;</span>
+            </div>
+            <!-- Row 4 -->
+            <div class="fp-room fp-room-accent" style="grid-column:1/2;grid-row:4/5;">
+              <span class="fp-room-name">방 3</span>
+              <span class="fp-room-size">10.2m&sup2;</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Type detail info -->
+        <div class="type-detail">
+          <div class="type-detail-header">
+            <h2 class="type-detail-name">84B <span>Type</span></h2>
+            <div class="type-detail-badge">총 120세대 &middot; 최다 세대</div>
+          </div>
+
+          <div class="type-info-grid">
+            <div class="type-info-card">
+              <div class="type-info-label">전용면적</div>
+              <div class="type-info-value">84.89<small>m&sup2;</small></div>
+            </div>
+            <div class="type-info-card">
+              <div class="type-info-label">공급면적</div>
+              <div class="type-info-value">114.72<small>m&sup2;</small></div>
+            </div>
+            <div class="type-info-card">
+              <div class="type-info-label">방 / 욕실</div>
+              <div class="type-info-value">3<small>Room</small> / 2<small>Bath</small></div>
+            </div>
+            <div class="type-info-card">
+              <div class="type-info-label">추천 가구</div>
+              <div class="type-info-value">3~4<small>인 가구</small></div>
+            </div>
+          </div>
+
+          <div class="type-features">
+            <div class="type-features-title">특화 설계</div>
+            <ul class="type-features-list">
+              <li>4Bay 판상형 구조의 넓은 전면 채광</li>
+              <li>안방 전용 드레스룸으로 수납 극대화</li>
+              <li>독립형 주방과 넓은 식당 공간 확보</li>
+              <li>3개 침실 모두 창문 배치로 환기 최적화</li>
+              <li>알파 수납장 및 현관 시스템 수납 적용</li>
+              <li>발코니 확장 시 거실 폭 6m 이상 확보</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= 105C TYPE ======= -->
+  <div class="tab-panel" id="type105" role="tabpanel">
+    <div class="floorplan-display">
+      <div class="floorplan-layout">
+
+        <!-- Floor plan schematic -->
+        <div class="floorplan-schematic">
+          <span class="floorplan-schematic-label">105C Type</span>
+          <div class="fp-compass"></div>
+          <span class="floorplan-schematic-scale">Scale 1:100</span>
+          <div class="fp-grid fp-grid-105">
+            <!-- Row 1 -->
+            <div class="fp-room fp-room-accent" style="grid-column:1/2;grid-row:1/2;">
+              <span class="fp-room-name">방 1</span>
+              <span class="fp-room-size">13.4m&sup2;</span>
+            </div>
+            <div class="fp-room fp-room-highlight" style="grid-column:2/4;grid-row:1/3;">
+              <span class="fp-room-name">거실</span>
+              <span class="fp-room-size">38.6m&sup2;</span>
+            </div>
+            <div class="fp-room fp-room-accent" style="grid-column:4/5;grid-row:1/2;">
+              <span class="fp-room-name">방 2</span>
+              <span class="fp-room-size">11.2m&sup2;</span>
+            </div>
+            <div class="fp-room fp-room-accent" style="grid-column:5/6;grid-row:1/3;">
+              <span class="fp-room-name">알파룸</span>
+              <span class="fp-room-size">7.8m&sup2;</span>
+            </div>
+            <!-- Row 2 -->
+            <div class="fp-room fp-room-dark" style="grid-column:1/2;grid-row:2/3;">
+              <span class="fp-room-name">욕실 1</span>
+              <span class="fp-room-size">5.2m&sup2;</span>
+            </div>
+            <div class="fp-room fp-room-dark" style="grid-column:4/5;grid-row:2/3;">
+              <span class="fp-room-name">욕실 2</span>
+              <span class="fp-room-size">5.6m&sup2;</span>
+            </div>
+            <!-- Row 3 -->
+            <div class="fp-room" style="grid-column:1/2;grid-row:3/4;">
+              <span class="fp-room-name">현관</span>
+              <span class="fp-room-size">4.1m&sup2;</span>
+            </div>
+            <div class="fp-room" style="grid-column:2/4;grid-row:3/5;">
+              <span class="fp-room-name">주방 / 식당</span>
+              <span class="fp-room-size">20.4m&sup2;</span>
+            </div>
+            <div class="fp-room fp-room-accent" style="grid-column:4/6;grid-row:3/4;">
+              <span class="fp-room-name">드레스룸</span>
+              <span class="fp-room-size">7.2m&sup2;</span>
+            </div>
+            <!-- Row 4 -->
+            <div class="fp-room fp-room-accent" style="grid-column:1/2;grid-row:4/5;">
+              <span class="fp-room-name">방 3</span>
+              <span class="fp-room-size">10.8m&sup2;</span>
+            </div>
+            <div class="fp-room fp-room-accent" style="grid-column:4/6;grid-row:4/5;">
+              <span class="fp-room-name">방 4</span>
+              <span class="fp-room-size">11.6m&sup2;</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Type detail info -->
+        <div class="type-detail">
+          <div class="type-detail-header">
+            <h2 class="type-detail-name">105C <span>Type</span></h2>
+            <div class="type-detail-badge">총 68세대 &middot; 프리미엄</div>
+          </div>
+
+          <div class="type-info-grid">
+            <div class="type-info-card">
+              <div class="type-info-label">전용면적</div>
+              <div class="type-info-value">105.42<small>m&sup2;</small></div>
+            </div>
+            <div class="type-info-card">
+              <div class="type-info-label">공급면적</div>
+              <div class="type-info-value">139.18<small>m&sup2;</small></div>
+            </div>
+            <div class="type-info-card">
+              <div class="type-info-label">방 / 욕실</div>
+              <div class="type-info-value">4<small>Room</small> / 2<small>Bath</small></div>
+            </div>
+            <div class="type-info-card">
+              <div class="type-info-label">추천 가구</div>
+              <div class="type-info-value">4<small>인+ 가구</small></div>
+            </div>
+          </div>
+
+          <div class="type-features">
+            <div class="type-features-title">특화 설계</div>
+            <ul class="type-features-list">
+              <li>5Bay 초광폭 설계로 전 세대 강변 조망</li>
+              <li>방 4개 + 알파룸으로 다목적 공간 활용</li>
+              <li>안방 전용 대형 드레스룸 (워크인 클로젯)</li>
+              <li>아일랜드 주방 적용, 리빙 다이닝 일체형 설계</li>
+              <li>마스터 욕실 건식/습식 분리 고급 사양</li>
+              <li>세탁실 + 유틸리티룸 독립 배치</li>
+              <li>고층부 전용 프리미엄 천장고 2.5m 적용</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- =============================================
+     TYPE COMPARISON TABLE
+     ============================================= -->
+<section class="comparison-section">
+  <div class="comparison-inner">
+    <p class="section-eyebrow reveal">Type Comparison</p>
+    <h2 class="section-heading reveal">타입별 <em>비교</em></h2>
+    <p class="section-desc reveal">리버사이드 파크의 3가지 평면 타입을 한눈에 비교하고, 라이프스타일에 맞는 최적의 공간을 선택하세요.</p>
+
+    <div class="comparison-table-wrap reveal">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>구분</th>
+            <th>59A타입</th>
+            <th>84B타입</th>
+            <th>105C타입</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>전용면적</td>
+            <td>59.97m&sup2;</td>
+            <td>84.89m&sup2;</td>
+            <td><strong>105.42m&sup2;</strong></td>
+          </tr>
+          <tr>
+            <td>공급면적</td>
+            <td>84.92m&sup2;</td>
+            <td>114.72m&sup2;</td>
+            <td><strong>139.18m&sup2;</strong></td>
+          </tr>
+          <tr>
+            <td>방 수</td>
+            <td>2개</td>
+            <td>3개</td>
+            <td><strong>4개</strong></td>
+          </tr>
+          <tr>
+            <td>욕실 수</td>
+            <td>2개</td>
+            <td>2개</td>
+            <td>2개</td>
+          </tr>
+          <tr>
+            <td>드레스룸</td>
+            <td>-</td>
+            <td>1개</td>
+            <td><strong>1개 (워크인)</strong></td>
+          </tr>
+          <tr>
+            <td>알파룸</td>
+            <td>-</td>
+            <td>-</td>
+            <td><strong>1개</strong> <span class="comparison-tag">Only</span></td>
+          </tr>
+          <tr>
+            <td>추천 가구</td>
+            <td>2~3인</td>
+            <td>3~4인</td>
+            <td>4인+</td>
+          </tr>
+          <tr>
+            <td>세대 수</td>
+            <td>80세대</td>
+            <td><strong>120세대</strong> <span class="comparison-tag">최다</span></td>
+            <td>68세대</td>
+          </tr>
+          <tr>
+            <td>Bay 구조</td>
+            <td>3Bay</td>
+            <td>4Bay</td>
+            <td><strong>5Bay</strong></td>
+          </tr>
+          <tr>
+            <td>특화 사양</td>
+            <td>오픈형 구조</td>
+            <td>넓은 수납</td>
+            <td><strong>프리미엄 풀옵션</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================
+     INTERIOR GALLERY
+     ============================================= -->
+<section class="gallery-section">
+  <div class="gallery-inner">
+    <p class="section-eyebrow reveal">Interior Design</p>
+    <h2 class="section-heading reveal">프리미엄 <em>인테리어</em></h2>
+    <p class="section-desc reveal">세계적 수준의 마감재와 정교한 디테일이 만들어내는 품격 있는 주거 공간을 경험하세요.</p>
+
+    <div class="gallery-grid">
+      <div class="gallery-item reveal">
+        <img src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80" alt="리버사이드 파크 거실 인테리어" loading="lazy">
+        <div class="gallery-item-overlay">
+          <div>
+            <div class="gallery-item-caption">리빙 다이닝</div>
+            <div class="gallery-item-sub">자연광이 가득한 개방형 거실, 천연 대리석 바닥재 적용</div>
+          </div>
+        </div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-1">
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80" alt="리버사이드 파크 주방 인테리어" loading="lazy">
+        <div class="gallery-item-overlay">
+          <div>
+            <div class="gallery-item-caption">프리미엄 주방</div>
+            <div class="gallery-item-sub">유럽산 빌트인 가전, 엔지니어드 스톤 상판</div>
+          </div>
+        </div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-2">
+        <img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800&q=80" alt="리버사이드 파크 침실 인테리어" loading="lazy">
+        <div class="gallery-item-overlay">
+          <div>
+            <div class="gallery-item-caption">마스터 베드룸</div>
+            <div class="gallery-item-sub">강변 조망 극대화, 간접 조명 시스템</div>
+          </div>
+        </div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-1">
+        <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80" alt="리버사이드 파크 로비 인테리어" loading="lazy">
+        <div class="gallery-item-overlay">
+          <div>
+            <div class="gallery-item-caption">그랜드 로비</div>
+            <div class="gallery-item-sub">호텔급 로비 라운지, 이중 높이 천장 설계</div>
+          </div>
+        </div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-2">
+        <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80" alt="리버사이드 파크 외관" loading="lazy">
+        <div class="gallery-item-overlay">
+          <div>
+            <div class="gallery-item-caption">건축 외관</div>
+            <div class="gallery-item-sub">알루미늄 커튼월 + 천연석 외장 마감</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================
+     PREMIUM FINISHES
+     ============================================= -->
+<section class="finishes-section">
+  <div class="finishes-inner">
+    <p class="section-eyebrow reveal">Premium Specifications</p>
+    <h2 class="section-heading reveal">프리미엄 <em>마감 사양</em></h2>
+    <p class="section-desc reveal">엄선된 최고급 자재와 최신 스마트 기술이 적용된 차별화된 주거 사양을 제공합니다.</p>
+
+    <div class="finishes-grid">
+      <div class="finish-card reveal">
+        <div class="finish-number">01</div>
+        <div class="finish-title">천연 대리석 마감</div>
+        <div class="finish-desc">현관, 거실, 욕실 바닥에 이탈리아산 천연 대리석을 적용하여 클래식한 품격을 완성합니다. 욕실 벽면까지 풀 마블 마감으로 호텔급 공간을 구현합니다.</div>
+      </div>
+      <div class="finish-card reveal reveal-delay-1">
+        <div class="finish-number">02</div>
+        <div class="finish-title">유럽산 주방 기기</div>
+        <div class="finish-desc">밀레(Miele) 빌트인 오븐, 인덕션, 식기세척기 기본 제공. 엔지니어드 스톤 상판과 하이글로시 도장 마감 싱크대로 럭셔리 키친을 완성합니다.</div>
+      </div>
+      <div class="finish-card reveal reveal-delay-2">
+        <div class="finish-number">03</div>
+        <div class="finish-title">3중 로이유리 시스템</div>
+        <div class="finish-desc">독일 기술 기반의 3중 로이유리 창호 시스템으로 단열 성능을 극대화하고, 외부 소음을 효과적으로 차단합니다. 결로 방지 성능까지 갖춘 프리미엄 창호입니다.</div>
+      </div>
+      <div class="finish-card reveal">
+        <div class="finish-number">04</div>
+        <div class="finish-title">스마트홈 시스템</div>
+        <div class="finish-desc">월패드 기반 IoT 통합 제어 시스템으로 조명, 냉난방, 환기, 보안을 원터치로 관리합니다. 음성 제어 및 모바일 앱 원격 제어를 지원합니다.</div>
+      </div>
+      <div class="finish-card reveal reveal-delay-1">
+        <div class="finish-number">05</div>
+        <div class="finish-title">천장 매립 에어컨</div>
+        <div class="finish-desc">거실과 각 침실에 시스템 에어컨을 천장 매립형으로 설치하여 인테리어 일체감을 높이고, 공간 효율성을 극대화합니다.</div>
+      </div>
+      <div class="finish-card reveal reveal-delay-2">
+        <div class="finish-number">06</div>
+        <div class="finish-title">프리미엄 욕실 사양</div>
+        <div class="finish-desc">한스그로에(Hansgrohe) 수전, 듀라빗(Duravit) 위생도기 등 유럽 명품 브랜드 욕실 기기를 기본 적용합니다. 레인 샤워 및 월풀 욕조 옵션을 제공합니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================
+     CTA SECTION
+     ============================================= -->
+<section class="cta-section">
+  <div class="cta-inner reveal">
+    <h2 class="cta-title">나에게 맞는 평면,<br><em>직접 확인하세요</em></h2>
+    <p class="cta-desc">관심고객으로 등록하시면 상세 평면도와 3D 가상 투어, 분양 일정 등 최신 정보를 우선적으로 안내해 드립니다.</p>
+    <a href="contact.html" class="cta-link">
+      관심고객 등록하기
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- =============================================
+     FOOTER
+     ============================================= -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-mega reveal">RIVERSIDE PARK</div>
+    <nav class="footer-nav reveal">
+      <a href="overview.html">사업개요</a>
+      <a href="floorplan.html">평면안내</a>
+      <a href="amenities.html">커뮤니티</a>
+      <a href="location.html">입지환경</a>
+      <a href="contact.html">관심고객</a>
+    </nav>
+    <div class="footer-divider reveal"></div>
+    <p class="footer-copy reveal">
+      &copy; 2026 리버사이드 파크. All Rights Reserved.<br>
+      본 사이트의 모든 CG 및 이미지는 소비자의 이해를 돕기 위한 것으로 실제와 다를 수 있습니다.
+    </p>
+  </div>
+</footer>
+
+<!-- =============================================
+     JAVASCRIPT
+     ============================================= -->
+<script>
+(function() {
+  'use strict';
+
+  /* ----- Page Hero entrance animation ----- */
+  function animatePageHero() {
+    var els = ['.page-hero-eyebrow', '.page-hero-title', '.page-hero-subtitle'];
+    els.forEach(function(sel, i) {
+      var el = document.querySelector(sel);
+      if (!el) return;
+      setTimeout(function() {
+        el.style.transition = 'opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1)';
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      }, 300 + i * 180);
+    });
+  }
+
+  window.addEventListener('load', function() {
+    animatePageHero();
+  });
+
+  /* ----- Header solid on scroll ----- */
+  var header = document.querySelector('.header');
+
+  function onScroll() {
+    var y = window.scrollY || window.pageYOffset;
+
+    if (y > 80) {
+      header.classList.add('solid');
+    } else {
+      header.classList.remove('solid');
+    }
+
+    // Scroll progress
+    var docH = document.documentElement.scrollHeight - window.innerHeight;
+    var progress = docH > 0 ? y / docH : 0;
+    document.querySelector('.scroll-progress').style.transform = 'scaleX(' + progress + ')';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* ----- Mobile nav toggle ----- */
+  var hamburger = document.querySelector('.hamburger');
+  var mobileNav = document.querySelector('.mobile-nav');
+
+  hamburger.addEventListener('click', function() {
+    hamburger.classList.toggle('active');
+    mobileNav.classList.toggle('open');
+    document.body.style.overflow = mobileNav.classList.contains('open') ? 'hidden' : '';
+  });
+
+  mobileNav.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() {
+      hamburger.classList.remove('active');
+      mobileNav.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+
+  /* ----- Tab switching with smooth fade ----- */
+  var tabBtns = document.querySelectorAll('.tab-btn');
+  var tabPanels = document.querySelectorAll('.tab-panel');
+  var isAnimating = false;
+
+  function switchTab(targetId) {
+    if (isAnimating) return;
+    var currentPanel = document.querySelector('.tab-panel.active');
+    var targetPanel = document.getElementById(targetId);
+
+    if (!targetPanel || currentPanel === targetPanel) return;
+
+    isAnimating = true;
+
+    // Update button states
+    tabBtns.forEach(function(btn) {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-selected', 'false');
+    });
+    document.querySelector('[data-tab="' + targetId + '"]').classList.add('active');
+    document.querySelector('[data-tab="' + targetId + '"]').setAttribute('aria-selected', 'true');
+
+    // Fade out current panel
+    currentPanel.classList.remove('visible');
+
+    setTimeout(function() {
+      // Hide current, show target
+      currentPanel.classList.remove('active');
+
+      targetPanel.classList.add('active');
+
+      // Force reflow for transition
+      void targetPanel.offsetWidth;
+
+      // Fade in new panel
+      requestAnimationFrame(function() {
+        targetPanel.classList.add('visible');
+        isAnimating = false;
+      });
+    }, 400);
+  }
+
+  tabBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      switchTab(this.getAttribute('data-tab'));
+    });
+  });
+
+  // Keyboard accessibility for tabs
+  var tabNavEl = document.querySelector('.tab-nav');
+  tabNavEl.addEventListener('keydown', function(e) {
+    var btns = Array.from(tabBtns);
+    var idx = btns.indexOf(document.activeElement);
+    if (idx === -1) return;
+
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      var next = btns[(idx + 1) % btns.length];
+      next.focus();
+      switchTab(next.getAttribute('data-tab'));
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      var prev = btns[(idx - 1 + btns.length) % btns.length];
+      prev.focus();
+      switchTab(prev.getAttribute('data-tab'));
+    }
+  });
+
+  /* ----- Scroll reveal (IntersectionObserver) ----- */
+  var reveals = document.querySelectorAll('.reveal');
+
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    reveals.forEach(function(el) { observer.observe(el); });
+  } else {
+    reveals.forEach(function(el) { el.classList.add('visible'); });
+  }
+
+  /* ----- Custom cursor (dot + ring) ----- */
+  var cursorDot = document.querySelector('.cursor-dot');
+  var cursorRing = document.querySelector('.cursor-ring');
+  var mouseX = 0, mouseY = 0;
+  var ringX = 0, ringY = 0;
+  var cursorVisible = false;
+
+  document.addEventListener('mousemove', function(e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+
+    if (!cursorVisible) {
+      cursorDot.classList.remove('hide');
+      cursorRing.classList.remove('hide');
+      cursorVisible = true;
+    }
+
+    cursorDot.style.left = mouseX + 'px';
+    cursorDot.style.top = mouseY + 'px';
+  });
+
+  // Smooth ring follow
+  function animateCursorRing() {
+    ringX += (mouseX - ringX) * 0.15;
+    ringY += (mouseY - ringY) * 0.15;
+
+    cursorRing.style.left = ringX + 'px';
+    cursorRing.style.top = ringY + 'px';
+
+    requestAnimationFrame(animateCursorRing);
+  }
+  animateCursorRing();
+
+  document.addEventListener('mouseleave', function() {
+    cursorDot.classList.add('hide');
+    cursorRing.classList.add('hide');
+    cursorVisible = false;
+  });
+
+  // Hover effect on interactive elements
+  var hoverTargets = document.querySelectorAll('a, button, .gallery-item, .finish-card, .type-info-card, .fp-room, .tab-btn');
+  hoverTargets.forEach(function(el) {
+    el.addEventListener('mouseenter', function() { cursorRing.classList.add('hover'); });
+    el.addEventListener('mouseleave', function() { cursorRing.classList.remove('hover'); });
+  });
+
+  // Hide cursor on touch devices
+  if ('ontouchstart' in window) {
+    cursorDot.style.display = 'none';
+    cursorRing.style.display = 'none';
+    document.body.style.cursor = 'auto';
+    document.querySelectorAll('a, button').forEach(function(el) { el.style.cursor = 'pointer'; });
+  }
+
+  /* ----- Floor plan room hover interactivity ----- */
+  var fpRooms = document.querySelectorAll('.fp-room');
+  fpRooms.forEach(function(room) {
+    room.addEventListener('mouseenter', function() {
+      this.style.zIndex = '2';
+    });
+    room.addEventListener('mouseleave', function() {
+      this.style.zIndex = '';
+    });
+  });
+
+  /* ----- Comparison table row highlight ----- */
+  var tableRows = document.querySelectorAll('.comparison-table tbody tr');
+  tableRows.forEach(function(row) {
+    row.addEventListener('mouseenter', function() {
+      this.style.background = 'rgba(200,169,125,0.06)';
+    });
+    row.addEventListener('mouseleave', function() {
+      this.style.background = '';
+    });
+  });
+
+  /* ----- Parallax subtle effect on hero ----- */
+  var heroBg = document.querySelector('.page-hero-bg');
+  window.addEventListener('scroll', function() {
+    var y = window.scrollY || window.pageYOffset;
+    if (y < window.innerHeight) {
+      heroBg.style.transform = 'scale(' + (1 + y * 0.0001) + ') translateY(' + (y * 0.3) + 'px)';
+    }
+  }, { passive: true });
+
+  /* ----- Swipe support for tabs on mobile ----- */
+  var tabPanelsWrap = document.querySelector('.tab-panels');
+  var touchStartX = 0;
+  var touchEndX = 0;
+  var tabOrder = ['type59', 'type84', 'type105'];
+
+  tabPanelsWrap.addEventListener('touchstart', function(e) {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+
+  tabPanelsWrap.addEventListener('touchend', function(e) {
+    touchEndX = e.changedTouches[0].screenX;
+    var diff = touchStartX - touchEndX;
+    if (Math.abs(diff) < 60) return;
+
+    var currentActive = document.querySelector('.tab-panel.active');
+    var currentIdx = tabOrder.indexOf(currentActive.id);
+
+    if (diff > 0 && currentIdx < tabOrder.length - 1) {
+      // Swipe left — next tab
+      switchTab(tabOrder[currentIdx + 1]);
+    } else if (diff < 0 && currentIdx > 0) {
+      // Swipe right — previous tab
+      switchTab(tabOrder[currentIdx - 1]);
+    }
+  }, { passive: true });
+
+})();
+</script>
+</body>
+</html>

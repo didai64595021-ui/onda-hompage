@@ -1,0 +1,2060 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>리버사이드 파크 — 강변의 새로운 랜드마크</title>
+<meta name="description" content="리버사이드 파크. 268세대, 42층, 2027년 입주. 강변 프리미엄 주거의 새로운 기준.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+/* ==============================================
+   CSS CUSTOM PROPERTIES
+   ============================================== */
+:root {
+  --bg: #0C0C0C;
+  --bg-surface: #161614;
+  --bg-light: #F7F4F0;
+  --accent: #C8A97D;
+  --accent-light: #E2D1B5;
+  --text: #E8E4DF;
+  --text-dim: #8A8580;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Pretendard Variable', -apple-system, sans-serif;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --grid: 8px;
+}
+
+/* ==============================================
+   RESET & BASE
+   ============================================== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  word-break: keep-all;
+  line-height: 1.7;
+  cursor: none;
+}
+
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+button { font: inherit; border: none; background: none; cursor: none; }
+
+/* ==============================================
+   CUSTOM CURSOR (dot 8px + ring 36px)
+   ============================================== */
+.cursor-dot {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10001;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s, opacity 0.2s;
+}
+.cursor-ring {
+  position: fixed;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid rgba(200,169,125,0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s var(--ease), height 0.3s var(--ease), border-color 0.3s, opacity 0.2s;
+}
+.cursor-dot.hide, .cursor-ring.hide { opacity: 0; }
+.cursor-ring.hover {
+  width: 56px;
+  height: 56px;
+  border-color: var(--accent);
+}
+
+/* ==============================================
+   CURSOR GLOW
+   ============================================== */
+.cursor-glow {
+  position: fixed;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200,169,125,0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.cursor-glow.active { opacity: 1; }
+
+/* ==============================================
+   SCROLL PROGRESS
+   ============================================== */
+.scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  z-index: 9999;
+  transform-origin: left;
+  transform: scaleX(0);
+  width: 100%;
+}
+
+/* ==============================================
+   GRAIN OVERLAY
+   ============================================== */
+.grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px;
+}
+
+/* ==============================================
+   PRELOADER
+   ============================================== */
+.preloader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 10002;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s var(--ease), visibility 0.8s;
+}
+.preloader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+
+.preloader-line {
+  width: 56px;
+  height: 1px;
+  background: var(--accent);
+  margin-bottom: calc(var(--grid) * 4);
+  transform: scaleX(0);
+  animation: preloaderLine 1.4s var(--ease) forwards;
+}
+
+.preloader-text {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 5vw, 44px);
+  color: var(--accent);
+  letter-spacing: 0.2em;
+  overflow: hidden;
+}
+.preloader-text span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(110%);
+  animation: letterReveal 0.6s var(--ease) forwards;
+}
+.preloader-sub {
+  margin-top: calc(var(--grid) * 2);
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  opacity: 0;
+  animation: fadeIn 0.6s var(--ease) 1.2s forwards;
+}
+
+@keyframes preloaderLine { to { transform: scaleX(1); } }
+@keyframes letterReveal { to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { to { opacity: 1; } }
+
+/* ==============================================
+   HEADER
+   ============================================== */
+.header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 900;
+  padding: calc(var(--grid) * 3) calc(var(--grid) * 5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.4s, padding 0.4s var(--ease), backdrop-filter 0.4s;
+}
+.header.solid {
+  background: rgba(12,12,12,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: calc(var(--grid) * 2) calc(var(--grid) * 5);
+}
+
+.header-logo {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+
+.header-nav { display: flex; gap: calc(var(--grid) * 4); }
+.header-nav a {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  position: relative;
+  transition: color 0.3s;
+}
+.header-nav a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 100%; height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s var(--ease);
+}
+.header-nav a:hover { color: var(--text); }
+.header-nav a:hover::after { transform: scaleX(1); transform-origin: left; }
+
+/* Hamburger */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  z-index: 1001;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 1.5px;
+  background: var(--text);
+  transition: transform 0.4s var(--ease), opacity 0.3s;
+}
+.hamburger.active span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+.hamburger.active span:nth-child(2) { opacity: 0; }
+.hamburger.active span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+/* Mobile overlay */
+.mobile-nav {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--grid) * 5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s var(--ease), visibility 0.5s;
+}
+.mobile-nav.open { opacity: 1; visibility: visible; }
+.mobile-nav a {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 5vw, 40px);
+  color: var(--text);
+  letter-spacing: 0.06em;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.4s var(--ease), transform 0.5s var(--ease), color 0.3s;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.mobile-nav.open a { opacity: 1; transform: translateY(0); }
+.mobile-nav a:hover { color: var(--accent); }
+
+/* ==============================================
+   HERO
+   ============================================== */
+.hero {
+  position: relative;
+  height: 100vh;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: calc(var(--grid) * 10) calc(var(--grid) * 5) calc(var(--grid) * 12);
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: -20px;
+  background: url('https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1600&q=80') center/cover no-repeat;
+  animation: kenBurns 24s ease-in-out infinite alternate;
+  will-change: transform;
+}
+.hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--bg) 0%, rgba(12,12,12,0.5) 35%, rgba(12,12,12,0.15) 100%);
+}
+
+@keyframes kenBurns {
+  0% { transform: scale(1) translate(0, 0); }
+  100% { transform: scale(1.1) translate(-10px, -5px); }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 960px;
+}
+
+.hero-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: calc(var(--grid) * 3);
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(56px, 10vw, 120px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: calc(var(--grid) * 3);
+  opacity: 0;
+  transform: translateY(32px);
+}
+.hero-title em {
+  font-style: italic;
+  color: var(--accent-light);
+}
+
+.hero-subtitle {
+  font-size: clamp(15px, 1.8vw, 18px);
+  color: var(--text-dim);
+  max-width: 520px;
+  margin-bottom: calc(var(--grid) * 6);
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.hero-stats {
+  display: flex;
+  gap: calc(var(--grid) * 6);
+  padding-top: calc(var(--grid) * 4);
+  border-top: 1px solid rgba(200,169,125,0.2);
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.hero-stat { display: flex; flex-direction: column; gap: 4px; }
+.hero-stat-value {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.5vw, 42px);
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1.1;
+}
+.hero-stat-label {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* Scroll indicator */
+.hero-scroll {
+  position: absolute;
+  bottom: calc(var(--grid) * 5);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--grid) * 1);
+  z-index: 2;
+  opacity: 0;
+  animation: fadeIn 0.6s var(--ease) 2.8s forwards;
+}
+.hero-scroll-text {
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.hero-scroll-line {
+  width: 1px;
+  height: 40px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-scroll-line::after {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--accent);
+  animation: scrollLine 1.8s var(--ease) infinite;
+}
+@keyframes scrollLine {
+  0% { top: -100%; }
+  50% { top: 0; }
+  100% { top: 100%; }
+}
+
+/* ==============================================
+   SCROLL REVEAL
+   ============================================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(48px);
+  transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+
+/* ==============================================
+   BRAND STORY
+   ============================================== */
+.brand-story {
+  position: relative;
+  padding: calc(var(--grid) * 20) calc(var(--grid) * 5);
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.brand-story-mega {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: clamp(100px, 18vw, 300px);
+  font-weight: 700;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200,169,125,0.07);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+.brand-story-inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: calc(var(--grid) * 10);
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  align-items: center;
+}
+
+.brand-story-vertical {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 6vw, 80px);
+  font-weight: 700;
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--accent);
+  letter-spacing: 0.08em;
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0.6;
+}
+
+.brand-story-content { max-width: 560px; }
+
+.brand-story-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: calc(var(--grid) * 3);
+}
+
+.brand-story-heading {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.5vw, 44px);
+  font-weight: 600;
+  line-height: 1.25;
+  margin-bottom: calc(var(--grid) * 4);
+}
+.brand-story-heading em { font-style: italic; color: var(--accent); }
+
+.brand-story-text {
+  font-size: clamp(14px, 1.2vw, 16px);
+  color: var(--text-dim);
+  line-height: 1.9;
+  margin-bottom: calc(var(--grid) * 5);
+}
+
+.brand-story-divider {
+  width: 48px;
+  height: 1px;
+  background: var(--accent);
+  margin-bottom: calc(var(--grid) * 5);
+}
+
+.brand-story-quote {
+  font-family: var(--font-display);
+  font-size: clamp(16px, 1.5vw, 20px);
+  font-style: italic;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* ==============================================
+   MARQUEE BAND
+   ============================================== */
+.marquee {
+  padding: calc(var(--grid) * 6) 0;
+  overflow: hidden;
+  border-top: 1px solid rgba(200,169,125,0.1);
+  border-bottom: 1px solid rgba(200,169,125,0.1);
+  background: var(--bg-surface);
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 30s linear infinite;
+}
+.marquee-track:hover { animation-play-state: paused; }
+.marquee-item {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: clamp(24px, 4vw, 48px);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200,169,125,0.3);
+  padding: 0 calc(var(--grid) * 5);
+  white-space: nowrap;
+  user-select: none;
+}
+.marquee-item .sep {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.4;
+  margin: 0 calc(var(--grid) * 4);
+  vertical-align: middle;
+}
+
+@keyframes marqueeScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ==============================================
+   GALLERY
+   ============================================== */
+.gallery {
+  padding: calc(var(--grid) * 16) calc(var(--grid) * 5);
+  overflow: hidden;
+}
+
+.gallery-header {
+  max-width: 1200px;
+  margin: 0 auto calc(var(--grid) * 8);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: calc(var(--grid) * 4);
+}
+.gallery-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: calc(var(--grid) * 2);
+}
+.gallery-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: calc(var(--grid) * 2);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.gallery-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  aspect-ratio: 4/3;
+}
+.gallery-item:nth-child(1) { grid-column: 1 / 2; }
+.gallery-item:nth-child(2) { grid-column: 2 / 3; transform: translateY(calc(var(--grid) * 6)); }
+.gallery-item:nth-child(3) { grid-column: 1 / 2; }
+.gallery-item:nth-child(4) { grid-column: 2 / 3; transform: translateY(calc(var(--grid) * 6)); }
+
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s var(--ease);
+}
+.gallery-item:hover img { transform: scale(1.05); }
+
+.gallery-item-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(12,12,12,0.8) 0%, transparent 60%);
+  display: flex;
+  align-items: flex-end;
+  padding: calc(var(--grid) * 3);
+  opacity: 0;
+  transition: opacity 0.5s var(--ease);
+}
+.gallery-item:hover .gallery-item-overlay { opacity: 1; }
+
+.gallery-item-label {
+  font-family: var(--font-display);
+  font-size: clamp(14px, 1.4vw, 18px);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+.gallery-item-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+}
+
+/* ==============================================
+   UNIT TYPES PREVIEW
+   ============================================== */
+.units {
+  padding: calc(var(--grid) * 16) calc(var(--grid) * 5);
+  background: var(--bg-surface);
+}
+
+.units-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.units-header {
+  text-align: center;
+  margin-bottom: calc(var(--grid) * 10);
+}
+.units-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: calc(var(--grid) * 2);
+}
+.units-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.units-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: calc(var(--grid) * 3);
+}
+
+.unit-card {
+  position: relative;
+  background: var(--bg);
+  border: 1px solid rgba(200,169,125,0.1);
+  border-radius: 4px;
+  padding: calc(var(--grid) * 5);
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.4s var(--ease), transform 0.4s var(--ease);
+}
+.unit-card:hover {
+  border-color: rgba(200,169,125,0.3);
+  transform: translateY(-4px);
+}
+
+.unit-card-type {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 3vw, 44px);
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1.1;
+  margin-bottom: calc(var(--grid) * 1);
+}
+.unit-card-name {
+  font-size: 14px;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+  margin-bottom: calc(var(--grid) * 4);
+}
+
+.unit-card-divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(200,169,125,0.12);
+  margin-bottom: calc(var(--grid) * 4);
+}
+
+.unit-card-specs {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--grid) * 2);
+  margin-bottom: calc(var(--grid) * 5);
+  flex-grow: 1;
+}
+.unit-card-spec {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+.unit-card-spec-label { color: var(--text-dim); }
+.unit-card-spec-value { color: var(--text); font-weight: 500; }
+
+.unit-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--grid) * 1);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  transition: gap 0.3s var(--ease);
+}
+.unit-card:hover .unit-card-link { gap: calc(var(--grid) * 2); }
+.unit-card-link-arrow {
+  display: inline-block;
+  width: 16px;
+  height: 1px;
+  background: var(--accent);
+  position: relative;
+}
+.unit-card-link-arrow::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -3px;
+  width: 7px;
+  height: 7px;
+  border-right: 1px solid var(--accent);
+  border-top: 1px solid var(--accent);
+  transform: rotate(45deg);
+}
+
+/* ==============================================
+   NUMBER STATS
+   ============================================== */
+.stats {
+  position: relative;
+  padding: calc(var(--grid) * 20) calc(var(--grid) * 5);
+  overflow: hidden;
+}
+
+.stats-bg-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: clamp(120px, 20vw, 360px);
+  font-weight: 700;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200,169,125,0.04);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+.stats-grid {
+  position: relative;
+  z-index: 2;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: calc(var(--grid) * 4);
+}
+
+.stat-item {
+  text-align: center;
+  padding: calc(var(--grid) * 4) calc(var(--grid) * 2);
+}
+
+.stat-number {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 7vw, 88px);
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: calc(var(--grid) * 1);
+}
+.stat-unit {
+  font-family: var(--font-display);
+  font-size: clamp(16px, 2vw, 24px);
+  color: var(--accent-light);
+  opacity: 0.7;
+}
+.stat-label {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin-top: calc(var(--grid) * 1);
+}
+.stat-divider {
+  width: 24px;
+  height: 1px;
+  background: rgba(200,169,125,0.3);
+  margin: calc(var(--grid) * 2) auto 0;
+}
+
+/* ==============================================
+   AMENITIES PREVIEW
+   ============================================== */
+.amenities {
+  padding: calc(var(--grid) * 16) 0;
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
+.amenities-header {
+  max-width: 1200px;
+  margin: 0 auto calc(var(--grid) * 8);
+  padding: 0 calc(var(--grid) * 5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: calc(var(--grid) * 4);
+}
+.amenities-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: calc(var(--grid) * 2);
+}
+.amenities-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 600;
+  line-height: 1.2;
+}
+.amenities-link {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--grid) * 1);
+  transition: gap 0.3s var(--ease);
+  min-height: 44px;
+}
+.amenities-link:hover { gap: calc(var(--grid) * 2); }
+
+.amenities-scroll {
+  display: flex;
+  gap: calc(var(--grid) * 3);
+  padding: 0 calc(var(--grid) * 5);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+.amenities-scroll::-webkit-scrollbar { display: none; }
+
+.amenity-card {
+  flex: 0 0 280px;
+  scroll-snap-align: start;
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  aspect-ratio: 3/4;
+}
+.amenity-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s var(--ease);
+}
+.amenity-card:hover img { transform: scale(1.06); }
+
+.amenity-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(12,12,12,0.85) 0%, rgba(12,12,12,0.1) 50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: calc(var(--grid) * 3);
+}
+.amenity-card-icon {
+  font-size: 28px;
+  margin-bottom: calc(var(--grid) * 1);
+}
+.amenity-card-name {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.amenity-card-desc {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+/* ==============================================
+   LOCATION PREVIEW
+   ============================================== */
+.location {
+  padding: calc(var(--grid) * 16) calc(var(--grid) * 5);
+  overflow: hidden;
+}
+
+.location-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--grid) * 8);
+  align-items: center;
+}
+
+.location-image {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  aspect-ratio: 4/3;
+}
+.location-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s var(--ease);
+}
+.location-image:hover img { transform: scale(1.03); }
+.location-image-badge {
+  position: absolute;
+  top: calc(var(--grid) * 3);
+  left: calc(var(--grid) * 3);
+  background: rgba(12,12,12,0.8);
+  backdrop-filter: blur(10px);
+  padding: calc(var(--grid) * 1) calc(var(--grid) * 2);
+  border-radius: 2px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.location-content {}
+.location-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: calc(var(--grid) * 2);
+}
+.location-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.5vw, 44px);
+  font-weight: 600;
+  line-height: 1.25;
+  margin-bottom: calc(var(--grid) * 3);
+}
+.location-desc {
+  font-size: clamp(14px, 1.2vw, 16px);
+  color: var(--text-dim);
+  line-height: 1.8;
+  margin-bottom: calc(var(--grid) * 6);
+}
+
+.location-distances {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--grid) * 2);
+  margin-bottom: calc(var(--grid) * 6);
+}
+.location-distance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(var(--grid) * 2) 0;
+  border-bottom: 1px solid rgba(200,169,125,0.08);
+}
+.location-distance-name {
+  font-size: 14px;
+  color: var(--text);
+}
+.location-distance-value {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.location-link {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--grid) * 1);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  transition: gap 0.3s var(--ease);
+  min-height: 44px;
+}
+.location-link:hover { gap: calc(var(--grid) * 2); }
+
+/* ==============================================
+   CTA SECTION
+   ============================================== */
+.cta {
+  position: relative;
+  padding: calc(var(--grid) * 20) calc(var(--grid) * 5);
+  text-align: center;
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
+.cta-bg-img {
+  position: absolute;
+  inset: 0;
+  background: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200&q=80') center/cover no-repeat;
+  opacity: 0.12;
+}
+
+.cta-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.cta-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: calc(var(--grid) * 3);
+}
+.cta-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: calc(var(--grid) * 3);
+}
+.cta-desc {
+  font-size: clamp(14px, 1.3vw, 17px);
+  color: var(--text-dim);
+  line-height: 1.8;
+  margin-bottom: calc(var(--grid) * 6);
+}
+
+.cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--grid) * 2);
+  padding: calc(var(--grid) * 2.5) calc(var(--grid) * 5);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  transition: background 0.4s var(--ease), color 0.4s var(--ease), gap 0.3s var(--ease);
+  min-height: 44px;
+}
+.cta-button:hover {
+  background: var(--accent);
+  color: var(--bg);
+  gap: calc(var(--grid) * 3);
+}
+.cta-button-arrow {
+  display: inline-block;
+  width: 20px;
+  height: 1px;
+  background: currentColor;
+  position: relative;
+  transition: width 0.3s var(--ease);
+}
+.cta-button-arrow::after {
+  content: '';
+  position: absolute;
+  right: 0; top: -3px;
+  width: 7px; height: 7px;
+  border-right: 1px solid currentColor;
+  border-top: 1px solid currentColor;
+  transform: rotate(45deg);
+}
+
+/* ==============================================
+   FOOTER
+   ============================================== */
+.footer {
+  position: relative;
+  padding: calc(var(--grid) * 16) calc(var(--grid) * 5) calc(var(--grid) * 8);
+  overflow: hidden;
+}
+
+.footer-mega {
+  font-family: var(--font-display);
+  font-size: clamp(60px, 14vw, 200px);
+  font-weight: 700;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200,169,125,0.1);
+  letter-spacing: 0.05em;
+  line-height: 1;
+  text-align: center;
+  margin-bottom: calc(var(--grid) * 8);
+  user-select: none;
+}
+
+.footer-nav {
+  display: flex;
+  justify-content: center;
+  gap: calc(var(--grid) * 4);
+  margin-bottom: calc(var(--grid) * 6);
+  flex-wrap: wrap;
+}
+.footer-nav a {
+  font-size: 13px;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  transition: color 0.3s;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.footer-nav a:hover { color: var(--accent); }
+
+.footer-divider {
+  width: 48px;
+  height: 1px;
+  background: rgba(200,169,125,0.15);
+  margin: 0 auto calc(var(--grid) * 6);
+}
+
+.footer-social {
+  display: flex;
+  justify-content: center;
+  gap: calc(var(--grid) * 3);
+  margin-bottom: calc(var(--grid) * 5);
+}
+.footer-social a {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(200,169,125,0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--text-dim);
+  transition: border-color 0.3s, color 0.3s, background 0.3s;
+}
+.footer-social a:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(200,169,125,0.05);
+}
+
+.footer-bottom {
+  text-align: center;
+}
+.footer-copy {
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+.footer-legal {
+  font-size: 10px;
+  color: rgba(138,133,128,0.6);
+  letter-spacing: 0.04em;
+}
+
+/* ==============================================
+   RESPONSIVE — 1024px
+   ============================================== */
+@media (max-width: 1024px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .units-grid { grid-template-columns: repeat(2, 1fr); }
+  .units-grid .unit-card:last-child {
+    grid-column: 1 / -1;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  .location-inner { grid-template-columns: 1fr; gap: calc(var(--grid) * 6); }
+}
+
+/* ==============================================
+   RESPONSIVE — 768px
+   ============================================== */
+@media (max-width: 768px) {
+  .header-nav { display: none; }
+  .hamburger { display: flex; }
+
+  .hero { padding: calc(var(--grid) * 8) calc(var(--grid) * 3) calc(var(--grid) * 10); }
+  .hero-stats { gap: calc(var(--grid) * 4); flex-wrap: wrap; }
+
+  .brand-story { padding: calc(var(--grid) * 14) calc(var(--grid) * 3); }
+  .brand-story-inner { grid-template-columns: 1fr; gap: calc(var(--grid) * 6); }
+  .brand-story-vertical {
+    writing-mode: horizontal-tb;
+    text-orientation: initial;
+    font-size: clamp(36px, 8vw, 56px);
+  }
+
+  .gallery { padding: calc(var(--grid) * 10) calc(var(--grid) * 3); }
+  .gallery-grid { grid-template-columns: 1fr; gap: calc(var(--grid) * 3); }
+  .gallery-item:nth-child(2),
+  .gallery-item:nth-child(4) { transform: none; }
+  .gallery-item-overlay { opacity: 1; }
+
+  .units { padding: calc(var(--grid) * 10) calc(var(--grid) * 3); }
+  .units-grid { grid-template-columns: 1fr; gap: calc(var(--grid) * 3); }
+  .units-grid .unit-card:last-child { max-width: none; }
+
+  .stats { padding: calc(var(--grid) * 12) calc(var(--grid) * 3); }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: calc(var(--grid) * 3); }
+
+  .amenities { padding: calc(var(--grid) * 10) 0; }
+  .amenity-card { flex: 0 0 240px; }
+
+  .location { padding: calc(var(--grid) * 10) calc(var(--grid) * 3); }
+  .location-inner { grid-template-columns: 1fr; }
+
+  .cta { padding: calc(var(--grid) * 12) calc(var(--grid) * 3); }
+
+  .footer { padding: calc(var(--grid) * 10) calc(var(--grid) * 3) calc(var(--grid) * 6); }
+
+  .mobile-nav a { transition-delay: calc(var(--i, 0) * 0.06s); }
+
+  .gallery-header { flex-direction: column; align-items: flex-start; }
+  .amenities-header { flex-direction: column; align-items: flex-start; }
+}
+
+/* ==============================================
+   RESPONSIVE — 375px
+   ============================================== */
+@media (max-width: 375px) {
+  .hero-title { font-size: 48px; }
+  .hero-stats { flex-direction: column; gap: calc(var(--grid) * 3); }
+  .brand-story-vertical { font-size: 32px; }
+  .stat-number { font-size: 40px; }
+  .amenity-card { flex: 0 0 200px; }
+}
+
+/* ==============================================
+   RESPONSIVE — 1440px+
+   ============================================== */
+@media (min-width: 1440px) {
+  .header { padding: calc(var(--grid) * 4) calc(var(--grid) * 10); }
+  .header.solid { padding: calc(var(--grid) * 2.5) calc(var(--grid) * 10); }
+  .hero { padding: calc(var(--grid) * 12) calc(var(--grid) * 10) calc(var(--grid) * 14); }
+  .brand-story { padding: calc(var(--grid) * 24) calc(var(--grid) * 10); }
+  .gallery { padding: calc(var(--grid) * 20) calc(var(--grid) * 10); }
+  .units { padding: calc(var(--grid) * 20) calc(var(--grid) * 10); }
+  .stats { padding: calc(var(--grid) * 24) calc(var(--grid) * 10); }
+  .amenities-header { padding: 0 calc(var(--grid) * 10); }
+  .amenities-scroll { padding: 0 calc(var(--grid) * 10); }
+  .location { padding: calc(var(--grid) * 20) calc(var(--grid) * 10); }
+  .cta { padding: calc(var(--grid) * 24) calc(var(--grid) * 10); }
+  .footer { padding: calc(var(--grid) * 20) calc(var(--grid) * 10) calc(var(--grid) * 10); }
+  .amenity-card { flex: 0 0 320px; }
+}
+
+/* ==============================================
+   TOUCH DEVICE ADJUSTMENTS
+   ============================================== */
+@media (hover: none) {
+  body { cursor: auto; }
+  button { cursor: auto; }
+  .cursor-dot, .cursor-ring, .cursor-glow { display: none !important; }
+  .gallery-item-overlay { opacity: 1; }
+}
+</style>
+</head>
+<body>
+
+<!-- Grain overlay -->
+<div class="grain"></div>
+
+<!-- Custom cursor -->
+<div class="cursor-dot hide"></div>
+<div class="cursor-ring hide"></div>
+<div class="cursor-glow"></div>
+
+<!-- Scroll progress -->
+<div class="scroll-progress"></div>
+
+<!-- Preloader -->
+<div class="preloader">
+  <div class="preloader-line"></div>
+  <div class="preloader-text" aria-label="리버사이드 파크"></div>
+  <div class="preloader-sub">Premium Riverside Living</div>
+</div>
+
+<!-- Header -->
+<header class="header">
+  <a href="index.html" class="header-logo">RIVERSIDE PARK</a>
+  <nav class="header-nav">
+    <a href="overview.html">사업개요</a>
+    <a href="floorplan.html">평면안내</a>
+    <a href="amenities.html">커뮤니티</a>
+    <a href="location.html">입지환경</a>
+    <a href="contact.html">관심고객</a>
+  </nav>
+  <button class="hamburger" aria-label="메뉴 열기">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- Mobile nav overlay -->
+<nav class="mobile-nav">
+  <a href="overview.html" style="--i:0">사업개요</a>
+  <a href="floorplan.html" style="--i:1">평면안내</a>
+  <a href="amenities.html" style="--i:2">커뮤니티</a>
+  <a href="location.html" style="--i:3">입지환경</a>
+  <a href="contact.html" style="--i:4">관심고객</a>
+</nav>
+
+<!-- ========================================
+     SECTION 1: HERO
+     ======================================== -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <p class="hero-label">Premium Residence &mdash; Since 2027</p>
+    <h1 class="hero-title">리버사이드<br><em>파크</em></h1>
+    <p class="hero-subtitle">강변을 따라 펼쳐지는 압도적 스카이라인. 자연과 도시가 공존하는 프리미엄 주거의 새로운 기준을 제시합니다.</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-value" data-count="268">0</span>
+        <span class="hero-stat-label">세대</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-value" data-count="42">0</span>
+        <span class="hero-stat-label">층</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-value" data-count="2027">0</span>
+        <span class="hero-stat-label">입주</span>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span class="hero-scroll-text">Scroll</span>
+    <span class="hero-scroll-line"></span>
+  </div>
+</section>
+
+<!-- ========================================
+     SECTION 2: BRAND STORY
+     ======================================== -->
+<section class="brand-story">
+  <div class="brand-story-mega" data-parallax-y="-0.08">RIVERSIDE</div>
+  <div class="brand-story-inner">
+    <div class="brand-story-vertical reveal">THE PARK</div>
+    <div class="brand-story-content">
+      <p class="brand-story-eyebrow reveal">Brand Philosophy</p>
+      <h2 class="brand-story-heading reveal reveal-delay-1">
+        자연이 머무는 곳에<br><em>새로운 일상</em>이 시작됩니다
+      </h2>
+      <p class="brand-story-text reveal reveal-delay-2">
+        리버사이드 파크는 단순한 주거 공간을 넘어, 강변의 자연과 도시의 편리함이 조화를 이루는 프리미엄 라이프스타일을 제안합니다. 42층 스카이라인이 만들어내는 탁 트인 조망과 268세대만을 위한 프라이빗한 커뮤니티가 격이 다른 일상을 완성합니다.
+      </p>
+      <div class="brand-story-divider reveal reveal-delay-3"></div>
+      <p class="brand-story-quote reveal reveal-delay-4">
+        "강이 보이는 곳에서, 삶의 가치가 달라집니다."
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     SECTION 3: MARQUEE BAND
+     ======================================== -->
+<div class="marquee">
+  <div class="marquee-track">
+    <span class="marquee-item">PREMIUM RIVERSIDE LIVING <span class="sep"></span></span>
+    <span class="marquee-item">268 HOUSEHOLDS <span class="sep"></span></span>
+    <span class="marquee-item">42 FLOORS <span class="sep"></span></span>
+    <span class="marquee-item">PREMIUM RIVERSIDE LIVING <span class="sep"></span></span>
+    <span class="marquee-item">THE NEW STANDARD <span class="sep"></span></span>
+    <span class="marquee-item">RIVERSIDE PARK <span class="sep"></span></span>
+    <!-- Duplicated for seamless loop -->
+    <span class="marquee-item">PREMIUM RIVERSIDE LIVING <span class="sep"></span></span>
+    <span class="marquee-item">268 HOUSEHOLDS <span class="sep"></span></span>
+    <span class="marquee-item">42 FLOORS <span class="sep"></span></span>
+    <span class="marquee-item">PREMIUM RIVERSIDE LIVING <span class="sep"></span></span>
+    <span class="marquee-item">THE NEW STANDARD <span class="sep"></span></span>
+    <span class="marquee-item">RIVERSIDE PARK <span class="sep"></span></span>
+  </div>
+</div>
+
+<!-- ========================================
+     SECTION 4: GALLERY
+     ======================================== -->
+<section class="gallery">
+  <div class="gallery-header reveal">
+    <div>
+      <p class="gallery-eyebrow">Gallery</p>
+      <h2 class="gallery-title">공간이 만드는<br>감동의 순간</h2>
+    </div>
+  </div>
+  <div class="gallery-grid">
+    <div class="gallery-item reveal">
+      <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80" alt="리버사이드 파크 인테리어" loading="lazy">
+      <div class="gallery-item-overlay">
+        <div>
+          <p class="gallery-item-label">Interior Design</p>
+          <p class="gallery-item-sub">자연 소재와 미니멀한 디자인의 조화</p>
+        </div>
+      </div>
+    </div>
+    <div class="gallery-item reveal reveal-delay-2">
+      <img src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=1200&q=80" alt="리버사이드 파크 거실" loading="lazy">
+      <div class="gallery-item-overlay">
+        <div>
+          <p class="gallery-item-label">Living Room</p>
+          <p class="gallery-item-sub">강변 조망을 극대화한 파노라마 거실</p>
+        </div>
+      </div>
+    </div>
+    <div class="gallery-item reveal reveal-delay-1">
+      <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80" alt="리버사이드 파크 로비" loading="lazy">
+      <div class="gallery-item-overlay">
+        <div>
+          <p class="gallery-item-label">Grand Lobby</p>
+          <p class="gallery-item-sub">호텔급 컨시어지 서비스를 갖춘 그랜드 로비</p>
+        </div>
+      </div>
+    </div>
+    <div class="gallery-item reveal reveal-delay-3">
+      <img src="https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1200&q=80" alt="리버사이드 파크 야경" loading="lazy">
+      <div class="gallery-item-overlay">
+        <div>
+          <p class="gallery-item-label">Night View</p>
+          <p class="gallery-item-sub">도시의 밤을 품은 프리미엄 스카이라인</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     SECTION 5: UNIT TYPES PREVIEW
+     ======================================== -->
+<section class="units">
+  <div class="units-inner">
+    <div class="units-header reveal">
+      <p class="units-eyebrow">Unit Types</p>
+      <h2 class="units-title">맞춤형 평면 설계</h2>
+    </div>
+    <div class="units-grid">
+      <a href="floorplan.html" class="unit-card reveal">
+        <span class="unit-card-type">59A</span>
+        <span class="unit-card-name">컴팩트 프리미엄</span>
+        <span class="unit-card-divider"></span>
+        <div class="unit-card-specs">
+          <div class="unit-card-spec">
+            <span class="unit-card-spec-label">전용면적</span>
+            <span class="unit-card-spec-value">59.98㎡</span>
+          </div>
+          <div class="unit-card-spec">
+            <span class="unit-card-spec-label">공급면적</span>
+            <span class="unit-card-spec-value">84.72㎡</span>
+          </div>
+          <div class="unit-card-spec">
+            <span class="unit-card-spec-label">방/욕실</span>
+            <span class="unit-card-spec-value">2Room / 1Bath</span>
+          </div>
+        </div>
+        <span class="unit-card-link">
+          평면도 보기 <span class="unit-card-link-arrow"></span>
+        </span>
+      </a>
+      <a href="floorplan.html" class="unit-card reveal reveal-delay-2">
+        <span class="unit-card-type">84B</span>
+        <span class="unit-card-name">패밀리 스탠다드</span>
+        <span class="unit-card-divider"></span>
+        <div class="unit-card-specs">
+          <div class="unit-card-spec">
+            <span class="unit-card-spec-label">전용면적</span>
+            <span class="unit-card-spec-value">84.92㎡</span>
+          </div>
+          <div class="unit-card-spec">
+            <span class="unit-card-spec-label">공급면적</span>
+            <span class="unit-card-spec-value">112.48㎡</span>
+          </div>
+          <div class="unit-card-spec">
+            <span class="unit-card-spec-label">방/욕실</span>
+            <span class="unit-card-spec-value">3Room / 2Bath</span>
+          </div>
+        </div>
+        <span class="unit-card-link">
+          평면도 보기 <span class="unit-card-link-arrow"></span>
+        </span>
+      </a>
+      <a href="floorplan.html" class="unit-card reveal reveal-delay-4">
+        <span class="unit-card-type">105C</span>
+        <span class="unit-card-name">펜트하우스</span>
+        <span class="unit-card-divider"></span>
+        <div class="unit-card-specs">
+          <div class="unit-card-spec">
+            <span class="unit-card-spec-label">전용면적</span>
+            <span class="unit-card-spec-value">105.24㎡</span>
+          </div>
+          <div class="unit-card-spec">
+            <span class="unit-card-spec-label">공급면적</span>
+            <span class="unit-card-spec-value">138.96㎡</span>
+          </div>
+          <div class="unit-card-spec">
+            <span class="unit-card-spec-label">방/욕실</span>
+            <span class="unit-card-spec-value">4Room / 2Bath</span>
+          </div>
+        </div>
+        <span class="unit-card-link">
+          평면도 보기 <span class="unit-card-link-arrow"></span>
+        </span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     SECTION 6: NUMBER STATS
+     ======================================== -->
+<section class="stats">
+  <div class="stats-bg-text" data-parallax-y="-0.05">PARK</div>
+  <div class="stats-grid">
+    <div class="stat-item reveal">
+      <div class="stat-number" data-countup="268">0</div>
+      <div class="stat-unit">세대</div>
+      <div class="stat-label">프라이빗 가구</div>
+      <div class="stat-divider"></div>
+    </div>
+    <div class="stat-item reveal reveal-delay-1">
+      <div class="stat-number" data-countup="42">0</div>
+      <div class="stat-unit">층</div>
+      <div class="stat-label">최고층 랜드마크</div>
+      <div class="stat-divider"></div>
+    </div>
+    <div class="stat-item reveal reveal-delay-2">
+      <div class="stat-number" data-countup="15230" data-format="comma">0</div>
+      <div class="stat-unit">㎡</div>
+      <div class="stat-label">대지면적</div>
+      <div class="stat-divider"></div>
+    </div>
+    <div class="stat-item reveal reveal-delay-3">
+      <div class="stat-number" data-countup="2027">0</div>
+      <div class="stat-unit">년</div>
+      <div class="stat-label">입주 예정</div>
+      <div class="stat-divider"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     SECTION 7: AMENITIES PREVIEW
+     ======================================== -->
+<section class="amenities">
+  <div class="amenities-header reveal">
+    <div>
+      <p class="amenities-eyebrow">Community</p>
+      <h2 class="amenities-title">일상을 특별하게<br>만드는 공간</h2>
+    </div>
+    <a href="amenities.html" class="amenities-link">
+      전체 보기 <span class="unit-card-link-arrow"></span>
+    </a>
+  </div>
+  <div class="amenities-scroll">
+    <div class="amenity-card reveal">
+      <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80" alt="피트니스 센터" loading="lazy">
+      <div class="amenity-card-overlay">
+        <div class="amenity-card-icon">&#9878;</div>
+        <div class="amenity-card-name">프리미엄 피트니스</div>
+        <div class="amenity-card-desc">전문 트레이너와 최신 기구를 갖춘 입주민 전용 운동 공간</div>
+      </div>
+    </div>
+    <div class="amenity-card reveal reveal-delay-1">
+      <img src="https://images.unsplash.com/photo-1572331165267-854da2b021b1?w=800&q=80" alt="인피니티 풀" loading="lazy">
+      <div class="amenity-card-overlay">
+        <div class="amenity-card-icon">&#9906;</div>
+        <div class="amenity-card-name">인피니티 풀</div>
+        <div class="amenity-card-desc">강변 조망의 사계절 실내 수영장 및 스파 시설</div>
+      </div>
+    </div>
+    <div class="amenity-card reveal reveal-delay-2">
+      <img src="https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=800&q=80" alt="골프 라운지" loading="lazy">
+      <div class="amenity-card-overlay">
+        <div class="amenity-card-icon">&#9971;</div>
+        <div class="amenity-card-name">스크린 골프</div>
+        <div class="amenity-card-desc">최첨단 시뮬레이터를 갖춘 프라이빗 골프 라운지</div>
+      </div>
+    </div>
+    <div class="amenity-card reveal reveal-delay-3">
+      <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&q=80" alt="카페 라운지" loading="lazy">
+      <div class="amenity-card-overlay">
+        <div class="amenity-card-icon">&#9749;</div>
+        <div class="amenity-card-name">커뮤니티 카페</div>
+        <div class="amenity-card-desc">바리스타가 상주하는 입주민 전용 라운지 카페</div>
+      </div>
+    </div>
+    <div class="amenity-card reveal reveal-delay-4">
+      <img src="https://images.unsplash.com/photo-1587654780291-39c9404d7dd0?w=800&q=80" alt="키즈 파크" loading="lazy">
+      <div class="amenity-card-overlay">
+        <div class="amenity-card-icon">&#9734;</div>
+        <div class="amenity-card-name">키즈 파크</div>
+        <div class="amenity-card-desc">안전한 놀이 공간과 창의 교육 프로그램 운영</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     SECTION 8: LOCATION PREVIEW
+     ======================================== -->
+<section class="location">
+  <div class="location-inner">
+    <div class="location-image reveal">
+      <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=1200&q=80" alt="리버사이드 파크 입지" loading="lazy">
+      <div class="location-image-badge">Prime Location</div>
+    </div>
+    <div class="location-content">
+      <p class="location-eyebrow reveal">Location</p>
+      <h2 class="location-title reveal reveal-delay-1">도심 속<br>최적의 입지</h2>
+      <p class="location-desc reveal reveal-delay-2">
+        강변을 따라 펼쳐지는 자연환경과 도심의 핵심 인프라를 동시에 누릴 수 있는 최적의 위치. 교통, 교육, 생활 편의시설이 도보권에 밀집해 있어 완성형 주거 환경을 실현합니다.
+      </p>
+      <div class="location-distances reveal reveal-delay-3">
+        <div class="location-distance">
+          <span class="location-distance-name">지하철역</span>
+          <span class="location-distance-value">도보 5분</span>
+        </div>
+        <div class="location-distance">
+          <span class="location-distance-name">종합병원</span>
+          <span class="location-distance-value">차량 8분</span>
+        </div>
+        <div class="location-distance">
+          <span class="location-distance-name">강변공원</span>
+          <span class="location-distance-value">도보 3분</span>
+        </div>
+        <div class="location-distance">
+          <span class="location-distance-name">명문학군</span>
+          <span class="location-distance-value">도보 10분</span>
+        </div>
+        <div class="location-distance">
+          <span class="location-distance-name">대형마트</span>
+          <span class="location-distance-value">차량 5분</span>
+        </div>
+      </div>
+      <a href="location.html" class="location-link reveal reveal-delay-4">
+        입지환경 자세히 보기 <span class="unit-card-link-arrow"></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     SECTION 9: CTA
+     ======================================== -->
+<section class="cta">
+  <div class="cta-bg-img"></div>
+  <div class="cta-inner">
+    <p class="cta-eyebrow reveal">Registration</p>
+    <h2 class="cta-title reveal reveal-delay-1">관심고객<br>사전등록</h2>
+    <p class="cta-desc reveal reveal-delay-2">
+      리버사이드 파크의 특별한 혜택을 가장 먼저 만나보세요.<br>사전등록 고객에게 우선 안내 및 특별 할인 혜택을 드립니다.
+    </p>
+    <div class="reveal reveal-delay-3">
+      <a href="contact.html" class="cta-button">
+        관심고객 등록하기 <span class="cta-button-arrow"></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     SECTION 10: FOOTER
+     ======================================== -->
+<footer class="footer">
+  <div class="footer-mega reveal">RIVERSIDE PARK</div>
+  <nav class="footer-nav reveal">
+    <a href="overview.html">사업개요</a>
+    <a href="floorplan.html">평면안내</a>
+    <a href="amenities.html">커뮤니티</a>
+    <a href="location.html">입지환경</a>
+    <a href="contact.html">관심고객</a>
+  </nav>
+  <div class="footer-divider"></div>
+  <div class="footer-social reveal">
+    <a href="#" aria-label="Instagram">IG</a>
+    <a href="#" aria-label="YouTube">YT</a>
+    <a href="#" aria-label="Blog">BG</a>
+    <a href="#" aria-label="KakaoTalk">KT</a>
+  </div>
+  <div class="footer-bottom reveal">
+    <p class="footer-copy">&copy; 2026 리버사이드 파크. All Rights Reserved.</p>
+    <p class="footer-legal">본 사이트의 모든 이미지는 소비자의 이해를 돕기 위한 참고 자료이며, 실제와 다를 수 있습니다.</p>
+  </div>
+</footer>
+
+<!-- =============================================
+     JAVASCRIPT
+     ============================================= -->
+<script>
+(function() {
+  'use strict';
+
+  /* ===== PRELOADER ===== */
+  var preloaderText = document.querySelector('.preloader-text');
+  var preloader = document.querySelector('.preloader');
+  var letters = '리버사이드 파크';
+
+  letters.split('').forEach(function(ch, i) {
+    var span = document.createElement('span');
+    span.textContent = ch === ' ' ? '\u00A0' : ch;
+    span.style.animationDelay = (0.6 + i * 0.08) + 's';
+    preloaderText.appendChild(span);
+  });
+
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      preloader.classList.add('done');
+      document.body.style.overflow = '';
+      animateHero();
+    }, 2000);
+  });
+
+  // Prevent scrolling during preloader
+  document.body.style.overflow = 'hidden';
+
+  /* ===== HERO ENTRANCE ===== */
+  function animateHero() {
+    var els = ['.hero-label', '.hero-title', '.hero-subtitle', '.hero-stats'];
+    els.forEach(function(sel, i) {
+      var el = document.querySelector(sel);
+      if (!el) return;
+      setTimeout(function() {
+        el.style.transition = 'opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1)';
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      }, i * 200);
+    });
+
+    // Animate hero stat counters
+    setTimeout(function() {
+      document.querySelectorAll('.hero-stat-value[data-count]').forEach(function(el) {
+        animateCount(el, parseInt(el.getAttribute('data-count')), 1200);
+      });
+    }, 600);
+  }
+
+  /* ===== COUNT-UP ANIMATION ===== */
+  function animateCount(el, target, duration) {
+    var start = 0;
+    var startTime = null;
+    var format = el.getAttribute('data-format');
+
+    function step(timestamp) {
+      if (!startTime) startTime = timestamp;
+      var progress = Math.min((timestamp - startTime) / duration, 1);
+      // Ease out cubic
+      var eased = 1 - Math.pow(1 - progress, 3);
+      var current = Math.floor(eased * target);
+      if (format === 'comma') {
+        el.textContent = current.toLocaleString();
+      } else {
+        el.textContent = current;
+      }
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        if (format === 'comma') {
+          el.textContent = target.toLocaleString();
+        } else {
+          el.textContent = target;
+        }
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ===== HEADER SOLID ON SCROLL ===== */
+  var header = document.querySelector('.header');
+
+  function onScroll() {
+    var y = window.scrollY || window.pageYOffset;
+
+    // Header
+    if (y > 80) {
+      header.classList.add('solid');
+    } else {
+      header.classList.remove('solid');
+    }
+
+    // Scroll progress
+    var docH = document.documentElement.scrollHeight - window.innerHeight;
+    var progress = docH > 0 ? y / docH : 0;
+    document.querySelector('.scroll-progress').style.transform = 'scaleX(' + progress + ')';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  /* ===== PARALLAX ===== */
+  function updateParallax() {
+    var scrollY = window.scrollY || window.pageYOffset;
+    document.querySelectorAll('[data-parallax-y]').forEach(function(el) {
+      var speed = parseFloat(el.getAttribute('data-parallax-y'));
+      var rect = el.parentElement.getBoundingClientRect();
+      var offset = (rect.top + rect.height / 2 - window.innerHeight / 2) * speed;
+      el.style.transform = 'translate(-50%, calc(-50% + ' + offset + 'px))';
+    });
+  }
+  window.addEventListener('scroll', updateParallax, { passive: true });
+
+  /* ===== MOBILE NAV TOGGLE ===== */
+  var hamburger = document.querySelector('.hamburger');
+  var mobileNav = document.querySelector('.mobile-nav');
+
+  hamburger.addEventListener('click', function() {
+    hamburger.classList.toggle('active');
+    mobileNav.classList.toggle('open');
+    document.body.style.overflow = mobileNav.classList.contains('open') ? 'hidden' : '';
+  });
+
+  mobileNav.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() {
+      hamburger.classList.remove('active');
+      mobileNav.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+
+  /* ===== SCROLL REVEAL (IntersectionObserver) ===== */
+  var reveals = document.querySelectorAll('.reveal');
+
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+
+          // Trigger countup for stat numbers inside this element
+          var countEls = entry.target.querySelectorAll('[data-countup]');
+          if (entry.target.hasAttribute('data-countup')) {
+            countEls = [entry.target];
+          }
+          countEls.forEach(function(el) {
+            if (!el._counted) {
+              el._counted = true;
+              var target = parseInt(el.getAttribute('data-countup'));
+              var format = el.getAttribute('data-format');
+              animateCount(el, target, 1800);
+            }
+          });
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+    reveals.forEach(function(el) { observer.observe(el); });
+
+    // Also observe stat-items directly for countup
+    document.querySelectorAll('.stat-item').forEach(function(el) {
+      var countupObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            var num = entry.target.querySelector('[data-countup]');
+            if (num && !num._counted) {
+              num._counted = true;
+              animateCount(num, parseInt(num.getAttribute('data-countup')), 1800);
+            }
+            countupObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.3 });
+      countupObserver.observe(el);
+    });
+  } else {
+    reveals.forEach(function(el) { el.classList.add('visible'); });
+  }
+
+  /* ===== CUSTOM CURSOR ===== */
+  var cursorDot = document.querySelector('.cursor-dot');
+  var cursorRing = document.querySelector('.cursor-ring');
+  var cursorGlow = document.querySelector('.cursor-glow');
+  var mouseX = 0, mouseY = 0;
+  var ringX = 0, ringY = 0;
+  var cursorVisible = false;
+
+  document.addEventListener('mousemove', function(e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    if (!cursorVisible) {
+      cursorDot.classList.remove('hide');
+      cursorRing.classList.remove('hide');
+      cursorVisible = true;
+    }
+    cursorDot.style.left = mouseX + 'px';
+    cursorDot.style.top = mouseY + 'px';
+
+    // Glow follows mouse
+    cursorGlow.style.left = mouseX + 'px';
+    cursorGlow.style.top = mouseY + 'px';
+  });
+
+  // Smooth ring follow
+  function animateRing() {
+    ringX += (mouseX - ringX) * 0.15;
+    ringY += (mouseY - ringY) * 0.15;
+    cursorRing.style.left = ringX + 'px';
+    cursorRing.style.top = ringY + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.addEventListener('mouseleave', function() {
+    cursorDot.classList.add('hide');
+    cursorRing.classList.add('hide');
+    cursorGlow.classList.remove('active');
+    cursorVisible = false;
+  });
+
+  // Hover effect on interactive elements
+  document.querySelectorAll('a, button, .gallery-item, .unit-card, .amenity-card').forEach(function(el) {
+    el.addEventListener('mouseenter', function() { cursorRing.classList.add('hover'); });
+    el.addEventListener('mouseleave', function() { cursorRing.classList.remove('hover'); });
+  });
+
+  // Glow activation on dark sections
+  var darkSections = document.querySelectorAll('.brand-story, .stats, .hero, .cta, .footer');
+  darkSections.forEach(function(section) {
+    section.addEventListener('mouseenter', function() { cursorGlow.classList.add('active'); });
+    section.addEventListener('mouseleave', function() { cursorGlow.classList.remove('active'); });
+  });
+
+  // Hide cursor on touch devices
+  if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    cursorDot.style.display = 'none';
+    cursorRing.style.display = 'none';
+    cursorGlow.style.display = 'none';
+    document.body.style.cursor = 'auto';
+    document.querySelectorAll('a, button').forEach(function(b) { b.style.cursor = 'pointer'; });
+  }
+
+  /* ===== MOBILE TOUCH SWIPE FOR AMENITIES ===== */
+  var amenitiesScroll = document.querySelector('.amenities-scroll');
+  if (amenitiesScroll) {
+    var isDown = false;
+    var startX, scrollLeft;
+
+    amenitiesScroll.addEventListener('mousedown', function(e) {
+      isDown = true;
+      startX = e.pageX - amenitiesScroll.offsetLeft;
+      scrollLeft = amenitiesScroll.scrollLeft;
+      amenitiesScroll.style.cursor = 'grabbing';
+    });
+    amenitiesScroll.addEventListener('mouseleave', function() {
+      isDown = false;
+      amenitiesScroll.style.cursor = '';
+    });
+    amenitiesScroll.addEventListener('mouseup', function() {
+      isDown = false;
+      amenitiesScroll.style.cursor = '';
+    });
+    amenitiesScroll.addEventListener('mousemove', function(e) {
+      if (!isDown) return;
+      e.preventDefault();
+      var x = e.pageX - amenitiesScroll.offsetLeft;
+      var walk = (x - startX) * 1.5;
+      amenitiesScroll.scrollLeft = scrollLeft - walk;
+    });
+  }
+
+  /* ===== GALLERY IMAGE PARALLAX ON SCROLL ===== */
+  var galleryItems = document.querySelectorAll('.gallery-item img');
+  function galleryParallax() {
+    galleryItems.forEach(function(img) {
+      var rect = img.parentElement.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        var percent = (rect.top / window.innerHeight);
+        var offset = (percent - 0.5) * 30;
+        img.style.transform = 'translateY(' + offset + 'px) scale(1)';
+      }
+    });
+  }
+  window.addEventListener('scroll', galleryParallax, { passive: true });
+
+  // Re-apply hover scale on gallery items (combine with parallax)
+  document.querySelectorAll('.gallery-item').forEach(function(item) {
+    var img = item.querySelector('img');
+    item.addEventListener('mouseenter', function() {
+      img.style.transition = 'transform 0.7s cubic-bezier(0.16,1,0.3,1)';
+      var rect = item.getBoundingClientRect();
+      var percent = (rect.top / window.innerHeight);
+      var offset = (percent - 0.5) * 30;
+      img.style.transform = 'translateY(' + offset + 'px) scale(1.05)';
+    });
+    item.addEventListener('mouseleave', function() {
+      img.style.transition = 'transform 0.7s cubic-bezier(0.16,1,0.3,1)';
+    });
+  });
+
+})();
+</script>
+</body>
+</html>
