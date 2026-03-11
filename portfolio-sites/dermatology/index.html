@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>글로우 스킨 클리닉 — 아름다움의 시작</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+/* ========== RESET & BASE ========== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: 'Lato', sans-serif;
+  color: #2d2d2d;
+  background: #fefefe;
+  word-break: keep-all;
+  overflow-x: hidden;
+  line-height: 1.7;
+}
+a { text-decoration: none; color: inherit; }
+img { max-width: 100%; display: block; }
+h1, h2, h3, h4, h5 { font-family: 'Cormorant Garamond', serif; font-weight: 600; line-height: 1.3; }
+
+/* ========== CSS VARIABLES ========== */
+:root {
+  --pink: #FDE8E8;
+  --lavender: #EDE9FE;
+  --mint: #ECFDF5;
+  --rose: #E91E63;
+  --lav-accent: #B794F6;
+  --dark: #1a1a2e;
+  --text: #2d2d2d;
+  --text-light: #6b7280;
+  --white: #ffffff;
+  --shadow: 0 8px 32px rgba(0,0,0,0.08);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,0.12);
+  --radius: 24px;
+  --pill: 50px;
+}
+
+/* ========== FLOATING PILL NAV ========== */
+.nav-wrapper {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: auto;
+}
+.nav-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--pill);
+  padding: 8px 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.6);
+}
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--rose);
+  padding: 0 12px;
+  white-space: nowrap;
+}
+.nav-pill a {
+  padding: 10px 16px;
+  border-radius: var(--pill);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+.nav-pill a:hover, .nav-pill a.active {
+  background: var(--rose);
+  color: var(--white);
+}
+.nav-cta {
+  background: linear-gradient(135deg, var(--rose), var(--lav-accent));
+  color: var(--white) !important;
+  padding: 10px 20px !important;
+}
+.nav-cta:hover {
+  background: linear-gradient(135deg, var(--lav-accent), var(--rose)) !important;
+  color: var(--white) !important;
+}
+.mobile-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 8px;
+  color: var(--rose);
+}
+.nav-links { display: flex; gap: 4px; align-items: center; }
+
+/* ========== HERO — GRADIENT MORPHING ========== */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--pink), var(--lavender), var(--mint), var(--pink));
+  background-size: 400% 400%;
+  animation: gradientMorph 12s ease infinite;
+}
+@keyframes gradientMorph {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 100% 0%; }
+  50% { background-position: 100% 100%; }
+  75% { background-position: 0% 100%; }
+  100% { background-position: 0% 50%; }
+}
+.hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  animation: blobFloat 8s ease-in-out infinite;
+}
+.hero-blob-1 {
+  width: 500px; height: 500px;
+  background: var(--rose);
+  top: -100px; left: -100px;
+  animation-delay: 0s;
+}
+.hero-blob-2 {
+  width: 400px; height: 400px;
+  background: var(--lav-accent);
+  bottom: -80px; right: -80px;
+  animation-delay: -3s;
+}
+.hero-blob-3 {
+  width: 300px; height: 300px;
+  background: #a7f3d0;
+  top: 50%; left: 60%;
+  animation-delay: -5s;
+}
+@keyframes blobFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -30px) scale(1.05); }
+  66% { transform: translate(-20px, 20px) scale(0.95); }
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 0 20px;
+}
+.hero-subtitle {
+  font-family: 'Lato', sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--rose);
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+.hero-title {
+  font-size: clamp(2.8rem, 7vw, 5.5rem);
+  font-weight: 300;
+  color: var(--dark);
+  margin-bottom: 24px;
+  letter-spacing: -1px;
+}
+.hero-title em {
+  font-style: normal;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--rose), var(--lav-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-desc {
+  font-size: 1.15rem;
+  color: var(--text-light);
+  max-width: 520px;
+  margin: 0 auto 40px;
+  line-height: 1.8;
+}
+.btn-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 40px;
+  border-radius: var(--pill);
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  min-height: 52px;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--rose), var(--lav-accent));
+  color: var(--white);
+  box-shadow: 0 8px 24px rgba(233,30,99,0.3);
+}
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(233,30,99,0.4);
+}
+.btn-outline {
+  background: transparent;
+  color: var(--rose);
+  border: 2px solid var(--rose);
+}
+.btn-outline:hover {
+  background: var(--rose);
+  color: var(--white);
+}
+.hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.hero-scroll {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  animation: scrollBounce 2s ease-in-out infinite;
+}
+.hero-scroll span {
+  display: block;
+  width: 28px;
+  height: 44px;
+  border: 2px solid var(--rose);
+  border-radius: 14px;
+  position: relative;
+}
+.hero-scroll span::after {
+  content: '';
+  width: 4px;
+  height: 8px;
+  background: var(--rose);
+  border-radius: 2px;
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: scrollDot 2s ease-in-out infinite;
+}
+@keyframes scrollBounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(10px)} }
+@keyframes scrollDot { 0%{opacity:1;top:8px} 100%{opacity:0;top:24px} }
+
+/* ========== WAVE SVG DIVIDER ========== */
+.wave-divider {
+  width: 100%;
+  line-height: 0;
+  overflow: hidden;
+}
+.wave-divider svg {
+  width: 100%;
+  height: 80px;
+  display: block;
+}
+
+/* ========== SECTION COMMON ========== */
+.section {
+  padding: 100px 20px;
+  position: relative;
+}
+.section-pink { background: var(--pink); }
+.section-lavender { background: var(--lavender); }
+.section-mint { background: var(--mint); }
+.section-white { background: var(--white); }
+.container { max-width: 1200px; margin: 0 auto; }
+.section-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+.section-label {
+  font-size: 0.85rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--rose);
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.section-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: var(--dark);
+  margin-bottom: 16px;
+}
+.section-desc {
+  font-size: 1.05rem;
+  color: var(--text-light);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ========== BENTO GRID — TREATMENTS ========== */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: minmax(200px, auto);
+  gap: 20px;
+}
+.bento-card {
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  background: var(--white);
+  box-shadow: var(--shadow);
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+.bento-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg);
+}
+.bento-card.large { grid-column: span 2; grid-row: span 2; }
+.bento-card.tall { grid-row: span 2; }
+.bento-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+  transition: transform 0.6s ease;
+}
+.bento-card:hover .bento-card-img { transform: scale(1.05); }
+.bento-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(26,26,46,0.8));
+  z-index: 1;
+}
+.bento-card-content {
+  position: relative;
+  z-index: 2;
+  padding: 30px;
+  margin-top: auto;
+  color: var(--white);
+}
+.bento-card-content h3 {
+  font-size: 1.6rem;
+  margin-bottom: 8px;
+}
+.bento-card-content p {
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+.bento-card-icon {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 2;
+  width: 48px;
+  height: 48px;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
+
+/* ========== BLOB MASK — DOCTORS ========== */
+.doctors-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+}
+.doctor-card {
+  text-align: center;
+  transition: transform 0.4s ease;
+}
+.doctor-card:hover { transform: translateY(-8px); }
+.doctor-blob {
+  width: 220px;
+  height: 220px;
+  margin: 0 auto 24px;
+  position: relative;
+  overflow: hidden;
+}
+.doctor-blob img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  clip-path: url(#blobClip);
+}
+.doctor-name {
+  font-size: 1.5rem;
+  color: var(--dark);
+  margin-bottom: 4px;
+}
+.doctor-title {
+  font-size: 0.9rem;
+  color: var(--rose);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.doctor-spec {
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
+/* ========== BEFORE/AFTER GALLERY ========== */
+.ba-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.ba-item {
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  aspect-ratio: 3/4;
+  cursor: pointer;
+}
+.ba-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+.ba-item:hover img { transform: scale(1.08); }
+.ba-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 6px 14px;
+  border-radius: var(--pill);
+  font-size: 0.75rem;
+  font-weight: 700;
+  z-index: 2;
+}
+.ba-before { background: var(--rose); color: var(--white); }
+.ba-after { background: var(--lav-accent); color: var(--white); }
+
+/* ========== STATS COUNTER ========== */
+.stats-section {
+  background: linear-gradient(135deg, var(--dark) 0%, #2d1b69 100%);
+  padding: 80px 20px;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.stat-item { text-align: center; color: var(--white); }
+.stat-number {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--pink), var(--lav-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+.stat-label {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  letter-spacing: 2px;
+}
+
+/* ========== REVIEWS CAROUSEL ========== */
+.reviews-track {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px 0;
+  scrollbar-width: none;
+}
+.reviews-track::-webkit-scrollbar { display: none; }
+.review-card {
+  flex: 0 0 360px;
+  scroll-snap-align: start;
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 36px;
+  box-shadow: var(--shadow);
+  position: relative;
+}
+.review-stars {
+  color: #fbbf24;
+  font-size: 1.1rem;
+  margin-bottom: 16px;
+}
+.review-text {
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+.review-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.review-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink), var(--lavender));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--rose);
+}
+.review-name { font-weight: 700; font-size: 0.9rem; }
+.review-treatment { font-size: 0.8rem; color: var(--text-light); }
+.review-quote {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  font-size: 3rem;
+  color: var(--pink);
+  font-family: 'Cormorant Garamond', serif;
+  line-height: 1;
+}
+
+/* ========== CTA SECTION ========== */
+.cta-section {
+  background: linear-gradient(135deg, var(--rose), var(--lav-accent));
+  padding: 100px 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cta-section::before {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  top: -200px;
+  right: -200px;
+}
+.cta-section::after {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  bottom: -150px;
+  left: -150px;
+}
+.cta-content { position: relative; z-index: 2; }
+.cta-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: var(--white);
+  margin-bottom: 16px;
+}
+.cta-desc {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 36px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.btn-white {
+  background: var(--white);
+  color: var(--rose);
+  padding: 16px 44px;
+  border-radius: var(--pill);
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 52px;
+}
+.btn-white:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+
+/* ========== FOOTER ========== */
+.footer {
+  background: var(--dark);
+  color: rgba(255,255,255,0.7);
+  padding: 80px 20px 40px;
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto 60px;
+}
+.footer-brand h3 {
+  font-size: 1.5rem;
+  color: var(--white);
+  margin-bottom: 16px;
+}
+.footer-brand p { font-size: 0.9rem; line-height: 1.8; }
+.footer-col h4 {
+  color: var(--white);
+  font-family: 'Lato', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.footer-col ul { list-style: none; }
+.footer-col li { margin-bottom: 10px; }
+.footer-col a {
+  font-size: 0.88rem;
+  transition: color 0.3s;
+}
+.footer-col a:hover { color: var(--lav-accent); }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 30px;
+  text-align: center;
+  font-size: 0.82rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ========== MOUSE RIPPLE ========== */
+.ripple-effect {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(233,30,99,0.3), transparent);
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%) scale(0);
+  animation: rippleAnim 0.6s ease-out forwards;
+}
+@keyframes rippleAnim {
+  to { transform: translate(-50%, -50%) scale(4); opacity: 0; }
+}
+
+/* ========== SCROLL REVEAL ========== */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1024px) {
+  .bento-grid { grid-template-columns: repeat(2, 1fr); }
+  .bento-card.large { grid-column: span 2; grid-row: span 1; }
+  .doctors-grid { grid-template-columns: repeat(2, 1fr); }
+  .ba-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .nav-links.open {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow-lg);
+    min-width: 220px;
+  }
+  .mobile-toggle { display: block; }
+  .bento-grid { grid-template-columns: 1fr; }
+  .bento-card.large { grid-column: span 1; }
+  .bento-card.tall { grid-row: span 1; }
+  .doctors-grid { grid-template-columns: 1fr; }
+  .ba-grid { grid-template-columns: 1fr 1fr; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .review-card { flex: 0 0 300px; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .hero-title { font-size: 2.4rem; }
+}
+@media (max-width: 480px) {
+  .ba-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .review-card { flex: 0 0 280px; padding: 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SVG DEFS FOR BLOB CLIP -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <clipPath id="blobClip" clipPathUnits="objectBoundingBox">
+      <path d="M0.5,0.02 C0.72,0.02,0.88,0.12,0.95,0.32 C1.02,0.52,0.98,0.75,0.85,0.88 C0.72,1.01,0.5,1.02,0.32,0.95 C0.12,0.88,0.02,0.7,0.02,0.5 C0.02,0.28,0.15,0.12,0.32,0.05 C0.38,0.03,0.44,0.02,0.5,0.02"/>
+    </clipPath>
+  </defs>
+</svg>
+
+<!-- NAVIGATION -->
+<nav class="nav-wrapper">
+  <div class="nav-pill">
+    <span class="nav-logo">GLOW SKIN</span>
+    <button class="mobile-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="메뉴">☰</button>
+    <div class="nav-links">
+      <a href="index.html" class="active">홈</a>
+      <a href="treatments.html">시술 안내</a>
+      <a href="doctors.html">의료진</a>
+      <a href="gallery.html">비포/애프터</a>
+      <a href="about.html">병원 소개</a>
+      <a href="contact.html" class="nav-cta">상담 예약</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-blob hero-blob-1"></div>
+  <div class="hero-blob hero-blob-2"></div>
+  <div class="hero-blob hero-blob-3"></div>
+  <div class="hero-content">
+    <p class="hero-subtitle">GLOW SKIN CLINIC</p>
+    <h1 class="hero-title"><em>아름다움</em>의 시작,<br>글로우 스킨 클리닉</h1>
+    <p class="hero-desc">피부과 전문의가 1:1 맞춤 진료로 당신만의 빛나는 피부를 설계합니다. 최첨단 장비와 검증된 시술로 자연스러운 아름다움을 만나보세요.</p>
+    <div class="hero-buttons">
+      <a href="contact.html" class="btn-pill btn-primary">무료 상담 예약 →</a>
+      <a href="treatments.html" class="btn-pill btn-outline">시술 둘러보기</a>
+    </div>
+  </div>
+  <div class="hero-scroll"><span></span></div>
+</section>
+
+<!-- WAVE -->
+<div class="wave-divider">
+  <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+    <path d="M0,40 C360,80 720,0 1080,40 C1260,60 1380,50 1440,40 L1440,80 L0,80 Z" fill="#ffffff"/>
+  </svg>
+</div>
+
+<!-- TREATMENTS BENTO -->
+<section class="section section-white" id="treatments">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="section-label">Treatments</p>
+      <h2 class="section-title">맞춤 시술 프로그램</h2>
+      <p class="section-desc">피부 타입과 고민에 따른 1:1 맞춤 시술 솔루션을 제공합니다</p>
+    </div>
+    <div class="bento-grid reveal">
+      <!-- 레이저 -->
+      <div class="bento-card large">
+        <img class="bento-card-img" src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&q=80" alt="레이저 시술">
+        <div class="bento-card-overlay"></div>
+        <span class="bento-card-icon">✨</span>
+        <div class="bento-card-content">
+          <h3>레이저 토닝</h3>
+          <p>색소 침착, 기미, 잡티를 개선하는 프리미엄 레이저 프로그램</p>
+        </div>
+      </div>
+      <!-- 보톡스 -->
+      <div class="bento-card">
+        <img class="bento-card-img" src="https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?w=600&q=80" alt="보톡스">
+        <div class="bento-card-overlay"></div>
+        <span class="bento-card-icon">💉</span>
+        <div class="bento-card-content">
+          <h3>보톡스</h3>
+          <p>자연스러운 주름 개선</p>
+        </div>
+      </div>
+      <!-- 필러 -->
+      <div class="bento-card">
+        <img class="bento-card-img" src="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=600&q=80" alt="필러">
+        <div class="bento-card-overlay"></div>
+        <span class="bento-card-icon">💎</span>
+        <div class="bento-card-content">
+          <h3>필러</h3>
+          <p>볼륨과 윤곽 개선</p>
+        </div>
+      </div>
+      <!-- 리프팅 -->
+      <div class="bento-card tall">
+        <img class="bento-card-img" src="https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=600&q=80" alt="리프팅">
+        <div class="bento-card-overlay"></div>
+        <span class="bento-card-icon">🔝</span>
+        <div class="bento-card-content">
+          <h3>리프팅</h3>
+          <p>울쎄라·써마지로 탄력있는 피부</p>
+        </div>
+      </div>
+      <!-- 스킨케어 -->
+      <div class="bento-card">
+        <img class="bento-card-img" src="https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=600&q=80" alt="스킨케어">
+        <div class="bento-card-overlay"></div>
+        <span class="bento-card-icon">🧴</span>
+        <div class="bento-card-content">
+          <h3>스킨케어</h3>
+          <p>모공·트러블 집중 관리</p>
+        </div>
+      </div>
+      <!-- 바디 -->
+      <div class="bento-card">
+        <img class="bento-card-img" src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&q=80" alt="바디">
+        <div class="bento-card-overlay"></div>
+        <span class="bento-card-icon">🌿</span>
+        <div class="bento-card-content">
+          <h3>바디 시술</h3>
+          <p>체형·셀룰라이트 관리</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WAVE -->
+<div class="wave-divider" style="background:var(--white)">
+  <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+    <path d="M0,20 C480,80 960,0 1440,40 L1440,80 L0,80 Z" fill="var(--lavender)"/>
+  </svg>
+</div>
+
+<!-- DOCTORS -->
+<section class="section section-lavender" id="doctors">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="section-label">Doctors</p>
+      <h2 class="section-title">신뢰할 수 있는 전문 의료진</h2>
+      <p class="section-desc">풍부한 경험과 전문 자격을 갖춘 피부과 전문의가 진료합니다</p>
+    </div>
+    <div class="doctors-grid reveal">
+      <div class="doctor-card">
+        <div class="doctor-blob">
+          <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80" alt="김서연 원장">
+        </div>
+        <h3 class="doctor-name">김서연 원장</h3>
+        <p class="doctor-title">피부과 전문의 · 대표원장</p>
+        <p class="doctor-spec">서울대 의대 졸업 · 삼성서울병원 피부과 전임의<br>대한피부과학회 정회원 · 레이저학회 인정의</p>
+      </div>
+      <div class="doctor-card">
+        <div class="doctor-blob">
+          <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80" alt="박준혁 원장">
+        </div>
+        <h3 class="doctor-name">박준혁 원장</h3>
+        <p class="doctor-title">피부과 전문의 · 부원장</p>
+        <p class="doctor-spec">연세대 의대 졸업 · 세브란스병원 피부과 전공의<br>보톡스·필러 시술 1만건+ · 미용피부과학회 이사</p>
+      </div>
+      <div class="doctor-card">
+        <div class="doctor-blob">
+          <img src="https://images.unsplash.com/photo-1594824476967-48c8b964f137?w=400&q=80" alt="이하은 원장">
+        </div>
+        <h3 class="doctor-name">이하은 원장</h3>
+        <p class="doctor-title">피부과 전문의</p>
+        <p class="doctor-spec">고려대 의대 졸업 · 아산병원 피부과 전임의<br>리프팅·안티에이징 전문 · SCI 논문 12편</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WAVE -->
+<div class="wave-divider" style="background:var(--lavender)">
+  <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+    <path d="M0,60 C360,0 720,80 1080,20 C1260,0 1380,30 1440,20 L1440,80 L0,80 Z" fill="#ffffff"/>
+  </svg>
+</div>
+
+<!-- BEFORE/AFTER -->
+<section class="section section-white" id="gallery">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="section-label">Before & After</p>
+      <h2 class="section-title">시술 전후 비교</h2>
+      <p class="section-desc">실제 시술 결과를 확인하세요. 자연스럽고 건강한 변화를 추구합니다.</p>
+    </div>
+    <div class="ba-grid reveal">
+      <div class="ba-item">
+        <span class="ba-badge ba-before">Before</span>
+        <img src="https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=400&q=80" alt="시술 전 1">
+      </div>
+      <div class="ba-item">
+        <span class="ba-badge ba-after">After</span>
+        <img src="https://images.unsplash.com/photo-1509967419530-da38b4704bc6?w=400&q=80" alt="시술 후 1">
+      </div>
+      <div class="ba-item">
+        <span class="ba-badge ba-before">Before</span>
+        <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80" alt="시술 전 2">
+      </div>
+      <div class="ba-item">
+        <span class="ba-badge ba-after">After</span>
+        <img src="https://images.unsplash.com/photo-1591604021695-0c69b7c05981?w=400&q=80" alt="시술 후 2">
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:40px" class="reveal">
+      <a href="gallery.html" class="btn-pill btn-primary">전체 갤러리 보기 →</a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-section">
+  <div class="stats-grid reveal">
+    <div class="stat-item">
+      <div class="stat-number" data-target="52847">52,847</div>
+      <div class="stat-label">누적 시술 건수</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">98.7%</div>
+      <div class="stat-label">환자 만족도</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">15년</div>
+      <div class="stat-label">평균 경력</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">3명</div>
+      <div class="stat-label">피부과 전문의</div>
+    </div>
+  </div>
+</section>
+
+<!-- WAVE -->
+<div class="wave-divider" style="background:linear-gradient(135deg, var(--dark), #2d1b69)">
+  <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+    <path d="M0,40 C480,0 960,80 1440,40 L1440,80 L0,80 Z" fill="var(--mint)"/>
+  </svg>
+</div>
+
+<!-- REVIEWS -->
+<section class="section section-mint" id="reviews">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="section-label">Reviews</p>
+      <h2 class="section-title">생생한 환자 후기</h2>
+      <p class="section-desc">글로우 스킨 클리닉을 직접 경험한 분들의 이야기입니다</p>
+    </div>
+    <div class="reviews-track reveal">
+      <div class="review-card">
+        <div class="review-quote">"</div>
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">레이저 토닝 5회 받고 기미가 정말 많이 옅어졌어요. 김서연 원장님이 매번 피부 상태 체크하시고 세기 조절해주셔서 안심하고 받았습니다. 직원분들도 친절하세요!</p>
+        <div class="review-author">
+          <div class="review-avatar">J</div>
+          <div>
+            <div class="review-name">정은** 님</div>
+            <div class="review-treatment">레이저 토닝 · 2024.11</div>
+          </div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="review-quote">"</div>
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">필러 처음이라 겁났는데 박준혁 원장님이 꼼꼼하게 상담해주시고 통증 관리도 잘 해주셔서 편했어요. 코 라인이 자연스럽게 살아나서 너무 만족합니다.</p>
+        <div class="review-author">
+          <div class="review-avatar">K</div>
+          <div>
+            <div class="review-name">김수** 님</div>
+            <div class="review-treatment">코필러 · 2024.12</div>
+          </div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="review-quote">"</div>
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">울쎄라 리프팅 받고 한 달 정도 지나니까 턱선이 확 살아났어요. 이하은 원장님 손이 정말 가벼우세요. 시술 시간도 빠르고 다운타임도 거의 없었습니다.</p>
+        <div class="review-author">
+          <div class="review-avatar">L</div>
+          <div>
+            <div class="review-name">이미** 님</div>
+            <div class="review-treatment">울쎄라 리프팅 · 2025.01</div>
+          </div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="review-quote">"</div>
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">피코레이저로 잡티 치료 받았는데 3회 만에 깨끗해졌어요! 병원 인테리어도 깔끔하고 대기 시간도 짧아서 좋았습니다. 주변에 많이 추천하고 있어요.</p>
+        <div class="review-author">
+          <div class="review-avatar">P</div>
+          <div>
+            <div class="review-name">박하** 님</div>
+            <div class="review-treatment">피코레이저 · 2025.02</div>
+          </div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="review-quote">"</div>
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">보톡스 맞으러 여기저기 다녔는데 글로우 스킨이 제일 자연스러워요. 이마 보톡스인데 표정이 굳지 않고 자연스럽게 주름만 펴져서 대만족입니다.</p>
+        <div class="review-author">
+          <div class="review-avatar">C</div>
+          <div>
+            <div class="review-name">최유** 님</div>
+            <div class="review-treatment">보톡스 · 2025.02</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-content reveal">
+    <h2 class="cta-title">지금 무료 상담을 예약하세요</h2>
+    <p class="cta-desc">전문 상담사가 피부 고민을 꼼꼼히 들어드립니다. 부담 없이 문의해 주세요.</p>
+    <a href="contact.html" class="btn-white">📞 무료 상담 예약</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <h3>GLOW SKIN CLINIC</h3>
+      <p>서울특별시 강남구 테헤란로 152 글로우타워 3~5층<br>피부과 전문의 3인 진료 · 최첨단 레이저 장비 보유<br>자연스럽고 건강한 아름다움을 추구합니다.</p>
+    </div>
+    <div class="footer-col">
+      <h4>시술 안내</h4>
+      <ul>
+        <li><a href="treatments.html">레이저 토닝</a></li>
+        <li><a href="treatments.html">보톡스 · 필러</a></li>
+        <li><a href="treatments.html">리프팅</a></li>
+        <li><a href="treatments.html">스킨케어</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>병원 안내</h4>
+      <ul>
+        <li><a href="doctors.html">의료진 소개</a></li>
+        <li><a href="about.html">병원 소개</a></li>
+        <li><a href="gallery.html">비포/애프터</a></li>
+        <li><a href="contact.html">오시는 길</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>진료 시간</h4>
+      <ul>
+        <li>월~금 10:00 – 20:00</li>
+        <li>토요일 10:00 – 17:00</li>
+        <li>일·공휴일 휴진</li>
+        <li style="margin-top:12px"><strong style="color:var(--lav-accent)">☎ 02-1234-5678</strong></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 글로우 스킨 클리닉. All Rights Reserved. | 사업자등록번호: 123-45-67890</p>
+  </div>
+</footer>
+
+<script>
+// Scroll Reveal
+const revealEls = document.querySelectorAll('.reveal');
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); }});
+}, { threshold: 0.15 });
+revealEls.forEach(el => revealObs.observe(el));
+
+// Mouse Ripple
+document.addEventListener('click', (e) => {
+  const r = document.createElement('div');
+  r.className = 'ripple-effect';
+  r.style.left = e.clientX + 'px';
+  r.style.top = e.clientY + 'px';
+  document.body.appendChild(r);
+  setTimeout(() => r.remove(), 600);
+});
+
+// Typo Weight on hover (I34)
+document.querySelectorAll('.section-title, .hero-title, .doctor-name').forEach(el => {
+  el.addEventListener('mouseenter', () => { el.style.fontWeight = '700'; el.style.transition = 'font-weight 0.3s'; });
+  el.addEventListener('mouseleave', () => { el.style.fontWeight = ''; });
+});
+</script>
+</body>
+</html>

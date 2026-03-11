@@ -19,7 +19,7 @@ html{scroll-behavior:smooth;overflow-x:hidden}
 body{font-family:var(--font-body);background:var(--white);color:var(--charcoal);overflow-x:hidden;line-height:1.6;word-break:keep-all}
 
 /* NAV */
-.nav{position:fixed;top:0;left:0;width:100%;z-index:1000;padding:1.5rem 3rem;display:grid;grid-template-columns:auto 1fr auto;align-items:center;background:rgba(250,250,250,.9);backdrop-filter:blur(12px);transition:all .3s}
+.nav{position:fixed;top:0;left:0;width:100%;z-index:1000;padding:1.5rem 3rem;display:grid;grid-template-columns:auto 1fr auto;align-items:center;background:rgba(250,250,250,.95);backdrop-filter:blur(12px);transition:all .3s}
 .nav.scrolled{padding:1rem 3rem;box-shadow:0 1px 20px rgba(0,0,0,.06)}
 .nav-logo{font-family:var(--font-heading);font-weight:800;font-size:1.5rem;letter-spacing:-.02em;color:var(--charcoal);text-decoration:none}
 .nav-logo span{color:var(--blue)}
@@ -36,14 +36,33 @@ body{font-family:var(--font-body);background:var(--white);color:var(--charcoal);
 .mobile-toggle span:nth-child(2){top:50%;transform:translateY(-50%)}
 .mobile-toggle span:nth-child(3){bottom:0}
 
-/* HERO */
-.hero{height:100vh;display:grid;place-items:center;position:relative;overflow:hidden}
-.hero-text{font-family:var(--font-heading);font-size:clamp(5rem,18vw,16rem);font-weight:800;letter-spacing:-.04em;line-height:.9;background:url('https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1920&q=80') center/cover;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;user-select:none;position:relative;z-index:2}
-.hero-sub{position:absolute;bottom:12vh;left:50%;transform:translateX(-50%);text-align:center;z-index:2}
-.hero-sub p{font-size:1.125rem;color:#666;margin-bottom:1.5rem}
-.hero-sub .scroll-hint{width:28px;height:44px;border:2px solid var(--charcoal);border-radius:14px;position:relative;margin:0 auto}
-.hero-sub .scroll-hint::after{content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);width:4px;height:10px;background:var(--charcoal);border-radius:2px;animation:scrollDot 1.8s ease-in-out infinite}
+/* HERO - 완전 새로운 풀스크린 슬라이드쇼 */
+.hero{height:100vh;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.hero-bg{position:absolute;inset:0;z-index:1}
+.hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 2s ease-in-out}
+.hero-slide.active{opacity:1}
+.hero-slide::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,0.4)}
+.hero-content{position:relative;z-index:3;text-align:center;color:white;max-width:1200px;padding:0 2rem}
+.hero-text{font-family:var(--font-heading);font-size:clamp(5rem,18vw,16rem);font-weight:800;letter-spacing:-.04em;line-height:.9;color:#fff;user-select:none;text-shadow:0 4px 20px rgba(0,0,0,0.3)}
+.hero-subtitle{font-size:clamp(1.2rem,3vw,2rem);font-weight:300;margin:1.5rem 0 3rem;opacity:.9;text-shadow:0 2px 10px rgba(0,0,0,0.3)}
+.hero-buttons{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:4rem}
+.hero-btn{font-family:var(--font-heading);font-size:1rem;font-weight:600;padding:1rem 2.5rem;border-radius:100px;text-decoration:none;transition:all .3s;border:2px solid transparent}
+.hero-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.hero-btn.primary:hover{background:rgba(0,102,255,.9);transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,102,255,.3)}
+.hero-btn.secondary{background:transparent;color:#fff;border-color:#fff}
+.hero-btn.secondary:hover{background:#fff;color:var(--charcoal)}
+.platform-icons{position:absolute;bottom:8vh;left:50%;transform:translateX(-50%);display:flex;gap:2rem;z-index:3}
+.platform-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2);transition:all .4s;animation:float 3s ease-in-out infinite}
+.platform-icon:nth-child(2){animation-delay:-.5s}
+.platform-icon:nth-child(3){animation-delay:-1s}
+.platform-icon:nth-child(4){animation-delay:-1.5s}
+.platform-icon:hover{transform:translateY(-5px);background:rgba(255,255,255,.2)}
+.platform-icon svg{width:24px;height:24px}
+.hero-scroll{position:absolute;bottom:2vh;left:50%;transform:translateX(-50%);z-index:3}
+.scroll-hint{width:28px;height:44px;border:2px solid rgba(255,255,255,.6);border-radius:14px;position:relative}
+.scroll-hint::after{content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);width:4px;height:10px;background:rgba(255,255,255,.8);border-radius:2px;animation:scrollDot 1.8s ease-in-out infinite}
 @keyframes scrollDot{0%,100%{opacity:1;transform:translateX(-50%) translateY(0)}50%{opacity:.3;transform:translateX(-50%) translateY(14px)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 
 /* BLOB */
 .blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.15;z-index:1;animation:morphBlob 15s ease-in-out infinite alternate}
@@ -51,122 +70,266 @@ body{font-family:var(--font-body);background:var(--white);color:var(--charcoal);
 .blob-2{width:400px;height:400px;background:var(--coral);bottom:-100px;left:-100px}
 @keyframes morphBlob{0%{border-radius:50% 30% 70% 40%/60% 40% 60% 50%;transform:rotate(0deg) scale(1)}50%{border-radius:40% 60% 30% 70%/50% 60% 40% 60%;transform:rotate(180deg) scale(1.1)}100%{border-radius:60% 40% 50% 50%/40% 50% 60% 50%;transform:rotate(360deg) scale(1)}}
 
-/* HORIZONTAL SCROLL PLATFORMS */
-.platforms{position:relative;padding:6rem 0}
-.platforms-title{font-family:var(--font-heading);font-size:clamp(2rem,5vw,3.5rem);font-weight:700;text-align:center;margin-bottom:1rem;letter-spacing:-.02em}
-.platforms-desc{text-align:center;color:#666;margin-bottom:3rem;font-size:1.05rem}
-.h-scroll-wrap{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;cursor:grab}
-.h-scroll-wrap::-webkit-scrollbar{display:none}
-.h-scroll-track{display:grid;grid-auto-flow:column;grid-auto-columns:85vw;gap:1.5rem;padding:0 3rem;min-height:70vh}
-.platform-card{border-radius:24px;padding:3rem;display:grid;grid-template-rows:auto 1fr auto;position:relative;overflow:hidden;color:#fff;transition:transform .4s}
-.platform-card:hover{transform:scale(.98)}
-.platform-card.naver{background:linear-gradient(135deg,#03C75A,#02a34a)}
-.platform-card.insta{background:linear-gradient(135deg,#E1306C,#F77737,#FCAF45)}
-.platform-card.youtube{background:linear-gradient(135deg,#FF0000,#cc0000)}
-.platform-card.tiktok{background:linear-gradient(135deg,#010101,#1a1a2e);color:#fff}
-.platform-card h3{font-family:var(--font-heading);font-size:clamp(2rem,4vw,3rem);font-weight:700;margin-bottom:1rem}
-.platform-card .platform-icon{width:64px;height:64px;margin-bottom:1.5rem}
-.platform-card p{font-size:1.1rem;line-height:1.7;opacity:.9}
-.platform-card .card-stat{font-family:var(--font-heading);font-size:3rem;font-weight:800;margin-top:1rem}
-.tiktok-accent{color:var(--tiktok-cyan)}
-
-/* STATS WITH PROGRESS CIRCLES */
-.stats{padding:8rem 3rem;text-align:center}
-.stats-title{font-family:var(--font-heading);font-size:clamp(2rem,5vw,3.5rem);font-weight:700;margin-bottom:1rem;letter-spacing:-.02em}
-.stats-sub{color:#666;font-size:1.05rem;margin-bottom:4rem}
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3rem;max-width:1000px;margin:0 auto}
-.stat-item{display:grid;place-items:center;gap:1rem}
-.progress-circle{position:relative;width:140px;height:140px}
-.progress-circle svg{transform:rotate(-90deg);width:140px;height:140px}
-.progress-circle circle{fill:none;stroke-width:6}
-.progress-circle .bg{stroke:#eee}
-.progress-circle .fill{stroke:var(--blue);stroke-linecap:round;stroke-dasharray:408;stroke-dashoffset:408;transition:stroke-dashoffset 1.5s ease}
-.progress-circle.coral .fill{stroke:var(--coral)}
-.progress-circle .value{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-heading);font-size:2rem;font-weight:700}
-.stat-label{font-size:.95rem;color:#666}
-
-/* PORTFOLIO CAROUSEL */
-.portfolio-sec{padding:6rem 0;overflow:hidden}
-.portfolio-sec .sec-header{padding:0 3rem;margin-bottom:3rem}
-.sec-header h2{font-family:var(--font-heading);font-size:clamp(2rem,5vw,3.5rem);font-weight:700;letter-spacing:-.02em}
-.sec-header p{color:#666;font-size:1.05rem;margin-top:.5rem}
-.drag-carousel{display:flex;gap:1.5rem;padding:0 3rem;cursor:grab;user-select:none;transition:transform .1s}
-.drag-carousel.dragging{cursor:grabbing;transition:none}
-.carousel-item{min-width:350px;border-radius:20px;overflow:hidden;position:relative;aspect-ratio:4/5;flex-shrink:0}
-.carousel-item img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
-.carousel-item:hover img{transform:scale(1.05)}
-.carousel-item .overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7),transparent);display:grid;align-content:end;padding:2rem;opacity:0;transition:opacity .4s}
-.carousel-item:hover .overlay{opacity:1}
-.overlay h4{font-family:var(--font-heading);color:#fff;font-size:1.3rem;font-weight:600}
-.overlay span{color:rgba(255,255,255,.7);font-size:.875rem}
-
-/* TESTIMONIALS */
-.testimonials{padding:8rem 3rem;background:var(--charcoal);color:var(--white)}
-.testimonials-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;max-width:1100px;margin:0 auto}
-.testimonial-item .quote{font-family:var(--font-heading);font-size:clamp(1.2rem,2.5vw,1.8rem);font-weight:300;line-height:1.5;margin-bottom:2rem;position:relative;padding-left:2rem}
-.testimonial-item .quote::before{content:'"';position:absolute;left:-.5rem;top:-.5rem;font-size:5rem;color:var(--blue);font-family:Georgia,serif;line-height:1}
-.testimonial-item .author{display:flex;align-items:center;gap:1rem}
-.testimonial-item .author img{width:48px;height:48px;border-radius:50%;object-fit:cover}
-.testimonial-item .author-info .name{font-weight:600;font-size:.95rem}
-.testimonial-item .author-info .role{color:rgba(255,255,255,.5);font-size:.85rem}
-
-/* CTA */
-.cta-section{padding:10rem 3rem;text-align:center;position:relative}
-.cta-section h2{font-family:var(--font-heading);font-size:clamp(2.5rem,6vw,5rem);font-weight:800;letter-spacing:-.03em;margin-bottom:1.5rem}
-.cta-section h2 span{color:var(--blue)}
-.cta-section p{color:#666;font-size:1.15rem;margin-bottom:3rem;max-width:500px;margin-left:auto;margin-right:auto}
-.magnetic-btn{display:inline-block;padding:1.2rem 3.5rem;background:var(--blue);color:#fff;font-family:var(--font-heading);font-size:1.1rem;font-weight:600;border-radius:100px;text-decoration:none;transition:transform .2s,box-shadow .3s;cursor:pointer;border:none}
-.magnetic-btn:hover{box-shadow:0 10px 40px rgba(0,102,255,.3);transform:scale(1.03)}
-
-/* FOOTER */
-.footer{padding:4rem 3rem;border-top:1px solid #eee;display:grid;grid-template-columns:1fr auto;align-items:center;gap:2rem}
-.footer-left{font-family:var(--font-heading);font-weight:700;font-size:1.1rem}
-.footer-left span{color:var(--blue)}
-.footer-right{display:flex;gap:2rem}
-.footer-right a{color:#999;text-decoration:none;font-size:.85rem;transition:color .3s}
-.footer-right a:hover{color:var(--charcoal)}
+/* SECTION ANIMATIONS */
+.fade-in{opacity:0;transform:translateY(40px);transition:all .8s ease-out}
+.fade-in.visible{opacity:1;transform:translateY(0)}
 
 /* TEXT SCRUB */
-.scrub-section{padding:10rem 3rem;max-width:900px;margin:0 auto}
+.scrub-section{padding:10rem 3rem;max-width:1000px;margin:0 auto}
 .scrub-text{font-family:var(--font-heading);font-size:clamp(1.5rem,4vw,3rem);font-weight:700;line-height:1.5;letter-spacing:-.01em}
 .scrub-text .word{color:#ddd;transition:color .15s}
 .scrub-text .word.active{color:var(--charcoal)}
 
-/* RESPONSIVE */
-@media(max-width:1024px){
-.stats-grid{grid-template-columns:repeat(2,1fr);gap:2rem}
-.testimonials-grid{grid-template-columns:1fr;gap:3rem}
-}
-@media(max-width:768px){
-.nav{padding:1rem 1.5rem}
-.nav-links{display:none}
-.nav-cta{display:none}
-.mobile-toggle{display:block}
-.h-scroll-track{grid-auto-columns:90vw;padding:0 1.5rem}
-.platform-card{padding:2rem}
-.stats{padding:5rem 1.5rem}
-.carousel-item{min-width:280px}
-.drag-carousel{padding:0 1.5rem}
-.testimonials{padding:5rem 1.5rem}
-.cta-section{padding:6rem 1.5rem}
-.footer{grid-template-columns:1fr;text-align:center}
-.footer-right{justify-content:center}
-.scrub-section{padding:6rem 1.5rem}
-.sec-header{padding:0 1.5rem!important}
-}
-@media(max-width:375px){
-.hero-text{font-size:4rem}
-.stats-grid{grid-template-columns:1fr 1fr;gap:1.5rem}
-.progress-circle{width:100px;height:100px}
-.progress-circle svg{width:100px;height:100px}
-.progress-circle .value{font-size:1.5rem}
-}
+/* HORIZONTAL SCROLL PLATFORMS - 보강됨 */
+.platforms{position:relative;padding:8rem 0;background:linear-gradient(135deg,#f8f9fa 0%,#fff 100%)}
+.platforms-title{font-family:var(--font-heading);font-size:clamp(2rem,5vw,3.5rem);font-weight:700;text-align:center;margin-bottom:1rem;letter-spacing:-.02em}
+.platforms-desc{text-align:center;color:#666;margin-bottom:4rem;font-size:1.05rem;max-width:600px;margin-left:auto;margin-right:auto}
+.h-scroll-wrap{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;cursor:grab}
+.h-scroll-wrap::-webkit-scrollbar{display:none}
+.h-scroll-track{display:grid;grid-auto-flow:column;grid-auto-columns:85vw;gap:2rem;padding:0 3rem;min-height:80vh}
+.platform-card{border-radius:24px;padding:3rem;display:grid;grid-template-rows:auto auto 1fr auto auto;position:relative;overflow:hidden;color:#fff;transition:transform .4s;box-shadow:0 10px 40px rgba(0,0,0,.1)}
+.platform-card:hover{transform:scale(.98) rotateY(5deg)}
+.platform-card.naver{background:linear-gradient(135deg,#03C75A,#02a34a)}
+.platform-card.insta{background:linear-gradient(135deg,#E1306C,#F77737,#FCAF45)}
+.platform-card.youtube{background:linear-gradient(135deg,#FF0000,#cc0000)}
+.platform-card.tiktok{background:linear-gradient(135deg,#010101,#1a1a2e);color:#fff}
+.platform-card h3{font-family:var(--font-heading);font-size:clamp(2rem,4vw,2.5rem);font-weight:700;margin-bottom:1rem}
+.platform-card .platform-icon{width:64px;height:64px;margin-bottom:1.5rem;background:rgba(255,255,255,.2);border-radius:16px;display:flex;align-items:center;justify-content:center}
+.platform-card p{font-size:1.1rem;line-height:1.7;opacity:.9;margin-bottom:2rem}
+.platform-card .case-study{background:rgba(255,255,255,.1);border-radius:12px;padding:1.5rem;margin:1.5rem 0;border-left:4px solid rgba(255,255,255,.3)}
+.platform-card .case-study h4{font-size:1rem;font-weight:600;margin-bottom:.5rem;opacity:.9}
+.platform-card .case-study span{font-size:.875rem;opacity:.7}
+.platform-card .card-stat{font-family:var(--font-heading);font-size:3rem;font-weight:800;margin-top:auto}
+.tiktok-accent{color:var(--tiktok-cyan)}
+
+/* STATS WITH PROGRESS CIRCLES - 6개로 확장 */
+.stats{padding:10rem 3rem;text-align:center;background:#fff}
+.stats-title{font-family:var(--font-heading);font-size:clamp(2rem,5vw,3.5rem);font-weight:700;margin-bottom:1rem;letter-spacing:-.02em}
+.stats-sub{color:#666;font-size:1.05rem;margin-bottom:5rem;max-width:500px;margin-left:auto;margin-right:auto}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4rem;max-width:1200px;margin:0 auto}
+.stat-item{display:grid;place-items:center;gap:1.5rem;padding:2rem;border-radius:20px;background:linear-gradient(135deg,#f8f9fa,#fff);box-shadow:0 5px 25px rgba(0,0,0,.05);transition:transform .3s}
+.stat-item:hover{transform:translateY(-10px)}
+.progress-circle{position:relative;width:120px;height:120px}
+.progress-circle svg{transform:rotate(-90deg);width:120px;height:120px}
+.progress-circle circle{fill:none;stroke-width:8}
+.progress-circle .bg{stroke:#eee}
+.progress-circle .fill{stroke:var(--blue);stroke-linecap:round;stroke-dasharray:345;stroke-dashoffset:345;transition:stroke-dashoffset 2s ease}
+.progress-circle.coral .fill{stroke:var(--coral)}
+.progress-circle .value{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-heading);font-size:1.8rem;font-weight:700;color:var(--charcoal)}
+.stat-label{font-size:1rem;color:#666;font-weight:500;text-align:center}
+.stat-desc{font-size:.875rem;color:#999;text-align:center;max-width:200px}
+
+/* 우리의 프로세스 - 새로운 섹션 */
+.process-section{padding:10rem 3rem;background:linear-gradient(135deg,#f8f9fa 0%,#fff 50%,#f8f9fa 100%)}
+.process-section .section-header{text-align:center;margin-bottom:6rem}
+.process-section h2{font-family:var(--font-heading);font-size:clamp(2rem,5vw,3.5rem);font-weight:700;margin-bottom:1rem;letter-spacing:-.02em}
+.process-section .section-desc{color:#666;font-size:1.1rem;max-width:600px;margin:0 auto}
+.process-timeline{max-width:1200px;margin:0 auto;position:relative}
+.process-timeline::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:4px;background:linear-gradient(to bottom,var(--blue),var(--coral));transform:translateX(-50%);border-radius:2px}
+.process-step{display:grid;grid-template-columns:1fr auto 1fr;gap:3rem;align-items:center;margin-bottom:6rem;position:relative}
+.process-step:nth-child(even) .step-content:first-child{order:3}
+.process-step:nth-child(even) .step-number{order:2}
+.process-step:nth-child(even) .step-content:last-child{order:1}
+.step-content{padding:2.5rem;background:#fff;border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,.08);transition:transform .4s}
+.step-content:hover{transform:translateY(-5px)}
+.step-content h3{font-family:var(--font-heading);font-size:1.5rem;font-weight:700;margin-bottom:1rem;color:var(--charcoal)}
+.step-content p{color:#666;line-height:1.7;margin-bottom:1rem}
+.step-features{display:flex;flex-wrap:wrap;gap:.5rem}
+.step-feature{background:var(--blue);color:#fff;padding:.3rem .8rem;border-radius:100px;font-size:.8rem;font-weight:500}
+.step-number{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--coral));color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:1.5rem;font-weight:700;box-shadow:0 8px 25px rgba(0,102,255,.3)}
+
+/* 파트너사 로고 - 새로운 섹션 */
+.partners-section{padding:8rem 3rem;background:#fff}
+.partners-title{font-family:var(--font-heading);font-size:clamp(1.5rem,4vw,2.5rem);font-weight:700;text-align:center;margin-bottom:1rem;color:var(--charcoal)}
+.partners-desc{text-align:center;color:#666;margin-bottom:4rem;font-size:1rem}
+.partners-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem;max-width:1000px;margin:0 auto;align-items:center}
+.partner-logo{display:flex;align-items:center;justify-content:center;padding:2rem;background:#f8f9fa;border-radius:16px;transition:all .3s;min-height:120px}
+.partner-logo:hover{background:#fff;box-shadow:0 5px 20px rgba(0,0,0,.08);transform:translateY(-3px)}
+.partner-logo svg{opacity:.6;transition:opacity .3s}
+.partner-logo:hover svg{opacity:.9}
+
+/* 포트폴리오 캐러셀 - 8개로 확장 */
+.portfolio-sec{padding:8rem 0;overflow:hidden;background:linear-gradient(135deg,#fff 0%,#f8f9fa 100%)}
+.portfolio-sec .sec-header{padding:0 3rem;margin-bottom:4rem;text-align:center}
+.sec-header h2{font-family:var(--font-heading);font-size:clamp(2rem,5vw,3.5rem);font-weight:700;letter-spacing:-.02em;margin-bottom:1rem}
+.sec-header p{color:#666;font-size:1.05rem}
+.drag-carousel{display:flex;gap:2rem;padding:0 3rem;cursor:grab;user-select:none;transition:transform .1s}
+.drag-carousel.dragging{cursor:grabbing;transition:none}
+.carousel-item{min-width:320px;border-radius:24px;overflow:hidden;position:relative;aspect-ratio:4/5;flex-shrink:0;background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.08);transition:all .4s}
+.carousel-item:hover{transform:translateY(-10px);box-shadow:0 20px 50px rgba(0,0,0,.15)}
+.carousel-item img{width:100%;height:70%;object-fit:cover;transition:transform .6s}
+.carousel-item:hover img{transform:scale(1.05)}
+.carousel-item .overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8),transparent 60%);display:grid;align-content:end;padding:2rem;opacity:0;transition:opacity .4s}
+.carousel-item:hover .overlay{opacity:1}
+.carousel-item .content{position:absolute;bottom:0;left:0;right:0;padding:1.5rem;background:#fff}
+.carousel-item .content h4{font-family:var(--font-heading);font-size:1.2rem;font-weight:600;margin-bottom:.5rem;color:var(--charcoal)}
+.carousel-item .content .meta{color:#666;font-size:.875rem;margin-bottom:.5rem}
+.carousel-item .content .tags{display:flex;flex-wrap:wrap;gap:.5rem}
+.carousel-item .content .tag{background:var(--blue);color:#fff;padding:.2rem .6rem;border-radius:100px;font-size:.75rem}
+.overlay h4{font-family:var(--font-heading);color:#fff;font-size:1.3rem;font-weight:600;margin-bottom:.5rem}
+.overlay span{color:rgba(255,255,255,.7);font-size:.875rem}
+.overlay .view-btn{background:var(--blue);color:#fff;padding:.5rem 1rem;border-radius:100px;font-size:.8rem;font-weight:600;text-decoration:none;margin-top:1rem;display:inline-block;transition:all .3s}
+.overlay .view-btn:hover{background:rgba(0,102,255,.9)}
+
+/* 고객 후기 - 6개로 확장 (3x2 그리드) */
+.testimonials{padding:10rem 3rem;background:var(--charcoal);color:var(--white)}
+.testimonials .section-header{text-align:center;margin-bottom:6rem}
+.testimonials h2{font-family:var(--font-heading);font-size:clamp(2rem,5vw,3.5rem);font-weight:700;margin-bottom:1rem;letter-spacing:-.02em}
+.testimonials .section-desc{color:rgba(255,255,255,.7);font-size:1.1rem;max-width:600px;margin:0 auto}
+.testimonials-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3rem;max-width:1300px;margin:0 auto}
+.testimonial-item{background:rgba(255,255,255,.05);backdrop-filter:blur(10px);border-radius:20px;padding:2.5rem;border:1px solid rgba(255,255,255,.1);transition:all .4s}
+.testimonial-item:hover{transform:translateY(-10px);background:rgba(255,255,255,.08)}
+.testimonial-item .quote{font-family:var(--font-heading);font-size:1.1rem;font-weight:300;line-height:1.6;margin-bottom:2rem;position:relative;padding-left:2rem}
+.testimonial-item .quote::before{content:'"';position:absolute;left:-.5rem;top:-.5rem;font-size:4rem;color:var(--blue);font-family:Georgia,serif;line-height:1;opacity:.7}
+.testimonial-item .author{display:flex;align-items:center;gap:1rem}
+.testimonial-item .author img{width:48px;height:48px;border-radius:50%;object-fit:cover}
+.testimonial-item .author-info .name{font-weight:600;font-size:.95rem}
+.testimonial-item .author-info .role{color:rgba(255,255,255,.5);font-size:.85rem}
+.testimonial-item .author-info .company{color:var(--blue);font-size:.8rem;margin-top:.2rem}
+.testimonial-item .rating{display:flex;gap:.2rem;margin-bottom:1.5rem}
+.testimonial-item .rating .star{color:var(--coral);font-size:1.2rem}
+
+/* 최신 인사이트 - 새로운 섹션 */
+.insights-section{padding:10rem 3rem;background:#fff}
+.insights-section .section-header{text-align:center;margin-bottom:6rem}
+.insights-section h2{font-family:var(--font-heading);font-size:clamp(2rem,5vw,3.5rem);font-weight:700;margin-bottom:1rem;letter-spacing:-.02em}
+.insights-section .section-desc{color:#666;font-size:1.1rem;max-width:600px;margin:0 auto}
+.insights-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:3rem;max-width:1200px;margin:0 auto}
+.insight-card{background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.08);transition:all .4s;border:1px solid #f0f0f0}
+.insight-card:hover{transform:translateY(-10px);box-shadow:0 20px 50px rgba(0,0,0,.15)}
+.insight-card .card-image{height:200px;background:linear-gradient(135deg,var(--blue),var(--coral));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.insight-card .card-image::after{content:'';position:absolute;inset:0;background:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="25" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="25" cy="50" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/></svg>') repeat;opacity:.3}
+.insight-card .card-image h3{font-family:var(--font-heading);font-size:1.5rem;font-weight:700;color:#fff;z-index:2;position:relative;text-align:center}
+.insight-card .card-content{padding:2rem}
+.insight-card .card-date{color:var(--blue);font-size:.85rem;font-weight:500;margin-bottom:.5rem}
+.insight-card .card-title{font-family:var(--font-heading);font-size:1.3rem;font-weight:600;margin-bottom:1rem;color:var(--charcoal);line-height:1.4}
+.insight-card .card-excerpt{color:#666;line-height:1.6;margin-bottom:1.5rem}
+.insight-card .read-more{color:var(--blue);font-weight:600;text-decoration:none;font-size:.9rem;transition:color .3s}
+.insight-card .read-more:hover{color:var(--coral)}
+
+/* FAQ - 새로운 섹션 */
+.faq-section{padding:10rem 3rem;background:linear-gradient(135deg,#f8f9fa,#fff)}
+.faq-section .section-header{text-align:center;margin-bottom:6rem}
+.faq-section h2{font-family:var(--font-heading);font-size:clamp(2rem,5vw,3.5rem);font-weight:700;margin-bottom:1rem;letter-spacing:-.02em}
+.faq-section .section-desc{color:#666;font-size:1.1rem;max-width:600px;margin:0 auto}
+.faq-container{max-width:800px;margin:0 auto}
+.faq-item{background:#fff;border-radius:16px;margin-bottom:1.5rem;box-shadow:0 5px 20px rgba(0,0,0,.05);overflow:hidden;border:1px solid #f0f0f0}
+.faq-question{display:flex;justify-content:space-between;align-items:center;padding:2rem;cursor:pointer;transition:all .3s;background:#fff}
+.faq-question:hover{background:#f8f9fa}
+.faq-question h3{font-family:var(--font-heading);font-size:1.2rem;font-weight:600;color:var(--charcoal);margin:0}
+.faq-toggle{width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.2rem;transition:transform .3s}
+.faq-item.open .faq-toggle{transform:rotate(45deg)}
+.faq-answer{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.faq-answer.open{max-height:200px}
+.faq-answer-content{padding:0 2rem 2rem;color:#666;line-height:1.7}
+
+/* CTA */
+.cta-section{padding:12rem 3rem;text-align:center;position:relative;background:linear-gradient(135deg,var(--blue),var(--coral));color:#fff;overflow:hidden}
+.cta-section::before{content:'';position:absolute;inset:0;background:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="20" cy="20" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="80" r="0.8" fill="rgba(255,255,255,0.1)"/></svg>') repeat;opacity:.3}
+.cta-section h2{font-family:var(--font-heading);font-size:clamp(2.5rem,6vw,5rem);font-weight:800;letter-spacing:-.03em;margin-bottom:1.5rem;position:relative;z-index:2}
+.cta-section h2 span{background:linear-gradient(45deg,#fff,#e0e0e0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cta-section p{font-size:1.15rem;margin-bottom:3rem;max-width:500px;margin-left:auto;margin-right:auto;opacity:.9;position:relative;z-index:2}
+.cta-buttons{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;position:relative;z-index:2}
+.magnetic-btn{display:inline-block;padding:1.2rem 3.5rem;background:#fff;color:var(--blue);font-family:var(--font-heading);font-size:1.1rem;font-weight:600;border-radius:100px;text-decoration:none;transition:transform .2s,box-shadow .3s;cursor:pointer;border:none}
+.magnetic-btn:hover{box-shadow:0 10px 40px rgba(255,255,255,.3);transform:scale(1.03)}
+.magnetic-btn.secondary{background:transparent;color:#fff;border:2px solid #fff}
+.magnetic-btn.secondary:hover{background:#fff;color:var(--blue)}
+
+/* FOOTER */
+.footer{padding:6rem 3rem 3rem;background:var(--charcoal);color:var(--white)}
+.footer-main{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:4rem;margin-bottom:3rem;max-width:1200px;margin-left:auto;margin-right:auto}
+.footer-brand h3{font-family:var(--font-heading);font-weight:800;font-size:2rem;letter-spacing:-.02em;margin-bottom:1rem}
+.footer-brand h3 span{color:var(--blue)}
+.footer-brand p{color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:2rem}
+.footer-social{display:flex;gap:1rem}
+.footer-social a{width:40px;height:40px;background:rgba(255,255,255,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);transition:all .3s;text-decoration:none}
+.footer-social a:hover{background:var(--blue);color:#fff;transform:translateY(-2px)}
+.footer-col h4{font-family:var(--font-heading);font-weight:600;font-size:1.1rem;margin-bottom:1.5rem;color:#fff}
+.footer-col a{color:rgba(255,255,255,.7);text-decoration:none;display:block;margin-bottom:.8rem;transition:color .3s}
+.footer-col a:hover{color:var(--blue)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;max-width:1200px;margin:0 auto}
+.footer-bottom-left{display:flex;gap:2rem;flex-wrap:wrap}
+.footer-bottom-left a{color:rgba(255,255,255,.5);text-decoration:none;font-size:.85rem;transition:color .3s}
+.footer-bottom-left a:hover{color:rgba(255,255,255,.8)}
+.footer-copyright{color:rgba(255,255,255,.5);font-size:.85rem}
 
 /* MOBILE NAV OVERLAY */
 .mobile-nav{position:fixed;inset:0;background:var(--white);z-index:999;display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .4s}
 .mobile-nav.open{opacity:1;pointer-events:all}
 .mobile-nav-links{display:grid;gap:2rem;text-align:center}
-.mobile-nav-links a{font-family:var(--font-heading);font-size:2rem;font-weight:600;text-decoration:none;color:var(--charcoal)}
+.mobile-nav-links a{font-family:var(--font-heading);font-size:2rem;font-weight:600;text-decoration:none;color:var(--charcoal);transition:color .3s}
+.mobile-nav-links a:hover{color:var(--blue)}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+.stats-grid{grid-template-columns:repeat(2,1fr);gap:3rem}
+.testimonials-grid{grid-template-columns:repeat(2,1fr);gap:2.5rem}
+.process-timeline::before{display:none}
+.process-step{grid-template-columns:1fr;gap:1.5rem}
+.process-step .step-content{order:2!important}
+.process-step .step-number{order:1!important;margin:0 auto}
+.footer-main{grid-template-columns:1fr 1fr;gap:3rem}
+.insights-grid{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.platform-card .case-study{margin:1rem 0}
+}
+
+@media(max-width:768px){
+.nav{padding:1rem 1.5rem;grid-template-columns:1fr auto}
+.nav-links{display:none}
+.nav-cta{display:none}
+.mobile-toggle{display:block}
+.hero-text{font-size:clamp(3rem,15vw,8rem)}
+.hero-buttons{flex-direction:column;align-items:center}
+.hero-btn{width:100%;max-width:280px}
+.platform-icons{gap:1rem}
+.platform-icon{width:40px;height:40px}
+.h-scroll-track{grid-auto-columns:90vw;padding:0 1.5rem}
+.platform-card{padding:2rem}
+.stats{padding:5rem 1.5rem}
+.stats-grid{grid-template-columns:1fr;gap:2rem}
+.carousel-item{min-width:280px}
+.drag-carousel{padding:0 1.5rem}
+.testimonials{padding:5rem 1.5rem}
+.testimonials-grid{grid-template-columns:1fr;gap:2rem}
+.cta-section{padding:6rem 1.5rem}
+.footer{padding:4rem 1.5rem 2rem}
+.footer-main{grid-template-columns:1fr;gap:2rem;text-align:center}
+.footer-bottom{flex-direction:column;text-align:center}
+.scrub-section{padding:6rem 1.5rem}
+.sec-header{padding:0 1.5rem!important}
+.process-section{padding:6rem 1.5rem}
+.insights-section{padding:6rem 1.5rem}
+.faq-section{padding:6rem 1.5rem}
+.partners-section{padding:5rem 1.5rem}
+.partners-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.process-step{margin-bottom:3rem}
+.cta-buttons{flex-direction:column;align-items:center}
+.magnetic-btn{width:100%;max-width:280px}
+}
+
+@media(max-width:375px){
+.hero-text{font-size:3rem}
+.progress-circle{width:100px;height:100px}
+.progress-circle svg{width:100px;height:100px}
+.progress-circle .value{font-size:1.3rem}
+.platform-card h3{font-size:1.8rem}
+.testimonial-item{padding:1.5rem}
+.insight-card .card-content{padding:1.5rem}
+.faq-question{padding:1.5rem}
+.step-content{padding:2rem}
+}
+
+/* DARK MODE SUPPORT */
+@media (prefers-color-scheme: dark) {
+  /* Keep light theme as specified in requirements */
+}
+
+/* PRINT STYLES */
+@media print {
+.nav, .mobile-nav, .hero-scroll, .platform-icons { display: none; }
+.hero { height: auto; padding: 4rem 0; }
+body { background: white; color: black; }
+}
 </style>
 </head>
 <body>
@@ -196,179 +359,712 @@ body{font-family:var(--font-body);background:var(--white);color:var(--charcoal);
 </div>
 </div>
 
-<!-- HERO -->
+<!-- 새로운 HERO - 풀스크린 배경 슬라이드쇼 -->
 <section class="hero">
-<div class="blob blob-1"></div>
-<div class="blob blob-2"></div>
+<div class="hero-bg">
+<div class="hero-slide active" style="background-image:url('https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1920&q=80')"></div>
+<div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1552664730-d307ca884978?w=1920&q=80')"></div>
+<div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1920&q=80')"></div>
+</div>
+<div class="hero-content">
 <div class="hero-text" id="heroText">WAVE</div>
-<div class="hero-sub">
-<p>브랜드의 파도를 만드는 디지털 마케팅 에이전시</p>
+<div class="hero-subtitle">브랜드의 파도를 만듭니다</div>
+<div class="hero-buttons">
+<a href="contact.html" class="hero-btn primary">무료 상담 시작</a>
+<a href="portfolio.html" class="hero-btn secondary">포트폴리오 보기</a>
+</div>
+</div>
+<div class="platform-icons">
+<div class="platform-icon">
+<svg viewBox="0 0 24 24" fill="white">
+<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+</svg>
+</div>
+<div class="platform-icon">
+<svg viewBox="0 0 24 24" fill="white">
+<rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+<path d="m16 11.37-4-1.4-4 1.4V6h8z"/>
+</svg>
+</div>
+<div class="platform-icon">
+<svg viewBox="0 0 24 24" fill="white">
+<polygon points="5,3 19,12 5,21"/>
+</svg>
+</div>
+<div class="platform-icon">
+<svg viewBox="0 0 24 24" fill="white">
+<path d="M19.5 12c0-.5-.2-.9-.5-1.2l-4-4c-.3-.3-.7-.5-1.2-.5s-.9.2-1.2.5L8 11.4V8c0-.6-.4-1-1-1s-1 .4-1 1v8c0 .6.4 1 1 1s1-.4 1-1v-3.4l4.6 4.6c.3.3.7.5 1.2.5s.9-.2 1.2-.5l4-4c.3-.3.5-.7.5-1.2z"/>
+</svg>
+</div>
+</div>
+<div class="hero-scroll">
 <div class="scroll-hint"></div>
 </div>
 </section>
 
 <!-- TEXT SCRUB -->
-<section class="scrub-section">
+<section class="scrub-section fade-in">
 <p class="scrub-text" id="scrubText">
-<span class="word">우리는</span> <span class="word">단순한</span> <span class="word">광고를</span> <span class="word">넘어</span> <span class="word">브랜드가</span> <span class="word">소비자의</span> <span class="word">일상에</span> <span class="word">자연스럽게</span> <span class="word">스며들</span> <span class="word">수</span> <span class="word">있도록</span> <span class="word">전략을</span> <span class="word">설계합니다.</span> <span class="word">네이버부터</span> <span class="word">틱톡까지,</span> <span class="word">모든</span> <span class="word">플랫폼에서</span> <span class="word">파도를</span> <span class="word">일으킵니다.</span>
+<span class="word">우리는</span> <span class="word">단순한</span> <span class="word">광고를</span> <span class="word">넘어</span> <span class="word">브랜드가</span> <span class="word">소비자의</span> <span class="word">일상에</span> <span class="word">자연스럽게</span> <span class="word">스며들</span> <span class="word">수</span> <span class="word">있도록</span> <span class="word">전략을</span> <span class="word">설계합니다.</span> <span class="word">네이버부터</span> <span class="word">틱톡까지,</span> <span class="word">모든</span> <span class="word">플랫폼에서</span> <span class="word">파도를</span> <span class="word">일으키며</span> <span class="word">브랜드</span> <span class="word">가치를</span> <span class="word">증폭시킵니다.</span> <span class="word">데이터</span> <span class="word">분석부터</span> <span class="word">크리에이티브</span> <span class="word">실행까지,</span> <span class="word">완벽한</span> <span class="word">마케팅</span> <span class="word">솔루션을</span> <span class="word">제공합니다.</span>
 </p>
 </section>
 
-<!-- PLATFORMS HORIZONTAL SCROLL -->
-<section class="platforms">
+<!-- PLATFORMS HORIZONTAL SCROLL - 보강됨 -->
+<section class="platforms fade-in">
 <h2 class="platforms-title">4대 플랫폼 전문 운영</h2>
-<p class="platforms-desc">각 플랫폼의 알고리즘과 사용자 행동을 완벽히 이해합니다</p>
+<p class="platforms-desc">각 플랫폼의 알고리즘과 사용자 행동을 완벽히 이해하여, 브랜드에 최적화된 마케팅 전략을 수립합니다</p>
 <div class="h-scroll-wrap" id="hScroll">
 <div class="h-scroll-track">
 <div class="platform-card naver">
 <svg class="platform-icon" viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="16" fill="rgba(255,255,255,.2)"/><path d="M20 20v24l12-14 12 14V20" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <h3>네이버</h3>
-<p>블로그·플레이스·스마트스토어·검색광고까지 네이버 생태계 전체를 아우르는 통합 마케팅 전략을 제공합니다. 상위노출은 기본, 전환까지 설계합니다.</p>
+<p>블로그, 플레이스, 스마트스토어, 검색광고까지 네이버 생태계 전체를 아우르는 통합 마케팅 전략을 제공합니다. 상위노출은 기본, 전환까지 완벽하게 설계합니다.</p>
+<div class="case-study">
+<h4>📈 케이스 스터디</h4>
+<span>화장품 브랜드 A사 - 네이버 블로그 마케팅으로 월 매출 300% 증가, 키워드 상위노출 95% 달성</span>
+</div>
 <div class="card-stat">+340%</div>
 </div>
 <div class="platform-card insta">
 <svg class="platform-icon" viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="16" fill="rgba(255,255,255,.2)"/><rect x="16" y="16" width="32" height="32" rx="8" stroke="#fff" stroke-width="3"/><circle cx="32" cy="32" r="8" stroke="#fff" stroke-width="3"/><circle cx="44" cy="20" r="2.5" fill="#fff"/></svg>
 <h3>인스타그램</h3>
-<p>릴스·피드·스토리·광고까지 인스타그램 전 영역을 커버합니다. 감각적인 비주얼과 데이터 기반 콘텐츠로 팔로워를 고객으로 전환합니다.</p>
+<p>릴스, 피드, 스토리, 광고까지 인스타그램의 전 영역을 커버합니다. 감각적인 비주얼과 데이터 기반 콘텐츠로 팔로워를 실제 구매 고객으로 전환시킵니다.</p>
+<div class="case-study">
+<h4>🎯 케이스 스터디</h4>
+<span>패션 브랜드 B사 - 인플루언서 콜라보와 릴스 캠페인으로 팔로워 500% 증가, 매출 연동률 85% 달성</span>
+</div>
 <div class="card-stat">+520%</div>
 </div>
 <div class="platform-card youtube">
 <svg class="platform-icon" viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="16" fill="rgba(255,255,255,.2)"/><path d="M26 22l16 10-16 10V22z" fill="#fff"/></svg>
 <h3>유튜브</h3>
-<p>쇼츠·롱폼·라이브·광고 캠페인까지 영상 마케팅의 모든 것. 기획부터 촬영, 편집, 채널 운영까지 원스톱으로 진행합니다.</p>
+<p>쇼츠, 롱폼, 라이브, 광고 캠페인까지 영상 마케팅의 모든 것을 다룹니다. 기획부터 촬영, 편집, 채널 운영까지 원스톱으로 진행하여 지속가능한 성장을 이끕니다.</p>
+<div class="case-study">
+<h4>🚀 케이스 스터디</h4>
+<span>교육 스타트업 C사 - 유튜브 채널 런칭 6개월 만에 구독자 10만 달성, 수강 신청 전환율 12% 기록</span>
+</div>
 <div class="card-stat">+280%</div>
 </div>
 <div class="platform-card tiktok">
 <svg class="platform-icon" viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="16" fill="rgba(255,255,255,.1)"/><path d="M36 18c0 4 3 7 7 7v6c-3 0-5-1-7-3v13a10 10 0 11-7-9.5V38a4 4 0 104 4V18h3z" fill="#fff"/></svg>
 <h3>틱톡</h3>
-<p>MZ세대의 놀이터 틱톡에서 바이럴을 만듭니다. 트렌드 분석, 챌린지 기획, 인플루언서 콜라보까지 <span class="tiktok-accent">폭발적 성장</span>을 이끕니다.</p>
+<p>MZ세대의 놀이터 틱톡에서 바이럴을 만듭니다. 트렌드 분석, 챌린지 기획, 인플루언서 콜라보까지 <span class="tiktok-accent">폭발적 성장</span>을 이끌어내는 전략을 제공합니다.</p>
+<div class="case-study">
+<h4>💥 케이스 스터디</h4>
+<span>F&B 브랜드 D사 - 틱톡 챌린지 캠페인으로 일주일 만에 조회수 500만 돌파, 매장 방문율 200% 증가</span>
+</div>
 <div class="card-stat">+890%</div>
 </div>
 </div>
 </div>
 </section>
 
-<!-- STATS -->
-<section class="stats" id="statsSection">
-<h2 class="stats-title">숫자로 증명합니다</h2>
-<p class="stats-sub">2024년 기준 누적 성과</p>
+<!-- STATS - 6개로 확장 -->
+<section class="stats fade-in" id="statsSection">
+<h2 class="stats-title">숫자로 증명하는 성과</h2>
+<p class="stats-sub">2024년 기준 누적 데이터를 통해 검증된 마케팅 전문성을 확인하세요</p>
 <div class="stats-grid">
 <div class="stat-item">
 <div class="progress-circle" data-target="95">
-<svg><circle class="bg" cx="70" cy="70" r="65"/><circle class="fill" cx="70" cy="70" r="65"/></svg>
+<svg><circle class="bg" cx="60" cy="60" r="55"/><circle class="fill" cx="60" cy="60" r="55"/></svg>
 <span class="value">0</span>
 </div>
 <span class="stat-label">클라이언트 만족도</span>
+<span class="stat-desc">재계약을 원하는 고객 비율</span>
 </div>
 <div class="stat-item">
 <div class="progress-circle coral" data-target="87">
-<svg><circle class="bg" cx="70" cy="70" r="65"/><circle class="fill" cx="70" cy="70" r="65"/></svg>
+<svg><circle class="bg" cx="60" cy="60" r="55"/><circle class="fill" cx="60" cy="60" r="55"/></svg>
 <span class="value">0</span>
 </div>
 <span class="stat-label">재계약률</span>
+<span class="stat-desc">지속적인 파트너십 유지율</span>
 </div>
 <div class="stat-item">
 <div class="progress-circle" data-target="340">
-<svg><circle class="bg" cx="70" cy="70" r="65"/><circle class="fill" cx="70" cy="70" r="65"/></svg>
+<svg><circle class="bg" cx="60" cy="60" r="55"/><circle class="fill" cx="60" cy="60" r="55"/></svg>
 <span class="value">0</span>
 </div>
 <span class="stat-label">누적 프로젝트</span>
+<span class="stat-desc">성공적으로 완료한 캠페인</span>
 </div>
 <div class="stat-item">
 <div class="progress-circle coral" data-target="42">
-<svg><circle class="bg" cx="70" cy="70" r="65"/><circle class="fill" cx="70" cy="70" r="65"/></svg>
+<svg><circle class="bg" cx="60" cy="60" r="55"/><circle class="fill" cx="60" cy="60" r="55"/></svg>
 <span class="value">0</span>
 </div>
 <span class="stat-label">전문 마케터</span>
+<span class="stat-desc">각 분야별 전문가 팀</span>
+</div>
+<div class="stat-item">
+<div class="progress-circle" data-target="1200">
+<svg><circle class="bg" cx="60" cy="60" r="55"/><circle class="fill" cx="60" cy="60" r="55"/></svg>
+<span class="value">0</span>
+</div>
+<span class="stat-label">월 평균 콘텐츠 제작</span>
+<span class="stat-desc">다양한 플랫폼별 콘텐츠</span>
+</div>
+<div class="stat-item">
+<div class="progress-circle coral" data-target="580">
+<svg><circle class="bg" cx="60" cy="60" r="55"/><circle class="fill" cx="60" cy="60" r="55"/></svg>
+<span class="value">0</span>
+</div>
+<span class="stat-label">평균 광고 ROAS</span>
+<span class="stat-desc">투자 대비 수익률 성과</span>
 </div>
 </div>
 </section>
 
-<!-- PORTFOLIO CAROUSEL -->
-<section class="portfolio-sec">
+<!-- 우리의 프로세스 - 새로운 섹션 -->
+<section class="process-section fade-in">
+<div class="section-header">
+<h2>우리의 프로세스</h2>
+<p class="section-desc">체계적이고 전문적인 5단계 프로세스를 통해 브랜드의 성공을 보장합니다</p>
+</div>
+<div class="process-timeline">
+<div class="process-step">
+<div class="step-content">
+<h3>브랜드 분석</h3>
+<p>브랜드의 현재 상황, 타겟 고객, 경쟁사 분석을 통해 마케팅의 기초를 다집니다. 데이터 기반의 정확한 인사이트를 도출합니다.</p>
+<div class="step-features">
+<span class="step-feature">브랜드 오디팅</span>
+<span class="step-feature">경쟁사 분석</span>
+<span class="step-feature">타겟 페르소나</span>
+<span class="step-feature">시장 조사</span>
+</div>
+</div>
+<div class="step-number">01</div>
+<div class="step-content">
+<h3>전략 수립</h3>
+<p>분석 결과를 바탕으로 각 플랫폼별 최적화된 마케팅 전략을 수립합니다. 명확한 목표와 KPI를 설정하여 성과 측정이 가능한 계획을 세웁니다.</p>
+<div class="step-features">
+<span class="step-feature">전략 기획</span>
+<span class="step-feature">KPI 설정</span>
+<span class="step-feature">콘텐츠 전략</span>
+<span class="step-feature">예산 배분</span>
+</div>
+</div>
+</div>
+<div class="process-step">
+<div class="step-content">
+<h3>콘텐츠 실행</h3>
+<p>수립된 전략을 바탕으로 각 플랫폼에 맞는 고품질 콘텐츠를 제작하고 실행합니다. 크리에이티브부터 광고 운영까지 전 과정을 관리합니다.</p>
+<div class="step-features">
+<span class="step-feature">콘텐츠 제작</span>
+<span class="step-feature">광고 운영</span>
+<span class="step-feature">커뮤니티 관리</span>
+<span class="step-feature">인플루언서 매칭</span>
+</div>
+</div>
+<div class="step-number">02</div>
+<div class="step-content">
+<h3>성과 최적화</h3>
+<p>실시간 데이터 모니터링을 통해 캠페인 성과를 분석하고 지속적으로 최적화합니다. A/B 테스트와 데이터 분석으로 더 나은 결과를 만듭니다.</p>
+<div class="step-features">
+<span class="step-feature">실시간 모니터링</span>
+<span class="step-feature">A/B 테스트</span>
+<span class="step-feature">성과 분석</span>
+<span class="step-feature">전략 조정</span>
+</div>
+</div>
+</div>
+<div class="process-step">
+<div class="step-content">
+<h3>결과 보고</h3>
+<p>투명하고 상세한 성과 보고서를 제공합니다. 달성한 성과와 개선점을 명확히 제시하여 다음 단계의 전략 수립에 활용합니다.</p>
+<div class="step-features">
+<span class="step-feature">성과 보고서</span>
+<span class="step-feature">ROI 분석</span>
+<span class="step-feature">개선 제안</span>
+<span class="step-feature">미래 전략</span>
+</div>
+</div>
+<div class="step-number">03</div>
+<div class="step-content"></div>
+</div>
+</div>
+</section>
+
+<!-- 파트너사 로고 - 새로운 섹션 -->
+<section class="partners-section fade-in">
+<h2 class="partners-title">신뢰받는 파트너</h2>
+<p class="partners-desc">다양한 업종의 선도 기업들과 함께 성공 스토리를 만들어가고 있습니다</p>
+<div class="partners-grid">
+<div class="partner-logo">
+<svg width="120" height="40" viewBox="0 0 120 40">
+<text x="60" y="25" text-anchor="middle" fill="#666" font-family="Arial, sans-serif" font-size="14" font-weight="bold">NAVER</text>
+</svg>
+</div>
+<div class="partner-logo">
+<svg width="120" height="40" viewBox="0 0 120 40">
+<text x="60" y="25" text-anchor="middle" fill="#666" font-family="Arial, sans-serif" font-size="14" font-weight="bold">KAKAO</text>
+</svg>
+</div>
+<div class="partner-logo">
+<svg width="120" height="40" viewBox="0 0 120 40">
+<text x="60" y="25" text-anchor="middle" fill="#666" font-family="Arial, sans-serif" font-size="14" font-weight="bold">COUPANG</text>
+</svg>
+</div>
+<div class="partner-logo">
+<svg width="120" height="40" viewBox="0 0 120 40">
+<text x="60" y="25" text-anchor="middle" fill="#666" font-family="Arial, sans-serif" font-size="14" font-weight="bold">KURLY</text>
+</svg>
+</div>
+<div class="partner-logo">
+<svg width="120" height="40" viewBox="0 0 120 40">
+<text x="60" y="25" text-anchor="middle" fill="#666" font-family="Arial, sans-serif" font-size="14" font-weight="bold">TOSS</text>
+</svg>
+</div>
+<div class="partner-logo">
+<svg width="120" height="40" viewBox="0 0 120 40">
+<text x="60" y="25" text-anchor="middle" fill="#666" font-family="Arial, sans-serif" font-size="14" font-weight="bold">BAEMIN</text>
+</svg>
+</div>
+<div class="partner-logo">
+<svg width="120" height="40" viewBox="0 0 120 40">
+<text x="60" y="25" text-anchor="middle" fill="#666" font-family="Arial, sans-serif" font-size="14" font-weight="bold">ZIGZAG</text>
+</svg>
+</div>
+<div class="partner-logo">
+<svg width="120" height="40" viewBox="0 0 120 40">
+<text x="60" y="25" text-anchor="middle" fill="#666" font-family="Arial, sans-serif" font-size="14" font-weight="bold">MUSINSA</text>
+</svg>
+</div>
+</div>
+</section>
+
+<!-- PORTFOLIO CAROUSEL - 8개로 확장 -->
+<section class="portfolio-sec fade-in">
 <div class="sec-header">
 <h2>최근 프로젝트</h2>
-<p>드래그하여 더 많은 프로젝트를 확인하세요</p>
+<p>드래그하여 더 많은 성공 사례를 확인하세요</p>
 </div>
 <div class="drag-carousel" id="dragCarousel">
 <div class="carousel-item">
-<img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80" alt="프로젝트" loading="lazy">
-<div class="overlay"><h4>뷰티브랜드 네이버 상위노출</h4><span>네이버 · 검색마케팅</span></div>
+<img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80" alt="뷰티브랜드 마케팅" loading="lazy">
+<div class="overlay">
+<h4>뷰티브랜드 네이버 상위노출</h4>
+<span>검색마케팅 • 6개월</span>
+<a href="#" class="view-btn">자세히 보기</a>
+</div>
+<div class="content">
+<h4>뷰티브랜드 네이버 마케팅</h4>
+<div class="meta">네이버 • 검색마케팅 • 2024.06</div>
+<div class="tags">
+<span class="tag">블로그</span>
+<span class="tag">SEO</span>
+<span class="tag">광고</span>
+</div>
+</div>
 </div>
 <div class="carousel-item">
-<img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&q=80" alt="프로젝트" loading="lazy">
-<div class="overlay"><h4>패션 인스타그램 릴스 캠페인</h4><span>인스타그램 · 콘텐츠</span></div>
+<img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&q=80" alt="패션브랜드 인스타그램" loading="lazy">
+<div class="overlay">
+<h4>패션 인스타그램 릴스 캠페인</h4>
+<span>인스타그램 • 4개월</span>
+<a href="#" class="view-btn">자세히 보기</a>
+</div>
+<div class="content">
+<h4>패션브랜드 인스타그램 성장</h4>
+<div class="meta">인스타그램 • 콘텐츠마케팅 • 2024.08</div>
+<div class="tags">
+<span class="tag">릴스</span>
+<span class="tag">인플루언서</span>
+<span class="tag">브랜딩</span>
+</div>
+</div>
 </div>
 <div class="carousel-item">
-<img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=600&q=80" alt="프로젝트" loading="lazy">
-<div class="overlay"><h4>스타트업 유튜브 채널 론칭</h4><span>유튜브 · 채널운영</span></div>
+<img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=600&q=80" alt="스타트업 유튜브" loading="lazy">
+<div class="overlay">
+<h4>스타트업 유튜브 채널 론칭</h4>
+<span>유튜브 • 8개월</span>
+<a href="#" class="view-btn">자세히 보기</a>
+</div>
+<div class="content">
+<h4>교육 스타트업 유튜브 성장</h4>
+<div class="meta">유튜브 • 채널운영 • 2024.05</div>
+<div class="tags">
+<span class="tag">쇼츠</span>
+<span class="tag">교육</span>
+<span class="tag">구독자</span>
+</div>
+</div>
 </div>
 <div class="carousel-item">
-<img src="https://images.unsplash.com/photo-1563986768609-322da13575f2?w=600&q=80" alt="프로젝트" loading="lazy">
-<div class="overlay"><h4>F&B 틱톡 바이럴 챌린지</h4><span>틱톡 · 바이럴</span></div>
+<img src="https://images.unsplash.com/photo-1563986768609-322da13575f2?w=600&q=80" alt="F&B 틱톡" loading="lazy">
+<div class="overlay">
+<h4>F&B 틱톡 바이럴 챌린지</h4>
+<span>틱톡 • 3개월</span>
+<a href="#" class="view-btn">자세히 보기</a>
+</div>
+<div class="content">
+<h4>카페 브랜드 틱톡 바이럴</h4>
+<div class="meta">틱톡 • 바이럴마케팅 • 2024.09</div>
+<div class="tags">
+<span class="tag">챌린지</span>
+<span class="tag">바이럴</span>
+<span class="tag">MZ세대</span>
+</div>
+</div>
 </div>
 <div class="carousel-item">
-<img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80" alt="프로젝트" loading="lazy">
-<div class="overlay"><h4>종합 브랜드 리뉴얼</h4><span>통합 · 브랜딩</span></div>
+<img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80" alt="통합 브랜딩" loading="lazy">
+<div class="overlay">
+<h4>종합 브랜드 리뉴얼</h4>
+<span>통합마케팅 • 12개월</span>
+<a href="#" class="view-btn">자세히 보기</a>
+</div>
+<div class="content">
+<h4>대기업 브랜드 리뉴얼</h4>
+<div class="meta">통합 • 브랜딩 • 2024.03</div>
+<div class="tags">
+<span class="tag">리브랜딩</span>
+<span class="tag">통합</span>
+<span class="tag">전략</span>
+</div>
+</div>
 </div>
 <div class="carousel-item">
-<img src="https://images.unsplash.com/photo-1542744094-3a31f272c490?w=600&q=80" alt="프로젝트" loading="lazy">
-<div class="overlay"><h4>이커머스 퍼포먼스 마케팅</h4><span>네이버 · 광고</span></div>
+<img src="https://images.unsplash.com/photo-1542744094-3a31f272c490?w=600&q=80" alt="이커머스 퍼포먼스" loading="lazy">
+<div class="overlay">
+<h4>이커머스 퍼포먼스 마케팅</h4>
+<span>퍼포먼스 • 6개월</span>
+<a href="#" class="view-btn">자세히 보기</a>
+</div>
+<div class="content">
+<h4>온라인몰 매출 최적화</h4>
+<div class="meta">네이버 • 퍼포먼스 • 2024.07</div>
+<div class="tags">
+<span class="tag">광고</span>
+<span class="tag">전환</span>
+<span class="tag">ROAS</span>
+</div>
+</div>
+</div>
+<div class="carousel-item">
+<img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?w=600&q=80" alt="헬스케어 브랜딩" loading="lazy">
+<div class="overlay">
+<h4>헬스케어 브랜드 런칭</h4>
+<span>신규브랜드 • 10개월</span>
+<a href="#" class="view-btn">자세히 보기</a>
+</div>
+<div class="content">
+<h4>건강식품 브랜드 런칭</h4>
+<div class="meta">통합 • 신규런칭 • 2024.04</div>
+<div class="tags">
+<span class="tag">런칭</span>
+<span class="tag">헬스케어</span>
+<span class="tag">인지도</span>
+</div>
+</div>
+</div>
+<div class="carousel-item">
+<img src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&q=80" alt="테크 스타트업" loading="lazy">
+<div class="overlay">
+<h4>테크 스타트업 그로스해킹</h4>
+<span>그로스 • 5개월</span>
+<a href="#" class="view-btn">자세히 보기</a>
+</div>
+<div class="content">
+<h4>핀테크 앱 사용자 증대</h4>
+<div class="meta">앱마케팅 • 그로스해킹 • 2024.10</div>
+<div class="tags">
+<span class="tag">앱</span>
+<span class="tag">그로스</span>
+<span class="tag">핀테크</span>
+</div>
+</div>
 </div>
 </div>
 </section>
 
-<!-- TESTIMONIALS -->
-<section class="testimonials">
+<!-- TESTIMONIALS - 6개로 확장 (3x2 그리드) -->
+<section class="testimonials fade-in">
+<div class="section-header">
+<h2>고객 후기</h2>
+<p class="section-desc">함께 성장한 브랜드들의 생생한 후기를 들어보세요</p>
+</div>
 <div class="testimonials-grid">
 <div class="testimonial-item">
-<div class="quote">네이버 블로그 마케팅을 맡긴 후 매출이 3배 이상 성장했습니다. 데이터를 기반으로 한 전략이 인상적이었어요.</div>
+<div class="rating">
+<span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+</div>
+<div class="quote">네이버 블로그 마케팅을 맡긴 후 매출이 3배 이상 성장했습니다. 데이터를 기반으로 한 전략이 인상적이었어요. 정말 전문적인 팀입니다.</div>
 <div class="author">
-<img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80" alt="고객" loading="lazy">
-<div class="author-info"><div class="name">김민수 대표</div><div class="role">뷰티 스타트업</div></div>
+<img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80" alt="김민수 대표" loading="lazy">
+<div class="author-info">
+<div class="name">김민수 대표</div>
+<div class="role">마케팅 총괄</div>
+<div class="company">뷰티 스타트업 A사</div>
+</div>
 </div>
 </div>
 <div class="testimonial-item">
-<div class="quote">인스타그램 팔로워 0에서 시작해 6개월 만에 5만 명을 돌파했습니다. 콘텐츠 퀄리티가 남다릅니다.</div>
+<div class="rating">
+<span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+</div>
+<div class="quote">인스타그램 팔로워 0에서 시작해 6개월 만에 5만 명을 돌파했습니다. 콘텐츠 퀄리티가 남다르고 전략적 접근이 놀라웠어요.</div>
 <div class="author">
-<img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80" alt="고객" loading="lazy">
-<div class="author-info"><div class="name">이지영 실장</div><div class="role">패션 브랜드</div></div>
+<img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80" alt="이지영 실장" loading="lazy">
+<div class="author-info">
+<div class="name">이지영 실장</div>
+<div class="role">브랜드 매니저</div>
+<div class="company">패션 브랜드 B사</div>
+</div>
 </div>
 </div>
 <div class="testimonial-item">
-<div class="quote">틱톡 챌린지 하나로 일주일 만에 조회수 500만을 달성했습니다. 트렌드를 정확히 읽는 팀입니다.</div>
+<div class="rating">
+<span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+</div>
+<div class="quote">틱톡 챌린지 하나로 일주일 만에 조회수 500만을 달성했습니다. 트렌드를 정확히 읽는 팀이에요. 매장 방문율도 2배 늘었습니다.</div>
 <div class="author">
-<img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80" alt="고객" loading="lazy">
-<div class="author-info"><div class="name">박준혁 마케팅팀장</div><div class="role">F&B 기업</div></div>
+<img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80" alt="박준혁 팀장" loading="lazy">
+<div class="author-info">
+<div class="name">박준혁 팀장</div>
+<div class="role">마케팅팀장</div>
+<div class="company">F&B 기업 C사</div>
+</div>
 </div>
 </div>
 <div class="testimonial-item">
-<div class="quote">유튜브 채널 구독자 10만 달성까지 체계적으로 도와주셨어요. 기획력이 정말 뛰어납니다.</div>
+<div class="rating">
+<span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+</div>
+<div class="quote">유튜브 채널 구독자 10만 달성까지 체계적으로 도와주셨어요. 기획력이 정말 뛰어나고 결과도 확실히 보여주는 팀입니다.</div>
 <div class="author">
-<img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80" alt="고객" loading="lazy">
-<div class="author-info"><div class="name">최수진 이사</div><div class="role">교육 플랫폼</div></div>
+<img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80" alt="최수진 이사" loading="lazy">
+<div class="author-info">
+<div class="name">최수진 이사</div>
+<div class="role">콘텐츠 총괄</div>
+<div class="company">교육 플랫폼 D사</div>
+</div>
+</div>
+</div>
+<div class="testimonial-item">
+<div class="rating">
+<span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+</div>
+<div class="quote">브랜드 리뉴얼 프로젝트를 진행하면서 매출과 브랜드 인지도가 동시에 상승했습니다. 통합적인 접근 방식이 인상 깊었어요.</div>
+<div class="author">
+<img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&q=80" alt="정민호 상무" loading="lazy">
+<div class="author-info">
+<div class="name">정민호 상무</div>
+<div class="role">브랜드 전략</div>
+<div class="company">대기업 E사</div>
+</div>
+</div>
+</div>
+<div class="testimonial-item">
+<div class="rating">
+<span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+</div>
+<div class="quote">퍼포먼스 마케팅으로 ROAS를 5배 향상시켰습니다. 데이터 분석 능력이 뛰어나고 지속적인 최적화가 정말 만족스러웠어요.</div>
+<div class="author">
+<img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&q=80" alt="홍지연 대리" loading="lazy">
+<div class="author-info">
+<div class="name">홍지연 대리</div>
+<div class="role">퍼포먼스 마케터</div>
+<div class="company">이커머스 F사</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- 최신 인사이트 - 새로운 섹션 -->
+<section class="insights-section fade-in">
+<div class="section-header">
+<h2>최신 마케팅 인사이트</h2>
+<p class="section-desc">급변하는 디지털 마케팅 트렌드와 실무에 바로 적용할 수 있는 인사이트를 제공합니다</p>
+</div>
+<div class="insights-grid">
+<div class="insight-card">
+<div class="card-image">
+<h3>2024 소셜미디어 트렌드</h3>
+</div>
+<div class="card-content">
+<div class="card-date">2024. 12. 10</div>
+<h4 class="card-title">2024년 하반기 소셜미디어 마케팅 핵심 트렌드 5가지</h4>
+<p class="card-excerpt">인스타그램 릴스의 알고리즘 변화부터 틱톡의 새로운 기능까지, 마케터가 반드시 알아야 할 최신 트렌드를 분석했습니다. 실제 캠페인 사례와 함께 살펴보세요.</p>
+<a href="#" class="read-more">자세히 읽기 →</a>
+</div>
+</div>
+<div class="insight-card">
+<div class="card-image">
+<h3>네이버 SEO 완벽 가이드</h3>
+</div>
+<div class="card-content">
+<div class="card-date">2024. 12. 05</div>
+<h4 class="card-title">네이버 검색 상위노출을 위한 SEO 최적화 전략</h4>
+<p class="card-excerpt">2024년 네이버 검색 알고리즘의 주요 변화점과 블로그 마케팅 성공 사례를 통해 실제 상위노출에 성공한 노하우를 공개합니다. 키워드 분석부터 콘텐츠 작성까지.</p>
+<a href="#" class="read-more">자세히 읽기 →</a>
+</div>
+</div>
+<div class="insight-card">
+<div class="card-image">
+<h3>퍼포먼스 마케팅 ROI</h3>
+</div>
+<div class="card-content">
+<div class="card-date">2024. 11. 28</div>
+<h4 class="card-title">퍼포먼스 마케팅 ROI 극대화하는 7가지 방법</h4>
+<p class="card-excerpt">광고비 효율을 높이고 전환율을 개선하는 구체적인 방법론을 제시합니다. 실제 클라이언트 사례를 통해 ROAS 300% 달성 과정을 단계별로 설명합니다.</p>
+<a href="#" class="read-more">자세히 읽기 →</a>
+</div>
+</div>
+</div>
+</section>
+
+<!-- FAQ - 새로운 섹션 -->
+<section class="faq-section fade-in">
+<div class="section-header">
+<h2>자주 묻는 질문</h2>
+<p class="section-desc">마케팅 서비스에 대해 궁금한 점들을 미리 확인해보세요</p>
+</div>
+<div class="faq-container">
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<h3>마케팅 서비스의 최소 계약 기간은 얼마인가요?</h3>
+<div class="faq-toggle">+</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-content">
+효과적인 디지털 마케팅을 위해서는 최소 3개월의 계약 기간을 권장합니다. 초기 1개월은 브랜드 분석과 전략 수립, 2-3개월차부터 본격적인 성과가 나타나기 시작합니다. 다만 프로젝트 성격에 따라 유연하게 조정 가능합니다.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<h3>어떤 업종의 브랜드와 주로 작업하시나요?</h3>
+<div class="faq-toggle">+</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-content">
+뷰티, 패션, F&B, 교육, 헬스케어, 핀테크 등 다양한 업종에서 경험을 쌓았습니다. 업종별 특성을 이해하고 타겟 고객에게 최적화된 마케팅 전략을 제공합니다. 스타트업부터 대기업까지 모든 규모의 브랜드와 협업 가능합니다.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<h3>마케팅 성과는 어떻게 측정하고 보고하나요?</h3>
+<div class="faq-toggle">+</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-content">
+프로젝트 시작 시 명확한 KPI를 설정하고, 주간/월간 단위로 상세한 성과 보고서를 제공합니다. 트래픽, 전환율, 매출, 브랜드 인지도 등 다양한 지표를 통해 투명하게 성과를 공유하며, 개선점도 함께 제시합니다.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<h3>콘텐츠 제작도 포함되어 있나요?</h3>
+<div class="faq-toggle">+</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-content">
+네, 전략 기획부터 콘텐츠 제작, 실행, 분석까지 원스톱 서비스를 제공합니다. 카피라이팅, 디자인, 영상 제작, 사진 촬영 등 모든 크리에이티브 작업을 내부 전문팀에서 진행하여 브랜드 일관성을 유지합니다.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<h3>마케팅 예산은 어느 정도 필요한가요?</h3>
+<div class="faq-toggle">+</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-content">
+브랜드의 규모, 목표, 플랫폼에 따라 예산이 달라집니다. 월 300만원부터 시작할 수 있으며, 초기 상담을 통해 브랜드에 맞는 최적의 예산 배분 계획을 제안해드립니다. 단계적 투자로 리스크를 최소화하면서 효과를 극대화할 수 있습니다.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<h3>성과가 나오지 않으면 어떻게 되나요?</h3>
+<div class="faq-toggle">+</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-content">
+사전에 설정한 KPI 달성을 위해 지속적으로 전략을 조정하고 최적화합니다. 만약 목표 달성이 어려운 경우, 원인을 분석하여 개선 방안을 제시하고 추가적인 지원을 제공합니다. 고객 성공이 저희의 성공이라고 생각합니다.
+</div>
 </div>
 </div>
 </div>
 </section>
 
 <!-- CTA -->
-<section class="cta-section">
-<div class="blob blob-1" style="width:400px;height:400px;top:auto;bottom:-100px;right:auto;left:50%;transform:translateX(-50%)"></div>
+<section class="cta-section fade-in">
 <h2>다음 <span>파도</span>의<br>주인공이 되세요</h2>
-<p>무료 상담으로 브랜드의 가능성을 확인하세요</p>
+<p>무료 상담으로 브랜드의 가능성을 확인해보세요. 맞춤형 마케팅 전략을 제안해드립니다.</p>
+<div class="cta-buttons">
 <a href="contact.html" class="magnetic-btn" id="magneticBtn">무료 상담 시작하기</a>
+<a href="portfolio.html" class="magnetic-btn secondary">성공 사례 보기</a>
+</div>
 </section>
 
 <!-- FOOTER -->
 <footer class="footer">
-<div class="footer-left">WAVE<span>.</span> © 2024</div>
-<div class="footer-right">
-<a href="services.html">서비스</a>
-<a href="portfolio.html">포트폴리오</a>
+<div class="footer-main">
+<div class="footer-brand">
+<h3>WAVE<span>.</span></h3>
+<p>브랜드의 파도를 만드는 디지털 마케팅 전문 에이전시입니다. 데이터 기반의 전략과 창의적인 실행으로 고객의 성공을 함께 만들어갑니다.</p>
+<div class="footer-social">
+<a href="#" aria-label="인스타그램">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+<rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+<path d="m16 11.37-4-1.4-4 1.4V6h8z"/>
+</svg>
+</a>
+<a href="#" aria-label="유튜브">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+<polygon points="5,3 19,12 5,21"/>
+</svg>
+</a>
+<a href="#" aria-label="네이버">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+</svg>
+</a>
+<a href="#" aria-label="틱톡">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+<path d="M19.5 12c0-.5-.2-.9-.5-1.2l-4-4c-.3-.3-.7-.5-1.2-.5s-.9.2-1.2.5L8 11.4V8c0-.6-.4-1-1-1s-1 .4-1 1v8c0 .6.4 1 1 1s1-.4 1-1v-3.4l4.6 4.6c.3.3.7.5 1.2.5s.9-.2 1.2-.5l4-4c.3-.3.5-.7.5-1.2z"/>
+</svg>
+</a>
+</div>
+</div>
+<div class="footer-col">
+<h4>서비스</h4>
+<a href="services.html">네이버 마케팅</a>
+<a href="services.html">인스타그램 마케팅</a>
+<a href="services.html">유튜브 마케팅</a>
+<a href="services.html">틱톡 마케팅</a>
+<a href="services.html">통합 브랜딩</a>
+<a href="services.html">퍼포먼스 마케팅</a>
+</div>
+<div class="footer-col">
+<h4>회사</h4>
 <a href="about.html">회사소개</a>
-<a href="blog.html">인사이트</a>
-<a href="contact.html">문의</a>
+<a href="about.html">팀 소개</a>
+<a href="portfolio.html">포트폴리오</a>
+<a href="blog.html">블로그</a>
+<a href="contact.html">채용정보</a>
+</div>
+<div class="footer-col">
+<h4>지원</h4>
+<a href="contact.html">문의하기</a>
+<a href="contact.html">무료 상담</a>
+<a href="#">FAQ</a>
+<a href="#">이용약관</a>
+<a href="#">개인정보처리방침</a>
+</div>
+</div>
+<div class="footer-bottom">
+<div class="footer-bottom-left">
+<a href="#">이용약관</a>
+<a href="#">개인정보처리방침</a>
+<a href="#">사업자정보</a>
+</div>
+<div class="footer-copyright">© 2024 WAVE DIGITAL. All rights reserved.</div>
 </div>
 </footer>
 
@@ -380,6 +1076,27 @@ toggle.addEventListener('click',()=>{mobileNav.classList.toggle('open')});
 // Nav scroll
 window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',window.scrollY>50)});
 
+// Hero 슬라이드쇼
+const slides=document.querySelectorAll('.hero-slide');
+let currentSlide=0;
+function nextSlide(){
+slides[currentSlide].classList.remove('active');
+currentSlide=(currentSlide+1)%slides.length;
+slides[currentSlide].classList.add('active');
+}
+setInterval(nextSlide,5000);
+
+// Section fade in animation
+const observerOptions={root:null,rootMargin:'0px',threshold:0.1};
+const observer=new IntersectionObserver((entries)=>{
+entries.forEach(entry=>{
+if(entry.isIntersecting){
+entry.target.classList.add('visible');
+}
+});
+},observerOptions);
+document.querySelectorAll('.fade-in').forEach(el=>{observer.observe(el)});
+
 // Text scrub
 const scrubWords=document.querySelectorAll('#scrubText .word');
 function updateScrub(){
@@ -390,7 +1107,7 @@ scrubWords.forEach((w,i)=>w.classList.toggle('active',i<activeCount));
 }
 window.addEventListener('scroll',updateScrub);
 
-// Progress circles
+// Progress circles with count up animation
 const circles=document.querySelectorAll('.progress-circle');
 let statsAnimated=false;
 function animateStats(){
@@ -402,16 +1119,28 @@ circles.forEach(c=>{
 const target=parseInt(c.dataset.target);
 const fill=c.querySelector('.fill');
 const val=c.querySelector('.value');
-const circumference=2*Math.PI*65;
+const circumference=2*Math.PI*55;
 const isPercent=target<=100;
-const offset=isPercent?circumference*(1-target/100):0;
+const isLarge=target>100;
+let offset;
+if(isPercent){
+offset=circumference*(1-target/100);
+}else{
+offset=circumference*0.2;
+}
 fill.style.strokeDashoffset=offset;
 let current=0;
-const step=Math.ceil(target/60);
+const step=Math.ceil(target/80);
 const timer=setInterval(()=>{
 current+=step;
 if(current>=target){current=target;clearInterval(timer)}
-val.textContent=isPercent?current+'%':current+'+';
+if(isPercent){
+val.textContent=current+'%';
+}else if(isLarge){
+val.textContent=current+'+';
+}else{
+val.textContent=current;
+}
 },25);
 });
 }
@@ -425,12 +1154,13 @@ carousel.addEventListener('mousedown',e=>{isDragging=true;carousel.classList.add
 carousel.addEventListener('mouseleave',()=>{isDragging=false;carousel.classList.remove('dragging')});
 carousel.addEventListener('mouseup',()=>{isDragging=false;carousel.classList.remove('dragging')});
 carousel.addEventListener('mousemove',e=>{if(!isDragging)return;e.preventDefault();const x=e.pageX-carousel.offsetLeft;carousel.scrollLeft=scrollLeft-(x-startX)*1.5});
-carousel.style.overflowX='auto';carousel.style.scrollbarWidth='none';
 
 // Magnetic button
 const magBtn=document.getElementById('magneticBtn');
+if(magBtn){
 magBtn.addEventListener('mousemove',e=>{const rect=magBtn.getBoundingClientRect();const x=e.clientX-rect.left-rect.width/2;const y=e.clientY-rect.top-rect.height/2;magBtn.style.transform=`translate(${x*.3}px,${y*.3}px) scale(1.03)`});
 magBtn.addEventListener('mouseleave',()=>{magBtn.style.transform=''});
+}
 
 // Horizontal scroll grab
 const hScroll=document.getElementById('hScroll');
@@ -438,6 +1168,55 @@ let hDrag=false,hStartX,hScrollL;
 hScroll.addEventListener('mousedown',e=>{hDrag=true;hStartX=e.pageX;hScrollL=hScroll.scrollLeft});
 document.addEventListener('mouseup',()=>hDrag=false);
 document.addEventListener('mousemove',e=>{if(!hDrag)return;hScroll.scrollLeft=hScrollL-(e.pageX-hStartX)});
+
+// FAQ Toggle
+function toggleFAQ(element){
+const faqItem=element.parentElement;
+const answer=faqItem.querySelector('.faq-answer');
+const isOpen=faqItem.classList.contains('open');
+// Close all other FAQ items
+document.querySelectorAll('.faq-item').forEach(item=>{
+item.classList.remove('open');
+item.querySelector('.faq-answer').classList.remove('open');
+});
+// Toggle current item
+if(!isOpen){
+faqItem.classList.add('open');
+answer.classList.add('open');
+}
+}
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor=>{
+anchor.addEventListener('click',function(e){
+e.preventDefault();
+const target=document.querySelector(this.getAttribute('href'));
+if(target){
+target.scrollIntoView({behavior:'smooth'});
+}
+});
+});
+
+// Add loading states
+window.addEventListener('load',()=>{
+document.body.classList.add('loaded');
+});
+
+// Performance optimization - lazy loading
+if('IntersectionObserver'in window){
+const lazyImages=document.querySelectorAll('img[loading="lazy"]');
+const imageObserver=new IntersectionObserver((entries,observer)=>{
+entries.forEach(entry=>{
+if(entry.isIntersecting){
+const img=entry.target;
+img.src=img.src;
+img.classList.remove('lazy');
+observer.unobserve(img);
+}
+});
+});
+lazyImages.forEach(img=>imageObserver.observe(img));
+}
 </script>
 </body>
 </html>
