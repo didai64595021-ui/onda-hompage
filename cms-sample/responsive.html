@@ -9,7 +9,7 @@
 :root{
   --primary:#1B65A6;--accent:#00C9A7;--dark:#0F1724;--bg:#F7F9FC;--card:#fff;
   --text:#1A1F36;--text2:#6B7280;--radius:12px;--shadow:0 2px 16px rgba(0,0,0,.06);
-  --danger:#EF4444;--warning:#F59E0B;--success:#10B981;
+  --danger:#EF4444;--success:#10B981;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Noto Sans KR',sans-serif;color:var(--text);background:var(--bg);line-height:1.7}
@@ -29,48 +29,103 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--text);background:var(--bg
 .section-header h1{font-size:2rem;font-weight:900;margin-bottom:8px}
 .section-header p{color:var(--text2);font-size:1rem;max-width:520px;margin:0 auto}
 
-/* Device Buttons */
-.device-btns{display:flex;justify-content:center;gap:12px;margin-bottom:32px;flex-wrap:wrap}
-.device-btn{padding:10px 20px;border:2px solid #e5e7eb;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;font-size:.9rem;transition:all .3s}
-.device-btn.active{border-color:var(--primary);background:var(--primary);color:#fff}
+/* ===== Comparison Illustration ===== */
+.compare-illustration{display:flex;gap:40px;justify-content:center;align-items:flex-start;margin-bottom:56px;flex-wrap:wrap}
+.illust-side{flex:1;min-width:280px;max-width:480px}
+.illust-label{font-weight:700;font-size:1rem;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.illust-label.good{color:var(--accent)}
+.illust-label.bad{color:var(--danger)}
 
-/* Compare */
-.compare-wrap{display:grid;grid-template-columns:1fr 1fr;gap:32px}
-@media(max-width:768px){.compare-wrap{grid-template-columns:1fr}}
-.compare-box{border:2px solid #e5e7eb;border-radius:var(--radius);overflow:hidden}
-.compare-box.good{border-color:var(--accent)}
-.compare-box.bad{border-color:var(--danger)}
-.compare-label{padding:12px 16px;font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:8px}
-.compare-box.good .compare-label{background:rgba(0,201,167,.1);color:var(--accent)}
-.compare-box.bad .compare-label{background:rgba(239,68,68,.1);color:var(--danger)}
-.compare-viewport{margin:16px;border:2px solid #e5e7eb;border-radius:8px;overflow:hidden;transition:width .5s ease;background:#fff;position:relative}
-.compare-viewport.responsive{width:100%}
-.compare-viewport.non-responsive{overflow-x:auto}
-.compare-inner{min-width:900px;padding:20px}
-.compare-viewport.responsive .compare-inner{min-width:0}
-.demo-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.compare-viewport.responsive .demo-cards{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
-.demo-card{background:var(--bg);border-radius:8px;padding:16px;text-align:center}
-.demo-card .icon{width:48px;height:48px;border-radius:50%;background:var(--primary);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem}
-.demo-card h4{font-size:.9rem;margin-bottom:4px}
-.demo-card p{font-size:.75rem;color:var(--text2)}
-.overflow-indicator{display:none;position:absolute;right:0;top:0;bottom:0;width:40px;background:linear-gradient(to right,transparent,rgba(239,68,68,.15));pointer-events:none}
-.compare-viewport.non-responsive .overflow-indicator{display:block}
+/* Device Frames */
+.device-group{display:flex;gap:12px;align-items:flex-end;justify-content:center}
+.device-frame{background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1);position:relative}
+.device-frame::before{content:'';display:block;height:20px;background:#f1f3f5;border-bottom:1px solid #e5e7eb;position:relative}
+.device-frame::after{content:'';position:absolute;top:6px;left:8px;width:8px;height:8px;border-radius:50%;background:#ccc;box-shadow:14px 0 0 #ccc,28px 0 0 #ccc}
+.device-frame.pc{width:220px;height:160px}
+.device-frame.tablet{width:120px;height:150px}
+.device-frame.mobile{width:70px;height:130px}
 
-/* Bottom Nav */
-.bottom-nav{text-align:center;margin-top:60px;padding:32px 0}
+/* Good device content */
+.device-content{padding:8px;height:calc(100% - 20px);display:flex;flex-direction:column;gap:4px}
+.d-nav{height:10px;background:var(--primary);border-radius:3px;opacity:.8}
+.d-hero{flex:0 0 28px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:4px;display:flex;align-items:center;justify-content:center}
+.d-hero-text{width:60%;height:6px;background:rgba(255,255,255,.6);border-radius:2px}
+.d-cards{display:flex;gap:3px;flex:1}
+.d-card{flex:1;background:var(--bg);border-radius:3px;min-height:16px}
+.d-footer{height:8px;background:#e5e7eb;border-radius:2px}
+
+/* Mobile stacked cards for responsive */
+.device-frame.mobile .d-cards{flex-direction:column}
+.device-frame.tablet .d-cards .d-card:nth-child(3){display:none}
+
+/* Bad device content - overflow */
+.device-content.bad{position:relative}
+.device-content.bad .d-inner{min-width:200px;padding:0;display:flex;flex-direction:column;gap:4px;height:100%}
+.device-frame.tablet .device-content.bad,
+.device-frame.mobile .device-content.bad{overflow:hidden}
+.device-content.bad .d-cards .d-card{min-width:55px}
+
+/* Overflow warning stripe */
+.overflow-stripe{position:absolute;right:0;top:20px;bottom:0;width:14px;background:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(239,68,68,.15) 3px,rgba(239,68,68,.15) 6px)}
+.device-frame.pc .overflow-stripe{display:none}
+
+/* Cut-off indicator */
+.cut-label{position:absolute;bottom:4px;right:2px;font-size:7px;color:var(--danger);font-weight:700;writing-mode:vertical-rl}
+.device-frame.pc .cut-label{display:none}
+
+/* VS Divider */
+.vs-divider{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 0;flex-shrink:0}
+.vs-circle{width:48px;height:48px;border-radius:50%;background:var(--dark);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.9rem}
+
+/* ===== Guide Text ===== */
+.guide-text{text-align:center;margin-bottom:48px;padding:20px;background:linear-gradient(135deg,rgba(27,101,166,.06),rgba(0,201,167,.06));border-radius:var(--radius);border:1px dashed rgba(27,101,166,.2)}
+.guide-text p{font-size:1.1rem;font-weight:700;color:var(--primary)}
+.guide-text small{color:var(--text2);font-size:.85rem}
+
+/* ===== Sample Cards ===== */
+.sample-cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:48px}
+@media(max-width:640px){.sample-cards{grid-template-columns:1fr}}
+.sample-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:transform .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block;border:2px solid transparent}
+.sample-card:hover{transform:translateY(-4px);box-shadow:0 8px 32px rgba(0,0,0,.1)}
+.sample-card.good{border-color:rgba(0,201,167,.3)}
+.sample-card.good:hover{border-color:var(--accent)}
+.sample-card.bad{border-color:rgba(239,68,68,.3)}
+.sample-card.bad:hover{border-color:var(--danger)}
+.card-header{padding:24px 24px 16px;display:flex;align-items:center;gap:12px}
+.card-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.sample-card.good .card-icon{background:rgba(0,201,167,.12);color:var(--accent)}
+.sample-card.bad .card-icon{background:rgba(239,68,68,.12);color:var(--danger)}
+.card-header h3{font-size:1.1rem;font-weight:700}
+.card-body{padding:0 24px 24px}
+.card-body p{color:var(--text2);font-size:.9rem;line-height:1.6;margin-bottom:16px}
+.card-action{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:.9rem;color:var(--primary)}
+
+/* ===== Bottom Nav ===== */
+.bottom-nav{text-align:center;margin-top:40px;padding:32px 0}
 .bottom-nav a{display:inline-block;padding:14px 32px;background:var(--primary);color:#fff;text-decoration:none;border-radius:8px;font-weight:700;font-size:1rem;transition:background .2s}
 .bottom-nav a:hover{background:#154f85}
 
 /* Footer */
 .footer{text-align:center;padding:32px 24px;color:var(--text2);font-size:.85rem;border-top:1px solid #e5e7eb;margin-top:20px}
+
+/* Responsive */
+@media(max-width:768px){
+  .section-header h1{font-size:1.5rem}
+  .compare-illustration{gap:20px}
+  .illust-side{min-width:240px}
+  .device-frame.pc{width:160px;height:120px}
+  .device-frame.tablet{width:90px;height:110px}
+  .device-frame.mobile{width:55px;height:100px}
+  .vs-divider{padding:10px 0}
+  .vs-circle{width:36px;height:36px;font-size:.75rem}
+}
 </style>
 </head>
 <body>
 
 <!-- Top Navigation -->
 <nav class="top-nav">
-  <a href="index.html">← 메인으로</a>
+  <a href="index.html">&larr; 메인으로</a>
   <span class="nav-title">반응형 vs 미반응형 비교</span>
   <span class="nav-logo">ONDA CMS</span>
 </nav>
@@ -80,131 +135,165 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--text);background:var(--bg
 
   <!-- Section Header -->
   <div class="section-header">
-    <span class="badge">SECTION 1</span>
-    <h1>반응형 vs 미반응형 비교</h1>
-    <p>같은 레이아웃이 화면 크기에 따라 어떻게 달라지는지 직접 확인하세요.</p>
+    <span class="badge">RESPONSIVE</span>
+    <h1>반응형 웹 vs 미반응형 웹</h1>
+    <p>같은 웹사이트가 기기에 따라 어떻게 달라지는지 한눈에 확인하세요.</p>
   </div>
 
-  <!-- Device Switch Buttons -->
-  <div class="device-btns">
-    <button class="device-btn active" data-width="100%" onclick="switchDevice(this,'100%')">🖥 데스크톱 (100%)</button>
-    <button class="device-btn" data-width="768px" onclick="switchDevice(this,'768px')">📱 태블릿 (768px)</button>
-    <button class="device-btn" data-width="375px" onclick="switchDevice(this,'375px')">📲 모바일 (375px)</button>
-  </div>
+  <!-- ===== Comparison Illustration ===== -->
+  <div class="compare-illustration">
 
-  <!-- Compare Boxes -->
-  <div class="compare-wrap">
-
-    <!-- Left: Responsive -->
-    <div class="compare-box good">
-      <div class="compare-label">✅ 반응형 (온다 CMS)</div>
-      <div class="compare-viewport responsive" id="vpGood">
-        <div class="compare-inner">
-          <div class="demo-cards">
-            <div class="demo-card">
-              <div class="icon">🎨</div>
-              <h4>디자인</h4>
-              <p>드래그&드롭으로 완성</p>
+    <!-- Good: Responsive -->
+    <div class="illust-side">
+      <div class="illust-label good">&#10003; 반응형 웹사이트</div>
+      <div class="device-group">
+        <!-- PC -->
+        <div class="device-frame pc">
+          <div class="device-content">
+            <div class="d-nav"></div>
+            <div class="d-hero"><div class="d-hero-text"></div></div>
+            <div class="d-cards">
+              <div class="d-card"></div>
+              <div class="d-card"></div>
+              <div class="d-card"></div>
             </div>
-            <div class="demo-card">
-              <div class="icon">⚡</div>
-              <h4>속도</h4>
-              <p>초고속 로딩</p>
+            <div class="d-footer"></div>
+          </div>
+        </div>
+        <!-- Tablet -->
+        <div class="device-frame tablet">
+          <div class="device-content">
+            <div class="d-nav"></div>
+            <div class="d-hero"><div class="d-hero-text"></div></div>
+            <div class="d-cards">
+              <div class="d-card"></div>
+              <div class="d-card"></div>
+              <div class="d-card"></div>
             </div>
-            <div class="demo-card">
-              <div class="icon">📱</div>
-              <h4>반응형</h4>
-              <p>모든 기기 최적화</p>
+            <div class="d-footer"></div>
+          </div>
+        </div>
+        <!-- Mobile -->
+        <div class="device-frame mobile">
+          <div class="device-content">
+            <div class="d-nav"></div>
+            <div class="d-hero"><div class="d-hero-text"></div></div>
+            <div class="d-cards">
+              <div class="d-card"></div>
+              <div class="d-card"></div>
+              <div class="d-card"></div>
             </div>
-            <div class="demo-card">
-              <div class="icon">🔒</div>
-              <h4>보안</h4>
-              <p>SSL 기본 제공</p>
-            </div>
-            <div class="demo-card">
-              <div class="icon">📊</div>
-              <h4>SEO</h4>
-              <p>검색엔진 최적화</p>
-            </div>
-            <div class="demo-card">
-              <div class="icon">🛠</div>
-              <h4>관리</h4>
-              <p>쉬운 콘텐츠 관리</p>
-            </div>
+            <div class="d-footer"></div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Right: Non-responsive -->
-    <div class="compare-box bad">
-      <div class="compare-label">❌ 미반응형 (구형 빌더)</div>
-      <div class="compare-viewport non-responsive" id="vpBad">
-        <div class="compare-inner">
-          <div class="demo-cards">
-            <div class="demo-card">
-              <div class="icon">🎨</div>
-              <h4>디자인</h4>
-              <p>드래그&드롭으로 완성</p>
+    <!-- VS -->
+    <div class="vs-divider">
+      <div class="vs-circle">VS</div>
+    </div>
+
+    <!-- Bad: Non-responsive -->
+    <div class="illust-side">
+      <div class="illust-label bad">&#10007; 미반응형 웹사이트</div>
+      <div class="device-group">
+        <!-- PC (looks fine) -->
+        <div class="device-frame pc">
+          <div class="device-content bad">
+            <div class="d-inner">
+              <div class="d-nav"></div>
+              <div class="d-hero"><div class="d-hero-text"></div></div>
+              <div class="d-cards">
+                <div class="d-card"></div>
+                <div class="d-card"></div>
+                <div class="d-card"></div>
+              </div>
+              <div class="d-footer"></div>
             </div>
-            <div class="demo-card">
-              <div class="icon">⚡</div>
-              <h4>속도</h4>
-              <p>초고속 로딩</p>
-            </div>
-            <div class="demo-card">
-              <div class="icon">📱</div>
-              <h4>반응형</h4>
-              <p>모든 기기 최적화</p>
-            </div>
-            <div class="demo-card">
-              <div class="icon">🔒</div>
-              <h4>보안</h4>
-              <p>SSL 기본 제공</p>
-            </div>
-            <div class="demo-card">
-              <div class="icon">📊</div>
-              <h4>SEO</h4>
-              <p>검색엔진 최적화</p>
-            </div>
-            <div class="demo-card">
-              <div class="icon">🛠</div>
-              <h4>관리</h4>
-              <p>쉬운 콘텐츠 관리</p>
-            </div>
+            <div class="overflow-stripe"></div>
           </div>
         </div>
-        <div class="overflow-indicator"></div>
+        <!-- Tablet (overflow) -->
+        <div class="device-frame tablet">
+          <div class="device-content bad">
+            <div class="d-inner">
+              <div class="d-nav"></div>
+              <div class="d-hero"><div class="d-hero-text"></div></div>
+              <div class="d-cards">
+                <div class="d-card"></div>
+                <div class="d-card"></div>
+                <div class="d-card"></div>
+              </div>
+              <div class="d-footer"></div>
+            </div>
+            <div class="overflow-stripe"></div>
+            <span class="cut-label">CUT</span>
+          </div>
+        </div>
+        <!-- Mobile (overflow severe) -->
+        <div class="device-frame mobile">
+          <div class="device-content bad">
+            <div class="d-inner">
+              <div class="d-nav"></div>
+              <div class="d-hero"><div class="d-hero-text"></div></div>
+              <div class="d-cards">
+                <div class="d-card"></div>
+                <div class="d-card"></div>
+                <div class="d-card"></div>
+              </div>
+              <div class="d-footer"></div>
+            </div>
+            <div class="overflow-stripe"></div>
+            <span class="cut-label">CUT</span>
+          </div>
+        </div>
       </div>
     </div>
 
+  </div>
+
+  <!-- Guide Text -->
+  <div class="guide-text">
+    <p>PC에서 웹 브라우저 창을 늘리고 줄여보세요!</p>
+    <small>아래 샘플 페이지를 열고 브라우저 창 크기를 조절하면 차이를 직접 체험할 수 있습니다.</small>
+  </div>
+
+  <!-- Sample Cards -->
+  <div class="sample-cards">
+    <!-- Card 1: Responsive -->
+    <a href="responsive-sample.html" class="sample-card good">
+      <div class="card-header">
+        <div class="card-icon">&#10003;</div>
+        <h3>반응형 샘플</h3>
+      </div>
+      <div class="card-body">
+        <p>브라우저 창 크기를 줄여보세요. 레이아웃이 자동으로 최적화됩니다.</p>
+        <span class="card-action">샘플 페이지 열기 &rarr;</span>
+      </div>
+    </a>
+    <!-- Card 2: Non-responsive -->
+    <a href="non-responsive-sample.html" class="sample-card bad">
+      <div class="card-header">
+        <div class="card-icon">&#10007;</div>
+        <h3>미반응형 샘플</h3>
+      </div>
+      <div class="card-body">
+        <p>브라우저 창 크기를 줄여보세요. 콘텐츠가 잘리고 가로 스크롤이 생깁니다.</p>
+        <span class="card-action">샘플 페이지 열기 &rarr;</span>
+      </div>
+    </a>
   </div>
 
   <!-- Bottom Navigation -->
   <div class="bottom-nav">
-    <a href="editor.html">다음 기능 보기: CMS 편집기능 →</a>
+    <a href="editor.html">다음 기능 보기: CMS 편집기능 &rarr;</a>
   </div>
 
 </div>
 
 <!-- Footer -->
-<div class="footer">© 2026 ONDA Marketing. CMS 웹빌더 토탈 기능 데모 페이지.</div>
-
-<script>
-function switchDevice(btn, width) {
-  // Toggle active class
-  document.querySelectorAll('.device-btn').forEach(function(b) {
-    b.classList.remove('active');
-  });
-  btn.classList.add('active');
-
-  // Set max-width on both viewports
-  var vpGood = document.getElementById('vpGood');
-  var vpBad = document.getElementById('vpBad');
-  vpGood.style.maxWidth = width;
-  vpBad.style.maxWidth = width;
-}
-</script>
+<div class="footer">&copy; 2026 ONDA Marketing. CMS 웹빌더 토탈 기능 데모 페이지.</div>
 
 </body>
 </html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>반응형 샘플 — ONDA CMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#1B65A6;--accent:#00C9A7;--dark:#0F1724;--bg:#F7F9FC;--card:#fff;
+  --text:#1A1F36;--text2:#6B7280;--radius:12px;--shadow:0 2px 16px rgba(0,0,0,.06);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--text);background:#fff;line-height:1.7}
+
+/* ===== Back Bar ===== */
+.back-bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--accent);display:flex;align-items:center;padding:0 20px;z-index:2000}
+.back-bar a{color:#fff;text-decoration:none;font-weight:700;font-size:.85rem}
+
+/* ===== Navbar ===== */
+.navbar{position:sticky;top:44px;background:#fff;border-bottom:1px solid #e5e7eb;z-index:1000;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px}
+.nav-brand{font-weight:900;font-size:1.2rem;color:var(--primary)}
+.nav-links{display:flex;gap:28px;list-style:none}
+.nav-links a{text-decoration:none;color:var(--text);font-weight:500;font-size:.9rem;transition:color .2s}
+.nav-links a:hover{color:var(--primary)}
+.nav-cta{padding:10px 22px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:.85rem;cursor:pointer}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;background:none;border:none}
+.hamburger span{display:block;width:24px;height:2px;background:var(--text);transition:all .3s}
+
+/* ===== Hero ===== */
+.hero{padding:80px 24px;text-align:center;background:linear-gradient(135deg,#e8f4fd 0%,#f0fdf9 100%)}
+.hero h1{font-size:2.4rem;font-weight:900;margin-bottom:16px;line-height:1.3}
+.hero h1 span{color:var(--primary)}
+.hero p{color:var(--text2);font-size:1.1rem;max-width:560px;margin:0 auto 32px}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-primary{padding:14px 32px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;text-decoration:none}
+.btn-outline{padding:14px 32px;background:transparent;color:var(--primary);border:2px solid var(--primary);border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;text-decoration:none}
+
+/* ===== Services ===== */
+.services{padding:80px 24px;max-width:1100px;margin:0 auto}
+.services-header{text-align:center;margin-bottom:48px}
+.services-header h2{font-size:1.8rem;font-weight:900;margin-bottom:8px}
+.services-header p{color:var(--text2);font-size:1rem}
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.service-card{background:var(--bg);border-radius:var(--radius);padding:32px 24px;text-align:center;transition:transform .2s,box-shadow .2s}
+.service-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.service-icon{width:56px;height:56px;border-radius:14px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 16px}
+.service-card h3{font-size:1.05rem;font-weight:700;margin-bottom:8px}
+.service-card p{color:var(--text2);font-size:.88rem}
+
+/* ===== About ===== */
+.about{padding:80px 24px;background:var(--bg)}
+.about-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.about-img{background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:var(--radius);height:320px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:3rem;font-weight:900}
+.about-text h2{font-size:1.8rem;font-weight:900;margin-bottom:16px}
+.about-text p{color:var(--text2);font-size:1rem;margin-bottom:24px}
+.about-text ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.about-text li{display:flex;align-items:center;gap:10px;font-size:.95rem}
+.about-text li::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0}
+
+/* ===== Contact ===== */
+.contact{padding:80px 24px;max-width:700px;margin:0 auto;text-align:center}
+.contact h2{font-size:1.8rem;font-weight:900;margin-bottom:8px}
+.contact>p{color:var(--text2);margin-bottom:32px}
+.contact-form{display:flex;flex-direction:column;gap:16px;text-align:left}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.contact-form label{font-weight:600;font-size:.9rem;margin-bottom:4px;display:block}
+.contact-form input,.contact-form textarea{width:100%;padding:12px 16px;border:1px solid #e5e7eb;border-radius:8px;font-size:.95rem;font-family:inherit;outline:none;transition:border-color .2s}
+.contact-form input:focus,.contact-form textarea:focus{border-color:var(--primary)}
+.contact-form textarea{resize:vertical;min-height:120px}
+.form-submit{padding:14px 32px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;align-self:center}
+
+/* ===== Footer ===== */
+.footer{background:var(--dark);color:#fff;padding:48px 24px}
+.footer-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:32px}
+.footer h4{font-weight:700;margin-bottom:12px;font-size:.95rem}
+.footer p,.footer a{color:rgba(255,255,255,.7);font-size:.85rem;text-decoration:none;line-height:2}
+.footer a:hover{color:#fff}
+.footer-bottom{max-width:1100px;margin:24px auto 0;padding-top:24px;border-top:1px solid rgba(255,255,255,.1);font-size:.8rem;color:rgba(255,255,255,.5);text-align:center}
+
+/* ===== Responsive ===== */
+@media(max-width:768px){
+  .nav-links,.nav-cta{display:none}
+  .hamburger{display:flex}
+  .nav-links.open{display:flex;flex-direction:column;position:absolute;top:64px;left:0;right:0;background:#fff;padding:20px 24px;border-bottom:1px solid #e5e7eb;gap:16px}
+  .hero h1{font-size:1.6rem}
+  .hero p{font-size:.95rem}
+  .services-grid{grid-template-columns:1fr}
+  .about-inner{grid-template-columns:1fr}
+  .about-img{height:200px;font-size:2rem}
+  .form-row{grid-template-columns:1fr}
+  .footer-inner{grid-template-columns:1fr}
+}
+@media(min-width:769px) and (max-width:1024px){
+  .services-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- Back Bar -->
+<div class="back-bar">
+  <a href="responsive.html">&larr; 비교 페이지로 돌아가기 (반응형 샘플)</a>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="nav-brand">SampleBiz</div>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#services">서비스</a></li>
+    <li><a href="#about">소개</a></li>
+    <li><a href="#contact">문의</a></li>
+  </ul>
+  <button class="nav-cta">무료 상담</button>
+  <button class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="메뉴">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <h1>비즈니스를 위한<br><span>올인원 솔루션</span></h1>
+  <p>효율적인 업무 자동화와 데이터 기반 의사결정으로 비즈니스를 한 단계 성장시키세요.</p>
+  <div class="hero-btns">
+    <a href="#contact" class="btn-primary">무료 체험 시작</a>
+    <a href="#services" class="btn-outline">서비스 알아보기</a>
+  </div>
+</section>
+
+<!-- Services -->
+<section class="services" id="services">
+  <div class="services-header">
+    <h2>핵심 서비스</h2>
+    <p>비즈니스 성장을 위한 3가지 핵심 솔루션을 제공합니다.</p>
+  </div>
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-icon">&#9881;</div>
+      <h3>업무 자동화</h3>
+      <p>반복 업무를 자동화하여 핵심 업무에 집중할 수 있도록 도와드립니다.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">&#9733;</div>
+      <h3>데이터 분석</h3>
+      <p>실시간 데이터 분석으로 정확한 비즈니스 인사이트를 제공합니다.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">&#9830;</div>
+      <h3>고객 관리</h3>
+      <p>체계적인 CRM으로 고객 만족도를 높이고 매출을 증대시킵니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- About -->
+<section class="about" id="about">
+  <div class="about-inner">
+    <div class="about-img">SAMPLE</div>
+    <div class="about-text">
+      <h2>10년의 경험,<br>1,000+ 고객사</h2>
+      <p>국내 최고의 비즈니스 솔루션 파트너로서 다양한 산업군의 기업들과 함께 성장해왔습니다.</p>
+      <ul>
+        <li>맞춤형 솔루션 설계</li>
+        <li>24시간 기술 지원</li>
+        <li>99.9% 서비스 가동률</li>
+        <li>ISO 27001 보안 인증</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Contact -->
+<section class="contact" id="contact">
+  <h2>문의하기</h2>
+  <p>아래 양식을 작성해주시면 24시간 내에 답변드리겠습니다.</p>
+  <form class="contact-form" onsubmit="return false">
+    <div class="form-row">
+      <div>
+        <label>이름</label>
+        <input type="text" placeholder="홍길동">
+      </div>
+      <div>
+        <label>이메일</label>
+        <input type="email" placeholder="email@example.com">
+      </div>
+    </div>
+    <div>
+      <label>회사명</label>
+      <input type="text" placeholder="(주)예시회사">
+    </div>
+    <div>
+      <label>문의 내용</label>
+      <textarea placeholder="문의 내용을 입력해주세요."></textarea>
+    </div>
+    <button type="submit" class="form-submit">문의 보내기</button>
+  </form>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <h4>SampleBiz</h4>
+      <p>비즈니스 성장의 파트너<br>서울특별시 강남구 테헤란로 123<br>대표전화: 02-1234-5678</p>
+    </div>
+    <div>
+      <h4>서비스</h4>
+      <a href="#">업무 자동화</a><br>
+      <a href="#">데이터 분석</a><br>
+      <a href="#">고객 관리</a>
+    </div>
+    <div>
+      <h4>고객 지원</h4>
+      <a href="#">이용약관</a><br>
+      <a href="#">개인정보처리방침</a><br>
+      <a href="#">FAQ</a>
+    </div>
+  </div>
+  <div class="footer-bottom">&copy; 2026 SampleBiz. All rights reserved. (반응형 데모 페이지)</div>
+</footer>
+
+</body>
+</html>
