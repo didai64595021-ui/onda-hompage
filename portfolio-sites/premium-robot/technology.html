@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>핵심 기술 — NEXABOT</title>
+<meta name="description" content="AI 비전, 6축 정밀 제어, 예측 유지보수, 엣지 컴퓨팅 — NEXABOT의 핵심 기술력을 소개합니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===== CSS VARIABLES ===== */
+:root {
+  --bg-primary: #0A0A0F;
+  --bg-surface: #12121A;
+  --bg-card: #1A1A24;
+  --accent: #00D4FF;
+  --accent-glow: rgba(0, 212, 255, 0.15);
+  --text-primary: #E0E0E8;
+  --text-secondary: #6B6B80;
+  --text-dark: #1A1A2E;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ===== RESET ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  word-break: keep-all;
+  overflow-x: hidden;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+img { max-width: 100%; display: block; }
+ul { list-style: none; }
+
+/* ===== GRAIN TEXTURE OVERLAY ===== */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99990;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* ===== SCROLL PROGRESS BAR ===== */
+#scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 0%;
+  height: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent), 0 0 16px rgba(0,212,255,0.5);
+  z-index: 99998;
+  transition: none;
+}
+
+/* ===== CUSTOM CURSOR ===== */
+#cursor-dot {
+  position: fixed;
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99997;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s;
+  box-shadow: 0 0 8px var(--accent);
+}
+#cursor-ring {
+  position: fixed;
+  width: 36px; height: 36px;
+  border: 1.5px solid rgba(0, 212, 255, 0.6);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99996;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s var(--ease-expo), height 0.4s var(--ease-expo), border-color 0.3s;
+}
+#cursor-ring.expanded {
+  width: 56px; height: 56px;
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(0,212,255,0.3);
+}
+@media (pointer: coarse) {
+  #cursor-dot, #cursor-ring { display: none; }
+  body { cursor: auto; }
+}
+
+/* ===== HEADER / NAV ===== */
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 24px 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.4s, backdrop-filter 0.4s, padding 0.4s;
+}
+header.scrolled {
+  background: rgba(10,10,15,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 16px 80px;
+  border-bottom: 1px solid rgba(0,212,255,0.08);
+}
+.logo {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: var(--text-primary);
+}
+.logo span { color: var(--accent); }
+nav ul {
+  display: flex;
+  gap: 40px;
+}
+nav a {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  transition: color 0.3s;
+  position: relative;
+}
+nav a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 0; height: 1px;
+  background: var(--accent);
+  transition: width 0.4s var(--ease-expo);
+}
+nav a:hover { color: var(--text-primary); }
+nav a:hover::after { width: 100%; }
+nav a.active { color: var(--accent); }
+nav a.active::after { width: 100%; }
+.nav-cta {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  padding: 10px 24px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  border-radius: 2px;
+  transition: all 0.3s;
+  display: inline-block;
+}
+.nav-cta:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
+  box-shadow: 0 0 24px rgba(0,212,255,0.4);
+}
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 10001;
+}
+.hamburger span {
+  display: block;
+  width: 24px; height: 2px;
+  background: var(--text-primary);
+  transition: all 0.4s var(--ease-expo);
+  transform-origin: center;
+}
+.hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.active span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ===== MOBILE NAV OVERLAY ===== */
+#mobile-nav {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,10,15,0.97);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s var(--ease-expo);
+}
+#mobile-nav.active {
+  opacity: 1;
+  pointer-events: all;
+}
+.mobile-nav-links {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.mobile-nav-links a {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 2px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: color 0.3s, opacity 0.5s var(--ease-expo), transform 0.5s var(--ease-expo);
+}
+#mobile-nav.active .mobile-nav-links a {
+  opacity: 1;
+  transform: translateY(0);
+}
+#mobile-nav.active .mobile-nav-links a:nth-child(1) { transition-delay: 0.05s; }
+#mobile-nav.active .mobile-nav-links a:nth-child(2) { transition-delay: 0.1s; }
+#mobile-nav.active .mobile-nav-links a:nth-child(3) { transition-delay: 0.15s; }
+#mobile-nav.active .mobile-nav-links a:nth-child(4) { transition-delay: 0.2s; }
+#mobile-nav.active .mobile-nav-links a:nth-child(5) { transition-delay: 0.25s; }
+#mobile-nav.active .mobile-nav-links a:nth-child(6) { transition-delay: 0.3s; }
+.mobile-nav-links a:hover { color: var(--accent); }
+
+/* ===== HERO ===== */
+#hero {
+  position: relative;
+  height: 100vh;
+  min-height: 700px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 80px;
+  overflow: hidden;
+}
+.hero-dot-bg {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, #1A1A24 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: 0.6;
+  pointer-events: none;
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 1280px;
+  width: 100%;
+}
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  margin-bottom: 24px;
+  opacity: 0;
+  animation: fade-up 0.8s var(--ease-expo) 0.3s forwards;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 8vw, 120px);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 32px;
+  position: relative;
+  opacity: 0;
+  animation: fade-up 0.9s var(--ease-expo) 0.5s forwards;
+}
+.hero-title.glitch-active::before,
+.hero-title.glitch-active::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+}
+.hero-title.glitch-active::before {
+  color: var(--accent);
+  clip-path: inset(30% 0 50% 0);
+  animation: glitch-title-a 0.4s steps(3) forwards;
+}
+.hero-title.glitch-active::after {
+  color: #FF0040;
+  clip-path: inset(55% 0 20% 0);
+  animation: glitch-title-b 0.4s steps(3) forwards;
+}
+@keyframes glitch-title-a {
+  0% { transform: translateX(0); }
+  33% { transform: translateX(-8px); }
+  66% { transform: translateX(6px); }
+  100% { transform: translateX(0); }
+}
+@keyframes glitch-title-b {
+  0% { transform: translateX(0); }
+  33% { transform: translateX(8px); }
+  66% { transform: translateX(-6px); }
+  100% { transform: translateX(0); }
+}
+.hero-sub {
+  font-family: var(--font-body);
+  font-size: clamp(16px, 2vw, 22px);
+  font-weight: 300;
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.7;
+  opacity: 0;
+  animation: fade-up 0.8s var(--ease-expo) 0.7s forwards;
+}
+.hero-scroll {
+  position: absolute;
+  bottom: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  animation: fade-in 1s ease 1.2s forwards;
+}
+.hero-scroll span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--text-secondary);
+}
+.scroll-line {
+  width: 1px;
+  height: 48px;
+  background: linear-gradient(to bottom, var(--text-secondary), transparent);
+  animation: scroll-pulse 2s ease-in-out infinite;
+}
+@keyframes scroll-pulse {
+  0%, 100% { transform: scaleY(1); opacity: 0.5; }
+  50% { transform: scaleY(1.3); opacity: 1; }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ===== COMMON ===== */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 80px;
+}
+section { position: relative; overflow: hidden; }
+
+/* ===== REVEAL ANIMATIONS ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.9s var(--ease-expo), transform 0.9s var(--ease-expo);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.clip-reveal {
+  clip-path: inset(100% 0 0 0);
+  transition: clip-path 1s var(--ease-expo);
+}
+.clip-reveal.visible {
+  clip-path: inset(0% 0 0 0);
+}
+.revealed, .reveal.revealed, .clip-reveal.revealed, .stagger-parent.revealed {
+  opacity: 1 !important;
+  transform: none !important;
+  clip-path: none !important;
+}
+.revealed > *, .stagger-parent.revealed .stagger-child {
+  opacity: 1 !important;
+  transform: none !important;
+}
+.stagger-parent .stagger-child {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s var(--ease-expo), transform 0.7s var(--ease-expo);
+}
+.stagger-parent.visible .stagger-child:nth-child(1) { opacity:1; transform:translateY(0); transition-delay: 0s; }
+.stagger-parent.visible .stagger-child:nth-child(2) { opacity:1; transform:translateY(0); transition-delay: 0.1s; }
+.stagger-parent.visible .stagger-child:nth-child(3) { opacity:1; transform:translateY(0); transition-delay: 0.15s; }
+.stagger-parent.visible .stagger-child:nth-child(4) { opacity:1; transform:translateY(0); transition-delay: 0.2s; }
+.stagger-parent.visible .stagger-child:nth-child(5) { opacity:1; transform:translateY(0); transition-delay: 0.25s; }
+.stagger-parent.visible .stagger-child:nth-child(6) { opacity:1; transform:translateY(0); transition-delay: 0.3s; }
+
+/* ===== TECH CARDS — HORIZONTAL SCROLL ===== */
+#tech-cards-section {
+  padding: 120px 0;
+  background: var(--bg-surface);
+}
+.section-header {
+  max-width: 1280px;
+  margin: 0 auto 64px;
+  padding: 0 80px;
+}
+.section-tag {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  margin-bottom: 16px;
+  display: block;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 4vw, 56px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+.section-title em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.tech-scroll-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0 80px 40px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.tech-scroll-container::-webkit-scrollbar { display: none; }
+.tech-scroll-track {
+  display: flex;
+  gap: 24px;
+  width: max-content;
+}
+.tech-card {
+  flex-shrink: 0;
+  width: 320px;
+  padding: 48px 36px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+  scroll-snap-align: start;
+  transition: border-color 0.4s, box-shadow 0.5s var(--ease-expo), transform 0.3s var(--ease-expo);
+}
+.tech-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 3px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+}
+.tech-card:hover {
+  border-color: rgba(0,212,255,0.3);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 32px rgba(0,212,255,0.08);
+  transform: translateY(-4px);
+}
+.tech-card-icon {
+  font-size: 32px;
+  margin-bottom: 4px;
+}
+.tech-card-metric {
+  font-family: var(--font-mono);
+  font-size: clamp(48px, 5vw, 64px);
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.tech-card-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.tech-card-desc {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+.scroll-hint {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 80px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.scroll-hint-text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--text-secondary);
+}
+.scroll-hint-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(107,107,128,0.3), transparent);
+}
+.scroll-hint-arrow {
+  font-size: 14px;
+  color: var(--accent);
+  animation: hint-bounce 1.5s ease-in-out infinite;
+}
+@keyframes hint-bounce {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(6px); }
+}
+
+/* ===== TIMELINE SECTION ===== */
+#timeline-section {
+  padding: 120px 0;
+  background: var(--bg-primary);
+}
+.timeline-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 80px;
+  position: relative;
+}
+.timeline-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255,255,255,0.08);
+  transform: translateX(-50%);
+}
+.timeline-line::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 0;
+  background: linear-gradient(to bottom, var(--accent), rgba(0,212,255,0.2));
+  animation: timeline-grow 2s var(--ease-expo) forwards;
+}
+@keyframes timeline-grow {
+  to { height: 100%; }
+}
+.timeline-item {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  margin-bottom: 64px;
+  position: relative;
+}
+.timeline-item:last-child { margin-bottom: 0; }
+.timeline-item:nth-child(odd) {
+  flex-direction: row;
+}
+.timeline-item:nth-child(even) {
+  flex-direction: row-reverse;
+}
+.timeline-dot {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px; height: 14px;
+  background: var(--bg-primary);
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  z-index: 2;
+  transition: all 0.4s;
+}
+.timeline-item:hover .timeline-dot {
+  background: var(--accent);
+  box-shadow: 0 0 16px rgba(0,212,255,0.5);
+  transform: translateX(-50%) scale(1.3);
+}
+.timeline-year {
+  font-family: var(--font-mono);
+  font-size: 48px;
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1;
+  width: calc(50% - 48px);
+  text-align: right;
+  flex-shrink: 0;
+}
+.timeline-item:nth-child(even) .timeline-year {
+  text-align: left;
+}
+.timeline-content {
+  width: calc(50% - 48px);
+  padding: 32px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.06);
+  position: relative;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.timeline-content:hover {
+  border-color: rgba(0,212,255,0.2);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.timeline-content::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+}
+.timeline-content h3 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.timeline-content p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+/* ===== PATENT + R&D SECTION ===== */
+#rnd-section {
+  padding: 120px 0;
+  background: var(--bg-surface);
+}
+.rnd-grid {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 80px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+.rnd-stat-card {
+  padding: 64px 48px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.06);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.rnd-stat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(0,212,255,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.rnd-big-number {
+  font-family: var(--font-mono);
+  font-size: clamp(64px, 8vw, 96px);
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 16px;
+  position: relative;
+}
+.rnd-big-number .plus {
+  display: inline-block;
+  animation: breathing 2s ease-in-out infinite;
+}
+@keyframes breathing {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.1); }
+}
+.rnd-big-label {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+.rnd-big-desc {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  max-width: 320px;
+  margin: 0 auto;
+}
+.rnd-details {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+.rnd-detail-item {
+  padding: 40px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-left: 3px solid var(--accent);
+  position: relative;
+  overflow: hidden;
+}
+.rnd-detail-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,212,255,0.03) 0%, transparent 60%);
+}
+.rnd-detail-value {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 8px;
+  position: relative;
+}
+.rnd-detail-value span { color: var(--accent); }
+.rnd-detail-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  position: relative;
+}
+.rnd-detail-desc {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  position: relative;
+}
+
+/* ===== CTA SECTION ===== */
+.cta-section {
+  padding: 120px 0;
+  background: var(--bg-primary);
+  text-align: center;
+  position: relative;
+}
+.cta-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(0,212,255,0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cta-line {
+  width: 1px;
+  height: 64px;
+  background: linear-gradient(to bottom, transparent, var(--accent));
+  margin: 0 auto 48px;
+}
+.cta-title {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+}
+.cta-sub {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-bottom: 48px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.btn-primary {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  padding: 16px 40px;
+  background: var(--accent);
+  color: var(--text-dark);
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+}
+.btn-primary:hover {
+  box-shadow: 0 0 32px rgba(0,212,255,0.5), 0 8px 32px rgba(0,0,0,0.3);
+  transform: translateY(-2px);
+}
+
+/* ===== FOOTER ===== */
+footer {
+  background: var(--bg-primary);
+  padding: 80px 0;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  position: relative;
+  overflow: hidden;
+}
+.footer-mega {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: clamp(80px, 15vw, 200px);
+  font-weight: 700;
+  color: var(--text-primary);
+  opacity: 0.04;
+  white-space: nowrap;
+  pointer-events: none;
+  letter-spacing: -0.04em;
+}
+.footer-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 80px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 48px;
+  position: relative;
+  z-index: 1;
+}
+.footer-brand .logo { font-size: 20px; margin-bottom: 16px; }
+.footer-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  max-width: 240px;
+}
+.footer-heading {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.footer-info p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.9;
+}
+.footer-socials {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.footer-social-link {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  transition: color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.footer-social-link::before { content: '\2197'; font-size: 10px; }
+.footer-social-link:hover { color: var(--accent); }
+.footer-bottom {
+  max-width: 1280px;
+  margin: 48px auto 0;
+  padding: 24px 80px 0;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+.footer-copy {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  header { padding: 20px 48px; }
+  header.scrolled { padding: 14px 48px; }
+  nav ul { gap: 24px; }
+  .container, .section-header, .timeline-container, .rnd-grid, .footer-inner, .footer-bottom { padding-left: 48px; padding-right: 48px; }
+  #hero { padding: 0 48px; }
+  .tech-scroll-container { padding: 0 48px 40px; }
+  .scroll-hint { padding: 0 48px; }
+  .tech-card { width: 280px; }
+  .rnd-grid { gap: 40px; }
+}
+
+@media (max-width: 768px) {
+  nav ul { display: none; }
+  .nav-cta { display: none; }
+  .hamburger { display: flex; }
+  header { padding: 20px 24px; }
+  header.scrolled { padding: 14px 24px; }
+  #hero { padding: 0 24px; min-height: 600px; }
+  .container { padding: 0 24px; }
+  .section-header { padding: 0 24px; margin-bottom: 40px; }
+  .tech-scroll-container { padding: 0 24px 32px; }
+  .scroll-hint { padding: 0 24px; }
+  .tech-card { width: 280px; padding: 36px 28px; }
+
+  /* Timeline — single column */
+  .timeline-container { padding: 0 24px; }
+  .timeline-line {
+    left: 24px;
+    transform: none;
+  }
+  .timeline-item {
+    flex-direction: column !important;
+    align-items: flex-start;
+    gap: 16px;
+    padding-left: 48px;
+    margin-bottom: 48px;
+  }
+  .timeline-dot {
+    left: 24px;
+    transform: translateX(-50%);
+    top: 8px;
+  }
+  .timeline-year {
+    width: auto;
+    text-align: left !important;
+    font-size: 36px;
+  }
+  .timeline-content {
+    width: 100%;
+  }
+
+  /* R&D */
+  .rnd-grid { grid-template-columns: 1fr; gap: 32px; padding: 0 24px; }
+  #rnd-section { padding: 80px 0; }
+  #tech-cards-section { padding: 80px 0; }
+  #timeline-section { padding: 80px 0; }
+
+  .footer-inner { grid-template-columns: 1fr; gap: 40px; padding: 0 24px; }
+  .footer-bottom { padding: 24px 24px 0; flex-direction: column; gap: 16px; text-align: center; }
+  .cta-section { padding: 80px 0; }
+}
+
+@media (max-width: 480px) {
+  .hero-title { font-size: clamp(36px, 12vw, 64px); }
+  .tech-card { width: 260px; }
+  .rnd-big-number { font-size: 64px; }
+  .rnd-detail-value { font-size: 36px; }
+  .timeline-year { font-size: 28px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SCROLL PROGRESS -->
+<div id="scroll-progress"></div>
+
+<!-- CUSTOM CURSOR -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- HEADER -->
+<header id="site-header">
+  <a href="index.html" class="logo">NEXA<span>BOT</span></a>
+  <nav>
+    <ul>
+      <li><a href="about.html">회사소개</a></li>
+      <li><a href="solutions.html">솔루션</a></li>
+      <li><a href="technology.html" class="active">기술</a></li>
+      <li><a href="cases.html">실적</a></li>
+      <li><a href="contact.html">문의</a></li>
+    </ul>
+  </nav>
+  <a href="contact.html" class="nav-cta">상담 신청</a>
+  <button class="hamburger" id="hamburger" aria-label="메뉴 열기">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- MOBILE NAV -->
+<div id="mobile-nav">
+  <nav class="mobile-nav-links">
+    <a href="about.html" onclick="closeMobileNav()">회사소개</a>
+    <a href="solutions.html" onclick="closeMobileNav()">솔루션</a>
+    <a href="technology.html" onclick="closeMobileNav()">기술</a>
+    <a href="cases.html" onclick="closeMobileNav()">실적</a>
+    <a href="contact.html" onclick="closeMobileNav()">문의</a>
+  </nav>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-dot-bg"></div>
+  <div class="hero-content">
+    <div class="hero-label">// TECHNOLOGY — NEXABOT</div>
+    <h1 class="hero-title" id="hero-title" data-text="기술이 미래를 만듭니다">기술이 미래를<br>만듭니다</h1>
+    <p class="hero-sub">AI 비전, 정밀 제어, 예측 유지보수, 엣지 컴퓨팅 — 네 가지 핵심 기술이 스마트 팩토리의 근간을 이룹니다.</p>
+  </div>
+  <div class="hero-scroll">
+    <span>SCROLL</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- TECH CARDS — HORIZONTAL SCROLL -->
+<section id="tech-cards-section">
+  <div class="section-header reveal">
+    <span class="section-tag">// CORE TECHNOLOGY</span>
+    <h2 class="section-title">핵심 기술 <em>4</em>가지</h2>
+  </div>
+
+  <div class="tech-scroll-container">
+    <div class="tech-scroll-track stagger-parent">
+      <div class="tech-card stagger-child">
+        <div class="tech-card-icon">👁️</div>
+        <div class="tech-card-metric">99.9<span style="font-size:0.5em">%</span></div>
+        <div class="tech-card-name">AI Vision</div>
+        <div class="tech-card-desc">딥러닝 결함 탐지. 초당 120프레임 실시간 분석으로 마이크론 단위 불량을 식별합니다.</div>
+      </div>
+      <div class="tech-card stagger-child">
+        <div class="tech-card-icon">🦾</div>
+        <div class="tech-card-metric">±0.01<span style="font-size:0.5em">mm</span></div>
+        <div class="tech-card-name">6-Axis Control</div>
+        <div class="tech-card-desc">6축 다관절 아암의 반복 정밀도. 반도체, 의료기기, 정밀 부품 조립에 최적화.</div>
+      </div>
+      <div class="tech-card stagger-child">
+        <div class="tech-card-icon">🔮</div>
+        <div class="tech-card-metric">-85<span style="font-size:0.5em">%</span></div>
+        <div class="tech-card-name">Predictive Maintenance</div>
+        <div class="tech-card-desc">AI 예측 유지보수로 계획되지 않은 다운타임을 85% 줄입니다.</div>
+      </div>
+      <div class="tech-card stagger-child">
+        <div class="tech-card-icon">⚡</div>
+        <div class="tech-card-metric">&lt;10<span style="font-size:0.5em">ms</span></div>
+        <div class="tech-card-name">Edge Computing</div>
+        <div class="tech-card-desc">클라우드 없이 엣지에서 10ms 이하 지연으로 실시간 제어.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <span class="scroll-hint-text">SWIPE</span>
+    <div class="scroll-hint-line"></div>
+    <span class="scroll-hint-arrow">&rarr;</span>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section id="timeline-section">
+  <div class="section-header reveal" style="max-width:1280px;margin:0 auto 80px;padding:0 80px;">
+    <span class="section-tag">// MILESTONES</span>
+    <h2 class="section-title">기술 <em>혁신</em>의 여정</h2>
+  </div>
+
+  <div class="timeline-container">
+    <div class="timeline-line"></div>
+
+    <div class="timeline-item reveal">
+      <div class="timeline-year">2012</div>
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <h3>NEXABOT 설립</h3>
+        <p>경기도 판교에 본사를 설립하고, 첫 산업용 로봇 암 프로토타입 개발에 착수했습니다.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal">
+      <div class="timeline-year">2015</div>
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <h3>AI 비전 시스템 v1 출시</h3>
+        <p>자체 개발 딥러닝 엔진 "NEXA-EYE" 초기 버전을 탑재한 머신 비전 시스템을 상용화했습니다.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal">
+      <div class="timeline-year">2018</div>
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <h3>스마트 팩토리 통합 플랫폼 런칭</h3>
+        <p>로봇 암, 비전 검사, 물류 자동화를 하나로 연결하는 통합 제어 플랫폼을 출시했습니다.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal">
+      <div class="timeline-year">2020</div>
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <h3>자율 물류 시스템 상용화</h3>
+        <p>SLAM 기반 자율 주행 AGV와 스마트 컨베이어 통합 시스템을 대형 물류센터에 최초 납품했습니다.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal">
+      <div class="timeline-year">2022</div>
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <h3>엣지 컴퓨팅 모듈 개발</h3>
+        <p>클라우드 없이 10ms 이하 지연으로 실시간 제어가 가능한 자체 엣지 프로세서를 개발했습니다.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal">
+      <div class="timeline-year">2024</div>
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <h3>CES 혁신상 수상</h3>
+        <p>AI 예측 유지보수 시스템으로 CES Innovation Awards를 수상하며 글로벌 기술력을 인정받았습니다.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal">
+      <div class="timeline-year">2026</div>
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <h3>차세대 AI 로봇 플랫폼 발표</h3>
+        <p>생성 AI와 로봇 제어를 융합한 차세대 플랫폼으로 제조업 자동화의 새로운 패러다임을 제시합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- R&D / PATENT SECTION -->
+<section id="rnd-section">
+  <div class="section-header reveal" style="max-width:1280px;margin:0 auto 80px;padding:0 80px;">
+    <span class="section-tag">// R&D INVESTMENT</span>
+    <h2 class="section-title">기술에 <em>투자</em>합니다</h2>
+  </div>
+
+  <div class="rnd-grid">
+    <div class="rnd-stat-card reveal">
+      <div class="rnd-big-number"><span class="counter" data-target="45" data-suffix="">0</span><span class="plus">+</span></div>
+      <div class="rnd-big-label">등록 특허</div>
+      <div class="rnd-big-desc">산업용 로봇 제어, AI 비전, 물류 최적화 분야의 핵심 기술 특허를 보유하고 있습니다.</div>
+    </div>
+
+    <div class="rnd-details">
+      <div class="rnd-detail-item reveal">
+        <div class="rnd-detail-value">25<span>%</span></div>
+        <div class="rnd-detail-label">// R&D RATIO</div>
+        <div class="rnd-detail-desc">매출의 25%를 연구개발에 투자하여 끊임없이 기술을 혁신합니다.</div>
+      </div>
+      <div class="rnd-detail-item reveal">
+        <div class="rnd-detail-value">85<span>명</span></div>
+        <div class="rnd-detail-label">// RESEARCH TEAM</div>
+        <div class="rnd-detail-desc">석박사급 85명의 연구인력이 AI, 로보틱스, 제어공학 분야를 연구합니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-line reveal"></div>
+    <div class="cta-title reveal">기술 파트너십<br>문의</div>
+    <div class="cta-sub reveal">NEXABOT의 기술력과 함께 제조 현장의 미래를 설계하세요.</div>
+    <a href="contact.html" class="btn-primary reveal">파트너십 문의하기</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-mega" aria-hidden="true">ENGINEERING TOMORROW</div>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">NEXA<span>BOT</span></div>
+      <p class="footer-desc">AI 기반 산업용 로봇과 자동화 솔루션으로 대한민국 제조업의 미래를 설계합니다.</p>
+    </div>
+    <div class="footer-info">
+      <div class="footer-heading">// CONTACT</div>
+      <p>경기도 성남시 분당구 판교로 335<br>
+      넥사봇 기술연구소 7F<br>
+      Tel. 031-000-0000<br>
+      contact@nexabot.co.kr</p>
+    </div>
+    <div>
+      <div class="footer-heading">// FOLLOW</div>
+      <div class="footer-socials">
+        <a href="#" class="footer-social-link">LinkedIn</a>
+        <a href="#" class="footer-social-link">YouTube</a>
+        <a href="#" class="footer-social-link">Instagram</a>
+        <a href="#" class="footer-social-link">GitHub</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">&copy; 2026 NEXABOT Co., Ltd. All rights reserved.</span>
+    <span class="footer-copy">사업자등록번호: 123-45-67890</span>
+  </div>
+</footer>
+
+<script>
+/* ===== SCROLL PROGRESS ===== */
+window.addEventListener('scroll', () => {
+  const progress = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+  document.getElementById('scroll-progress').style.width = progress + '%';
+}, { passive: true });
+
+/* ===== CUSTOM CURSOR ===== */
+const dot = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, cx = 0, cy = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+(function animate() {
+  cx += (mx - cx) * 0.15;
+  cy += (my - cy) * 0.15;
+  if (dot) { dot.style.left = mx + 'px'; dot.style.top = my + 'px'; }
+  if (ring) { ring.style.left = cx + 'px'; ring.style.top = cy + 'px'; }
+  requestAnimationFrame(animate);
+})();
+
+/* ===== HOVER EXPAND ===== */
+document.querySelectorAll('a, button, .tech-card, .timeline-content').forEach(el => {
+  el.addEventListener('mouseenter', () => ring && ring.classList.add('expanded'));
+  el.addEventListener('mouseleave', () => ring && ring.classList.remove('expanded'));
+});
+
+/* ===== REVEAL ON SCROLL ===== */
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      e.target.querySelectorAll('.counter').forEach(animateCounter);
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal, .clip-reveal, .stagger-parent').forEach(el => revealObserver.observe(el));
+
+/* ===== COUNTER ANIMATION ===== */
+function animateCounter(el) {
+  if (el.dataset.animated) return;
+  el.dataset.animated = 'true';
+  const target = parseFloat(el.dataset.target);
+  const suffix = el.dataset.suffix || '';
+  const decimal = parseInt(el.dataset.decimal) || 0;
+  const duration = 2000;
+  const start = performance.now();
+  function update(now) {
+    const p = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - p, 4);
+    el.textContent = (eased * target).toFixed(decimal) + suffix;
+    if (p < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { animateCounter(e.target); counterObserver.unobserve(e.target); }
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('.counter').forEach(el => counterObserver.observe(el));
+
+/* ===== HEADER SCROLL BEHAVIOR ===== */
+let lastScroll = 0;
+const header = document.getElementById('site-header');
+window.addEventListener('scroll', () => {
+  const y = window.scrollY;
+  if (y > 80) header.classList.add('scrolled');
+  else header.classList.remove('scrolled');
+  lastScroll = y;
+}, { passive: true });
+
+/* ===== HAMBURGER ===== */
+const hamburger = document.getElementById('hamburger');
+const mobileNav = document.getElementById('mobile-nav');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('active');
+  mobileNav.classList.toggle('active');
+  document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
+});
+function closeMobileNav() {
+  hamburger.classList.remove('active');
+  mobileNav.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+/* ===== ESCAPE KEY ===== */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeMobileNav();
+});
+
+/* ===== SAFETY NET ===== */
+setTimeout(() => {
+  document.querySelectorAll('.reveal, .clip-reveal, .stagger-parent').forEach(el => {
+    el.classList.add('visible');
+    el.classList.add('revealed');
+  });
+  document.querySelectorAll('.stagger-child').forEach(el => {
+    el.style.opacity = '1';
+    el.style.transform = 'none';
+  });
+}, 2000);
+
+/* ===== GLITCH EFFECT ON HERO TITLE ===== */
+const heroTitle = document.querySelector('.hero-title');
+if (heroTitle) {
+  function doGlitch() {
+    heroTitle.classList.add('glitch-active');
+    setTimeout(() => heroTitle.classList.remove('glitch-active'), 400);
+    setTimeout(doGlitch, 4000 + Math.random() * 2000);
+  }
+  setTimeout(doGlitch, 1000);
+}
+
+/* ===== MAGNETIC BUTTONS ===== */
+document.querySelectorAll('.btn-primary, .nav-cta').forEach(btn => {
+  btn.addEventListener('mousemove', e => {
+    const rect = btn.getBoundingClientRect();
+    const bx = rect.left + rect.width / 2;
+    const by = rect.top + rect.height / 2;
+    const dx = e.clientX - bx;
+    const dy = e.clientY - by;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    const maxDist = 80;
+    if (dist < maxDist) {
+      const pull = (1 - dist / maxDist) * 0.4;
+      btn.style.transform = `translate(${dx * pull}px, ${dy * pull}px)`;
+    }
+  });
+  btn.addEventListener('mouseleave', () => {
+    btn.style.transform = '';
+  });
+});
+</script>
+</body>
+</html>

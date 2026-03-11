@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXABOT — 문의하기</title>
+<meta name="description" content="NEXABOT에 자동화 도입, 스마트 팩토리 구축 등 문의를 남겨주세요. 영업일 1일 이내 담당자가 연락드립니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===== CSS VARIABLES ===== */
+:root {
+  --bg-primary: #0A0A0F;
+  --bg-surface: #12121A;
+  --bg-card: #1A1A24;
+  --accent: #00D4FF;
+  --accent-glow: rgba(0, 212, 255, 0.15);
+  --text-primary: #E0E0E8;
+  --text-secondary: #6B6B80;
+  --text-dark: #1A1A2E;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ===== RESET ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  word-break: keep-all;
+  overflow-x: hidden;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+img { max-width: 100%; display: block; }
+ul { list-style: none; }
+input, select, textarea { font-family: inherit; }
+
+/* ===== GRAIN OVERLAY ===== */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 99999;
+}
+
+/* ===== SCROLL PROGRESS BAR ===== */
+#scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 0%;
+  height: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent), 0 0 16px rgba(0,212,255,0.5);
+  z-index: 99998;
+  transition: none;
+}
+
+/* ===== CUSTOM CURSOR ===== */
+#cursor-dot {
+  position: fixed;
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99997;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s;
+  box-shadow: 0 0 8px var(--accent);
+}
+#cursor-ring {
+  position: fixed;
+  width: 36px; height: 36px;
+  border: 1.5px solid rgba(0, 212, 255, 0.6);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99996;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s var(--ease-expo), height 0.4s var(--ease-expo), border-color 0.3s;
+}
+#cursor-ring.expanded {
+  width: 56px; height: 56px;
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(0,212,255,0.3);
+}
+@media (pointer: coarse) {
+  #cursor-dot, #cursor-ring { display: none; }
+  body { cursor: auto; }
+}
+
+/* ===== HEADER / NAV ===== */
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 24px 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.4s, backdrop-filter 0.4s, padding 0.4s;
+}
+header.scrolled {
+  background: rgba(10,10,15,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 16px 80px;
+  border-bottom: 1px solid rgba(0,212,255,0.08);
+}
+.logo {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: var(--text-primary);
+}
+.logo span { color: var(--accent); }
+nav ul {
+  display: flex;
+  gap: 40px;
+}
+nav a {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  transition: color 0.3s;
+  position: relative;
+}
+nav a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 0; height: 1px;
+  background: var(--accent);
+  transition: width 0.4s var(--ease-expo);
+}
+nav a:hover { color: var(--text-primary); }
+nav a:hover::after { width: 100%; }
+nav a.active { color: var(--accent); }
+nav a.active::after { width: 100%; }
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 10001;
+}
+.hamburger span {
+  display: block;
+  width: 24px; height: 2px;
+  background: var(--text-primary);
+  transition: all 0.4s var(--ease-expo);
+  transform-origin: center;
+}
+.hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.active span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ===== MOBILE NAV OVERLAY ===== */
+#mobile-nav {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,10,15,0.97);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s var(--ease-expo);
+}
+#mobile-nav.active {
+  opacity: 1;
+  pointer-events: all;
+}
+.mobile-nav-links {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.mobile-nav-links a {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 2px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: color 0.3s, opacity 0.5s var(--ease-expo), transform 0.5s var(--ease-expo);
+}
+#mobile-nav.active .mobile-nav-links a {
+  opacity: 1;
+  transform: translateY(0);
+}
+#mobile-nav.active .mobile-nav-links a:nth-child(1) { transition-delay: 0.05s; }
+#mobile-nav.active .mobile-nav-links a:nth-child(2) { transition-delay: 0.1s; }
+#mobile-nav.active .mobile-nav-links a:nth-child(3) { transition-delay: 0.15s; }
+#mobile-nav.active .mobile-nav-links a:nth-child(4) { transition-delay: 0.2s; }
+#mobile-nav.active .mobile-nav-links a:nth-child(5) { transition-delay: 0.25s; }
+.mobile-nav-links a:hover { color: var(--accent); }
+
+/* ===== HERO ===== */
+#hero {
+  position: relative;
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 160px 80px 80px;
+  overflow: hidden;
+}
+.hero-dot-bg {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, #1A1A24 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: 0.6;
+  pointer-events: none;
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+}
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  margin-bottom: 24px;
+  opacity: 0;
+  animation: fade-up 0.8s var(--ease-expo) 0.3s forwards;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 6vw, 80px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+  position: relative;
+  opacity: 0;
+  animation: fade-up 0.9s var(--ease-expo) 0.5s forwards;
+}
+.hero-title.glitch-active::before,
+.hero-title.glitch-active::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+}
+.hero-title.glitch-active::before {
+  color: var(--accent);
+  clip-path: inset(30% 0 50% 0);
+  animation: glitch-title-a 0.4s steps(3) forwards;
+}
+.hero-title.glitch-active::after {
+  color: #FF0040;
+  clip-path: inset(55% 0 20% 0);
+  animation: glitch-title-b 0.4s steps(3) forwards;
+}
+@keyframes glitch-title-a {
+  0% { transform: translateX(0); }
+  33% { transform: translateX(-8px); }
+  66% { transform: translateX(6px); }
+  100% { transform: translateX(0); }
+}
+@keyframes glitch-title-b {
+  0% { transform: translateX(0); }
+  33% { transform: translateX(8px); }
+  66% { transform: translateX(-6px); }
+  100% { transform: translateX(0); }
+}
+.hero-subtitle {
+  font-family: var(--font-body);
+  font-size: clamp(16px, 1.8vw, 22px);
+  font-weight: 300;
+  color: var(--text-secondary);
+  max-width: 640px;
+  line-height: 1.7;
+  opacity: 0;
+  animation: fade-up 0.8s var(--ease-expo) 0.7s forwards;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ===== COMMON SECTION ===== */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 80px;
+}
+section { position: relative; overflow: hidden; }
+
+/* ===== REVEAL ANIMATIONS ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.9s var(--ease-expo), transform 0.9s var(--ease-expo);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Safety net -- forced reveal */
+.revealed, .reveal.revealed {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* ===== CONTACT SECTION ===== */
+#contact {
+  padding: 0 0 120px;
+}
+.contact-grid {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 80px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 80px;
+  align-items: start;
+}
+
+/* --- Left: Form --- */
+.contact-form-wrap {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.05);
+  padding: 56px;
+  position: relative;
+  overflow: hidden;
+}
+.contact-form-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,212,255,0.03) 0%, transparent 60%);
+  pointer-events: none;
+}
+.form-group {
+  margin-bottom: 24px;
+}
+.form-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-primary);
+  padding: 14px 16px;
+  font-size: 15px;
+  border-radius: 2px;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.form-input::placeholder, .form-select::placeholder, .form-textarea::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0,212,255,0.08);
+}
+.form-select {
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6B80' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+}
+.form-select option {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.btn-submit {
+  display: block;
+  width: 100%;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 20px 56px;
+  background: var(--accent);
+  color: var(--bg-primary);
+  border-radius: 2px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.4s var(--ease-expo);
+  position: relative;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.btn-submit::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.15);
+  transform: translateX(-110%) skewX(-20deg);
+  transition: transform 0.5s var(--ease-expo);
+}
+.btn-submit:hover {
+  box-shadow: 0 0 40px rgba(0,212,255,0.5), 0 16px 40px rgba(0,0,0,0.3);
+  transform: translateY(-3px);
+}
+.btn-submit:hover::before { transform: translateX(110%) skewX(-20deg); }
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* --- Right: Info sidebar --- */
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+.info-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.info-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  border: 1px solid rgba(0,212,255,0.1);
+  font-size: 20px;
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+.info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.info-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+}
+.info-value {
+  font-size: 15px;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* Map placeholder */
+.map-placeholder {
+  width: 100%;
+  height: 300px;
+  background: var(--bg-card);
+  border: 1px solid rgba(0,212,255,0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--text-secondary);
+  position: relative;
+  overflow: hidden;
+}
+.map-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(0,212,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+.map-pin {
+  font-size: 36px;
+  color: var(--accent);
+  position: relative;
+  z-index: 1;
+  animation: pin-bounce 2s ease-in-out infinite;
+}
+@keyframes pin-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.map-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  color: var(--text-secondary);
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== SUCCESS MODAL ===== */
+#success-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 99990;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+#success-modal.active {
+  opacity: 1;
+  pointer-events: all;
+}
+.success-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(10,10,15,0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.success-box {
+  position: relative;
+  z-index: 1;
+  background: var(--bg-card);
+  border: 1px solid rgba(0,212,255,0.2);
+  width: 100%;
+  max-width: 480px;
+  padding: 64px 48px;
+  text-align: center;
+  transform: translateY(30px) scale(0.95);
+  transition: transform 0.5s var(--ease-expo);
+}
+#success-modal.active .success-box {
+  transform: translateY(0) scale(1);
+}
+
+/* Checkmark animation */
+.checkmark-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 32px;
+  position: relative;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.4s var(--ease-expo) 0.2s, transform 0.5s var(--ease-expo) 0.2s;
+}
+#success-modal.active .checkmark-circle {
+  opacity: 1;
+  transform: scale(1);
+}
+.checkmark-circle svg {
+  width: 36px;
+  height: 36px;
+}
+.checkmark-svg {
+  stroke: var(--accent);
+  stroke-width: 3;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+}
+#success-modal.active .checkmark-svg {
+  animation: draw-check 0.6s var(--ease-expo) 0.5s forwards;
+}
+@keyframes draw-check {
+  to { stroke-dashoffset: 0; }
+}
+.checkmark-glow {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: rgba(0,212,255,0.1);
+  opacity: 0;
+}
+#success-modal.active .checkmark-glow {
+  animation: glow-pulse 1.5s ease 0.4s;
+}
+@keyframes glow-pulse {
+  0% { opacity: 0; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+
+.success-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+.success-msg {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 40px;
+}
+.btn-close-modal {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  padding: 14px 40px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  background: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.btn-close-modal:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
+  box-shadow: 0 0 24px rgba(0,212,255,0.4);
+}
+
+/* ===== FOOTER ===== */
+footer {
+  background: var(--bg-primary);
+  padding: 80px 0;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  position: relative;
+  overflow: hidden;
+}
+.footer-mega {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: clamp(80px, 15vw, 200px);
+  font-weight: 700;
+  color: var(--text-primary);
+  opacity: 0.04;
+  white-space: nowrap;
+  pointer-events: none;
+  letter-spacing: -0.04em;
+}
+.footer-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 80px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 48px;
+  position: relative;
+  z-index: 1;
+}
+.footer-brand .logo { font-size: 20px; margin-bottom: 16px; }
+.footer-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  max-width: 240px;
+}
+.footer-heading {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.footer-info p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.9;
+}
+.footer-socials {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.footer-social-link {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  transition: color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.footer-social-link::before { content: '\2197'; font-size: 10px; }
+.footer-social-link:hover { color: var(--accent); }
+.footer-bottom {
+  max-width: 1280px;
+  margin: 48px auto 0;
+  padding: 24px 80px 0;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+.footer-copy {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  header { padding: 20px 48px; }
+  header.scrolled { padding: 14px 48px; }
+  nav ul { gap: 24px; }
+  #hero { padding: 140px 48px 64px; }
+  .contact-grid { padding: 0 48px; gap: 48px; }
+  .contact-form-wrap { padding: 40px; }
+  .footer-inner, .footer-bottom { padding-left: 48px; padding-right: 48px; }
+}
+
+@media (max-width: 768px) {
+  nav ul { display: none; }
+  .hamburger { display: flex; }
+  header { padding: 20px 24px; }
+  header.scrolled { padding: 14px 24px; }
+  #hero { padding: 120px 24px 48px; }
+  .contact-grid {
+    grid-template-columns: 1fr;
+    padding: 0 24px;
+    gap: 48px;
+  }
+  .contact-form-wrap { padding: 32px 24px; }
+  .form-row { grid-template-columns: 1fr; }
+  .footer-inner { grid-template-columns: 1fr; gap: 40px; padding: 0 24px; }
+  .footer-bottom { padding: 24px 24px 0; flex-direction: column; gap: 16px; text-align: center; }
+  .success-box { padding: 48px 24px; }
+}
+
+@media (max-width: 480px) {
+  .hero-title { font-size: clamp(32px, 9vw, 56px); }
+  .contact-form-wrap { padding: 24px 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SCROLL PROGRESS -->
+<div id="scroll-progress"></div>
+
+<!-- CUSTOM CURSOR -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- HEADER -->
+<header id="site-header">
+  <a href="index.html" class="logo">NEXA<span>BOT</span></a>
+  <nav>
+    <ul>
+      <li><a href="about.html">회사소개</a></li>
+      <li><a href="solutions.html">솔루션</a></li>
+      <li><a href="technology.html">기술</a></li>
+      <li><a href="cases.html">실적</a></li>
+      <li><a href="contact.html" class="active">문의</a></li>
+    </ul>
+  </nav>
+  <button class="hamburger" id="hamburger" aria-label="메뉴 열기">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- MOBILE NAV -->
+<div id="mobile-nav">
+  <div class="mobile-nav-links">
+    <a href="about.html" onclick="closeMobileNav()">회사소개</a>
+    <a href="solutions.html" onclick="closeMobileNav()">솔루션</a>
+    <a href="technology.html" onclick="closeMobileNav()">기술</a>
+    <a href="cases.html" onclick="closeMobileNav()">실적</a>
+    <a href="contact.html" onclick="closeMobileNav()">문의</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-dot-bg"></div>
+  <div class="hero-content">
+    <div class="hero-label">// CONTACT &mdash; NEXABOT</div>
+    <h1 class="hero-title" id="hero-title" data-text="다음 혁신을 함께 만들어갑니다">다음 혁신을 함께 만들어갑니다</h1>
+    <p class="hero-subtitle">자동화 도입부터 스마트 팩토리 구축까지, 최적의 솔루션을 제안합니다</p>
+  </div>
+</section>
+
+<!-- CONTACT CONTENT -->
+<section id="contact">
+  <div class="contact-grid">
+
+    <!-- LEFT: Form -->
+    <div class="contact-form-wrap reveal">
+      <form id="contact-form" onsubmit="handleFormSubmit(event)" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">// 회사명</label>
+            <input type="text" class="form-input" name="company" placeholder="(주)회사명" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">// 담당자명</label>
+            <input type="text" class="form-input" name="name" placeholder="홍길동" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">// 연락처</label>
+            <input type="tel" class="form-input" name="phone" placeholder="010-0000-0000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">// 이메일</label>
+            <input type="email" class="form-input" name="email" placeholder="email@company.com" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">// 문의 유형</label>
+          <select class="form-select" name="type">
+            <option value="">문의 유형을 선택해주세요</option>
+            <option value="견적 문의">견적 문의</option>
+            <option value="기술 문의">기술 문의</option>
+            <option value="파트너십 제안">파트너십 제안</option>
+            <option value="유지보수/A/S">유지보수/A/S</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">// 문의 내용</label>
+          <textarea class="form-textarea" name="message" rows="6" placeholder="도입하려는 공정, 현재 생산량, 자동화 목표 등을 자세히 작성해주시면 더 정확한 제안이 가능합니다."></textarea>
+        </div>
+        <button type="submit" class="btn-submit">제출하기</button>
+      </form>
+    </div>
+
+    <!-- RIGHT: Info -->
+    <div class="contact-info reveal">
+      <div class="info-item">
+        <div class="info-icon">&#x1F3E2;</div>
+        <div class="info-content">
+          <span class="info-label">// 본사 주소</span>
+          <span class="info-value">경기도 성남시 분당구 판교로 335,<br>넥사봇 기술연구소 7F</span>
+        </div>
+      </div>
+      <div class="info-item">
+        <div class="info-icon">&#x260E;</div>
+        <div class="info-content">
+          <span class="info-label">// 전화</span>
+          <span class="info-value">031-000-0000</span>
+        </div>
+      </div>
+      <div class="info-item">
+        <div class="info-icon">&#x2709;</div>
+        <div class="info-content">
+          <span class="info-label">// 이메일</span>
+          <span class="info-value">contact@nexabot.co.kr</span>
+        </div>
+      </div>
+      <div class="info-item">
+        <div class="info-icon">&#x1F4CB;</div>
+        <div class="info-content">
+          <span class="info-label">// 사업자등록번호</span>
+          <span class="info-value">123-45-67890</span>
+        </div>
+      </div>
+
+      <!-- Map placeholder -->
+      <div class="map-placeholder">
+        <div class="map-pin">&#x1F4CD;</div>
+        <span class="map-label">MAP</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SUCCESS MODAL -->
+<div id="success-modal">
+  <div class="success-backdrop" onclick="closeSuccessModal()"></div>
+  <div class="success-box">
+    <div class="checkmark-circle">
+      <div class="checkmark-glow"></div>
+      <svg viewBox="0 0 36 36">
+        <polyline class="checkmark-svg" points="8 18 15 26 28 10"/>
+      </svg>
+    </div>
+    <div class="success-title">문의 접수 완료</div>
+    <p class="success-msg">영업일 1일 이내 담당자가 연락드립니다.</p>
+    <button class="btn-close-modal" onclick="closeSuccessModal()">확인</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-mega" aria-hidden="true">ENGINEERING TOMORROW</div>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">NEXA<span>BOT</span></div>
+      <p class="footer-desc">AI 기반 산업용 로봇과 자동화 솔루션으로 대한민국 제조업의 미래를 설계합니다.</p>
+    </div>
+    <div class="footer-info">
+      <div class="footer-heading">// CONTACT</div>
+      <p>경기도 성남시 분당구 판교로 335<br>
+      넥사봇 기술연구소 7F<br>
+      Tel. 031-000-0000<br>
+      contact@nexabot.co.kr</p>
+    </div>
+    <div>
+      <div class="footer-heading">// FOLLOW</div>
+      <div class="footer-socials">
+        <a href="#" class="footer-social-link">LinkedIn</a>
+        <a href="#" class="footer-social-link">YouTube</a>
+        <a href="#" class="footer-social-link">Instagram</a>
+        <a href="#" class="footer-social-link">GitHub</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">&copy; 2026 NEXABOT Co., Ltd. All rights reserved.</span>
+    <span class="footer-copy">사업자등록번호: 123-45-67890</span>
+  </div>
+</footer>
+
+<script>
+/* ===== CUSTOM CURSOR ===== */
+const cursorDot = document.getElementById('cursor-dot');
+const cursorRing = document.getElementById('cursor-ring');
+let ringX = 0, ringY = 0;
+let mouseX = 0, mouseY = 0;
+
+if (window.matchMedia('(pointer: fine)').matches) {
+  document.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    cursorDot.style.left = mouseX + 'px';
+    cursorDot.style.top = mouseY + 'px';
+  });
+  function animateRing() {
+    ringX += (mouseX - ringX) * 0.12;
+    ringY += (mouseY - ringY) * 0.12;
+    cursorRing.style.left = ringX + 'px';
+    cursorRing.style.top = ringY + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+  document.querySelectorAll('a, button, .form-input, .form-select, .form-textarea, .info-item').forEach(el => {
+    el.addEventListener('mouseenter', () => cursorRing.classList.add('expanded'));
+    el.addEventListener('mouseleave', () => cursorRing.classList.remove('expanded'));
+  });
+}
+
+/* ===== SCROLL PROGRESS ===== */
+const progressBar = document.getElementById('scroll-progress');
+window.addEventListener('scroll', () => {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  if (docHeight > 0) {
+    progressBar.style.width = (scrollTop / docHeight * 100) + '%';
+  }
+}, { passive: true });
+
+/* ===== HEADER SCROLL ===== */
+const header = document.getElementById('site-header');
+window.addEventListener('scroll', () => {
+  header.classList.toggle('scrolled', window.scrollY > 60);
+}, { passive: true });
+
+/* ===== MOBILE NAV ===== */
+const hamburger = document.getElementById('hamburger');
+const mobileNav = document.getElementById('mobile-nav');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('active');
+  mobileNav.classList.toggle('active');
+  document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
+});
+function closeMobileNav() {
+  hamburger.classList.remove('active');
+  mobileNav.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+/* ===== HERO GLITCH ===== */
+(function startHeroGlitch() {
+  const title = document.getElementById('hero-title');
+  if (!title) return;
+  function doGlitch() {
+    title.classList.add('glitch-active');
+    setTimeout(() => title.classList.remove('glitch-active'), 400);
+    setTimeout(doGlitch, 4000 + Math.random() * 2000);
+  }
+  setTimeout(doGlitch, 1500);
+})();
+
+/* ===== INTERSECTION OBSERVER ===== */
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.reveal').forEach(el => {
+  revealObserver.observe(el);
+});
+
+/* ===== FORM VALIDATION & SUBMIT ===== */
+function handleFormSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const inputs = form.querySelectorAll('[required]');
+  let valid = true;
+
+  // Reset previous error states
+  form.querySelectorAll('.form-input, .form-select, .form-textarea').forEach(el => {
+    el.style.borderColor = '';
+  });
+
+  // Check required fields
+  inputs.forEach(input => {
+    if (!input.value.trim()) {
+      valid = false;
+      input.style.borderColor = '#FF0040';
+      setTimeout(() => input.style.borderColor = '', 2000);
+    }
+  });
+
+  // Email format validation
+  const email = form.querySelector('input[type="email"]');
+  if (email && email.value && !email.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+    valid = false;
+    email.style.borderColor = '#FF0040';
+    setTimeout(() => email.style.borderColor = '', 2000);
+  }
+
+  if (valid) {
+    document.getElementById('success-modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    form.reset();
+  }
+}
+
+/* ===== SUCCESS MODAL ===== */
+function closeSuccessModal() {
+  document.getElementById('success-modal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+/* ===== MAGNETIC BUTTONS ===== */
+document.querySelectorAll('.btn-submit, .btn-close-modal').forEach(btn => {
+  btn.addEventListener('mousemove', e => {
+    const rect = btn.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = e.clientX - cx;
+    const dy = e.clientY - cy;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const maxDist = 80;
+    if (dist < maxDist) {
+      const pull = (1 - dist / maxDist) * 0.4;
+      btn.style.transform = 'translate(' + (dx * pull) + 'px, ' + (dy * pull) + 'px)';
+    }
+  });
+  btn.addEventListener('mouseleave', () => {
+    btn.style.transform = '';
+  });
+});
+
+/* ===== ESCAPE KEY ===== */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeSuccessModal();
+    closeMobileNav();
+  }
+});
+
+/* ===== SAFETY NET -- Force all reveals visible after 2s ===== */
+setTimeout(() => {
+  document.querySelectorAll('.reveal, [class*="reveal"]').forEach(el => {
+    el.style.opacity = '1';
+    el.style.transform = 'none';
+    el.classList.add('visible');
+    el.classList.add('revealed');
+  });
+}, 2000);
+
+let safetyTriggered = false;
+window.addEventListener('scroll', () => {
+  if (!safetyTriggered) {
+    safetyTriggered = true;
+    document.querySelectorAll('.reveal:not(.visible)').forEach(el => {
+      el.classList.add('visible');
+      el.classList.add('revealed');
+    });
+  }
+}, { once: true });
+</script>
+</body>
+</html>
