@@ -8,16 +8,18 @@
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--white:#FAFAFA;--charcoal:#1A1A1A;--blue:#0066FF;--coral:#FF6B4A;--naver:#03C75A;--insta-1:#E1306C;--youtube:#FF0000;--tiktok-pink:#FF0050;--font-heading:'Sora',sans-serif;--font-body:'Pretendard Variable','Pretendard',sans-serif}
+:root{--white:#FAFAFA;--charcoal:#1A1A1A;--blue:#0066FF;--coral:#FF6B4A;--naver:#03C75A;--insta-1:#E1306C;--insta-2:#F77737;--insta-3:#FCAF45;--youtube:#FF0000;--tiktok-cyan:#00F2EA;--tiktok-pink:#FF0050;--font-heading:'Sora',sans-serif;--font-body:'Pretendard Variable','Pretendard',sans-serif}
 html{scroll-behavior:smooth;overflow-x:hidden}
 body{font-family:var(--font-body);background:var(--white);color:var(--charcoal);overflow-x:hidden;line-height:1.6;word-break:keep-all}
 
+/* NAV */
 .nav{position:fixed;top:0;left:0;width:100%;z-index:1000;padding:1.5rem 3rem;display:grid;grid-template-columns:auto 1fr auto;align-items:center;background:rgba(250,250,250,.9);backdrop-filter:blur(12px)}
 .nav-logo{font-family:var(--font-heading);font-weight:800;font-size:1.5rem;letter-spacing:-.02em;color:var(--charcoal);text-decoration:none}
 .nav-logo span{color:var(--blue)}
 .nav-links{display:flex;gap:2.5rem;justify-content:center}
 .nav-links a{text-decoration:none;color:var(--charcoal);font-size:.875rem;font-weight:500;transition:color .3s}
-.nav-links a:hover,.nav-links a.active{color:var(--blue)}
+.nav-links a:hover{color:var(--blue)}
+.nav-links a.active{color:var(--blue)}
 .nav-cta{font-family:var(--font-heading);font-size:.875rem;font-weight:600;padding:.75rem 2rem;border:2px solid var(--charcoal);border-radius:100px;text-decoration:none;color:var(--charcoal);transition:all .3s}
 .nav-cta:hover{background:var(--charcoal);color:var(--white)}
 .mobile-toggle{display:none;background:none;border:none;cursor:pointer;width:32px;height:24px;position:relative}
@@ -28,88 +30,171 @@ body{font-family:var(--font-body);background:var(--white);color:var(--charcoal);
 .mobile-nav-links{display:grid;gap:2rem;text-align:center}
 .mobile-nav-links a{font-family:var(--font-heading);font-size:2rem;font-weight:600;text-decoration:none;color:var(--charcoal)}
 
-/* PAGE HEADER */
-.page-header{padding:10rem 3rem 4rem;max-width:900px}
-.page-header h1{font-family:var(--font-heading);font-size:clamp(3rem,7vw,5rem);font-weight:800;letter-spacing:-.03em;line-height:1}
-.page-header p{color:#666;font-size:1.15rem;margin-top:1rem}
+/* HERO SECTION */
+.hero{padding:10rem 3rem 6rem;background:linear-gradient(135deg,#f8f9ff 0%,#fff 100%);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23e6f2ff' fill-opacity='0.3'%3E%3Cpolygon points='30,5 35,20 50,20 39,30 44,45 30,37 16,45 21,30 10,20 25,20'/%3E%3C/g%3E%3C/svg%3E");opacity:.4}
+.hero-content{max-width:1200px;margin:0 auto;position:relative;z-index:1;text-align:center}
+.hero h1{font-family:var(--font-heading);font-size:clamp(3.5rem,8vw,6rem);font-weight:800;letter-spacing:-.03em;line-height:.95;margin-bottom:1.5rem}
+.hero h1 span{background:linear-gradient(135deg,var(--blue) 0%,var(--coral) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{font-size:1.25rem;color:#666;max-width:600px;margin:0 auto 3rem;line-height:1.7}
 
-/* CONTROLS */
-.controls{padding:0 3rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1.5rem;margin-bottom:3rem}
-.filters{display:flex;gap:.5rem;flex-wrap:wrap}
-.filter-pill{padding:.5rem 1.25rem;border-radius:100px;border:1.5px solid #ddd;background:none;font-family:var(--font-body);font-size:.85rem;font-weight:500;cursor:pointer;transition:all .3s;color:#666}
-.filter-pill.active,.filter-pill:hover{border-color:var(--blue);background:var(--blue);color:#fff}
-.view-modes{display:flex;gap:.5rem}
-.view-btn{width:40px;height:40px;border:1.5px solid #ddd;border-radius:10px;background:none;cursor:pointer;display:grid;place-items:center;transition:all .3s;color:#999}
-.view-btn.active,.view-btn:hover{border-color:var(--charcoal);color:var(--charcoal)}
+/* FILTER SECTION */
+.filter-section{padding:3rem;background:#fff;border-radius:20px;margin:-3rem 3rem 4rem;box-shadow:0 10px 40px rgba(0,0,0,.1);position:relative;z-index:2}
+.filter-buttons{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap}
+.filter-btn{padding:.75rem 1.5rem;border-radius:50px;border:2px solid #eee;background:#fff;font-family:var(--font-body);font-size:.9rem;font-weight:600;cursor:pointer;transition:all .3s;color:#666;position:relative}
+.filter-btn:hover,.filter-btn.active{border-color:var(--blue);background:var(--blue);color:#fff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(0,102,255,.3)}
+.filter-btn.naver.active{background:var(--naver);border-color:var(--naver)}
+.filter-btn.insta.active{background:linear-gradient(135deg,var(--insta-1) 0%,var(--insta-2) 100%);border:none}
+.filter-btn.youtube.active{background:var(--youtube);border-color:var(--youtube)}
+.filter-btn.tiktok.active{background:linear-gradient(135deg,var(--tiktok-cyan) 0%,var(--tiktok-pink) 100%);border:none}
 
-/* GRID VIEW */
-.portfolio-grid{padding:0 3rem 6rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.5rem;transition:all .4s}
-.portfolio-grid.list-view{grid-template-columns:1fr}
-.portfolio-grid.fullscreen-view{grid-template-columns:1fr;gap:0}
+/* PORTFOLIO GRID */
+.portfolio-section{padding:4rem 3rem}
+.portfolio-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:2rem;margin-bottom:4rem}
+.portfolio-item{background:#fff;border-radius:20px;overflow:hidden;position:relative;cursor:pointer;transition:all .4s;box-shadow:0 4px 20px rgba(0,0,0,.08);opacity:1;transform:scale(1)}
+.portfolio-item:hover{transform:translateY(-8px);box-shadow:0 15px 40px rgba(0,0,0,.15)}
+.portfolio-item.hidden{opacity:0;transform:scale(0.8);pointer-events:none}
 
-.portfolio-card{border-radius:20px;overflow:hidden;position:relative;aspect-ratio:4/3;cursor:pointer;transition:transform .4s}
-.portfolio-card:hover{transform:translateY(-4px)}
-.portfolio-card img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
-.portfolio-card:hover img{transform:scale(1.05)}
-.portfolio-card .card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8) 0%,rgba(0,0,0,.3) 40%,transparent 70%);display:grid;align-content:end;padding:2rem;transition:opacity .4s}
-.portfolio-card .card-tag{display:inline-block;padding:.25rem .75rem;border-radius:100px;font-size:.75rem;font-weight:600;color:#fff;margin-bottom:.75rem}
-.tag-naver{background:var(--naver)}.tag-insta{background:var(--insta-1)}.tag-youtube{background:var(--youtube)}.tag-tiktok{background:var(--tiktok-pink)}
-.portfolio-card h3{color:#fff;font-family:var(--font-heading);font-size:1.3rem;font-weight:600;margin-bottom:.25rem}
-.portfolio-card .card-desc{color:rgba(255,255,255,.7);font-size:.85rem}
-/* Before/After overlay */
-.ba-overlay{position:absolute;inset:0;background:var(--blue);display:grid;grid-template-columns:1fr 1fr;opacity:0;transition:opacity .4s;z-index:5}
-.portfolio-card:hover .ba-overlay{opacity:1}
-.ba-side{padding:2rem;display:grid;align-content:center;color:#fff}
-.ba-side h4{font-family:var(--font-heading);font-size:.85rem;font-weight:600;opacity:.7;margin-bottom:.5rem}
-.ba-side .ba-num{font-family:var(--font-heading);font-size:2.5rem;font-weight:800}
-.ba-side:last-child{background:rgba(255,255,255,.1)}
+.portfolio-image{position:relative;aspect-ratio:16/10;overflow:hidden}
+.portfolio-image img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.portfolio-item:hover .portfolio-image img{transform:scale(1.05)}
+.portfolio-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,102,255,.9) 0%,rgba(255,107,74,.9) 100%);opacity:0;transition:opacity .3s;display:grid;place-items:center;color:#fff}
+.portfolio-item:hover .portfolio-overlay{opacity:1}
+.overlay-content{text-align:center;padding:2rem}
+.overlay-content h3{font-family:var(--font-heading);font-size:1.5rem;font-weight:700;margin-bottom:1rem}
+.view-details{background:rgba(255,255,255,.2);border:2px solid #fff;color:#fff;padding:.75rem 2rem;border-radius:50px;font-family:var(--font-heading);font-weight:600;cursor:pointer;transition:all .3s}
+.view-details:hover{background:#fff;color:var(--blue)}
 
-/* LIST VIEW */
-.list-view .portfolio-card{aspect-ratio:auto;border-radius:16px;display:grid;grid-template-columns:300px 1fr;height:200px}
-.list-view .portfolio-card img{height:100%}
-.list-view .card-overlay{position:relative;background:none;padding:2rem;color:var(--charcoal)}
-.list-view .card-overlay h3{color:var(--charcoal)}
-.list-view .card-overlay .card-desc{color:#666}
-.list-view .ba-overlay{display:none}
+.portfolio-content{padding:2rem}
+.portfolio-category{display:inline-block;padding:.3rem .8rem;border-radius:20px;font-size:.75rem;font-weight:600;color:#fff;margin-bottom:1rem}
+.category-naver{background:var(--naver)}
+.category-insta{background:linear-gradient(135deg,var(--insta-1) 0%,var(--insta-2) 100%)}
+.category-youtube{background:var(--youtube)}
+.category-tiktok{background:linear-gradient(135deg,var(--tiktok-cyan) 0%,var(--tiktok-pink) 100%)}
 
-/* FULLSCREEN VIEW */
-.fullscreen-view .portfolio-card{aspect-ratio:16/7;border-radius:0}
+.portfolio-title{font-family:var(--font-heading);font-size:1.3rem;font-weight:700;margin-bottom:.5rem;color:var(--charcoal)}
+.portfolio-desc{color:#666;font-size:.9rem;line-height:1.5;margin-bottom:1.5rem}
+.portfolio-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:1rem}
+.result-item{text-align:center;padding:1rem;background:#f8f9ff;border-radius:12px}
+.result-value{font-family:var(--font-heading);font-size:1.2rem;font-weight:800;color:var(--blue);display:block}
+.result-label{font-size:.7rem;color:#888;margin-top:.25rem}
 
 /* MODAL */
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;opacity:0;pointer-events:none;transition:opacity .4s;display:grid;place-items:center;overflow-y:auto;padding:2rem}
-.modal-backdrop.open{opacity:1;pointer-events:all}
-.modal{background:var(--white);border-radius:24px;max-width:800px;width:100%;max-height:90vh;overflow-y:auto;transform:translateY(20px);transition:transform .4s}
-.modal-backdrop.open .modal{transform:translateY(0)}
-.modal-img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:24px 24px 0 0}
-.modal-body{padding:2.5rem}
-.modal-body h2{font-family:var(--font-heading);font-size:1.8rem;font-weight:700;margin-bottom:.5rem}
-.modal-body .modal-tag{display:inline-block;padding:.25rem .75rem;border-radius:100px;font-size:.75rem;font-weight:600;color:#fff;margin-bottom:1.5rem}
-.modal-body p{color:#555;line-height:1.8;margin-bottom:1.5rem}
-.modal-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
-.modal-stat{text-align:center;padding:1.25rem;background:#f5f5f5;border-radius:14px}
-.modal-stat .num{font-family:var(--font-heading);font-size:1.5rem;font-weight:800;color:var(--blue)}
-.modal-stat .label{font-size:.8rem;color:#888;margin-top:.25rem}
-.modal-close{position:absolute;top:1.5rem;right:1.5rem;width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.5);border:none;color:#fff;font-size:1.5rem;cursor:pointer;display:grid;place-items:center;transition:background .3s}
-.modal-close:hover{background:rgba(0,0,0,.8)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:2000;display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .3s;padding:2rem}
+.modal.open{opacity:1;pointer-events:all}
+.modal-content{background:#fff;border-radius:20px;max-width:800px;max-height:90vh;overflow-y:auto;position:relative;animation:modalSlide .3s ease-out}
+@keyframes modalSlide{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-close{position:absolute;top:2rem;right:2rem;width:40px;height:40px;border:none;background:none;font-size:1.5rem;cursor:pointer;color:#666;z-index:1}
+.modal-image{width:100%;height:300px;object-fit:cover;border-radius:20px 20px 0 0}
+.modal-body{padding:3rem}
+.modal-title{font-family:var(--font-heading);font-size:2rem;font-weight:800;margin-bottom:1rem;color:var(--charcoal)}
+.modal-category{display:inline-block;padding:.5rem 1rem;border-radius:25px;font-size:.8rem;font-weight:600;color:#fff;margin-bottom:2rem}
+.modal-desc{color:#666;line-height:1.7;margin-bottom:2rem}
+.modal-details{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem;margin-bottom:2rem}
+.detail-group h4{font-family:var(--font-heading);font-weight:600;color:var(--charcoal);margin-bottom:.5rem}
+.detail-group p{color:#666;font-size:.9rem}
+.modal-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1.5rem;padding:2rem;background:#f8f9ff;border-radius:16px}
+.modal-result-item{text-align:center}
+.modal-result-value{font-family:var(--font-heading);font-size:1.8rem;font-weight:800;color:var(--blue);display:block}
+.modal-result-label{font-size:.8rem;color:#888;margin-top:.5rem}
 
-.footer{padding:4rem 3rem;border-top:1px solid #eee;display:grid;grid-template-columns:1fr auto;align-items:center;gap:2rem}
-.footer-left{font-family:var(--font-heading);font-weight:700;font-size:1.1rem}
+/* STATS SECTION */
+.stats-section{padding:6rem 3rem;background:linear-gradient(135deg,var(--charcoal) 0%,#333 100%);color:#fff;text-align:center;position:relative;overflow:hidden}
+.stats-section::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1' opacity='0.1'%3E%3Ccircle cx='50' cy='50' r='40'/%3E%3Ccircle cx='50' cy='50' r='25'/%3E%3Ccircle cx='50' cy='50' r='10'/%3E%3C/g%3E%3C/svg%3E");opacity:.2}
+.stats-content{position:relative;z-index:1;max-width:1200px;margin:0 auto}
+.stats-section h2{font-family:var(--font-heading);font-size:3rem;font-weight:800;margin-bottom:1rem}
+.stats-section p{font-size:1.1rem;opacity:.9;margin-bottom:4rem;max-width:600px;margin-left:auto;margin-right:auto}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:3rem}
+.stat-item{text-align:center}
+.stat-number{font-family:var(--font-heading);font-size:3.5rem;font-weight:800;color:var(--coral);display:block;margin-bottom:.5rem}
+.stat-label{font-size:1rem;opacity:.9}
+.stat-desc{font-size:.85rem;opacity:.7;margin-top:.5rem;line-height:1.4}
+
+/* CLIENTS SECTION */
+.clients-section{padding:6rem 3rem;background:#fff}
+.clients-content{max-width:1200px;margin:0 auto;text-align:center}
+.clients-section h2{font-family:var(--font-heading);font-size:2.5rem;font-weight:800;margin-bottom:1rem;color:var(--charcoal)}
+.clients-section p{color:#666;font-size:1.1rem;margin-bottom:4rem;max-width:600px;margin-left:auto;margin-right:auto}
+.clients-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:2rem;align-items:center}
+.client-logo{padding:2rem;background:#f8f9ff;border-radius:16px;transition:all .3s;display:grid;place-items:center;min-height:120px}
+.client-logo:hover{transform:translateY(-4px);box-shadow:0 8px 25px rgba(0,0,0,.1)}
+.client-logo svg{max-width:100px;height:40px}
+
+/* COMPARISON SLIDER */
+.comparison-section{padding:6rem 3rem;background:linear-gradient(135deg,#f8f9ff 0%,#fff 100%)}
+.comparison-content{max-width:1000px;margin:0 auto;text-align:center}
+.comparison-section h2{font-family:var(--font-heading);font-size:2.5rem;font-weight:800;margin-bottom:1rem;color:var(--charcoal)}
+.comparison-section p{color:#666;font-size:1.1rem;margin-bottom:4rem;max-width:600px;margin-left:auto;margin-right:auto}
+.comparison-slider{position:relative;max-width:600px;margin:0 auto;border-radius:20px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.2)}
+.slider-container{position:relative;width:100%;height:400px;overflow:hidden}
+.slider-before,.slider-after{position:absolute;top:0;left:0;width:100%;height:100%;background-size:cover;background-position:center}
+.slider-before{background-image:url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80')}
+.slider-after{background-image:url('https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&q=80');clip-path:inset(0 50% 0 0)}
+.slider-handle{position:absolute;top:0;left:50%;width:4px;height:100%;background:var(--blue);cursor:ew-resize;z-index:10;transform:translateX(-2px)}
+.slider-handle::before{content:'';position:absolute;top:50%;left:50%;width:20px;height:20px;background:var(--blue);border:3px solid #fff;border-radius:50%;transform:translate(-50%,-50%)}
+.slider-labels{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-between;padding:2rem;background:linear-gradient(transparent,rgba(0,0,0,.7));color:#fff}
+.label-before,.label-after{font-family:var(--font-heading);font-weight:600}
+
+/* CTA SECTION */
+.cta-section{padding:6rem 3rem;background:linear-gradient(135deg,var(--blue) 0%,var(--coral) 100%);text-align:center;color:#fff;position:relative;overflow:hidden}
+.cta-section::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='2' opacity='0.1'%3E%3Cpath d='m60 15 15 30h30l-24 18 9 30-30-18-30 18 9-30-24-18h30z'/%3E%3C/g%3E%3C/svg%3E");opacity:.3}
+.cta-content{position:relative;z-index:1;max-width:800px;margin:0 auto}
+.cta-section h2{font-family:var(--font-heading);font-size:3rem;font-weight:800;margin-bottom:1rem}
+.cta-section p{font-size:1.2rem;margin-bottom:3rem;opacity:.95;line-height:1.6}
+.cta-buttons{display:flex;gap:2rem;justify-content:center;flex-wrap:wrap}
+.cta-primary,.cta-secondary{padding:1rem 3rem;border-radius:50px;font-family:var(--font-heading);font-weight:600;text-decoration:none;transition:all .3s;display:inline-flex;align-items:center;gap:.75rem;font-size:1.1rem}
+.cta-primary{background:#fff;color:var(--blue);border:2px solid #fff}
+.cta-primary:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(255,255,255,.3)}
+.cta-secondary{border:2px solid #fff;color:#fff;background:none}
+.cta-secondary:hover{background:#fff;color:var(--blue)}
+
+/* FOOTER */
+.footer{padding:2rem 3rem;background:var(--charcoal);color:#fff;display:flex;justify-content:space-between;align-items:center;font-size:.9rem}
+.footer-left{font-family:var(--font-heading);font-weight:600}
 .footer-left span{color:var(--blue)}
 .footer-right{display:flex;gap:2rem}
-.footer-right a{color:#999;text-decoration:none;font-size:.85rem;transition:color .3s}
-.footer-right a:hover{color:var(--charcoal)}
+.footer-right a{color:#ccc;text-decoration:none;transition:color .3s}
+.footer-right a:hover{color:#fff}
 
-@media(max-width:768px){
-.nav{padding:1rem 1.5rem}.nav-links,.nav-cta{display:none}.mobile-toggle{display:block}
-.page-header{padding:7rem 1.5rem 3rem}
-.controls{padding:0 1.5rem}
-.portfolio-grid{padding:0 1.5rem 4rem;grid-template-columns:1fr}
-.list-view .portfolio-card{grid-template-columns:1fr;height:auto}
-.list-view .portfolio-card img{height:200px}
-.modal-stats{grid-template-columns:1fr}
-.modal-body{padding:1.5rem}
-.footer{grid-template-columns:1fr;text-align:center;padding:3rem 1.5rem}
-.footer-right{justify-content:center}
+/* ANIMATIONS */
+.fade-in{opacity:0;transform:translateY(30px);transition:all .8s ease-out}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+.slide-up{opacity:0;transform:translateY(40px);transition:all .6s ease-out}
+.slide-up.visible{opacity:1;transform:translateY(0)}
+.scale-in{opacity:0;transform:scale(0.9);transition:all .6s ease-out}
+.scale-in.visible{opacity:1;transform:scale(1)}
+
+/* RESPONSIVE */
+@media (max-width:768px){
+.nav{padding:1rem;grid-template-columns:auto auto}
+.nav-links,.nav-cta{display:none}
+.mobile-toggle{display:block}
+.hero{padding:8rem 1.5rem 4rem;text-align:center}
+.hero h1{font-size:2.5rem}
+.filter-section{margin:-2rem 1.5rem 3rem;padding:2rem}
+.filter-buttons{gap:.5rem}
+.filter-btn{padding:.5rem 1rem;font-size:.8rem}
+.portfolio-section{padding:2rem 1.5rem}
+.portfolio-grid{grid-template-columns:1fr;gap:1.5rem}
+.portfolio-item{margin-bottom:1rem}
+.modal{padding:1rem}
+.modal-content{max-height:80vh}
+.modal-body{padding:2rem}
+.stats-grid{grid-template-columns:repeat(2,1fr);gap:2rem}
+.stat-number{font-size:2.5rem}
+.clients-grid{grid-template-columns:repeat(2,1fr);gap:1.5rem}
+.comparison-slider{margin:0 1rem}
+.slider-container{height:250px}
+.cta-buttons{flex-direction:column;align-items:center}
+.footer{flex-direction:column;gap:1rem;text-align:center}
+.footer-right{flex-wrap:wrap;justify-content:center}
+}
+
+@media (max-width:480px){
+.portfolio-grid{gap:1rem}
+.stats-grid{grid-template-columns:1fr}
+.clients-grid{grid-template-columns:1fr}
+.comparison-slider{margin:0}
 }
 </style>
 </head>
@@ -118,161 +203,978 @@ body{font-family:var(--font-body);background:var(--white);color:var(--charcoal);
 <nav class="nav">
 <a href="index.html" class="nav-logo">WAVE<span>.</span></a>
 <div class="nav-links">
-<a href="services.html">서비스</a><a href="portfolio.html" class="active">포트폴리오</a><a href="about.html">회사소개</a><a href="blog.html">인사이트</a><a href="contact.html">문의</a>
+<a href="services.html">서비스</a>
+<a href="portfolio.html" class="active">포트폴리오</a>
+<a href="about.html">회사소개</a>
+<a href="blog.html">인사이트</a>
+<a href="contact.html">문의</a>
 </div>
 <a href="contact.html" class="nav-cta">프로젝트 시작</a>
 <button class="mobile-toggle" id="mobileToggle" aria-label="메뉴"><span></span><span></span><span></span></button>
 </nav>
-<div class="mobile-nav" id="mobileNav"><div class="mobile-nav-links">
-<a href="services.html">서비스</a><a href="portfolio.html">포트폴리오</a><a href="about.html">회사소개</a><a href="blog.html">인사이트</a><a href="contact.html">문의</a>
-</div></div>
 
-<header class="page-header">
-<h1>포트폴리오</h1>
-<p>데이터와 크리에이티브의 만남. 실제 성과로 증명합니다.</p>
-</header>
-
-<div class="controls">
-<div class="filters">
-<button class="filter-pill active" data-filter="all">전체</button>
-<button class="filter-pill" data-filter="naver">네이버</button>
-<button class="filter-pill" data-filter="insta">인스타그램</button>
-<button class="filter-pill" data-filter="youtube">유튜브</button>
-<button class="filter-pill" data-filter="tiktok">틱톡</button>
-</div>
-<div class="view-modes">
-<button class="view-btn active" data-view="grid" title="그리드">
-<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="1" y="11" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="11" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
-</button>
-<button class="view-btn" data-view="list" title="리스트">
-<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1" y="2" width="16" height="3" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="1" y="8" width="16" height="3" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="1" y="14" width="16" height="3" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
-</button>
-<button class="view-btn" data-view="fullscreen" title="풀스크린">
-<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1" y="1" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/></svg>
-</button>
+<div class="mobile-nav" id="mobileNav">
+<div class="mobile-nav-links">
+<a href="services.html">서비스</a>
+<a href="portfolio.html">포트폴리오</a>
+<a href="about.html">회사소개</a>
+<a href="blog.html">인사이트</a>
+<a href="contact.html">문의</a>
 </div>
 </div>
 
-<div class="portfolio-grid" id="portfolioGrid">
-<div class="portfolio-card" data-category="naver" data-index="0">
-<img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80" alt="뷰티브랜드 네이버" loading="lazy">
-<div class="card-overlay"><span class="card-tag tag-naver">네이버</span><h3>글로벌 뷰티 브랜드 검색 마케팅</h3><div class="card-desc">블로그·플레이스 통합 전략</div></div>
-<div class="ba-overlay"><div class="ba-side"><h4>이전</h4><div class="ba-num">23위</div></div><div class="ba-side"><h4>이후</h4><div class="ba-num">1위</div></div></div>
+<!-- HERO SECTION -->
+<section class="hero fade-in">
+<div class="hero-content">
+<h1>우리의 <span>작업</span>을 확인하세요</h1>
+<p>다양한 플랫폼에서 검증된 성과를 만들어낸 프로젝트들을 만나보세요. 각 브랜드의 목표에 맞춰 최적화된 전략으로 놀라운 결과를 달성했습니다.</p>
 </div>
-<div class="portfolio-card" data-category="insta" data-index="1">
-<img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80" alt="패션 인스타" loading="lazy">
-<div class="card-overlay"><span class="card-tag tag-insta">인스타그램</span><h3>프리미엄 패션 릴스 캠페인</h3><div class="card-desc">릴스 중심 바이럴 전략</div></div>
-<div class="ba-overlay"><div class="ba-side"><h4>이전</h4><div class="ba-num">2천</div></div><div class="ba-side"><h4>이후</h4><div class="ba-num">5만</div></div></div>
+</section>
+
+<!-- FILTER SECTION -->
+<section class="filter-section fade-in">
+<div class="filter-buttons">
+<button class="filter-btn active" data-filter="all">전체</button>
+<button class="filter-btn naver" data-filter="naver">네이버</button>
+<button class="filter-btn insta" data-filter="insta">인스타그램</button>
+<button class="filter-btn youtube" data-filter="youtube">유튜브</button>
+<button class="filter-btn tiktok" data-filter="tiktok">틱톡</button>
 </div>
-<div class="portfolio-card" data-category="youtube" data-index="2">
-<img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&q=80" alt="스타트업 유튜브" loading="lazy">
-<div class="card-overlay"><span class="card-tag tag-youtube">유튜브</span><h3>테크 스타트업 채널 론칭</h3><div class="card-desc">0에서 10만 구독자 달성</div></div>
-<div class="ba-overlay"><div class="ba-side"><h4>이전</h4><div class="ba-num">0명</div></div><div class="ba-side"><h4>이후</h4><div class="ba-num">10만</div></div></div>
-</div>
-<div class="portfolio-card" data-category="tiktok" data-index="3">
-<img src="https://images.unsplash.com/photo-1563986768609-322da13575f2?w=800&q=80" alt="F&B 틱톡" loading="lazy">
-<div class="card-overlay"><span class="card-tag tag-tiktok">틱톡</span><h3>프랜차이즈 틱톡 챌린지</h3><div class="card-desc">바이럴 챌린지 500만 조회</div></div>
-<div class="ba-overlay"><div class="ba-side"><h4>이전</h4><div class="ba-num">0회</div></div><div class="ba-side"><h4>이후</h4><div class="ba-num">500만</div></div></div>
-</div>
-<div class="portfolio-card" data-category="naver" data-index="4">
-<img src="https://images.unsplash.com/photo-1542744094-3a31f272c490?w=800&q=80" alt="이커머스" loading="lazy">
-<div class="card-overlay"><span class="card-tag tag-naver">네이버</span><h3>이커머스 스마트스토어 런칭</h3><div class="card-desc">매출 420% 성장</div></div>
-<div class="ba-overlay"><div class="ba-side"><h4>이전</h4><div class="ba-num">월 200만</div></div><div class="ba-side"><h4>이후</h4><div class="ba-num">월 1억</div></div></div>
-</div>
-<div class="portfolio-card" data-category="insta" data-index="5">
-<img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80" alt="라이프스타일" loading="lazy">
-<div class="card-overlay"><span class="card-tag tag-insta">인스타그램</span><h3>라이프스타일 브랜드 리브랜딩</h3><div class="card-desc">브랜드 인지도 380% 상승</div></div>
-<div class="ba-overlay"><div class="ba-side"><h4>이전</h4><div class="ba-num">1.2%</div></div><div class="ba-side"><h4>이후</h4><div class="ba-num">5.8%</div></div></div>
-</div>
-<div class="portfolio-card" data-category="youtube" data-index="6">
-<img src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&q=80" alt="교육 유튜브" loading="lazy">
-<div class="card-overlay"><span class="card-tag tag-youtube">유튜브</span><h3>교육 플랫폼 콘텐츠 전략</h3><div class="card-desc">시청 지속률 92% 달성</div></div>
-<div class="ba-overlay"><div class="ba-side"><h4>이전</h4><div class="ba-num">35%</div></div><div class="ba-side"><h4>이후</h4><div class="ba-num">92%</div></div></div>
-</div>
-<div class="portfolio-card" data-category="tiktok" data-index="7">
-<img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&q=80" alt="앱 틱톡" loading="lazy">
-<div class="card-overlay"><span class="card-tag tag-tiktok">틱톡</span><h3>모바일 앱 다운로드 캠페인</h3><div class="card-desc">CPI 67% 절감</div></div>
-<div class="ba-overlay"><div class="ba-side"><h4>이전</h4><div class="ba-num">₩3,200</div></div><div class="ba-side"><h4>이후</h4><div class="ba-num">₩1,050</div></div></div>
+</section>
+
+<!-- PORTFOLIO SECTION -->
+<section class="portfolio-section">
+<div class="portfolio-grid">
+<!-- 네이버 프로젝트들 -->
+<article class="portfolio-item scale-in" data-category="naver" data-id="project1">
+<div class="portfolio-image">
+<img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80" alt="프로젝트 이미지">
+<div class="portfolio-overlay">
+<div class="overlay-content">
+<h3>온라인 쇼핑몰 마케팅</h3>
+<button class="view-details">자세히 보기</button>
 </div>
 </div>
+</div>
+<div class="portfolio-content">
+<span class="portfolio-category category-naver">네이버</span>
+<h3 class="portfolio-title">K-패션 브랜드 매출 300% 증가</h3>
+<p class="portfolio-desc">네이버 쇼핑광고와 검색광고를 연계한 통합 마케팅으로 6개월 만에 매출 300% 상승을 달성한 성공 사례입니다.</p>
+<div class="portfolio-results">
+<div class="result-item">
+<span class="result-value">+300%</span>
+<div class="result-label">매출 증가</div>
+</div>
+<div class="result-item">
+<span class="result-value">4.2%</span>
+<div class="result-label">전환율</div>
+</div>
+<div class="result-item">
+<span class="result-value">850원</span>
+<div class="result-label">평균 CPC</div>
+</div>
+</div>
+</div>
+</article>
+
+<article class="portfolio-item scale-in" data-category="naver" data-id="project2">
+<div class="portfolio-image">
+<img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&q=80" alt="프로젝트 이미지">
+<div class="portfolio-overlay">
+<div class="overlay-content">
+<h3>로컬 레스토랑 브랜딩</h3>
+<button class="view-details">자세히 보기</button>
+</div>
+</div>
+</div>
+<div class="portfolio-content">
+<span class="portfolio-category category-naver">네이버</span>
+<h3 class="portfolio-title">프리미엄 레스토랑 예약 200% 증가</h3>
+<p class="portfolio-desc">네이버 플레이스 최적화와 블로그 마케팅으로 고급 레스토랑의 온라인 예약을 대폭 늘린 프로젝트입니다.</p>
+<div class="portfolio-results">
+<div class="result-item">
+<span class="result-value">+200%</span>
+<div class="result-label">예약 증가</div>
+</div>
+<div class="result-item">
+<span class="result-value">4.8</span>
+<div class="result-label">평점</div>
+</div>
+<div class="result-item">
+<span class="result-value">120</span>
+<div class="result-label">리뷰 수</div>
+</div>
+</div>
+</div>
+</article>
+
+<article class="portfolio-item scale-in" data-category="naver" data-id="project3">
+<div class="portfolio-image">
+<img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=600&q=80" alt="프로젝트 이미지">
+<div class="portfolio-overlay">
+<div class="overlay-content">
+<h3>IT 스타트업 브랜드 구축</h3>
+<button class="view-details">자세히 보기</button>
+</div>
+</div>
+</div>
+<div class="portfolio-content">
+<span class="portfolio-category category-naver">네이버</span>
+<h3 class="portfolio-title">AI 스타트업 리드 300% 증가</h3>
+<p class="portfolio-desc">네이버 검색광고와 브랜드검색 전략으로 B2B AI 솔루션의 리드 창출을 극대화한 성공 사례입니다.</p>
+<div class="portfolio-results">
+<div class="result-item">
+<span class="result-value">+300%</span>
+<div class="result-label">리드 증가</div>
+</div>
+<div class="result-item">
+<span class="result-value">6.8%</span>
+<div class="result-label">CTR</div>
+</div>
+<div class="result-item">
+<span class="result-value">1,200원</span>
+<div class="result-label">CPC</div>
+</div>
+</div>
+</div>
+</article>
+
+<!-- 인스타그램 프로젝트들 -->
+<article class="portfolio-item scale-in" data-category="insta" data-id="project4">
+<div class="portfolio-image">
+<img src="https://images.unsplash.com/photo-1563986768609-322da13575f2?w=600&q=80" alt="프로젝트 이미지">
+<div class="portfolio-overlay">
+<div class="overlay-content">
+<h3>럭셔리 뷰티 브랜드</h3>
+<button class="view-details">자세히 보기</button>
+</div>
+</div>
+</div>
+<div class="portfolio-content">
+<span class="portfolio-category category-insta">인스타그램</span>
+<h3 class="portfolio-title">프리미엄 스킨케어 브랜드 론칭</h3>
+<p class="portfolio-desc">인플루언서 마케팅과 스토리 광고로 신제품을 성공적으로 론칭하여 브랜드 인지도 500% 상승을 달성했습니다.</p>
+<div class="portfolio-results">
+<div class="result-item">
+<span class="result-value">+500%</span>
+<div class="result-label">인지도 증가</div>
+</div>
+<div class="result-item">
+<span class="result-value">8.5%</span>
+<div class="result-label">참여율</div>
+</div>
+<div class="result-item">
+<span class="result-value">120만</span>
+<div class="result-label">도달 수</div>
+</div>
+</div>
+</div>
+</article>
+
+<article class="portfolio-item scale-in" data-category="insta" data-id="project5">
+<div class="portfolio-image">
+<img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80" alt="프로젝트 이미지">
+<div class="portfolio-overlay">
+<div class="overlay-content">
+<h3>라이프스타일 브랜드</h3>
+<button class="view-details">자세히 보기</button>
+</div>
+</div>
+</div>
+<div class="portfolio-content">
+<span class="portfolio-category category-insta">인스타그램</span>
+<h3 class="portfolio-title">홈카페 브랜드 팔로워 5만 달성</h3>
+<p class="portfolio-desc">일관성 있는 브랜딩과 고품질 콘텐츠로 6개월 만에 팔로워 5만명을 달성하고 매출 250% 증가를 이뤄냈습니다.</p>
+<div class="portfolio-results">
+<div class="result-item">
+<span class="result-value">5만+</span>
+<div class="result-label">팔로워</div>
+</div>
+<div class="result-item">
+<span class="result-value">+250%</span>
+<div class="result-label">매출 증가</div>
+</div>
+<div class="result-item">
+<span class="result-value">12%</span>
+<div class="result-label">참여율</div>
+</div>
+</div>
+</div>
+</article>
+
+<article class="portfolio-item scale-in" data-category="insta" data-id="project6">
+<div class="portfolio-image">
+<img src="https://images.unsplash.com/photo-1542744094-3a31f272c490?w=600&q=80" alt="프로젝트 이미지">
+<div class="portfolio-overlay">
+<div class="overlay-content">
+<h3>패션 스타트업</h3>
+<button class="view-details">자세히 보기</button>
+</div>
+</div>
+</div>
+<div class="portfolio-content">
+<span class="portfolio-category category-insta">인스타그램</span>
+<h3 class="portfolio-title">지속가능 패션 브랜드 론칭</h3>
+<p class="portfolio-desc">환경을 생각하는 패션 브랜드의 가치를 스토리텔링으로 전달하여 젊은 층의 강력한 지지를 얻은 프로젝트입니다.</p>
+<div class="portfolio-results">
+<div class="result-item">
+<span class="result-value">3만+</span>
+<div class="result-label">팔로워</div>
+</div>
+<div class="result-item">
+<span class="result-value">15%</span>
+<div class="result-label">참여율</div>
+</div>
+<div class="result-item">
+<span class="result-value">80만</span>
+<div class="result-label">도달 수</div>
+</div>
+</div>
+</div>
+</article>
+
+<!-- 유튜브 프로젝트들 -->
+<article class="portfolio-item scale-in" data-category="youtube" data-id="project7">
+<div class="portfolio-image">
+<img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&q=80" alt="프로젝트 이미지">
+<div class="portfolio-overlay">
+<div class="overlay-content">
+<h3>교육 플랫폼 채널</h3>
+<button class="view-details">자세히 보기</button>
+</div>
+</div>
+</div>
+<div class="portfolio-content">
+<span class="portfolio-category category-youtube">유튜브</span>
+<h3 class="portfolio-title">온라인 교육 채널 구독자 10만 돌파</h3>
+<p class="portfolio-desc">체계적인 콘텐츠 기획과 SEO 최적화로 교육 콘텐츠 채널을 6개월 만에 10만 구독자까지 성장시킨 프로젝트입니다.</p>
+<div class="portfolio-results">
+<div class="result-item">
+<span class="result-value">10만+</span>
+<div class="result-label">구독자</div>
+</div>
+<div class="result-item">
+<span class="result-value">+400%</span>
+<div class="result-label">매출 증가</div>
+</div>
+<div class="result-item">
+<span class="result-value">12%</span>
+<div class="result-label">전환율</div>
+</div>
+</div>
+</div>
+</article>
+
+<article class="portfolio-item scale-in" data-category="youtube" data-id="project8">
+<div class="portfolio-image">
+<img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&q=80" alt="프로젝트 이미지">
+<div class="portfolio-overlay">
+<div class="overlay-content">
+<h3>요리 브랜드 채널</h3>
+<button class="view-details">자세히 보기</button>
+</div>
+</div>
+</div>
+<div class="portfolio-content">
+<span class="portfolio-category category-youtube">유튜브</span>
+<h3 class="portfolio-title">홈쿠킹 브랜드 바이럴 영상 제작</h3>
+<p class="portfolio-desc">간편식 브랜드의 유튜브 채널 운영과 바이럴 영상으로 조회수 500만회를 달성하고 매출 증대에 기여했습니다.</p>
+<div class="portfolio-results">
+<div class="result-item">
+<span class="result-value">500만+</span>
+<div class="result-label">조회수</div>
+</div>
+<div class="result-item">
+<span class="result-value">5만+</span>
+<div class="result-label">구독자</div>
+</div>
+<div class="result-item">
+<span class="result-value">+180%</span>
+<div class="result-label">매출 증가</div>
+</div>
+</div>
+</div>
+</article>
+
+<article class="portfolio-item scale-in" data-category="youtube" data-id="project9">
+<div class="portfolio-image">
+<img src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&q=80" alt="프로젝트 이미지">
+<div class="portfolio-overlay">
+<div class="overlay-content">
+<h3>테크 리뷰 채널</h3>
+<button class="view-details">자세히 보기</button>
+</div>
+</div>
+</div>
+<div class="portfolio-content">
+<span class="portfolio-category category-youtube">유튜브</span>
+<h3 class="portfolio-title">IT 제품 리뷰 채널 수익화</h3>
+<p class="portfolio-desc">전문적인 IT 제품 리뷰 콘텐츠로 높은 신뢰도를 구축하고 브랜드 협업으로 안정적인 수익 구조를 만든 사례입니다.</p>
+<div class="portfolio-results">
+<div class="result-item">
+<span class="result-value">8만+</span>
+<div class="result-label">구독자</div>
+</div>
+<div class="result-item">
+<span class="result-value">200만+</span>
+<div class="result-label">월 조회수</div>
+</div>
+<div class="result-item">
+<span class="result-value">15개</span>
+<div class="result-label">브랜드 협업</div>
+</div>
+</div>
+</div>
+</article>
+
+<!-- 틱톡 프로젝트들 -->
+<article class="portfolio-item scale-in" data-category="tiktok" data-id="project10">
+<div class="portfolio-image">
+<img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&q=80" alt="프로젝트 이미지">
+<div class="portfolio-overlay">
+<div class="overlay-content">
+<h3>패션 챌린지 캠페인</h3>
+<button class="view-details">자세히 보기</button>
+</div>
+</div>
+</div>
+<div class="portfolio-content">
+<span class="portfolio-category category-tiktok">틱톡</span>
+<h3 class="portfolio-title">#OOTD 챌린지 1000만 조회수 달성</h3>
+<p class="portfolio-desc">패션 브랜드의 해시태그 챌린지를 기획하여 7일 만에 1000만 조회수를 돌파하고 브랜드 인지도를 급상승시켰습니다.</p>
+<div class="portfolio-results">
+<div class="result-item">
+<span class="result-value">1000만+</span>
+<div class="result-label">조회수</div>
+</div>
+<div class="result-item">
+<span class="result-value">15%</span>
+<div class="result-label">참여율</div>
+</div>
+<div class="result-item">
+<span class="result-value">25만</span>
+<div class="result-label">참여자 수</div>
+</div>
+</div>
+</div>
+</article>
+
+<article class="portfolio-item scale-in" data-category="tiktok" data-id="project11">
+<div class="portfolio-image">
+<img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&q=80" alt="프로젝트 이미지">
+<div class="portfolio-overlay">
+<div class="overlay-content">
+<h3>뷰티 브랜드 크리에이터 협업</h3>
+<button class="view-details">자세히 보기</button>
+</div>
+</div>
+</div>
+<div class="portfolio-content">
+<span class="portfolio-category category-tiktok">틱톡</span>
+<h3 class="portfolio-title">K-뷰티 브랜드 글로벌 진출</h3>
+<p class="portfolio-desc">해외 틱톡 크리에이터들과의 협업으로 K-뷰티 제품을 글로벌 시장에 성공적으로 진출시킨 프로젝트입니다.</p>
+<div class="portfolio-results">
+<div class="result-item">
+<span class="result-value">800만+</span>
+<div class="result-label">해외 조회수</div>
+</div>
+<div class="result-item">
+<span class="result-value">20%</span>
+<div class="result-label">참여율</div>
+</div>
+<div class="result-item">
+<span class="result-value">12개국</span>
+<div class="result-label">진출국</div>
+</div>
+</div>
+</div>
+</article>
+
+<article class="portfolio-item scale-in" data-category="tiktok" data-id="project12">
+<div class="portfolio-image">
+<img src="https://images.unsplash.com/photo-1557426272-fc759fdf7a8d?w=600&q=80" alt="프로젝트 이미지">
+<div class="portfolio-overlay">
+<div class="overlay-content">
+<h3>푸드 브랜드 바이럴</h3>
+<button class="view-details">자세히 보기</button>
+</div>
+</div>
+</div>
+<div class="portfolio-content">
+<span class="portfolio-category category-tiktok">틱톡</span>
+<h3 class="portfolio-title">음식 브랜드 레시피 챌린지</h3>
+<p class="portfolio-desc">간편 요리 제품을 활용한 레시피 챌린지로 Z세대 사이에서 큰 인기를 얻고 매출 증대에 직접적으로 기여했습니다.</p>
+<div class="portfolio-results">
+<div class="result-item">
+<span class="result-value">600만+</span>
+<div class="result-label">조회수</div>
+</div>
+<div class="result-item">
+<span class="result-value">18%</span>
+<div class="result-label">참여율</div>
+</div>
+<div class="result-item">
+<span class="result-value">+350%</span>
+<div class="result-label">매출 증가</div>
+</div>
+</div>
+</div>
+</article>
+</div>
+</section>
 
 <!-- MODAL -->
-<div class="modal-backdrop" id="modal">
-<div class="modal" onclick="event.stopPropagation()">
+<div class="modal" id="projectModal">
+<div class="modal-content">
 <button class="modal-close" onclick="closeModal()">×</button>
-<img class="modal-img" id="modalImg" src="" alt="">
+<img class="modal-image" id="modalImage" src="" alt="">
 <div class="modal-body">
-<span class="modal-tag" id="modalTag"></span>
-<h2 id="modalTitle"></h2>
-<p id="modalDesc"></p>
-<div class="modal-stats" id="modalStats"></div>
+<span class="modal-category" id="modalCategory"></span>
+<h2 class="modal-title" id="modalTitle"></h2>
+<p class="modal-desc" id="modalDesc"></p>
+<div class="modal-details">
+<div class="detail-group">
+<h4>프로젝트 기간</h4>
+<p id="modalDuration"></p>
+</div>
+<div class="detail-group">
+<h4>주요 전략</h4>
+<p id="modalStrategy"></p>
+</div>
+<div class="detail-group">
+<h4>타겟 고객</h4>
+<p id="modalTarget"></p>
+</div>
+<div class="detail-group">
+<h4>사용 도구</h4>
+<p id="modalTools"></p>
+</div>
+</div>
+<div class="modal-results" id="modalResults">
+<!-- 결과 데이터가 여기에 삽입됩니다 -->
 </div>
 </div>
 </div>
+</div>
+
+<!-- STATS SECTION -->
+<section class="stats-section fade-in">
+<div class="stats-content">
+<h2>숫자로 보는 성과</h2>
+<p>데이터가 말하는 우리의 실력을 확인하세요. 매 프로젝트마다 측정 가능한 성과로 증명합니다.</p>
+<div class="stats-grid">
+<div class="stat-item slide-up">
+<span class="stat-number" data-target="500">0</span>
+<div class="stat-label">완료된 프로젝트</div>
+<p class="stat-desc">다양한 업종의 브랜드와 함께한 성공적인 마케팅 캠페인</p>
+</div>
+<div class="stat-item slide-up">
+<span class="stat-number" data-target="285">0</span>
+<div class="stat-label">평균 성장률 (%)</div>
+<p class="stat-desc">클라이언트들의 평균적인 비즈니스 성장 지표</p>
+</div>
+<div class="stat-item slide-up">
+<span class="stat-number" data-target="50000000">0</span>
+<div class="stat-label">총 도달한 고객 수</div>
+<p class="stat-desc">모든 플랫폼을 통해 도달한 누적 사용자 수</p>
+</div>
+<div class="stat-item slide-up">
+<span class="stat-number" data-target="98">0</span>
+<div class="stat-label">고객 만족도 (%)</div>
+<p class="stat-desc">프로젝트 완료 후 클라이언트 만족도 조사 결과</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- CLIENTS SECTION -->
+<section class="clients-section fade-in">
+<div class="clients-content">
+<h2>함께한 클라이언트</h2>
+<p>다양한 업종의 선도 기업들이 WAVE와 함께 성장했습니다. 여러분도 그 일원이 되어보세요.</p>
+<div class="clients-grid">
+<div class="client-logo">
+<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#0066FF">TECHNO</text>
+</svg>
+</div>
+<div class="client-logo">
+<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#FF6B4A">BEAUTY</text>
+</svg>
+</div>
+<div class="client-logo">
+<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#1A1A1A">FASHION</text>
+</svg>
+</div>
+<div class="client-logo">
+<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#03C75A">FOODS</text>
+</svg>
+</div>
+<div class="client-logo">
+<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#E1306C">LIFESTYLE</text>
+</svg>
+</div>
+<div class="client-logo">
+<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#FF0000">MEDIA</text>
+</svg>
+</div>
+<div class="client-logo">
+<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#00F2EA">TRAVEL</text>
+</svg>
+</div>
+<div class="client-logo">
+<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#666">HEALTH</text>
+</svg>
+</div>
+<div class="client-logo">
+<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#0066FF">FINTECH</text>
+</svg>
+</div>
+<div class="client-logo">
+<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#FF6B4A">EDUCATION</text>
+</svg>
+</div>
+</div>
+</div>
+</section>
+
+<!-- COMPARISON SLIDER -->
+<section class="comparison-section fade-in">
+<div class="comparison-content">
+<h2>Before & After</h2>
+<p>마케팅 전후의 극적인 변화를 직접 확인해보세요. 데이터 기반의 전략으로 만들어낸 놀라운 성과입니다.</p>
+<div class="comparison-slider" id="comparisonSlider">
+<div class="slider-container">
+<div class="slider-before"></div>
+<div class="slider-after" id="sliderAfter"></div>
+<div class="slider-handle" id="sliderHandle"></div>
+<div class="slider-labels">
+<div class="label-before">BEFORE<br>월 매출 500만원</div>
+<div class="label-after">AFTER<br>월 매출 2,000만원</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- CTA SECTION -->
+<section class="cta-section fade-in">
+<div class="cta-content">
+<h2>다음 성공 사례의 주인공이 되세요</h2>
+<p>지금까지 본 성과들이 특별해 보이시나요? 이제 여러분의 브랜드도 이런 성과를 만들어낼 차례입니다. 전문가와 함께 시작해보세요.</p>
+<div class="cta-buttons">
+<a href="contact.html" class="cta-primary">
+프로젝트 시작하기
+<span>→</span>
+</a>
+<a href="services.html" class="cta-secondary">
+서비스 둘러보기
+<span>→</span>
+</a>
+</div>
+</div>
+</section>
 
 <footer class="footer">
 <div class="footer-left">WAVE<span>.</span> © 2024</div>
-<div class="footer-right"><a href="services.html">서비스</a><a href="portfolio.html">포트폴리오</a><a href="about.html">회사소개</a><a href="blog.html">인사이트</a><a href="contact.html">문의</a></div>
+<div class="footer-right">
+<a href="services.html">서비스</a><a href="portfolio.html">포트폴리오</a><a href="about.html">회사소개</a><a href="blog.html">인사이트</a><a href="contact.html">문의</a>
+</div>
 </footer>
 
 <script>
-document.getElementById('mobileToggle').addEventListener('click',()=>document.getElementById('mobileNav').classList.toggle('open'));
+// 프로젝트 상세 데이터
+const projectData = {
+project1: {
+title: "K-패션 브랜드 매출 300% 증가",
+category: "naver",
+image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80",
+desc: "네이버 쇼핑광고와 검색광고를 연계한 통합 마케팅으로 온라인 패션 브랜드의 매출을 6개월 만에 300% 상승시킨 성공 사례입니다. 키워드 최적화와 상품 카탈로그 관리로 높은 ROI를 달성했습니다.",
+duration: "6개월",
+strategy: "네이버 쇼핑광고 + 검색광고 + 블로그 마케팅",
+target: "20-40대 여성, 패션에 관심 많은 직장인",
+tools: "네이버 광고 시스템, 키워드 플래너, 애널리틱스",
+results: [
+{label: "매출 증가율", value: "+300%"},
+{label: "전환율", value: "4.2%"},
+{label: "평균 CPC", value: "850원"},
+{label: "ROAS", value: "420%"}
+]
+},
+project2: {
+title: "프리미엄 레스토랑 예약 200% 증가",
+category: "naver",
+image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&q=80",
+desc: "네이버 플레이스 최적화와 블로그 마케팅을 통해 고급 레스토랑의 온라인 인지도를 높이고 예약률을 200% 증가시킨 프로젝트입니다. 지역 SEO 전략으로 현지 고객 유치에 성공했습니다.",
+duration: "4개월",
+strategy: "네이버 플레이스 최적화 + 블로그 마케팅 + 리뷰 관리",
+target: "30-50대 고소득층, 특별한 날 외식을 즐기는 고객",
+tools: "네이버 플레이스, 블로그 작성 도구, 리뷰 모니터링",
+results: [
+{label: "예약 증가율", value: "+200%"},
+{label: "평점", value: "4.8/5.0"},
+{label: "리뷰 수", value: "120개"},
+{label: "재방문율", value: "65%"}
+]
+},
+project3: {
+title: "AI 스타트업 리드 300% 증가",
+category: "naver",
+image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=600&q=80",
+desc: "B2B AI 솔루션 스타트업의 리드 창출을 위한 네이버 검색광고 캠페인입니다. 전문적인 키워드 전략과 랜딩페이지 최적화로 높은 품질의 리드를 300% 증가시켰습니다.",
+duration: "8개월",
+strategy: "네이버 검색광고 + 브랜드검색 + 콘텐츠 마케팅",
+target: "IT 기업 의사결정권자, CTO, 개발팀장",
+tools: "네이버 광고센터, 랜딩페이지 빌더, CRM 연동",
+results: [
+{label: "리드 증가율", value: "+300%"},
+{label: "클릭률", value: "6.8%"},
+{label: "평균 CPC", value: "1,200원"},
+{label: "리드 품질 점수", value: "8.5/10"}
+]
+},
+project4: {
+title: "프리미엄 스킨케어 브랜드 론칭",
+category: "insta",
+image: "https://images.unsplash.com/photo-1563986768609-322da13575f2?w=600&q=80",
+desc: "인플루언서 마케팅과 스토리 광고를 결합하여 새로운 스킨케어 브랜드를 성공적으로 론칭한 사례입니다. 브랜드 인지도 500% 상승과 함께 충성도 높은 고객층을 확보했습니다.",
+duration: "5개월",
+strategy: "인플루언서 마케팅 + 인스타그램 광고 + 스토리텔링",
+target: "20-35세 여성, 뷰티에 관심이 많은 소비자",
+tools: "인스타그램 비즈니스, 인플루언서 플랫폼, 브랜드 모니터링",
+results: [
+{label: "브랜드 인지도", value: "+500%"},
+{label: "참여율", value: "8.5%"},
+{label: "도달 수", value: "120만명"},
+{label: "신제품 매출", value: "5억원"}
+]
+},
+project5: {
+title: "홈카페 브랜드 팔로워 5만 달성",
+category: "insta",
+image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80",
+desc: "홈카페 관련 제품을 판매하는 브랜드의 인스타그램 계정을 체계적으로 운영하여 6개월 만에 팔로워 5만명을 달성하고 매출 250% 증가를 이뤄낸 프로젝트입니다.",
+duration: "6개월",
+strategy: "콘텐츠 마케팅 + 해시태그 전략 + 커뮤니티 빌딩",
+target: "25-40세 직장인, 홈카페에 관심 있는 소비자",
+tools: "인스타그램 크리에이터 스튜디오, 스케줄링 도구, 애널리틱스",
+results: [
+{label: "팔로워 수", value: "5만명"},
+{label: "매출 증가율", value: "+250%"},
+{label: "참여율", value: "12%"},
+{label: "월 도달 수", value: "80만명"}
+]
+},
+project6: {
+title: "지속가능 패션 브랜드 론칭",
+category: "insta",
+image: "https://images.unsplash.com/photo-1542744094-3a31f272c490?w=600&q=80",
+desc: "환경을 생각하는 패션 브랜드의 가치를 효과적으로 전달하여 젊은 세대의 강력한 지지를 얻은 프로젝트입니다. 스토리텔링 중심의 콘텐츠로 브랜드 충성도를 높였습니다.",
+duration: "4개월",
+strategy: "브랜드 스토리텔링 + 가치 중심 마케팅 + 커뮤니티 참여",
+target: "18-30세 MZ세대, 환경 의식이 높은 소비자",
+tools: "인스타그램 광고 관리자, 스토리 제작 도구, 브랜드 모니터링",
+results: [
+{label: "팔로워 수", value: "3만명"},
+{label: "참여율", value: "15%"},
+{label: "도달 수", value: "80만명"},
+{label: "브랜드 충성도", value: "9.2/10"}
+]
+},
+project7: {
+title: "온라인 교육 채널 구독자 10만 돌파",
+category: "youtube",
+image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&q=80",
+desc: "체계적인 콘텐츠 기획과 SEO 최적화를 통해 교육 콘텐츠 채널을 6개월 만에 10만 구독자까지 성장시키고 수익화에 성공한 프로젝트입니다.",
+duration: "6개월",
+strategy: "콘텐츠SEO + 썸네일 최적화 + 시리즈 기획 + 커뮤니티 관리",
+target: "20-40세 직장인, 자기계발에 관심 있는 학습자",
+tools: "유튜브 스튜디오, 키워드 도구, 썸네일 디자인 툴",
+results: [
+{label: "구독자 수", value: "10만명"},
+{label: "매출 증가율", value: "+400%"},
+{label: "평균 조회 시간", value: "8분"},
+{label: "전환율", value: "12%"}
+]
+},
+project8: {
+title: "홈쿠킹 브랜드 바이럴 영상 제작",
+category: "youtube",
+image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&q=80",
+desc: "간편식 브랜드를 위한 홈쿠킹 콘텐츠 제작으로 바이럴을 달성하고 브랜드 인지도와 매출 증대를 동시에 이뤄낸 성공적인 유튜브 마케팅 사례입니다.",
+duration: "5개월",
+strategy: "레시피 콘텐츠 + 제품 자연스런 노출 + 크리에이터 협업",
+target: "25-45세 주부, 요리에 관심 있는 직장인",
+tools: "영상 편집 소프트웨어, 유튜브 애널리틱스, 협업 관리 도구",
+results: [
+{label: "총 조회수", value: "500만회"},
+{label: "구독자 증가", value: "5만명"},
+{label: "매출 증가율", value: "+180%"},
+{label: "브랜드 검색량", value: "+320%"}
+]
+},
+project9: {
+title: "IT 제품 리뷰 채널 수익화",
+category: "youtube",
+image: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&q=80",
+desc: "전문적이고 신뢰도 높은 IT 제품 리뷰 콘텐츠를 통해 채널을 성장시키고 다양한 브랜드와의 협업으로 안정적인 수익 구조를 구축한 프로젝트입니다.",
+duration: "8개월",
+strategy: "전문성 기반 리뷰 + 브랜드 협업 + 커뮤니티 신뢰도 구축",
+target: "20-40세 남성, IT 제품에 관심 많은 얼리어답터",
+tools: "전문 촬영 장비, 벤치마크 소프트웨어, 협업 관리 시스템",
+results: [
+{label: "구독자 수", value: "8만명"},
+{label: "월 조회수", value: "200만회"},
+{label: "브랜드 협업", value: "15개"},
+{label: "월 수익", value: "800만원"}
+]
+},
+project10: {
+title: "#OOTD 챌린지 1000만 조회수 달성",
+category: "tiktok",
+image: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&q=80",
+desc: "패션 브랜드를 위한 해시태그 챌린지를 기획하여 단 7일 만에 1000만 조회수를 달성하고 브랜드 인지도를 급속도로 확산시킨 바이럴 마케팅의 대표 사례입니다.",
+duration: "1개월",
+strategy: "해시태그 챌린지 + 인플루언서 시드 + 트렌드 활용",
+target: "16-25세 Z세대, 패션에 민감한 틱톡 사용자",
+tools: "틱톡 광고 관리자, 해시태그 분석 도구, 인플루언서 플랫폼",
+results: [
+{label: "총 조회수", value: "1000만회"},
+{label: "참여율", value: "15%"},
+{label: "참여자 수", value: "25만명"},
+{label: "브랜드 언급량", value: "+800%"}
+]
+},
+project11: {
+title: "K-뷰티 브랜드 글로벌 진출",
+category: "tiktok",
+image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&q=80",
+desc: "한국 뷰티 브랜드의 글로벌 진출을 위해 해외 틱톡 크리에이터들과 협업하여 12개국에서 성공적인 브랜드 런칭을 달성한 국제적 마케팅 프로젝트입니다.",
+duration: "6개월",
+strategy: "글로벌 크리에이터 네트워크 + 현지화 콘텐츠 + 문화 적응",
+target: "16-30세 해외 여성, K-뷰티에 관심 있는 글로벌 소비자",
+tools: "글로벌 인플루언서 플랫폼, 다국가 광고 관리, 현지화 도구",
+results: [
+{label: "해외 조회수", value: "800만회"},
+{label: "참여율", value: "20%"},
+{label: "진출 국가", value: "12개국"},
+{label: "해외 매출", value: "30억원"}
+]
+},
+project12: {
+title: "음식 브랜드 레시피 챌린지",
+category: "tiktok",
+image: "https://images.unsplash.com/photo-1557426272-fc759fdf7a8d?w=600&q=80",
+desc: "간편 요리 제품을 활용한 창의적인 레시피 챌린지를 통해 Z세대 사이에서 폭발적인 인기를 얻고 매출 증대에 직접적으로 기여한 푸드 브랜드 마케팅 성공 사례입니다.",
+duration: "3개월",
+strategy: "레시피 챌린지 + UGC 활용 + 크리에이터 협업",
+target: "18-28세 Z세대, 간편 요리에 관심 있는 1인 가구",
+tools: "틱톡 크리에이터 펀드, 레시피 기획 도구, UGC 수집 시스템",
+results: [
+{label: "총 조회수", value: "600만회"},
+{label: "참여율", value: "18%"},
+{label: "매출 증가율", value: "+350%"},
+{label: "신규 고객", value: "8만명"}
+]
+}
+};
 
-// Filter
-document.querySelectorAll('.filter-pill').forEach(p=>{
-p.addEventListener('click',()=>{
-document.querySelectorAll('.filter-pill').forEach(f=>f.classList.remove('active'));
-p.classList.add('active');
-const filter=p.dataset.filter;
-document.querySelectorAll('.portfolio-card').forEach(c=>{
-c.style.display=(filter==='all'||c.dataset.category===filter)?'':'none';
+// 모바일 네비게이션 토글
+const mobileToggle = document.getElementById('mobileToggle');
+const mobileNav = document.getElementById('mobileNav');
+
+mobileToggle.addEventListener('click', () => {
+mobileNav.classList.toggle('open');
+});
+
+// 필터 기능
+const filterButtons = document.querySelectorAll('.filter-btn');
+const portfolioItems = document.querySelectorAll('.portfolio-item');
+
+filterButtons.forEach(button => {
+button.addEventListener('click', () => {
+// 활성 버튼 변경
+filterButtons.forEach(btn => btn.classList.remove('active'));
+button.classList.add('active');
+
+const filter = button.getAttribute('data-filter');
+
+// 아이템 필터링
+portfolioItems.forEach(item => {
+if (filter === 'all' || item.getAttribute('data-category') === filter) {
+item.classList.remove('hidden');
+} else {
+item.classList.add('hidden');
+}
 });
 });
 });
 
-// View modes
-document.querySelectorAll('.view-btn').forEach(b=>{
-b.addEventListener('click',()=>{
-document.querySelectorAll('.view-btn').forEach(v=>v.classList.remove('active'));
-b.classList.add('active');
-const grid=document.getElementById('portfolioGrid');
-grid.classList.remove('list-view','fullscreen-view');
-if(b.dataset.view==='list')grid.classList.add('list-view');
-if(b.dataset.view==='fullscreen')grid.classList.add('fullscreen-view');
+// 모달 기능
+function openModal(projectId) {
+const project = projectData[projectId];
+if (!project) return;
+
+const modal = document.getElementById('projectModal');
+const modalImage = document.getElementById('modalImage');
+const modalCategory = document.getElementById('modalCategory');
+const modalTitle = document.getElementById('modalTitle');
+const modalDesc = document.getElementById('modalDesc');
+const modalDuration = document.getElementById('modalDuration');
+const modalStrategy = document.getElementById('modalStrategy');
+const modalTarget = document.getElementById('modalTarget');
+const modalTools = document.getElementById('modalTools');
+const modalResults = document.getElementById('modalResults');
+
+// 모달 내용 설정
+modalImage.src = project.image;
+modalTitle.textContent = project.title;
+modalDesc.textContent = project.desc;
+modalDuration.textContent = project.duration;
+modalStrategy.textContent = project.strategy;
+modalTarget.textContent = project.target;
+modalTools.textContent = project.tools;
+
+// 카테고리 스타일 설정
+modalCategory.textContent = project.category === 'naver' ? '네이버' : 
+project.category === 'insta' ? '인스타그램' :
+project.category === 'youtube' ? '유튜브' : '틱톡';
+modalCategory.className = `modal-category category-${project.category}`;
+
+// 결과 데이터 설정
+modalResults.innerHTML = project.results.map(result => `
+<div class="modal-result-item">
+<span class="modal-result-value">${result.value}</span>
+<div class="modal-result-label">${result.label}</div>
+</div>
+`).join('');
+
+modal.classList.add('open');
+}
+
+function closeModal() {
+document.getElementById('projectModal').classList.remove('open');
+}
+
+// 포트폴리오 아이템 클릭 이벤트
+portfolioItems.forEach(item => {
+item.addEventListener('click', () => {
+const projectId = item.getAttribute('data-id');
+openModal(projectId);
 });
 });
 
-// Modal data
-const cases=[
-{img:'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80',tag:'네이버',tagClass:'tag-naver',title:'글로벌 뷰티 브랜드 검색 마케팅',desc:'국내 대표 뷰티 브랜드의 네이버 블로그·플레이스 통합 마케팅을 진행했습니다. 3개월 간의 체계적인 콘텐츠 전략과 검색 최적화로 핵심 키워드 1위를 달성하고, 스마트스토어 매출을 340% 성장시켰습니다.',stats:[{num:'1위',label:'키워드 순위'},{num:'340%',label:'매출 성장'},{num:'15만',label:'월 유입수'}]},
-{img:'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=1200&q=80',tag:'인스타그램',tagClass:'tag-insta',title:'프리미엄 패션 릴스 캠페인',desc:'신진 패션 브랜드의 인스타그램 런칭을 담당했습니다. 감각적인 릴스 콘텐츠와 인플루언서 콜라보로 6개월 만에 팔로워 5만 명을 달성하고, 온라인 매출의 65%를 인스타그램에서 창출했습니다.',stats:[{num:'5만',label:'팔로워 달성'},{num:'4.7%',label:'참여율'},{num:'65%',label:'매출 비중'}]},
-{img:'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=1200&q=80',tag:'유튜브',tagClass:'tag-youtube',title:'테크 스타트업 채널 론칭',desc:'AI 스타트업의 유튜브 채널을 기획부터 운영까지 전담했습니다. 교육 콘텐츠와 제품 시연 영상으로 구독자 10만을 달성하고, 영상을 통한 B2B 문의가 월 50건 이상으로 증가했습니다.',stats:[{num:'10만',label:'구독자'},{num:'92%',label:'시청 지속률'},{num:'50건+',label:'월 문의'}]},
-{img:'https://images.unsplash.com/photo-1563986768609-322da13575f2?w=1200&q=80',tag:'틱톡',tagClass:'tag-tiktok',title:'프랜차이즈 틱톡 챌린지',desc:'전국 200개 매장을 보유한 프랜차이즈의 틱톡 바이럴 캠페인을 진행했습니다. 브랜드 챌린지 하나로 일주일 만에 500만 조회수를 기록하고, 챌린지 기간 매장 방문객이 180% 증가했습니다.',stats:[{num:'500만',label:'조회수'},{num:'180%',label:'방문 증가'},{num:'3.2만',label:'참여 영상'}]},
-{img:'https://images.unsplash.com/photo-1542744094-3a31f272c490?w=1200&q=80',tag:'네이버',tagClass:'tag-naver',title:'이커머스 스마트스토어 런칭',desc:'신규 라이프스타일 브랜드의 스마트스토어를 개설하고 통합 마케팅을 실행했습니다. 검색광고, 블로그, 인플루언서를 결합한 전략으로 월 매출 1억 원을 돌파했습니다.',stats:[{num:'1억',label:'월 매출'},{num:'420%',label:'매출 성장'},{num:'ROAS 580%',label:'광고 효율'}]},
-{img:'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&q=80',tag:'인스타그램',tagClass:'tag-insta',title:'라이프스타일 브랜드 리브랜딩',desc:'10년 된 라이프스타일 브랜드의 인스타그램 리브랜딩을 진행했습니다. 새로운 비주얼 아이덴티티와 콘텐츠 전략으로 브랜드 인지도와 참여율을 동시에 끌어올렸습니다.',stats:[{num:'380%',label:'인지도 상승'},{num:'5.8%',label:'참여율'},{num:'2.3배',label:'매출 증가'}]},
-{img:'https://images.unsplash.com/photo-1551434678-e076c223a692?w=1200&q=80',tag:'유튜브',tagClass:'tag-youtube',title:'교육 플랫폼 콘텐츠 전략',desc:'온라인 교육 플랫폼의 유튜브 마케팅을 담당했습니다. 무료 강의 콘텐츠를 통한 리드 제너레이션 전략으로 회원 가입 전환율을 대폭 개선했습니다.',stats:[{num:'92%',label:'시청 지속률'},{num:'25만',label:'월 조회수'},{num:'340%',label:'가입 전환'}]},
-{img:'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&q=80',tag:'틱톡',tagClass:'tag-tiktok',title:'모바일 앱 다운로드 캠페인',desc:'핀테크 앱의 틱톡 다운로드 캠페인을 운영했습니다. 크리에이터 협업과 정밀 타겟팅으로 설치당 비용을 67% 절감하면서 다운로드 수를 3배 이상 확대했습니다.',stats:[{num:'67%',label:'CPI 절감'},{num:'3배',label:'다운로드 증가'},{num:'₩1,050',label:'CPI'}]}
-];
-
-document.querySelectorAll('.portfolio-card').forEach(card=>{
-card.addEventListener('click',()=>{
-const i=parseInt(card.dataset.index);
-const c=cases[i];
-document.getElementById('modalImg').src=c.img;
-const tag=document.getElementById('modalTag');
-tag.textContent=c.tag;tag.className='modal-tag '+c.tagClass;
-document.getElementById('modalTitle').textContent=c.title;
-document.getElementById('modalDesc').textContent=c.desc;
-document.getElementById('modalStats').innerHTML=c.stats.map(s=>`<div class="modal-stat"><div class="num">${s.num}</div><div class="label">${s.label}</div></div>`).join('');
-document.getElementById('modal').classList.add('open');
-});
+// 모달 배경 클릭으로 닫기
+document.getElementById('projectModal').addEventListener('click', (e) => {
+if (e.target.classList.contains('modal')) {
+closeModal();
+}
 });
 
-function closeModal(){document.getElementById('modal').classList.remove('open')}
-document.getElementById('modal').addEventListener('click',closeModal);
+// 숫자 카운팅 애니메이션
+function animateNumber(element, target, duration = 2000) {
+const start = 0;
+const increment = target / (duration / 16);
+let current = start;
 
-// Keyboard nav
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+const timer = setInterval(() => {
+current += increment;
+if (current >= target) {
+current = target;
+clearInterval(timer);
+}
+
+if (target >= 1000000) {
+element.textContent = (current / 1000000).toFixed(0) + '천만';
+} else if (target >= 10000) {
+element.textContent = (current / 10000).toFixed(0) + '만';
+} else {
+element.textContent = Math.floor(current);
+}
+}, 16);
+}
+
+// 비교 슬라이더
+const slider = document.getElementById('comparisonSlider');
+const handle = document.getElementById('sliderHandle');
+const afterImage = document.getElementById('sliderAfter');
+
+let isDragging = false;
+
+handle.addEventListener('mousedown', () => {
+isDragging = true;
+});
+
+document.addEventListener('mousemove', (e) => {
+if (!isDragging) return;
+
+const rect = slider.getBoundingClientRect();
+const x = e.clientX - rect.left;
+const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+
+handle.style.left = percentage + '%';
+afterImage.style.clipPath = `inset(0 ${100 - percentage}% 0 0)`;
+});
+
+document.addEventListener('mouseup', () => {
+isDragging = false;
+});
+
+// 터치 이벤트 (모바일)
+handle.addEventListener('touchstart', () => {
+isDragging = true;
+});
+
+document.addEventListener('touchmove', (e) => {
+if (!isDragging) return;
+e.preventDefault();
+
+const rect = slider.getBoundingClientRect();
+const x = e.touches[0].clientX - rect.left;
+const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+
+handle.style.left = percentage + '%';
+afterImage.style.clipPath = `inset(0 ${100 - percentage}% 0 0)`;
+});
+
+document.addEventListener('touchend', () => {
+isDragging = false;
+});
+
+// 스크롤 애니메이션
+const observerOptions = {
+threshold: 0.1,
+rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+entries.forEach(entry => {
+if (entry.isIntersecting) {
+entry.target.classList.add('visible');
+
+// 숫자 카운팅 애니메이션 실행
+if (entry.target.classList.contains('stat-item')) {
+const numberElement = entry.target.querySelector('.stat-number');
+const target = parseInt(numberElement.getAttribute('data-target'));
+animateNumber(numberElement, target);
+}
+}
+});
+}, observerOptions);
+
+document.querySelectorAll('.fade-in, .slide-up, .scale-in').forEach(el => {
+observer.observe(el);
+});
 </script>
+
 </body>
 </html>
