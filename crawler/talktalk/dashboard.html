@@ -1,0 +1,1232 @@
+<!-- 톡톡 발송 시스템 대시보드 | http://localhost:3400/dashboard -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>톡톡 발송 시스템</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#1a1a2e;--card:#16213e;--accent:#0f3460;--highlight:#e94560;
+  --success:#00d4aa;--error:#e94560;--warning:#ffc107;--info:#4cc9f0;--primary:#7209b7;
+  --text:#e0e0e0;--text-dim:#8892a4;--border:#2a3a5c;--radius:8px;--transition:0.3s ease;
+}
+html{font-size:14px;scroll-behavior:smooth}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5;
+}
+a{color:var(--info);text-decoration:none}
+input,textarea,select,button{
+  font-family:inherit;font-size:inherit;color:var(--text);
+  background:var(--accent);border:1px solid var(--border);border-radius:var(--radius);
+  padding:8px 12px;outline:none;transition:border-color var(--transition);
+}
+input:focus,textarea:focus,select:focus{border-color:var(--info)}
+button{
+  cursor:pointer;background:var(--primary);border-color:var(--primary);
+  color:#fff;font-weight:600;transition:all var(--transition);
+}
+button:hover{opacity:0.85;transform:translateY(-1px)}
+button:active{transform:translateY(0)}
+button:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+table{width:100%;border-collapse:collapse}
+th,td{
+  padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);
+  font-family:'SF Mono',Monaco,'Cascadia Code',monospace,monospace;font-size:0.85rem;
+}
+th{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  color:var(--text-dim);font-weight:600;font-size:0.75rem;text-transform:uppercase;
+  letter-spacing:0.05em;cursor:pointer;user-select:none;white-space:nowrap;
+}
+th:hover{color:var(--text)}
+th .sort-arrow{margin-left:4px;font-size:0.6rem;opacity:0.5}
+th .sort-arrow.active{opacity:1}
+tr:hover td{background:rgba(15,52,96,0.3)}
+.mono{font-family:'SF Mono',Monaco,'Cascadia Code',monospace,monospace;font-size:0.85rem}
+
+/* Layout */
+.header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 24px;background:var(--card);border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:100;
+}
+.header h1{font-size:1.25rem;font-weight:700;letter-spacing:-0.02em}
+.header-right{display:flex;align-items:center;gap:16px}
+.status-dot{
+  width:10px;height:10px;border-radius:50%;display:inline-block;
+  transition:background var(--transition);
+}
+.status-dot.online{background:var(--success);box-shadow:0 0 6px var(--success)}
+.status-dot.offline{background:var(--error);box-shadow:0 0 6px var(--error)}
+.status-label{font-size:0.8rem;color:var(--text-dim);margin-left:6px}
+.toggle-wrap{display:flex;align-items:center;gap:8px;font-size:0.8rem;color:var(--text-dim)}
+.toggle{
+  width:36px;height:20px;border-radius:10px;background:var(--accent);
+  position:relative;cursor:pointer;transition:background var(--transition);border:1px solid var(--border);
+}
+.toggle.active{background:var(--success);border-color:var(--success)}
+.toggle::after{
+  content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;
+  border-radius:50%;background:#fff;transition:transform var(--transition);
+}
+.toggle.active::after{transform:translateX(16px)}
+
+/* Tabs */
+.tabs{
+  display:flex;background:var(--card);border-bottom:1px solid var(--border);
+  padding:0 24px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+}
+.tab{
+  padding:12px 20px;font-size:0.85rem;font-weight:500;color:var(--text-dim);
+  cursor:pointer;border-bottom:2px solid transparent;transition:all var(--transition);
+  white-space:nowrap;
+}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--info);border-bottom-color:var(--info)}
+
+.main{padding:24px;max-width:1400px;margin:0 auto}
+.tab-content{display:none;animation:fadeIn 0.3s ease}
+.tab-content.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Stats cards */
+.stats-row{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px;
+}
+.stat-card{
+  background:var(--card);border-radius:var(--radius);padding:20px;
+  border:1px solid var(--border);transition:all var(--transition);position:relative;overflow:hidden;
+}
+.stat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  border-radius:var(--radius) var(--radius) 0 0;
+}
+.stat-card.total::before{background:var(--primary)}
+.stat-card.talko::before{background:var(--success)}
+.stat-card.talkx::before{background:var(--error)}
+.stat-card.unknown::before{background:var(--text-dim)}
+.stat-card.sent::before{background:var(--info)}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+.stat-label{font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px}
+.stat-value{font-size:1.75rem;font-weight:700;font-family:'SF Mono',Monaco,monospace}
+.stat-card.total .stat-value{color:var(--primary)}
+.stat-card.talko .stat-value{color:var(--success)}
+.stat-card.talkx .stat-value{color:var(--error)}
+.stat-card.unknown .stat-value{color:var(--text-dim)}
+.stat-card.sent .stat-value{color:var(--info)}
+
+/* Card / Section */
+.section{
+  background:var(--card);border-radius:var(--radius);border:1px solid var(--border);
+  margin-bottom:24px;overflow:hidden;
+}
+.section-header{
+  padding:16px 20px;border-bottom:1px solid var(--border);display:flex;
+  align-items:center;justify-content:space-between;
+}
+.section-header h2{font-size:0.95rem;font-weight:600}
+.section-body{padding:20px;overflow-x:auto}
+.section-body.no-pad{padding:0}
+
+/* Form */
+.form-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px}
+.form-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:140px}
+.form-group label{font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.05em}
+.form-group.full{flex-basis:100%}
+.char-count{font-size:0.7rem;color:var(--text-dim);text-align:right}
+
+/* Badge */
+.badge{
+  display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.7rem;
+  font-weight:600;text-transform:uppercase;letter-spacing:0.03em;
+}
+.badge-success{background:rgba(0,212,170,0.15);color:var(--success)}
+.badge-error{background:rgba(233,69,96,0.15);color:var(--error)}
+.badge-warning{background:rgba(255,193,7,0.15);color:var(--warning)}
+.badge-info{background:rgba(76,201,240,0.15);color:var(--info)}
+.badge-primary{background:rgba(114,9,183,0.15);color:var(--primary)}
+.badge-dim{background:rgba(136,146,164,0.15);color:var(--text-dim)}
+
+/* Progress bar */
+.progress-bar{
+  height:8px;background:var(--accent);border-radius:4px;overflow:hidden;position:relative;
+  min-width:80px;
+}
+.progress-fill{
+  height:100%;border-radius:4px;transition:width 0.5s ease;
+  background:linear-gradient(90deg,var(--info),var(--success));
+}
+.progress-fill.has-fail{
+  background:linear-gradient(90deg,var(--success),var(--success) var(--success-pct),var(--error) var(--success-pct));
+}
+.progress-text{font-size:0.7rem;color:var(--text-dim);margin-top:2px;text-align:center}
+
+/* Stacked bar */
+.stacked-bar{height:28px;background:var(--accent);border-radius:var(--radius);overflow:hidden;display:flex}
+.stacked-bar .seg{transition:width 0.5s ease;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:600;color:#fff;min-width:0}
+.stacked-bar .seg.success-seg{background:var(--success)}
+.stacked-bar .seg.fail-seg{background:var(--error)}
+.stacked-bar .seg.remain-seg{background:var(--accent)}
+
+/* Modal */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);
+  z-index:200;display:none;align-items:center;justify-content:center;
+  animation:fadeIn 0.2s ease;
+}
+.modal-overlay.show{display:flex}
+.modal{
+  background:var(--card);border-radius:var(--radius);border:1px solid var(--border);
+  width:90%;max-width:560px;max-height:90vh;overflow-y:auto;
+  box-shadow:0 16px 48px rgba(0,0,0,0.4);
+}
+.modal-header{
+  padding:16px 20px;border-bottom:1px solid var(--border);display:flex;
+  align-items:center;justify-content:space-between;
+}
+.modal-header h3{font-size:1rem;font-weight:600}
+.modal-close{
+  background:none;border:none;color:var(--text-dim);font-size:1.2rem;
+  cursor:pointer;padding:4px 8px;line-height:1;
+}
+.modal-close:hover{color:var(--text);transform:none}
+.modal-body{padding:20px}
+.modal-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+/* Toast */
+.toast-container{
+  position:fixed;top:16px;right:16px;z-index:300;display:flex;flex-direction:column;gap:8px;
+  pointer-events:none;
+}
+.toast{
+  padding:12px 20px;border-radius:var(--radius);color:#fff;font-size:0.85rem;
+  font-weight:500;pointer-events:auto;animation:toastIn 0.3s ease;
+  box-shadow:0 4px 12px rgba(0,0,0,0.3);max-width:360px;
+}
+.toast.out{animation:toastOut 0.3s ease forwards}
+.toast-success{background:var(--success)}
+.toast-error{background:var(--error)}
+.toast-info{background:var(--info)}
+.toast-warning{background:var(--warning)}
+@keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(40px)}}
+
+/* Spinner */
+.spinner{
+  width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--info);
+  border-radius:50%;animation:spin 0.6s linear infinite;display:inline-block;vertical-align:middle;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-overlay{
+  display:flex;align-items:center;justify-content:center;padding:40px;gap:8px;
+  color:var(--text-dim);font-size:0.85rem;
+}
+
+/* Campaign detail panel */
+.detail-panel{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  margin-top:16px;overflow:hidden;display:none;animation:fadeIn 0.3s ease;
+}
+.detail-panel.show{display:block}
+.detail-panel .section-header{cursor:pointer}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px}
+.detail-item label{display:block;font-size:0.7rem;color:var(--text-dim);text-transform:uppercase;margin-bottom:2px}
+.detail-item .val{font-size:0.9rem}
+.detail-item.full{grid-column:1/-1}
+.detail-message{
+  background:var(--accent);padding:12px;border-radius:var(--radius);
+  white-space:pre-wrap;word-break:break-all;font-size:0.85rem;line-height:1.6;
+  max-height:200px;overflow-y:auto;
+}
+
+/* Pagination */
+.pagination{display:flex;align-items:center;justify-content:center;gap:8px;padding:16px}
+.pagination button{
+  min-width:32px;height:32px;padding:0 8px;font-size:0.8rem;
+  background:var(--accent);border-color:var(--border);
+}
+.pagination button.active{background:var(--primary);border-color:var(--primary)}
+.pagination button:disabled{opacity:0.3}
+
+/* Filter row */
+.filter-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.filter-row select,.filter-row input{max-width:180px}
+
+/* Empty state */
+.empty{padding:40px;text-align:center;color:var(--text-dim);font-size:0.85rem}
+
+/* Preview count */
+.preview-count{
+  padding:8px 12px;background:var(--accent);border-radius:var(--radius);
+  font-size:0.85rem;text-align:center;margin-top:8px;
+}
+.preview-count strong{color:var(--info)}
+
+/* Worker card */
+.worker-card{
+  background:var(--accent);border-radius:var(--radius);padding:12px 16px;
+  border:1px solid var(--border);margin-bottom:8px;
+}
+.worker-card .wname{font-weight:600;font-size:0.9rem}
+.worker-card .wmeta{font-size:0.75rem;color:var(--text-dim);margin-top:4px}
+
+/* Responsive */
+@media(max-width:768px){
+  .header{padding:12px 16px;flex-wrap:wrap;gap:8px}
+  .header h1{font-size:1.1rem}
+  .main{padding:16px}
+  .stats-row{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+  .stat-card{padding:14px}
+  .stat-value{font-size:1.3rem}
+  .form-row{flex-direction:column}
+  .form-group{min-width:100%}
+  .tabs{padding:0 12px}
+  .tab{padding:10px 14px;font-size:0.8rem}
+  .detail-grid{grid-template-columns:1fr}
+  .section-body{padding:12px}
+  th,td{padding:8px 6px;font-size:0.75rem}
+}
+@media(max-width:480px){
+  .stats-row{grid-template-columns:1fr 1fr}
+  .header-right{font-size:0.75rem}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <h1>톡톡 발송 시스템</h1>
+  <div class="header-right">
+    <div style="display:flex;align-items:center">
+      <span class="status-dot offline" id="statusDot"></span>
+      <span class="status-label" id="statusLabel">연결 중...</span>
+    </div>
+    <div class="toggle-wrap">
+      <span>자동 새로고침</span>
+      <div class="toggle" id="autoRefreshToggle" onclick="toggleAutoRefresh()"></div>
+    </div>
+  </div>
+</header>
+
+<!-- Tabs -->
+<nav class="tabs" id="tabNav">
+  <div class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">대시보드</div>
+  <div class="tab" data-tab="crawling" onclick="switchTab('crawling')">크롤링</div>
+  <div class="tab" data-tab="campaigns" onclick="switchTab('campaigns')">캠페인</div>
+  <div class="tab" data-tab="history" onclick="switchTab('history')">발송이력</div>
+  <div class="tab" data-tab="workers" onclick="switchTab('workers')">워커</div>
+</nav>
+
+<!-- Main content -->
+<div class="main">
+
+  <!-- Tab 1: Dashboard -->
+  <div class="tab-content active" id="tab-dashboard">
+    <div class="stats-row" id="statsCards">
+      <div class="stat-card total">
+        <div class="stat-label">전체 DB</div>
+        <div class="stat-value" id="statTotal">--</div>
+      </div>
+      <div class="stat-card talko">
+        <div class="stat-label">톡톡 O</div>
+        <div class="stat-value" id="statTalkO">--</div>
+      </div>
+      <div class="stat-card talkx">
+        <div class="stat-label">톡톡 X</div>
+        <div class="stat-value" id="statTalkX">--</div>
+      </div>
+      <div class="stat-card unknown">
+        <div class="stat-label">미확인</div>
+        <div class="stat-value" id="statUnknown">--</div>
+      </div>
+      <div class="stat-card sent">
+        <div class="stat-label">발송 완료</div>
+        <div class="stat-value" id="statSent">--</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <h2>업종별 통계 (톡톡O 상위 20)</h2>
+      </div>
+      <div class="section-body no-pad">
+        <table id="categoryTable">
+          <thead>
+            <tr>
+              <th data-sort="category">업종 <span class="sort-arrow">&uarr;</span></th>
+              <th data-sort="total">전체 <span class="sort-arrow">&uarr;</span></th>
+              <th data-sort="talkO">톡톡O <span class="sort-arrow active">&darr;</span></th>
+              <th data-sort="sent">발송완료 <span class="sort-arrow">&uarr;</span></th>
+              <th data-sort="ratio">톡톡비율 <span class="sort-arrow">&uarr;</span></th>
+            </tr>
+          </thead>
+          <tbody id="categoryBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 2: Crawling -->
+  <div class="tab-content" id="tab-crawling">
+    <div class="section">
+      <div class="section-header"><h2>크롤링 실행</h2></div>
+      <div class="section-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>키워드</label>
+            <input type="text" id="crawlKeyword" placeholder="예: 강남 미용실">
+          </div>
+          <div class="form-group">
+            <label>지역</label>
+            <input type="text" id="crawlRegion" placeholder="예: 서울">
+          </div>
+          <div class="form-group" style="flex:0 0 auto">
+            <label>&nbsp;</label>
+            <button id="crawlBtn" onclick="startCrawl()">크롤링 시작</button>
+          </div>
+        </div>
+        <div id="crawlResult" style="display:none">
+          <div class="stats-row" id="crawlStats" style="margin-bottom:16px"></div>
+          <table>
+            <thead>
+              <tr><th>업체명</th><th>업종</th><th>주소</th><th>톡톡</th></tr>
+            </thead>
+            <tbody id="crawlResultBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <h2>최근 크롤링 이력</h2>
+        <button onclick="clearCrawlHistory()" style="font-size:0.75rem;padding:4px 10px;background:var(--accent);border-color:var(--border)">이력 삭제</button>
+      </div>
+      <div class="section-body no-pad">
+        <table>
+          <thead><tr><th>시간</th><th>키워드</th><th>지역</th><th>전체</th><th>톡톡O</th><th>신규</th></tr></thead>
+          <tbody id="crawlHistoryBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 3: Campaigns -->
+  <div class="tab-content" id="tab-campaigns">
+    <div class="section">
+      <div class="section-header">
+        <h2>캠페인 목록</h2>
+        <button onclick="openNewCampaign()">새 캠페인</button>
+      </div>
+      <div class="section-body no-pad">
+        <table>
+          <thead>
+            <tr>
+              <th>이름</th><th>상태</th><th>메시지</th><th>대상</th>
+              <th>진행률</th><th>성공</th><th>실패</th><th>생성일</th>
+            </tr>
+          </thead>
+          <tbody id="campaignBody"></tbody>
+        </table>
+        <div id="campaignEmpty" class="empty">캠페인이 없습니다. 새 캠페인을 생성하세요.</div>
+      </div>
+    </div>
+    <div class="detail-panel" id="campaignDetail">
+      <div class="section-header" onclick="closeCampaignDetail()">
+        <h2 id="detailTitle">캠페인 상세</h2>
+        <span style="color:var(--text-dim);font-size:0.8rem;cursor:pointer">닫기 &times;</span>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-item"><label>상태</label><div class="val" id="detailStatus">--</div></div>
+        <div class="detail-item"><label>생성일</label><div class="val" id="detailCreated">--</div></div>
+        <div class="detail-item full"><label>메시지</label><div class="detail-message" id="detailMessage">--</div></div>
+        <div class="detail-item full">
+          <label>진행 현황</label>
+          <div class="stacked-bar" id="detailBar" style="margin-top:6px">
+            <div class="seg success-seg" style="width:0"></div>
+            <div class="seg fail-seg" style="width:0"></div>
+            <div class="seg remain-seg" style="width:100%"></div>
+          </div>
+          <div style="display:flex;gap:16px;margin-top:8px;font-size:0.75rem;color:var(--text-dim)">
+            <span>전체: <strong id="detailTotal" style="color:var(--text)">0</strong></span>
+            <span>발송: <strong id="detailSent" style="color:var(--info)">0</strong></span>
+            <span>성공: <strong id="detailSuccess" style="color:var(--success)">0</strong></span>
+            <span>실패: <strong id="detailFail" style="color:var(--error)">0</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 4: Send History -->
+  <div class="tab-content" id="tab-history">
+    <div class="section">
+      <div class="section-header">
+        <h2>발송이력</h2>
+        <div class="filter-row" style="margin:0">
+          <select id="historyFilter" onchange="loadHistory()">
+            <option value="">전체</option>
+            <option value="success">성공</option>
+            <option value="fail">실패</option>
+          </select>
+        </div>
+      </div>
+      <div class="section-body no-pad">
+        <table>
+          <thead>
+            <tr><th>시간</th><th>업체명</th><th>Talk ID</th><th>결과</th><th>계정</th></tr>
+          </thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+        <div id="historyEmpty" class="empty" style="display:none">발송이력이 없습니다.</div>
+      </div>
+      <div class="pagination" id="historyPagination"></div>
+    </div>
+  </div>
+
+  <!-- Tab 5: Workers -->
+  <div class="tab-content" id="tab-workers">
+    <div class="section">
+      <div class="section-header"><h2>연결된 워커</h2></div>
+      <div class="section-body" id="workerList">
+        <div class="empty">워커 활동 기록이 없습니다.</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-header"><h2>워커 활동 로그</h2></div>
+      <div class="section-body no-pad">
+        <table>
+          <thead><tr><th>시간</th><th>워커</th><th>동작</th><th>상세</th></tr></thead>
+          <tbody id="workerLogBody"></tbody>
+        </table>
+        <div id="workerLogEmpty" class="empty">활동 로그가 없습니다.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New Campaign Modal -->
+<div class="modal-overlay" id="campaignModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>새 캠페인 생성</h3>
+      <button class="modal-close" onclick="closeCampaignModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group full">
+          <label>캠페인명</label>
+          <input type="text" id="campName" placeholder="캠페인 이름 입력">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full">
+          <label>메시지</label>
+          <textarea id="campMessage" rows="5" placeholder="발송할 메시지를 입력하세요" oninput="updateCharCount()"></textarea>
+          <div class="char-count"><span id="charCount">0</span>자</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>업종 필터 (선택)</label>
+          <input type="text" id="campCategory" placeholder="예: 미용실" oninput="updatePreviewCount()">
+        </div>
+        <div class="form-group">
+          <label>지역 필터 (선택)</label>
+          <input type="text" id="campRegion" placeholder="예: 강남" oninput="updatePreviewCount()">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>발송 제한</label>
+          <input type="number" id="campLimit" value="100" min="1" oninput="updatePreviewCount()">
+        </div>
+      </div>
+      <div class="preview-count" id="previewCount">대상 업체 수 조회 중...</div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeCampaignModal()" style="background:var(--accent);border-color:var(--border)">취소</button>
+      <button onclick="createCampaign()" id="createCampBtn">생성</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+/* =====================================================================
+   State
+   ===================================================================== */
+let autoRefresh = localStorage.getItem('autoRefresh') !== 'false';
+let refreshTimer = null;
+let currentTab = localStorage.getItem('activeTab') || 'dashboard';
+let categorySortKey = 'talkO';
+let categorySortAsc = false;
+let categoryData = [];
+let historyPage = 1;
+const HISTORY_PER_PAGE = 50;
+let allHistory = [];
+let previewDebounce = null;
+let workerLogs = [];
+
+/* =====================================================================
+   API Helper
+   ===================================================================== */
+async function api(method, path, body) {
+  const opts = {
+    method: method,
+    headers: { 'Content-Type': 'application/json' }
+  };
+  if (body && method !== 'GET') {
+    opts.body = JSON.stringify(body);
+  }
+  const res = await fetch(path, opts);
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || res.statusText);
+  }
+  return res.json();
+}
+
+/* =====================================================================
+   Formatting Helpers
+   ===================================================================== */
+function fmt(n) {
+  if (n == null || isNaN(n)) return '--';
+  return Number(n).toLocaleString('ko-KR');
+}
+
+function pct(a, b) {
+  if (!b) return '0%';
+  return (a / b * 100).toFixed(1) + '%';
+}
+
+function relTime(dateStr) {
+  if (!dateStr) return '--';
+  const d = new Date(dateStr);
+  const now = Date.now();
+  const diff = Math.floor((now - d.getTime()) / 1000);
+  if (diff < 0) return fmtDate(dateStr);
+  if (diff < 60) return diff + '초 전';
+  if (diff < 3600) return Math.floor(diff / 60) + '분 전';
+  if (diff < 86400) return Math.floor(diff / 3600) + '시간 전';
+  if (diff < 604800) return Math.floor(diff / 86400) + '일 전';
+  return fmtDate(dateStr);
+}
+
+function fmtDate(dateStr) {
+  if (!dateStr) return '--';
+  const d = new Date(dateStr);
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mi = String(d.getMinutes()).padStart(2, '0');
+  return mm + '-' + dd + ' ' + hh + ':' + mi;
+}
+
+function truncate(s, max) {
+  if (!s) return '';
+  return s.length > max ? s.substring(0, max) + '...' : s;
+}
+
+function statusBadge(status) {
+  const map = {
+    'pending': ['대기', 'badge-dim'],
+    'running': ['진행중', 'badge-info'],
+    'paused': ['일시정지', 'badge-warning'],
+    'completed': ['완료', 'badge-success'],
+    'failed': ['실패', 'badge-error'],
+  };
+  const m = map[status] || [status || '--', 'badge-dim'];
+  return '<span class="badge ' + m[1] + '">' + m[0] + '</span>';
+}
+
+function resultBadge(result) {
+  if (result === 'success' || result === true) return '<span class="badge badge-success">성공</span>';
+  if (result === 'fail' || result === false) return '<span class="badge badge-error">실패</span>';
+  return '<span class="badge badge-dim">' + (result || '--') + '</span>';
+}
+
+/* =====================================================================
+   Toast
+   ===================================================================== */
+function toast(msg, type) {
+  type = type || 'info';
+  var container = document.getElementById('toastContainer');
+  var el = document.createElement('div');
+  el.className = 'toast toast-' + type;
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(function() {
+    el.classList.add('out');
+    setTimeout(function() { el.remove(); }, 300);
+  }, 3000);
+}
+
+/* =====================================================================
+   Tabs
+   ===================================================================== */
+function switchTab(name) {
+  currentTab = name;
+  localStorage.setItem('activeTab', name);
+  document.querySelectorAll('.tab').forEach(function(t) {
+    t.classList.toggle('active', t.dataset.tab === name);
+  });
+  document.querySelectorAll('.tab-content').forEach(function(tc) {
+    tc.classList.toggle('active', tc.id === 'tab-' + name);
+  });
+  window.location.hash = name;
+  if (name === 'dashboard') loadStats();
+  if (name === 'campaigns') loadCampaigns();
+  if (name === 'history') loadHistory();
+  if (name === 'crawling') renderCrawlHistory();
+}
+
+/* =====================================================================
+   Auto-refresh
+   ===================================================================== */
+function toggleAutoRefresh() {
+  autoRefresh = !autoRefresh;
+  localStorage.setItem('autoRefresh', autoRefresh);
+  updateAutoRefreshUI();
+  if (autoRefresh) startRefresh();
+  else stopRefresh();
+}
+
+function updateAutoRefreshUI() {
+  var toggle = document.getElementById('autoRefreshToggle');
+  toggle.classList.toggle('active', autoRefresh);
+}
+
+function startRefresh() {
+  stopRefresh();
+  refreshTimer = setInterval(refreshCurrent, 5000);
+}
+
+function stopRefresh() {
+  if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; }
+}
+
+function refreshCurrent() {
+  if (currentTab === 'dashboard') loadStats();
+  else if (currentTab === 'campaigns') loadCampaigns();
+  else if (currentTab === 'history') loadHistory();
+}
+
+/* =====================================================================
+   Server Status
+   ===================================================================== */
+async function checkStatus() {
+  try {
+    await api('GET', '/api/stats');
+    setOnline(true);
+  } catch (e) {
+    setOnline(false);
+  }
+}
+
+function setOnline(ok) {
+  var dot = document.getElementById('statusDot');
+  var label = document.getElementById('statusLabel');
+  dot.className = 'status-dot ' + (ok ? 'online' : 'offline');
+  label.textContent = ok ? '연결됨' : '연결 끊김';
+}
+
+/* =====================================================================
+   Dashboard: Stats
+   ===================================================================== */
+async function loadStats() {
+  try {
+    var data = await api('GET', '/api/stats');
+    setOnline(true);
+    document.getElementById('statTotal').textContent = fmt(data.total);
+    document.getElementById('statTalkO').textContent = fmt(data.talkO);
+    document.getElementById('statTalkX').textContent = fmt(data.talkX);
+    document.getElementById('statUnknown').textContent = fmt(data.unknown);
+    document.getElementById('statSent').textContent = fmt(data.sent);
+
+    if (data.categoryStats) {
+      categoryData = Object.keys(data.categoryStats).map(function(cat) {
+        var s = data.categoryStats[cat];
+        return {
+          category: cat,
+          total: s.total || 0,
+          talkO: s.talkO || 0,
+          sent: s.sent || 0,
+          ratio: s.total ? (s.talkO / s.total) : 0
+        };
+      });
+      sortAndRenderCategories();
+    }
+  } catch (e) {
+    setOnline(false);
+  }
+}
+
+function sortAndRenderCategories() {
+  var key = categorySortKey;
+  var asc = categorySortAsc;
+  categoryData.sort(function(a, b) {
+    var va = a[key], vb = b[key];
+    if (typeof va === 'string') {
+      va = va.toLowerCase(); vb = vb.toLowerCase();
+      if (va < vb) return asc ? -1 : 1;
+      if (va > vb) return asc ? 1 : -1;
+      return 0;
+    }
+    return asc ? va - vb : vb - va;
+  });
+  var top20 = categoryData.slice(0, 20);
+  var tbody = document.getElementById('categoryBody');
+  if (top20.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:24px">데이터 없음</td></tr>';
+    return;
+  }
+  var html = '';
+  top20.forEach(function(r) {
+    html += '<tr>'
+      + '<td>' + esc(r.category) + '</td>'
+      + '<td>' + fmt(r.total) + '</td>'
+      + '<td style="color:var(--success)">' + fmt(r.talkO) + '</td>'
+      + '<td style="color:var(--info)">' + fmt(r.sent) + '</td>'
+      + '<td>' + pct(r.talkO, r.total) + '</td>'
+      + '</tr>';
+  });
+  tbody.innerHTML = html;
+
+  // Update sort arrows
+  document.querySelectorAll('#categoryTable th').forEach(function(th) {
+    var arrow = th.querySelector('.sort-arrow');
+    if (!arrow) return;
+    var k = th.dataset.sort;
+    if (k === categorySortKey) {
+      arrow.classList.add('active');
+      arrow.innerHTML = categorySortAsc ? '&uarr;' : '&darr;';
+    } else {
+      arrow.classList.remove('active');
+      arrow.innerHTML = '&uarr;';
+    }
+  });
+}
+
+document.querySelectorAll('#categoryTable th').forEach(function(th) {
+  th.addEventListener('click', function() {
+    var k = th.dataset.sort;
+    if (!k) return;
+    if (categorySortKey === k) categorySortAsc = !categorySortAsc;
+    else { categorySortKey = k; categorySortAsc = false; }
+    sortAndRenderCategories();
+  });
+});
+
+/* =====================================================================
+   Crawling
+   ===================================================================== */
+async function startCrawl() {
+  var keyword = document.getElementById('crawlKeyword').value.trim();
+  var region = document.getElementById('crawlRegion').value.trim();
+  if (!keyword) { toast('키워드를 입력하세요', 'warning'); return; }
+  var btn = document.getElementById('crawlBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> 크롤링 중...';
+  try {
+    var data = await api('POST', '/api/crawl', { keyword: keyword, region: region });
+    toast('크롤링 완료: ' + fmt(data.total) + '건', 'success');
+    renderCrawlResult(data);
+    saveCrawlHistory({ keyword: keyword, region: region, total: data.total, talkO: data.talkO, newAdded: data.newAdded, time: new Date().toISOString() });
+    renderCrawlHistory();
+  } catch (e) {
+    toast('크롤링 실패: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '크롤링 시작';
+  }
+}
+
+function renderCrawlResult(data) {
+  var area = document.getElementById('crawlResult');
+  area.style.display = 'block';
+  document.getElementById('crawlStats').innerHTML =
+    '<div class="stat-card total"><div class="stat-label">전체</div><div class="stat-value">' + fmt(data.total) + '</div></div>'
+    + '<div class="stat-card talko"><div class="stat-label">톡톡 O</div><div class="stat-value">' + fmt(data.talkO) + '</div></div>'
+    + '<div class="stat-card sent"><div class="stat-label">신규 추가</div><div class="stat-value">' + fmt(data.newAdded) + '</div></div>';
+  var tbody = document.getElementById('crawlResultBody');
+  if (!data.results || data.results.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-dim)">결과 없음</td></tr>';
+    return;
+  }
+  var html = '';
+  data.results.forEach(function(r) {
+    var talkBadge = r.talkId ? '<span class="badge badge-success">O</span>' : '<span class="badge badge-error">X</span>';
+    html += '<tr>'
+      + '<td>' + esc(r.name || '') + '</td>'
+      + '<td>' + esc(r.category || '') + '</td>'
+      + '<td>' + esc(r.address || '') + '</td>'
+      + '<td>' + talkBadge + '</td>'
+      + '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+function saveCrawlHistory(entry) {
+  var hist = JSON.parse(localStorage.getItem('crawlHistory') || '[]');
+  hist.unshift(entry);
+  if (hist.length > 50) hist = hist.slice(0, 50);
+  localStorage.setItem('crawlHistory', JSON.stringify(hist));
+}
+
+function renderCrawlHistory() {
+  var hist = JSON.parse(localStorage.getItem('crawlHistory') || '[]');
+  var tbody = document.getElementById('crawlHistoryBody');
+  if (hist.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:24px">이력 없음</td></tr>';
+    return;
+  }
+  var html = '';
+  hist.forEach(function(h) {
+    html += '<tr>'
+      + '<td>' + relTime(h.time) + '</td>'
+      + '<td>' + esc(h.keyword) + '</td>'
+      + '<td>' + esc(h.region || '--') + '</td>'
+      + '<td>' + fmt(h.total) + '</td>'
+      + '<td style="color:var(--success)">' + fmt(h.talkO) + '</td>'
+      + '<td>' + fmt(h.newAdded) + '</td>'
+      + '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+function clearCrawlHistory() {
+  localStorage.removeItem('crawlHistory');
+  renderCrawlHistory();
+  toast('크롤링 이력 삭제됨', 'info');
+}
+
+/* =====================================================================
+   Campaigns
+   ===================================================================== */
+async function loadCampaigns() {
+  try {
+    var data = await api('GET', '/api/campaigns');
+    setOnline(true);
+    var tbody = document.getElementById('campaignBody');
+    var empty = document.getElementById('campaignEmpty');
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    var html = '';
+    data.forEach(function(c) {
+      var p = c.progress || { total: 0, sent: 0, success: 0, fail: 0 };
+      var pctVal = p.total ? (p.sent / p.total * 100) : 0;
+      html += '<tr style="cursor:pointer" onclick="showCampaignDetail(\'' + esc(c.id) + '\')">'
+        + '<td>' + esc(c.name || '--') + '</td>'
+        + '<td>' + statusBadge(c.status) + '</td>'
+        + '<td>' + esc(truncate(c.message, 30)) + '</td>'
+        + '<td>' + fmt(p.total) + '</td>'
+        + '<td><div class="progress-bar"><div class="progress-fill" style="width:' + pctVal + '%"></div></div>'
+        + '<div class="progress-text">' + pct(p.sent, p.total) + '</div></td>'
+        + '<td style="color:var(--success)">' + fmt(p.success) + '</td>'
+        + '<td style="color:var(--error)">' + fmt(p.fail) + '</td>'
+        + '<td>' + relTime(c.created) + '</td>'
+        + '</tr>';
+    });
+    tbody.innerHTML = html;
+  } catch (e) {
+    setOnline(false);
+  }
+}
+
+function openNewCampaign() {
+  document.getElementById('campName').value = '';
+  document.getElementById('campMessage').value = '';
+  document.getElementById('campCategory').value = '';
+  document.getElementById('campRegion').value = '';
+  document.getElementById('campLimit').value = '100';
+  document.getElementById('charCount').textContent = '0';
+  document.getElementById('previewCount').innerHTML = '필터를 입력하면 대상 수가 표시됩니다';
+  document.getElementById('campaignModal').classList.add('show');
+  updatePreviewCount();
+}
+
+function closeCampaignModal() {
+  document.getElementById('campaignModal').classList.remove('show');
+}
+
+function updateCharCount() {
+  var val = document.getElementById('campMessage').value;
+  document.getElementById('charCount').textContent = val.length;
+}
+
+function updatePreviewCount() {
+  clearTimeout(previewDebounce);
+  previewDebounce = setTimeout(async function() {
+    var cat = document.getElementById('campCategory').value.trim();
+    var region = document.getElementById('campRegion').value.trim();
+    var limit = parseInt(document.getElementById('campLimit').value) || 100;
+    var params = new URLSearchParams();
+    if (cat) params.set('category', cat);
+    if (region) params.set('region', region);
+    params.set('limit', limit);
+    params.set('unsent', 'true');
+    try {
+      var data = await api('GET', '/api/targets?' + params.toString());
+      var count = Array.isArray(data) ? data.length : 0;
+      document.getElementById('previewCount').innerHTML =
+        '대상 업체: <strong>' + fmt(count) + '</strong>건 (최대 ' + fmt(limit) + '건)';
+    } catch (e) {
+      document.getElementById('previewCount').innerHTML = '대상 수 조회 실패';
+    }
+  }, 400);
+}
+
+async function createCampaign() {
+  var name = document.getElementById('campName').value.trim();
+  var message = document.getElementById('campMessage').value.trim();
+  if (!name) { toast('캠페인명을 입력하세요', 'warning'); return; }
+  if (!message) { toast('메시지를 입력하세요', 'warning'); return; }
+  var btn = document.getElementById('createCampBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+  try {
+    var body = {
+      name: name,
+      message: message,
+      category: document.getElementById('campCategory').value.trim() || undefined,
+      region: document.getElementById('campRegion').value.trim() || undefined,
+      limit: parseInt(document.getElementById('campLimit').value) || 100
+    };
+    await api('POST', '/api/campaign', body);
+    toast('캠페인 생성 완료', 'success');
+    closeCampaignModal();
+    loadCampaigns();
+  } catch (e) {
+    toast('캠페인 생성 실패: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '생성';
+  }
+}
+
+async function showCampaignDetail(id) {
+  var panel = document.getElementById('campaignDetail');
+  panel.classList.add('show');
+  panel.scrollIntoView({ behavior: 'smooth' });
+  try {
+    var c = await api('GET', '/api/campaign/' + id);
+    document.getElementById('detailTitle').textContent = c.name || '캠페인 상세';
+    document.getElementById('detailStatus').innerHTML = statusBadge(c.status);
+    document.getElementById('detailCreated').textContent = fmtDate(c.created);
+    document.getElementById('detailMessage').textContent = c.message || '';
+    var p = c.progress || { total: 0, sent: 0, success: 0, fail: 0 };
+    var t = p.total || 1;
+    var successPct = (p.success / t * 100);
+    var failPct = (p.fail / t * 100);
+    var remainPct = 100 - successPct - failPct;
+    if (remainPct < 0) remainPct = 0;
+    var bar = document.getElementById('detailBar');
+    var segs = bar.querySelectorAll('.seg');
+    segs[0].style.width = successPct + '%';
+    segs[0].textContent = p.success ? fmt(p.success) : '';
+    segs[1].style.width = failPct + '%';
+    segs[1].textContent = p.fail ? fmt(p.fail) : '';
+    segs[2].style.width = remainPct + '%';
+    document.getElementById('detailTotal').textContent = fmt(p.total);
+    document.getElementById('detailSent').textContent = fmt(p.sent);
+    document.getElementById('detailSuccess').textContent = fmt(p.success);
+    document.getElementById('detailFail').textContent = fmt(p.fail);
+  } catch (e) {
+    toast('캠페인 상세 조회 실패', 'error');
+  }
+}
+
+function closeCampaignDetail() {
+  document.getElementById('campaignDetail').classList.remove('show');
+}
+
+/* =====================================================================
+   Send History
+   ===================================================================== */
+async function loadHistory() {
+  try {
+    var filterVal = document.getElementById('historyFilter').value;
+    var params = new URLSearchParams();
+    params.set('limit', '500');
+    var data = await api('GET', '/api/sent?' + params.toString());
+    setOnline(true);
+    if (!Array.isArray(data)) data = [];
+    if (filterVal) {
+      data = data.filter(function(h) {
+        if (filterVal === 'success') return h.result === 'success' || h.result === true;
+        if (filterVal === 'fail') return h.result === 'fail' || h.result === false;
+        return true;
+      });
+    }
+    allHistory = data;
+    historyPage = 1;
+    renderHistory();
+  } catch (e) {
+    setOnline(false);
+    document.getElementById('historyBody').innerHTML = '';
+    document.getElementById('historyEmpty').style.display = 'block';
+  }
+}
+
+function renderHistory() {
+  var tbody = document.getElementById('historyBody');
+  var empty = document.getElementById('historyEmpty');
+  var pagi = document.getElementById('historyPagination');
+  if (allHistory.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    pagi.innerHTML = '';
+    return;
+  }
+  empty.style.display = 'none';
+  var totalPages = Math.ceil(allHistory.length / HISTORY_PER_PAGE);
+  var start = (historyPage - 1) * HISTORY_PER_PAGE;
+  var pageData = allHistory.slice(start, start + HISTORY_PER_PAGE);
+  var html = '';
+  pageData.forEach(function(h) {
+    html += '<tr>'
+      + '<td>' + relTime(h.time || h.created || h.sentAt) + '</td>'
+      + '<td>' + esc(h.name || h.targetName || '--') + '</td>'
+      + '<td class="mono">' + esc(h.talk_id || h.talkId || '--') + '</td>'
+      + '<td>' + resultBadge(h.result || h.status) + '</td>'
+      + '<td class="mono">' + esc(h.account || h.worker || '--') + '</td>'
+      + '</tr>';
+  });
+  tbody.innerHTML = html;
+
+  // Pagination
+  if (totalPages <= 1) { pagi.innerHTML = ''; return; }
+  var ph = '';
+  ph += '<button ' + (historyPage <= 1 ? 'disabled' : '') + ' onclick="goHistoryPage(' + (historyPage - 1) + ')">&#8249;</button>';
+  var startPage = Math.max(1, historyPage - 2);
+  var endPage = Math.min(totalPages, startPage + 4);
+  if (endPage - startPage < 4) startPage = Math.max(1, endPage - 4);
+  for (var i = startPage; i <= endPage; i++) {
+    ph += '<button class="' + (i === historyPage ? 'active' : '') + '" onclick="goHistoryPage(' + i + ')">' + i + '</button>';
+  }
+  ph += '<button ' + (historyPage >= totalPages ? 'disabled' : '') + ' onclick="goHistoryPage(' + (historyPage + 1) + ')">&#8250;</button>';
+  pagi.innerHTML = ph;
+}
+
+function goHistoryPage(p) {
+  var totalPages = Math.ceil(allHistory.length / HISTORY_PER_PAGE);
+  if (p < 1 || p > totalPages) return;
+  historyPage = p;
+  renderHistory();
+}
+
+/* =====================================================================
+   Workers
+   ===================================================================== */
+function addWorkerLog(entry) {
+  workerLogs.unshift(entry);
+  if (workerLogs.length > 100) workerLogs = workerLogs.slice(0, 100);
+  renderWorkerLogs();
+}
+
+function renderWorkerLogs() {
+  var tbody = document.getElementById('workerLogBody');
+  var empty = document.getElementById('workerLogEmpty');
+  if (workerLogs.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  var html = '';
+  workerLogs.forEach(function(w) {
+    html += '<tr>'
+      + '<td>' + relTime(w.time) + '</td>'
+      + '<td class="mono">' + esc(w.worker || '--') + '</td>'
+      + '<td>' + esc(w.action || '--') + '</td>'
+      + '<td>' + esc(w.detail || '--') + '</td>'
+      + '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+/* Worker fetch / report wrappers for manual testing */
+async function workerFetch(campaignId, workerId, count) {
+  try {
+    var data = await api('POST', '/api/worker/fetch', {
+      campaign_id: campaignId,
+      worker_id: workerId,
+      count: count || 10
+    });
+    addWorkerLog({ time: new Date().toISOString(), worker: workerId, action: 'fetch', detail: (data.length || 0) + '건 수신' });
+    return data;
+  } catch (e) {
+    addWorkerLog({ time: new Date().toISOString(), worker: workerId, action: 'fetch 실패', detail: e.message });
+    return null;
+  }
+}
+
+async function workerReport(campaignId, workerId, results) {
+  try {
+    var data = await api('POST', '/api/worker/report', {
+      campaign_id: campaignId,
+      worker_id: workerId,
+      results: results
+    });
+    addWorkerLog({ time: new Date().toISOString(), worker: workerId, action: 'report', detail: (results.length || 0) + '건 보고' });
+    return data;
+  } catch (e) {
+    addWorkerLog({ time: new Date().toISOString(), worker: workerId, action: 'report 실패', detail: e.message });
+    return null;
+  }
+}
+
+/* =====================================================================
+   XSS escape
+   ===================================================================== */
+function esc(s) {
+  if (s == null) return '';
+  var d = document.createElement('div');
+  d.appendChild(document.createTextNode(String(s)));
+  return d.innerHTML;
+}
+
+/* =====================================================================
+   Init
+   ===================================================================== */
+(function init() {
+  // Restore tab from hash or localStorage
+  var hash = window.location.hash.replace('#', '');
+  if (hash && document.getElementById('tab-' + hash)) {
+    currentTab = hash;
+  }
+  switchTab(currentTab);
+  updateAutoRefreshUI();
+  checkStatus();
+  if (autoRefresh) startRefresh();
+
+  // Close modal on overlay click
+  document.getElementById('campaignModal').addEventListener('click', function(e) {
+    if (e.target === this) closeCampaignModal();
+  });
+
+  // Escape key closes modal
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeCampaignModal();
+  });
+
+  // Hash change
+  window.addEventListener('hashchange', function() {
+    var h = window.location.hash.replace('#', '');
+    if (h && document.getElementById('tab-' + h) && h !== currentTab) {
+      switchTab(h);
+    }
+  });
+})();
+</script>
+</body>
+</html>
