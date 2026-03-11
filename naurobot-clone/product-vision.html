@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartTech Korea | AI 비전검사 ST-V 시리즈</title>
+  <meta name="description" content="스마트테크 코리아 - AI 비전검사 ST-V 시리즈. 딥러닝 기반 비전검사로 불량률 제로에 도전합니다.">
+  <meta property="og:title" content="SmartTech Korea | AI 비전검사 ST-V 시리즈">
+  <meta property="og:description" content="딥러닝 기반 비전검사로 불량률 제로에 도전합니다">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1200">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      color: #fff;
+      background: #0a0f1a;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+    img { max-width: 100%; display: block; }
+
+    /* ===== CSS VARIABLES ===== */
+    :root {
+      --primary: #00b4d8;
+      --primary-dark: #0077b6;
+      --accent: #00e5ff;
+      --bg-dark: #0a0f1a;
+      --bg-section: #0f1628;
+      --bg-card: #141c30;
+      --text-primary: #ffffff;
+      --text-secondary: #a0aec0;
+      --text-muted: #6b7a90;
+      --max-width: 1280px;
+      --nav-height: 80px;
+    }
+
+    /* ===== UTILITY ===== */
+    .container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .section-subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: clamp(0.95rem, 2vw, 1.1rem);
+      margin-bottom: 60px;
+      font-weight: 300;
+    }
+    .section-label {
+      display: inline-block;
+      color: var(--primary);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      text-align: center;
+      width: 100%;
+    }
+
+    /* ===== SCROLL ANIMATIONS ===== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .fade-in-left {
+      opacity: 0;
+      transform: translateX(-60px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .fade-in-left.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .fade-in-right {
+      opacity: 0;
+      transform: translateX(60px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .fade-in-right.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* ===== NAVIGATION ===== */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      padding: 0 40px;
+      height: var(--nav-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+    .nav.scrolled {
+      background: rgba(10, 15, 26, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    }
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-logo span { color: var(--primary); }
+    .nav-logo .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: #0a0f1a;
+    }
+    .nav-menu { display: flex; gap: 36px; align-items: center; }
+    .nav-menu a {
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.8);
+      position: relative;
+      padding: 4px 0;
+      transition: color 0.3s;
+    }
+    .nav-menu a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      transition: width 0.3s;
+    }
+    .nav-menu a:hover { color: #fff; }
+    .nav-menu a:hover::after { width: 100%; }
+    .nav-menu a.active { color: #fff; }
+    .nav-menu a.active::after { width: 100%; }
+
+    /* Hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      z-index: 1001;
+      padding: 8px;
+    }
+    .hamburger span {
+      display: block;
+      width: 28px;
+      height: 2px;
+      background: #fff;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .hamburger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .hamburger.active span:nth-child(2) { opacity: 0; }
+    .hamburger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+    /* Mobile Menu */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 100%;
+      height: 100vh;
+      background: rgba(10, 15, 26, 0.98);
+      backdrop-filter: blur(20px);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      transition: right 0.4s ease;
+    }
+    .mobile-menu.open { right: 0; }
+    .mobile-menu a {
+      font-size: 1.4rem;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.8);
+      transition: color 0.3s;
+    }
+    .mobile-menu a:hover { color: var(--primary); }
+    .mobile-menu a.active { color: var(--primary); }
+
+    /* ===== PRODUCT HERO ===== */
+    .product-hero {
+      position: relative;
+      width: 100%;
+      height: 60vh;
+      min-height: 400px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-image: url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1920');
+      background-size: cover;
+      background-position: center;
+    }
+    .product-hero::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(10,15,26,0.6) 0%, rgba(10,15,26,0.75) 50%, rgba(10,15,26,0.95) 100%);
+    }
+    .product-hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 800px;
+      padding: 0 24px;
+    }
+    .product-hero-content h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .product-hero-content h1 .highlight { color: var(--primary); }
+    .product-hero-content p {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--text-secondary);
+      font-weight: 300;
+    }
+
+    /* ===== PRODUCT DESCRIPTION ===== */
+    .product-desc {
+      padding: 100px 0;
+      background: var(--bg-section);
+      position: relative;
+      overflow: hidden;
+    }
+    .product-desc::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0,180,216,0.06) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .product-desc-inner {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .product-desc-inner p {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      line-height: 1.9;
+      margin-bottom: 24px;
+    }
+    .product-desc-inner p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* ===== ALTERNATING FEATURES ===== */
+    .features-section {
+      padding: 100px 0;
+      background: var(--bg-dark);
+    }
+    .feature-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      margin-bottom: 80px;
+    }
+    .feature-row:last-child {
+      margin-bottom: 0;
+    }
+    .feature-row.reverse .feature-image {
+      order: 2;
+    }
+    .feature-row.reverse .feature-text {
+      order: 1;
+    }
+    .feature-image {
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 16/10;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .feature-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .feature-image .feature-num {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: #fff;
+    }
+    .feature-text h3 {
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .feature-text h3 .highlight { color: var(--primary); }
+    .feature-text p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      line-height: 1.8;
+    }
+
+    /* ===== TAB SECTION ===== */
+    .tab-section {
+      padding: 100px 0;
+      background: var(--bg-section);
+    }
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .tab-btn {
+      padding: 12px 24px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      color: var(--text-secondary);
+    }
+    .tab-btn.active,
+    .tab-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    .tab-content {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 40px;
+      border: 1px solid rgba(255,255,255,0.05);
+      min-height: 300px;
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Tab: Cards grid */
+    .tab-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .tab-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .tab-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-4px);
+    }
+    .tab-card-img {
+      width: 100%;
+      height: 180px;
+      overflow: hidden;
+    }
+    .tab-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s;
+    }
+    .tab-card:hover .tab-card-img img {
+      transform: scale(1.05);
+    }
+    .tab-card-body {
+      padding: 20px;
+    }
+    .tab-card-body h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .tab-card-body p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Tab: Video cards */
+    .tab-videos {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    .tab-video-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.3s;
+      cursor: pointer;
+    }
+    .tab-video-card:hover {
+      border-color: var(--primary);
+    }
+    .tab-video-thumb {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      overflow: hidden;
+    }
+    .tab-video-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .tab-video-thumb .play-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60px;
+      height: 60px;
+      background: rgba(0,180,216,0.9);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .tab-video-card:hover .play-icon {
+      background: var(--primary);
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+    .play-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: #fff;
+      margin-left: 3px;
+    }
+    .tab-video-body {
+      padding: 16px 20px;
+    }
+    .tab-video-body h4 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    /* Tab: Gallery */
+    .tab-gallery {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .tab-gallery-item {
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 1;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: border-color 0.3s;
+    }
+    .tab-gallery-item:hover {
+      border-color: var(--primary);
+    }
+    .tab-gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s;
+    }
+    .tab-gallery-item:hover img {
+      transform: scale(1.08);
+    }
+    .tab-gallery-item .gallery-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 12px;
+      background: linear-gradient(transparent, rgba(10,15,26,0.9));
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    /* Tab: Spec table */
+    .spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 32px;
+    }
+    .spec-table th,
+    .spec-table td {
+      padding: 14px 20px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 0.95rem;
+    }
+    .spec-table th {
+      background: rgba(0,180,216,0.1);
+      color: var(--primary);
+      font-weight: 600;
+      width: 200px;
+    }
+    .spec-table td {
+      color: var(--text-secondary);
+    }
+    .spec-table tr:hover td {
+      color: #fff;
+    }
+    .spec-drawing {
+      margin-top: 24px;
+      padding: 40px;
+      background: rgba(255,255,255,0.02);
+      border: 1px dashed rgba(255,255,255,0.1);
+      border-radius: 12px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Tab: Application cards */
+    .tab-apps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    .tab-app-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 28px 20px;
+      text-align: center;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .tab-app-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-4px);
+    }
+    .tab-app-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 16px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    .tab-app-card h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .tab-app-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ===== CTA SECTION ===== */
+    .cta-section {
+      padding: 100px 0;
+      background: linear-gradient(135deg, var(--primary-dark), #003566);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h60v60H0z' fill='none'/%3E%3Cpath d='M30 0v60M0 30h60' stroke='rgba(255,255,255,0.03)' stroke-width='1'/%3E%3C/svg%3E");
+    }
+    .cta-content {
+      position: relative;
+      z-index: 1;
+    }
+    .cta-content h2 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      margin-bottom: 24px;
+      letter-spacing: -0.02em;
+    }
+    .cta-btn {
+      display: inline-block;
+      padding: 16px 48px;
+      background: #fff;
+      color: var(--primary-dark);
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      border-radius: 50px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      text-transform: uppercase;
+    }
+    .cta-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      padding: 60px 0 30px;
+      background: #060a14;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+    .footer-brand .footer-logo {
+      font-size: 1.3rem;
+      font-weight: 900;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .footer-brand .footer-logo span { color: var(--primary); }
+    .footer-brand p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+    .footer-social {
+      display: flex;
+      gap: 12px;
+    }
+    .footer-social a {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+      font-size: 0.85rem;
+    }
+    .footer-social a:hover { background: var(--primary); }
+    .footer-col h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .footer-col ul li { margin-bottom: 12px; }
+    .footer-col ul li a {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      transition: color 0.3s;
+    }
+    .footer-col ul li a:hover { color: var(--primary); }
+    .footer-bottom {
+      padding-top: 30px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-bottom p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .feature-row { grid-template-columns: 1fr; gap: 32px; }
+      .feature-row.reverse .feature-image { order: 0; }
+      .feature-row.reverse .feature-text { order: 0; }
+      .tab-cards { grid-template-columns: repeat(2, 1fr); }
+      .tab-gallery { grid-template-columns: repeat(2, 1fr); }
+      .tab-apps { grid-template-columns: repeat(2, 1fr); }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      :root { --nav-height: 64px; }
+      .nav { padding: 0 20px; }
+      .nav-menu { display: none; }
+      .hamburger { display: flex; }
+      .mobile-menu { display: flex; }
+
+      .product-hero { height: 50vh; min-height: 320px; }
+      .product-hero-content h1 { font-size: clamp(1.5rem, 6vw, 2.2rem); }
+
+      .product-desc { padding: 60px 0; }
+      .features-section { padding: 60px 0; }
+      .tab-section { padding: 60px 0; }
+      .cta-section { padding: 60px 0; }
+
+      .feature-row { gap: 24px; margin-bottom: 60px; }
+
+      .tab-cards { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; }
+      .tab-videos { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; }
+      .tab-gallery { grid-template-columns: repeat(2, 1fr); }
+      .tab-apps { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+      .tab-content { padding: 24px; }
+      .tab-nav { gap: 6px; }
+      .tab-btn { padding: 10px 16px; font-size: 0.8rem; }
+
+      .spec-table th { width: 120px; padding: 10px 12px; font-size: 0.85rem; }
+      .spec-table td { padding: 10px 12px; font-size: 0.85rem; }
+
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+      .footer-bottom { flex-direction: column; text-align: center; }
+
+      .section-title { margin-bottom: 12px; }
+      .section-subtitle { margin-bottom: 40px; }
+    }
+
+    @media (max-width: 480px) {
+      .tab-gallery { grid-template-columns: 1fr; }
+      .cta-btn { padding: 14px 36px; font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVIGATION ===== -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-icon">ST</div>
+      Smart<span>Tech</span>
+    </a>
+    <ul class="nav-menu">
+      <li><a href="company.html">Company</a></li>
+      <li><a href="product-sensor.html" class="active">Product</a></li>
+      <li><a href="#">Business</a></li>
+      <li><a href="#">News</a></li>
+      <li><a href="#">Video</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="hamburger" id="hamburger" aria-label="menu" role="button" tabindex="0">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="company.html">Company</a>
+    <a href="product-sensor.html" class="active">Product</a>
+    <a href="#">Business</a>
+    <a href="#">News</a>
+    <a href="#">Video</a>
+    <a href="#contact">Contact</a>
+  </div>
+
+  <!-- ===== HERO ===== -->
+  <section class="product-hero">
+    <div class="product-hero-content">
+      <span class="section-label">AI Vision Inspection</span>
+      <h1>AI 비전검사 <span class="highlight">ST-V 시리즈</span></h1>
+      <p>딥러닝 기반 비전검사로 불량률 제로에 도전합니다</p>
+    </div>
+  </section>
+
+  <!-- ===== 제품 설명 ===== -->
+  <section class="product-desc">
+    <div class="container">
+      <div class="product-desc-inner fade-in">
+        <span class="section-label">Product Overview</span>
+        <h2 class="section-title" style="margin-bottom:40px;">AI가 이끄는 품질 혁신</h2>
+        <p>
+          ST-V 시리즈는 자체 개발한 딥러닝 AI 엔진을 탑재한 차세대 비전검사 시스템입니다.
+          기존 룰 기반 검사 방식의 한계를 뛰어넘어, 복잡한 패턴의 미세 결함까지 정확하게 검출합니다.
+          수만 장의 학습 데이터를 기반으로 지속적으로 검사 정확도가 향상되며, 새로운 불량 유형에도 빠르게 대응할 수 있습니다.
+        </p>
+        <p>
+          멀티카메라 동시 제어 기술을 통해 제품의 모든 면을 사각지대 없이 검사하며,
+          고해상도 카메라와 고속 이미지 프로세싱 기술의 결합으로 생산 라인의 속도를 저하시키지 않으면서도
+          99.99%의 불량 검출률을 달성합니다. 과검출(False Positive)을 최소화하여 불필요한 라인 정지를 방지하고
+          생산성과 품질을 동시에 확보합니다.
+        </p>
+        <p>
+          반도체, 자동차, 식품/의약, 디스플레이 등 다양한 산업 분야에 최적화된 검사 알고리즘을 제공하며,
+          실시간 대시보드를 통해 검사 결과를 즉시 모니터링할 수 있습니다.
+          SmartInspect Pro 소프트웨어는 직관적인 UI로 누구나 쉽게 검사 설정과 결과 분석이 가능합니다.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 특징 (Alternating Layout) ===== -->
+  <section class="features-section">
+    <div class="container">
+      <span class="section-label">Key Features</span>
+      <h2 class="section-title fade-in" style="margin-bottom:60px;">ST-V 시리즈의 핵심 기술</h2>
+
+      <!-- Feature 1 -->
+      <div class="feature-row fade-in">
+        <div class="feature-image fade-in-left">
+          <img src="https://images.unsplash.com/photo-1555255707-c07966088b7b?w=800&q=80" alt="AI 딥러닝 검사" loading="lazy">
+          <div class="feature-num">01</div>
+        </div>
+        <div class="feature-text fade-in-right">
+          <h3>AI <span class="highlight">딥러닝 검사</span></h3>
+          <p>
+            자체 개발 딥러닝 엔진으로 미세 결함까지 정확히 검출합니다.
+            학습 데이터가 축적될수록 검사 정확도가 지속적으로 향상되며,
+            기존 룰 기반 검사로는 발견하기 어려운 복잡한 패턴의 불량도
+            높은 정확도로 검출합니다. 신규 불량 유형 발생 시에도
+            소량의 학습 데이터만으로 빠르게 대응할 수 있습니다.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 2 (Reverse) -->
+      <div class="feature-row reverse fade-in">
+        <div class="feature-image fade-in-right">
+          <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&q=80" alt="멀티카메라 지원" loading="lazy">
+          <div class="feature-num">02</div>
+        </div>
+        <div class="feature-text fade-in-left">
+          <h3><span class="highlight">멀티카메라</span> 지원</h3>
+          <p>
+            최대 16대의 카메라를 동시에 제어하여 다각도 검사를 수행합니다.
+            사각지대 없는 완벽한 품질 검사를 구현하며, 제품의 상면, 하면,
+            측면을 동시에 촬영하여 하나의 제품에 대한 전방위 검사가 가능합니다.
+            GigE Vision 및 USB3 인터페이스를 지원하여 다양한 산업용 카메라와
+            호환됩니다.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="feature-row fade-in">
+        <div class="feature-image fade-in-left">
+          <img src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&q=80" alt="불량률 0.01% 달성" loading="lazy">
+          <div class="feature-num">03</div>
+        </div>
+        <div class="feature-text fade-in-right">
+          <h3>불량률 <span class="highlight">0.01%</span> 달성</h3>
+          <p>
+            기존 육안 검사 대비 불량 검출률 99.99%를 달성합니다.
+            과검출을 최소화하여 생산성과 품질을 동시에 확보하며,
+            AI 기반 자동 판정으로 검사원의 피로도나 숙련도에 관계없이
+            일관된 검사 품질을 유지합니다. 분당 최대 1,000개의
+            고속 검사가 가능합니다.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 4 (Reverse) -->
+      <div class="feature-row reverse fade-in">
+        <div class="feature-image fade-in-right">
+          <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80" alt="실시간 리포트" loading="lazy">
+          <div class="feature-num">04</div>
+        </div>
+        <div class="feature-text fade-in-left">
+          <h3>실시간 <span class="highlight">리포트</span></h3>
+          <p>
+            검사 결과를 실시간 대시보드로 제공합니다.
+            불량 유형별 통계, 시간대별 트렌드 분석, 라인별 비교 등
+            다양한 분석 기능을 지원하며, 자동 보고서 생성으로
+            품질 관리 업무를 효율화합니다. 이상 발생 시 즉각적인
+            알림으로 신속한 대응이 가능합니다.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TAB SECTION ===== -->
+  <section class="tab-section">
+    <div class="container">
+      <span class="section-label">Details</span>
+      <h2 class="section-title fade-in">제품 상세정보</h2>
+      <p class="section-subtitle fade-in">ST-V 시리즈의 적용사례, 영상, 스펙 등 상세 정보를 확인하세요</p>
+
+      <!-- Tab Navigation -->
+      <div class="tab-nav fade-in">
+        <div class="tab-btn active" data-tab="0">적용사례</div>
+        <div class="tab-btn" data-tab="1">비디오</div>
+        <div class="tab-btn" data-tab="2">제품이미지</div>
+        <div class="tab-btn" data-tab="3">스펙&도면</div>
+        <div class="tab-btn" data-tab="4">어플리케이션</div>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="tab-content fade-in">
+
+        <!-- Tab 1: 적용사례 -->
+        <div class="tab-panel active" data-panel="0">
+          <div class="tab-cards">
+            <div class="tab-card">
+              <div class="tab-card-img">
+                <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80" alt="PCB 기판 검사" loading="lazy">
+              </div>
+              <div class="tab-card-body">
+                <h4>PCB 기판 검사</h4>
+                <p>고밀도 PCB 기판의 납땜 불량, 패턴 결함, 부품 실장 오류를 AI로 자동 검출합니다.</p>
+              </div>
+            </div>
+            <div class="tab-card">
+              <div class="tab-card-img">
+                <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=600&q=80" alt="자동차 외관 검사" loading="lazy">
+              </div>
+              <div class="tab-card-body">
+                <h4>자동차 외관 검사</h4>
+                <p>차량 도장면의 스크래치, 덴트, 색상 불균일 등 외관 결함을 실시간으로 검출합니다.</p>
+              </div>
+            </div>
+            <div class="tab-card">
+              <div class="tab-card-img">
+                <img src="https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=600&q=80" alt="의약품 패키지 검사" loading="lazy">
+              </div>
+              <div class="tab-card-body">
+                <h4>의약품 패키지 검사</h4>
+                <p>의약품 포장 상태, 라벨 인쇄 품질, 이물질 혼입 여부를 정밀 검사합니다.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: 비디오 -->
+        <div class="tab-panel" data-panel="1">
+          <div class="tab-videos">
+            <div class="tab-video-card">
+              <div class="tab-video-thumb">
+                <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600&q=80" alt="ST-V 시리즈 소개 영상" loading="lazy">
+                <div class="play-icon">
+                  <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+                </div>
+              </div>
+              <div class="tab-video-body">
+                <h4>ST-V 시리즈 소개 영상</h4>
+              </div>
+            </div>
+            <div class="tab-video-card">
+              <div class="tab-video-thumb">
+                <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&q=80" alt="AI 비전검사 데모" loading="lazy">
+                <div class="play-icon">
+                  <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+                </div>
+              </div>
+              <div class="tab-video-body">
+                <h4>AI 비전검사 데모</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: 제품이미지 -->
+        <div class="tab-panel" data-panel="2">
+          <div class="tab-gallery">
+            <div class="tab-gallery-item">
+              <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&q=80" alt="ST-V 본체 정면" loading="lazy">
+              <div class="gallery-label">ST-V 본체 정면</div>
+            </div>
+            <div class="tab-gallery-item">
+              <img src="https://images.unsplash.com/photo-1555255707-c07966088b7b?w=400&q=80" alt="ST-V 카메라 모듈" loading="lazy">
+              <div class="gallery-label">ST-V 카메라 모듈</div>
+            </div>
+            <div class="tab-gallery-item">
+              <img src="https://images.unsplash.com/photo-1565043666747-69f6646db940?w=400&q=80" alt="ST-V 설치 현장" loading="lazy">
+              <div class="gallery-label">ST-V 설치 현장</div>
+            </div>
+            <div class="tab-gallery-item">
+              <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80" alt="ST-V 소프트웨어 UI" loading="lazy">
+              <div class="gallery-label">ST-V 소프트웨어 UI</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: 스펙&도면 -->
+        <div class="tab-panel" data-panel="3">
+          <table class="spec-table">
+            <tbody>
+              <tr><th>항목</th><th>사양</th></tr>
+              <tr><td>모델명</td><td>ST-V 500 Pro</td></tr>
+              <tr><td>카메라</td><td>최대 16대 동시</td></tr>
+              <tr><td>해상도</td><td>5MP / 12MP</td></tr>
+              <tr><td>검사속도</td><td>최대 1,000pcs/min</td></tr>
+              <tr><td>AI 엔진</td><td>SmartVision AI v3.0</td></tr>
+              <tr><td>인터페이스</td><td>GigE Vision / USB3</td></tr>
+              <tr><td>소프트웨어</td><td>SmartInspect Pro</td></tr>
+              <tr><td>인증</td><td>CE / KC</td></tr>
+            </tbody>
+          </table>
+          <div class="spec-drawing">
+            <p>[ 도면 이미지 영역 ]</p>
+            <p style="margin-top:8px; font-size:0.8rem;">ST-V 500 Pro 외형 도면 및 설치 규격</p>
+          </div>
+        </div>
+
+        <!-- Tab 5: 어플리케이션 -->
+        <div class="tab-panel" data-panel="4">
+          <div class="tab-apps">
+            <div class="tab-app-card">
+              <div class="tab-app-icon">&#x1F4BB;</div>
+              <h4>반도체/전자</h4>
+              <p>웨이퍼, PCB, 커넥터 등 정밀 부품 검사</p>
+            </div>
+            <div class="tab-app-card">
+              <div class="tab-app-icon">&#x1F697;</div>
+              <h4>자동차</h4>
+              <p>외관, 도장, 용접부 등 품질 검사</p>
+            </div>
+            <div class="tab-app-card">
+              <div class="tab-app-icon">&#x1F48A;</div>
+              <h4>식품/의약</h4>
+              <p>이물질 검출, 패키지 상태 검사</p>
+            </div>
+            <div class="tab-app-card">
+              <div class="tab-app-icon">&#x1F4FA;</div>
+              <h4>디스플레이</h4>
+              <p>패널 결함, 색상 균일성 검사</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA SECTION ===== -->
+  <section class="cta-section">
+    <div class="cta-content fade-in">
+      <h2>제품에 대해 더 궁금하신가요?</h2>
+      <a href="#contact" class="cta-btn">제품 문의하기</a>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer" id="contact">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            Smart<span>Tech</span> Korea
+          </div>
+          <p>
+            서울특별시 강남구 테헤란로 123, 스마트빌딩 15층<br>
+            TEL: 02-1234-5678 | FAX: 02-1234-5679<br>
+            E-mail: info@smarttechkorea.co.kr
+          </p>
+          <div class="footer-social">
+            <a href="#" aria-label="YouTube">YT</a>
+            <a href="#" aria-label="Blog">BL</a>
+            <a href="#" aria-label="Instagram">IG</a>
+            <a href="#" aria-label="LinkedIn">IN</a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="company.html">회사소개</a></li>
+            <li><a href="company.html">CEO 인사말</a></li>
+            <li><a href="company.html">연혁</a></li>
+            <li><a href="company.html">오시는 길</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="product-sensor.html">스마트센서 ST-100</a></li>
+            <li><a href="product-vision.html">AI 비전검사 ST-V</a></li>
+            <li><a href="product-conveyor.html">컨베이어 ST-C</a></li>
+            <li><a href="#">맞춤형 솔루션</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="#">기술지원</a></li>
+            <li><a href="#">다운로드</a></li>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">견적문의</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 SmartTech Korea Co., Ltd. All rights reserved.</p>
+        <p>이 사이트는 데모 목적으로 제작되었습니다.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script>
+    // ===== Navigation scroll effect =====
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 50);
+    });
+    // Initial check (page might be scrolled on load)
+    if (window.scrollY > 50) navbar.classList.add('scrolled');
+
+    // ===== Hamburger menu =====
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active');
+      mobileMenu.classList.toggle('open');
+      document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+    });
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        mobileMenu.classList.remove('open');
+        document.body.style.overflow = '';
+      });
+    });
+
+    // ===== Scroll animations (IntersectionObserver) =====
+    const animElements = document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right');
+    const observerOptions = { threshold: 0.15, rootMargin: '0px 0px -50px 0px' };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    animElements.forEach(el => observer.observe(el));
+
+    // ===== Tab functionality =====
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const index = btn.dataset.tab;
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabPanels.forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelector(`.tab-panel[data-panel="${index}"]`).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

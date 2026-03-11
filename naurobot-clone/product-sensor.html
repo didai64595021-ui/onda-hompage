@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>스마트센서 ST-100 시리즈 | SmartTech Korea</title>
+  <meta name="description" content="스마트테크 코리아 스마트센서 ST-100 시리즈 - 초정밀 IoT 센서로 스마트팩토리의 핵심을 완성합니다.">
+  <meta property="og:title" content="스마트센서 ST-100 시리즈 | SmartTech Korea">
+  <meta property="og:description" content="초정밀 IoT 센서로 스마트팩토리의 핵심을 완성합니다">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      color: #fff;
+      background: #0a0f1a;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+    img { max-width: 100%; display: block; }
+
+    /* ===== CSS VARIABLES ===== */
+    :root {
+      --primary: #00b4d8;
+      --primary-dark: #0077b6;
+      --accent: #00e5ff;
+      --bg-dark: #0a0f1a;
+      --bg-section: #0f1628;
+      --bg-card: #141c30;
+      --text-primary: #ffffff;
+      --text-secondary: #a0aec0;
+      --text-muted: #6b7a90;
+      --max-width: 1280px;
+      --nav-height: 80px;
+    }
+
+    /* ===== UTILITY ===== */
+    .container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .section-subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: clamp(0.95rem, 2vw, 1.1rem);
+      margin-bottom: 60px;
+      font-weight: 300;
+    }
+    .section-label {
+      display: inline-block;
+      color: var(--primary);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      text-align: center;
+      width: 100%;
+    }
+
+    /* ===== SCROLL ANIMATIONS ===== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .fade-in-left {
+      opacity: 0;
+      transform: translateX(-60px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .fade-in-left.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .fade-in-right {
+      opacity: 0;
+      transform: translateX(60px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .fade-in-right.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* ===== NAVIGATION ===== */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      padding: 0 40px;
+      height: var(--nav-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+    .nav.scrolled {
+      background: rgba(10, 15, 26, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    }
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-logo span { color: var(--primary); }
+    .nav-logo .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: #0a0f1a;
+    }
+    .nav-menu { display: flex; gap: 36px; align-items: center; }
+    .nav-menu a {
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.8);
+      position: relative;
+      padding: 4px 0;
+      transition: color 0.3s;
+    }
+    .nav-menu a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      transition: width 0.3s;
+    }
+    .nav-menu a:hover { color: #fff; }
+    .nav-menu a:hover::after { width: 100%; }
+    .nav-menu a.active { color: #fff; }
+    .nav-menu a.active::after { width: 100%; }
+
+    /* Hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      z-index: 1001;
+      padding: 8px;
+    }
+    .hamburger span {
+      display: block;
+      width: 28px;
+      height: 2px;
+      background: #fff;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .hamburger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .hamburger.active span:nth-child(2) { opacity: 0; }
+    .hamburger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+    /* Mobile Menu */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 100%;
+      height: 100vh;
+      background: rgba(10, 15, 26, 0.98);
+      backdrop-filter: blur(20px);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      transition: right 0.4s ease;
+    }
+    .mobile-menu.open { right: 0; }
+    .mobile-menu a {
+      font-size: 1.4rem;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.8);
+      transition: color 0.3s;
+    }
+    .mobile-menu a:hover { color: var(--primary); }
+    .mobile-menu a.active { color: var(--primary); }
+
+    /* ===== HERO SECTION (Product) ===== */
+    .hero-product {
+      position: relative;
+      width: 100%;
+      height: 60vh;
+      min-height: 400px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hero-product-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('https://images.unsplash.com/photo-1518770660439-4636190af475?w=1920');
+      background-size: cover;
+      background-position: center;
+    }
+    .hero-product-bg::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(10,15,26,0.5) 0%, rgba(10,15,26,0.7) 50%, rgba(10,15,26,0.95) 100%);
+    }
+    .hero-product-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      width: 90%;
+      max-width: 900px;
+    }
+    .hero-product-content h1 {
+      font-size: clamp(2rem, 5vw, 3.8rem);
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 20px;
+      letter-spacing: -0.02em;
+    }
+    .hero-product-content h1 .highlight { color: var(--primary); }
+    .hero-product-content p {
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      color: var(--text-secondary);
+      font-weight: 300;
+    }
+
+    /* ===== PRODUCT DESCRIPTION SECTION ===== */
+    .product-desc {
+      padding: 100px 0;
+      background: var(--bg-section);
+      position: relative;
+      overflow: hidden;
+    }
+    .product-desc::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0,180,216,0.06) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .product-desc-inner {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .product-desc-inner h2 {
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 32px;
+      letter-spacing: -0.02em;
+    }
+    .product-desc-inner h2 .highlight { color: var(--primary); }
+    .product-desc-inner p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      line-height: 1.9;
+      margin-bottom: 24px;
+    }
+
+    /* ===== FEATURES SECTION (Alternating) ===== */
+    .features {
+      padding: 100px 0;
+      background: var(--bg-dark);
+    }
+    .feature-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      margin-bottom: 80px;
+    }
+    .feature-row:last-child { margin-bottom: 0; }
+    .feature-row.reverse .feature-image { order: 2; }
+    .feature-row.reverse .feature-text { order: 1; }
+    .feature-image {
+      width: 100%;
+      height: 320px;
+      background: var(--bg-card);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,0.05);
+      overflow: hidden;
+      position: relative;
+    }
+    .feature-image .placeholder-icon {
+      font-size: 3rem;
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+    .feature-image::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0,180,216,0.05), transparent);
+      pointer-events: none;
+    }
+    .feature-text h3 {
+      font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+    .feature-text .feature-badge {
+      display: inline-block;
+      padding: 4px 14px;
+      background: rgba(0,180,216,0.1);
+      border: 1px solid rgba(0,180,216,0.3);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--primary);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .feature-text p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      line-height: 1.8;
+    }
+
+    /* ===== TAB SECTION ===== */
+    .tab-section {
+      padding: 100px 0;
+      background: var(--bg-section);
+    }
+    .tab-buttons {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 48px;
+      border-bottom: 2px solid rgba(255,255,255,0.05);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tab-btn {
+      flex-shrink: 0;
+      padding: 14px 28px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      position: relative;
+      transition: color 0.3s;
+      white-space: nowrap;
+    }
+    .tab-btn::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      transition: width 0.3s;
+    }
+    .tab-btn:hover { color: var(--text-secondary); }
+    .tab-btn.active {
+      color: var(--primary);
+      font-weight: 700;
+    }
+    .tab-btn.active::after { width: 100%; }
+
+    .tab-panel {
+      display: none;
+    }
+    .tab-panel.active {
+      display: block;
+      animation: tabFadeIn 0.4s ease;
+    }
+    @keyframes tabFadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Tab: Cards grid */
+    .tab-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .tab-card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.3s, border-color 0.3s;
+    }
+    .tab-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0,180,216,0.3);
+    }
+    .tab-card-img {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #1a2540, #0f1928);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .tab-card-img .placeholder-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+    .tab-card-body {
+      padding: 20px;
+    }
+    .tab-card-body h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .tab-card-body p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Tab: Video cards */
+    .tab-video-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    .video-thumb {
+      background: var(--bg-card);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.3s, border-color 0.3s;
+      cursor: pointer;
+    }
+    .video-thumb:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0,180,216,0.3);
+    }
+    .video-thumb-img {
+      width: 100%;
+      height: 240px;
+      background: linear-gradient(135deg, #1a2540, #0f1928);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .play-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(0,180,216,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s, background 0.3s;
+    }
+    .play-btn::after {
+      content: '';
+      display: block;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 10px 0 10px 18px;
+      border-color: transparent transparent transparent #fff;
+      margin-left: 3px;
+    }
+    .video-thumb:hover .play-btn {
+      transform: scale(1.1);
+      background: rgba(0,180,216,1);
+    }
+    .video-thumb-body {
+      padding: 20px;
+    }
+    .video-thumb-body h4 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    /* Tab: Gallery */
+    .tab-gallery {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .gallery-item {
+      background: var(--bg-card);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.3s, border-color 0.3s;
+      cursor: pointer;
+    }
+    .gallery-item:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0,180,216,0.3);
+    }
+    .gallery-item-img {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #1a2540, #0f1928);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gallery-item-img .placeholder-text {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+    .gallery-item-label {
+      padding: 14px 16px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    /* Tab: Spec table */
+    .spec-wrapper {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 40px;
+    }
+    .spec-table th,
+    .spec-table td {
+      padding: 16px 20px;
+      text-align: left;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .spec-table th {
+      color: var(--text-muted);
+      font-weight: 500;
+      width: 35%;
+      background: rgba(255,255,255,0.02);
+    }
+    .spec-table td {
+      color: var(--text-primary);
+      font-weight: 400;
+    }
+    .spec-table tr:hover th,
+    .spec-table tr:hover td {
+      background: rgba(0,180,216,0.03);
+    }
+    .spec-drawing {
+      width: 100%;
+      height: 300px;
+      background: var(--bg-card);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .spec-drawing .placeholder-text {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    /* Tab: Application cards */
+    .app-cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    .app-card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 32px 24px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.3s, border-color 0.3s;
+    }
+    .app-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0,180,216,0.3);
+    }
+    .app-card-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(0,180,216,0.15), rgba(0,229,255,0.08));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 1.5rem;
+    }
+    .app-card h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .app-card p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ===== CTA SECTION ===== */
+    .cta-section {
+      padding: 100px 0;
+      background: var(--bg-dark);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(0,180,216,0.08) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .cta-section h2 {
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 700;
+      margin-bottom: 32px;
+      position: relative;
+    }
+    .cta-btn {
+      display: inline-block;
+      padding: 16px 48px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      border-radius: 50px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      text-transform: uppercase;
+      position: relative;
+    }
+    .cta-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0,180,216,0.3);
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      padding: 60px 0 30px;
+      background: #060a14;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+    .footer-brand .footer-logo {
+      font-size: 1.3rem;
+      font-weight: 900;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .footer-brand .footer-logo span { color: var(--primary); }
+    .footer-brand p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+    .footer-social {
+      display: flex;
+      gap: 12px;
+    }
+    .footer-social a {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+      font-size: 0.85rem;
+    }
+    .footer-social a:hover { background: var(--primary); }
+    .footer-col h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .footer-col ul li { margin-bottom: 12px; }
+    .footer-col ul li a {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      transition: color 0.3s;
+    }
+    .footer-col ul li a:hover { color: var(--primary); }
+    .footer-bottom {
+      padding-top: 30px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-bottom p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .feature-row { grid-template-columns: 1fr; gap: 32px; }
+      .feature-row.reverse .feature-image { order: 0; }
+      .feature-row.reverse .feature-text { order: 0; }
+      .tab-gallery { grid-template-columns: repeat(2, 1fr); }
+      .app-cards { grid-template-columns: repeat(2, 1fr); }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      :root { --nav-height: 64px; }
+      .nav { padding: 0 20px; }
+      .nav-menu { display: none; }
+      .hamburger { display: flex; }
+      .mobile-menu { display: flex; }
+
+      .hero-product { height: 50vh; min-height: 320px; }
+      .hero-product-content h1 { font-size: clamp(1.6rem, 6vw, 2.4rem); }
+
+      .feature-row { grid-template-columns: 1fr; gap: 24px; }
+      .feature-image { height: 240px; }
+
+      .tab-cards { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; }
+      .tab-video-grid { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; }
+      .tab-gallery { grid-template-columns: repeat(2, 1fr); }
+      .app-cards { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+
+      .tab-buttons { gap: 0; }
+      .tab-btn { padding: 12px 16px; font-size: 0.8rem; }
+
+      .spec-table th,
+      .spec-table td { padding: 12px 14px; font-size: 0.85rem; }
+
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVIGATION ===== -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-icon">ST</div>
+      Smart<span>Tech</span>
+    </a>
+    <ul class="nav-menu">
+      <li><a href="company.html">Company</a></li>
+      <li><a href="product-sensor.html" class="active">Product</a></li>
+      <li><a href="#">Business</a></li>
+      <li><a href="#">News</a></li>
+      <li><a href="#">Video</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="company.html">Company</a>
+    <a href="product-sensor.html" class="active">Product</a>
+    <a href="#">Business</a>
+    <a href="#">News</a>
+    <a href="#">Video</a>
+    <a href="#contact">Contact</a>
+  </div>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="hero-product">
+    <div class="hero-product-bg"></div>
+    <div class="hero-product-content">
+      <h1 class="fade-in"><span class="highlight">스마트센서</span> ST-100 시리즈</h1>
+      <p class="fade-in">초정밀 IoT 센서로 스마트팩토리의 핵심을 완성합니다</p>
+    </div>
+  </section>
+
+  <!-- ===== 제품 설명 SECTION ===== -->
+  <section class="product-desc">
+    <div class="container">
+      <div class="product-desc-inner fade-in">
+        <span class="section-label">Product Overview</span>
+        <h2><span class="highlight">ST-100 시리즈</span>는 산업 현장을 위한<br>차세대 IoT 스마트 센서입니다</h2>
+        <p>
+          스마트센서 ST-100 시리즈는 스마트팩토리 환경에 최적화된 초정밀 IoT 센서 솔루션입니다.
+          온도, 습도, 진동, 압력 등 다양한 환경 변수를 실시간으로 측정하고 분석하여
+          생산 라인의 효율성을 극대화합니다. 독자적인 센서 융합 기술과 AI 기반 분석 알고리즘을
+          통해 기존 센서 대비 최대 10배 높은 정밀도와 안정성을 제공합니다.
+        </p>
+        <p>
+          Wi-Fi, Bluetooth, LoRa 등 다양한 무선 통신 프로토콜을 지원하여 기존 설비에
+          손쉽게 통합할 수 있으며, 클라우드 기반 대시보드를 통해 언제 어디서나 실시간
+          모니터링이 가능합니다. 또한 초저전력 설계로 배터리 수명 최대 5년을 보장하여
+          유지보수 비용을 획기적으로 절감합니다.
+        </p>
+        <p>
+          반도체, 자동차, 식품, 물류 등 다양한 산업 분야에서 이미 500개 이상의 기업이
+          ST-100 시리즈를 도입하여 스마트팩토리 혁신을 실현하고 있습니다.
+          SmartTech Korea의 전문 엔지니어 팀이 도입부터 운영까지 맞춤형 기술 지원을 제공합니다.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 특징 SECTION (Alternating) ===== -->
+  <section class="features">
+    <div class="container">
+      <span class="section-label fade-in">Key Features</span>
+      <h2 class="section-title fade-in">ST-100의 핵심 기능</h2>
+      <p class="section-subtitle fade-in">산업 현장의 요구를 충족하는 최첨단 센서 기술</p>
+
+      <!-- Feature 1: 초정밀 측정 -->
+      <div class="feature-row">
+        <div class="feature-image fade-in-left">
+          <span class="placeholder-icon">&#9881;</span>
+        </div>
+        <div class="feature-text fade-in-right">
+          <span class="feature-badge">Precision</span>
+          <h3>초정밀 측정</h3>
+          <p>
+            &plusmn;0.001mm의 정밀도로 산업 현장의 모든 측정 요구를 충족합니다.
+            온도, 습도, 진동 등 다양한 환경 변수를 동시에 모니터링하여
+            생산 공정의 미세한 변화까지 정확하게 감지합니다.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 2: IoT 연동 -->
+      <div class="feature-row reverse">
+        <div class="feature-image fade-in-right">
+          <span class="placeholder-icon">&#128225;</span>
+        </div>
+        <div class="feature-text fade-in-left">
+          <span class="feature-badge">Connectivity</span>
+          <h3>IoT 연동</h3>
+          <p>
+            Wi-Fi, Bluetooth, LoRa 등 다양한 통신 프로토콜을 지원합니다.
+            클라우드 플랫폼과 실시간 데이터 동기화를 통해 어디서나
+            센서 데이터에 접근하고 원격으로 관리할 수 있습니다.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 3: 실시간 모니터링 -->
+      <div class="feature-row">
+        <div class="feature-image fade-in-left">
+          <span class="placeholder-icon">&#128200;</span>
+        </div>
+        <div class="feature-text fade-in-right">
+          <span class="feature-badge">Monitoring</span>
+          <h3>실시간 모니터링</h3>
+          <p>
+            24/7 무중단 모니터링으로 이상 징후를 즉시 감지합니다.
+            AI 기반 예측 유지보수 기능으로 장비 다운타임을 최소화하고
+            생산 효율을 극대화합니다.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 4: 저전력 설계 -->
+      <div class="feature-row reverse">
+        <div class="feature-image fade-in-right">
+          <span class="placeholder-icon">&#9889;</span>
+        </div>
+        <div class="feature-text fade-in-left">
+          <span class="feature-badge">Low Power</span>
+          <h3>저전력 설계</h3>
+          <p>
+            초저전력 설계로 배터리 수명 최대 5년을 보장합니다.
+            태양광 패널 연동으로 자립형 센서 네트워크를 구축할 수 있어
+            전원 공급이 어려운 환경에서도 안정적으로 운영됩니다.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TAB SECTION ===== -->
+  <section class="tab-section">
+    <div class="container">
+      <span class="section-label fade-in">Details</span>
+      <h2 class="section-title fade-in">제품 상세 정보</h2>
+      <p class="section-subtitle fade-in">ST-100 시리즈의 다양한 정보를 확인하세요</p>
+
+      <!-- Tab Buttons -->
+      <div class="tab-buttons fade-in">
+        <button class="tab-btn active" data-tab="0">적용사례</button>
+        <button class="tab-btn" data-tab="1">비디오</button>
+        <button class="tab-btn" data-tab="2">제품이미지</button>
+        <button class="tab-btn" data-tab="3">스펙&amp;도면</button>
+        <button class="tab-btn" data-tab="4">어플리케이션</button>
+      </div>
+
+      <!-- Tab Panel 0: 적용사례 -->
+      <div class="tab-panel active" data-panel="0">
+        <div class="tab-cards">
+          <div class="tab-card">
+            <div class="tab-card-img">
+              <span class="placeholder-text">Case Study Image</span>
+            </div>
+            <div class="tab-card-body">
+              <h4>반도체 공정 모니터링</h4>
+              <p>클린룸 환경의 온습도, 미세입자를 실시간 모니터링하여 반도체 수율을 극대화합니다.</p>
+            </div>
+          </div>
+          <div class="tab-card">
+            <div class="tab-card-img">
+              <span class="placeholder-text">Case Study Image</span>
+            </div>
+            <div class="tab-card-body">
+              <h4>식품 안전 온도 관리</h4>
+              <p>식품 저장 및 유통 과정의 온도를 실시간 추적하여 콜드체인 품질을 보장합니다.</p>
+            </div>
+          </div>
+          <div class="tab-card">
+            <div class="tab-card-img">
+              <span class="placeholder-text">Case Study Image</span>
+            </div>
+            <div class="tab-card-body">
+              <h4>자동차 부품 품질검사</h4>
+              <p>자동차 부품 생산 라인에서 치수 및 표면 품질을 정밀 측정하여 불량률을 최소화합니다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Panel 1: 비디오 -->
+      <div class="tab-panel" data-panel="1">
+        <div class="tab-video-grid">
+          <div class="video-thumb">
+            <div class="video-thumb-img">
+              <div class="play-btn"></div>
+            </div>
+            <div class="video-thumb-body">
+              <h4>ST-100 제품 소개 영상</h4>
+            </div>
+          </div>
+          <div class="video-thumb">
+            <div class="video-thumb-img">
+              <div class="play-btn"></div>
+            </div>
+            <div class="video-thumb-body">
+              <h4>스마트팩토리 적용사례</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Panel 2: 제품이미지 -->
+      <div class="tab-panel" data-panel="2">
+        <div class="tab-gallery">
+          <div class="gallery-item">
+            <div class="gallery-item-img">
+              <span class="placeholder-text">Product Photo</span>
+            </div>
+            <div class="gallery-item-label">ST-100 정면</div>
+          </div>
+          <div class="gallery-item">
+            <div class="gallery-item-img">
+              <span class="placeholder-text">Product Photo</span>
+            </div>
+            <div class="gallery-item-label">ST-100 측면</div>
+          </div>
+          <div class="gallery-item">
+            <div class="gallery-item-img">
+              <span class="placeholder-text">Product Photo</span>
+            </div>
+            <div class="gallery-item-label">ST-100 설치 모습</div>
+          </div>
+          <div class="gallery-item">
+            <div class="gallery-item-img">
+              <span class="placeholder-text">Product Photo</span>
+            </div>
+            <div class="gallery-item-label">ST-100 패키지</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Panel 3: 스펙&도면 -->
+      <div class="tab-panel" data-panel="3">
+        <div class="spec-wrapper">
+          <table class="spec-table">
+            <tbody>
+              <tr>
+                <th>모델명</th>
+                <td>ST-100 Pro</td>
+              </tr>
+              <tr>
+                <th>측정 정밀도</th>
+                <td>&plusmn;0.001mm</td>
+              </tr>
+              <tr>
+                <th>통신</th>
+                <td>Wi-Fi / BLE / LoRa</td>
+              </tr>
+              <tr>
+                <th>전원</th>
+                <td>DC 5V / 배터리</td>
+              </tr>
+              <tr>
+                <th>동작 온도</th>
+                <td>-20&deg;C ~ 70&deg;C</td>
+              </tr>
+              <tr>
+                <th>크기</th>
+                <td>85 x 55 x 32mm</td>
+              </tr>
+              <tr>
+                <th>무게</th>
+                <td>120g</td>
+              </tr>
+              <tr>
+                <th>인증</th>
+                <td>CE / KC / FCC</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="spec-drawing">
+            <span class="placeholder-text">도면 이미지 (Drawing)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Panel 4: 어플리케이션 -->
+      <div class="tab-panel" data-panel="4">
+        <div class="app-cards">
+          <div class="app-card">
+            <div class="app-card-icon">&#127981;</div>
+            <h4>스마트팩토리</h4>
+            <p>생산라인 자동 모니터링 및 품질 관리</p>
+          </div>
+          <div class="app-card">
+            <div class="app-card-icon">&#127793;</div>
+            <h4>환경 모니터링</h4>
+            <p>온습도, 미세먼지 등 환경 데이터 수집</p>
+          </div>
+          <div class="app-card">
+            <div class="app-card-icon">&#9889;</div>
+            <h4>에너지 관리</h4>
+            <p>전력 사용량 실시간 모니터링 및 최적화</p>
+          </div>
+          <div class="app-card">
+            <div class="app-card-icon">&#128230;</div>
+            <h4>물류/창고</h4>
+            <p>재고 관리 및 환경 조건 모니터링</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA SECTION ===== -->
+  <section class="cta-section">
+    <div class="container fade-in">
+      <h2>제품에 대해 더 궁금하신가요?</h2>
+      <a href="#contact" class="cta-btn">제품 문의하기</a>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer" id="contact">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            Smart<span>Tech</span> Korea
+          </div>
+          <p>
+            서울특별시 강남구 테헤란로 123, 스마트빌딩 15층<br>
+            TEL: 02-1234-5678 | FAX: 02-1234-5679<br>
+            E-mail: info@smarttechkorea.co.kr
+          </p>
+          <div class="footer-social">
+            <a href="#" aria-label="YouTube">YT</a>
+            <a href="#" aria-label="Blog">BL</a>
+            <a href="#" aria-label="Instagram">IG</a>
+            <a href="#" aria-label="LinkedIn">IN</a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="company.html">회사소개</a></li>
+            <li><a href="#">CEO 인사말</a></li>
+            <li><a href="#">연혁</a></li>
+            <li><a href="#">오시는 길</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="product-sensor.html">스마트센서 ST-100</a></li>
+            <li><a href="#">AI 비전검사 ST-V</a></li>
+            <li><a href="#">컨베이어 ST-C</a></li>
+            <li><a href="#">맞춤형 솔루션</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="#">기술지원</a></li>
+            <li><a href="#">다운로드</a></li>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">견적문의</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 SmartTech Korea Co., Ltd. All rights reserved.</p>
+        <p>이 사이트는 데모 목적으로 제작되었습니다.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script>
+    // ===== Navigation scroll effect =====
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // ===== Hamburger menu =====
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active');
+      mobileMenu.classList.toggle('open');
+      document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+    });
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        mobileMenu.classList.remove('open');
+        document.body.style.overflow = '';
+      });
+    });
+
+    // ===== Scroll animations (IntersectionObserver) =====
+    const animElements = document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right');
+    const observerOptions = { threshold: 0.15, rootMargin: '0px 0px -50px 0px' };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    animElements.forEach(el => observer.observe(el));
+
+    // ===== Tab functionality =====
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const index = btn.dataset.tab;
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabPanels.forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelector(`.tab-panel[data-panel="${index}"]`).classList.add('active');
+      });
+    });
+  </script>
+
+</body>
+</html>

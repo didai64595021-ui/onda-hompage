@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>자동화 컨베이어 ST-C 시리즈 | SmartTech Korea</title>
+  <meta name="description" content="스마트테크 코리아 - 모듈형 스마트 컨베이어 ST-C 시리즈. 물류 자동화의 새 기준을 제시합니다.">
+  <meta property="og:title" content="자동화 컨베이어 ST-C 시리즈 | SmartTech Korea">
+  <meta property="og:description" content="모듈형 스마트 컨베이어로 물류 자동화의 새 기준을 제시합니다">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1563968743333-044cef800494?w=1200">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      color: #fff;
+      background: #0a0f1a;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+    img { max-width: 100%; display: block; }
+
+    /* ===== CSS VARIABLES ===== */
+    :root {
+      --primary: #00b4d8;
+      --primary-dark: #0077b6;
+      --accent: #00e5ff;
+      --bg-dark: #0a0f1a;
+      --bg-section: #0f1628;
+      --bg-card: #141c30;
+      --text-primary: #ffffff;
+      --text-secondary: #a0aec0;
+      --text-muted: #6b7a90;
+      --max-width: 1280px;
+      --nav-height: 80px;
+    }
+
+    /* ===== UTILITY ===== */
+    .container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .section-subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: clamp(0.95rem, 2vw, 1.1rem);
+      margin-bottom: 60px;
+      font-weight: 300;
+    }
+    .section-label {
+      display: inline-block;
+      color: var(--primary);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      text-align: center;
+      width: 100%;
+    }
+
+    /* ===== SCROLL ANIMATIONS ===== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .fade-in-left {
+      opacity: 0;
+      transform: translateX(-60px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .fade-in-left.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .fade-in-right {
+      opacity: 0;
+      transform: translateX(60px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .fade-in-right.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* ===== NAVIGATION ===== */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      padding: 0 40px;
+      height: var(--nav-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+    .nav.scrolled {
+      background: rgba(10, 15, 26, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    }
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-logo span { color: var(--primary); }
+    .nav-logo .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: #0a0f1a;
+    }
+    .nav-menu { display: flex; gap: 36px; align-items: center; }
+    .nav-menu a {
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.8);
+      position: relative;
+      padding: 4px 0;
+      transition: color 0.3s;
+    }
+    .nav-menu a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      transition: width 0.3s;
+    }
+    .nav-menu a:hover { color: #fff; }
+    .nav-menu a:hover::after { width: 100%; }
+    .nav-menu a.active { color: #fff; }
+    .nav-menu a.active::after { width: 100%; }
+
+    /* Hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      z-index: 1001;
+      padding: 8px;
+    }
+    .hamburger span {
+      display: block;
+      width: 28px;
+      height: 2px;
+      background: #fff;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .hamburger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .hamburger.active span:nth-child(2) { opacity: 0; }
+    .hamburger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+    /* Mobile Menu */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 100%;
+      height: 100vh;
+      background: rgba(10, 15, 26, 0.98);
+      backdrop-filter: blur(20px);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      transition: right 0.4s ease;
+    }
+    .mobile-menu.open { right: 0; }
+    .mobile-menu a {
+      font-size: 1.4rem;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.8);
+      transition: color 0.3s;
+    }
+    .mobile-menu a:hover { color: var(--primary); }
+    .mobile-menu a.active { color: var(--primary); }
+
+    /* ===== PRODUCT HERO ===== */
+    .product-hero {
+      position: relative;
+      width: 100%;
+      height: 60vh;
+      min-height: 400px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .product-hero-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+    }
+    .product-hero-bg::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(10,15,26,0.5) 0%, rgba(10,15,26,0.7) 50%, rgba(10,15,26,0.95) 100%);
+    }
+    .product-hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      width: 90%;
+      max-width: 900px;
+    }
+    .product-hero-content .breadcrumb {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+    .product-hero-content .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.3s;
+    }
+    .product-hero-content .breadcrumb a:hover { color: var(--primary); }
+    .product-hero-content .breadcrumb span { color: var(--primary); }
+    .product-hero-content h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 20px;
+      letter-spacing: -0.02em;
+    }
+    .product-hero-content p {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--text-secondary);
+      font-weight: 300;
+    }
+
+    /* ===== PRODUCT DESCRIPTION ===== */
+    .product-desc {
+      padding: 100px 0;
+      background: var(--bg-dark);
+      position: relative;
+      overflow: hidden;
+    }
+    .product-desc::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0,180,216,0.05) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .product-desc-content {
+      max-width: 880px;
+      margin: 0 auto;
+    }
+    .product-desc-content p {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 24px;
+    }
+    .product-desc-content p:last-child { margin-bottom: 0; }
+    .product-desc-content .highlight-text {
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    /* ===== ALTERNATING FEATURES ===== */
+    .features-section {
+      padding: 100px 0;
+      background: var(--bg-section);
+    }
+    .feature-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      margin-bottom: 100px;
+    }
+    .feature-row:last-child { margin-bottom: 0; }
+    .feature-row.reverse .feature-image { order: 2; }
+    .feature-row.reverse .feature-text { order: 1; }
+    .feature-image {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      aspect-ratio: 4/3;
+    }
+    .feature-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .feature-image:hover img { transform: scale(1.05); }
+    .feature-image .feature-badge {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      padding: 6px 16px;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    .feature-text .feature-number {
+      font-size: 4rem;
+      font-weight: 900;
+      color: rgba(0,180,216,0.15);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .feature-text h3 {
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .feature-text h3 .highlight { color: var(--primary); }
+    .feature-text p {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .feature-text .feature-stats {
+      display: flex;
+      gap: 32px;
+      margin-top: 24px;
+    }
+    .feature-text .feature-stat {
+      text-align: center;
+    }
+    .feature-text .feature-stat .stat-value {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--primary);
+    }
+    .feature-text .feature-stat .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ===== TABS SECTION ===== */
+    .tabs-section {
+      padding: 100px 0;
+      background: var(--bg-dark);
+    }
+    .tabs-nav {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      padding: 12px 28px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 50px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    .tab-btn:hover {
+      background: rgba(0,180,216,0.1);
+      border-color: rgba(0,180,216,0.3);
+      color: var(--primary);
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-color: transparent;
+      color: #fff;
+    }
+    .tab-panel {
+      display: none;
+      animation: tabFadeIn 0.4s ease;
+    }
+    .tab-panel.active { display: block; }
+    @keyframes tabFadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Tab: Cases */
+    .cases-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .case-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.3s, border-color 0.3s;
+    }
+    .case-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(0,180,216,0.3);
+    }
+    .case-card-img {
+      height: 200px;
+      overflow: hidden;
+    }
+    .case-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s;
+    }
+    .case-card:hover .case-card-img img { transform: scale(1.1); }
+    .case-card-body {
+      padding: 24px;
+    }
+    .case-card-body h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .case-card-body p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Tab: Video */
+    .video-grid-tab {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .video-card-tab {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      aspect-ratio: 16/9;
+      cursor: pointer;
+    }
+    .video-card-tab img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s;
+    }
+    .video-card-tab:hover img { transform: scale(1.1); }
+    .video-card-tab .video-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: background 0.3s;
+    }
+    .video-card-tab:hover .video-overlay { background: rgba(0,0,0,0.5); }
+    .video-card-tab .play-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(0,180,216,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s;
+    }
+    .video-card-tab:hover .play-icon { transform: scale(1.1); }
+    .video-card-tab .play-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: #fff;
+    }
+    .video-card-tab .video-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #fff;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+
+    /* Tab: Gallery */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .gallery-item {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      aspect-ratio: 1;
+      cursor: pointer;
+    }
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s;
+    }
+    .gallery-item:hover img { transform: scale(1.1); }
+    .gallery-item .gallery-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0);
+      display: flex;
+      align-items: flex-end;
+      padding: 16px;
+      transition: background 0.3s;
+    }
+    .gallery-item:hover .gallery-overlay { background: rgba(0,0,0,0.5); }
+    .gallery-item .gallery-overlay span {
+      font-size: 0.9rem;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .gallery-item:hover .gallery-overlay span {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Tab: Spec */
+    .spec-content {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 40px;
+    }
+    .spec-table th,
+    .spec-table td {
+      padding: 16px 24px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 0.95rem;
+    }
+    .spec-table th {
+      width: 30%;
+      color: var(--text-secondary);
+      font-weight: 500;
+      background: rgba(255,255,255,0.02);
+    }
+    .spec-table td {
+      color: var(--text-primary);
+      font-weight: 400;
+    }
+    .spec-table tr:hover {
+      background: rgba(0,180,216,0.03);
+    }
+    .spec-drawing {
+      background: var(--bg-card);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 60px;
+      text-align: center;
+    }
+    .spec-drawing .drawing-placeholder {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      aspect-ratio: 16/9;
+      background: rgba(255,255,255,0.03);
+      border: 2px dashed rgba(255,255,255,0.1);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--text-muted);
+    }
+    .spec-drawing .drawing-placeholder svg {
+      width: 48px;
+      height: 48px;
+      fill: var(--text-muted);
+    }
+    .spec-drawing .drawing-placeholder span {
+      font-size: 0.9rem;
+    }
+
+    /* Tab: Application */
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    .app-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.3s, border-color 0.3s;
+    }
+    .app-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(0,180,216,0.3);
+    }
+    .app-card .app-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 20px;
+      background: rgba(0,180,216,0.1);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+    }
+    .app-card h4 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .app-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ===== CTA SECTION ===== */
+    .cta-section {
+      padding: 100px 0;
+      background: var(--bg-section);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(0,180,216,0.08) 0%, transparent 60%);
+      border-radius: 50%;
+    }
+    .cta-content {
+      position: relative;
+      z-index: 1;
+    }
+    .cta-content h2 {
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .cta-content p {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      margin-bottom: 36px;
+    }
+    .cta-btn {
+      display: inline-block;
+      padding: 16px 48px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      border-radius: 50px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      text-transform: uppercase;
+    }
+    .cta-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0,180,216,0.3);
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      padding: 60px 0 30px;
+      background: #060a14;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+    .footer-brand .footer-logo {
+      font-size: 1.3rem;
+      font-weight: 900;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .footer-brand .footer-logo span { color: var(--primary); }
+    .footer-brand p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+    .footer-social {
+      display: flex;
+      gap: 12px;
+    }
+    .footer-social a {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+      font-size: 0.85rem;
+    }
+    .footer-social a:hover { background: var(--primary); }
+    .footer-col h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .footer-col ul li { margin-bottom: 12px; }
+    .footer-col ul li a {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      transition: color 0.3s;
+    }
+    .footer-col ul li a:hover { color: var(--primary); }
+    .footer-bottom {
+      padding-top: 30px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-bottom p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .feature-row { grid-template-columns: 1fr; gap: 32px; }
+      .feature-row.reverse .feature-image { order: 0; }
+      .feature-row.reverse .feature-text { order: 0; }
+      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+      .app-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      :root { --nav-height: 64px; }
+      .nav { padding: 0 20px; }
+      .nav-menu { display: none; }
+      .hamburger { display: flex; }
+      .mobile-menu { display: flex; }
+
+      .product-hero { height: 50vh; min-height: 340px; }
+      .product-hero-content h1 { font-size: clamp(1.6rem, 6vw, 2.4rem); }
+
+      .product-desc { padding: 60px 0; }
+
+      .features-section { padding: 60px 0; }
+      .feature-row { gap: 24px; margin-bottom: 60px; }
+      .feature-text .feature-number { font-size: 3rem; }
+      .feature-text .feature-stats { gap: 20px; }
+
+      .tabs-section { padding: 60px 0; }
+      .tabs-nav { gap: 6px; }
+      .tab-btn { padding: 10px 20px; font-size: 0.8rem; }
+
+      .cases-grid { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; }
+      .video-grid-tab { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; }
+      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+      .app-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+
+      .spec-table th,
+      .spec-table td { padding: 12px 16px; font-size: 0.85rem; }
+
+      .cta-section { padding: 60px 0; }
+
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+      .footer-bottom { flex-direction: column; text-align: center; }
+
+      .section-title { margin-bottom: 12px; }
+      .section-subtitle { margin-bottom: 40px; }
+    }
+
+    @media (max-width: 480px) {
+      .tabs-nav { gap: 4px; }
+      .tab-btn { padding: 8px 14px; font-size: 0.75rem; }
+      .gallery-grid { grid-template-columns: 1fr; }
+      .feature-text .feature-stats { flex-direction: column; gap: 16px; align-items: flex-start; }
+      .spec-drawing { padding: 32px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVIGATION ===== -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-icon">ST</div>
+      Smart<span>Tech</span>
+    </a>
+    <ul class="nav-menu">
+      <li><a href="company.html">Company</a></li>
+      <li><a href="product-sensor.html" class="active">Product</a></li>
+      <li><a href="#">Business</a></li>
+      <li><a href="#">News</a></li>
+      <li><a href="#">Video</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="hamburger" id="hamburger" aria-label="메뉴 열기" role="button" tabindex="0">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="company.html">Company</a>
+    <a href="product-sensor.html" class="active">Product</a>
+    <a href="#">Business</a>
+    <a href="#">News</a>
+    <a href="#">Video</a>
+    <a href="#contact">Contact</a>
+  </div>
+
+  <!-- ===== PRODUCT HERO ===== -->
+  <section class="product-hero">
+    <div class="product-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1563968743333-044cef800494?w=1920&q=80');"></div>
+    <div class="product-hero-content fade-in">
+      <div class="breadcrumb">
+        <a href="index.html">Home</a> &nbsp;/&nbsp; <a href="product-sensor.html">Product</a> &nbsp;/&nbsp; <span>ST-C 시리즈</span>
+      </div>
+      <h1>자동화 컨베이어 ST-C 시리즈</h1>
+      <p>모듈형 스마트 컨베이어로 물류 자동화의 새 기준을 제시합니다</p>
+    </div>
+  </section>
+
+  <!-- ===== 제품 설명 ===== -->
+  <section class="product-desc">
+    <div class="container">
+      <div class="product-desc-content fade-in">
+        <span class="section-label" style="text-align:left;width:auto;">About ST-C Series</span>
+        <p>
+          ST-C 시리즈는 스마트테크 코리아가 10년간의 물류 자동화 노하우를 집약하여 개발한 <span class="highlight-text">모듈형 스마트 컨베이어 시스템</span>입니다.
+          기존 컨베이어의 한계를 뛰어넘어, 레고처럼 조합 가능한 모듈형 설계로 어떤 공장 레이아웃에도 유연하게 적응하며,
+          IoT 센서 기반의 실시간 모니터링으로 물류 흐름을 최적화합니다.
+        </p>
+        <p>
+          AI 기반 자동 분류 시스템은 분당 최대 200개의 제품을 정확하게 분류하며, 오분류율 0.1% 이하의 압도적인 정확도를 자랑합니다.
+          PLC와 IoT를 통합한 <span class="highlight-text">스마트 제어 시스템</span>은 공정 데이터를 실시간으로 수집하고 분석하여,
+          예측 유지보수를 가능하게 하고 돌발 정지를 95%까지 감소시킵니다.
+        </p>
+        <p>
+          최대 500kg의 중량물 이송이 가능한 강화 프레임 구조와 고토크 모터를 탑재하여 자동차 부품부터 식품, 전자제품까지
+          다양한 산업 분야에서 안정적으로 운용됩니다. ST-C 시리즈는 단순한 컨베이어가 아닌,
+          <span class="highlight-text">스마트 물류의 핵심 인프라</span>입니다.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 특징 섹션 ===== -->
+  <section class="features-section">
+    <div class="container">
+      <span class="section-label">Key Features</span>
+      <h2 class="section-title fade-in">ST-C 시리즈의 핵심 기술</h2>
+      <p class="section-subtitle fade-in">산업 현장의 요구를 반영한 4가지 핵심 기능</p>
+
+      <!-- Feature 1: 모듈형 설계 (이미지 좌, 텍스트 우) -->
+      <div class="feature-row">
+        <div class="feature-image fade-in-left">
+          <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80" alt="모듈형 설계" loading="lazy">
+          <div class="feature-badge">MODULAR</div>
+        </div>
+        <div class="feature-text fade-in-right">
+          <div class="feature-number">01</div>
+          <h3><span class="highlight">모듈형</span> 설계</h3>
+          <p>레고처럼 조합 가능한 모듈형 설계로 어떤 공장 레이아웃에도 최적화됩니다. 직선형, 곡선형, 분기형 등 다양한 모듈을 자유롭게 결합하여 복잡한 물류 동선도 간단하게 구현할 수 있습니다.</p>
+          <div class="feature-stats">
+            <div class="feature-stat">
+              <div class="stat-value">60%</div>
+              <div class="stat-label">설치 기간 단축</div>
+            </div>
+            <div class="feature-stat">
+              <div class="stat-value">12+</div>
+              <div class="stat-label">모듈 종류</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 2: 고속 분류 (텍스트 좌, 이미지 우) -->
+      <div class="feature-row reverse">
+        <div class="feature-image fade-in-right">
+          <img src="https://images.unsplash.com/photo-1565043666747-69f6646db940?w=800&q=80" alt="고속 분류" loading="lazy">
+          <div class="feature-badge">HIGH-SPEED</div>
+        </div>
+        <div class="feature-text fade-in-left">
+          <div class="feature-number">02</div>
+          <h3><span class="highlight">고속</span> 분류</h3>
+          <p>분당 최대 200개 제품을 정밀하게 분류 처리합니다. AI 기반 자동 분류 알고리즘이 바코드, QR코드, 형상을 실시간으로 인식하여 오분류율 0.1% 이하의 압도적인 정확도를 달성합니다.</p>
+          <div class="feature-stats">
+            <div class="feature-stat">
+              <div class="stat-value">200</div>
+              <div class="stat-label">분당 분류(pcs)</div>
+            </div>
+            <div class="feature-stat">
+              <div class="stat-value">0.1%</div>
+              <div class="stat-label">오분류율 이하</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 3: 중량물 대응 (이미지 좌, 텍스트 우) -->
+      <div class="feature-row">
+        <div class="feature-image fade-in-left">
+          <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&q=80" alt="중량물 대응" loading="lazy">
+          <div class="feature-badge">HEAVY DUTY</div>
+        </div>
+        <div class="feature-text fade-in-right">
+          <div class="feature-number">03</div>
+          <h3><span class="highlight">중량물</span> 대응</h3>
+          <p>최대 500kg 중량물 이송이 가능합니다. 고강도 스틸 프레임과 고토크 서보모터를 적용하여 자동차 부품, 금속 자재 등 무거운 제품도 안정적으로 이송하며, 진동과 소음을 최소화했습니다.</p>
+          <div class="feature-stats">
+            <div class="feature-stat">
+              <div class="stat-value">500kg</div>
+              <div class="stat-label">최대 적재</div>
+            </div>
+            <div class="feature-stat">
+              <div class="stat-value">60m</div>
+              <div class="stat-label">분당 이송</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 4: 스마트 제어 (텍스트 좌, 이미지 우) -->
+      <div class="feature-row reverse">
+        <div class="feature-image fade-in-right">
+          <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80" alt="스마트 제어" loading="lazy">
+          <div class="feature-badge">SMART IoT</div>
+        </div>
+        <div class="feature-text fade-in-left">
+          <div class="feature-number">04</div>
+          <h3><span class="highlight">스마트</span> 제어</h3>
+          <p>IoT 센서 통합 모니터링으로 컨베이어의 실시간 상태를 파악합니다. 벨트 마모도, 모터 온도, 진동 패턴을 AI가 분석하여 예측 유지보수를 실현하고, 돌발 정지를 95% 감소시킵니다.</p>
+          <div class="feature-stats">
+            <div class="feature-stat">
+              <div class="stat-value">95%</div>
+              <div class="stat-label">돌발 정지 감소</div>
+            </div>
+            <div class="feature-stat">
+              <div class="stat-value">24/7</div>
+              <div class="stat-label">실시간 모니터링</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 탭 섹션 ===== -->
+  <section class="tabs-section">
+    <div class="container">
+      <span class="section-label">Details</span>
+      <h2 class="section-title fade-in">제품 상세 정보</h2>
+      <p class="section-subtitle fade-in">적용사례부터 스펙까지, ST-C 시리즈의 모든 것</p>
+
+      <!-- Tabs Navigation -->
+      <div class="tabs-nav fade-in">
+        <button class="tab-btn active" data-tab="cases">적용사례</button>
+        <button class="tab-btn" data-tab="video">비디오</button>
+        <button class="tab-btn" data-tab="gallery">제품이미지</button>
+        <button class="tab-btn" data-tab="spec">스펙&amp;도면</button>
+        <button class="tab-btn" data-tab="application">어플리케이션</button>
+      </div>
+
+      <!-- Tab 1: 적용사례 -->
+      <div class="tab-panel active" data-panel="cases">
+        <div class="cases-grid">
+          <div class="case-card fade-in">
+            <div class="case-card-img">
+              <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&q=80" alt="물류센터 자동 분류" loading="lazy">
+            </div>
+            <div class="case-card-body">
+              <h4>물류센터 자동 분류</h4>
+              <p>국내 대형 물류센터에 ST-C 시리즈를 도입하여 일일 처리량 300% 향상을 달성했습니다. AI 분류 시스템으로 오배송률이 0.05%로 감소했습니다.</p>
+            </div>
+          </div>
+          <div class="case-card fade-in">
+            <div class="case-card-img">
+              <img src="https://images.unsplash.com/photo-1565043666747-69f6646db940?w=600&q=80" alt="자동차 조립라인" loading="lazy">
+            </div>
+            <div class="case-card-body">
+              <h4>자동차 조립라인</h4>
+              <p>자동차 조립라인에 중량물 대응 컨베이어를 설치하여 부품 공급 자동화를 실현했습니다. 생산성 40% 향상, 작업자 부상률 85% 감소를 달성했습니다.</p>
+            </div>
+          </div>
+          <div class="case-card fade-in">
+            <div class="case-card-img">
+              <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&q=80" alt="식품 포장 자동화" loading="lazy">
+            </div>
+            <div class="case-card-body">
+              <h4>식품 포장 자동화</h4>
+              <p>위생 등급 스테인리스 벨트를 적용한 식품용 컨베이어로 포장 라인을 자동화했습니다. HACCP 인증 기준을 충족하며 포장 효율 250% 향상을 달성했습니다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: 비디오 -->
+      <div class="tab-panel" data-panel="video">
+        <div class="video-grid-tab">
+          <div class="video-card-tab">
+            <img src="https://images.unsplash.com/photo-1563968743333-044cef800494?w=600&q=80" alt="ST-C 시리즈 소개 영상" loading="lazy">
+            <div class="video-overlay">
+              <div class="play-icon">
+                <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+              </div>
+              <div class="video-title">ST-C 시리즈 소개 영상</div>
+            </div>
+          </div>
+          <div class="video-card-tab">
+            <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&q=80" alt="물류센터 설치 사례" loading="lazy">
+            <div class="video-overlay">
+              <div class="play-icon">
+                <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+              </div>
+              <div class="video-title">물류센터 설치 사례</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: 제품이미지 -->
+      <div class="tab-panel" data-panel="gallery">
+        <div class="gallery-grid">
+          <div class="gallery-item">
+            <img src="https://images.unsplash.com/photo-1563968743333-044cef800494?w=600&q=80" alt="ST-C 직선형" loading="lazy">
+            <div class="gallery-overlay">
+              <span>ST-C 직선형</span>
+            </div>
+          </div>
+          <div class="gallery-item">
+            <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600&q=80" alt="ST-C 곡선형" loading="lazy">
+            <div class="gallery-overlay">
+              <span>ST-C 곡선형</span>
+            </div>
+          </div>
+          <div class="gallery-item">
+            <img src="https://images.unsplash.com/photo-1565043666747-69f6646db940?w=600&q=80" alt="ST-C 분류 모듈" loading="lazy">
+            <div class="gallery-overlay">
+              <span>ST-C 분류 모듈</span>
+            </div>
+          </div>
+          <div class="gallery-item">
+            <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&q=80" alt="ST-C 설치 현장" loading="lazy">
+            <div class="gallery-overlay">
+              <span>ST-C 설치 현장</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: 스펙&도면 -->
+      <div class="tab-panel" data-panel="spec">
+        <div class="spec-content">
+          <table class="spec-table">
+            <tbody>
+              <tr>
+                <th>항목</th>
+                <td><strong>사양</strong></td>
+              </tr>
+              <tr>
+                <th>모델명</th>
+                <td>ST-C 3000</td>
+              </tr>
+              <tr>
+                <th>최대 적재</th>
+                <td>500kg</td>
+              </tr>
+              <tr>
+                <th>이송 속도</th>
+                <td>최대 60m/min</td>
+              </tr>
+              <tr>
+                <th>분류 속도</th>
+                <td>200pcs/min</td>
+              </tr>
+              <tr>
+                <th>벨트 폭</th>
+                <td>300~1,200mm</td>
+              </tr>
+              <tr>
+                <th>제어</th>
+                <td>PLC + IoT 통합</td>
+              </tr>
+              <tr>
+                <th>전원</th>
+                <td>AC 380V / 3Phase</td>
+              </tr>
+              <tr>
+                <th>인증</th>
+                <td>CE / KC / KCs</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="spec-drawing">
+            <div class="drawing-placeholder">
+              <svg viewBox="0 0 24 24"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M9,13V19H7V13H9M15,15V19H13V15H15M11,11V19H13V11H11Z"/></svg>
+              <span>도면 다운로드는 별도 문의 바랍니다</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 5: 어플리케이션 -->
+      <div class="tab-panel" data-panel="application">
+        <div class="app-grid">
+          <div class="app-card fade-in">
+            <div class="app-icon">&#x1F4E6;</div>
+            <h4>물류/택배</h4>
+            <p>대규모 물류센터 자동 분류 및 이송</p>
+          </div>
+          <div class="app-card fade-in">
+            <div class="app-icon">&#x1F697;</div>
+            <h4>자동차</h4>
+            <p>조립라인 부품 공급 및 완성차 이송</p>
+          </div>
+          <div class="app-card fade-in">
+            <div class="app-icon">&#x1F35E;</div>
+            <h4>식품/음료</h4>
+            <p>위생 등급 컨베이어로 식품 안전 이송</p>
+          </div>
+          <div class="app-card fade-in">
+            <div class="app-icon">&#x1F4BB;</div>
+            <h4>전자/반도체</h4>
+            <p>정전기 방지 벨트로 정밀 부품 이송</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA SECTION ===== -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-content fade-in">
+        <h2>제품에 대해 더 궁금하신가요?</h2>
+        <p>ST-C 시리즈에 대한 상세 견적, 기술 상담, 현장 방문 데모를 요청하세요</p>
+        <a href="#contact" class="cta-btn">제품 문의하기</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer" id="contact">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            Smart<span>Tech</span> Korea
+          </div>
+          <p>
+            서울특별시 강남구 테헤란로 123, 스마트빌딩 15층<br>
+            TEL: 02-1234-5678 | FAX: 02-1234-5679<br>
+            E-mail: info@smarttechkorea.co.kr
+          </p>
+          <div class="footer-social">
+            <a href="#" aria-label="YouTube">YT</a>
+            <a href="#" aria-label="Blog">BL</a>
+            <a href="#" aria-label="Instagram">IG</a>
+            <a href="#" aria-label="LinkedIn">IN</a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="company.html">회사소개</a></li>
+            <li><a href="#">CEO 인사말</a></li>
+            <li><a href="#">연혁</a></li>
+            <li><a href="#">오시는 길</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="product-sensor.html">스마트센서 ST-100</a></li>
+            <li><a href="#">AI 비전검사 ST-V</a></li>
+            <li><a href="product-conveyor.html">컨베이어 ST-C</a></li>
+            <li><a href="#">맞춤형 솔루션</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="#">기술지원</a></li>
+            <li><a href="#">다운로드</a></li>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">견적문의</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 SmartTech Korea Co., Ltd. All rights reserved.</p>
+        <p>이 사이트는 데모 목적으로 제작되었습니다.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script>
+    // ===== Navigation scroll effect =====
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 50);
+    });
+    // Initial check (page might load scrolled)
+    if (window.scrollY > 50) navbar.classList.add('scrolled');
+
+    // ===== Hamburger menu =====
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active');
+      mobileMenu.classList.toggle('open');
+      document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+    });
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        mobileMenu.classList.remove('open');
+        document.body.style.overflow = '';
+      });
+    });
+
+    // ===== Scroll animations (IntersectionObserver) =====
+    const animElements = document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right');
+    const observerOptions = { threshold: 0.15, rootMargin: '0px 0px -50px 0px' };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    animElements.forEach(el => observer.observe(el));
+
+    // ===== Tabs =====
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.tab;
+
+        // Update button states
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Update panel states
+        tabPanels.forEach(p => p.classList.remove('active'));
+        document.querySelector(`.tab-panel[data-panel="${target}"]`).classList.add('active');
+
+        // Re-observe new fade-in elements in the active panel
+        const newPanel = document.querySelector(`.tab-panel[data-panel="${target}"]`);
+        newPanel.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right').forEach(el => {
+          if (!el.classList.contains('visible')) {
+            observer.observe(el);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
