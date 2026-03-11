@@ -317,3 +317,50 @@
 ## 작업 완료 시 URL 필수 (2026-03-12, 영구)
 - 모든 포트폴리오/사이트 작업 완료 보고 시 URL 반드시 포함
 - URL 없는 완료 보고 = 미완료
+
+## UIUX 시각적 버그 수정 패턴 (2026-03-12, 영구)
+모바일에서 발생하는 시각적 버그 수정 시 반드시 적용할 체크리스트:
+
+### 1. 한글 폰트 깨짐 방지
+- **Playfair Display는 영문 전용** — 한글에 적용하면 글자가 깨짐 ("평면안내" → "경ㄴ ㄴ ㅐ")
+- 한글 제목/본문은 반드시 `font-family: var(--font-body)` (Pretendard) 사용
+- 수정법: `font-family: 'Playfair Display', ...` → `font-family: var(--font-body)`
+- **전 페이지 일괄 검색**: `grep -n "Playfair" *.html` → 한글 요소에 적용된 것 전부 교체
+
+### 2. 텍스트 겹침 방지
+- header(fixed) + 히어로 padding-top 충돌이 주 원인
+- 모바일: `padding-top: 96px+` / 태블릿: `112px+` 확보
+- 히어로 오버레이: `rgba(0,0,0,0.65)` 이상으로 가독성 확보
+- 마키 밴드가 네비와 겹치지 않게 z-index 정리
+
+### 3. 카드 높이 균일화
+- `display: flex` + `align-items: stretch` 또는 `display: grid`
+- 각 카드에 `min-height` 통일
+- 이미지 카드: `aspect-ratio: 4/3` 또는 `16/9` 필수
+
+### 4. 이미지 빈 공간 방지
+- `onerror="this.style.display='none'"` 사용 금지 — 빈 공간 발생
+- 대신 `aspect-ratio` + `background-color` 로 placeholder 확보
+- Unsplash URL은 배포 전 반드시 HTTP 200 확인
+
+### 5. 검증 스크립트
+- `/home/onda/scripts/uiux-deploy-verify.sh <dir>` 실행 필수
+- 이미지 URL 404 체크 + 반응형 + z-index 검증
+
+## UIUX QA 항시 체크 로직 (2026-03-12, 영구, 최우선)
+- **docs/UIUX_QA_CHECKLIST.md** — 전체 체크리스트 (10개 카테고리, 50+ 항목)
+- **scripts/uiux-qa-check.sh** — 자동 검증 스크립트
+- 모든 서브에이전트 태스크에 필수 포함:
+  1. 제작 시 체크리스트 항목 준수
+  2. 완료 후 `bash /home/onda/scripts/uiux-qa-check.sh /path/to/site/` 실행
+  3. ❌ 에러 0개여야만 커밋 가능
+- **핵심 필수 항목:**
+  - box-sizing: border-box (치우침 방지)
+  - overflow-x: hidden (가로스크롤 방지)
+  - word-break: keep-all (한글 줄바꿈)
+  - max-width 컨테이너 (와이드 화면 치우침 방지)
+  - font fallback 체인 (폰트 깨짐 방지)
+  - img: object-fit:cover + max-width:100% (영상/이미지 깨짐 방지)
+  - background-clip:text 사용 시 모바일 폴백 필수
+  - 8px 그리드 여백 통일
+  - 모든 브레이크포인트(375/768/1024/1440px) 검증
