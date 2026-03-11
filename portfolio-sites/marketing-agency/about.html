@@ -4,222 +4,732 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>회사소개 — WAVE DIGITAL</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--white:#FAFAFA;--charcoal:#1A1A1A;--blue:#0066FF;--coral:#FF6B4A;--font-heading:'Sora',sans-serif;--font-body:'Pretendard Variable','Pretendard',sans-serif}
+:root{
+--white:#FAFAFA;--charcoal:#1A1A1A;--blue:#0066FF;--coral:#FF6B4A;
+--font-heading:'Sora',sans-serif;--font-body:'Pretendard Variable','Pretendard',sans-serif;
+}
 html{scroll-behavior:smooth;overflow-x:hidden}
 body{font-family:var(--font-body);background:var(--white);color:var(--charcoal);overflow-x:hidden;line-height:1.6;word-break:keep-all}
 
-.nav{position:fixed;top:0;left:0;width:100%;z-index:1000;padding:1.5rem 3rem;display:grid;grid-template-columns:auto 1fr auto;align-items:center;background:rgba(250,250,250,.9);backdrop-filter:blur(12px)}
-.nav-logo{font-family:var(--font-heading);font-weight:800;font-size:1.5rem;letter-spacing:-.02em;color:var(--charcoal);text-decoration:none}.nav-logo span{color:var(--blue)}
+/* ===== UNIFIED NAV ===== */
+.nav{position:fixed;top:0;left:0;width:100%;z-index:1000;padding:1.5rem 3rem;display:grid;grid-template-columns:auto 1fr auto;align-items:center;background:rgba(250,250,250,.95);backdrop-filter:blur(12px);transition:all .3s}
+.nav.scrolled{padding:1rem 3rem;box-shadow:0 1px 20px rgba(0,0,0,.06)}
+.nav-logo{font-family:var(--font-heading);font-weight:800;font-size:1.5rem;letter-spacing:-.02em;color:var(--charcoal);text-decoration:none}
+.nav-logo span{color:var(--blue)}
 .nav-links{display:flex;gap:2.5rem;justify-content:center}
-.nav-links a{text-decoration:none;color:var(--charcoal);font-size:.875rem;font-weight:500;transition:color .3s}
-.nav-links a:hover,.nav-links a.active{color:var(--blue)}
+.nav-links a{text-decoration:none;color:var(--charcoal);font-size:.875rem;font-weight:500;position:relative;transition:color .3s}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--blue);transition:width .3s}
+.nav-links a:hover{color:var(--blue)}
+.nav-links a:hover::after{width:100%}
+.nav-links a.active{color:var(--blue)}
+.nav-links a.active::after{width:100%}
 .nav-cta{font-family:var(--font-heading);font-size:.875rem;font-weight:600;padding:.75rem 2rem;border:2px solid var(--charcoal);border-radius:100px;text-decoration:none;color:var(--charcoal);transition:all .3s}
 .nav-cta:hover{background:var(--charcoal);color:var(--white)}
-.mobile-toggle{display:none;background:none;border:none;cursor:pointer;width:32px;height:24px;position:relative}
-.mobile-toggle span{display:block;width:100%;height:2px;background:var(--charcoal);position:absolute;left:0;transition:all .3s}
-.mobile-toggle span:nth-child(1){top:0}.mobile-toggle span:nth-child(2){top:50%;transform:translateY(-50%)}.mobile-toggle span:nth-child(3){bottom:0}
+.mobile-toggle{display:none;background:none;border:none;cursor:pointer;width:32px;height:24px;position:relative;z-index:1001}
+.mobile-toggle span{display:block;width:100%;height:2px;background:var(--charcoal);transition:all .3s;position:absolute;left:0}
+.mobile-toggle span:nth-child(1){top:0}
+.mobile-toggle span:nth-child(2){top:50%;transform:translateY(-50%)}
+.mobile-toggle span:nth-child(3){bottom:0}
 .mobile-nav{position:fixed;inset:0;background:var(--white);z-index:999;display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .4s}
 .mobile-nav.open{opacity:1;pointer-events:all}
 .mobile-nav-links{display:grid;gap:2rem;text-align:center}
-.mobile-nav-links a{font-family:var(--font-heading);font-size:2rem;font-weight:600;text-decoration:none;color:var(--charcoal)}
+.mobile-nav-links a{font-family:var(--font-heading);font-size:2rem;font-weight:600;text-decoration:none;color:var(--charcoal);transition:color .3s}
+.mobile-nav-links a:hover{color:var(--blue)}
 
-/* HERO SLOGAN */
-.slogan-hero{height:100vh;display:grid;place-items:center;text-align:center;padding:2rem}
-.slogan-hero h1{font-family:var(--font-heading);font-size:clamp(2.5rem,7vw,5rem);font-weight:800;letter-spacing:-.03em;line-height:1.1}
-.slogan-hero h1 span{color:var(--blue)}
-.slogan-hero p{color:#666;font-size:1.2rem;margin-top:1.5rem;max-width:500px}
+/* ===== HERO ===== */
+.about-hero{height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden;background:var(--charcoal)}
+.about-hero::before{content:'';position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1600&q=80') center/cover;opacity:.2}
+.about-hero-content{position:relative;z-index:2;padding:0 2rem}
+.about-hero h1{font-family:var(--font-heading);font-size:clamp(2.5rem,8vw,6rem);font-weight:800;color:#fff;letter-spacing:-.04em;line-height:1}
+.about-hero h1 span{color:var(--blue)}
+.about-hero p{color:rgba(255,255,255,.7);font-size:clamp(1rem,2vw,1.4rem);margin-top:2rem;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.8}
+.hero-scroll{position:absolute;bottom:3rem;left:50%;transform:translateX(-50%);z-index:3}
+.scroll-hint{width:28px;height:44px;border:2px solid rgba(255,255,255,.5);border-radius:14px;position:relative}
+.scroll-hint::after{content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);width:4px;height:10px;background:rgba(255,255,255,.7);border-radius:2px;animation:scrollDot 1.8s ease-in-out infinite}
+@keyframes scrollDot{0%,100%{opacity:1;transform:translateX(-50%) translateY(0)}50%{opacity:.3;transform:translateX(-50%) translateY(14px)}}
 
-/* ASYMMETRIC ABOUT */
-.about-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:4rem;padding:6rem 3rem;max-width:1200px;margin:0 auto;align-items:center}
-.about-img{border-radius:24px;overflow:hidden;aspect-ratio:4/5}
-.about-img img{width:100%;height:100%;object-fit:cover}
-.about-text h2{font-family:var(--font-heading);font-size:clamp(1.8rem,3vw,2.5rem);font-weight:700;margin-bottom:1.5rem;letter-spacing:-.02em}
-.about-text p{color:#555;font-size:1.05rem;line-height:1.8;margin-bottom:1.5rem}
-.about-values{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:2rem}
-.value-card{padding:1.5rem;border-radius:16px;background:#f5f5f5}
-.value-card h4{font-family:var(--font-heading);font-size:1rem;font-weight:700;margin-bottom:.5rem;color:var(--blue)}
-.value-card p{font-size:.9rem;color:#666;line-height:1.6}
+/* ===== FADE-IN ===== */
+.fade-in{opacity:0;transform:translateY(40px);transition:all .8s ease-out}
+.fade-in.visible{opacity:1;transform:translateY(0)}
 
-/* TEAM */
-.team-section{padding:6rem 3rem;max-width:1200px;margin:0 auto}
-.section-title{font-family:var(--font-heading);font-size:clamp(2rem,4vw,3rem);font-weight:700;margin-bottom:.5rem;letter-spacing:-.02em}
-.section-desc{color:#666;font-size:1.05rem;margin-bottom:3rem}
-.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem}
-.team-member{text-align:center;position:relative;cursor:pointer}
-.team-member .avatar{width:140px;height:140px;border-radius:50%;overflow:hidden;margin:0 auto 1rem;position:relative}
-.team-member .avatar img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
-.team-member:hover .avatar img{transform:scale(1.1)}
-.team-member .info-slide{position:absolute;bottom:0;left:0;right:0;background:var(--blue);color:#fff;padding:.75rem;border-radius:0 0 50% 50%;transform:translateY(100%);transition:transform .4s;font-size:.8rem}
-.team-member:hover .info-slide{transform:translateY(0)}
-.team-member h4{font-family:var(--font-heading);font-size:1rem;font-weight:600}
-.team-member .role{color:#888;font-size:.85rem;margin-top:.25rem}
+/* ===== INTRO ===== */
+.intro-section{padding:8rem 3rem;max-width:1000px;margin:0 auto;text-align:center}
+.intro-section .eyebrow{font-family:var(--font-heading);font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:.15em;color:var(--blue);margin-bottom:1.5rem}
+.intro-section h2{font-family:var(--font-heading);font-size:clamp(1.8rem,4vw,3rem);font-weight:700;letter-spacing:-.02em;margin-bottom:2rem;line-height:1.3}
+.intro-section p{color:#555;font-size:1.1rem;line-height:1.9;max-width:700px;margin:0 auto}
 
-/* TIMELINE */
-.timeline-section{padding:6rem 3rem;overflow:hidden}
-.timeline-wrap{overflow-x:auto;scrollbar-width:none;padding-bottom:2rem}
-.timeline-wrap::-webkit-scrollbar{display:none}
-.timeline{display:flex;gap:3rem;padding:2rem 0;position:relative;min-width:max-content}
-.timeline::before{content:'';position:absolute;top:50%;left:0;right:0;height:2px;background:#eee}
-.timeline-item{text-align:center;position:relative;min-width:200px}
-.timeline-item .dot{width:16px;height:16px;border-radius:50%;background:var(--blue);margin:0 auto 1.5rem;position:relative;z-index:1}
-.timeline-item:nth-child(even) .dot{background:var(--coral)}
-.timeline-item .year{font-family:var(--font-heading);font-size:1.5rem;font-weight:700;margin-bottom:.5rem}
-.timeline-item .event{color:#666;font-size:.9rem;max-width:180px;margin:0 auto}
+/* ===== MISSION/VISION/VALUES ===== */
+.mvv-section{padding:6rem 3rem;background:#f8f9fa}
+.mvv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2.5rem;max-width:1200px;margin:0 auto}
+.mvv-card{background:#fff;border-radius:24px;padding:3rem;position:relative;overflow:hidden;transition:transform .4s,box-shadow .4s}
+.mvv-card:hover{transform:translateY(-8px);box-shadow:0 20px 60px rgba(0,0,0,.08)}
+.mvv-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
+.mvv-card:nth-child(1)::before{background:var(--blue)}
+.mvv-card:nth-child(2)::before{background:var(--coral)}
+.mvv-card:nth-child(3)::before{background:#03C75A}
+.mvv-icon{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;font-size:2rem}
+.mvv-card:nth-child(1) .mvv-icon{background:rgba(0,102,255,.1)}
+.mvv-card:nth-child(2) .mvv-icon{background:rgba(255,107,74,.1)}
+.mvv-card:nth-child(3) .mvv-icon{background:rgba(3,199,90,.1)}
+.mvv-card h3{font-family:var(--font-heading);font-size:1.5rem;font-weight:700;margin-bottom:1rem;letter-spacing:-.01em}
+.mvv-card p{color:#555;font-size:1rem;line-height:1.8}
+.mvv-card .mvv-list{list-style:none;padding:0;margin-top:1.5rem}
+.mvv-card .mvv-list li{padding:.6rem 0;border-bottom:1px solid #f0f0f0;color:#555;font-size:.95rem;display:flex;align-items:center;gap:.75rem}
+.mvv-card .mvv-list li::before{content:'✦';color:var(--blue);font-size:.7rem}
 
-/* PARTNERS */
-.partners{padding:6rem 3rem;text-align:center}
-.partner-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:2rem;align-items:center;max-width:1000px;margin:2rem auto 0;opacity:.5}
-.partner-grid .partner{height:50px;display:grid;place-items:center;font-family:var(--font-heading);font-weight:700;font-size:1.1rem;color:#999}
+/* ===== STATS BAR ===== */
+.stats-bar{padding:5rem 3rem;background:var(--charcoal);color:#fff}
+.stats-bar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3rem;max-width:1100px;margin:0 auto;text-align:center}
+.stat-item .stat-number{font-family:var(--font-heading);font-size:clamp(2.5rem,5vw,4rem);font-weight:800;letter-spacing:-.03em;color:var(--blue)}
+.stat-item .stat-number span{color:var(--coral)}
+.stat-item .stat-label{color:rgba(255,255,255,.6);font-size:.95rem;margin-top:.5rem}
 
-.footer{padding:4rem 3rem;border-top:1px solid #eee;display:grid;grid-template-columns:1fr auto;align-items:center;gap:2rem}
-.footer-left{font-family:var(--font-heading);font-weight:700;font-size:1.1rem}.footer-left span{color:var(--blue)}
-.footer-right{display:flex;gap:2rem}
-.footer-right a{color:#999;text-decoration:none;font-size:.85rem;transition:color .3s}
-.footer-right a:hover{color:var(--charcoal)}
+/* ===== TIMELINE ===== */
+.timeline-section{padding:8rem 3rem;overflow:hidden}
+.section-header{max-width:1200px;margin:0 auto 4rem}
+.section-header .eyebrow{font-family:var(--font-heading);font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:.15em;color:var(--blue);margin-bottom:1rem}
+.section-header h2{font-family:var(--font-heading);font-size:clamp(2rem,4vw,3rem);font-weight:700;letter-spacing:-.02em}
+.timeline-scroll{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2rem;cursor:grab}
+.timeline-scroll::-webkit-scrollbar{display:none}
+.timeline-track{display:flex;gap:0;padding:2rem 3rem;position:relative;min-width:max-content}
+.timeline-track::before{content:'';position:absolute;top:50%;left:3rem;right:3rem;height:2px;background:#e0e0e0;transform:translateY(-50%)}
+.timeline-item{min-width:220px;text-align:center;position:relative;padding:0 1rem}
+.timeline-dot{width:20px;height:20px;border-radius:50%;background:var(--blue);margin:0 auto 2rem;position:relative;z-index:2;border:4px solid var(--white);box-shadow:0 0 0 2px var(--blue);transition:transform .3s}
+.timeline-item:nth-child(even) .timeline-dot{background:var(--coral);box-shadow:0 0 0 2px var(--coral)}
+.timeline-item:hover .timeline-dot{transform:scale(1.3)}
+.timeline-year{font-family:var(--font-heading);font-size:1.8rem;font-weight:800;margin-bottom:.75rem;letter-spacing:-.02em}
+.timeline-events{color:#666;font-size:.9rem;line-height:1.7;max-width:180px;margin:0 auto}
+.timeline-events strong{color:var(--charcoal);display:block;margin-bottom:.25rem}
 
-@media(max-width:1024px){.team-grid{grid-template-columns:repeat(2,1fr)}.partner-grid{grid-template-columns:repeat(3,1fr)}}
+/* ===== TEAM ===== */
+.team-section{padding:8rem 3rem;background:#f8f9fa}
+.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2.5rem;max-width:1200px;margin:0 auto}
+.team-card{background:#fff;border-radius:20px;overflow:hidden;transition:transform .4s,box-shadow .4s;cursor:pointer}
+.team-card:hover{transform:translateY(-8px);box-shadow:0 20px 50px rgba(0,0,0,.08)}
+.team-card-img{aspect-ratio:3/4;overflow:hidden;position:relative}
+.team-card-img img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.team-card:hover .team-card-img img{transform:scale(1.08)}
+.team-card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7),transparent 50%);opacity:0;transition:opacity .4s;display:flex;align-items:flex-end;padding:1.5rem}
+.team-card:hover .team-card-overlay{opacity:1}
+.team-card-overlay p{color:rgba(255,255,255,.9);font-size:.9rem;line-height:1.6}
+.team-card-info{padding:1.5rem}
+.team-card-info h4{font-family:var(--font-heading);font-size:1.1rem;font-weight:700;margin-bottom:.25rem}
+.team-card-info .role{color:var(--blue);font-size:.85rem;font-weight:600}
+.team-card-info .desc{color:#888;font-size:.85rem;margin-top:.5rem;line-height:1.5}
+
+/* ===== OFFICE GALLERY ===== */
+.office-section{padding:8rem 3rem}
+.office-grid{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:300px 300px;gap:1.5rem;max-width:1200px;margin:0 auto}
+.office-grid .office-img{border-radius:20px;overflow:hidden}
+.office-grid .office-img img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.office-grid .office-img:hover img{transform:scale(1.05)}
+.office-grid .office-img:first-child{grid-row:1/3}
+.office-text{display:flex;flex-direction:column;justify-content:center;padding:2rem;background:#f8f9fa;border-radius:20px}
+.office-text h3{font-family:var(--font-heading);font-size:1.5rem;font-weight:700;margin-bottom:1rem;letter-spacing:-.01em}
+.office-text p{color:#666;font-size:.95rem;line-height:1.7}
+
+/* ===== PARTNERS MARQUEE ===== */
+.partners-section{padding:6rem 3rem;background:#f8f9fa;overflow:hidden}
+.partners-section .section-header{text-align:center}
+.marquee-wrap{overflow:hidden;position:relative;margin-top:3rem}
+.marquee-wrap::before,.marquee-wrap::after{content:'';position:absolute;top:0;bottom:0;width:100px;z-index:2}
+.marquee-wrap::before{left:0;background:linear-gradient(to right,#f8f9fa,transparent)}
+.marquee-wrap::after{right:0;background:linear-gradient(to left,#f8f9fa,transparent)}
+.marquee-track{display:flex;gap:4rem;animation:marquee 30s linear infinite;width:max-content}
+.marquee-track:hover{animation-play-state:paused}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.partner-logo{height:48px;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-weight:700;font-size:1.2rem;color:#999;white-space:nowrap;padding:1rem 2rem;background:#fff;border-radius:12px;transition:color .3s}
+.partner-logo:hover{color:var(--charcoal)}
+
+/* ===== CULTURE ===== */
+.culture-section{padding:8rem 3rem}
+.culture-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2rem;max-width:1000px;margin:0 auto}
+.culture-card{padding:2.5rem;border-radius:20px;background:#f8f9fa;transition:transform .3s}
+.culture-card:hover{transform:translateY(-4px)}
+.culture-card .culture-emoji{font-size:2.5rem;margin-bottom:1rem}
+.culture-card h4{font-family:var(--font-heading);font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+.culture-card p{color:#666;font-size:.95rem;line-height:1.7}
+
+/* ===== CTA ===== */
+.cta-section{padding:8rem 3rem;background:var(--blue);text-align:center;position:relative;overflow:hidden}
+.cta-section::before{content:'';position:absolute;top:-50%;right:-20%;width:600px;height:600px;border-radius:50%;background:rgba(255,255,255,.05)}
+.cta-section::after{content:'';position:absolute;bottom:-30%;left:-10%;width:400px;height:400px;border-radius:50%;background:rgba(255,255,255,.05)}
+.cta-content{position:relative;z-index:2}
+.cta-content h2{font-family:var(--font-heading);font-size:clamp(2rem,5vw,3.5rem);font-weight:800;color:#fff;letter-spacing:-.03em;margin-bottom:1.5rem}
+.cta-content p{color:rgba(255,255,255,.8);font-size:1.15rem;margin-bottom:3rem;max-width:500px;margin-left:auto;margin-right:auto;line-height:1.7}
+.cta-btn{display:inline-block;padding:1.2rem 3rem;background:#fff;color:var(--blue);font-family:var(--font-heading);font-size:1.1rem;font-weight:700;border-radius:100px;text-decoration:none;transition:all .3s}
+.cta-btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.2)}
+
+/* ===== UNIFIED FOOTER ===== */
+.footer{padding:6rem 3rem 3rem;background:var(--charcoal);color:var(--white)}
+.footer-main{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:4rem;margin-bottom:3rem;max-width:1200px;margin-left:auto;margin-right:auto}
+.footer-brand h3{font-family:var(--font-heading);font-weight:800;font-size:2rem;letter-spacing:-.02em;margin-bottom:1rem}
+.footer-brand h3 span{color:var(--blue)}
+.footer-brand p{color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:2rem}
+.footer-contact-info{margin-bottom:1.5rem}
+.footer-contact-info p{color:rgba(255,255,255,.6);font-size:.9rem;margin-bottom:.3rem}
+.footer-social{display:flex;gap:1rem}
+.footer-social a{width:40px;height:40px;background:rgba(255,255,255,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);transition:all .3s;text-decoration:none}
+.footer-social a:hover{background:var(--blue);color:#fff;transform:translateY(-2px)}
+.footer-col h4{font-family:var(--font-heading);font-weight:600;font-size:1.1rem;margin-bottom:1.5rem;color:#fff}
+.footer-col a{color:rgba(255,255,255,.7);text-decoration:none;display:block;margin-bottom:.8rem;transition:color .3s;font-size:.95rem}
+.footer-col a:hover{color:var(--blue)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;max-width:1200px;margin:0 auto}
+.footer-bottom-left{display:flex;gap:2rem;flex-wrap:wrap}
+.footer-bottom-left a{color:rgba(255,255,255,.5);text-decoration:none;font-size:.85rem;transition:color .3s}
+.footer-bottom-left a:hover{color:rgba(255,255,255,.8)}
+.footer-copyright{color:rgba(255,255,255,.5);font-size:.85rem}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1024px){
+.mvv-grid{grid-template-columns:1fr}
+.stats-bar-grid{grid-template-columns:repeat(2,1fr)}
+.team-grid{grid-template-columns:repeat(2,1fr)}
+.office-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
+.office-grid .office-img:first-child{grid-row:auto}
+.footer-main{grid-template-columns:1fr 1fr;gap:3rem}
+}
+
 @media(max-width:768px){
-.nav{padding:1rem 1.5rem}.nav-links,.nav-cta{display:none}.mobile-toggle{display:block}
-.about-grid{grid-template-columns:1fr;padding:4rem 1.5rem;gap:2rem}
-.about-values{grid-template-columns:1fr}
-.team-section{padding:4rem 1.5rem}
+.nav{padding:1rem 1.5rem;grid-template-columns:1fr auto}
+.nav-links{display:none}
+.nav-cta{display:none}
+.mobile-toggle{display:block}
+.about-hero h1{font-size:clamp(2rem,10vw,4rem)}
+.intro-section{padding:5rem 1.5rem}
+.mvv-section{padding:4rem 1.5rem}
+.stats-bar{padding:3rem 1.5rem}
+.stats-bar-grid{grid-template-columns:1fr 1fr;gap:2rem}
+.timeline-section{padding:5rem 1.5rem}
+.team-section{padding:5rem 1.5rem}
 .team-grid{grid-template-columns:1fr 1fr;gap:1.5rem}
-.timeline-section{padding:4rem 1.5rem}
-.partners{padding:4rem 1.5rem}
-.partner-grid{grid-template-columns:repeat(2,1fr)}
-.footer{grid-template-columns:1fr;text-align:center;padding:3rem 1.5rem}
-.footer-right{justify-content:center}
+.office-section{padding:5rem 1.5rem}
+.office-grid{grid-template-columns:1fr;grid-template-rows:auto}
+.partners-section{padding:4rem 1.5rem}
+.culture-section{padding:5rem 1.5rem}
+.culture-grid{grid-template-columns:1fr}
+.cta-section{padding:5rem 1.5rem}
+.footer{padding:4rem 1.5rem 2rem}
+.footer-main{grid-template-columns:1fr;gap:2rem;text-align:center}
+.footer-social{justify-content:center}
+.footer-bottom{flex-direction:column;text-align:center}
 }
 </style>
 </head>
 <body>
 
-<nav class="nav">
-<a href="index.html" class="nav-logo">WAVE<span>.</span></a>
+<!-- ===== UNIFIED NAV ===== -->
+<nav class="nav" id="nav">
+<a href="index.html" class="nav-logo">WAVE<span>.</span>DIGITAL</a>
 <div class="nav-links">
-<a href="services.html">서비스</a><a href="portfolio.html">포트폴리오</a><a href="about.html" class="active">회사소개</a><a href="blog.html">인사이트</a><a href="contact.html">문의</a>
+<a href="services.html">서비스</a>
+<a href="portfolio.html">포트폴리오</a>
+<a href="about.html" class="active">회사소개</a>
+<a href="blog.html">인사이트</a>
+<a href="contact.html">문의</a>
 </div>
-<a href="contact.html" class="nav-cta">프로젝트 시작</a>
-<button class="mobile-toggle" id="mobileToggle" aria-label="메뉴"><span></span><span></span><span></span></button>
+<a href="contact.html" class="nav-cta">프로젝트 시작하기</a>
+<button class="mobile-toggle" id="mobileToggle" aria-label="메뉴">
+<span></span><span></span><span></span>
+</button>
 </nav>
-<div class="mobile-nav" id="mobileNav"><div class="mobile-nav-links">
-<a href="services.html">서비스</a><a href="portfolio.html">포트폴리오</a><a href="about.html">회사소개</a><a href="blog.html">인사이트</a><a href="contact.html">문의</a>
-</div></div>
+<div class="mobile-nav" id="mobileNav">
+<div class="mobile-nav-links">
+<a href="services.html">서비스</a>
+<a href="portfolio.html">포트폴리오</a>
+<a href="about.html">회사소개</a>
+<a href="blog.html">인사이트</a>
+<a href="contact.html">문의</a>
+</div>
+</div>
 
-<!-- SLOGAN -->
-<section class="slogan-hero">
-<div>
-<h1>브랜드의 <span>파도</span>를<br>만듭니다</h1>
-<p>데이터와 크리에이티브를 결합하여 디지털 마케팅의 새로운 물결을 일으킵니다</p>
+<!-- ===== HERO ===== -->
+<section class="about-hero">
+<div class="about-hero-content">
+<h1>브랜드의 <span>파도</span>를<br>만드는 사람들</h1>
+<p>데이터와 크리에이티브의 교차점에서, 우리는 디지털 마케팅의 새로운 파도를 만들어갑니다. 2017년부터 지금까지, 340개 이상의 브랜드와 함께 성장하고 있습니다.</p>
+</div>
+<div class="hero-scroll">
+<div class="scroll-hint"></div>
 </div>
 </section>
 
-<!-- ABOUT GRID -->
-<section class="about-grid">
-<div class="about-img">
-<img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80" alt="팀 사진" loading="lazy">
+<!-- ===== INTRO ===== -->
+<section class="intro-section fade-in">
+<div class="eyebrow">About WAVE DIGITAL</div>
+<h2>단순한 마케팅 대행이 아닌,<br>브랜드 성장의 파트너</h2>
+<p>WAVE DIGITAL은 네이버, 인스타그램, 유튜브, 틱톡 — 4대 플랫폼 각각의 알고리즘과 사용자 행동 패턴을 깊이 이해하는 42명의 전문가가 모인 디지털 마케팅 에이전시입니다. 감이 아닌 데이터로 의사결정하고, 트렌드를 따라가지 않고 트렌드를 만듭니다.</p>
+</section>
+
+<!-- ===== MISSION / VISION / VALUES ===== -->
+<section class="mvv-section">
+<div class="mvv-grid">
+<div class="mvv-card fade-in">
+<div class="mvv-icon">🎯</div>
+<h3>미션</h3>
+<p>모든 브랜드가 디지털 세상에서 자신만의 파도를 만들 수 있도록 돕습니다. 데이터 기반의 정밀한 전략과 감성적인 크리에이티브로 실질적인 비즈니스 성과를 만들어냅니다.</p>
+<ul class="mvv-list">
+<li>데이터 기반 의사결정</li>
+<li>ROI 중심 성과 관리</li>
+<li>고객 비즈니스 성장 기여</li>
+</ul>
 </div>
-<div class="about-text">
-<h2>우리는 WAVE DIGITAL입니다</h2>
-<p>2018년 설립 이후, 300개 이상의 브랜드와 함께 디지털 마케팅의 새로운 기준을 만들어왔습니다. 단순한 노출을 넘어 실질적인 비즈니스 성장을 이끄는 것이 우리의 목표입니다.</p>
-<p>네이버, 인스타그램, 유튜브, 틱톡 — 4대 플랫폼 각각의 알고리즘과 사용자 행동 패턴을 깊이 이해하는 전문가 42명이 여러분의 브랜드를 위해 일합니다.</p>
-<div class="about-values">
-<div class="value-card"><h4>데이터 드리븐</h4><p>감이 아닌 데이터로 의사결정합니다. 모든 캠페인은 실시간 분석 기반입니다.</p></div>
-<div class="value-card"><h4>크리에이티브</h4><p>트렌드를 따라가지 않고, 트렌드를 만듭니다. 차별화된 콘텐츠가 핵심입니다.</p></div>
-<div class="value-card"><h4>성과 중심</h4><p>KPI 달성률 95%. 약속한 성과를 반드시 달성합니다.</p></div>
-<div class="value-card"><h4>원팀 파트너</h4><p>대행사가 아닌 파트너로서 함께 성장합니다.</p></div>
+<div class="mvv-card fade-in">
+<div class="mvv-icon">🔭</div>
+<h3>비전</h3>
+<p>아시아 최고의 디지털 마케팅 에이전시. 기술과 창의성의 결합으로 마케팅의 미래를 선도하며, 모든 클라이언트가 자신의 분야에서 1위가 되는 것을 목표로 합니다.</p>
+<ul class="mvv-list">
+<li>AI 마케팅 기술 선도</li>
+<li>글로벌 시장 확장</li>
+<li>업계 표준 정립</li>
+</ul>
+</div>
+<div class="mvv-card fade-in">
+<div class="mvv-icon">💎</div>
+<h3>핵심 가치</h3>
+<p>우리가 일하는 방식을 정의하는 4가지 핵심 가치입니다. 모든 프로젝트, 모든 의사결정에서 이 가치를 기준으로 판단합니다.</p>
+<ul class="mvv-list">
+<li>투명함 — 데이터와 결과를 숨기지 않습니다</li>
+<li>도전 — 안전한 선택보다 혁신적 시도를 합니다</li>
+<li>협업 — 클라이언트는 파트너입니다</li>
+<li>성장 — 멈추면 뒤처집니다</li>
+</ul>
 </div>
 </div>
 </section>
 
-<!-- TEAM -->
+<!-- ===== STATS BAR ===== -->
+<section class="stats-bar fade-in">
+<div class="stats-bar-grid">
+<div class="stat-item">
+<div class="stat-number" data-target="340">0<span>+</span></div>
+<div class="stat-label">누적 프로젝트</div>
+</div>
+<div class="stat-item">
+<div class="stat-number" data-target="42">0<span>명</span></div>
+<div class="stat-label">전문 인력</div>
+</div>
+<div class="stat-item">
+<div class="stat-number" data-target="95">0<span>%</span></div>
+<div class="stat-label">KPI 달성률</div>
+</div>
+<div class="stat-item">
+<div class="stat-number" data-target="7">0<span>년</span></div>
+<div class="stat-label">업력</div>
+</div>
+</div>
+</section>
+
+<!-- ===== TIMELINE ===== -->
+<section class="timeline-section">
+<div class="section-header fade-in">
+<div class="eyebrow">History</div>
+<h2>성장의 발자취</h2>
+</div>
+<div class="timeline-scroll">
+<div class="timeline-track">
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<div class="timeline-year">2017</div>
+<div class="timeline-events">
+<strong>WAVE DIGITAL 법인 설립</strong>
+서울 마포구에 첫 사무실 오픈. 네이버 블로그 마케팅으로 시작.
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<div class="timeline-year">2018</div>
+<div class="timeline-events">
+<strong>인스타그램 마케팅 론칭</strong>
+팀원 10명 돌파. 첫 해 50개 프로젝트 수행.
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<div class="timeline-year">2019</div>
+<div class="timeline-events">
+<strong>네이버 공식 파트너 선정</strong>
+누적 100개 프로젝트 달성. 매출 5억 돌파.
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<div class="timeline-year">2020</div>
+<div class="timeline-events">
+<strong>유튜브 마케팅 확장</strong>
+팀원 20명. 언택트 시대 디지털 전환 컨설팅 시작.
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<div class="timeline-year">2021</div>
+<div class="timeline-events">
+<strong>틱톡 마케팅 시작</strong>
+매출 10억 돌파. 4대 플랫폼 풀 서비스 완성.
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<div class="timeline-year">2022</div>
+<div class="timeline-events">
+<strong>디지털마케팅대상 수상</strong>
+누적 200개 프로젝트. 팀원 30명.
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<div class="timeline-year">2023</div>
+<div class="timeline-events">
+<strong>강남 사옥 이전</strong>
+웨이브타워 8층 입주. 팀원 35명. 해외 클라이언트 유치.
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<div class="timeline-year">2024</div>
+<div class="timeline-events">
+<strong>AI 마케팅 솔루션 도입</strong>
+팀원 42명. 340+ 프로젝트. 업계 선도 기업으로 성장.
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ===== TEAM ===== -->
 <section class="team-section">
-<h2 class="section-title">팀 소개</h2>
-<p class="section-desc">각 분야 전문가들이 여러분의 브랜드를 위해 함께합니다</p>
+<div class="section-header fade-in" style="max-width:1200px;margin:0 auto 3rem">
+<div class="eyebrow">Our Team</div>
+<h2>전문가들이 만드는 차이</h2>
+</div>
 <div class="team-grid">
-<div class="team-member">
-<div class="avatar">
-<img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&q=80" alt="이준호" loading="lazy">
-<div class="info-slide">디지털 마케팅 15년</div>
+<div class="team-card fade-in">
+<div class="team-card-img">
+<img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80" alt="이준호 대표이사" loading="lazy">
+<div class="team-card-overlay">
+<p>디지털 마케팅 15년 경력. 삼성전자, LG 출신. 데이터 기반 마케팅 전략의 선구자.</p>
 </div>
+</div>
+<div class="team-card-info">
 <h4>이준호</h4>
-<div class="role">대표이사</div>
+<div class="role">대표이사 · CEO</div>
+<div class="desc">전략 총괄 및 VIP 클라이언트 관리</div>
 </div>
-<div class="team-member">
-<div class="avatar">
-<img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=80" alt="김서연" loading="lazy">
-<div class="info-slide">네이버 공식 파트너</div>
 </div>
+<div class="team-card fade-in">
+<div class="team-card-img">
+<img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80" alt="김서연 전략기획 이사" loading="lazy">
+<div class="team-card-overlay">
+<p>네이버 공식 파트너 인증. 검색 마케팅 전문가. 연간 100+ 캠페인 총괄.</p>
+</div>
+</div>
+<div class="team-card-info">
 <h4>김서연</h4>
-<div class="role">전략기획 이사</div>
+<div class="role">전략기획 이사 · CSO</div>
+<div class="desc">캠페인 전략 수립 및 데이터 분석</div>
 </div>
-<div class="team-member">
-<div class="avatar">
-<img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&q=80" alt="박현우" loading="lazy">
-<div class="info-slide">영상 제작 10년</div>
 </div>
+<div class="team-card fade-in">
+<div class="team-card-img">
+<img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80" alt="박현우 콘텐츠 디렉터" loading="lazy">
+<div class="team-card-overlay">
+<p>영상 제작 10년 경력. CJ ENM 출신. 유튜브 채널 총 구독자 500만+ 관리.</p>
+</div>
+</div>
+<div class="team-card-info">
 <h4>박현우</h4>
 <div class="role">콘텐츠 디렉터</div>
+<div class="desc">영상 및 콘텐츠 제작 총괄</div>
 </div>
-<div class="team-member">
-<div class="avatar">
-<img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&q=80" alt="정아린" loading="lazy">
-<div class="info-slide">퍼포먼스 전문가</div>
 </div>
+<div class="team-card fade-in">
+<div class="team-card-img">
+<img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80" alt="정아린 퍼포먼스 팀장" loading="lazy">
+<div class="team-card-overlay">
+<p>퍼포먼스 마케팅 전문. 메타·구글 인증 전문가. 평균 ROAS 580% 달성.</p>
+</div>
+</div>
+<div class="team-card-info">
 <h4>정아린</h4>
 <div class="role">퍼포먼스 팀장</div>
+<div class="desc">광고 성과 최적화 및 매체 운영</div>
+</div>
+</div>
+<div class="team-card fade-in">
+<div class="team-card-img">
+<img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" alt="최동현 SNS팀장" loading="lazy">
+<div class="team-card-overlay">
+<p>인스타그램·틱톡 전문. 팔로워 성장 전략 및 바이럴 콘텐츠 기획.</p>
+</div>
+</div>
+<div class="team-card-info">
+<h4>최동현</h4>
+<div class="role">SNS 팀장</div>
+<div class="desc">소셜 미디어 채널 운영 및 성장</div>
+</div>
+</div>
+<div class="team-card fade-in">
+<div class="team-card-img">
+<img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80" alt="한수빈 브랜딩 매니저" loading="lazy">
+<div class="team-card-overlay">
+<p>브랜드 아이덴티티 전문. 50+ 브랜딩 프로젝트 수행. 디자인씽킹 코치.</p>
+</div>
+</div>
+<div class="team-card-info">
+<h4>한수빈</h4>
+<div class="role">브랜딩 매니저</div>
+<div class="desc">브랜드 전략 및 비주얼 아이덴티티</div>
+</div>
+</div>
+<div class="team-card fade-in">
+<div class="team-card-img">
+<img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80" alt="윤재혁 데이터 분석가" loading="lazy">
+<div class="team-card-overlay">
+<p>데이터 사이언스 석사. GA4·앰플리튜드 전문. 대시보드 설계 및 인사이트 도출.</p>
+</div>
+</div>
+<div class="team-card-info">
+<h4>윤재혁</h4>
+<div class="role">데이터 분석가</div>
+<div class="desc">데이터 분석 및 리포팅 자동화</div>
+</div>
+</div>
+<div class="team-card fade-in">
+<div class="team-card-img">
+<img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80" alt="오지은 AE팀장" loading="lazy">
+<div class="team-card-overlay">
+<p>클라이언트 매니지먼트 전문. 고객 만족도 98%. 커뮤니케이션 스페셜리스트.</p>
+</div>
+</div>
+<div class="team-card-info">
+<h4>오지은</h4>
+<div class="role">AE 팀장</div>
+<div class="desc">클라이언트 커뮤니케이션 및 프로젝트 관리</div>
+</div>
 </div>
 </div>
 </section>
 
-<!-- TIMELINE -->
-<section class="timeline-section">
-<h2 class="section-title" style="padding:0 0 .5rem">연혁</h2>
-<p class="section-desc">성장의 발자취</p>
-<div class="timeline-wrap">
-<div class="timeline">
-<div class="timeline-item"><div class="dot"></div><div class="year">2018</div><div class="event">WAVE DIGITAL 설립<br>첫 네이버 마케팅 프로젝트</div></div>
-<div class="timeline-item"><div class="dot"></div><div class="year">2019</div><div class="event">인스타그램 마케팅 론칭<br>누적 50개 프로젝트 달성</div></div>
-<div class="timeline-item"><div class="dot"></div><div class="year">2020</div><div class="event">유튜브 마케팅 확장<br>팀원 20명 돌파</div></div>
-<div class="timeline-item"><div class="dot"></div><div class="year">2021</div><div class="event">틱톡 마케팅 시작<br>매출 10억 돌파</div></div>
-<div class="timeline-item"><div class="dot"></div><div class="year">2022</div><div class="event">디지털마케팅대상 수상<br>누적 200개 프로젝트</div></div>
-<div class="timeline-item"><div class="dot"></div><div class="year">2023</div><div class="event">강남 사옥 이전<br>팀원 35명</div></div>
-<div class="timeline-item"><div class="dot"></div><div class="year">2024</div><div class="event">AI 마케팅 솔루션 도입<br>팀원 42명, 340+ 프로젝트</div></div>
+<!-- ===== OFFICE GALLERY ===== -->
+<section class="office-section">
+<div class="section-header fade-in" style="max-width:1200px;margin:0 auto 3rem">
+<div class="eyebrow">Our Space</div>
+<h2>우리가 일하는 공간</h2>
+</div>
+<div class="office-grid">
+<div class="office-img">
+<img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80" alt="메인 오피스" loading="lazy">
+</div>
+<div class="office-img">
+<img src="https://images.unsplash.com/photo-1497215842964-222b430dc094?w=500&q=80" alt="미팅룸" loading="lazy">
+</div>
+<div class="office-text">
+<h3>강남 웨이브타워</h3>
+<p>테헤란로 중심부, 자연광이 가득한 열린 공간에서 최고의 크리에이티브가 탄생합니다. 집중 업무존, 협업 라운지, 미디어 스튜디오를 갖추고 있습니다.</p>
+</div>
+<div class="office-img">
+<img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=500&q=80" alt="작업 공간" loading="lazy">
+</div>
+<div class="office-img">
+<img src="https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?w=500&q=80" alt="촬영 스튜디오" loading="lazy">
 </div>
 </div>
 </section>
 
-<!-- PARTNERS -->
-<section class="partners">
-<h2 class="section-title">파트너사</h2>
-<p class="section-desc">함께 성장하는 브랜드들</p>
-<div class="partner-grid">
-<div class="partner">아모레퍼시픽</div>
-<div class="partner">무신사</div>
-<div class="partner">배달의민족</div>
-<div class="partner">카카오</div>
-<div class="partner">토스</div>
-<div class="partner">쿠팡</div>
-<div class="partner">삼성물산</div>
-<div class="partner">CJ ENM</div>
-<div class="partner">네이버</div>
-<div class="partner">현대백화점</div>
-<div class="partner">올리브영</div>
-<div class="partner">마켓컬리</div>
+<!-- ===== PARTNERS MARQUEE ===== -->
+<section class="partners-section">
+<div class="section-header fade-in">
+<div class="eyebrow">Partners</div>
+<h2>함께 성장하는 브랜드들</h2>
+</div>
+<div class="marquee-wrap">
+<div class="marquee-track">
+<div class="partner-logo">아모레퍼시픽</div>
+<div class="partner-logo">무신사</div>
+<div class="partner-logo">배달의민족</div>
+<div class="partner-logo">카카오</div>
+<div class="partner-logo">토스</div>
+<div class="partner-logo">쿠팡</div>
+<div class="partner-logo">삼성물산</div>
+<div class="partner-logo">CJ ENM</div>
+<div class="partner-logo">네이버</div>
+<div class="partner-logo">현대백화점</div>
+<div class="partner-logo">올리브영</div>
+<div class="partner-logo">마켓컬리</div>
+<!-- duplicate for seamless loop -->
+<div class="partner-logo">아모레퍼시픽</div>
+<div class="partner-logo">무신사</div>
+<div class="partner-logo">배달의민족</div>
+<div class="partner-logo">카카오</div>
+<div class="partner-logo">토스</div>
+<div class="partner-logo">쿠팡</div>
+<div class="partner-logo">삼성물산</div>
+<div class="partner-logo">CJ ENM</div>
+<div class="partner-logo">네이버</div>
+<div class="partner-logo">현대백화점</div>
+<div class="partner-logo">올리브영</div>
+<div class="partner-logo">마켓컬리</div>
+</div>
 </div>
 </section>
 
+<!-- ===== CULTURE ===== -->
+<section class="culture-section">
+<div class="section-header fade-in" style="max-width:1000px;margin:0 auto 3rem;text-align:center">
+<div class="eyebrow">Culture</div>
+<h2>우리의 문화</h2>
+</div>
+<div class="culture-grid">
+<div class="culture-card fade-in">
+<div class="culture-emoji">🚀</div>
+<h4>빠른 실행, 빠른 학습</h4>
+<p>완벽한 계획보다 빠른 실행을 추구합니다. 실패해도 빨리 배우고, 그 인사이트를 다음 캠페인에 즉시 반영합니다. 매주 스프린트 리뷰로 학습을 공유합니다.</p>
+</div>
+<div class="culture-card fade-in">
+<div class="culture-emoji">🤝</div>
+<h4>수평적 소통</h4>
+<p>직급 대신 이름으로 부릅니다. 주니어의 아이디어가 시니어의 전략을 바꿀 수 있는 환경. 월 1회 '프리톡' 시간에 누구나 자유롭게 의견을 냅니다.</p>
+</div>
+<div class="culture-card fade-in">
+<div class="culture-emoji">📊</div>
+<h4>데이터로 말하기</h4>
+<p>"느낌적 느낌"은 없습니다. 모든 주장에는 데이터가 동반되어야 합니다. 주간 데이터 리뷰 미팅에서 숫자로 성과를 증명하고 인사이트를 공유합니다.</p>
+</div>
+<div class="culture-card fade-in">
+<div class="culture-emoji">🎨</div>
+<h4>크리에이티브 프라이데이</h4>
+<p>매주 금요일 오후는 자유 프로젝트 시간입니다. 실험적인 콘텐츠, 새로운 플랫폼 테스트, 사이드 프로젝트를 진행합니다. 이곳에서 히트작이 탄생합니다.</p>
+</div>
+</div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="cta-section">
+<div class="cta-content fade-in">
+<h2>함께 일할 준비가<br>되셨나요?</h2>
+<p>브랜드의 다음 파도를 함께 만들어보세요. 무료 상담으로 가능성을 확인하실 수 있습니다.</p>
+<a href="contact.html" class="cta-btn">프로젝트 시작하기</a>
+</div>
+</section>
+
+<!-- ===== UNIFIED FOOTER ===== -->
 <footer class="footer">
-<div class="footer-left">WAVE<span>.</span> © 2024</div>
-<div class="footer-right"><a href="services.html">서비스</a><a href="portfolio.html">포트폴리오</a><a href="about.html">회사소개</a><a href="blog.html">인사이트</a><a href="contact.html">문의</a></div>
+<div class="footer-main">
+<div class="footer-brand">
+<h3>WAVE<span>.</span>DIGITAL</h3>
+<p>브랜드의 파도를 만드는 디지털 마케팅 전문 에이전시입니다. 데이터 기반의 전략과 창의적인 실행으로 고객의 성공을 함께 만들어갑니다.</p>
+<div class="footer-contact-info">
+<p>📍 서울특별시 강남구 테헤란로 123 웨이브타워 8층</p>
+<p>📞 02-1234-5678</p>
+<p>✉️ hello@wavedigital.kr</p>
+</div>
+<div class="footer-social">
+<a href="#" aria-label="인스타그램"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5"/></svg></a>
+<a href="#" aria-label="유튜브"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2s-.2-1.6-.9-2.3c-.9-.9-1.8-.9-2.3-1C17 2.6 12 2.6 12 2.6s-5 0-8.3.3c-.5.1-1.4.1-2.3 1-.7.7-.9 2.3-.9 2.3S.2 8.1.2 10v1.8c0 1.9.3 3.8.3 3.8s.2 1.6.9 2.3c.9.9 2 .9 2.5 1 1.8.2 7.1.2 7.1.2s5 0 8.3-.3c.5-.1 1.4-.1 2.3-1 .7-.7.9-2.3.9-2.3s.3-1.9.3-3.8V10c0-1.9-.3-3.8-.3-3.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg></a>
+<a href="#" aria-label="블로그"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16.3 3.9H7.7c-.8 0-1.4.6-1.4 1.4v13.4c0 .8.6 1.4 1.4 1.4h8.6c.8 0 1.4-.6 1.4-1.4V5.3c0-.8-.6-1.4-1.4-1.4zm-5.5 2.8h2.4c.4 0 .7.3.7.7s-.3.7-.7.7h-2.4c-.4 0-.7-.3-.7-.7s.3-.7.7-.7zm3.8 10.6H9.4c-.4 0-.7-.3-.7-.7s.3-.7.7-.7h5.2c.4 0 .7.3.7.7s-.3.7-.7.7zm0-3h-5.2c-.4 0-.7-.3-.7-.7s.3-.7.7-.7h5.2c.4 0 .7.3.7.7s-.3.7-.7.7zm0-3h-5.2c-.4 0-.7-.3-.7-.7s.3-.7.7-.7h5.2c.4 0 .7.3.7.7s-.3.7-.7.7z"/></svg></a>
+</div>
+</div>
+<div class="footer-col">
+<h4>서비스</h4>
+<a href="services.html">네이버 마케팅</a>
+<a href="services.html">인스타그램 마케팅</a>
+<a href="services.html">유튜브 마케팅</a>
+<a href="services.html">틱톡 마케팅</a>
+<a href="services.html">통합 브랜딩</a>
+<a href="services.html">퍼포먼스 마케팅</a>
+</div>
+<div class="footer-col">
+<h4>인사이트</h4>
+<a href="blog.html">마케팅 트렌드</a>
+<a href="blog.html">플랫폼 분석</a>
+<a href="blog.html">성공 사례</a>
+<a href="blog.html">실전 가이드</a>
+<a href="about.html">회사소개</a>
+<a href="portfolio.html">포트폴리오</a>
+</div>
+<div class="footer-col">
+<h4>소셜</h4>
+<a href="#">인스타그램</a>
+<a href="#">유튜브</a>
+<a href="#">네이버 블로그</a>
+<a href="contact.html">문의하기</a>
+<a href="contact.html">무료 상담</a>
+</div>
+</div>
+<div class="footer-bottom">
+<div class="footer-bottom-left">
+<a href="#">이용약관</a>
+<a href="#">개인정보처리방침</a>
+<a href="#">사업자정보</a>
+</div>
+<div class="footer-copyright">© 2024 WAVE DIGITAL. All rights reserved. | 사업자등록번호 123-45-67890</div>
+</div>
 </footer>
 
 <script>
-document.getElementById('mobileToggle').addEventListener('click',()=>document.getElementById('mobileNav').classList.toggle('open'));
+// Mobile Nav
+const mobileToggle = document.getElementById('mobileToggle');
+const mobileNav = document.getElementById('mobileNav');
+mobileToggle.addEventListener('click', () => {
+mobileNav.classList.toggle('open');
+});
+
+// Nav scroll
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+nav.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// Fade in on scroll
+const fadeEls = document.querySelectorAll('.fade-in');
+const fadeObserver = new IntersectionObserver((entries) => {
+entries.forEach(entry => {
+if (entry.isIntersecting) {
+entry.target.classList.add('visible');
+fadeObserver.unobserve(entry.target);
+}
+});
+}, { threshold: 0.15 });
+fadeEls.forEach(el => fadeObserver.observe(el));
+
+// Counter animation
+const statNumbers = document.querySelectorAll('.stat-number[data-target]');
+const counterObserver = new IntersectionObserver((entries) => {
+entries.forEach(entry => {
+if (entry.isIntersecting) {
+const el = entry.target;
+const target = parseInt(el.dataset.target);
+const suffix = el.querySelector('span')?.outerHTML || '';
+let current = 0;
+const increment = target / 60;
+const timer = setInterval(() => {
+current += increment;
+if (current >= target) {
+current = target;
+clearInterval(timer);
+}
+el.innerHTML = Math.floor(current) + suffix;
+}, 16);
+counterObserver.unobserve(el);
+}
+});
+}, { threshold: 0.5 });
+statNumbers.forEach(el => counterObserver.observe(el));
+
+// Timeline drag scroll
+const timelineScroll = document.querySelector('.timeline-scroll');
+if (timelineScroll) {
+let isDown = false, startX, scrollLeft;
+timelineScroll.addEventListener('mousedown', e => { isDown = true; startX = e.pageX - timelineScroll.offsetLeft; scrollLeft = timelineScroll.scrollLeft; timelineScroll.style.cursor = 'grabbing'; });
+timelineScroll.addEventListener('mouseleave', () => { isDown = false; timelineScroll.style.cursor = 'grab'; });
+timelineScroll.addEventListener('mouseup', () => { isDown = false; timelineScroll.style.cursor = 'grab'; });
+timelineScroll.addEventListener('mousemove', e => { if (!isDown) return; e.preventDefault(); const x = e.pageX - timelineScroll.offsetLeft; timelineScroll.scrollLeft = scrollLeft - (x - startX) * 1.5; });
+}
 </script>
 </body>
 </html>
