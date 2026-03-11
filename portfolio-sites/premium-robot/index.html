@@ -2422,6 +2422,24 @@ document.addEventListener('keydown', function(e) {
     });
   }
 });
+
+/* ===== SAFETY NET — FORCE REVEAL AFTER 3s ===== */
+/* Prevents "invisible black sections" if IntersectionObserver fails */
+setTimeout(function() {
+  // Force-reveal all .reveal elements that are still invisible
+  document.querySelectorAll('.reveal:not(.revealed)').forEach(function(el) {
+    el.classList.add('revealed');
+  });
+
+  // Catch any remaining inline opacity:0 that shouldn't persist
+  document.querySelectorAll('[style*="opacity: 0"], [style*="opacity:0"]').forEach(function(el) {
+    // Skip preloader, cursor, hover-state, and modal elements
+    if (el.closest('#preloader, .cursor-dot, .cursor-ring, .modal-overlay, .success-overlay, .solution-card-detail')) return;
+    el.style.opacity = '1';
+    el.style.transform = 'none';
+  });
+}, 3000);
+
 </script>
 </body>
 </html>

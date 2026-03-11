@@ -2863,6 +2863,36 @@ function rafDebounce(fn) {
   });
 })();
 
+/* =========================================
+   SAFETY NET — FORCE REVEAL AFTER 3s
+   Prevents "invisible black sections" if
+   IntersectionObserver fails to trigger.
+   ========================================= */
+setTimeout(() => {
+  // Force-reveal all .reveal elements that are still invisible
+  $$('.reveal:not(.revealed), .reveal-left:not(.revealed), .reveal-right:not(.revealed)').forEach(el => {
+    el.classList.add('revealed');
+  });
+
+  // Force-reveal brand text words
+  $$('.brand-text .word:not(.visible)').forEach(w => {
+    w.classList.add('visible');
+  });
+
+  // Force-activate timeline items
+  $$('.timeline-item:not(.active)').forEach(item => {
+    item.classList.add('active');
+  });
+
+  // Catch any remaining inline opacity:0 that shouldn't persist
+  document.querySelectorAll('[style*="opacity: 0"], [style*="opacity:0"]').forEach(el => {
+    // Skip preloader, cursor, and hover-state elements
+    if (el.closest('.preloader, #preloader, .cursor-dot, .cursor-ring, .gallery-caption, .amenity-desc, .modal')) return;
+    el.style.opacity = '1';
+    el.style.transform = 'none';
+  });
+}, 3000);
+
 </script>
 </body>
 </html>
