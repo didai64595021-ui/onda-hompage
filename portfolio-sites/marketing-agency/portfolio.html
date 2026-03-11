@@ -1,1195 +1,734 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>포트폴리오 — WAVE DIGITAL</title>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
-<style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--white:#FAFAFA;--charcoal:#1A1A1A;--blue:#0066FF;--coral:#FF6B4A;--naver:#03C75A;--insta-1:#E1306C;--insta-2:#F77737;--insta-3:#FCAF45;--youtube:#FF0000;--tiktok-cyan:#00F2EA;--tiktok-pink:#FF0050;--font-heading:'Sora',sans-serif;--font-body:'Pretendard Variable','Pretendard',sans-serif}
-html{scroll-behavior:smooth;overflow-x:hidden}
-body{font-family:var(--font-body);background:var(--white);color:var(--charcoal);overflow-x:hidden;line-height:1.6;word-break:keep-all}
-
-/* NAV */
-.nav{position:fixed;top:0;left:0;width:100%;z-index:1000;padding:1.5rem 3rem;display:grid;grid-template-columns:auto 1fr auto;align-items:center;background:rgba(250,250,250,.9);backdrop-filter:blur(12px)}
-.nav-logo{font-family:var(--font-heading);font-weight:800;font-size:1.5rem;letter-spacing:-.02em;color:var(--charcoal);text-decoration:none}
-.nav-logo span{color:var(--blue)}
-.nav-links{display:flex;gap:2.5rem;justify-content:center}
-.nav-links a{text-decoration:none;color:var(--charcoal);font-size:.875rem;font-weight:500;transition:color .3s}
-.nav-links a:hover{color:var(--blue)}
-.nav-links a.active{color:var(--blue)}
-.nav-cta{font-family:var(--font-heading);font-size:.875rem;font-weight:600;padding:.75rem 2rem;border:2px solid var(--charcoal);border-radius:100px;text-decoration:none;color:var(--charcoal);transition:all .3s}
-.nav-cta:hover{background:var(--charcoal);color:var(--white)}
-.mobile-toggle{display:none;background:none;border:none;cursor:pointer;width:32px;height:24px;position:relative}
-.mobile-toggle span{display:block;width:100%;height:2px;background:var(--charcoal);position:absolute;left:0;transition:all .3s}
-.mobile-toggle span:nth-child(1){top:0}.mobile-toggle span:nth-child(2){top:50%;transform:translateY(-50%)}.mobile-toggle span:nth-child(3){bottom:0}
-.mobile-nav{position:fixed;inset:0;background:var(--white);z-index:999;display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .4s}
-.mobile-nav.open{opacity:1;pointer-events:all}
-.mobile-nav-links{display:grid;gap:2rem;text-align:center}
-.mobile-nav-links a{font-family:var(--font-heading);font-size:2rem;font-weight:600;text-decoration:none;color:var(--charcoal)}
-
-/* HERO SECTION */
-.hero{padding:10rem 3rem 6rem;background:linear-gradient(135deg,#f8f9ff 0%,#fff 100%);position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23e6f2ff' fill-opacity='0.3'%3E%3Cpolygon points='30,5 35,20 50,20 39,30 44,45 30,37 16,45 21,30 10,20 25,20'/%3E%3C/g%3E%3C/svg%3E");opacity:.4}
-.hero-content{max-width:1200px;margin:0 auto;position:relative;z-index:1;text-align:center}
-.hero h1{font-family:var(--font-heading);font-size:clamp(3.5rem,8vw,6rem);font-weight:800;letter-spacing:-.03em;line-height:.95;margin-bottom:1.5rem}
-.hero h1 span{background:linear-gradient(135deg,var(--blue) 0%,var(--coral) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero p{font-size:1.25rem;color:#666;max-width:600px;margin:0 auto 3rem;line-height:1.7}
-
-/* FILTER SECTION */
-.filter-section{padding:3rem;background:#fff;border-radius:20px;margin:-3rem 3rem 4rem;box-shadow:0 10px 40px rgba(0,0,0,.1);position:relative;z-index:2}
-.filter-buttons{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap}
-.filter-btn{padding:.75rem 1.5rem;border-radius:50px;border:2px solid #eee;background:#fff;font-family:var(--font-body);font-size:.9rem;font-weight:600;cursor:pointer;transition:all .3s;color:#666;position:relative}
-.filter-btn:hover,.filter-btn.active{border-color:var(--blue);background:var(--blue);color:#fff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(0,102,255,.3)}
-.filter-btn.naver.active{background:var(--naver);border-color:var(--naver)}
-.filter-btn.insta.active{background:linear-gradient(135deg,var(--insta-1) 0%,var(--insta-2) 100%);border:none}
-.filter-btn.youtube.active{background:var(--youtube);border-color:var(--youtube)}
-.filter-btn.tiktok.active{background:linear-gradient(135deg,var(--tiktok-cyan) 0%,var(--tiktok-pink) 100%);border:none}
-
-/* PORTFOLIO GRID */
-.portfolio-section{padding:4rem 3rem}
-.portfolio-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:2rem;margin-bottom:4rem}
-.portfolio-item{background:#fff;border-radius:20px;overflow:hidden;position:relative;cursor:pointer;transition:all .4s;box-shadow:0 4px 20px rgba(0,0,0,.08);opacity:1;transform:scale(1)}
-.portfolio-item:hover{transform:translateY(-8px);box-shadow:0 15px 40px rgba(0,0,0,.15)}
-.portfolio-item.hidden{opacity:0;transform:scale(0.8);pointer-events:none}
-
-.portfolio-image{position:relative;aspect-ratio:16/10;overflow:hidden}
-.portfolio-image img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
-.portfolio-item:hover .portfolio-image img{transform:scale(1.05)}
-.portfolio-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,102,255,.9) 0%,rgba(255,107,74,.9) 100%);opacity:0;transition:opacity .3s;display:grid;place-items:center;color:#fff}
-.portfolio-item:hover .portfolio-overlay{opacity:1}
-.overlay-content{text-align:center;padding:2rem}
-.overlay-content h3{font-family:var(--font-heading);font-size:1.5rem;font-weight:700;margin-bottom:1rem}
-.view-details{background:rgba(255,255,255,.2);border:2px solid #fff;color:#fff;padding:.75rem 2rem;border-radius:50px;font-family:var(--font-heading);font-weight:600;cursor:pointer;transition:all .3s}
-.view-details:hover{background:#fff;color:var(--blue)}
-
-.portfolio-content{padding:2rem}
-.portfolio-category{display:inline-block;padding:.3rem .8rem;border-radius:20px;font-size:.75rem;font-weight:600;color:#fff;margin-bottom:1rem}
-.category-naver{background:var(--naver)}
-.category-insta{background:linear-gradient(135deg,var(--insta-1) 0%,var(--insta-2) 100%)}
-.category-youtube{background:var(--youtube)}
-.category-tiktok{background:linear-gradient(135deg,var(--tiktok-cyan) 0%,var(--tiktok-pink) 100%)}
-
-.portfolio-title{font-family:var(--font-heading);font-size:1.3rem;font-weight:700;margin-bottom:.5rem;color:var(--charcoal)}
-.portfolio-desc{color:#666;font-size:.9rem;line-height:1.5;margin-bottom:1.5rem}
-.portfolio-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:1rem}
-.result-item{text-align:center;padding:1rem;background:#f8f9ff;border-radius:12px}
-.result-value{font-family:var(--font-heading);font-size:1.2rem;font-weight:800;color:var(--blue);display:block}
-.result-label{font-size:.7rem;color:#888;margin-top:.25rem}
-
-/* MODAL */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:2000;display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .3s;padding:2rem}
-.modal.open{opacity:1;pointer-events:all}
-.modal-content{background:#fff;border-radius:20px;max-width:800px;max-height:90vh;overflow-y:auto;position:relative;animation:modalSlide .3s ease-out}
-@keyframes modalSlide{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-close{position:absolute;top:2rem;right:2rem;width:40px;height:40px;border:none;background:none;font-size:1.5rem;cursor:pointer;color:#666;z-index:1}
-.modal-image{width:100%;height:300px;object-fit:cover;border-radius:20px 20px 0 0}
-.modal-body{padding:3rem}
-.modal-title{font-family:var(--font-heading);font-size:2rem;font-weight:800;margin-bottom:1rem;color:var(--charcoal)}
-.modal-category{display:inline-block;padding:.5rem 1rem;border-radius:25px;font-size:.8rem;font-weight:600;color:#fff;margin-bottom:2rem}
-.modal-desc{color:#666;line-height:1.7;margin-bottom:2rem}
-.modal-details{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem;margin-bottom:2rem}
-.detail-group h4{font-family:var(--font-heading);font-weight:600;color:var(--charcoal);margin-bottom:.5rem}
-.detail-group p{color:#666;font-size:.9rem}
-.modal-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1.5rem;padding:2rem;background:#f8f9ff;border-radius:16px}
-.modal-result-item{text-align:center}
-.modal-result-value{font-family:var(--font-heading);font-size:1.8rem;font-weight:800;color:var(--blue);display:block}
-.modal-result-label{font-size:.8rem;color:#888;margin-top:.5rem}
-
-/* STATS SECTION */
-.stats-section{padding:6rem 3rem;background:linear-gradient(135deg,var(--charcoal) 0%,#333 100%);color:#fff;text-align:center;position:relative;overflow:hidden}
-.stats-section::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1' opacity='0.1'%3E%3Ccircle cx='50' cy='50' r='40'/%3E%3Ccircle cx='50' cy='50' r='25'/%3E%3Ccircle cx='50' cy='50' r='10'/%3E%3C/g%3E%3C/svg%3E");opacity:.2}
-.stats-content{position:relative;z-index:1;max-width:1200px;margin:0 auto}
-.stats-section h2{font-family:var(--font-heading);font-size:3rem;font-weight:800;margin-bottom:1rem}
-.stats-section p{font-size:1.1rem;opacity:.9;margin-bottom:4rem;max-width:600px;margin-left:auto;margin-right:auto}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:3rem}
-.stat-item{text-align:center}
-.stat-number{font-family:var(--font-heading);font-size:3.5rem;font-weight:800;color:var(--coral);display:block;margin-bottom:.5rem}
-.stat-label{font-size:1rem;opacity:.9}
-.stat-desc{font-size:.85rem;opacity:.7;margin-top:.5rem;line-height:1.4}
-
-/* CLIENTS SECTION */
-.clients-section{padding:6rem 3rem;background:#fff}
-.clients-content{max-width:1200px;margin:0 auto;text-align:center}
-.clients-section h2{font-family:var(--font-heading);font-size:2.5rem;font-weight:800;margin-bottom:1rem;color:var(--charcoal)}
-.clients-section p{color:#666;font-size:1.1rem;margin-bottom:4rem;max-width:600px;margin-left:auto;margin-right:auto}
-.clients-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:2rem;align-items:center}
-.client-logo{padding:2rem;background:#f8f9ff;border-radius:16px;transition:all .3s;display:grid;place-items:center;min-height:120px}
-.client-logo:hover{transform:translateY(-4px);box-shadow:0 8px 25px rgba(0,0,0,.1)}
-.client-logo svg{max-width:100px;height:40px}
-
-/* COMPARISON SLIDER */
-.comparison-section{padding:6rem 3rem;background:linear-gradient(135deg,#f8f9ff 0%,#fff 100%)}
-.comparison-content{max-width:1000px;margin:0 auto;text-align:center}
-.comparison-section h2{font-family:var(--font-heading);font-size:2.5rem;font-weight:800;margin-bottom:1rem;color:var(--charcoal)}
-.comparison-section p{color:#666;font-size:1.1rem;margin-bottom:4rem;max-width:600px;margin-left:auto;margin-right:auto}
-.comparison-slider{position:relative;max-width:600px;margin:0 auto;border-radius:20px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.2)}
-.slider-container{position:relative;width:100%;height:400px;overflow:hidden}
-.slider-before,.slider-after{position:absolute;top:0;left:0;width:100%;height:100%;background-size:cover;background-position:center}
-.slider-before{background-image:url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80')}
-.slider-after{background-image:url('https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&q=80');clip-path:inset(0 50% 0 0)}
-.slider-handle{position:absolute;top:0;left:50%;width:4px;height:100%;background:var(--blue);cursor:ew-resize;z-index:10;transform:translateX(-2px)}
-.slider-handle::before{content:'';position:absolute;top:50%;left:50%;width:20px;height:20px;background:var(--blue);border:3px solid #fff;border-radius:50%;transform:translate(-50%,-50%)}
-.slider-labels{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-between;padding:2rem;background:linear-gradient(transparent,rgba(0,0,0,.7));color:#fff}
-.label-before,.label-after{font-family:var(--font-heading);font-weight:600}
-
-/* CTA SECTION */
-.cta-section{padding:6rem 3rem;background:linear-gradient(135deg,var(--blue) 0%,var(--coral) 100%);text-align:center;color:#fff;position:relative;overflow:hidden}
-.cta-section::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='2' opacity='0.1'%3E%3Cpath d='m60 15 15 30h30l-24 18 9 30-30-18-30 18 9-30-24-18h30z'/%3E%3C/g%3E%3C/svg%3E");opacity:.3}
-.cta-content{position:relative;z-index:1;max-width:800px;margin:0 auto}
-.cta-section h2{font-family:var(--font-heading);font-size:3rem;font-weight:800;margin-bottom:1rem}
-.cta-section p{font-size:1.2rem;margin-bottom:3rem;opacity:.95;line-height:1.6}
-.cta-buttons{display:flex;gap:2rem;justify-content:center;flex-wrap:wrap}
-.cta-primary,.cta-secondary{padding:1rem 3rem;border-radius:50px;font-family:var(--font-heading);font-weight:600;text-decoration:none;transition:all .3s;display:inline-flex;align-items:center;gap:.75rem;font-size:1.1rem}
-.cta-primary{background:#fff;color:var(--blue);border:2px solid #fff}
-.cta-primary:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(255,255,255,.3)}
-.cta-secondary{border:2px solid #fff;color:#fff;background:none}
-.cta-secondary:hover{background:#fff;color:var(--blue)}
-
-/* FOOTER */
-.footer{padding:2rem 3rem;background:var(--charcoal);color:#fff;display:flex;justify-content:space-between;align-items:center;font-size:.9rem}
-.footer-left{font-family:var(--font-heading);font-weight:600}
-.footer-left span{color:var(--blue)}
-.footer-right{display:flex;gap:2rem}
-.footer-right a{color:#ccc;text-decoration:none;transition:color .3s}
-.footer-right a:hover{color:#fff}
-
-/* ANIMATIONS */
-.fade-in{opacity:0;transform:translateY(30px);transition:all .8s ease-out}
-.fade-in.visible{opacity:1;transform:translateY(0)}
-.slide-up{opacity:0;transform:translateY(40px);transition:all .6s ease-out}
-.slide-up.visible{opacity:1;transform:translateY(0)}
-.scale-in{opacity:0;transform:scale(0.9);transition:all .6s ease-out}
-.scale-in.visible{opacity:1;transform:scale(1)}
-
-/* RESPONSIVE */
-@media (max-width:768px){
-.nav{padding:1rem;grid-template-columns:auto auto}
-.nav-links,.nav-cta{display:none}
-.mobile-toggle{display:block}
-.hero{padding:8rem 1.5rem 4rem;text-align:center}
-.hero h1{font-size:2.5rem}
-.filter-section{margin:-2rem 1.5rem 3rem;padding:2rem}
-.filter-buttons{gap:.5rem}
-.filter-btn{padding:.5rem 1rem;font-size:.8rem}
-.portfolio-section{padding:2rem 1.5rem}
-.portfolio-grid{grid-template-columns:1fr;gap:1.5rem}
-.portfolio-item{margin-bottom:1rem}
-.modal{padding:1rem}
-.modal-content{max-height:80vh}
-.modal-body{padding:2rem}
-.stats-grid{grid-template-columns:repeat(2,1fr);gap:2rem}
-.stat-number{font-size:2.5rem}
-.clients-grid{grid-template-columns:repeat(2,1fr);gap:1.5rem}
-.comparison-slider{margin:0 1rem}
-.slider-container{height:250px}
-.cta-buttons{flex-direction:column;align-items:center}
-.footer{flex-direction:column;gap:1rem;text-align:center}
-.footer-right{flex-wrap:wrap;justify-content:center}
-}
-
-@media (max-width:480px){
-.portfolio-grid{gap:1rem}
-.stats-grid{grid-template-columns:1fr}
-.clients-grid{grid-template-columns:1fr}
-.comparison-slider{margin:0}
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="WAVE.DIGITAL 포트폴리오 — 340개 이상의 디지털 마케팅 프로젝트 성과">
+  <title>포트폴리오 — WAVE.DIGITAL</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌊</text></svg>">
 </head>
 <body>
 
-<nav class="nav" id="nav">
-<a href="index.html" class="nav-logo">WAVE<span>.</span>DIGITAL</a>
-<div class="nav-links">
-<a href="services.html">서비스</a>
-<a href="portfolio.html" class="active">포트폴리오</a>
-<a href="about.html">회사소개</a>
-<a href="blog.html">인사이트</a>
-<a href="contact.html">문의</a>
-</div>
-<a href="contact.html" class="nav-cta">프로젝트 시작하기</a>
-<button class="mobile-toggle" id="mobileToggle" aria-label="메뉴"><span></span><span></span><span></span></button>
-</nav>
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="container">
+      <a href="index.html" class="nav-logo">WAVE<span>.</span>DIGITAL</a>
+      <div class="nav-links">
+        <a href="services.html" class="nav-link">서비스</a>
+        <a href="portfolio.html" class="nav-link active">포트폴리오</a>
+        <a href="about.html" class="nav-link">회사소개</a>
+        <a href="blog.html" class="nav-link">인사이트</a>
+        <a href="contact.html" class="nav-link">문의</a>
+      </div>
+      <div class="nav-cta">
+        <a href="contact.html" class="btn btn-secondary btn-sm">프로젝트 시작하기</a>
+      </div>
+      <button class="nav-hamburger" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+  <div class="nav-mobile">
+    <a href="services.html" class="nav-link">서비스</a>
+    <a href="portfolio.html" class="nav-link active">포트폴리오</a>
+    <a href="about.html" class="nav-link">회사소개</a>
+    <a href="blog.html" class="nav-link">인사이트</a>
+    <a href="contact.html" class="nav-link">문의</a>
+    <a href="contact.html" class="btn btn-primary">프로젝트 시작하기</a>
+  </div>
 
-<div class="mobile-nav" id="mobileNav">
-<div class="mobile-nav-links">
-<a href="services.html">서비스</a>
-<a href="portfolio.html">포트폴리오</a>
-<a href="about.html">회사소개</a>
-<a href="blog.html">인사이트</a>
-<a href="contact.html">문의</a>
-</div>
-</div>
+  <!-- HERO -->
+  <section class="page-hero">
+    <div>
+      <p class="overline reveal" style="color:rgba(255,255,255,.5);margin-bottom:1rem">OUR WORKS</p>
+      <h1 class="heading-xl reveal">우리의 작업들</h1>
+      <p class="subtitle reveal" style="transition-delay:.1s">340개 이상의 프로젝트, 측정 가능한 성과</p>
+    </div>
+  </section>
 
-<!-- HERO SECTION -->
-<section class="hero fade-in">
-<div class="hero-content">
-<h1>우리의 <span>작업</span>을 확인하세요</h1>
-<p>다양한 플랫폼에서 검증된 성과를 만들어낸 프로젝트들을 만나보세요. 각 브랜드의 목표에 맞춰 최적화된 전략으로 놀라운 결과를 달성했습니다.</p>
-</div>
-</section>
+  <!-- Counter Bar -->
+  <section class="counter-bar">
+    <div class="container">
+      <div class="counter-grid">
+        <div class="counter-item reveal">
+          <div class="counter-number"><span data-count="280" data-suffix="%">0</span></div>
+          <div class="counter-label">평균 매출 증가율</div>
+        </div>
+        <div class="counter-item reveal">
+          <div class="counter-number"><span data-count="350" data-suffix="%">0</span></div>
+          <div class="counter-label">평균 팔로워 증가율</div>
+        </div>
+        <div class="counter-item reveal">
+          <div class="counter-number"><span data-count="420" data-suffix="%">0</span></div>
+          <div class="counter-label">평균 ROAS</div>
+        </div>
+        <div class="counter-item reveal">
+          <div class="counter-number"><span data-count="340" data-suffix="+">0</span></div>
+          <div class="counter-label">완료 프로젝트</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<!-- FILTER SECTION -->
-<section class="filter-section fade-in">
-<div class="filter-buttons">
-<button class="filter-btn active" data-filter="all">전체</button>
-<button class="filter-btn naver" data-filter="naver">네이버</button>
-<button class="filter-btn insta" data-filter="insta">인스타그램</button>
-<button class="filter-btn youtube" data-filter="youtube">유튜브</button>
-<button class="filter-btn tiktok" data-filter="tiktok">틱톡</button>
-</div>
-</section>
+  <!-- Filter Tabs -->
+  <section class="section">
+    <div class="container">
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">전체</button>
+        <button class="filter-tab" data-filter="naver">네이버</button>
+        <button class="filter-tab" data-filter="instagram">인스타그램</button>
+        <button class="filter-tab" data-filter="youtube">유튜브</button>
+        <button class="filter-tab" data-filter="tiktok">틱톡</button>
+        <button class="filter-tab" data-filter="branding">브랜딩</button>
+      </div>
 
-<!-- PORTFOLIO SECTION -->
-<section class="portfolio-section">
-<div class="portfolio-grid">
-<!-- 네이버 프로젝트들 -->
-<article class="portfolio-item scale-in" data-category="naver" data-id="project1">
-<div class="portfolio-image">
-<img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80" alt="프로젝트 이미지">
-<div class="portfolio-overlay">
-<div class="overlay-content">
-<h3>온라인 쇼핑몰 마케팅</h3>
-<button class="view-details">자세히 보기</button>
-</div>
-</div>
-</div>
-<div class="portfolio-content">
-<span class="portfolio-category category-naver">네이버</span>
-<h3 class="portfolio-title">K-패션 브랜드 매출 300% 증가</h3>
-<p class="portfolio-desc">네이버 쇼핑광고와 검색광고를 연계한 통합 마케팅으로 6개월 만에 매출 300% 상승을 달성한 성공 사례입니다.</p>
-<div class="portfolio-results">
-<div class="result-item">
-<span class="result-value">+300%</span>
-<div class="result-label">매출 증가</div>
-</div>
-<div class="result-item">
-<span class="result-value">4.2%</span>
-<div class="result-label">전환율</div>
-</div>
-<div class="result-item">
-<span class="result-value">850원</span>
-<div class="result-label">평균 CPC</div>
-</div>
-</div>
-</div>
-</article>
+      <!-- Portfolio Grid -->
+      <div class="portfolio-grid stagger">
+        <!-- 1 -->
+        <div class="portfolio-item reveal" data-category="instagram">
+          <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80" alt="글로벌 뷰티브랜드 A" loading="lazy">
+          <div class="portfolio-overlay">
+            <span class="portfolio-category">인스타그램 마케팅</span>
+            <h3>글로벌 뷰티브랜드 A</h3>
+            <span class="portfolio-result">팔로워 340% 증가 · ROAS 520%</span>
+            <a href="#" class="portfolio-link">자세히 보기 →</a>
+          </div>
+        </div>
 
-<article class="portfolio-item scale-in" data-category="naver" data-id="project2">
-<div class="portfolio-image">
-<img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&q=80" alt="프로젝트 이미지">
-<div class="portfolio-overlay">
-<div class="overlay-content">
-<h3>로컬 레스토랑 브랜딩</h3>
-<button class="view-details">자세히 보기</button>
-</div>
-</div>
-</div>
-<div class="portfolio-content">
-<span class="portfolio-category category-naver">네이버</span>
-<h3 class="portfolio-title">프리미엄 레스토랑 예약 200% 증가</h3>
-<p class="portfolio-desc">네이버 플레이스 최적화와 블로그 마케팅으로 고급 레스토랑의 온라인 예약을 대폭 늘린 프로젝트입니다.</p>
-<div class="portfolio-results">
-<div class="result-item">
-<span class="result-value">+200%</span>
-<div class="result-label">예약 증가</div>
-</div>
-<div class="result-item">
-<span class="result-value">4.8</span>
-<div class="result-label">평점</div>
-</div>
-<div class="result-item">
-<span class="result-value">120</span>
-<div class="result-label">리뷰 수</div>
-</div>
-</div>
-</div>
-</article>
+        <!-- 2 -->
+        <div class="portfolio-item reveal" data-category="naver">
+          <img src="https://images.unsplash.com/photo-1556740758-90de940bb468?w=800&q=80" alt="F&B 프랜차이즈 B" loading="lazy">
+          <div class="portfolio-overlay">
+            <span class="portfolio-category">네이버 마케팅</span>
+            <h3>F&B 프랜차이즈 B</h3>
+            <span class="portfolio-result">플레이스 1위 · 매출 230% 증가</span>
+            <a href="#" class="portfolio-link">자세히 보기 →</a>
+          </div>
+        </div>
 
-<article class="portfolio-item scale-in" data-category="naver" data-id="project3">
-<div class="portfolio-image">
-<img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=600&q=80" alt="프로젝트 이미지">
-<div class="portfolio-overlay">
-<div class="overlay-content">
-<h3>IT 스타트업 브랜드 구축</h3>
-<button class="view-details">자세히 보기</button>
-</div>
-</div>
-</div>
-<div class="portfolio-content">
-<span class="portfolio-category category-naver">네이버</span>
-<h3 class="portfolio-title">AI 스타트업 리드 300% 증가</h3>
-<p class="portfolio-desc">네이버 검색광고와 브랜드검색 전략으로 B2B AI 솔루션의 리드 창출을 극대화한 성공 사례입니다.</p>
-<div class="portfolio-results">
-<div class="result-item">
-<span class="result-value">+300%</span>
-<div class="result-label">리드 증가</div>
-</div>
-<div class="result-item">
-<span class="result-value">6.8%</span>
-<div class="result-label">CTR</div>
-</div>
-<div class="result-item">
-<span class="result-value">1,200원</span>
-<div class="result-label">CPC</div>
-</div>
-</div>
-</div>
-</article>
+        <!-- 3 -->
+        <div class="portfolio-item reveal" data-category="tiktok">
+          <img src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800&q=80" alt="패션 스타트업 C" loading="lazy">
+          <div class="portfolio-overlay">
+            <span class="portfolio-category">틱톡 마케팅</span>
+            <h3>패션 스타트업 C</h3>
+            <span class="portfolio-result">조회수 1,200만 · 매출 180% 증가</span>
+            <a href="#" class="portfolio-link">자세히 보기 →</a>
+          </div>
+        </div>
 
-<!-- 인스타그램 프로젝트들 -->
-<article class="portfolio-item scale-in" data-category="insta" data-id="project4">
-<div class="portfolio-image">
-<img src="https://images.unsplash.com/photo-1563986768609-322da13575f2?w=600&q=80" alt="프로젝트 이미지">
-<div class="portfolio-overlay">
-<div class="overlay-content">
-<h3>럭셔리 뷰티 브랜드</h3>
-<button class="view-details">자세히 보기</button>
-</div>
-</div>
-</div>
-<div class="portfolio-content">
-<span class="portfolio-category category-insta">인스타그램</span>
-<h3 class="portfolio-title">프리미엄 스킨케어 브랜드 론칭</h3>
-<p class="portfolio-desc">인플루언서 마케팅과 스토리 광고로 신제품을 성공적으로 론칭하여 브랜드 인지도 500% 상승을 달성했습니다.</p>
-<div class="portfolio-results">
-<div class="result-item">
-<span class="result-value">+500%</span>
-<div class="result-label">인지도 증가</div>
-</div>
-<div class="result-item">
-<span class="result-value">8.5%</span>
-<div class="result-label">참여율</div>
-</div>
-<div class="result-item">
-<span class="result-value">120만</span>
-<div class="result-label">도달 수</div>
-</div>
-</div>
-</div>
-</article>
+        <!-- 4 -->
+        <div class="portfolio-item reveal" data-category="instagram">
+          <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80" alt="테크 기업 D" loading="lazy">
+          <div class="portfolio-overlay">
+            <span class="portfolio-category">퍼포먼스 광고</span>
+            <h3>테크 기업 D</h3>
+            <span class="portfolio-result">CPA 65% 감소 · 전환율 420% 증가</span>
+            <a href="#" class="portfolio-link">자세히 보기 →</a>
+          </div>
+        </div>
 
-<article class="portfolio-item scale-in" data-category="insta" data-id="project5">
-<div class="portfolio-image">
-<img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80" alt="프로젝트 이미지">
-<div class="portfolio-overlay">
-<div class="overlay-content">
-<h3>라이프스타일 브랜드</h3>
-<button class="view-details">자세히 보기</button>
-</div>
-</div>
-</div>
-<div class="portfolio-content">
-<span class="portfolio-category category-insta">인스타그램</span>
-<h3 class="portfolio-title">홈카페 브랜드 팔로워 5만 달성</h3>
-<p class="portfolio-desc">일관성 있는 브랜딩과 고품질 콘텐츠로 6개월 만에 팔로워 5만명을 달성하고 매출 250% 증가를 이뤄냈습니다.</p>
-<div class="portfolio-results">
-<div class="result-item">
-<span class="result-value">5만+</span>
-<div class="result-label">팔로워</div>
-</div>
-<div class="result-item">
-<span class="result-value">+250%</span>
-<div class="result-label">매출 증가</div>
-</div>
-<div class="result-item">
-<span class="result-value">12%</span>
-<div class="result-label">참여율</div>
-</div>
-</div>
-</div>
-</article>
+        <!-- 5 -->
+        <div class="portfolio-item reveal" data-category="youtube">
+          <img src="https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=800&q=80" alt="올리브영 유튜브" loading="lazy">
+          <div class="portfolio-overlay">
+            <span class="portfolio-category">유튜브 마케팅</span>
+            <h3>올리브영</h3>
+            <span class="portfolio-result">구독자 5만 달성 · 6개월</span>
+            <a href="#" class="portfolio-link">자세히 보기 →</a>
+          </div>
+        </div>
 
-<article class="portfolio-item scale-in" data-category="insta" data-id="project6">
-<div class="portfolio-image">
-<img src="https://images.unsplash.com/photo-1542744094-3a31f272c490?w=600&q=80" alt="프로젝트 이미지">
-<div class="portfolio-overlay">
-<div class="overlay-content">
-<h3>패션 스타트업</h3>
-<button class="view-details">자세히 보기</button>
-</div>
-</div>
-</div>
-<div class="portfolio-content">
-<span class="portfolio-category category-insta">인스타그램</span>
-<h3 class="portfolio-title">지속가능 패션 브랜드 론칭</h3>
-<p class="portfolio-desc">환경을 생각하는 패션 브랜드의 가치를 스토리텔링으로 전달하여 젊은 층의 강력한 지지를 얻은 프로젝트입니다.</p>
-<div class="portfolio-results">
-<div class="result-item">
-<span class="result-value">3만+</span>
-<div class="result-label">팔로워</div>
-</div>
-<div class="result-item">
-<span class="result-value">15%</span>
-<div class="result-label">참여율</div>
-</div>
-<div class="result-item">
-<span class="result-value">80만</span>
-<div class="result-label">도달 수</div>
-</div>
-</div>
-</div>
-</article>
+        <!-- 6 -->
+        <div class="portfolio-item reveal" data-category="branding">
+          <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&q=80" alt="마켓컬리 리브랜딩" loading="lazy">
+          <div class="portfolio-overlay">
+            <span class="portfolio-category">브랜드 컨설팅</span>
+            <h3>마켓컬리</h3>
+            <span class="portfolio-result">브랜드 인지도 35% 상승</span>
+            <a href="#" class="portfolio-link">자세히 보기 →</a>
+          </div>
+        </div>
 
-<!-- 유튜브 프로젝트들 -->
-<article class="portfolio-item scale-in" data-category="youtube" data-id="project7">
-<div class="portfolio-image">
-<img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&q=80" alt="프로젝트 이미지">
-<div class="portfolio-overlay">
-<div class="overlay-content">
-<h3>교육 플랫폼 채널</h3>
-<button class="view-details">자세히 보기</button>
-</div>
-</div>
-</div>
-<div class="portfolio-content">
-<span class="portfolio-category category-youtube">유튜브</span>
-<h3 class="portfolio-title">온라인 교육 채널 구독자 10만 돌파</h3>
-<p class="portfolio-desc">체계적인 콘텐츠 기획과 SEO 최적화로 교육 콘텐츠 채널을 6개월 만에 10만 구독자까지 성장시킨 프로젝트입니다.</p>
-<div class="portfolio-results">
-<div class="result-item">
-<span class="result-value">10만+</span>
-<div class="result-label">구독자</div>
-</div>
-<div class="result-item">
-<span class="result-value">+400%</span>
-<div class="result-label">매출 증가</div>
-</div>
-<div class="result-item">
-<span class="result-value">12%</span>
-<div class="result-label">전환율</div>
-</div>
-</div>
-</div>
-</article>
+        <!-- 7 -->
+        <div class="portfolio-item reveal" data-category="naver">
+          <img src="https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=800&q=80" alt="강남 피부과 E" loading="lazy">
+          <div class="portfolio-overlay">
+            <span class="portfolio-category">네이버 마케팅</span>
+            <h3>강남 피부과 E</h3>
+            <span class="portfolio-result">플레이스 3위 · 신규 예약 180% 증가</span>
+            <a href="#" class="portfolio-link">자세히 보기 →</a>
+          </div>
+        </div>
 
-<article class="portfolio-item scale-in" data-category="youtube" data-id="project8">
-<div class="portfolio-image">
-<img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&q=80" alt="프로젝트 이미지">
-<div class="portfolio-overlay">
-<div class="overlay-content">
-<h3>요리 브랜드 채널</h3>
-<button class="view-details">자세히 보기</button>
-</div>
-</div>
-</div>
-<div class="portfolio-content">
-<span class="portfolio-category category-youtube">유튜브</span>
-<h3 class="portfolio-title">홈쿠킹 브랜드 바이럴 영상 제작</h3>
-<p class="portfolio-desc">간편식 브랜드의 유튜브 채널 운영과 바이럴 영상으로 조회수 500만회를 달성하고 매출 증대에 기여했습니다.</p>
-<div class="portfolio-results">
-<div class="result-item">
-<span class="result-value">500만+</span>
-<div class="result-label">조회수</div>
-</div>
-<div class="result-item">
-<span class="result-value">5만+</span>
-<div class="result-label">구독자</div>
-</div>
-<div class="result-item">
-<span class="result-value">+180%</span>
-<div class="result-label">매출 증가</div>
-</div>
-</div>
-</div>
-</article>
+        <!-- 8 -->
+        <div class="portfolio-item reveal" data-category="instagram">
+          <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80" alt="라이프스타일 브랜드 F" loading="lazy">
+          <div class="portfolio-overlay">
+            <span class="portfolio-category">인스타그램 마케팅</span>
+            <h3>라이프스타일 브랜드 F</h3>
+            <span class="portfolio-result">인게이지먼트 5.2% · 매출 290% 증가</span>
+            <a href="#" class="portfolio-link">자세히 보기 →</a>
+          </div>
+        </div>
 
-<article class="portfolio-item scale-in" data-category="youtube" data-id="project9">
-<div class="portfolio-image">
-<img src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&q=80" alt="프로젝트 이미지">
-<div class="portfolio-overlay">
-<div class="overlay-content">
-<h3>테크 리뷰 채널</h3>
-<button class="view-details">자세히 보기</button>
-</div>
-</div>
-</div>
-<div class="portfolio-content">
-<span class="portfolio-category category-youtube">유튜브</span>
-<h3 class="portfolio-title">IT 제품 리뷰 채널 수익화</h3>
-<p class="portfolio-desc">전문적인 IT 제품 리뷰 콘텐츠로 높은 신뢰도를 구축하고 브랜드 협업으로 안정적인 수익 구조를 만든 사례입니다.</p>
-<div class="portfolio-results">
-<div class="result-item">
-<span class="result-value">8만+</span>
-<div class="result-label">구독자</div>
-</div>
-<div class="result-item">
-<span class="result-value">200만+</span>
-<div class="result-label">월 조회수</div>
-</div>
-<div class="result-item">
-<span class="result-value">15개</span>
-<div class="result-label">브랜드 협업</div>
-</div>
-</div>
-</div>
-</article>
+        <!-- 9 -->
+        <div class="portfolio-item reveal" data-category="tiktok">
+          <img src="https://images.unsplash.com/photo-1596558450268-9c27524ba856?w=800&q=80" alt="음료 브랜드 G" loading="lazy">
+          <div class="portfolio-overlay">
+            <span class="portfolio-category">틱톡 마케팅</span>
+            <h3>음료 브랜드 G</h3>
+            <span class="portfolio-result">챌린지 800만 조회 · 매출 150% 증가</span>
+            <a href="#" class="portfolio-link">자세히 보기 →</a>
+          </div>
+        </div>
 
-<!-- 틱톡 프로젝트들 -->
-<article class="portfolio-item scale-in" data-category="tiktok" data-id="project10">
-<div class="portfolio-image">
-<img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&q=80" alt="프로젝트 이미지">
-<div class="portfolio-overlay">
-<div class="overlay-content">
-<h3>패션 챌린지 캠페인</h3>
-<button class="view-details">자세히 보기</button>
-</div>
-</div>
-</div>
-<div class="portfolio-content">
-<span class="portfolio-category category-tiktok">틱톡</span>
-<h3 class="portfolio-title">#OOTD 챌린지 1000만 조회수 달성</h3>
-<p class="portfolio-desc">패션 브랜드의 해시태그 챌린지를 기획하여 7일 만에 1000만 조회수를 돌파하고 브랜드 인지도를 급상승시켰습니다.</p>
-<div class="portfolio-results">
-<div class="result-item">
-<span class="result-value">1000만+</span>
-<div class="result-label">조회수</div>
-</div>
-<div class="result-item">
-<span class="result-value">15%</span>
-<div class="result-label">참여율</div>
-</div>
-<div class="result-item">
-<span class="result-value">25만</span>
-<div class="result-label">참여자 수</div>
-</div>
-</div>
-</div>
-</article>
+        <!-- 10 -->
+        <div class="portfolio-item reveal" data-category="youtube">
+          <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80" alt="에듀테크 기업 H" loading="lazy">
+          <div class="portfolio-overlay">
+            <span class="portfolio-category">유튜브 마케팅</span>
+            <h3>에듀테크 기업 H</h3>
+            <span class="portfolio-result">구독자 3만 · 리드 320% 증가</span>
+            <a href="#" class="portfolio-link">자세히 보기 →</a>
+          </div>
+        </div>
 
-<article class="portfolio-item scale-in" data-category="tiktok" data-id="project11">
-<div class="portfolio-image">
-<img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&q=80" alt="프로젝트 이미지">
-<div class="portfolio-overlay">
-<div class="overlay-content">
-<h3>뷰티 브랜드 크리에이터 협업</h3>
-<button class="view-details">자세히 보기</button>
-</div>
-</div>
-</div>
-<div class="portfolio-content">
-<span class="portfolio-category category-tiktok">틱톡</span>
-<h3 class="portfolio-title">K-뷰티 브랜드 글로벌 진출</h3>
-<p class="portfolio-desc">해외 틱톡 크리에이터들과의 협업으로 K-뷰티 제품을 글로벌 시장에 성공적으로 진출시킨 프로젝트입니다.</p>
-<div class="portfolio-results">
-<div class="result-item">
-<span class="result-value">800만+</span>
-<div class="result-label">해외 조회수</div>
-</div>
-<div class="result-item">
-<span class="result-value">20%</span>
-<div class="result-label">참여율</div>
-</div>
-<div class="result-item">
-<span class="result-value">12개국</span>
-<div class="result-label">진출국</div>
-</div>
-</div>
-</div>
-</article>
+        <!-- 11 -->
+        <div class="portfolio-item reveal" data-category="naver">
+          <img src="https://images.unsplash.com/photo-1556740758-90de940bb468?w=800&q=80" alt="인테리어 기업 I" loading="lazy">
+          <div class="portfolio-overlay">
+            <span class="portfolio-category">네이버 마케팅</span>
+            <h3>인테리어 기업 I</h3>
+            <span class="portfolio-result">블로그 유입 450% 증가 · 견적 문의 3배</span>
+            <a href="#" class="portfolio-link">자세히 보기 →</a>
+          </div>
+        </div>
 
-<article class="portfolio-item scale-in" data-category="tiktok" data-id="project12">
-<div class="portfolio-image">
-<img src="https://images.unsplash.com/photo-1557426272-fc759fdf7a8d?w=600&q=80" alt="프로젝트 이미지">
-<div class="portfolio-overlay">
-<div class="overlay-content">
-<h3>푸드 브랜드 바이럴</h3>
-<button class="view-details">자세히 보기</button>
-</div>
-</div>
-</div>
-<div class="portfolio-content">
-<span class="portfolio-category category-tiktok">틱톡</span>
-<h3 class="portfolio-title">음식 브랜드 레시피 챌린지</h3>
-<p class="portfolio-desc">간편 요리 제품을 활용한 레시피 챌린지로 Z세대 사이에서 큰 인기를 얻고 매출 증대에 직접적으로 기여했습니다.</p>
-<div class="portfolio-results">
-<div class="result-item">
-<span class="result-value">600만+</span>
-<div class="result-label">조회수</div>
-</div>
-<div class="result-item">
-<span class="result-value">18%</span>
-<div class="result-label">참여율</div>
-</div>
-<div class="result-item">
-<span class="result-value">+350%</span>
-<div class="result-label">매출 증가</div>
-</div>
-</div>
-</div>
-</article>
-</div>
-</section>
+        <!-- 12 -->
+        <div class="portfolio-item reveal" data-category="branding">
+          <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80" alt="스타트업 J 브랜딩" loading="lazy">
+          <div class="portfolio-overlay">
+            <span class="portfolio-category">브랜드 컨설팅</span>
+            <h3>헬스케어 스타트업 J</h3>
+            <span class="portfolio-result">시리즈A 투자 유치 성공</span>
+            <a href="#" class="portfolio-link">자세히 보기 →</a>
+          </div>
+        </div>
+      </div>
 
-<!-- MODAL -->
-<div class="modal" id="projectModal">
-<div class="modal-content">
-<button class="modal-close" onclick="closeModal()">×</button>
-<img class="modal-image" id="modalImage" src="" alt="">
-<div class="modal-body">
-<span class="modal-category" id="modalCategory"></span>
-<h2 class="modal-title" id="modalTitle"></h2>
-<p class="modal-desc" id="modalDesc"></p>
-<div class="modal-details">
-<div class="detail-group">
-<h4>프로젝트 기간</h4>
-<p id="modalDuration"></p>
-</div>
-<div class="detail-group">
-<h4>주요 전략</h4>
-<p id="modalStrategy"></p>
-</div>
-<div class="detail-group">
-<h4>타겟 고객</h4>
-<p id="modalTarget"></p>
-</div>
-<div class="detail-group">
-<h4>사용 도구</h4>
-<p id="modalTools"></p>
-</div>
-</div>
-<div class="modal-results" id="modalResults">
-<!-- 결과 데이터가 여기에 삽입됩니다 -->
-</div>
-</div>
-</div>
-</div>
+      <div class="text-center reveal" style="margin-top:3rem">
+        <button class="btn btn-secondary">더 많은 프로젝트 보기 →</button>
+      </div>
+    </div>
+  </section>
 
-<!-- STATS SECTION -->
-<section class="stats-section fade-in">
-<div class="stats-content">
-<h2>숫자로 보는 성과</h2>
-<p>데이터가 말하는 우리의 실력을 확인하세요. 매 프로젝트마다 측정 가능한 성과로 증명합니다.</p>
-<div class="stats-grid">
-<div class="stat-item slide-up">
-<span class="stat-number" data-target="500">0</span>
-<div class="stat-label">완료된 프로젝트</div>
-<p class="stat-desc">다양한 업종의 브랜드와 함께한 성공적인 마케팅 캠페인</p>
-</div>
-<div class="stat-item slide-up">
-<span class="stat-number" data-target="285">0</span>
-<div class="stat-label">평균 성장률 (%)</div>
-<p class="stat-desc">클라이언트들의 평균적인 비즈니스 성장 지표</p>
-</div>
-<div class="stat-item slide-up">
-<span class="stat-number" data-target="50000000">0</span>
-<div class="stat-label">총 도달한 고객 수</div>
-<p class="stat-desc">모든 플랫폼을 통해 도달한 누적 사용자 수</p>
-</div>
-<div class="stat-item slide-up">
-<span class="stat-number" data-target="98">0</span>
-<div class="stat-label">고객 만족도 (%)</div>
-<p class="stat-desc">프로젝트 완료 후 클라이언트 만족도 조사 결과</p>
-</div>
-</div>
-</div>
-</section>
+  <!-- ============================================================
+       CASE STUDY 1
+       ============================================================ -->
+  <section class="section" style="background:var(--gray-50)">
+    <div class="container">
+      <div class="text-center reveal" style="margin-bottom:3rem">
+        <p class="overline">CASE STUDY</p>
+        <h2 class="heading-lg" style="margin-top:.75rem">대표 케이스 스터디</h2>
+        <p class="body-lg" style="color:var(--gray-600);max-width:600px;margin:.75rem auto 0">
+          프로젝트의 시작부터 성과까지,<br>과정을 투명하게 공개합니다.
+        </p>
+      </div>
 
-<!-- CLIENTS SECTION -->
-<section class="clients-section fade-in">
-<div class="clients-content">
-<h2>함께한 클라이언트</h2>
-<p>다양한 업종의 선도 기업들이 WAVE와 함께 성장했습니다. 여러분도 그 일원이 되어보세요.</p>
-<div class="clients-grid">
-<div class="client-logo">
-<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
-<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#0066FF">TECHNO</text>
-</svg>
-</div>
-<div class="client-logo">
-<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
-<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#FF6B4A">BEAUTY</text>
-</svg>
-</div>
-<div class="client-logo">
-<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
-<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#1A1A1A">FASHION</text>
-</svg>
-</div>
-<div class="client-logo">
-<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
-<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#03C75A">FOODS</text>
-</svg>
-</div>
-<div class="client-logo">
-<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
-<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#E1306C">LIFESTYLE</text>
-</svg>
-</div>
-<div class="client-logo">
-<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
-<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#FF0000">MEDIA</text>
-</svg>
-</div>
-<div class="client-logo">
-<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
-<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#00F2EA">TRAVEL</text>
-</svg>
-</div>
-<div class="client-logo">
-<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
-<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#666">HEALTH</text>
-</svg>
-</div>
-<div class="client-logo">
-<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
-<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#0066FF">FINTECH</text>
-</svg>
-</div>
-<div class="client-logo">
-<svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
-<text x="60" y="25" text-anchor="middle" font-family="Sora" font-weight="700" font-size="16" fill="#FF6B4A">EDUCATION</text>
-</svg>
-</div>
-</div>
-</div>
-</section>
+      <!-- Case Study 1 -->
+      <div class="case-study reveal">
+        <div class="case-study-header">
+          <div class="case-study-img">
+            <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80" alt="글로벌 뷰티브랜드 A 케이스" loading="lazy">
+          </div>
+          <div>
+            <span class="badge badge-blue" style="margin-bottom:.75rem;display:inline-block">인스타그램 마케팅</span>
+            <h3 class="heading-sm" style="margin-bottom:.75rem">글로벌 뷰티브랜드 A<br>인스타그램 캠페인</h3>
+            <p style="color:var(--gray-600);line-height:1.8;margin-bottom:1rem">
+              글로벌 뷰티브랜드 A의 한국 시장 진출에 맞춰 인스타그램 마케팅 전략을 수립하고 실행한 프로젝트입니다. 브랜드 인지도가 거의 없는 상태에서 시작하여 6개월 만에 한국 뷰티 시장의 주요 플레이어로 자리매김하는 데 성공했습니다.
+            </p>
+            <p style="color:var(--gray-600);line-height:1.8;margin-bottom:1.5rem">
+              릴스 중심의 콘텐츠 전략, 뷰티 인플루언서 30인 협업, META 광고 최적화를 통해 브랜드의 비주얼 아이덴티티를 확립하고, 실질적인 매출 성과를 동시에 달성했습니다.
+            </p>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem">
+              <div style="text-align:center;padding:1rem;background:var(--blue-light);border-radius:var(--radius-sm)">
+                <div style="font-family:var(--font-heading);font-size:1.5rem;font-weight:800;color:var(--blue)">340%</div>
+                <div style="font-size:.75rem;color:var(--gray-600)">팔로워 증가</div>
+              </div>
+              <div style="text-align:center;padding:1rem;background:var(--blue-light);border-radius:var(--radius-sm)">
+                <div style="font-family:var(--font-heading);font-size:1.5rem;font-weight:800;color:var(--blue)">520%</div>
+                <div style="font-size:.75rem;color:var(--gray-600)">ROAS</div>
+              </div>
+              <div style="text-align:center;padding:1rem;background:var(--blue-light);border-radius:var(--radius-sm)">
+                <div style="font-family:var(--font-heading);font-size:1.5rem;font-weight:800;color:var(--blue)">500만</div>
+                <div style="font-size:.75rem;color:var(--gray-600)">월 평균 도달</div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-<!-- COMPARISON SLIDER -->
-<section class="comparison-section fade-in">
-<div class="comparison-content">
-<h2>Before & After</h2>
-<p>마케팅 전후의 극적인 변화를 직접 확인해보세요. 데이터 기반의 전략으로 만들어낸 놀라운 성과입니다.</p>
-<div class="comparison-slider" id="comparisonSlider">
-<div class="slider-container">
-<div class="slider-before"></div>
-<div class="slider-after" id="sliderAfter"></div>
-<div class="slider-handle" id="sliderHandle"></div>
-<div class="slider-labels">
-<div class="label-before">BEFORE<br>월 매출 500만원</div>
-<div class="label-after">AFTER<br>월 매출 2,000만원</div>
-</div>
-</div>
-</div>
-</div>
-</section>
+        <div class="case-study-steps">
+          <div class="case-study-step">
+            <div class="step-label">CHALLENGE</div>
+            <h4>챌린지</h4>
+            <p>한국 시장 진출 초기 단계로 브랜드 인지도가 거의 없었습니다. 경쟁이 치열한 뷰티 시장에서 차별화된 포지셔닝을 확보하고, 한국 소비자의 취향에 맞는 콘텐츠 전략이 필요했습니다. 초기 팔로워 8,000명으로 시작했습니다.</p>
+          </div>
+          <div class="case-study-step">
+            <div class="step-label">SOLUTION</div>
+            <h4>솔루션</h4>
+            <p>K-뷰티 트렌드를 반영한 릴스 콘텐츠 전략을 수립했습니다. 뷰티 크리에이터 30인과의 시딩 캠페인, 사용자 생성 콘텐츠(UGC) 이벤트, META 광고의 유사타겟 최적화를 병행했습니다. 주 3회 릴스 업로드와 일일 스토리 운영을 실행했습니다.</p>
+          </div>
+          <div class="case-study-step">
+            <div class="step-label">RESULT</div>
+            <h4>결과</h4>
+            <p>6개월 만에 팔로워 8,000명에서 35,200명으로 340% 성장. 월 평균 도달 500만을 달성하고, 인스타그램 쇼핑 연동을 통해 온라인몰 매출이 340% 증가했습니다. 인게이지먼트율 4.8%로 업계 평균(1.2%)의 4배를 기록했습니다.</p>
+          </div>
+        </div>
 
-<!-- CTA SECTION -->
-<section class="cta-section fade-in">
-<div class="cta-content">
-<h2>다음 성공 사례의 주인공이 되세요</h2>
-<p>지금까지 본 성과들이 특별해 보이시나요? 이제 여러분의 브랜드도 이런 성과를 만들어낼 차례입니다. 전문가와 함께 시작해보세요.</p>
-<div class="cta-buttons">
-<a href="contact.html" class="cta-primary">
-프로젝트 시작하기
-<span>→</span>
-</a>
-<a href="services.html" class="cta-secondary">
-서비스 둘러보기
-<span>→</span>
-</a>
-</div>
-</div>
-</section>
+        <div class="case-study-quote">
+          <blockquote>
+            "WAVE.DIGITAL과 함께한 인스타그램 캠페인 덕분에 한국 시장에서의 입지를 빠르게 확보할 수 있었습니다. 데이터에 기반한 체계적인 접근과 크리에이티브한 콘텐츠가 결합되어 기대 이상의 성과를 만들어냈습니다."
+            <footer style="margin-top:1rem;font-style:normal;font-size:.875rem;color:var(--gray-600)">
+              — 박서연 팀장, 글로벌 뷰티브랜드 A 디지털마케팅팀
+            </footer>
+          </blockquote>
+        </div>
+      </div>
 
-<footer class="footer" style="padding:6rem 3rem 3rem;background:var(--charcoal);color:var(--white)">
-<div class="footer-main" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:4rem;margin-bottom:3rem;max-width:1200px;margin-left:auto;margin-right:auto">
-<div class="footer-brand">
-<h3 style="font-family:var(--font-heading);font-weight:800;font-size:2rem;letter-spacing:-.02em;margin-bottom:1rem">WAVE<span style="color:var(--blue)">.</span>DIGITAL</h3>
-<p style="color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:2rem">브랜드의 파도를 만드는 디지털 마케팅 전문 에이전시입니다.</p>
-<div style="margin-bottom:1.5rem"><p style="color:rgba(255,255,255,.6);font-size:.9rem;margin-bottom:.3rem">📍 서울특별시 강남구 테헤란로 123 웨이브타워 8층</p><p style="color:rgba(255,255,255,.6);font-size:.9rem;margin-bottom:.3rem">📞 02-1234-5678</p><p style="color:rgba(255,255,255,.6);font-size:.9rem">✉️ hello@wavedigital.kr</p></div>
-<div style="display:flex;gap:1rem">
-<a href="#" aria-label="인스타그램" style="width:40px;height:40px;background:rgba(255,255,255,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);text-decoration:none">📷</a>
-<a href="#" aria-label="유튜브" style="width:40px;height:40px;background:rgba(255,255,255,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);text-decoration:none">▶️</a>
-<a href="#" aria-label="블로그" style="width:40px;height:40px;background:rgba(255,255,255,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);text-decoration:none">📝</a>
-</div>
-</div>
-<div class="footer-col"><h4 style="font-family:var(--font-heading);font-weight:600;font-size:1.1rem;margin-bottom:1.5rem;color:#fff">서비스</h4><a href="services.html" style="color:rgba(255,255,255,.7);text-decoration:none;display:block;margin-bottom:.8rem">네이버 마케팅</a><a href="services.html" style="color:rgba(255,255,255,.7);text-decoration:none;display:block;margin-bottom:.8rem">인스타그램 마케팅</a><a href="services.html" style="color:rgba(255,255,255,.7);text-decoration:none;display:block;margin-bottom:.8rem">유튜브 마케팅</a><a href="services.html" style="color:rgba(255,255,255,.7);text-decoration:none;display:block;margin-bottom:.8rem">틱톡 마케팅</a><a href="services.html" style="color:rgba(255,255,255,.7);text-decoration:none;display:block;margin-bottom:.8rem">통합 브랜딩</a></div>
-<div class="footer-col"><h4 style="font-family:var(--font-heading);font-weight:600;font-size:1.1rem;margin-bottom:1.5rem;color:#fff">인사이트</h4><a href="blog.html" style="color:rgba(255,255,255,.7);text-decoration:none;display:block;margin-bottom:.8rem">마케팅 트렌드</a><a href="blog.html" style="color:rgba(255,255,255,.7);text-decoration:none;display:block;margin-bottom:.8rem">플랫폼 분석</a><a href="blog.html" style="color:rgba(255,255,255,.7);text-decoration:none;display:block;margin-bottom:.8rem">성공 사례</a><a href="about.html" style="color:rgba(255,255,255,.7);text-decoration:none;display:block;margin-bottom:.8rem">회사소개</a><a href="portfolio.html" style="color:rgba(255,255,255,.7);text-decoration:none;display:block;margin-bottom:.8rem">포트폴리오</a></div>
-<div class="footer-col"><h4 style="font-family:var(--font-heading);font-weight:600;font-size:1.1rem;margin-bottom:1.5rem;color:#fff">소셜</h4><a href="#" style="color:rgba(255,255,255,.7);text-decoration:none;display:block;margin-bottom:.8rem">인스타그램</a><a href="#" style="color:rgba(255,255,255,.7);text-decoration:none;display:block;margin-bottom:.8rem">유튜브</a><a href="#" style="color:rgba(255,255,255,.7);text-decoration:none;display:block;margin-bottom:.8rem">네이버 블로그</a><a href="contact.html" style="color:rgba(255,255,255,.7);text-decoration:none;display:block;margin-bottom:.8rem">문의하기</a></div>
-</div>
-<div style="border-top:1px solid rgba(255,255,255,.1);padding-top:2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;max-width:1200px;margin:0 auto">
-<div style="display:flex;gap:2rem;flex-wrap:wrap"><a href="#" style="color:rgba(255,255,255,.5);text-decoration:none;font-size:.85rem">이용약관</a><a href="#" style="color:rgba(255,255,255,.5);text-decoration:none;font-size:.85rem">개인정보처리방침</a><a href="#" style="color:rgba(255,255,255,.5);text-decoration:none;font-size:.85rem">사업자정보</a></div>
-<div style="color:rgba(255,255,255,.5);font-size:.85rem">© 2024 WAVE DIGITAL. All rights reserved. | 사업자등록번호 123-45-67890</div>
-</div>
-</footer>
+      <!-- Case Study 2 -->
+      <div class="case-study reveal">
+        <div class="case-study-header">
+          <div class="case-study-img">
+            <img src="https://images.unsplash.com/photo-1556740758-90de940bb468?w=800&q=80" alt="F&B 프랜차이즈 B 케이스" loading="lazy">
+          </div>
+          <div>
+            <span class="badge badge-blue" style="margin-bottom:.75rem;display:inline-block">네이버 마케팅</span>
+            <h3 class="heading-sm" style="margin-bottom:.75rem">F&B 프랜차이즈 B<br>네이버 통합 마케팅</h3>
+            <p style="color:var(--gray-600);line-height:1.8;margin-bottom:1rem">
+              강남 지역에 5개 매장을 운영하는 F&B 프랜차이즈 B의 네이버 마케팅 프로젝트입니다. 네이버 플레이스, 블로그, 검색광고를 통합 운영하여 오프라인 매장 방문과 매출 증가를 이끌어냈습니다.
+            </p>
+            <p style="color:var(--gray-600);line-height:1.8;margin-bottom:1.5rem">
+              특히 네이버 플레이스 최적화에 집중하여 47위에서 2위로 순위를 끌어올린 것이 핵심 성과입니다. 리뷰 관리, 사진 최적화, 영업정보 업데이트, 키워드 전략을 체계적으로 실행한 결과입니다.
+            </p>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem">
+              <div style="text-align:center;padding:1rem;background:var(--blue-light);border-radius:var(--radius-sm)">
+                <div style="font-family:var(--font-heading);font-size:1.5rem;font-weight:800;color:var(--blue)">2위</div>
+                <div style="font-size:.75rem;color:var(--gray-600)">플레이스 순위</div>
+              </div>
+              <div style="text-align:center;padding:1rem;background:var(--blue-light);border-radius:var(--radius-sm)">
+                <div style="font-family:var(--font-heading);font-size:1.5rem;font-weight:800;color:var(--blue)">230%</div>
+                <div style="font-size:.75rem;color:var(--gray-600)">매출 증가</div>
+              </div>
+              <div style="text-align:center;padding:1rem;background:var(--blue-light);border-radius:var(--radius-sm)">
+                <div style="font-family:var(--font-heading);font-size:1.5rem;font-weight:800;color:var(--blue)">580개</div>
+                <div style="font-size:.75rem;color:var(--gray-600)">네이버 리뷰</div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-<script>
-// 프로젝트 상세 데이터
-const projectData = {
-project1: {
-title: "K-패션 브랜드 매출 300% 증가",
-category: "naver",
-image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80",
-desc: "네이버 쇼핑광고와 검색광고를 연계한 통합 마케팅으로 온라인 패션 브랜드의 매출을 6개월 만에 300% 상승시킨 성공 사례입니다. 키워드 최적화와 상품 카탈로그 관리로 높은 ROI를 달성했습니다.",
-duration: "6개월",
-strategy: "네이버 쇼핑광고 + 검색광고 + 블로그 마케팅",
-target: "20-40대 여성, 패션에 관심 많은 직장인",
-tools: "네이버 광고 시스템, 키워드 플래너, 애널리틱스",
-results: [
-{label: "매출 증가율", value: "+300%"},
-{label: "전환율", value: "4.2%"},
-{label: "평균 CPC", value: "850원"},
-{label: "ROAS", value: "420%"}
-]
-},
-project2: {
-title: "프리미엄 레스토랑 예약 200% 증가",
-category: "naver",
-image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&q=80",
-desc: "네이버 플레이스 최적화와 블로그 마케팅을 통해 고급 레스토랑의 온라인 인지도를 높이고 예약률을 200% 증가시킨 프로젝트입니다. 지역 SEO 전략으로 현지 고객 유치에 성공했습니다.",
-duration: "4개월",
-strategy: "네이버 플레이스 최적화 + 블로그 마케팅 + 리뷰 관리",
-target: "30-50대 고소득층, 특별한 날 외식을 즐기는 고객",
-tools: "네이버 플레이스, 블로그 작성 도구, 리뷰 모니터링",
-results: [
-{label: "예약 증가율", value: "+200%"},
-{label: "평점", value: "4.8/5.0"},
-{label: "리뷰 수", value: "120개"},
-{label: "재방문율", value: "65%"}
-]
-},
-project3: {
-title: "AI 스타트업 리드 300% 증가",
-category: "naver",
-image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=600&q=80",
-desc: "B2B AI 솔루션 스타트업의 리드 창출을 위한 네이버 검색광고 캠페인입니다. 전문적인 키워드 전략과 랜딩페이지 최적화로 높은 품질의 리드를 300% 증가시켰습니다.",
-duration: "8개월",
-strategy: "네이버 검색광고 + 브랜드검색 + 콘텐츠 마케팅",
-target: "IT 기업 의사결정권자, CTO, 개발팀장",
-tools: "네이버 광고센터, 랜딩페이지 빌더, CRM 연동",
-results: [
-{label: "리드 증가율", value: "+300%"},
-{label: "클릭률", value: "6.8%"},
-{label: "평균 CPC", value: "1,200원"},
-{label: "리드 품질 점수", value: "8.5/10"}
-]
-},
-project4: {
-title: "프리미엄 스킨케어 브랜드 론칭",
-category: "insta",
-image: "https://images.unsplash.com/photo-1563986768609-322da13575f2?w=600&q=80",
-desc: "인플루언서 마케팅과 스토리 광고를 결합하여 새로운 스킨케어 브랜드를 성공적으로 론칭한 사례입니다. 브랜드 인지도 500% 상승과 함께 충성도 높은 고객층을 확보했습니다.",
-duration: "5개월",
-strategy: "인플루언서 마케팅 + 인스타그램 광고 + 스토리텔링",
-target: "20-35세 여성, 뷰티에 관심이 많은 소비자",
-tools: "인스타그램 비즈니스, 인플루언서 플랫폼, 브랜드 모니터링",
-results: [
-{label: "브랜드 인지도", value: "+500%"},
-{label: "참여율", value: "8.5%"},
-{label: "도달 수", value: "120만명"},
-{label: "신제품 매출", value: "5억원"}
-]
-},
-project5: {
-title: "홈카페 브랜드 팔로워 5만 달성",
-category: "insta",
-image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80",
-desc: "홈카페 관련 제품을 판매하는 브랜드의 인스타그램 계정을 체계적으로 운영하여 6개월 만에 팔로워 5만명을 달성하고 매출 250% 증가를 이뤄낸 프로젝트입니다.",
-duration: "6개월",
-strategy: "콘텐츠 마케팅 + 해시태그 전략 + 커뮤니티 빌딩",
-target: "25-40세 직장인, 홈카페에 관심 있는 소비자",
-tools: "인스타그램 크리에이터 스튜디오, 스케줄링 도구, 애널리틱스",
-results: [
-{label: "팔로워 수", value: "5만명"},
-{label: "매출 증가율", value: "+250%"},
-{label: "참여율", value: "12%"},
-{label: "월 도달 수", value: "80만명"}
-]
-},
-project6: {
-title: "지속가능 패션 브랜드 론칭",
-category: "insta",
-image: "https://images.unsplash.com/photo-1542744094-3a31f272c490?w=600&q=80",
-desc: "환경을 생각하는 패션 브랜드의 가치를 효과적으로 전달하여 젊은 세대의 강력한 지지를 얻은 프로젝트입니다. 스토리텔링 중심의 콘텐츠로 브랜드 충성도를 높였습니다.",
-duration: "4개월",
-strategy: "브랜드 스토리텔링 + 가치 중심 마케팅 + 커뮤니티 참여",
-target: "18-30세 MZ세대, 환경 의식이 높은 소비자",
-tools: "인스타그램 광고 관리자, 스토리 제작 도구, 브랜드 모니터링",
-results: [
-{label: "팔로워 수", value: "3만명"},
-{label: "참여율", value: "15%"},
-{label: "도달 수", value: "80만명"},
-{label: "브랜드 충성도", value: "9.2/10"}
-]
-},
-project7: {
-title: "온라인 교육 채널 구독자 10만 돌파",
-category: "youtube",
-image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&q=80",
-desc: "체계적인 콘텐츠 기획과 SEO 최적화를 통해 교육 콘텐츠 채널을 6개월 만에 10만 구독자까지 성장시키고 수익화에 성공한 프로젝트입니다.",
-duration: "6개월",
-strategy: "콘텐츠SEO + 썸네일 최적화 + 시리즈 기획 + 커뮤니티 관리",
-target: "20-40세 직장인, 자기계발에 관심 있는 학습자",
-tools: "유튜브 스튜디오, 키워드 도구, 썸네일 디자인 툴",
-results: [
-{label: "구독자 수", value: "10만명"},
-{label: "매출 증가율", value: "+400%"},
-{label: "평균 조회 시간", value: "8분"},
-{label: "전환율", value: "12%"}
-]
-},
-project8: {
-title: "홈쿠킹 브랜드 바이럴 영상 제작",
-category: "youtube",
-image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&q=80",
-desc: "간편식 브랜드를 위한 홈쿠킹 콘텐츠 제작으로 바이럴을 달성하고 브랜드 인지도와 매출 증대를 동시에 이뤄낸 성공적인 유튜브 마케팅 사례입니다.",
-duration: "5개월",
-strategy: "레시피 콘텐츠 + 제품 자연스런 노출 + 크리에이터 협업",
-target: "25-45세 주부, 요리에 관심 있는 직장인",
-tools: "영상 편집 소프트웨어, 유튜브 애널리틱스, 협업 관리 도구",
-results: [
-{label: "총 조회수", value: "500만회"},
-{label: "구독자 증가", value: "5만명"},
-{label: "매출 증가율", value: "+180%"},
-{label: "브랜드 검색량", value: "+320%"}
-]
-},
-project9: {
-title: "IT 제품 리뷰 채널 수익화",
-category: "youtube",
-image: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&q=80",
-desc: "전문적이고 신뢰도 높은 IT 제품 리뷰 콘텐츠를 통해 채널을 성장시키고 다양한 브랜드와의 협업으로 안정적인 수익 구조를 구축한 프로젝트입니다.",
-duration: "8개월",
-strategy: "전문성 기반 리뷰 + 브랜드 협업 + 커뮤니티 신뢰도 구축",
-target: "20-40세 남성, IT 제품에 관심 많은 얼리어답터",
-tools: "전문 촬영 장비, 벤치마크 소프트웨어, 협업 관리 시스템",
-results: [
-{label: "구독자 수", value: "8만명"},
-{label: "월 조회수", value: "200만회"},
-{label: "브랜드 협업", value: "15개"},
-{label: "월 수익", value: "800만원"}
-]
-},
-project10: {
-title: "#OOTD 챌린지 1000만 조회수 달성",
-category: "tiktok",
-image: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&q=80",
-desc: "패션 브랜드를 위한 해시태그 챌린지를 기획하여 단 7일 만에 1000만 조회수를 달성하고 브랜드 인지도를 급속도로 확산시킨 바이럴 마케팅의 대표 사례입니다.",
-duration: "1개월",
-strategy: "해시태그 챌린지 + 인플루언서 시드 + 트렌드 활용",
-target: "16-25세 Z세대, 패션에 민감한 틱톡 사용자",
-tools: "틱톡 광고 관리자, 해시태그 분석 도구, 인플루언서 플랫폼",
-results: [
-{label: "총 조회수", value: "1000만회"},
-{label: "참여율", value: "15%"},
-{label: "참여자 수", value: "25만명"},
-{label: "브랜드 언급량", value: "+800%"}
-]
-},
-project11: {
-title: "K-뷰티 브랜드 글로벌 진출",
-category: "tiktok",
-image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&q=80",
-desc: "한국 뷰티 브랜드의 글로벌 진출을 위해 해외 틱톡 크리에이터들과 협업하여 12개국에서 성공적인 브랜드 런칭을 달성한 국제적 마케팅 프로젝트입니다.",
-duration: "6개월",
-strategy: "글로벌 크리에이터 네트워크 + 현지화 콘텐츠 + 문화 적응",
-target: "16-30세 해외 여성, K-뷰티에 관심 있는 글로벌 소비자",
-tools: "글로벌 인플루언서 플랫폼, 다국가 광고 관리, 현지화 도구",
-results: [
-{label: "해외 조회수", value: "800만회"},
-{label: "참여율", value: "20%"},
-{label: "진출 국가", value: "12개국"},
-{label: "해외 매출", value: "30억원"}
-]
-},
-project12: {
-title: "음식 브랜드 레시피 챌린지",
-category: "tiktok",
-image: "https://images.unsplash.com/photo-1557426272-fc759fdf7a8d?w=600&q=80",
-desc: "간편 요리 제품을 활용한 창의적인 레시피 챌린지를 통해 Z세대 사이에서 폭발적인 인기를 얻고 매출 증대에 직접적으로 기여한 푸드 브랜드 마케팅 성공 사례입니다.",
-duration: "3개월",
-strategy: "레시피 챌린지 + UGC 활용 + 크리에이터 협업",
-target: "18-28세 Z세대, 간편 요리에 관심 있는 1인 가구",
-tools: "틱톡 크리에이터 펀드, 레시피 기획 도구, UGC 수집 시스템",
-results: [
-{label: "총 조회수", value: "600만회"},
-{label: "참여율", value: "18%"},
-{label: "매출 증가율", value: "+350%"},
-{label: "신규 고객", value: "8만명"}
-]
-}
-};
+        <div class="case-study-steps">
+          <div class="case-study-step">
+            <div class="step-label">CHALLENGE</div>
+            <h4>챌린지</h4>
+            <p>강남 브런치 카페 경쟁이 극심한 상황에서 네이버 플레이스 순위 47위, 리뷰 120개에 머물러 있었습니다. 검색 유입은 있으나 실제 방문으로 이어지지 않는 문제가 있었고, 경쟁 매장 대비 온라인 존재감이 부족했습니다.</p>
+          </div>
+          <div class="case-study-step">
+            <div class="step-label">SOLUTION</div>
+            <h4>솔루션</h4>
+            <p>네이버 플레이스 정보 100% 최적화, 전문 포토그래퍼의 메뉴 촬영, 블로거 체험단 월 20명 운영, 리뷰 답글 관리, 검색광고 키워드 50개 최적화를 실행했습니다. 주변 직장인 타겟의 점심/브런치 키워드에 집중했습니다.</p>
+          </div>
+          <div class="case-study-step">
+            <div class="step-label">RESULT</div>
+            <h4>결과</h4>
+            <p>6개월 만에 네이버 플레이스 47위→2위 달성. 리뷰 120개→580개로 증가. 월 매출 2,400만원→7,800만원으로 230% 증가. 블로그 검색 노출 1페이지 달성, 검색광고 CPC 40% 절감.</p>
+          </div>
+        </div>
 
-// 모바일 네비게이션 토글
-const mobileToggle = document.getElementById('mobileToggle');
-const mobileNav = document.getElementById('mobileNav');
+        <div class="case-study-quote">
+          <blockquote>
+            "솔직히 처음엔 마케팅 대행에 반신반의했습니다. 하지만 WAVE.DIGITAL 팀의 체계적인 접근에 놀랐고, 실제 매출이 올라가는 걸 보며 확신을 갖게 되었습니다. 이제는 다른 매장에도 확대 적용 중입니다."
+            <footer style="margin-top:1rem;font-style:normal;font-size:.875rem;color:var(--gray-600)">
+              — 김민수 대표, 프레시가든 F&B
+            </footer>
+          </blockquote>
+        </div>
+      </div>
+    </div>
+  </section>
 
-mobileToggle.addEventListener('click', () => {
-mobileNav.classList.toggle('open');
-});
+  <!-- ============================================================
+       RESULTS COMPARISON
+       ============================================================ -->
+  <section class="section">
+    <div class="container">
+      <div class="text-center reveal" style="margin-bottom:3rem">
+        <p class="overline">BEFORE & AFTER</p>
+        <h2 class="heading-lg" style="margin-top:.75rem">프로젝트 전후 비교</h2>
+      </div>
 
-// 필터 기능
-const filterButtons = document.querySelectorAll('.filter-btn');
-const portfolioItems = document.querySelectorAll('.portfolio-item');
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem">
+        <!-- Comparison 1 -->
+        <div class="reveal" style="padding:2rem;background:var(--gray-50);border-radius:var(--radius-lg)">
+          <h3 style="font-size:1.0625rem;margin-bottom:1.25rem">🏪 F&B 프랜차이즈 B</h3>
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:center">
+            <div>
+              <p style="font-size:.75rem;color:var(--coral);font-weight:600;margin-bottom:.75rem">BEFORE</p>
+              <div style="display:flex;flex-direction:column;gap:.5rem">
+                <div style="padding:.5rem;background:#fff;border-radius:var(--radius-sm);font-size:.8125rem;text-align:center">
+                  <span style="color:var(--gray-500)">순위</span> <strong>47위</strong>
+                </div>
+                <div style="padding:.5rem;background:#fff;border-radius:var(--radius-sm);font-size:.8125rem;text-align:center">
+                  <span style="color:var(--gray-500)">매출</span> <strong>2,400만</strong>
+                </div>
+                <div style="padding:.5rem;background:#fff;border-radius:var(--radius-sm);font-size:.8125rem;text-align:center">
+                  <span style="color:var(--gray-500)">리뷰</span> <strong>120개</strong>
+                </div>
+              </div>
+            </div>
+            <div style="font-size:1.5rem;color:var(--blue)">→</div>
+            <div>
+              <p style="font-size:.75rem;color:var(--blue);font-weight:600;margin-bottom:.75rem">AFTER</p>
+              <div style="display:flex;flex-direction:column;gap:.5rem">
+                <div style="padding:.5rem;background:var(--blue-light);border-radius:var(--radius-sm);font-size:.8125rem;text-align:center;color:var(--blue)">
+                  <span>순위</span> <strong>2위</strong>
+                </div>
+                <div style="padding:.5rem;background:var(--blue-light);border-radius:var(--radius-sm);font-size:.8125rem;text-align:center;color:var(--blue)">
+                  <span>매출</span> <strong>7,800만</strong>
+                </div>
+                <div style="padding:.5rem;background:var(--blue-light);border-radius:var(--radius-sm);font-size:.8125rem;text-align:center;color:var(--blue)">
+                  <span>리뷰</span> <strong>580개</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-filterButtons.forEach(button => {
-button.addEventListener('click', () => {
-// 활성 버튼 변경
-filterButtons.forEach(btn => btn.classList.remove('active'));
-button.classList.add('active');
+        <!-- Comparison 2 -->
+        <div class="reveal" style="padding:2rem;background:var(--gray-50);border-radius:var(--radius-lg)">
+          <h3 style="font-size:1.0625rem;margin-bottom:1.25rem">💄 글로벌 뷰티브랜드 A</h3>
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:center">
+            <div>
+              <p style="font-size:.75rem;color:var(--coral);font-weight:600;margin-bottom:.75rem">BEFORE</p>
+              <div style="display:flex;flex-direction:column;gap:.5rem">
+                <div style="padding:.5rem;background:#fff;border-radius:var(--radius-sm);font-size:.8125rem;text-align:center">
+                  <span style="color:var(--gray-500)">팔로워</span> <strong>8,000</strong>
+                </div>
+                <div style="padding:.5rem;background:#fff;border-radius:var(--radius-sm);font-size:.8125rem;text-align:center">
+                  <span style="color:var(--gray-500)">월도달</span> <strong>12만</strong>
+                </div>
+                <div style="padding:.5rem;background:#fff;border-radius:var(--radius-sm);font-size:.8125rem;text-align:center">
+                  <span style="color:var(--gray-500)">ROAS</span> <strong>180%</strong>
+                </div>
+              </div>
+            </div>
+            <div style="font-size:1.5rem;color:var(--blue)">→</div>
+            <div>
+              <p style="font-size:.75rem;color:var(--blue);font-weight:600;margin-bottom:.75rem">AFTER</p>
+              <div style="display:flex;flex-direction:column;gap:.5rem">
+                <div style="padding:.5rem;background:var(--blue-light);border-radius:var(--radius-sm);font-size:.8125rem;text-align:center;color:var(--blue)">
+                  <span>팔로워</span> <strong>35,200</strong>
+                </div>
+                <div style="padding:.5rem;background:var(--blue-light);border-radius:var(--radius-sm);font-size:.8125rem;text-align:center;color:var(--blue)">
+                  <span>월도달</span> <strong>500만</strong>
+                </div>
+                <div style="padding:.5rem;background:var(--blue-light);border-radius:var(--radius-sm);font-size:.8125rem;text-align:center;color:var(--blue)">
+                  <span>ROAS</span> <strong>520%</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-const filter = button.getAttribute('data-filter');
+        <!-- Comparison 3 -->
+        <div class="reveal" style="padding:2rem;background:var(--gray-50);border-radius:var(--radius-lg)">
+          <h3 style="font-size:1.0625rem;margin-bottom:1.25rem">👗 패션 스타트업 C</h3>
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:center">
+            <div>
+              <p style="font-size:.75rem;color:var(--coral);font-weight:600;margin-bottom:.75rem">BEFORE</p>
+              <div style="display:flex;flex-direction:column;gap:.5rem">
+                <div style="padding:.5rem;background:#fff;border-radius:var(--radius-sm);font-size:.8125rem;text-align:center">
+                  <span style="color:var(--gray-500)">틱톡</span> <strong>팔로워 2,100</strong>
+                </div>
+                <div style="padding:.5rem;background:#fff;border-radius:var(--radius-sm);font-size:.8125rem;text-align:center">
+                  <span style="color:var(--gray-500)">자사몰</span> <strong>일방문 320</strong>
+                </div>
+                <div style="padding:.5rem;background:#fff;border-radius:var(--radius-sm);font-size:.8125rem;text-align:center">
+                  <span style="color:var(--gray-500)">월매출</span> <strong>1,800만</strong>
+                </div>
+              </div>
+            </div>
+            <div style="font-size:1.5rem;color:var(--blue)">→</div>
+            <div>
+              <p style="font-size:.75rem;color:var(--blue);font-weight:600;margin-bottom:.75rem">AFTER</p>
+              <div style="display:flex;flex-direction:column;gap:.5rem">
+                <div style="padding:.5rem;background:var(--blue-light);border-radius:var(--radius-sm);font-size:.8125rem;text-align:center;color:var(--blue)">
+                  <span>틱톡</span> <strong>팔로워 28,000</strong>
+                </div>
+                <div style="padding:.5rem;background:var(--blue-light);border-radius:var(--radius-sm);font-size:.8125rem;text-align:center;color:var(--blue)">
+                  <span>자사몰</span> <strong>일방문 2,050</strong>
+                </div>
+                <div style="padding:.5rem;background:var(--blue-light);border-radius:var(--radius-sm);font-size:.8125rem;text-align:center;color:var(--blue)">
+                  <span>월매출</span> <strong>5,040만</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-// 아이템 필터링
-portfolioItems.forEach(item => {
-if (filter === 'all' || item.getAttribute('data-category') === filter) {
-item.classList.remove('hidden');
-} else {
-item.classList.add('hidden');
-}
-});
-});
-});
+        <!-- Comparison 4 -->
+        <div class="reveal" style="padding:2rem;background:var(--gray-50);border-radius:var(--radius-lg)">
+          <h3 style="font-size:1.0625rem;margin-bottom:1.25rem">💻 테크 기업 D</h3>
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:center">
+            <div>
+              <p style="font-size:.75rem;color:var(--coral);font-weight:600;margin-bottom:.75rem">BEFORE</p>
+              <div style="display:flex;flex-direction:column;gap:.5rem">
+                <div style="padding:.5rem;background:#fff;border-radius:var(--radius-sm);font-size:.8125rem;text-align:center">
+                  <span style="color:var(--gray-500)">월 리드</span> <strong>45건</strong>
+                </div>
+                <div style="padding:.5rem;background:#fff;border-radius:var(--radius-sm);font-size:.8125rem;text-align:center">
+                  <span style="color:var(--gray-500)">CPA</span> <strong>185,000원</strong>
+                </div>
+                <div style="padding:.5rem;background:#fff;border-radius:var(--radius-sm);font-size:.8125rem;text-align:center">
+                  <span style="color:var(--gray-500)">전환율</span> <strong>0.8%</strong>
+                </div>
+              </div>
+            </div>
+            <div style="font-size:1.5rem;color:var(--blue)">→</div>
+            <div>
+              <p style="font-size:.75rem;color:var(--blue);font-weight:600;margin-bottom:.75rem">AFTER</p>
+              <div style="display:flex;flex-direction:column;gap:.5rem">
+                <div style="padding:.5rem;background:var(--blue-light);border-radius:var(--radius-sm);font-size:.8125rem;text-align:center;color:var(--blue)">
+                  <span>월 리드</span> <strong>230건</strong>
+                </div>
+                <div style="padding:.5rem;background:var(--blue-light);border-radius:var(--radius-sm);font-size:.8125rem;text-align:center;color:var(--blue)">
+                  <span>CPA</span> <strong>64,750원</strong>
+                </div>
+                <div style="padding:.5rem;background:var(--blue-light);border-radius:var(--radius-sm);font-size:.8125rem;text-align:center;color:var(--blue)">
+                  <span>전환율</span> <strong>3.4%</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-// 모달 기능
-function openModal(projectId) {
-const project = projectData[projectId];
-if (!project) return;
+  <!-- ============================================================
+       INDUSTRY STATS
+       ============================================================ -->
+  <section class="section" style="background:var(--charcoal);color:#fff">
+    <div class="container">
+      <div class="text-center reveal" style="margin-bottom:3rem">
+        <p class="overline" style="color:var(--coral)">BY THE NUMBERS</p>
+        <h2 class="heading-lg" style="color:#fff;margin-top:.75rem">업종별 성과 요약</h2>
+      </div>
 
-const modal = document.getElementById('projectModal');
-const modalImage = document.getElementById('modalImage');
-const modalCategory = document.getElementById('modalCategory');
-const modalTitle = document.getElementById('modalTitle');
-const modalDesc = document.getElementById('modalDesc');
-const modalDuration = document.getElementById('modalDuration');
-const modalStrategy = document.getElementById('modalStrategy');
-const modalTarget = document.getElementById('modalTarget');
-const modalTools = document.getElementById('modalTools');
-const modalResults = document.getElementById('modalResults');
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem">
+        <div class="reveal" style="padding:2rem;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-md);text-align:center">
+          <div style="font-size:2rem;margin-bottom:.75rem">💄</div>
+          <h4 style="color:#fff;font-size:1rem;margin-bottom:.5rem">뷰티 · 화장품</h4>
+          <div style="font-family:var(--font-heading);font-size:2rem;font-weight:800;color:var(--blue);margin-bottom:.25rem">52건</div>
+          <p style="font-size:.8125rem;color:rgba(255,255,255,.5)">평균 팔로워 +320%</p>
+        </div>
+        <div class="reveal" style="padding:2rem;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-md);text-align:center">
+          <div style="font-size:2rem;margin-bottom:.75rem">🍽️</div>
+          <h4 style="color:#fff;font-size:1rem;margin-bottom:.5rem">F&B · 외식</h4>
+          <div style="font-family:var(--font-heading);font-size:2rem;font-weight:800;color:var(--blue);margin-bottom:.25rem">78건</div>
+          <p style="font-size:.8125rem;color:rgba(255,255,255,.5)">평균 매출 +230%</p>
+        </div>
+        <div class="reveal" style="padding:2rem;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-md);text-align:center">
+          <div style="font-size:2rem;margin-bottom:.75rem">👗</div>
+          <h4 style="color:#fff;font-size:1rem;margin-bottom:.5rem">패션 · 라이프</h4>
+          <div style="font-family:var(--font-heading);font-size:2rem;font-weight:800;color:var(--blue);margin-bottom:.25rem">64건</div>
+          <p style="font-size:.8125rem;color:rgba(255,255,255,.5)">평균 ROAS 480%</p>
+        </div>
+        <div class="reveal" style="padding:2rem;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-md);text-align:center">
+          <div style="font-size:2rem;margin-bottom:.75rem">💻</div>
+          <h4 style="color:#fff;font-size:1rem;margin-bottom:.5rem">IT · 테크</h4>
+          <div style="font-family:var(--font-heading);font-size:2rem;font-weight:800;color:var(--blue);margin-bottom:.25rem">46건</div>
+          <p style="font-size:.8125rem;color:rgba(255,255,255,.5)">평균 CPA -58%</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-// 모달 내용 설정
-modalImage.src = project.image;
-modalTitle.textContent = project.title;
-modalDesc.textContent = project.desc;
-modalDuration.textContent = project.duration;
-modalStrategy.textContent = project.strategy;
-modalTarget.textContent = project.target;
-modalTools.textContent = project.tools;
+  <!-- Testimonials from portfolio clients -->
+  <section class="section">
+    <div class="container">
+      <div class="text-center reveal" style="margin-bottom:2.5rem">
+        <p class="overline">CLIENT VOICES</p>
+        <h2 class="heading-md" style="margin-top:.5rem">클라이언트의 목소리</h2>
+      </div>
 
-// 카테고리 스타일 설정
-modalCategory.textContent = project.category === 'naver' ? '네이버' : 
-project.category === 'insta' ? '인스타그램' :
-project.category === 'youtube' ? '유튜브' : '틱톡';
-modalCategory.className = `modal-category category-${project.category}`;
+      <div class="testimonial-track">
+        <div class="testimonial-card">
+          <p class="testimonial-quote">인스타그램 마케팅의 전문성이 돋보였습니다. 릴스 콘텐츠 하나하나에 데이터 분석이 녹아있어서, 감이 아닌 근거 있는 마케팅이라는 느낌을 받았습니다. 결과도 기대 이상이었습니다.</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">AP</div>
+            <div>
+              <div class="testimonial-name">박서연 팀장</div>
+              <div class="testimonial-role">아모레퍼시픽 디지털마케팅팀</div>
+            </div>
+          </div>
+        </div>
 
-// 결과 데이터 설정
-modalResults.innerHTML = project.results.map(result => `
-<div class="modal-result-item">
-<span class="modal-result-value">${result.value}</span>
-<div class="modal-result-label">${result.label}</div>
-</div>
-`).join('');
+        <div class="testimonial-card">
+          <p class="testimonial-quote">플레이스 최적화부터 블로그, 검색광고까지 네이버 생태계를 완벽하게 이해하고 있는 팀이었습니다. 6개월 만에 47위에서 2위로 올라간 건 정말 놀라운 성과입니다.</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">MS</div>
+            <div>
+              <div class="testimonial-name">김민수 대표</div>
+              <div class="testimonial-role">프레시가든 F&B</div>
+            </div>
+          </div>
+        </div>
 
-modal.classList.add('open');
-}
+        <div class="testimonial-card">
+          <p class="testimonial-quote">틱톡 챌린지가 이렇게 큰 효과를 낼 줄 몰랐습니다. 트렌드를 정확히 읽고 타이밍에 맞춰 실행한 WAVE.DIGITAL 팀의 능력에 감사드립니다. 자사몰 트래픽이 5배 이상 늘었습니다.</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">FC</div>
+            <div>
+              <div class="testimonial-name">이현주 마케팅 매니저</div>
+              <div class="testimonial-role">패션커넥트</div>
+            </div>
+          </div>
+        </div>
 
-function closeModal() {
-document.getElementById('projectModal').classList.remove('open');
-}
+        <div class="testimonial-card">
+          <p class="testimonial-quote">B2B 마케팅은 어렵다고만 생각했는데, 체계적인 리드 퍼널 설계와 광고 최적화로 CPA가 65%나 줄었습니다. 투자 대비 효과가 명확하게 보이는 마케팅을 경험했습니다.</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">TD</div>
+            <div>
+              <div class="testimonial-name">정우진 CMO</div>
+              <div class="testimonial-role">테크드림 주식회사</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-// 포트폴리오 아이템 클릭 이벤트
-portfolioItems.forEach(item => {
-item.addEventListener('click', () => {
-const projectId = item.getAttribute('data-id');
-openModal(projectId);
-});
-});
+  <!-- Awards -->
+  <section class="section-sm" style="background:var(--gray-50)">
+    <div class="container">
+      <div class="text-center reveal" style="margin-bottom:2rem">
+        <p class="overline">AWARDS & CERTIFICATIONS</p>
+        <h2 class="heading-md" style="margin-top:.5rem">수상 및 인증</h2>
+      </div>
 
-// 모달 배경 클릭으로 닫기
-document.getElementById('projectModal').addEventListener('click', (e) => {
-if (e.target.classList.contains('modal')) {
-closeModal();
-}
-});
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;text-align:center">
+        <div class="reveal" style="padding:1.5rem;background:#fff;border-radius:var(--radius-md)">
+          <div style="font-size:2rem;margin-bottom:.75rem">🏆</div>
+          <h4 style="font-size:.875rem;margin-bottom:.25rem">대한민국 디지털광고대상</h4>
+          <p style="font-size:.75rem;color:var(--gray-500)">2023 소셜미디어 부문 대상</p>
+        </div>
+        <div class="reveal" style="padding:1.5rem;background:#fff;border-radius:var(--radius-md)">
+          <div style="font-size:2rem;margin-bottom:.75rem">🥇</div>
+          <h4 style="font-size:.875rem;margin-bottom:.25rem">Google Premier Partner</h4>
+          <p style="font-size:.75rem;color:var(--gray-500)">상위 3% 공인 파트너</p>
+        </div>
+        <div class="reveal" style="padding:1.5rem;background:#fff;border-radius:var(--radius-md)">
+          <div style="font-size:2rem;margin-bottom:.75rem">🎖️</div>
+          <h4 style="font-size:.875rem;margin-bottom:.25rem">META Business Partner</h4>
+          <p style="font-size:.75rem;color:var(--gray-500)">공식 비즈니스 파트너 인증</p>
+        </div>
+        <div class="reveal" style="padding:1.5rem;background:#fff;border-radius:var(--radius-md)">
+          <div style="font-size:2rem;margin-bottom:.75rem">⭐</div>
+          <h4 style="font-size:.875rem;margin-bottom:.25rem">네이버 공식 대행사</h4>
+          <p style="font-size:.75rem;color:var(--gray-500)">네이버 광고 공식 대행사</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-// 숫자 카운팅 애니메이션
-function animateNumber(element, target, duration = 2000) {
-const start = 0;
-const increment = target / (duration / 16);
-let current = start;
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="reveal">
+        <p class="overline" style="color:rgba(255,255,255,.6)">YOUR PROJECT</p>
+        <h2 class="heading-lg" style="color:#fff;margin-top:.75rem">다음 성공 사례의<br>주인공이 되세요</h2>
+        <p style="color:rgba(255,255,255,.8);max-width:500px;margin:1rem auto 2rem;font-size:1.0625rem;line-height:1.8">
+          무료 상담을 통해 브랜드에 맞는<br>최적의 마케팅 전략을 제안해드립니다.
+        </p>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+          <a href="contact.html" class="btn btn-white btn-lg">무료 상담 신청 →</a>
+          <a href="services.html" class="btn btn-lg" style="background:transparent;color:#fff;border:2px solid rgba(255,255,255,.3)">서비스 보기</a>
+        </div>
+      </div>
+    </div>
+  </section>
 
-const timer = setInterval(() => {
-current += increment;
-if (current >= target) {
-current = target;
-clearInterval(timer);
-}
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">WAVE<span>.</span>DIGITAL</div>
+          <p>데이터 기반 디지털 마케팅 에이전시.<br>브랜드의 파도를 만듭니다.</p>
+          <p style="margin-top:1rem">📍 서울특별시 강남구 역삼동 123-45</p>
+          <p>📞 02-000-0000</p>
+          <p>✉️ hello@wavedigital.kr</p>
+          <div class="footer-newsletter">
+            <p style="font-size:.875rem;color:#fff;font-weight:600">뉴스레터 구독</p>
+            <form class="footer-newsletter-form">
+              <input type="email" placeholder="이메일 주소 입력" aria-label="이메일 주소">
+              <button type="submit">구독</button>
+            </form>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-heading">서비스</h4>
+          <div class="footer-links">
+            <a href="services.html#naver">네이버 마케팅</a>
+            <a href="services.html#instagram">인스타그램 마케팅</a>
+            <a href="services.html#youtube">유튜브 마케팅</a>
+            <a href="services.html#tiktok">틱톡 마케팅</a>
+            <a href="services.html#performance">퍼포먼스 광고</a>
+            <a href="services.html#branding">브랜드 컨설팅</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-heading">인사이트</h4>
+          <div class="footer-links">
+            <a href="blog.html">SNS 마케팅</a>
+            <a href="blog.html">브랜딩 전략</a>
+            <a href="blog.html">퍼포먼스</a>
+            <a href="blog.html">트렌드 리포트</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-heading">소셜</h4>
+          <div class="footer-social">
+            <a href="#">
+              <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+              인스타그램
+            </a>
+            <a href="#">
+              <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              유튜브
+            </a>
+            <a href="#">
+              <svg viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.568 8.16c-.18 1.897-.962 6.502-1.36 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.9-.903-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.244-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.14.12.098.153.228.168.329.016.1.035.323.02.498z"/></svg>
+              블로그
+            </a>
+            <a href="#">
+              <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              링크드인
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2024 WAVE DIGITAL. All rights reserved.</p>
+        <p>사업자등록번호: 000-00-00000</p>
+      </div>
+    </div>
+  </footer>
 
-if (target >= 1000000) {
-element.textContent = (current / 1000000).toFixed(0) + '천만';
-} else if (target >= 10000) {
-element.textContent = (current / 10000).toFixed(0) + '만';
-} else {
-element.textContent = Math.floor(current);
-}
-}, 16);
-}
-
-// 비교 슬라이더
-const slider = document.getElementById('comparisonSlider');
-const handle = document.getElementById('sliderHandle');
-const afterImage = document.getElementById('sliderAfter');
-
-let isDragging = false;
-
-handle.addEventListener('mousedown', () => {
-isDragging = true;
-});
-
-document.addEventListener('mousemove', (e) => {
-if (!isDragging) return;
-
-const rect = slider.getBoundingClientRect();
-const x = e.clientX - rect.left;
-const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-
-handle.style.left = percentage + '%';
-afterImage.style.clipPath = `inset(0 ${100 - percentage}% 0 0)`;
-});
-
-document.addEventListener('mouseup', () => {
-isDragging = false;
-});
-
-// 터치 이벤트 (모바일)
-handle.addEventListener('touchstart', () => {
-isDragging = true;
-});
-
-document.addEventListener('touchmove', (e) => {
-if (!isDragging) return;
-e.preventDefault();
-
-const rect = slider.getBoundingClientRect();
-const x = e.touches[0].clientX - rect.left;
-const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-
-handle.style.left = percentage + '%';
-afterImage.style.clipPath = `inset(0 ${100 - percentage}% 0 0)`;
-});
-
-document.addEventListener('touchend', () => {
-isDragging = false;
-});
-
-// 스크롤 애니메이션
-const observerOptions = {
-threshold: 0.1,
-rootMargin: '0px 0px -50px 0px'
-};
-
-const observer = new IntersectionObserver((entries) => {
-entries.forEach(entry => {
-if (entry.isIntersecting) {
-entry.target.classList.add('visible');
-
-// 숫자 카운팅 애니메이션 실행
-if (entry.target.classList.contains('stat-item')) {
-const numberElement = entry.target.querySelector('.stat-number');
-const target = parseInt(numberElement.getAttribute('data-target'));
-animateNumber(numberElement, target);
-}
-}
-});
-}, observerOptions);
-
-document.querySelectorAll('.fade-in, .slide-up, .scale-in').forEach(el => {
-observer.observe(el);
-});
-</script>
-
+  <script src="script.js"></script>
 </body>
 </html>

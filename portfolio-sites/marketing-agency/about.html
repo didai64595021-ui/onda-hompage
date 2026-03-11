@@ -1,735 +1,662 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>회사소개 — WAVE DIGITAL</title>
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
-<style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{
---white:#FAFAFA;--charcoal:#1A1A1A;--blue:#0066FF;--coral:#FF6B4A;
---font-heading:'Sora',sans-serif;--font-body:'Pretendard Variable','Pretendard',sans-serif;
-}
-html{scroll-behavior:smooth;overflow-x:hidden}
-body{font-family:var(--font-body);background:var(--white);color:var(--charcoal);overflow-x:hidden;line-height:1.6;word-break:keep-all}
-
-/* ===== UNIFIED NAV ===== */
-.nav{position:fixed;top:0;left:0;width:100%;z-index:1000;padding:1.5rem 3rem;display:grid;grid-template-columns:auto 1fr auto;align-items:center;background:rgba(250,250,250,.95);backdrop-filter:blur(12px);transition:all .3s}
-.nav.scrolled{padding:1rem 3rem;box-shadow:0 1px 20px rgba(0,0,0,.06)}
-.nav-logo{font-family:var(--font-heading);font-weight:800;font-size:1.5rem;letter-spacing:-.02em;color:var(--charcoal);text-decoration:none}
-.nav-logo span{color:var(--blue)}
-.nav-links{display:flex;gap:2.5rem;justify-content:center}
-.nav-links a{text-decoration:none;color:var(--charcoal);font-size:.875rem;font-weight:500;position:relative;transition:color .3s}
-.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--blue);transition:width .3s}
-.nav-links a:hover{color:var(--blue)}
-.nav-links a:hover::after{width:100%}
-.nav-links a.active{color:var(--blue)}
-.nav-links a.active::after{width:100%}
-.nav-cta{font-family:var(--font-heading);font-size:.875rem;font-weight:600;padding:.75rem 2rem;border:2px solid var(--charcoal);border-radius:100px;text-decoration:none;color:var(--charcoal);transition:all .3s}
-.nav-cta:hover{background:var(--charcoal);color:var(--white)}
-.mobile-toggle{display:none;background:none;border:none;cursor:pointer;width:32px;height:24px;position:relative;z-index:1001}
-.mobile-toggle span{display:block;width:100%;height:2px;background:var(--charcoal);transition:all .3s;position:absolute;left:0}
-.mobile-toggle span:nth-child(1){top:0}
-.mobile-toggle span:nth-child(2){top:50%;transform:translateY(-50%)}
-.mobile-toggle span:nth-child(3){bottom:0}
-.mobile-nav{position:fixed;inset:0;background:var(--white);z-index:999;display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .4s}
-.mobile-nav.open{opacity:1;pointer-events:all}
-.mobile-nav-links{display:grid;gap:2rem;text-align:center}
-.mobile-nav-links a{font-family:var(--font-heading);font-size:2rem;font-weight:600;text-decoration:none;color:var(--charcoal);transition:color .3s}
-.mobile-nav-links a:hover{color:var(--blue)}
-
-/* ===== HERO ===== */
-.about-hero{height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden;background:var(--charcoal)}
-.about-hero::before{content:'';position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1600&q=80') center/cover;opacity:.2}
-.about-hero-content{position:relative;z-index:2;padding:0 2rem}
-.about-hero h1{font-family:var(--font-heading);font-size:clamp(2.5rem,8vw,6rem);font-weight:800;color:#fff;letter-spacing:-.04em;line-height:1}
-.about-hero h1 span{color:var(--blue)}
-.about-hero p{color:rgba(255,255,255,.7);font-size:clamp(1rem,2vw,1.4rem);margin-top:2rem;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.8}
-.hero-scroll{position:absolute;bottom:3rem;left:50%;transform:translateX(-50%);z-index:3}
-.scroll-hint{width:28px;height:44px;border:2px solid rgba(255,255,255,.5);border-radius:14px;position:relative}
-.scroll-hint::after{content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);width:4px;height:10px;background:rgba(255,255,255,.7);border-radius:2px;animation:scrollDot 1.8s ease-in-out infinite}
-@keyframes scrollDot{0%,100%{opacity:1;transform:translateX(-50%) translateY(0)}50%{opacity:.3;transform:translateX(-50%) translateY(14px)}}
-
-/* ===== FADE-IN ===== */
-.fade-in{opacity:0;transform:translateY(40px);transition:all .8s ease-out}
-.fade-in.visible{opacity:1;transform:translateY(0)}
-
-/* ===== INTRO ===== */
-.intro-section{padding:8rem 3rem;max-width:1000px;margin:0 auto;text-align:center}
-.intro-section .eyebrow{font-family:var(--font-heading);font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:.15em;color:var(--blue);margin-bottom:1.5rem}
-.intro-section h2{font-family:var(--font-heading);font-size:clamp(1.8rem,4vw,3rem);font-weight:700;letter-spacing:-.02em;margin-bottom:2rem;line-height:1.3}
-.intro-section p{color:#555;font-size:1.1rem;line-height:1.9;max-width:700px;margin:0 auto}
-
-/* ===== MISSION/VISION/VALUES ===== */
-.mvv-section{padding:6rem 3rem;background:#f8f9fa}
-.mvv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2.5rem;max-width:1200px;margin:0 auto}
-.mvv-card{background:#fff;border-radius:24px;padding:3rem;position:relative;overflow:hidden;transition:transform .4s,box-shadow .4s}
-.mvv-card:hover{transform:translateY(-8px);box-shadow:0 20px 60px rgba(0,0,0,.08)}
-.mvv-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
-.mvv-card:nth-child(1)::before{background:var(--blue)}
-.mvv-card:nth-child(2)::before{background:var(--coral)}
-.mvv-card:nth-child(3)::before{background:#03C75A}
-.mvv-icon{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;font-size:2rem}
-.mvv-card:nth-child(1) .mvv-icon{background:rgba(0,102,255,.1)}
-.mvv-card:nth-child(2) .mvv-icon{background:rgba(255,107,74,.1)}
-.mvv-card:nth-child(3) .mvv-icon{background:rgba(3,199,90,.1)}
-.mvv-card h3{font-family:var(--font-heading);font-size:1.5rem;font-weight:700;margin-bottom:1rem;letter-spacing:-.01em}
-.mvv-card p{color:#555;font-size:1rem;line-height:1.8}
-.mvv-card .mvv-list{list-style:none;padding:0;margin-top:1.5rem}
-.mvv-card .mvv-list li{padding:.6rem 0;border-bottom:1px solid #f0f0f0;color:#555;font-size:.95rem;display:flex;align-items:center;gap:.75rem}
-.mvv-card .mvv-list li::before{content:'✦';color:var(--blue);font-size:.7rem}
-
-/* ===== STATS BAR ===== */
-.stats-bar{padding:5rem 3rem;background:var(--charcoal);color:#fff}
-.stats-bar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3rem;max-width:1100px;margin:0 auto;text-align:center}
-.stat-item .stat-number{font-family:var(--font-heading);font-size:clamp(2.5rem,5vw,4rem);font-weight:800;letter-spacing:-.03em;color:var(--blue)}
-.stat-item .stat-number span{color:var(--coral)}
-.stat-item .stat-label{color:rgba(255,255,255,.6);font-size:.95rem;margin-top:.5rem}
-
-/* ===== TIMELINE ===== */
-.timeline-section{padding:8rem 3rem;overflow:hidden}
-.section-header{max-width:1200px;margin:0 auto 4rem}
-.section-header .eyebrow{font-family:var(--font-heading);font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:.15em;color:var(--blue);margin-bottom:1rem}
-.section-header h2{font-family:var(--font-heading);font-size:clamp(2rem,4vw,3rem);font-weight:700;letter-spacing:-.02em}
-.timeline-scroll{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2rem;cursor:grab}
-.timeline-scroll::-webkit-scrollbar{display:none}
-.timeline-track{display:flex;gap:0;padding:2rem 3rem;position:relative;min-width:max-content}
-.timeline-track::before{content:'';position:absolute;top:50%;left:3rem;right:3rem;height:2px;background:#e0e0e0;transform:translateY(-50%)}
-.timeline-item{min-width:220px;text-align:center;position:relative;padding:0 1rem}
-.timeline-dot{width:20px;height:20px;border-radius:50%;background:var(--blue);margin:0 auto 2rem;position:relative;z-index:2;border:4px solid var(--white);box-shadow:0 0 0 2px var(--blue);transition:transform .3s}
-.timeline-item:nth-child(even) .timeline-dot{background:var(--coral);box-shadow:0 0 0 2px var(--coral)}
-.timeline-item:hover .timeline-dot{transform:scale(1.3)}
-.timeline-year{font-family:var(--font-heading);font-size:1.8rem;font-weight:800;margin-bottom:.75rem;letter-spacing:-.02em}
-.timeline-events{color:#666;font-size:.9rem;line-height:1.7;max-width:180px;margin:0 auto}
-.timeline-events strong{color:var(--charcoal);display:block;margin-bottom:.25rem}
-
-/* ===== TEAM ===== */
-.team-section{padding:8rem 3rem;background:#f8f9fa}
-.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2.5rem;max-width:1200px;margin:0 auto}
-.team-card{background:#fff;border-radius:20px;overflow:hidden;transition:transform .4s,box-shadow .4s;cursor:pointer}
-.team-card:hover{transform:translateY(-8px);box-shadow:0 20px 50px rgba(0,0,0,.08)}
-.team-card-img{aspect-ratio:3/4;overflow:hidden;position:relative}
-.team-card-img img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
-.team-card:hover .team-card-img img{transform:scale(1.08)}
-.team-card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7),transparent 50%);opacity:0;transition:opacity .4s;display:flex;align-items:flex-end;padding:1.5rem}
-.team-card:hover .team-card-overlay{opacity:1}
-.team-card-overlay p{color:rgba(255,255,255,.9);font-size:.9rem;line-height:1.6}
-.team-card-info{padding:1.5rem}
-.team-card-info h4{font-family:var(--font-heading);font-size:1.1rem;font-weight:700;margin-bottom:.25rem}
-.team-card-info .role{color:var(--blue);font-size:.85rem;font-weight:600}
-.team-card-info .desc{color:#888;font-size:.85rem;margin-top:.5rem;line-height:1.5}
-
-/* ===== OFFICE GALLERY ===== */
-.office-section{padding:8rem 3rem}
-.office-grid{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:300px 300px;gap:1.5rem;max-width:1200px;margin:0 auto}
-.office-grid .office-img{border-radius:20px;overflow:hidden}
-.office-grid .office-img img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
-.office-grid .office-img:hover img{transform:scale(1.05)}
-.office-grid .office-img:first-child{grid-row:1/3}
-.office-text{display:flex;flex-direction:column;justify-content:center;padding:2rem;background:#f8f9fa;border-radius:20px}
-.office-text h3{font-family:var(--font-heading);font-size:1.5rem;font-weight:700;margin-bottom:1rem;letter-spacing:-.01em}
-.office-text p{color:#666;font-size:.95rem;line-height:1.7}
-
-/* ===== PARTNERS MARQUEE ===== */
-.partners-section{padding:6rem 3rem;background:#f8f9fa;overflow:hidden}
-.partners-section .section-header{text-align:center}
-.marquee-wrap{overflow:hidden;position:relative;margin-top:3rem}
-.marquee-wrap::before,.marquee-wrap::after{content:'';position:absolute;top:0;bottom:0;width:100px;z-index:2}
-.marquee-wrap::before{left:0;background:linear-gradient(to right,#f8f9fa,transparent)}
-.marquee-wrap::after{right:0;background:linear-gradient(to left,#f8f9fa,transparent)}
-.marquee-track{display:flex;gap:4rem;animation:marquee 30s linear infinite;width:max-content}
-.marquee-track:hover{animation-play-state:paused}
-@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.partner-logo{height:48px;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-weight:700;font-size:1.2rem;color:#999;white-space:nowrap;padding:1rem 2rem;background:#fff;border-radius:12px;transition:color .3s}
-.partner-logo:hover{color:var(--charcoal)}
-
-/* ===== CULTURE ===== */
-.culture-section{padding:8rem 3rem}
-.culture-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2rem;max-width:1000px;margin:0 auto}
-.culture-card{padding:2.5rem;border-radius:20px;background:#f8f9fa;transition:transform .3s}
-.culture-card:hover{transform:translateY(-4px)}
-.culture-card .culture-emoji{font-size:2.5rem;margin-bottom:1rem}
-.culture-card h4{font-family:var(--font-heading);font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
-.culture-card p{color:#666;font-size:.95rem;line-height:1.7}
-
-/* ===== CTA ===== */
-.cta-section{padding:8rem 3rem;background:var(--blue);text-align:center;position:relative;overflow:hidden}
-.cta-section::before{content:'';position:absolute;top:-50%;right:-20%;width:600px;height:600px;border-radius:50%;background:rgba(255,255,255,.05)}
-.cta-section::after{content:'';position:absolute;bottom:-30%;left:-10%;width:400px;height:400px;border-radius:50%;background:rgba(255,255,255,.05)}
-.cta-content{position:relative;z-index:2}
-.cta-content h2{font-family:var(--font-heading);font-size:clamp(2rem,5vw,3.5rem);font-weight:800;color:#fff;letter-spacing:-.03em;margin-bottom:1.5rem}
-.cta-content p{color:rgba(255,255,255,.8);font-size:1.15rem;margin-bottom:3rem;max-width:500px;margin-left:auto;margin-right:auto;line-height:1.7}
-.cta-btn{display:inline-block;padding:1.2rem 3rem;background:#fff;color:var(--blue);font-family:var(--font-heading);font-size:1.1rem;font-weight:700;border-radius:100px;text-decoration:none;transition:all .3s}
-.cta-btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.2)}
-
-/* ===== UNIFIED FOOTER ===== */
-.footer{padding:6rem 3rem 3rem;background:var(--charcoal);color:var(--white)}
-.footer-main{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:4rem;margin-bottom:3rem;max-width:1200px;margin-left:auto;margin-right:auto}
-.footer-brand h3{font-family:var(--font-heading);font-weight:800;font-size:2rem;letter-spacing:-.02em;margin-bottom:1rem}
-.footer-brand h3 span{color:var(--blue)}
-.footer-brand p{color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:2rem}
-.footer-contact-info{margin-bottom:1.5rem}
-.footer-contact-info p{color:rgba(255,255,255,.6);font-size:.9rem;margin-bottom:.3rem}
-.footer-social{display:flex;gap:1rem}
-.footer-social a{width:40px;height:40px;background:rgba(255,255,255,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);transition:all .3s;text-decoration:none}
-.footer-social a:hover{background:var(--blue);color:#fff;transform:translateY(-2px)}
-.footer-col h4{font-family:var(--font-heading);font-weight:600;font-size:1.1rem;margin-bottom:1.5rem;color:#fff}
-.footer-col a{color:rgba(255,255,255,.7);text-decoration:none;display:block;margin-bottom:.8rem;transition:color .3s;font-size:.95rem}
-.footer-col a:hover{color:var(--blue)}
-.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;max-width:1200px;margin:0 auto}
-.footer-bottom-left{display:flex;gap:2rem;flex-wrap:wrap}
-.footer-bottom-left a{color:rgba(255,255,255,.5);text-decoration:none;font-size:.85rem;transition:color .3s}
-.footer-bottom-left a:hover{color:rgba(255,255,255,.8)}
-.footer-copyright{color:rgba(255,255,255,.5);font-size:.85rem}
-
-/* ===== RESPONSIVE ===== */
-@media(max-width:1024px){
-.mvv-grid{grid-template-columns:1fr}
-.stats-bar-grid{grid-template-columns:repeat(2,1fr)}
-.team-grid{grid-template-columns:repeat(2,1fr)}
-.office-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
-.office-grid .office-img:first-child{grid-row:auto}
-.footer-main{grid-template-columns:1fr 1fr;gap:3rem}
-}
-
-@media(max-width:768px){
-.nav{padding:1rem 1.5rem;grid-template-columns:1fr auto}
-.nav-links{display:none}
-.nav-cta{display:none}
-.mobile-toggle{display:block}
-.about-hero h1{font-size:clamp(2rem,10vw,4rem)}
-.intro-section{padding:5rem 1.5rem}
-.mvv-section{padding:4rem 1.5rem}
-.stats-bar{padding:3rem 1.5rem}
-.stats-bar-grid{grid-template-columns:1fr 1fr;gap:2rem}
-.timeline-section{padding:5rem 1.5rem}
-.team-section{padding:5rem 1.5rem}
-.team-grid{grid-template-columns:1fr 1fr;gap:1.5rem}
-.office-section{padding:5rem 1.5rem}
-.office-grid{grid-template-columns:1fr;grid-template-rows:auto}
-.partners-section{padding:4rem 1.5rem}
-.culture-section{padding:5rem 1.5rem}
-.culture-grid{grid-template-columns:1fr}
-.cta-section{padding:5rem 1.5rem}
-.footer{padding:4rem 1.5rem 2rem}
-.footer-main{grid-template-columns:1fr;gap:2rem;text-align:center}
-.footer-social{justify-content:center}
-.footer-bottom{flex-direction:column;text-align:center}
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="WAVE.DIGITAL 회사소개 — 브랜드의 파도를 만드는 사람들. 7년간 340개 이상의 프로젝트.">
+  <title>회사소개 — WAVE.DIGITAL</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌊</text></svg>">
 </head>
 <body>
 
-<!-- ===== UNIFIED NAV ===== -->
-<nav class="nav" id="nav">
-<a href="index.html" class="nav-logo">WAVE<span>.</span>DIGITAL</a>
-<div class="nav-links">
-<a href="services.html">서비스</a>
-<a href="portfolio.html">포트폴리오</a>
-<a href="about.html" class="active">회사소개</a>
-<a href="blog.html">인사이트</a>
-<a href="contact.html">문의</a>
-</div>
-<a href="contact.html" class="nav-cta">프로젝트 시작하기</a>
-<button class="mobile-toggle" id="mobileToggle" aria-label="메뉴">
-<span></span><span></span><span></span>
-</button>
-</nav>
-<div class="mobile-nav" id="mobileNav">
-<div class="mobile-nav-links">
-<a href="services.html">서비스</a>
-<a href="portfolio.html">포트폴리오</a>
-<a href="about.html">회사소개</a>
-<a href="blog.html">인사이트</a>
-<a href="contact.html">문의</a>
-</div>
-</div>
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="container">
+      <a href="index.html" class="nav-logo">WAVE<span>.</span>DIGITAL</a>
+      <div class="nav-links">
+        <a href="services.html" class="nav-link">서비스</a>
+        <a href="portfolio.html" class="nav-link">포트폴리오</a>
+        <a href="about.html" class="nav-link active">회사소개</a>
+        <a href="blog.html" class="nav-link">인사이트</a>
+        <a href="contact.html" class="nav-link">문의</a>
+      </div>
+      <div class="nav-cta">
+        <a href="contact.html" class="btn btn-secondary btn-sm">프로젝트 시작하기</a>
+      </div>
+      <button class="nav-hamburger" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+  <div class="nav-mobile">
+    <a href="services.html" class="nav-link">서비스</a>
+    <a href="portfolio.html" class="nav-link">포트폴리오</a>
+    <a href="about.html" class="nav-link active">회사소개</a>
+    <a href="blog.html" class="nav-link">인사이트</a>
+    <a href="contact.html" class="nav-link">문의</a>
+    <a href="contact.html" class="btn btn-primary">프로젝트 시작하기</a>
+  </div>
 
-<!-- ===== HERO ===== -->
-<section class="about-hero">
-<div class="about-hero-content">
-<h1>브랜드의 <span>파도</span>를<br>만드는 사람들</h1>
-<p>데이터와 크리에이티브의 교차점에서, 우리는 디지털 마케팅의 새로운 파도를 만들어갑니다. 2017년부터 지금까지, 340개 이상의 브랜드와 함께 성장하고 있습니다.</p>
-</div>
-<div class="hero-scroll">
-<div class="scroll-hint"></div>
-</div>
-</section>
+  <!-- HERO -->
+  <section class="page-hero">
+    <div>
+      <p class="overline reveal" style="color:rgba(255,255,255,.5);margin-bottom:1rem">ABOUT US</p>
+      <h1 class="heading-xl reveal">브랜드의 파도를<br>만드는 사람들</h1>
+      <p class="subtitle reveal" style="transition-delay:.1s">2017년부터, 데이터와 크리에이티브의 결합으로<br>340개 이상의 브랜드 성장을 함께했습니다</p>
+    </div>
+  </section>
 
-<!-- ===== INTRO ===== -->
-<section class="intro-section fade-in">
-<div class="eyebrow">About WAVE DIGITAL</div>
-<h2>단순한 마케팅 대행이 아닌,<br>브랜드 성장의 파트너</h2>
-<p>WAVE DIGITAL은 네이버, 인스타그램, 유튜브, 틱톡 — 4대 플랫폼 각각의 알고리즘과 사용자 행동 패턴을 깊이 이해하는 42명의 전문가가 모인 디지털 마케팅 에이전시입니다. 감이 아닌 데이터로 의사결정하고, 트렌드를 따라가지 않고 트렌드를 만듭니다.</p>
-</section>
+  <!-- ============================================================
+       INTRO
+       ============================================================ -->
+  <section class="section">
+    <div class="container">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center">
+        <div class="reveal-left">
+          <p class="overline" style="margin-bottom:1rem">OUR STORY</p>
+          <h2 class="heading-md" style="margin-bottom:1.5rem">작은 스튜디오에서 시작한<br>42명의 마케팅 전문가 집단</h2>
+          <p style="color:var(--gray-600);line-height:1.8;margin-bottom:1rem">
+            WAVE.DIGITAL은 2017년, "데이터로 증명하는 마케팅"이라는 단순하지만 강력한 신념으로 시작되었습니다. 강남의 작은 스튜디오에서 3명이 시작한 팀은 이제 42명의 전문가로 성장했습니다.
+          </p>
+          <p style="color:var(--gray-600);line-height:1.8;margin-bottom:1rem">
+            우리는 처음부터 '감'이 아닌 '데이터'를 믿었습니다. 모든 전략의 출발점은 데이터 분석이고, 모든 실행의 결과는 숫자로 검증합니다. 이 원칙이 7년간 340개 이상의 프로젝트를 성공으로 이끈 원동력입니다.
+          </p>
+          <p style="color:var(--gray-600);line-height:1.8;margin-bottom:1rem">
+            네이버 마케팅, SNS 운영, 퍼포먼스 광고, 브랜드 컨설팅까지 디지털 마케팅의 모든 영역을 아우르는 풀서비스 에이전시로 성장한 WAVE.DIGITAL은 Google Premier Partner, META Business Partner 인증을 보유하고 있으며, 대한민국 디지털광고대상을 수상한 검증된 팀입니다.
+          </p>
+          <p style="color:var(--gray-600);line-height:1.8">
+            브랜드의 성장은 우리의 성장입니다. 클라이언트의 98% 만족도와 96% 재계약률이 우리의 진정한 성적표입니다.
+          </p>
+        </div>
+        <div class="reveal-right">
+          <div style="border-radius:var(--radius-lg);overflow:hidden;aspect-ratio:4/5">
+            <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80" alt="WAVE.DIGITAL 오피스" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<!-- ===== MISSION / VISION / VALUES ===== -->
-<section class="mvv-section">
-<div class="mvv-grid">
-<div class="mvv-card fade-in">
-<div class="mvv-icon">🎯</div>
-<h3>미션</h3>
-<p>모든 브랜드가 디지털 세상에서 자신만의 파도를 만들 수 있도록 돕습니다. 데이터 기반의 정밀한 전략과 감성적인 크리에이티브로 실질적인 비즈니스 성과를 만들어냅니다.</p>
-<ul class="mvv-list">
-<li>데이터 기반 의사결정</li>
-<li>ROI 중심 성과 관리</li>
-<li>고객 비즈니스 성장 기여</li>
-</ul>
-</div>
-<div class="mvv-card fade-in">
-<div class="mvv-icon">🔭</div>
-<h3>비전</h3>
-<p>아시아 최고의 디지털 마케팅 에이전시. 기술과 창의성의 결합으로 마케팅의 미래를 선도하며, 모든 클라이언트가 자신의 분야에서 1위가 되는 것을 목표로 합니다.</p>
-<ul class="mvv-list">
-<li>AI 마케팅 기술 선도</li>
-<li>글로벌 시장 확장</li>
-<li>업계 표준 정립</li>
-</ul>
-</div>
-<div class="mvv-card fade-in">
-<div class="mvv-icon">💎</div>
-<h3>핵심 가치</h3>
-<p>우리가 일하는 방식을 정의하는 4가지 핵심 가치입니다. 모든 프로젝트, 모든 의사결정에서 이 가치를 기준으로 판단합니다.</p>
-<ul class="mvv-list">
-<li>투명함 — 데이터와 결과를 숨기지 않습니다</li>
-<li>도전 — 안전한 선택보다 혁신적 시도를 합니다</li>
-<li>협업 — 클라이언트는 파트너입니다</li>
-<li>성장 — 멈추면 뒤처집니다</li>
-</ul>
-</div>
-</div>
-</section>
+  <!-- ============================================================
+       MISSION / VISION / VALUES
+       ============================================================ -->
+  <section class="section" style="background:var(--gray-50)">
+    <div class="container">
+      <div class="text-center reveal" style="margin-bottom:3.5rem">
+        <p class="overline">MISSION · VISION · VALUES</p>
+        <h2 class="heading-lg" style="margin-top:.75rem">우리가 믿는 것</h2>
+      </div>
 
-<!-- ===== STATS BAR ===== -->
-<section class="stats-bar fade-in">
-<div class="stats-bar-grid">
-<div class="stat-item">
-<div class="stat-number" data-target="340">0<span>+</span></div>
-<div class="stat-label">누적 프로젝트</div>
-</div>
-<div class="stat-item">
-<div class="stat-number" data-target="42">0<span>명</span></div>
-<div class="stat-label">전문 인력</div>
-</div>
-<div class="stat-item">
-<div class="stat-number" data-target="95">0<span>%</span></div>
-<div class="stat-label">KPI 달성률</div>
-</div>
-<div class="stat-item">
-<div class="stat-number" data-target="7">0<span>년</span></div>
-<div class="stat-label">업력</div>
-</div>
-</div>
-</section>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2rem">
+        <div class="card reveal" style="padding:2.5rem;text-align:center;border:2px solid var(--gray-200);background:#fff">
+          <div style="width:72px;height:72px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2rem">🎯</div>
+          <h3 style="font-size:1.25rem;margin-bottom:.75rem">미션</h3>
+          <p style="font-family:var(--font-heading);font-size:1.0625rem;font-weight:600;color:var(--blue);margin-bottom:1rem;line-height:1.5">
+            "데이터와 크리에이티브의 결합으로<br>측정 가능한 성과를 만든다"
+          </p>
+          <p style="color:var(--gray-600);font-size:.875rem;line-height:1.8">
+            우리의 미션은 단순합니다. 데이터에 기반한 전략과 감각적인 크리에이티브를 결합하여, 클라이언트가 눈으로 확인할 수 있는 실질적인 비즈니스 성과를 만드는 것입니다. 감이 아닌 숫자로 증명합니다.
+          </p>
+        </div>
 
-<!-- ===== TIMELINE ===== -->
-<section class="timeline-section">
-<div class="section-header fade-in">
-<div class="eyebrow">History</div>
-<h2>성장의 발자취</h2>
-</div>
-<div class="timeline-scroll">
-<div class="timeline-track">
-<div class="timeline-item">
-<div class="timeline-dot"></div>
-<div class="timeline-year">2017</div>
-<div class="timeline-events">
-<strong>WAVE DIGITAL 법인 설립</strong>
-서울 마포구에 첫 사무실 오픈. 네이버 블로그 마케팅으로 시작.
-</div>
-</div>
-<div class="timeline-item">
-<div class="timeline-dot"></div>
-<div class="timeline-year">2018</div>
-<div class="timeline-events">
-<strong>인스타그램 마케팅 론칭</strong>
-팀원 10명 돌파. 첫 해 50개 프로젝트 수행.
-</div>
-</div>
-<div class="timeline-item">
-<div class="timeline-dot"></div>
-<div class="timeline-year">2019</div>
-<div class="timeline-events">
-<strong>네이버 공식 파트너 선정</strong>
-누적 100개 프로젝트 달성. 매출 5억 돌파.
-</div>
-</div>
-<div class="timeline-item">
-<div class="timeline-dot"></div>
-<div class="timeline-year">2020</div>
-<div class="timeline-events">
-<strong>유튜브 마케팅 확장</strong>
-팀원 20명. 언택트 시대 디지털 전환 컨설팅 시작.
-</div>
-</div>
-<div class="timeline-item">
-<div class="timeline-dot"></div>
-<div class="timeline-year">2021</div>
-<div class="timeline-events">
-<strong>틱톡 마케팅 시작</strong>
-매출 10억 돌파. 4대 플랫폼 풀 서비스 완성.
-</div>
-</div>
-<div class="timeline-item">
-<div class="timeline-dot"></div>
-<div class="timeline-year">2022</div>
-<div class="timeline-events">
-<strong>디지털마케팅대상 수상</strong>
-누적 200개 프로젝트. 팀원 30명.
-</div>
-</div>
-<div class="timeline-item">
-<div class="timeline-dot"></div>
-<div class="timeline-year">2023</div>
-<div class="timeline-events">
-<strong>강남 사옥 이전</strong>
-웨이브타워 8층 입주. 팀원 35명. 해외 클라이언트 유치.
-</div>
-</div>
-<div class="timeline-item">
-<div class="timeline-dot"></div>
-<div class="timeline-year">2024</div>
-<div class="timeline-events">
-<strong>AI 마케팅 솔루션 도입</strong>
-팀원 42명. 340+ 프로젝트. 업계 선도 기업으로 성장.
-</div>
-</div>
-</div>
-</div>
-</section>
+        <div class="card reveal" style="padding:2.5rem;text-align:center;border:2px solid var(--blue);background:#fff">
+          <div style="width:72px;height:72px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2rem">🌊</div>
+          <h3 style="font-size:1.25rem;margin-bottom:.75rem">비전</h3>
+          <p style="font-family:var(--font-heading);font-size:1.0625rem;font-weight:600;color:var(--blue);margin-bottom:1rem;line-height:1.5">
+            "아시아 No.1<br>디지털 마케팅 에이전시"
+          </p>
+          <p style="color:var(--gray-600);font-size:.875rem;line-height:1.8">
+            한국을 넘어 아시아 시장을 선도하는 디지털 마케팅 에이전시가 되는 것이 우리의 비전입니다. 글로벌 브랜드의 아시아 마케팅 파트너로서, 로컬 인사이트와 디지털 전문성을 결합한 독보적인 가치를 제공합니다.
+          </p>
+        </div>
 
-<!-- ===== TEAM ===== -->
-<section class="team-section">
-<div class="section-header fade-in" style="max-width:1200px;margin:0 auto 3rem">
-<div class="eyebrow">Our Team</div>
-<h2>전문가들이 만드는 차이</h2>
-</div>
-<div class="team-grid">
-<div class="team-card fade-in">
-<div class="team-card-img">
-<img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80" alt="이준호 대표이사" loading="lazy">
-<div class="team-card-overlay">
-<p>디지털 마케팅 15년 경력. 삼성전자, LG 출신. 데이터 기반 마케팅 전략의 선구자.</p>
-</div>
-</div>
-<div class="team-card-info">
-<h4>이준호</h4>
-<div class="role">대표이사 · CEO</div>
-<div class="desc">전략 총괄 및 VIP 클라이언트 관리</div>
-</div>
-</div>
-<div class="team-card fade-in">
-<div class="team-card-img">
-<img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80" alt="김서연 전략기획 이사" loading="lazy">
-<div class="team-card-overlay">
-<p>네이버 공식 파트너 인증. 검색 마케팅 전문가. 연간 100+ 캠페인 총괄.</p>
-</div>
-</div>
-<div class="team-card-info">
-<h4>김서연</h4>
-<div class="role">전략기획 이사 · CSO</div>
-<div class="desc">캠페인 전략 수립 및 데이터 분석</div>
-</div>
-</div>
-<div class="team-card fade-in">
-<div class="team-card-img">
-<img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80" alt="박현우 콘텐츠 디렉터" loading="lazy">
-<div class="team-card-overlay">
-<p>영상 제작 10년 경력. CJ ENM 출신. 유튜브 채널 총 구독자 500만+ 관리.</p>
-</div>
-</div>
-<div class="team-card-info">
-<h4>박현우</h4>
-<div class="role">콘텐츠 디렉터</div>
-<div class="desc">영상 및 콘텐츠 제작 총괄</div>
-</div>
-</div>
-<div class="team-card fade-in">
-<div class="team-card-img">
-<img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80" alt="정아린 퍼포먼스 팀장" loading="lazy">
-<div class="team-card-overlay">
-<p>퍼포먼스 마케팅 전문. 메타·구글 인증 전문가. 평균 ROAS 580% 달성.</p>
-</div>
-</div>
-<div class="team-card-info">
-<h4>정아린</h4>
-<div class="role">퍼포먼스 팀장</div>
-<div class="desc">광고 성과 최적화 및 매체 운영</div>
-</div>
-</div>
-<div class="team-card fade-in">
-<div class="team-card-img">
-<img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" alt="최동현 SNS팀장" loading="lazy">
-<div class="team-card-overlay">
-<p>인스타그램·틱톡 전문. 팔로워 성장 전략 및 바이럴 콘텐츠 기획.</p>
-</div>
-</div>
-<div class="team-card-info">
-<h4>최동현</h4>
-<div class="role">SNS 팀장</div>
-<div class="desc">소셜 미디어 채널 운영 및 성장</div>
-</div>
-</div>
-<div class="team-card fade-in">
-<div class="team-card-img">
-<img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80" alt="한수빈 브랜딩 매니저" loading="lazy">
-<div class="team-card-overlay">
-<p>브랜드 아이덴티티 전문. 50+ 브랜딩 프로젝트 수행. 디자인씽킹 코치.</p>
-</div>
-</div>
-<div class="team-card-info">
-<h4>한수빈</h4>
-<div class="role">브랜딩 매니저</div>
-<div class="desc">브랜드 전략 및 비주얼 아이덴티티</div>
-</div>
-</div>
-<div class="team-card fade-in">
-<div class="team-card-img">
-<img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80" alt="윤재혁 데이터 분석가" loading="lazy">
-<div class="team-card-overlay">
-<p>데이터 사이언스 석사. GA4·앰플리튜드 전문. 대시보드 설계 및 인사이트 도출.</p>
-</div>
-</div>
-<div class="team-card-info">
-<h4>윤재혁</h4>
-<div class="role">데이터 분석가</div>
-<div class="desc">데이터 분석 및 리포팅 자동화</div>
-</div>
-</div>
-<div class="team-card fade-in">
-<div class="team-card-img">
-<img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80" alt="오지은 AE팀장" loading="lazy">
-<div class="team-card-overlay">
-<p>클라이언트 매니지먼트 전문. 고객 만족도 98%. 커뮤니케이션 스페셜리스트.</p>
-</div>
-</div>
-<div class="team-card-info">
-<h4>오지은</h4>
-<div class="role">AE 팀장</div>
-<div class="desc">클라이언트 커뮤니케이션 및 프로젝트 관리</div>
-</div>
-</div>
-</div>
-</section>
+        <div class="card reveal" style="padding:2.5rem;text-align:center;border:2px solid var(--gray-200);background:#fff">
+          <div style="width:72px;height:72px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2rem">💎</div>
+          <h3 style="font-size:1.25rem;margin-bottom:.75rem">가치</h3>
+          <p style="font-family:var(--font-heading);font-size:1.0625rem;font-weight:600;color:var(--blue);margin-bottom:1rem;line-height:1.5">
+            "투명 · 성장 · 혁신"
+          </p>
+          <p style="color:var(--gray-600);font-size:.875rem;line-height:1.8">
+            투명한 소통과 리포팅, 클라이언트와 함께하는 지속적 성장, 그리고 끊임없는 혁신. 이 세 가지 핵심 가치가 WAVE.DIGITAL의 모든 의사결정과 행동의 기준입니다.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<!-- ===== OFFICE GALLERY ===== -->
-<section class="office-section">
-<div class="section-header fade-in" style="max-width:1200px;margin:0 auto 3rem">
-<div class="eyebrow">Our Space</div>
-<h2>우리가 일하는 공간</h2>
-</div>
-<div class="office-grid">
-<div class="office-img">
-<img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80" alt="메인 오피스" loading="lazy">
-</div>
-<div class="office-img">
-<img src="https://images.unsplash.com/photo-1497215842964-222b430dc094?w=500&q=80" alt="미팅룸" loading="lazy">
-</div>
-<div class="office-text">
-<h3>강남 웨이브타워</h3>
-<p>테헤란로 중심부, 자연광이 가득한 열린 공간에서 최고의 크리에이티브가 탄생합니다. 집중 업무존, 협업 라운지, 미디어 스튜디오를 갖추고 있습니다.</p>
-</div>
-<div class="office-img">
-<img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=500&q=80" alt="작업 공간" loading="lazy">
-</div>
-<div class="office-img">
-<img src="https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?w=500&q=80" alt="촬영 스튜디오" loading="lazy">
-</div>
-</div>
-</section>
+  <!-- ============================================================
+       COUNTER
+       ============================================================ -->
+  <section class="counter-bar">
+    <div class="container">
+      <div class="counter-grid">
+        <div class="counter-item reveal">
+          <div class="counter-number"><span data-count="7" data-suffix="년">0</span></div>
+          <div class="counter-label">업계 경력</div>
+        </div>
+        <div class="counter-item reveal">
+          <div class="counter-number"><span data-count="340" data-suffix="+">0</span></div>
+          <div class="counter-label">완료 프로젝트</div>
+        </div>
+        <div class="counter-item reveal">
+          <div class="counter-number"><span data-count="42" data-suffix="명">0</span></div>
+          <div class="counter-label">마케팅 전문가</div>
+        </div>
+        <div class="counter-item reveal">
+          <div class="counter-number"><span data-count="98" data-suffix="%">0</span></div>
+          <div class="counter-label">클라이언트 만족도</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<!-- ===== PARTNERS MARQUEE ===== -->
-<section class="partners-section">
-<div class="section-header fade-in">
-<div class="eyebrow">Partners</div>
-<h2>함께 성장하는 브랜드들</h2>
-</div>
-<div class="marquee-wrap">
-<div class="marquee-track">
-<div class="partner-logo">아모레퍼시픽</div>
-<div class="partner-logo">무신사</div>
-<div class="partner-logo">배달의민족</div>
-<div class="partner-logo">카카오</div>
-<div class="partner-logo">토스</div>
-<div class="partner-logo">쿠팡</div>
-<div class="partner-logo">삼성물산</div>
-<div class="partner-logo">CJ ENM</div>
-<div class="partner-logo">네이버</div>
-<div class="partner-logo">현대백화점</div>
-<div class="partner-logo">올리브영</div>
-<div class="partner-logo">마켓컬리</div>
-<!-- duplicate for seamless loop -->
-<div class="partner-logo">아모레퍼시픽</div>
-<div class="partner-logo">무신사</div>
-<div class="partner-logo">배달의민족</div>
-<div class="partner-logo">카카오</div>
-<div class="partner-logo">토스</div>
-<div class="partner-logo">쿠팡</div>
-<div class="partner-logo">삼성물산</div>
-<div class="partner-logo">CJ ENM</div>
-<div class="partner-logo">네이버</div>
-<div class="partner-logo">현대백화점</div>
-<div class="partner-logo">올리브영</div>
-<div class="partner-logo">마켓컬리</div>
-</div>
-</div>
-</section>
+  <!-- ============================================================
+       CEO MESSAGE
+       ============================================================ -->
+  <section class="section">
+    <div class="container">
+      <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:4rem;align-items:center">
+        <div class="reveal-left">
+          <div style="border-radius:var(--radius-lg);overflow:hidden;aspect-ratio:3/4">
+            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&q=80" alt="김태현 CEO" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+          </div>
+        </div>
+        <div class="reveal-right">
+          <p class="overline" style="margin-bottom:1rem">CEO MESSAGE</p>
+          <h2 class="heading-md" style="margin-bottom:1.5rem">대표이사 인사말</h2>
+          <blockquote style="font-size:1.125rem;line-height:1.9;color:var(--gray-700);font-style:italic;border-left:3px solid var(--blue);padding-left:1.5rem;margin-bottom:1.5rem">
+            "우리는 단순한 마케팅 대행사가 아닙니다. 브랜드의 성장 파트너입니다. 데이터로 시작하고, 크리에이티브로 실행하며, 성과로 증명합니다. 이것이 7년간 변하지 않은 우리의 철학입니다."
+          </blockquote>
+          <p style="color:var(--gray-600);line-height:1.8;margin-bottom:1rem">
+            2017년 WAVE.DIGITAL을 설립한 이후, 저는 한 가지 질문을 끊임없이 던져왔습니다. "이 마케팅이 정말 클라이언트의 비즈니스를 성장시키고 있는가?" 이 질문에 자신 있게 "예"라고 답할 수 있을 때만 우리는 앞으로 나아갔습니다.
+          </p>
+          <p style="color:var(--gray-600);line-height:1.8;margin-bottom:1.5rem">
+            디지털 마케팅 시장은 빠르게 변합니다. 하지만 본질은 변하지 않습니다. 고객을 이해하고, 데이터를 분석하고, 최적의 메시지를 전달하는 것. WAVE.DIGITAL은 앞으로도 이 본질에 충실하며, 클라이언트와 함께 성장하는 에이전시가 되겠습니다.
+          </p>
+          <div>
+            <p style="font-family:var(--font-heading);font-weight:700;font-size:1.0625rem">김태현</p>
+            <p style="font-size:.875rem;color:var(--gray-500)">WAVE.DIGITAL 대표이사 · CEO</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<!-- ===== CULTURE ===== -->
-<section class="culture-section">
-<div class="section-header fade-in" style="max-width:1000px;margin:0 auto 3rem;text-align:center">
-<div class="eyebrow">Culture</div>
-<h2>우리의 문화</h2>
-</div>
-<div class="culture-grid">
-<div class="culture-card fade-in">
-<div class="culture-emoji">🚀</div>
-<h4>빠른 실행, 빠른 학습</h4>
-<p>완벽한 계획보다 빠른 실행을 추구합니다. 실패해도 빨리 배우고, 그 인사이트를 다음 캠페인에 즉시 반영합니다. 매주 스프린트 리뷰로 학습을 공유합니다.</p>
-</div>
-<div class="culture-card fade-in">
-<div class="culture-emoji">🤝</div>
-<h4>수평적 소통</h4>
-<p>직급 대신 이름으로 부릅니다. 주니어의 아이디어가 시니어의 전략을 바꿀 수 있는 환경. 월 1회 '프리톡' 시간에 누구나 자유롭게 의견을 냅니다.</p>
-</div>
-<div class="culture-card fade-in">
-<div class="culture-emoji">📊</div>
-<h4>데이터로 말하기</h4>
-<p>"느낌적 느낌"은 없습니다. 모든 주장에는 데이터가 동반되어야 합니다. 주간 데이터 리뷰 미팅에서 숫자로 성과를 증명하고 인사이트를 공유합니다.</p>
-</div>
-<div class="culture-card fade-in">
-<div class="culture-emoji">🎨</div>
-<h4>크리에이티브 프라이데이</h4>
-<p>매주 금요일 오후는 자유 프로젝트 시간입니다. 실험적인 콘텐츠, 새로운 플랫폼 테스트, 사이드 프로젝트를 진행합니다. 이곳에서 히트작이 탄생합니다.</p>
-</div>
-</div>
-</section>
+  <!-- ============================================================
+       TIMELINE
+       ============================================================ -->
+  <section class="section" style="background:var(--gray-50)">
+    <div class="container">
+      <div class="text-center reveal" style="margin-bottom:3rem">
+        <p class="overline">HISTORY</p>
+        <h2 class="heading-lg" style="margin-top:.75rem">연혁</h2>
+        <p class="body-lg" style="color:var(--gray-600)">2017년부터 지금까지의 성장 여정</p>
+      </div>
 
-<!-- ===== CTA ===== -->
-<section class="cta-section">
-<div class="cta-content fade-in">
-<h2>함께 일할 준비가<br>되셨나요?</h2>
-<p>브랜드의 다음 파도를 함께 만들어보세요. 무료 상담으로 가능성을 확인하실 수 있습니다.</p>
-<a href="contact.html" class="cta-btn">프로젝트 시작하기</a>
-</div>
-</section>
+      <div class="timeline-track">
+        <div class="timeline-item">
+          <div class="timeline-year">2017</div>
+          <h4>WAVE.DIGITAL 설립</h4>
+          <p>강남 역삼동에 3명의 팀으로 시작. 소규모 브랜드 중심의 SNS 마케팅 서비스 런칭. 첫 해 15개 프로젝트 완료.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2018</div>
+          <h4>네이버 공식 대행사 선정</h4>
+          <p>네이버 광고 공식 대행사로 선정. 팀 10명으로 확대. 네이버 플레이스 최적화 서비스 시작. 연간 50개 프로젝트 돌파.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2019</div>
+          <h4>퍼포먼스 마케팅팀 신설</h4>
+          <p>META, Google 광고 전문팀 신설. 팀 18명으로 성장. 연간 매출 10억 돌파. 첫 대기업 클라이언트 확보.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2020</div>
+          <h4>강남파이낸스센터 이전</h4>
+          <p>사무실 확장 이전. 브랜드 컨설팅 서비스 런칭. 팀 25명으로 성장. 코로나 시기 디지털 전환 컨설팅 수요 급증.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2021</div>
+          <h4>META Business Partner 인증</h4>
+          <p>META 공식 비즈니스 파트너 인증 획득. 숏폼 콘텐츠팀 신설. 연간 매출 25억 돌파. 해외 클라이언트 첫 수주.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2022</div>
+          <h4>Google Premier Partner 선정</h4>
+          <p>Google 광고 상위 3% 파트너 선정. 팀 35명으로 확대. 연간 200개 이상 프로젝트 수행. 업계 최고 수준의 ROAS 달성.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2023</div>
+          <h4>디지털광고대상 대상 수상</h4>
+          <p>대한민국 디지털광고대상 소셜미디어 부문 대상. 팀 38명. 아모레퍼시픽, 삼성물산 등 대형 클라이언트 다수 확보.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2024</div>
+          <h4>42명 규모, 아시아 진출 준비</h4>
+          <p>42명 규모의 전문 조직 완성. 일본, 동남아 시장 진출 준비. 연간 340개 이상 프로젝트 누적. 재계약률 96% 달성.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<!-- ===== UNIFIED FOOTER ===== -->
-<footer class="footer">
-<div class="footer-main">
-<div class="footer-brand">
-<h3>WAVE<span>.</span>DIGITAL</h3>
-<p>브랜드의 파도를 만드는 디지털 마케팅 전문 에이전시입니다. 데이터 기반의 전략과 창의적인 실행으로 고객의 성공을 함께 만들어갑니다.</p>
-<div class="footer-contact-info">
-<p>📍 서울특별시 강남구 테헤란로 123 웨이브타워 8층</p>
-<p>📞 02-1234-5678</p>
-<p>✉️ hello@wavedigital.kr</p>
-</div>
-<div class="footer-social">
-<a href="#" aria-label="인스타그램"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5"/></svg></a>
-<a href="#" aria-label="유튜브"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2s-.2-1.6-.9-2.3c-.9-.9-1.8-.9-2.3-1C17 2.6 12 2.6 12 2.6s-5 0-8.3.3c-.5.1-1.4.1-2.3 1-.7.7-.9 2.3-.9 2.3S.2 8.1.2 10v1.8c0 1.9.3 3.8.3 3.8s.2 1.6.9 2.3c.9.9 2 .9 2.5 1 1.8.2 7.1.2 7.1.2s5 0 8.3-.3c.5-.1 1.4-.1 2.3-1 .7-.7.9-2.3.9-2.3s.3-1.9.3-3.8V10c0-1.9-.3-3.8-.3-3.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg></a>
-<a href="#" aria-label="블로그"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16.3 3.9H7.7c-.8 0-1.4.6-1.4 1.4v13.4c0 .8.6 1.4 1.4 1.4h8.6c.8 0 1.4-.6 1.4-1.4V5.3c0-.8-.6-1.4-1.4-1.4zm-5.5 2.8h2.4c.4 0 .7.3.7.7s-.3.7-.7.7h-2.4c-.4 0-.7-.3-.7-.7s.3-.7.7-.7zm3.8 10.6H9.4c-.4 0-.7-.3-.7-.7s.3-.7.7-.7h5.2c.4 0 .7.3.7.7s-.3.7-.7.7zm0-3h-5.2c-.4 0-.7-.3-.7-.7s.3-.7.7-.7h5.2c.4 0 .7.3.7.7s-.3.7-.7.7zm0-3h-5.2c-.4 0-.7-.3-.7-.7s.3-.7.7-.7h5.2c.4 0 .7.3.7.7s-.3.7-.7.7z"/></svg></a>
-</div>
-</div>
-<div class="footer-col">
-<h4>서비스</h4>
-<a href="services.html">네이버 마케팅</a>
-<a href="services.html">인스타그램 마케팅</a>
-<a href="services.html">유튜브 마케팅</a>
-<a href="services.html">틱톡 마케팅</a>
-<a href="services.html">통합 브랜딩</a>
-<a href="services.html">퍼포먼스 마케팅</a>
-</div>
-<div class="footer-col">
-<h4>인사이트</h4>
-<a href="blog.html">마케팅 트렌드</a>
-<a href="blog.html">플랫폼 분석</a>
-<a href="blog.html">성공 사례</a>
-<a href="blog.html">실전 가이드</a>
-<a href="about.html">회사소개</a>
-<a href="portfolio.html">포트폴리오</a>
-</div>
-<div class="footer-col">
-<h4>소셜</h4>
-<a href="#">인스타그램</a>
-<a href="#">유튜브</a>
-<a href="#">네이버 블로그</a>
-<a href="contact.html">문의하기</a>
-<a href="contact.html">무료 상담</a>
-</div>
-</div>
-<div class="footer-bottom">
-<div class="footer-bottom-left">
-<a href="#">이용약관</a>
-<a href="#">개인정보처리방침</a>
-<a href="#">사업자정보</a>
-</div>
-<div class="footer-copyright">© 2024 WAVE DIGITAL. All rights reserved. | 사업자등록번호 123-45-67890</div>
-</div>
-</footer>
+  <!-- ============================================================
+       TEAM
+       ============================================================ -->
+  <section class="section">
+    <div class="container">
+      <div class="text-center reveal" style="margin-bottom:3.5rem">
+        <p class="overline">OUR TEAM</p>
+        <h2 class="heading-lg" style="margin-top:.75rem">리더십 팀</h2>
+        <p class="body-lg" style="color:var(--gray-600);max-width:600px;margin:.75rem auto 0">
+          각 분야 최고의 전문가들이<br>브랜드의 성장을 이끕니다.
+        </p>
+      </div>
 
-<script>
-// Mobile Nav
-const mobileToggle = document.getElementById('mobileToggle');
-const mobileNav = document.getElementById('mobileNav');
-mobileToggle.addEventListener('click', () => {
-mobileNav.classList.toggle('open');
-});
+      <div class="team-grid stagger">
+        <div class="team-card reveal">
+          <div class="team-photo">
+            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&q=80" alt="김태현" loading="lazy">
+          </div>
+          <h4>김태현</h4>
+          <p class="team-role">CEO · 대표이사</p>
+          <p>전 구글코리아 마케팅팀. 디지털 마케팅 12년 경력. 데이터 기반 의사결정의 선구자. 클라이언트의 비즈니스 성장에 진심인 리더.</p>
+        </div>
 
-// Nav scroll
-const nav = document.getElementById('nav');
-window.addEventListener('scroll', () => {
-nav.classList.toggle('scrolled', window.scrollY > 50);
-});
+        <div class="team-card reveal">
+          <div class="team-photo">
+            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=80" alt="박지영" loading="lazy">
+          </div>
+          <h4>박지영</h4>
+          <p class="team-role">COO · 최고운영책임자</p>
+          <p>전 네이버 비즈니스 전략. 프로젝트 관리의 달인. 42명의 팀을 이끌며 효율적인 운영 시스템을 구축. MBA 보유.</p>
+        </div>
 
-// Fade in on scroll
-const fadeEls = document.querySelectorAll('.fade-in');
-const fadeObserver = new IntersectionObserver((entries) => {
-entries.forEach(entry => {
-if (entry.isIntersecting) {
-entry.target.classList.add('visible');
-fadeObserver.unobserve(entry.target);
-}
-});
-}, { threshold: 0.15 });
-fadeEls.forEach(el => fadeObserver.observe(el));
+        <div class="team-card reveal">
+          <div class="team-photo">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80" alt="이준호" loading="lazy">
+          </div>
+          <h4>이준호</h4>
+          <p class="team-role">크리에이티브 디렉터</p>
+          <p>전 TBWA 아트 디렉터. 칸 광고제 수상 경력. 감각적인 비주얼과 전략적 사고를 결합한 크리에이티브를 총괄합니다.</p>
+        </div>
 
-// Counter animation
-const statNumbers = document.querySelectorAll('.stat-number[data-target]');
-const counterObserver = new IntersectionObserver((entries) => {
-entries.forEach(entry => {
-if (entry.isIntersecting) {
-const el = entry.target;
-const target = parseInt(el.dataset.target);
-const suffix = el.querySelector('span')?.outerHTML || '';
-let current = 0;
-const increment = target / 60;
-const timer = setInterval(() => {
-current += increment;
-if (current >= target) {
-current = target;
-clearInterval(timer);
-}
-el.innerHTML = Math.floor(current) + suffix;
-}, 16);
-counterObserver.unobserve(el);
-}
-});
-}, { threshold: 0.5 });
-statNumbers.forEach(el => counterObserver.observe(el));
+        <div class="team-card reveal">
+          <div class="team-photo">
+            <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&q=80" alt="김서연" loading="lazy">
+          </div>
+          <h4>김서연</h4>
+          <p class="team-role">SNS 전략팀장</p>
+          <p>전 네이버 마케팅랩. 인스타그램, 틱톡, 유튜브 전략을 총괄. 500개 이상의 SNS 계정 운영 경험. 알고리즘의 여왕.</p>
+        </div>
 
-// Timeline drag scroll
-const timelineScroll = document.querySelector('.timeline-scroll');
-if (timelineScroll) {
-let isDown = false, startX, scrollLeft;
-timelineScroll.addEventListener('mousedown', e => { isDown = true; startX = e.pageX - timelineScroll.offsetLeft; scrollLeft = timelineScroll.scrollLeft; timelineScroll.style.cursor = 'grabbing'; });
-timelineScroll.addEventListener('mouseleave', () => { isDown = false; timelineScroll.style.cursor = 'grab'; });
-timelineScroll.addEventListener('mouseup', () => { isDown = false; timelineScroll.style.cursor = 'grab'; });
-timelineScroll.addEventListener('mousemove', e => { if (!isDown) return; e.preventDefault(); const x = e.pageX - timelineScroll.offsetLeft; timelineScroll.scrollLeft = scrollLeft - (x - startX) * 1.5; });
-}
-</script>
+        <div class="team-card reveal">
+          <div class="team-photo">
+            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&q=80" alt="박민수" loading="lazy">
+          </div>
+          <h4>박민수</h4>
+          <p class="team-role">퍼포먼스 마케팅팀장</p>
+          <p>Google Certified. 연간 15억+ 광고 집행 관리. META, Google, 네이버 광고 최적화 전문가. ROAS 420% 평균 달성.</p>
+        </div>
+
+        <div class="team-card reveal">
+          <div class="team-photo">
+            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&q=80" alt="이현주" loading="lazy">
+          </div>
+          <h4>이현주</h4>
+          <p class="team-role">콘텐츠 프로덕션팀장</p>
+          <p>전 CJ ENM PD. 영상 기획부터 편집까지 콘텐츠 제작을 총괄. 숏폼 콘텐츠 전략의 선두주자. 연간 500건+ 제작.</p>
+        </div>
+
+        <div class="team-card reveal">
+          <div class="team-photo">
+            <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&q=80" alt="정우진" loading="lazy">
+          </div>
+          <h4>정우진</h4>
+          <p class="team-role">데이터 애널리틱스팀장</p>
+          <p>전 카카오 데이터사이언티스트. GA4, Amplitude 전문가. 데이터 기반 마케팅 전략 수립과 성과 측정을 담당합니다.</p>
+        </div>
+
+        <div class="team-card reveal">
+          <div class="team-photo">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=80" alt="한소희" loading="lazy">
+          </div>
+          <h4>한소희</h4>
+          <p class="team-role">브랜드 전략팀장</p>
+          <p>전 삼성전자 브랜드 매니저. BI/CI 개발, 네이밍, 브랜드 전략 수립을 총괄. 24개 이상의 브랜딩 프로젝트를 리드했습니다.</p>
+        </div>
+      </div>
+
+      <!-- Team Stats -->
+      <div class="reveal" style="margin-top:3rem;display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem">
+        <div style="text-align:center;padding:1.5rem;background:var(--gray-50);border-radius:var(--radius-md)">
+          <div style="font-family:var(--font-heading);font-size:1.75rem;font-weight:800;color:var(--blue)">42명</div>
+          <p style="font-size:.8125rem;color:var(--gray-600);margin-top:.25rem">전체 팀원</p>
+        </div>
+        <div style="text-align:center;padding:1.5rem;background:var(--gray-50);border-radius:var(--radius-md)">
+          <div style="font-family:var(--font-heading);font-size:1.75rem;font-weight:800;color:var(--blue)">8.5년</div>
+          <p style="font-size:.8125rem;color:var(--gray-600);margin-top:.25rem">평균 경력</p>
+        </div>
+        <div style="text-align:center;padding:1.5rem;background:var(--gray-50);border-radius:var(--radius-md)">
+          <div style="font-family:var(--font-heading);font-size:1.75rem;font-weight:800;color:var(--blue)">15개+</div>
+          <p style="font-size:.8125rem;color:var(--gray-600);margin-top:.25rem">보유 자격증</p>
+        </div>
+        <div style="text-align:center;padding:1.5rem;background:var(--gray-50);border-radius:var(--radius-md)">
+          <div style="font-family:var(--font-heading);font-size:1.75rem;font-weight:800;color:var(--blue)">92%</div>
+          <p style="font-size:.8125rem;color:var(--gray-600);margin-top:.25rem">직원 만족도</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       OFFICE GALLERY
+       ============================================================ -->
+  <section class="section" style="background:var(--gray-50)">
+    <div class="container">
+      <div class="text-center reveal" style="margin-bottom:3rem">
+        <p class="overline">OUR SPACE</p>
+        <h2 class="heading-lg" style="margin-top:.75rem">오피스</h2>
+        <p class="body-lg" style="color:var(--gray-600)">창의성이 살아 숨 쉬는 공간</p>
+      </div>
+
+      <div class="gallery-grid">
+        <div class="gallery-item reveal">
+          <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80" alt="오피스 전경" loading="lazy">
+        </div>
+        <div class="gallery-item reveal">
+          <img src="https://images.unsplash.com/photo-1497215842964-222b430dc094?w=400&q=80" alt="미팅룸" loading="lazy">
+        </div>
+        <div class="gallery-item reveal">
+          <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&q=80" alt="작업 공간" loading="lazy">
+        </div>
+        <div class="gallery-item reveal">
+          <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80" alt="협업 공간" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CULTURE & BENEFITS
+       ============================================================ -->
+  <section class="section">
+    <div class="container">
+      <div class="text-center reveal" style="margin-bottom:3.5rem">
+        <p class="overline">CULTURE & BENEFITS</p>
+        <h2 class="heading-lg" style="margin-top:.75rem">문화 & 복지</h2>
+        <p class="body-lg" style="color:var(--gray-600);max-width:600px;margin:.75rem auto 0">
+          최고의 성과는 최고의 환경에서 나옵니다.
+        </p>
+      </div>
+
+      <div class="culture-grid stagger">
+        <div class="culture-card reveal">
+          <div class="culture-icon">⏰</div>
+          <h4>자율 출퇴근</h4>
+          <p>오전 8시~10시 사이 자유로운 출근. 개인의 리듬에 맞춰 최고의 생산성을 발휘할 수 있는 환경을 제공합니다. 코어 타임은 10~16시입니다.</p>
+        </div>
+
+        <div class="culture-card reveal">
+          <div class="culture-icon">🏠</div>
+          <h4>원격 근무</h4>
+          <p>주 2회 재택근무 가능. 집중이 필요한 업무는 원격으로, 협업이 필요한 업무는 오피스에서. 유연한 근무 환경을 지향합니다.</p>
+        </div>
+
+        <div class="culture-card reveal">
+          <div class="culture-icon">📚</div>
+          <h4>교육 지원</h4>
+          <p>연간 200만원 자기계발비 지원. 외부 컨퍼런스, 온라인 강의, 자격증 취득비를 지원합니다. Google, META 공식 교육 프로그램 참여 기회도 제공.</p>
+        </div>
+
+        <div class="culture-card reveal">
+          <div class="culture-icon">🎉</div>
+          <h4>팀 빌딩</h4>
+          <p>분기별 팀 워크숍, 월간 팀 회식, 연간 워케이션. 팀원 간의 유대감을 강화하고 새로운 영감을 얻을 수 있는 다양한 프로그램을 운영합니다.</p>
+        </div>
+      </div>
+
+      <!-- Additional Benefits -->
+      <div class="reveal" style="margin-top:3rem;padding:2.5rem;background:var(--gray-50);border-radius:var(--radius-lg)">
+        <h3 style="font-size:1.125rem;margin-bottom:1.5rem;text-align:center">더 많은 복지 혜택</h3>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem">
+          <div style="text-align:center;padding:1rem">
+            <div style="font-size:1.5rem;margin-bottom:.5rem">☕</div>
+            <p style="font-size:.8125rem;font-weight:600">무제한 간식 & 음료</p>
+          </div>
+          <div style="text-align:center;padding:1rem">
+            <div style="font-size:1.5rem;margin-bottom:.5rem">💻</div>
+            <p style="font-size:.8125rem;font-weight:600">최신 장비 지급</p>
+          </div>
+          <div style="text-align:center;padding:1rem">
+            <div style="font-size:1.5rem;margin-bottom:.5rem">🏥</div>
+            <p style="font-size:.8125rem;font-weight:600">종합 건강검진</p>
+          </div>
+          <div style="text-align:center;padding:1rem">
+            <div style="font-size:1.5rem;margin-bottom:.5rem">🎂</div>
+            <p style="font-size:.8125rem;font-weight:600">생일 반차 + 선물</p>
+          </div>
+          <div style="text-align:center;padding:1rem">
+            <div style="font-size:1.5rem;margin-bottom:.5rem">🏖️</div>
+            <p style="font-size:.8125rem;font-weight:600">리프레시 휴가 5일</p>
+          </div>
+          <div style="text-align:center;padding:1rem">
+            <div style="font-size:1.5rem;margin-bottom:.5rem">📖</div>
+            <p style="font-size:.8125rem;font-weight:600">도서 무제한 구매</p>
+          </div>
+          <div style="text-align:center;padding:1rem">
+            <div style="font-size:1.5rem;margin-bottom:.5rem">🎯</div>
+            <p style="font-size:.8125rem;font-weight:600">성과 인센티브</p>
+          </div>
+          <div style="text-align:center;padding:1rem">
+            <div style="font-size:1.5rem;margin-bottom:.5rem">🚗</div>
+            <p style="font-size:.8125rem;font-weight:600">야근 택시비 지원</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PARTNER MARQUEE
+       ============================================================ -->
+  <section class="marquee" style="background:var(--gray-50)">
+    <div style="text-align:center;padding-bottom:1.5rem">
+      <p class="overline">TRUSTED BY</p>
+      <h3 style="font-family:var(--font-heading);font-size:1.125rem;margin-top:.5rem">함께한 파트너</h3>
+    </div>
+    <div class="marquee-track">
+      <div class="marquee-item">아모레퍼시픽</div>
+      <div class="marquee-item">무신사</div>
+      <div class="marquee-item">배달의민족</div>
+      <div class="marquee-item">카카오</div>
+      <div class="marquee-item">토스</div>
+      <div class="marquee-item">쿠팡</div>
+      <div class="marquee-item">삼성물산</div>
+      <div class="marquee-item">CJ ENM</div>
+      <div class="marquee-item">네이버</div>
+      <div class="marquee-item">현대백화점</div>
+      <div class="marquee-item">올리브영</div>
+      <div class="marquee-item">마켓컬리</div>
+      <div class="marquee-item">아모레퍼시픽</div>
+      <div class="marquee-item">무신사</div>
+      <div class="marquee-item">배달의민족</div>
+      <div class="marquee-item">카카오</div>
+      <div class="marquee-item">토스</div>
+      <div class="marquee-item">쿠팡</div>
+      <div class="marquee-item">삼성물산</div>
+      <div class="marquee-item">CJ ENM</div>
+      <div class="marquee-item">네이버</div>
+      <div class="marquee-item">현대백화점</div>
+      <div class="marquee-item">올리브영</div>
+      <div class="marquee-item">마켓컬리</div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       HIRING
+       ============================================================ -->
+  <section class="section">
+    <div class="container">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center">
+        <div class="reveal-left">
+          <p class="overline-coral" style="margin-bottom:1rem">JOIN US</p>
+          <h2 class="heading-md" style="margin-bottom:1rem">함께 파도를<br>만들 사람을 찾습니다</h2>
+          <p style="color:var(--gray-600);line-height:1.8;margin-bottom:1.5rem">
+            WAVE.DIGITAL은 열정과 전문성을 갖춘 인재를 항상 환영합니다. 데이터를 사랑하고, 크리에이티브한 사고를 가진 당신과 함께 일하고 싶습니다.
+          </p>
+          <div style="display:flex;flex-direction:column;gap:1rem;margin-bottom:2rem">
+            <div style="padding:1.25rem;background:var(--gray-50);border-radius:var(--radius-md);display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <h4 style="font-size:.9375rem">퍼포먼스 마케터 (경력)</h4>
+                <p style="font-size:.8125rem;color:var(--gray-500)">퍼포먼스팀 · 정규직</p>
+              </div>
+              <span class="badge badge-coral">채용중</span>
+            </div>
+            <div style="padding:1.25rem;background:var(--gray-50);border-radius:var(--radius-md);display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <h4 style="font-size:.9375rem">영상 편집자 (신입/경력)</h4>
+                <p style="font-size:.8125rem;color:var(--gray-500)">콘텐츠팀 · 정규직</p>
+              </div>
+              <span class="badge badge-coral">채용중</span>
+            </div>
+            <div style="padding:1.25rem;background:var(--gray-50);border-radius:var(--radius-md);display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <h4 style="font-size:.9375rem">브랜드 전략 컨설턴트 (경력)</h4>
+                <p style="font-size:.8125rem;color:var(--gray-500)">전략팀 · 정규직</p>
+              </div>
+              <span class="badge badge-coral">채용중</span>
+            </div>
+          </div>
+          <a href="#" class="btn btn-coral">전체 채용 공고 보기 →</a>
+        </div>
+        <div class="reveal-right">
+          <div style="border-radius:var(--radius-lg);overflow:hidden;aspect-ratio:4/3">
+            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80" alt="WAVE.DIGITAL 팀" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       AWARDS
+       ============================================================ -->
+  <section class="section-sm" style="background:var(--charcoal);color:#fff">
+    <div class="container">
+      <div class="text-center reveal" style="margin-bottom:2.5rem">
+        <p class="overline" style="color:var(--coral)">AWARDS & CERTIFICATIONS</p>
+        <h2 class="heading-md" style="color:#fff;margin-top:.5rem">수상 및 인증</h2>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;text-align:center">
+        <div class="reveal" style="padding:2rem;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-md)">
+          <div style="font-size:2.5rem;margin-bottom:.75rem">🏆</div>
+          <h4 style="color:#fff;font-size:.9375rem;margin-bottom:.25rem">디지털광고대상</h4>
+          <p style="font-size:.8125rem;color:rgba(255,255,255,.5)">2023 소셜미디어 대상</p>
+        </div>
+        <div class="reveal" style="padding:2rem;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-md)">
+          <div style="font-size:2.5rem;margin-bottom:.75rem">🥇</div>
+          <h4 style="color:#fff;font-size:.9375rem;margin-bottom:.25rem">Google Premier</h4>
+          <p style="font-size:.8125rem;color:rgba(255,255,255,.5)">상위 3% 파트너</p>
+        </div>
+        <div class="reveal" style="padding:2rem;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-md)">
+          <div style="font-size:2.5rem;margin-bottom:.75rem">🎖️</div>
+          <h4 style="color:#fff;font-size:.9375rem;margin-bottom:.25rem">META Partner</h4>
+          <p style="font-size:.8125rem;color:rgba(255,255,255,.5)">공식 비즈니스 파트너</p>
+        </div>
+        <div class="reveal" style="padding:2rem;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-md)">
+          <div style="font-size:2.5rem;margin-bottom:.75rem">⭐</div>
+          <h4 style="color:#fff;font-size:.9375rem;margin-bottom:.25rem">네이버 대행사</h4>
+          <p style="font-size:.8125rem;color:rgba(255,255,255,.5)">공식 광고 대행사</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="reveal">
+        <p class="overline" style="color:rgba(255,255,255,.6)">WORK WITH US</p>
+        <h2 class="heading-lg" style="color:#fff;margin-top:.75rem">함께 일하기</h2>
+        <p style="color:rgba(255,255,255,.8);max-width:500px;margin:1rem auto 2rem;font-size:1.0625rem;line-height:1.8">
+          브랜드의 다음 성장을 함께 만들어갈<br>파트너를 찾고 계신가요?
+        </p>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+          <a href="contact.html" class="btn btn-white btn-lg">무료 상담 신청 →</a>
+          <a href="portfolio.html" class="btn btn-lg" style="background:transparent;color:#fff;border:2px solid rgba(255,255,255,.3)">포트폴리오 보기</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">WAVE<span>.</span>DIGITAL</div>
+          <p>데이터 기반 디지털 마케팅 에이전시.<br>브랜드의 파도를 만듭니다.</p>
+          <p style="margin-top:1rem">📍 서울특별시 강남구 역삼동 123-45</p>
+          <p>📞 02-000-0000</p>
+          <p>✉️ hello@wavedigital.kr</p>
+          <div class="footer-newsletter">
+            <p style="font-size:.875rem;color:#fff;font-weight:600">뉴스레터 구독</p>
+            <form class="footer-newsletter-form">
+              <input type="email" placeholder="이메일 주소 입력" aria-label="이메일 주소">
+              <button type="submit">구독</button>
+            </form>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-heading">서비스</h4>
+          <div class="footer-links">
+            <a href="services.html#naver">네이버 마케팅</a>
+            <a href="services.html#instagram">인스타그램 마케팅</a>
+            <a href="services.html#youtube">유튜브 마케팅</a>
+            <a href="services.html#tiktok">틱톡 마케팅</a>
+            <a href="services.html#performance">퍼포먼스 광고</a>
+            <a href="services.html#branding">브랜드 컨설팅</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-heading">인사이트</h4>
+          <div class="footer-links">
+            <a href="blog.html">SNS 마케팅</a>
+            <a href="blog.html">브랜딩 전략</a>
+            <a href="blog.html">퍼포먼스</a>
+            <a href="blog.html">트렌드 리포트</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-heading">소셜</h4>
+          <div class="footer-social">
+            <a href="#">
+              <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+              인스타그램
+            </a>
+            <a href="#">
+              <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              유튜브
+            </a>
+            <a href="#">
+              <svg viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.568 8.16c-.18 1.897-.962 6.502-1.36 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.9-.903-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.244-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.14.12.098.153.228.168.329.016.1.035.323.02.498z"/></svg>
+              블로그
+            </a>
+            <a href="#">
+              <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              링크드인
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2024 WAVE DIGITAL. All rights reserved.</p>
+        <p>사업자등록번호: 000-00-00000</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>

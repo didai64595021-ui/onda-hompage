@@ -1,615 +1,861 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>인사이트 — WAVE DIGITAL</title>
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
-<style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{
---white:#FAFAFA;--charcoal:#1A1A1A;--blue:#0066FF;--coral:#FF6B4A;
---font-heading:'Sora',sans-serif;--font-body:'Pretendard Variable','Pretendard',sans-serif;
-}
-html{scroll-behavior:smooth;overflow-x:hidden}
-body{font-family:var(--font-body);background:var(--white);color:var(--charcoal);overflow-x:hidden;line-height:1.6;word-break:keep-all}
-
-/* ===== UNIFIED NAV ===== */
-.nav{position:fixed;top:0;left:0;width:100%;z-index:1000;padding:1.5rem 3rem;display:grid;grid-template-columns:auto 1fr auto;align-items:center;background:rgba(250,250,250,.95);backdrop-filter:blur(12px);transition:all .3s}
-.nav.scrolled{padding:1rem 3rem;box-shadow:0 1px 20px rgba(0,0,0,.06)}
-.nav-logo{font-family:var(--font-heading);font-weight:800;font-size:1.5rem;letter-spacing:-.02em;color:var(--charcoal);text-decoration:none}
-.nav-logo span{color:var(--blue)}
-.nav-links{display:flex;gap:2.5rem;justify-content:center}
-.nav-links a{text-decoration:none;color:var(--charcoal);font-size:.875rem;font-weight:500;position:relative;transition:color .3s}
-.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--blue);transition:width .3s}
-.nav-links a:hover{color:var(--blue)}
-.nav-links a:hover::after{width:100%}
-.nav-links a.active{color:var(--blue)}
-.nav-links a.active::after{width:100%}
-.nav-cta{font-family:var(--font-heading);font-size:.875rem;font-weight:600;padding:.75rem 2rem;border:2px solid var(--charcoal);border-radius:100px;text-decoration:none;color:var(--charcoal);transition:all .3s}
-.nav-cta:hover{background:var(--charcoal);color:var(--white)}
-.mobile-toggle{display:none;background:none;border:none;cursor:pointer;width:32px;height:24px;position:relative;z-index:1001}
-.mobile-toggle span{display:block;width:100%;height:2px;background:var(--charcoal);transition:all .3s;position:absolute;left:0}
-.mobile-toggle span:nth-child(1){top:0}
-.mobile-toggle span:nth-child(2){top:50%;transform:translateY(-50%)}
-.mobile-toggle span:nth-child(3){bottom:0}
-.mobile-nav{position:fixed;inset:0;background:var(--white);z-index:999;display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .4s}
-.mobile-nav.open{opacity:1;pointer-events:all}
-.mobile-nav-links{display:grid;gap:2rem;text-align:center}
-.mobile-nav-links a{font-family:var(--font-heading);font-size:2rem;font-weight:600;text-decoration:none;color:var(--charcoal);transition:color .3s}
-.mobile-nav-links a:hover{color:var(--blue)}
-
-/* ===== HERO ===== */
-.blog-hero{padding:12rem 3rem 4rem;max-width:1200px;margin:0 auto;position:relative}
-.blog-hero .eyebrow{font-family:var(--font-heading);font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:.15em;color:var(--blue);margin-bottom:1.5rem}
-.blog-hero h1{font-family:var(--font-heading);font-size:clamp(3rem,7vw,5.5rem);font-weight:800;letter-spacing:-.04em;line-height:1;margin-bottom:1.5rem}
-.blog-hero h1 span{color:var(--blue)}
-.blog-hero p{color:#666;font-size:1.2rem;max-width:600px;line-height:1.7}
-.blog-hero-deco{position:absolute;top:8rem;right:0;width:300px;height:300px;border-radius:50%;background:linear-gradient(135deg,rgba(0,102,255,.08),rgba(255,107,74,.08));filter:blur(60px);pointer-events:none}
-
-/* ===== FILTERS ===== */
-.filter-section{padding:0 3rem 3rem;max-width:1200px;margin:0 auto}
-.filter-tabs{display:flex;gap:.75rem;flex-wrap:wrap}
-.filter-tab{padding:.65rem 1.5rem;border-radius:100px;border:1.5px solid #e0e0e0;background:none;font-family:var(--font-body);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .3s;color:#666}
-.filter-tab.active,.filter-tab:hover{border-color:var(--blue);background:var(--blue);color:#fff}
-
-/* ===== FEATURED POST ===== */
-.featured-post{padding:0 3rem 4rem;max-width:1200px;margin:0 auto}
-.featured-card{display:grid;grid-template-columns:1.5fr 1fr;border-radius:24px;overflow:hidden;background:#fff;box-shadow:0 4px 40px rgba(0,0,0,.06);transition:transform .4s}
-.featured-card:hover{transform:translateY(-4px)}
-.featured-card-img{aspect-ratio:16/10;overflow:hidden}
-.featured-card-img img{width:100%;height:100%;object-fit:cover;transition:transform .8s}
-.featured-card:hover .featured-card-img img{transform:scale(1.05)}
-.featured-card-content{padding:3rem;display:flex;flex-direction:column;justify-content:center}
-.featured-card-content .category-tag{display:inline-block;padding:.3rem .9rem;border-radius:100px;background:rgba(0,102,255,.1);color:var(--blue);font-size:.8rem;font-weight:600;margin-bottom:1.5rem;width:fit-content}
-.featured-card-content h2{font-family:var(--font-heading);font-size:clamp(1.3rem,2.5vw,2rem);font-weight:700;letter-spacing:-.02em;margin-bottom:1rem;line-height:1.3}
-.featured-card-content .excerpt{color:#666;font-size:1rem;line-height:1.8;margin-bottom:2rem}
-.featured-card-content .meta{display:flex;align-items:center;gap:1rem;color:#999;font-size:.85rem}
-.featured-card-content .meta .author-img{width:36px;height:36px;border-radius:50%;object-fit:cover}
-.read-more{display:inline-flex;align-items:center;gap:.5rem;color:var(--blue);font-weight:600;font-size:.95rem;text-decoration:none;margin-top:auto;transition:gap .3s}
-.read-more:hover{gap:1rem}
-
-/* ===== BLOG GRID ===== */
-.blog-grid-section{padding:0 3rem 6rem;max-width:1200px;margin:0 auto}
-.blog-grid-title{font-family:var(--font-heading);font-size:1.5rem;font-weight:700;margin-bottom:2.5rem;letter-spacing:-.01em}
-.blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem}
-.blog-card{border-radius:20px;overflow:hidden;background:#fff;box-shadow:0 2px 20px rgba(0,0,0,.04);transition:transform .4s,box-shadow .4s;cursor:pointer}
-.blog-card:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(0,0,0,.08)}
-.blog-card-img{aspect-ratio:16/10;overflow:hidden;position:relative}
-.blog-card-img img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
-.blog-card:hover .blog-card-img img{transform:scale(1.08)}
-.blog-card-img .category-badge{position:absolute;top:1rem;left:1rem;padding:.3rem .8rem;border-radius:100px;background:var(--blue);color:#fff;font-size:.75rem;font-weight:600}
-.blog-card-body{padding:1.5rem}
-.blog-card-body h3{font-family:var(--font-heading);font-size:1.1rem;font-weight:700;margin-bottom:.75rem;letter-spacing:-.01em;line-height:1.4}
-.blog-card-body .summary{color:#666;font-size:.9rem;line-height:1.7;margin-bottom:1rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.blog-card-body .card-meta{display:flex;justify-content:space-between;align-items:center;color:#999;font-size:.8rem}
-.blog-card-body .card-meta .author{display:flex;align-items:center;gap:.5rem}
-.blog-card-body .card-meta .author img{width:24px;height:24px;border-radius:50%;object-fit:cover}
-
-/* ===== LOAD MORE ===== */
-.load-more-section{text-align:center;padding:0 3rem 6rem}
-.load-more-btn{padding:1rem 3rem;border:2px solid var(--charcoal);border-radius:100px;background:none;font-family:var(--font-heading);font-size:1rem;font-weight:600;cursor:pointer;transition:all .3s;color:var(--charcoal)}
-.load-more-btn:hover{background:var(--charcoal);color:var(--white)}
-
-/* ===== CATEGORY SECTION ===== */
-.categories-section{padding:4rem 3rem 6rem;background:#f8f9fa}
-.categories-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;max-width:1200px;margin:0 auto}
-.cat-card{background:#fff;border-radius:20px;padding:2.5rem 2rem;text-align:center;transition:transform .3s,box-shadow .3s;cursor:pointer}
-.cat-card:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(0,0,0,.06)}
-.cat-card .cat-icon{font-size:3rem;margin-bottom:1rem}
-.cat-card h3{font-family:var(--font-heading);font-size:1.1rem;font-weight:700;margin-bottom:.5rem}
-.cat-card p{color:#666;font-size:.85rem;line-height:1.6}
-.cat-card .cat-count{display:inline-block;margin-top:1rem;padding:.3rem .8rem;border-radius:100px;background:#f0f0f0;font-size:.8rem;font-weight:600;color:#666}
-
-/* ===== NEWSLETTER ===== */
-.newsletter-section{padding:6rem 3rem;text-align:center}
-.newsletter-inner{max-width:600px;margin:0 auto}
-.newsletter-inner .eyebrow{font-family:var(--font-heading);font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:.15em;color:var(--blue);margin-bottom:1rem}
-.newsletter-inner h2{font-family:var(--font-heading);font-size:clamp(1.8rem,4vw,2.5rem);font-weight:700;letter-spacing:-.02em;margin-bottom:1rem;line-height:1.3}
-.newsletter-inner p{color:#666;font-size:1rem;margin-bottom:2.5rem;line-height:1.7}
-.newsletter-form{display:flex;gap:.75rem;max-width:480px;margin:0 auto}
-.newsletter-form input{flex:1;padding:1rem 1.5rem;border:2px solid #e0e0e0;border-radius:100px;font-family:var(--font-body);font-size:1rem;outline:none;transition:border-color .3s}
-.newsletter-form input:focus{border-color:var(--blue)}
-.newsletter-form button{padding:1rem 2rem;background:var(--blue);color:#fff;font-family:var(--font-heading);font-size:.95rem;font-weight:600;border:none;border-radius:100px;cursor:pointer;transition:all .3s;white-space:nowrap}
-.newsletter-form button:hover{background:#0052cc;box-shadow:0 4px 15px rgba(0,102,255,.3)}
-.newsletter-note{color:#999;font-size:.8rem;margin-top:1rem}
-
-/* ===== POPULAR POSTS ===== */
-.popular-section{padding:4rem 3rem 6rem;background:#f8f9fa}
-.popular-inner{max-width:1200px;margin:0 auto}
-.popular-inner .section-title{font-family:var(--font-heading);font-size:1.5rem;font-weight:700;margin-bottom:2rem;letter-spacing:-.01em}
-.popular-list{display:grid;gap:1.5rem}
-.popular-item{display:grid;grid-template-columns:100px 1fr auto;align-items:center;gap:1.5rem;padding:1.5rem;background:#fff;border-radius:16px;transition:transform .3s;cursor:pointer}
-.popular-item:hover{transform:translateX(4px)}
-.popular-item .rank{font-family:var(--font-heading);font-size:2rem;font-weight:800;color:#e0e0e0;min-width:40px;text-align:center}
-.popular-item .pop-content h4{font-family:var(--font-heading);font-size:1rem;font-weight:600;margin-bottom:.25rem;line-height:1.4}
-.popular-item .pop-content p{color:#888;font-size:.85rem}
-.popular-item .pop-views{color:#999;font-size:.8rem;white-space:nowrap}
-
-/* ===== UNIFIED FOOTER ===== */
-.footer{padding:6rem 3rem 3rem;background:var(--charcoal);color:var(--white)}
-.footer-main{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:4rem;margin-bottom:3rem;max-width:1200px;margin-left:auto;margin-right:auto}
-.footer-brand h3{font-family:var(--font-heading);font-weight:800;font-size:2rem;letter-spacing:-.02em;margin-bottom:1rem}
-.footer-brand h3 span{color:var(--blue)}
-.footer-brand p{color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:2rem}
-.footer-contact-info{margin-bottom:1.5rem}
-.footer-contact-info p{color:rgba(255,255,255,.6);font-size:.9rem;margin-bottom:.3rem}
-.footer-social{display:flex;gap:1rem}
-.footer-social a{width:40px;height:40px;background:rgba(255,255,255,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);transition:all .3s;text-decoration:none}
-.footer-social a:hover{background:var(--blue);color:#fff;transform:translateY(-2px)}
-.footer-col h4{font-family:var(--font-heading);font-weight:600;font-size:1.1rem;margin-bottom:1.5rem;color:#fff}
-.footer-col a{color:rgba(255,255,255,.7);text-decoration:none;display:block;margin-bottom:.8rem;transition:color .3s;font-size:.95rem}
-.footer-col a:hover{color:var(--blue)}
-.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;max-width:1200px;margin:0 auto}
-.footer-bottom-left{display:flex;gap:2rem;flex-wrap:wrap}
-.footer-bottom-left a{color:rgba(255,255,255,.5);text-decoration:none;font-size:.85rem;transition:color .3s}
-.footer-bottom-left a:hover{color:rgba(255,255,255,.8)}
-.footer-copyright{color:rgba(255,255,255,.5);font-size:.85rem}
-
-/* ===== FADE IN ===== */
-.fade-in{opacity:0;transform:translateY(40px);transition:all .8s ease-out}
-.fade-in.visible{opacity:1;transform:translateY(0)}
-
-/* ===== RESPONSIVE ===== */
-@media(max-width:1024px){
-.blog-grid{grid-template-columns:repeat(2,1fr)}
-.categories-grid{grid-template-columns:repeat(2,1fr)}
-.footer-main{grid-template-columns:1fr 1fr;gap:3rem}
-}
-
-@media(max-width:768px){
-.nav{padding:1rem 1.5rem;grid-template-columns:1fr auto}
-.nav-links{display:none}
-.nav-cta{display:none}
-.mobile-toggle{display:block}
-.blog-hero{padding:8rem 1.5rem 3rem}
-.filter-section{padding:0 1.5rem 2rem}
-.featured-post{padding:0 1.5rem 3rem}
-.featured-card{grid-template-columns:1fr}
-.featured-card-content{padding:2rem}
-.blog-grid-section{padding:0 1.5rem 4rem}
-.blog-grid{grid-template-columns:1fr}
-.load-more-section{padding:0 1.5rem 4rem}
-.categories-section{padding:3rem 1.5rem 4rem}
-.categories-grid{grid-template-columns:1fr 1fr}
-.newsletter-section{padding:4rem 1.5rem}
-.newsletter-form{flex-direction:column}
-.popular-section{padding:3rem 1.5rem 4rem}
-.popular-item{grid-template-columns:40px 1fr;gap:1rem}
-.popular-item .pop-views{display:none}
-.footer{padding:4rem 1.5rem 2rem}
-.footer-main{grid-template-columns:1fr;gap:2rem;text-align:center}
-.footer-social{justify-content:center}
-.footer-bottom{flex-direction:column;text-align:center}
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="WAVE.DIGITAL 마케팅 인사이트 — SNS마케팅, 브랜딩, 퍼포먼스, 트렌드 리포트">
+  <title>인사이트 — WAVE.DIGITAL</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌊</text></svg>">
 </head>
 <body>
 
-<!-- ===== UNIFIED NAV ===== -->
-<nav class="nav" id="nav">
-<a href="index.html" class="nav-logo">WAVE<span>.</span>DIGITAL</a>
-<div class="nav-links">
-<a href="services.html">서비스</a>
-<a href="portfolio.html">포트폴리오</a>
-<a href="about.html">회사소개</a>
-<a href="blog.html" class="active">인사이트</a>
-<a href="contact.html">문의</a>
-</div>
-<a href="contact.html" class="nav-cta">프로젝트 시작하기</a>
-<button class="mobile-toggle" id="mobileToggle" aria-label="메뉴">
-<span></span><span></span><span></span>
-</button>
-</nav>
-<div class="mobile-nav" id="mobileNav">
-<div class="mobile-nav-links">
-<a href="services.html">서비스</a>
-<a href="portfolio.html">포트폴리오</a>
-<a href="about.html">회사소개</a>
-<a href="blog.html">인사이트</a>
-<a href="contact.html">문의</a>
-</div>
-</div>
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="container">
+      <a href="index.html" class="nav-logo">WAVE<span>.</span>DIGITAL</a>
+      <div class="nav-links">
+        <a href="services.html" class="nav-link">서비스</a>
+        <a href="portfolio.html" class="nav-link">포트폴리오</a>
+        <a href="about.html" class="nav-link">회사소개</a>
+        <a href="blog.html" class="nav-link active">인사이트</a>
+        <a href="contact.html" class="nav-link">문의</a>
+      </div>
+      <div class="nav-cta">
+        <a href="contact.html" class="btn btn-secondary btn-sm">프로젝트 시작하기</a>
+      </div>
+      <button class="nav-hamburger" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+  <div class="nav-mobile">
+    <a href="services.html" class="nav-link">서비스</a>
+    <a href="portfolio.html" class="nav-link">포트폴리오</a>
+    <a href="about.html" class="nav-link">회사소개</a>
+    <a href="blog.html" class="nav-link active">인사이트</a>
+    <a href="contact.html" class="nav-link">문의</a>
+    <a href="contact.html" class="btn btn-primary">프로젝트 시작하기</a>
+  </div>
 
-<!-- ===== HERO ===== -->
-<header class="blog-hero">
-<div class="eyebrow">Insights & Trends</div>
-<h1>마케팅<br><span>인사이트</span></h1>
-<p>디지털 마케팅의 최신 트렌드, 플랫폼 분석, 실전 가이드를 공유합니다. 데이터로 검증된 인사이트만 담았습니다.</p>
-<div class="blog-hero-deco"></div>
-</header>
+  <!-- HERO -->
+  <section class="page-hero">
+    <div>
+      <p class="overline reveal" style="color:rgba(255,255,255,.5);margin-bottom:1rem">MARKETING INSIGHTS</p>
+      <h1 class="heading-xl reveal">마케팅 인사이트</h1>
+      <p class="subtitle reveal" style="transition-delay:.1s">최신 마케팅 트렌드와 실전 전략을 공유합니다</p>
+    </div>
+  </section>
 
-<!-- ===== FILTERS ===== -->
-<section class="filter-section">
-<div class="filter-tabs">
-<button class="filter-tab active" data-cat="all">전체</button>
-<button class="filter-tab" data-cat="sns">SNS마케팅</button>
-<button class="filter-tab" data-cat="branding">브랜딩</button>
-<button class="filter-tab" data-cat="performance">퍼포먼스</button>
-<button class="filter-tab" data-cat="trend">트렌드</button>
-</div>
-</section>
+  <!-- Filter Tabs -->
+  <section class="section-sm">
+    <div class="container">
+      <div class="filter-tabs" style="margin-bottom:0">
+        <button class="filter-tab active" data-filter="all">전체</button>
+        <button class="filter-tab" data-filter="sns">SNS 마케팅</button>
+        <button class="filter-tab" data-filter="branding">브랜딩</button>
+        <button class="filter-tab" data-filter="performance">퍼포먼스</button>
+        <button class="filter-tab" data-filter="trend">트렌드</button>
+      </div>
+    </div>
+  </section>
 
-<!-- ===== FEATURED POST ===== -->
-<section class="featured-post fade-in" data-cat="trend">
-<div class="featured-card">
-<div class="featured-card-img">
-<img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1000&q=80" alt="2024년 디지털 마케팅 트렌드" loading="lazy">
-</div>
-<div class="featured-card-content">
-<span class="category-tag">트렌드</span>
-<h2>2024년 하반기 디지털 마케팅 트렌드 총정리</h2>
-<p class="excerpt">AI 기반 콘텐츠 생성, 숏폼 영상의 지속적 성장, 소셜 커머스의 확대 등 2024년 하반기 주목해야 할 디지털 마케팅 트렌드를 데이터와 함께 분석합니다. 실전에 바로 적용할 수 있는 전략을 포함했습니다.</p>
-<div class="meta">
-<img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&q=80" alt="김서연" class="author-img">
-<span>김서연 · 전략기획 이사</span>
-<span>2024.11.15</span>
-</div>
-<a href="#" class="read-more">자세히 읽기 →</a>
-</div>
-</div>
-</section>
+  <!-- Featured Article -->
+  <section class="section-sm" style="padding-top:0">
+    <div class="container">
+      <div class="featured-blog reveal">
+        <div class="featured-img">
+          <img src="https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=800&q=80" alt="인스타그램 알고리즘" loading="lazy">
+        </div>
+        <div class="featured-body">
+          <span class="badge badge-blue">SNS 마케팅</span>
+          <h2 class="heading-sm" style="margin-top:.75rem;margin-bottom:.75rem">2024 인스타그램 알고리즘 변화와 대응 전략: 릴스 시대의 생존법</h2>
+          <p style="color:var(--gray-600);line-height:1.8;margin-bottom:1rem">
+            2024년 인스타그램은 릴스 중심으로 알고리즘이 크게 변화했습니다. 기존의 피드 중심 전략으로는 더 이상 도달을 확보하기 어려운 시대가 되었습니다. 본 글에서는 변화된 알고리즘의 핵심 원리를 분석하고, 브랜드가 취해야 할 구체적인 대응 전략을 제시합니다.
+          </p>
+          <div class="blog-meta" style="margin-bottom:1.25rem">
+            <span>2024.03.15</span>
+            <span>·</span>
+            <span>김서연 · SNS전략팀장</span>
+            <span>·</span>
+            <span>8분 읽기</span>
+          </div>
+          <a href="#" class="btn btn-primary btn-sm">자세히 읽기 →</a>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<!-- ===== BLOG GRID ===== -->
-<section class="blog-grid-section">
-<div class="blog-grid-title fade-in">최신 인사이트</div>
-<div class="blog-grid" id="blogGrid">
-<div class="blog-card fade-in" data-cat="sns">
-<div class="blog-card-img">
-<img src="https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=600&q=80" alt="인스타그램 릴스" loading="lazy">
-<span class="category-badge">SNS마케팅</span>
-</div>
-<div class="blog-card-body">
-<h3>인스타그램 릴스로 팔로워 10배 늘리는 공식</h3>
-<p class="summary">실제 클라이언트 사례를 바탕으로 릴스 조회수와 팔로워를 폭발적으로 늘린 비결을 공개합니다. 후킹, 편집 템포, 해시태그 전략까지 모든 노하우를 담았습니다.</p>
-<div class="card-meta">
-<div class="author">
-<img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80" alt="최동현">
-<span>최동현</span>
-</div>
-<span>2024.10.25</span>
-</div>
-</div>
-</div>
-<div class="blog-card fade-in" data-cat="performance">
-<div class="blog-card-img">
-<img src="https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=600&q=80" alt="네이버 알고리즘" loading="lazy">
-<span class="category-badge">퍼포먼스</span>
-</div>
-<div class="blog-card-body">
-<h3>네이버 블로그 상위노출, 2024년 알고리즘 변화 대응법</h3>
-<p class="summary">네이버가 올해 적용한 블로그 알고리즘 변화를 상세히 분석하고, 상위노출을 유지하기 위한 실전 전략 5가지를 공유합니다.</p>
-<div class="card-meta">
-<div class="author">
-<img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&q=80" alt="김서연">
-<span>김서연</span>
-</div>
-<span>2024.11.08</span>
-</div>
-</div>
-</div>
-<div class="blog-card fade-in" data-cat="sns">
-<div class="blog-card-img">
-<img src="https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?w=600&q=80" alt="유튜브 쇼츠" loading="lazy">
-<span class="category-badge">SNS마케팅</span>
-</div>
-<div class="blog-card-body">
-<h3>유튜브 쇼츠 vs 롱폼, 어떤 전략이 효과적일까?</h3>
-<p class="summary">유튜브 쇼츠와 롱폼 콘텐츠의 알고리즘 차이, 수익화 전략, 그리고 브랜드별 최적의 콘텐츠 믹스를 데이터로 분석합니다.</p>
-<div class="card-meta">
-<div class="author">
-<img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80" alt="박현우">
-<span>박현우</span>
-</div>
-<span>2024.10.12</span>
-</div>
-</div>
-</div>
-<div class="blog-card fade-in" data-cat="sns">
-<div class="blog-card-img">
-<img src="https://images.unsplash.com/photo-1596558450268-9c27524ba856?w=600&q=80" alt="틱톡 알고리즘" loading="lazy">
-<span class="category-badge">SNS마케팅</span>
-</div>
-<div class="blog-card-body">
-<h3>틱톡 알고리즘 완전 해부: 추천 피드에 뜨는 법</h3>
-<p class="summary">틱톡 추천 알고리즘의 작동 원리를 분석하고, 조회수를 극대화하는 콘텐츠 제작 전략을 공유합니다. 업로드 시간부터 사운드 선택까지.</p>
-<div class="card-meta">
-<div class="author">
-<img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80" alt="최동현">
-<span>최동현</span>
-</div>
-<span>2024.09.30</span>
-</div>
-</div>
-</div>
-<div class="blog-card fade-in" data-cat="performance">
-<div class="blog-card-img">
-<img src="https://images.unsplash.com/photo-1553484771-047a44eee27b?w=600&q=80" alt="스마트스토어" loading="lazy">
-<span class="category-badge">퍼포먼스</span>
-</div>
-<div class="blog-card-body">
-<h3>스마트스토어 매출 3배 올리는 검색광고 세팅법</h3>
-<p class="summary">스마트스토어 검색광고의 키워드 선정, 입찰가 전략, 품질지수 관리법을 실전 경험을 바탕으로 설명합니다. ROAS 500% 이상 달성 캠페인 설정 공개.</p>
-<div class="card-meta">
-<div class="author">
-<img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&q=80" alt="정아린">
-<span>정아린</span>
-</div>
-<span>2024.09.18</span>
-</div>
-</div>
-</div>
-<div class="blog-card fade-in" data-cat="trend">
-<div class="blog-card-img">
-<img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&q=80" alt="AI 마케팅" loading="lazy">
-<span class="category-badge">트렌드</span>
-</div>
-<div class="blog-card-body">
-<h3>AI 마케팅 도구 비교: 실무에서 쓸 수 있는 것만</h3>
-<p class="summary">실무에서 실제로 생산성을 높여주는 AI 마케팅 도구 10가지를 비교 리뷰합니다. 콘텐츠 생성, 이미지 제작, 데이터 분석까지 분야별 추천.</p>
-<div class="card-meta">
-<div class="author">
-<img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80" alt="윤재혁">
-<span>윤재혁</span>
-</div>
-<span>2024.09.05</span>
-</div>
-</div>
-</div>
-<div class="blog-card fade-in" data-cat="performance">
-<div class="blog-card-img">
-<img src="https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=600&q=80" alt="인스타그램 광고" loading="lazy">
-<span class="category-badge">퍼포먼스</span>
-</div>
-<div class="blog-card-body">
-<h3>인스타그램 광고 ROAS 700% 달성 실전 가이드</h3>
-<p class="summary">메타 광고 플랫폼에서 ROAS 700%를 달성한 실제 캠페인의 타겟팅 설정, 소재 전략, 최적화 과정을 단계별로 공개합니다.</p>
-<div class="card-meta">
-<div class="author">
-<img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&q=80" alt="정아린">
-<span>정아린</span>
-</div>
-<span>2024.08.22</span>
-</div>
-</div>
-</div>
-<div class="blog-card fade-in" data-cat="branding">
-<div class="blog-card-img">
-<img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=600&q=80" alt="브랜딩" loading="lazy">
-<span class="category-badge">브랜딩</span>
-</div>
-<div class="blog-card-body">
-<h3>MZ세대를 사로잡는 브랜드 아이덴티티 구축법</h3>
-<p class="summary">MZ세대 소비자의 브랜드 인식 패턴을 분석하고, 그들의 마음을 사로잡는 브랜드 아이덴티티 구축 전략 7가지를 공유합니다.</p>
-<div class="card-meta">
-<div class="author">
-<img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80" alt="한수빈">
-<span>한수빈</span>
-</div>
-<span>2024.08.10</span>
-</div>
-</div>
-</div>
-</div>
-</section>
+  <!-- Blog Grid + Sidebar -->
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="blog-layout">
+        <!-- Main Content -->
+        <div>
+          <div class="blog-grid" style="grid-template-columns:repeat(2,1fr)">
+            <!-- Blog 1 -->
+            <article class="blog-card reveal" data-category="sns">
+              <div class="blog-img">
+                <img src="https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=600&q=80" alt="네이버 플레이스" loading="lazy">
+              </div>
+              <div class="blog-body">
+                <p class="blog-category">네이버 마케팅</p>
+                <h3>네이버 플레이스 상위노출, 진짜 중요한 3가지</h3>
+                <p class="blog-excerpt">네이버 플레이스 순위를 결정하는 핵심 요소 3가지와 실제 상위노출에 성공한 매장들의 공통점을 분석합니다. 리뷰 수보다 중요한 것이 있습니다.</p>
+                <div class="blog-meta">
+                  <span>2024.03.10</span>
+                  <span>·</span>
+                  <span>7분 읽기</span>
+                </div>
+              </div>
+            </article>
 
-<!-- ===== LOAD MORE ===== -->
-<section class="load-more-section">
-<button class="load-more-btn" id="loadMore">더 많은 인사이트 보기</button>
-</section>
+            <!-- Blog 2 -->
+            <article class="blog-card reveal" data-category="performance">
+              <div class="blog-img">
+                <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80" alt="META 광고" loading="lazy">
+              </div>
+              <div class="blog-body">
+                <p class="blog-category">퍼포먼스</p>
+                <h3>ROAS 300% 달성하는 META 광고 세팅법</h3>
+                <p class="blog-excerpt">META 광고에서 높은 ROAS를 달성하기 위한 캠페인 구조, 타겟팅 전략, 크리에이티브 최적화 방법을 실전 사례와 함께 공개합니다.</p>
+                <div class="blog-meta">
+                  <span>2024.03.05</span>
+                  <span>·</span>
+                  <span>8분 읽기</span>
+                </div>
+              </div>
+            </article>
 
-<!-- ===== CATEGORIES ===== -->
-<section class="categories-section">
-<div class="section-header fade-in" style="max-width:1200px;margin:0 auto 3rem;text-align:center">
-<div class="eyebrow" style="font-family:var(--font-heading);font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:.15em;color:var(--blue);margin-bottom:1rem">카테고리</div>
-<h2 style="font-family:var(--font-heading);font-size:clamp(1.8rem,4vw,2.5rem);font-weight:700;letter-spacing:-.02em">관심 있는 주제를 탐색하세요</h2>
-</div>
-<div class="categories-grid">
-<div class="cat-card fade-in">
-<div class="cat-icon">📱</div>
-<h3>SNS마케팅</h3>
-<p>인스타그램, 틱톡, 유튜브 등 소셜 미디어 채널 운영 및 성장 전략</p>
-<span class="cat-count">24개의 글</span>
-</div>
-<div class="cat-card fade-in">
-<div class="cat-icon">🎨</div>
-<h3>브랜딩</h3>
-<p>브랜드 아이덴티티, 포지셔닝, 스토리텔링 등 브랜드 구축 전략</p>
-<span class="cat-count">18개의 글</span>
-</div>
-<div class="cat-card fade-in">
-<div class="cat-icon">📊</div>
-<h3>퍼포먼스</h3>
-<p>검색광고, 디스플레이 광고, ROAS 최적화 등 성과 중심 마케팅</p>
-<span class="cat-count">21개의 글</span>
-</div>
-<div class="cat-card fade-in">
-<div class="cat-icon">🔮</div>
-<h3>트렌드</h3>
-<p>디지털 마케팅 트렌드, AI 도구, 새로운 플랫폼 분석 및 전망</p>
-<span class="cat-count">15개의 글</span>
-</div>
-</div>
-</section>
+            <!-- Blog 3 -->
+            <article class="blog-card reveal" data-category="trend">
+              <div class="blog-img">
+                <img src="https://images.unsplash.com/photo-1596558450268-9c27524ba856?w=600&q=80" alt="틱톡 트렌드" loading="lazy">
+              </div>
+              <div class="blog-body">
+                <p class="blog-category">트렌드</p>
+                <h3>2024 틱톡 마케팅 트렌드 TOP 7</h3>
+                <p class="blog-excerpt">올해 틱톡에서 주목해야 할 7가지 마케팅 트렌드를 정리했습니다. AI 콘텐츠, 소셜 커머스, 커뮤니티 중심 전략까지.</p>
+                <div class="blog-meta">
+                  <span>2024.02.28</span>
+                  <span>·</span>
+                  <span>6분 읽기</span>
+                </div>
+              </div>
+            </article>
 
-<!-- ===== NEWSLETTER ===== -->
-<section class="newsletter-section fade-in">
-<div class="newsletter-inner">
-<div class="eyebrow">Newsletter</div>
-<h2>매주 마케팅 인사이트를<br>받아보세요</h2>
-<p>매주 월요일, 디지털 마케팅 최신 트렌드와 실전 팁을 이메일로 보내드립니다. 이미 2,400명의 마케터가 구독 중입니다.</p>
-<form class="newsletter-form" id="newsletterForm">
-<input type="email" placeholder="이메일 주소를 입력하세요" required>
-<button type="submit">구독하기</button>
-</form>
-<p class="newsletter-note">스팸 없음 · 언제든 구독 취소 가능</p>
-</div>
-</section>
+            <!-- Blog 4 -->
+            <article class="blog-card reveal" data-category="branding">
+              <div class="blog-img">
+                <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&q=80" alt="브랜드 리뉴얼" loading="lazy">
+              </div>
+              <div class="blog-body">
+                <p class="blog-category">브랜딩</p>
+                <h3>성공적인 브랜드 리뉴얼의 5가지 원칙</h3>
+                <p class="blog-excerpt">브랜드 리뉴얼은 언제 해야 할까요? 성공적인 리뉴얼을 위한 5가지 핵심 원칙과 실패를 피하는 방법을 알려드립니다.</p>
+                <div class="blog-meta">
+                  <span>2024.02.20</span>
+                  <span>·</span>
+                  <span>10분 읽기</span>
+                </div>
+              </div>
+            </article>
 
-<!-- ===== POPULAR POSTS ===== -->
-<section class="popular-section">
-<div class="popular-inner">
-<div class="section-title fade-in">🔥 인기 인사이트</div>
-<div class="popular-list">
-<div class="popular-item fade-in">
-<div class="rank">01</div>
-<div class="pop-content">
-<h4>2024년 하반기 디지털 마케팅 트렌드 총정리</h4>
-<p>김서연 · 트렌드</p>
-</div>
-<div class="pop-views">조회 12,400</div>
-</div>
-<div class="popular-item fade-in">
-<div class="rank">02</div>
-<div class="pop-content">
-<h4>인스타그램 릴스로 팔로워 10배 늘리는 공식</h4>
-<p>최동현 · SNS마케팅</p>
-</div>
-<div class="pop-views">조회 9,800</div>
-</div>
-<div class="popular-item fade-in">
-<div class="rank">03</div>
-<div class="pop-content">
-<h4>틱톡 알고리즘 완전 해부: 추천 피드에 뜨는 법</h4>
-<p>최동현 · SNS마케팅</p>
-</div>
-<div class="pop-views">조회 8,200</div>
-</div>
-<div class="popular-item fade-in">
-<div class="rank">04</div>
-<div class="pop-content">
-<h4>인스타그램 광고 ROAS 700% 달성 실전 가이드</h4>
-<p>정아린 · 퍼포먼스</p>
-</div>
-<div class="pop-views">조회 7,500</div>
-</div>
-<div class="popular-item fade-in">
-<div class="rank">05</div>
-<div class="pop-content">
-<h4>스마트스토어 매출 3배 올리는 검색광고 세팅법</h4>
-<p>정아린 · 퍼포먼스</p>
-</div>
-<div class="pop-views">조회 6,900</div>
-</div>
-</div>
-</div>
-</section>
+            <!-- Blog 5 -->
+            <article class="blog-card reveal" data-category="sns">
+              <div class="blog-img">
+                <img src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&q=80" alt="유튜브 숏폼" loading="lazy">
+              </div>
+              <div class="blog-body">
+                <p class="blog-category">SNS 마케팅</p>
+                <h3>유튜브 숏츠 vs 틱톡 vs 릴스: 어디에 집중할까?</h3>
+                <p class="blog-excerpt">숏폼 플랫폼 3대장의 알고리즘, 사용자 특성, 광고 효율을 비교 분석하여 브랜드에 맞는 최적의 채널을 찾아드립니다.</p>
+                <div class="blog-meta">
+                  <span>2024.02.15</span>
+                  <span>·</span>
+                  <span>9분 읽기</span>
+                </div>
+              </div>
+            </article>
 
-<!-- ===== UNIFIED FOOTER ===== -->
-<footer class="footer">
-<div class="footer-main">
-<div class="footer-brand">
-<h3>WAVE<span>.</span>DIGITAL</h3>
-<p>브랜드의 파도를 만드는 디지털 마케팅 전문 에이전시입니다. 데이터 기반의 전략과 창의적인 실행으로 고객의 성공을 함께 만들어갑니다.</p>
-<div class="footer-contact-info">
-<p>📍 서울특별시 강남구 테헤란로 123 웨이브타워 8층</p>
-<p>📞 02-1234-5678</p>
-<p>✉️ hello@wavedigital.kr</p>
-</div>
-<div class="footer-social">
-<a href="#" aria-label="인스타그램"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5"/></svg></a>
-<a href="#" aria-label="유튜브"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2s-.2-1.6-.9-2.3c-.9-.9-1.8-.9-2.3-1C17 2.6 12 2.6 12 2.6s-5 0-8.3.3c-.5.1-1.4.1-2.3 1-.7.7-.9 2.3-.9 2.3S.2 8.1.2 10v1.8c0 1.9.3 3.8.3 3.8s.2 1.6.9 2.3c.9.9 2 .9 2.5 1 1.8.2 7.1.2 7.1.2s5 0 8.3-.3c.5-.1 1.4-.1 2.3-1 .7-.7.9-2.3.9-2.3s.3-1.9.3-3.8V10c0-1.9-.3-3.8-.3-3.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg></a>
-<a href="#" aria-label="블로그"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16.3 3.9H7.7c-.8 0-1.4.6-1.4 1.4v13.4c0 .8.6 1.4 1.4 1.4h8.6c.8 0 1.4-.6 1.4-1.4V5.3c0-.8-.6-1.4-1.4-1.4zm-5.5 2.8h2.4c.4 0 .7.3.7.7s-.3.7-.7.7h-2.4c-.4 0-.7-.3-.7-.7s.3-.7.7-.7zm3.8 10.6H9.4c-.4 0-.7-.3-.7-.7s.3-.7.7-.7h5.2c.4 0 .7.3.7.7s-.3.7-.7.7zm0-3h-5.2c-.4 0-.7-.3-.7-.7s.3-.7.7-.7h5.2c.4 0 .7.3.7.7s-.3.7-.7.7zm0-3h-5.2c-.4 0-.7-.3-.7-.7s.3-.7.7-.7h5.2c.4 0 .7.3.7.7s-.3.7-.7.7z"/></svg></a>
-</div>
-</div>
-<div class="footer-col">
-<h4>서비스</h4>
-<a href="services.html">네이버 마케팅</a>
-<a href="services.html">인스타그램 마케팅</a>
-<a href="services.html">유튜브 마케팅</a>
-<a href="services.html">틱톡 마케팅</a>
-<a href="services.html">통합 브랜딩</a>
-<a href="services.html">퍼포먼스 마케팅</a>
-</div>
-<div class="footer-col">
-<h4>인사이트</h4>
-<a href="blog.html">마케팅 트렌드</a>
-<a href="blog.html">플랫폼 분석</a>
-<a href="blog.html">성공 사례</a>
-<a href="blog.html">실전 가이드</a>
-<a href="about.html">회사소개</a>
-<a href="portfolio.html">포트폴리오</a>
-</div>
-<div class="footer-col">
-<h4>소셜</h4>
-<a href="#">인스타그램</a>
-<a href="#">유튜브</a>
-<a href="#">네이버 블로그</a>
-<a href="contact.html">문의하기</a>
-<a href="contact.html">무료 상담</a>
-</div>
-</div>
-<div class="footer-bottom">
-<div class="footer-bottom-left">
-<a href="#">이용약관</a>
-<a href="#">개인정보처리방침</a>
-<a href="#">사업자정보</a>
-</div>
-<div class="footer-copyright">© 2024 WAVE DIGITAL. All rights reserved. | 사업자등록번호 123-45-67890</div>
-</div>
-</footer>
+            <!-- Blog 6 -->
+            <article class="blog-card reveal" data-category="performance">
+              <div class="blog-img">
+                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80" alt="구글 애널리틱스" loading="lazy">
+              </div>
+              <div class="blog-body">
+                <p class="blog-category">퍼포먼스</p>
+                <h3>GA4 완벽 가이드: 마케터가 꼭 봐야 할 지표 10가지</h3>
+                <p class="blog-excerpt">Google Analytics 4로 전환한 후 혼란스러우신가요? 마케터가 반드시 확인해야 할 10가지 핵심 지표와 활용법을 정리했습니다.</p>
+                <div class="blog-meta">
+                  <span>2024.02.08</span>
+                  <span>·</span>
+                  <span>12분 읽기</span>
+                </div>
+              </div>
+            </article>
 
-<script>
-// Mobile Nav
-document.getElementById('mobileToggle').addEventListener('click', () => {
-document.getElementById('mobileNav').classList.toggle('open');
-});
+            <!-- Blog 7 -->
+            <article class="blog-card reveal" data-category="trend">
+              <div class="blog-img">
+                <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&q=80" alt="AI 마케팅" loading="lazy">
+              </div>
+              <div class="blog-body">
+                <p class="blog-category">트렌드</p>
+                <h3>AI가 바꾸는 디지털 마케팅의 미래</h3>
+                <p class="blog-excerpt">ChatGPT, Midjourney, DALL-E 등 AI 도구가 마케팅 현장을 어떻게 변화시키고 있는지, 그리고 마케터가 준비해야 할 것을 이야기합니다.</p>
+                <div class="blog-meta">
+                  <span>2024.02.01</span>
+                  <span>·</span>
+                  <span>7분 읽기</span>
+                </div>
+              </div>
+            </article>
 
-// Nav scroll
-const nav = document.getElementById('nav');
-window.addEventListener('scroll', () => {
-nav.classList.toggle('scrolled', window.scrollY > 50);
-});
+            <!-- Blog 8 -->
+            <article class="blog-card reveal" data-category="branding">
+              <div class="blog-img">
+                <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&q=80" alt="소비자 심리" loading="lazy">
+              </div>
+              <div class="blog-body">
+                <p class="blog-category">브랜딩</p>
+                <h3>MZ세대가 사랑하는 브랜드의 공통점</h3>
+                <p class="blog-excerpt">MZ세대 소비자 1,000명을 대상으로 한 설문 결과를 바탕으로, 이들이 진정으로 선호하는 브랜드의 5가지 공통점을 분석합니다.</p>
+                <div class="blog-meta">
+                  <span>2024.01.25</span>
+                  <span>·</span>
+                  <span>6분 읽기</span>
+                </div>
+              </div>
+            </article>
+          </div>
 
-// Fade in
-const fadeEls = document.querySelectorAll('.fade-in');
-const fadeObserver = new IntersectionObserver((entries) => {
-entries.forEach(entry => {
-if (entry.isIntersecting) {
-entry.target.classList.add('visible');
-fadeObserver.unobserve(entry.target);
-}
-});
-}, { threshold: 0.15 });
-fadeEls.forEach(el => fadeObserver.observe(el));
+          <!-- Load More -->
+          <div class="text-center reveal" style="margin-top:2.5rem">
+            <button class="btn btn-secondary">더 많은 인사이트 보기 →</button>
+          </div>
+        </div>
 
-// Filter tabs
-document.querySelectorAll('.filter-tab').forEach(tab => {
-tab.addEventListener('click', () => {
-document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-tab.classList.add('active');
-const cat = tab.dataset.cat;
-// Filter blog cards
-document.querySelectorAll('.blog-card').forEach(card => {
-card.style.display = (cat === 'all' || card.dataset.cat === cat) ? '' : 'none';
-});
-// Filter featured
-const featured = document.querySelector('.featured-post');
-if (featured) {
-featured.style.display = (cat === 'all' || featured.dataset.cat === cat) ? '' : 'none';
-}
-});
-});
+        <!-- Sidebar -->
+        <aside class="sidebar">
+          <!-- Popular -->
+          <div class="sidebar-section">
+            <h3>인기 인사이트 TOP 5</h3>
+            <div class="popular-list">
+              <div class="popular-item">
+                <span class="popular-rank">1</span>
+                <div>
+                  <h4>2024 인스타그램 알고리즘 변화와 대응 전략</h4>
+                  <p style="font-size:.6875rem;color:var(--gray-500);margin-top:.25rem">조회 12,450회</p>
+                </div>
+              </div>
+              <div class="popular-item">
+                <span class="popular-rank">2</span>
+                <div>
+                  <h4>네이버 플레이스 상위노출, 진짜 중요한 3가지</h4>
+                  <p style="font-size:.6875rem;color:var(--gray-500);margin-top:.25rem">조회 9,820회</p>
+                </div>
+              </div>
+              <div class="popular-item">
+                <span class="popular-rank">3</span>
+                <div>
+                  <h4>ROAS 300% 달성하는 META 광고 세팅법</h4>
+                  <p style="font-size:.6875rem;color:var(--gray-500);margin-top:.25rem">조회 8,340회</p>
+                </div>
+              </div>
+              <div class="popular-item">
+                <span class="popular-rank">4</span>
+                <div>
+                  <h4>유튜브 숏츠 vs 틱톡 vs 릴스 비교</h4>
+                  <p style="font-size:.6875rem;color:var(--gray-500);margin-top:.25rem">조회 7,150회</p>
+                </div>
+              </div>
+              <div class="popular-item">
+                <span class="popular-rank">5</span>
+                <div>
+                  <h4>GA4 완벽 가이드: 핵심 지표 10가지</h4>
+                  <p style="font-size:.6875rem;color:var(--gray-500);margin-top:.25rem">조회 6,890회</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-// Load more
-document.getElementById('loadMore').addEventListener('click', function() {
-this.textContent = '모든 글을 불러왔습니다';
-this.disabled = true;
-this.style.opacity = '.5';
-this.style.cursor = 'default';
-});
+          <!-- Newsletter -->
+          <div class="newsletter-box">
+            <h3>뉴스레터 구독</h3>
+            <p>매주 월요일, 최신 마케팅 인사이트를 이메일로 받아보세요.</p>
+            <form class="newsletter-form">
+              <input type="email" placeholder="이메일 주소 입력" aria-label="이메일 주소">
+              <button type="submit">무료 구독하기</button>
+            </form>
+            <p class="subscriber-count">1,247명이 구독 중</p>
+          </div>
 
-// Newsletter
-document.getElementById('newsletterForm').addEventListener('submit', function(e) {
-e.preventDefault();
-const btn = this.querySelector('button');
-btn.textContent = '✓ 구독 완료!';
-btn.style.background = '#03C75A';
-this.querySelector('input').value = '';
-setTimeout(() => { btn.textContent = '구독하기'; btn.style.background = ''; }, 3000);
-});
-</script>
+          <!-- Categories -->
+          <div class="sidebar-section">
+            <h3>카테고리</h3>
+            <div style="display:flex;flex-direction:column;gap:.5rem">
+              <a href="#" style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;font-size:.875rem;border-bottom:1px solid var(--gray-200)">
+                <span>SNS 마케팅</span>
+                <span class="badge badge-blue">12</span>
+              </a>
+              <a href="#" style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;font-size:.875rem;border-bottom:1px solid var(--gray-200)">
+                <span>브랜딩 전략</span>
+                <span class="badge badge-blue">8</span>
+              </a>
+              <a href="#" style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;font-size:.875rem;border-bottom:1px solid var(--gray-200)">
+                <span>퍼포먼스 마케팅</span>
+                <span class="badge badge-blue">10</span>
+              </a>
+              <a href="#" style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;font-size:.875rem">
+                <span>트렌드 리포트</span>
+                <span class="badge badge-blue">6</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Tags -->
+          <div class="sidebar-section">
+            <h3>태그</h3>
+            <div style="display:flex;flex-wrap:wrap;gap:.375rem">
+              <span class="badge badge-blue" style="cursor:pointer">인스타그램</span>
+              <span class="badge badge-blue" style="cursor:pointer">네이버</span>
+              <span class="badge badge-blue" style="cursor:pointer">틱톡</span>
+              <span class="badge badge-blue" style="cursor:pointer">유튜브</span>
+              <span class="badge badge-blue" style="cursor:pointer">ROAS</span>
+              <span class="badge badge-blue" style="cursor:pointer">SEO</span>
+              <span class="badge badge-blue" style="cursor:pointer">GA4</span>
+              <span class="badge badge-blue" style="cursor:pointer">AI</span>
+              <span class="badge badge-blue" style="cursor:pointer">브랜딩</span>
+              <span class="badge badge-blue" style="cursor:pointer">MZ세대</span>
+              <span class="badge badge-blue" style="cursor:pointer">숏폼</span>
+              <span class="badge badge-blue" style="cursor:pointer">인플루언서</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CATEGORY SECTIONS
+       ============================================================ -->
+
+  <!-- SNS 마케팅 -->
+  <section class="section" style="background:var(--gray-50)">
+    <div class="container">
+      <div class="reveal" style="margin-bottom:2.5rem">
+        <p class="overline">SNS MARKETING</p>
+        <h2 class="heading-md" style="margin-top:.5rem">SNS 마케팅 인사이트</h2>
+        <p style="color:var(--gray-600);margin-top:.5rem">소셜 미디어 채널별 최신 전략과 트렌드</p>
+      </div>
+
+      <div class="blog-grid">
+        <article class="blog-card reveal">
+          <div class="blog-img">
+            <img src="https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=600&q=80" alt="인스타그램 릴스" loading="lazy">
+          </div>
+          <div class="blog-body">
+            <p class="blog-category">인스타그램</p>
+            <h3>릴스 조회수 10만 달성하는 5가지 공식</h3>
+            <p class="blog-excerpt">실제 클라이언트 계정에서 검증된 릴스 바이럴 공식을 공개합니다. 처음 3초의 마법부터 해시태그 전략까지 모든 노하우를 담았습니다.</p>
+            <div class="blog-meta">
+              <span>2024.01.18</span>
+              <span>·</span>
+              <span>김서연</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="blog-card reveal">
+          <div class="blog-img">
+            <img src="https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=600&q=80" alt="네이버 블로그" loading="lazy">
+          </div>
+          <div class="blog-body">
+            <p class="blog-category">네이버</p>
+            <h3>네이버 블로그 SEO: 상위노출을 위한 완벽 가이드</h3>
+            <p class="blog-excerpt">네이버 블로그에서 검색 상위에 노출되기 위한 제목 작성법, 키워드 배치, 이미지 최적화 등 실전 SEO 기법을 정리했습니다.</p>
+            <div class="blog-meta">
+              <span>2024.01.10</span>
+              <span>·</span>
+              <span>박민수</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="blog-card reveal">
+          <div class="blog-img">
+            <img src="https://images.unsplash.com/photo-1596558450268-9c27524ba856?w=600&q=80" alt="틱톡 챌린지" loading="lazy">
+          </div>
+          <div class="blog-body">
+            <p class="blog-category">틱톡</p>
+            <h3>브랜드 챌린지 성공률을 3배 높이는 법</h3>
+            <p class="blog-excerpt">틱톡 챌린지는 왜 실패하는 경우가 많을까요? 성공한 챌린지들의 공통 패턴을 분석하고, 성공률을 높이는 기획법을 제시합니다.</p>
+            <div class="blog-meta">
+              <span>2024.01.05</span>
+              <span>·</span>
+              <span>이현주</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 브랜딩 -->
+  <section class="section">
+    <div class="container">
+      <div class="reveal" style="margin-bottom:2.5rem">
+        <p class="overline-coral">BRANDING</p>
+        <h2 class="heading-md" style="margin-top:.5rem">브랜딩 인사이트</h2>
+        <p style="color:var(--gray-600);margin-top:.5rem">브랜드 전략과 아이덴티티에 대한 깊은 이야기</p>
+      </div>
+
+      <div class="blog-grid">
+        <article class="blog-card reveal">
+          <div class="blog-img">
+            <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&q=80" alt="브랜드 스토리" loading="lazy">
+          </div>
+          <div class="blog-body">
+            <p class="blog-category" style="color:var(--coral)">브랜딩</p>
+            <h3>브랜드 스토리텔링: 고객의 마음을 움직이는 3가지 구조</h3>
+            <p class="blog-excerpt">나이키, 애플, 파타고니아의 브랜드 스토리에서 발견한 3가지 공통 구조와 이를 우리 브랜드에 적용하는 방법을 알려드립니다.</p>
+            <div class="blog-meta">
+              <span>2023.12.28</span>
+              <span>·</span>
+              <span>최준혁</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="blog-card reveal">
+          <div class="blog-img">
+            <img src="https://images.unsplash.com/photo-1556740758-90de940bb468?w=600&q=80" alt="컬러 심리학" loading="lazy">
+          </div>
+          <div class="blog-body">
+            <p class="blog-category" style="color:var(--coral)">브랜딩</p>
+            <h3>컬러 심리학: 브랜드 컬러가 매출에 미치는 영향</h3>
+            <p class="blog-excerpt">색상이 소비자의 구매 결정에 미치는 영향을 심리학 연구 결과와 실제 사례를 통해 분석합니다. 브랜드 컬러 선택 가이드를 제공합니다.</p>
+            <div class="blog-meta">
+              <span>2023.12.20</span>
+              <span>·</span>
+              <span>한소희</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="blog-card reveal">
+          <div class="blog-img">
+            <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&q=80" alt="브랜드 포지셔닝" loading="lazy">
+          </div>
+          <div class="blog-body">
+            <p class="blog-category" style="color:var(--coral)">브랜딩</p>
+            <h3>레드오션에서 살아남는 브랜드 포지셔닝 전략</h3>
+            <p class="blog-excerpt">경쟁이 치열한 시장에서 차별화된 포지셔닝을 확보하는 방법. 실제 클라이언트 사례와 함께 포지셔닝 맵 작성법을 소개합니다.</p>
+            <div class="blog-meta">
+              <span>2023.12.15</span>
+              <span>·</span>
+              <span>정우진</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 퍼포먼스 -->
+  <section class="section" style="background:var(--gray-50)">
+    <div class="container">
+      <div class="reveal" style="margin-bottom:2.5rem">
+        <p class="overline">PERFORMANCE</p>
+        <h2 class="heading-md" style="margin-top:.5rem">퍼포먼스 마케팅 인사이트</h2>
+        <p style="color:var(--gray-600);margin-top:.5rem">광고 효율을 극대화하는 실전 전략</p>
+      </div>
+
+      <div class="blog-grid">
+        <article class="blog-card reveal">
+          <div class="blog-img">
+            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80" alt="리타겟팅" loading="lazy">
+          </div>
+          <div class="blog-body">
+            <p class="blog-category">퍼포먼스</p>
+            <h3>리타겟팅 광고 전환율을 2배 높이는 세그먼트 전략</h3>
+            <p class="blog-excerpt">모든 리타겟팅이 같은 효과를 내는 것은 아닙니다. 사용자 행동 기반 세그먼트 분류와 단계별 리타겟팅 전략을 공개합니다.</p>
+            <div class="blog-meta">
+              <span>2023.12.10</span>
+              <span>·</span>
+              <span>박민수</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="blog-card reveal">
+          <div class="blog-img">
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80" alt="전환 추적" loading="lazy">
+          </div>
+          <div class="blog-body">
+            <p class="blog-category">퍼포먼스</p>
+            <h3>iOS 17 이후 전환 추적의 변화와 대응법</h3>
+            <p class="blog-excerpt">ATT 프레임워크와 개인정보 보호 강화로 달라진 전환 추적 환경. SKAN, CAPI 등 새로운 추적 방법과 대응 전략을 정리합니다.</p>
+            <div class="blog-meta">
+              <span>2023.12.05</span>
+              <span>·</span>
+              <span>김서연</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="blog-card reveal">
+          <div class="blog-img">
+            <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&q=80" alt="광고 크리에이티브" loading="lazy">
+          </div>
+          <div class="blog-body">
+            <p class="blog-category">퍼포먼스</p>
+            <h3>CTR 5% 이상 달성하는 광고 크리에이티브의 비밀</h3>
+            <p class="blog-excerpt">1,000개 이상의 광고 소재 A/B 테스트 결과를 분석하여 높은 CTR을 달성하는 크리에이티브의 공통 요소를 도출했습니다.</p>
+            <div class="blog-meta">
+              <span>2023.11.28</span>
+              <span>·</span>
+              <span>이현주</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 트렌드 -->
+  <section class="section">
+    <div class="container">
+      <div class="reveal" style="margin-bottom:2.5rem">
+        <p class="overline">TREND REPORT</p>
+        <h2 class="heading-md" style="margin-top:.5rem">트렌드 리포트</h2>
+        <p style="color:var(--gray-600);margin-top:.5rem">디지털 마케팅의 미래를 읽는 인사이트</p>
+      </div>
+
+      <div class="blog-grid">
+        <article class="blog-card reveal">
+          <div class="blog-img">
+            <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&q=80" alt="2024 트렌드" loading="lazy">
+          </div>
+          <div class="blog-body">
+            <p class="blog-category" style="color:var(--coral)">트렌드</p>
+            <h3>2024 디지털 마케팅 10대 트렌드 전망</h3>
+            <p class="blog-excerpt">AI 마케팅, 소셜 커머스, 개인화, 숏폼 콘텐츠 등 2024년 디지털 마케팅을 주도할 10가지 트렌드를 전망합니다.</p>
+            <div class="blog-meta">
+              <span>2023.12.30</span>
+              <span>·</span>
+              <span>WAVE 리서치팀</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="blog-card reveal">
+          <div class="blog-img">
+            <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&q=80" alt="소셜 커머스" loading="lazy">
+          </div>
+          <div class="blog-body">
+            <p class="blog-category" style="color:var(--coral)">트렌드</p>
+            <h3>소셜 커머스의 진화: 인스타그램 샵에서 라이브까지</h3>
+            <p class="blog-excerpt">소셜 미디어가 쇼핑 플랫폼으로 진화하고 있습니다. 인스타그램 샵, 틱톡 샵, 라이브 커머스의 현재와 미래를 분석합니다.</p>
+            <div class="blog-meta">
+              <span>2023.11.20</span>
+              <span>·</span>
+              <span>정우진</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="blog-card reveal">
+          <div class="blog-img">
+            <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&q=80" alt="Gen Z" loading="lazy">
+          </div>
+          <div class="blog-body">
+            <p class="blog-category" style="color:var(--coral)">트렌드</p>
+            <h3>Gen Z 마케팅: 진정성이 전략이 되는 시대</h3>
+            <p class="blog-excerpt">Z세대는 왜 '날것'의 콘텐츠에 반응할까요? Gen Z 소비자의 미디어 소비 패턴과 효과적인 마케팅 접근법을 연구합니다.</p>
+            <div class="blog-meta">
+              <span>2023.11.15</span>
+              <span>·</span>
+              <span>한소희</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       EXPERT COLUMNS
+       ============================================================ -->
+  <section class="section" style="background:var(--charcoal);color:#fff">
+    <div class="container">
+      <div class="text-center reveal" style="margin-bottom:3rem">
+        <p class="overline" style="color:var(--coral)">EXPERT COLUMN</p>
+        <h2 class="heading-md" style="color:#fff;margin-top:.5rem">전문가 칼럼</h2>
+        <p style="color:rgba(255,255,255,.6);margin-top:.5rem">WAVE.DIGITAL 전문가들의 심층 분석</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:2rem">
+        <div class="reveal" style="padding:2rem;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-md)">
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem">
+            <div style="width:48px;height:48px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-weight:700;color:#fff;flex-shrink:0">KS</div>
+            <div>
+              <p style="font-weight:600;color:#fff;font-size:.9375rem">김서연</p>
+              <p style="font-size:.75rem;color:rgba(255,255,255,.5)">SNS전략팀장 · 전 네이버 마케팅랩</p>
+            </div>
+          </div>
+          <h3 style="font-size:1.0625rem;color:#fff;margin-bottom:.75rem">알고리즘을 이기는 콘텐츠란 무엇인가</h3>
+          <p style="font-size:.875rem;color:rgba(255,255,255,.6);line-height:1.8;margin-bottom:1rem">
+            "많은 브랜드가 알고리즘에 맞추려고 콘텐츠를 만듭니다. 하지만 진짜 중요한 건 알고리즘이 아니라 사람입니다. 진정성 있는 콘텐츠가 결국 알고리즘의 선택을 받습니다. 7년간 500개 이상의 계정을 운영하며 깨달은 것은, 트릭보다 본질이 오래 간다는 것입니다."
+          </p>
+          <a href="#" style="font-family:var(--font-heading);font-size:.8125rem;font-weight:600;color:var(--blue)">전문 읽기 →</a>
+        </div>
+
+        <div class="reveal" style="padding:2rem;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-md)">
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem">
+            <div style="width:48px;height:48px;border-radius:50%;background:var(--coral);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-weight:700;color:#fff;flex-shrink:0">PM</div>
+            <div>
+              <p style="font-weight:600;color:#fff;font-size:.9375rem">박민수</p>
+              <p style="font-size:.75rem;color:rgba(255,255,255,.5)">퍼포먼스마케팅팀장 · Google Certified</p>
+            </div>
+          </div>
+          <h3 style="font-size:1.0625rem;color:#fff;margin-bottom:.75rem">ROAS만 보면 놓치는 것들</h3>
+          <p style="font-size:.875rem;color:rgba(255,255,255,.6);line-height:1.8;margin-bottom:1rem">
+            "ROAS는 중요한 지표이지만, 유일한 지표가 되어서는 안 됩니다. 단기 ROAS에만 집중하면 브랜드 인지도, 고객 LTV, 시장 점유율이라는 더 큰 그림을 놓칩니다. 퍼포먼스 마케터일수록 브랜딩적 사고가 필요한 시대입니다."
+          </p>
+          <a href="#" style="font-family:var(--font-heading);font-size:.8125rem;font-weight:600;color:var(--coral)">전문 읽기 →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       RESOURCES / DOWNLOADS
+       ============================================================ -->
+  <section class="section">
+    <div class="container">
+      <div class="text-center reveal" style="margin-bottom:3rem">
+        <p class="overline">FREE RESOURCES</p>
+        <h2 class="heading-md" style="margin-top:.5rem">무료 다운로드 자료</h2>
+        <p style="color:var(--gray-600);margin-top:.5rem">마케팅 실무에 바로 활용할 수 있는 템플릿과 가이드</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem">
+        <div class="card reveal" style="padding:2rem;text-align:center">
+          <div style="font-size:3rem;margin-bottom:1rem">📋</div>
+          <h3 style="font-size:1rem;margin-bottom:.5rem">2024 마케팅 캘린더</h3>
+          <p style="font-size:.8125rem;color:var(--gray-600);line-height:1.7;margin-bottom:1.25rem">주요 기념일, 시즌 이벤트, 마케팅 포인트를 정리한 2024년 마케팅 캘린더 (PDF)</p>
+          <a href="#" class="btn btn-primary btn-sm" style="width:100%;justify-content:center">무료 다운로드</a>
+          <p style="font-size:.6875rem;color:var(--gray-500);margin-top:.5rem">2,340회 다운로드</p>
+        </div>
+
+        <div class="card reveal" style="padding:2rem;text-align:center">
+          <div style="font-size:3rem;margin-bottom:1rem">📊</div>
+          <h3 style="font-size:1rem;margin-bottom:.5rem">SNS 성과 리포트 템플릿</h3>
+          <p style="font-size:.8125rem;color:var(--gray-600);line-height:1.7;margin-bottom:1.25rem">인스타그램, 유튜브, 틱톡 성과를 한눈에 정리하는 리포트 템플릿 (Google Sheets)</p>
+          <a href="#" class="btn btn-primary btn-sm" style="width:100%;justify-content:center">무료 다운로드</a>
+          <p style="font-size:.6875rem;color:var(--gray-500);margin-top:.5rem">1,890회 다운로드</p>
+        </div>
+
+        <div class="card reveal" style="padding:2rem;text-align:center">
+          <div style="font-size:3rem;margin-bottom:1rem">🎯</div>
+          <h3 style="font-size:1rem;margin-bottom:.5rem">퍼포먼스 광고 체크리스트</h3>
+          <p style="font-size:.8125rem;color:var(--gray-600);line-height:1.7;margin-bottom:1.25rem">META/Google/네이버 광고 세팅 시 놓치기 쉬운 항목을 점검하는 체크리스트 (PDF)</p>
+          <a href="#" class="btn btn-primary btn-sm" style="width:100%;justify-content:center">무료 다운로드</a>
+          <p style="font-size:.6875rem;color:var(--gray-500);margin-top:.5rem">1,560회 다운로드</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       WEBINAR
+       ============================================================ -->
+  <section class="section" style="background:var(--gray-50)">
+    <div class="container">
+      <div class="text-center reveal" style="margin-bottom:3rem">
+        <p class="overline">UPCOMING WEBINAR</p>
+        <h2 class="heading-md" style="margin-top:.5rem">다가오는 웨비나</h2>
+      </div>
+
+      <div class="reveal" style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;background:#fff;border-radius:var(--radius-lg);padding:3rem;border:1px solid var(--gray-200)">
+        <div>
+          <span class="badge badge-coral" style="margin-bottom:1rem;display:inline-block">LIVE</span>
+          <h3 class="heading-sm" style="margin-bottom:1rem">2024 하반기 디지털 마케팅 전략 세미나</h3>
+          <p style="color:var(--gray-600);line-height:1.8;margin-bottom:1.5rem">
+            2024년 상반기 마케팅 트렌드를 분석하고, 하반기에 주목해야 할 전략을 공유합니다. AI 마케팅 도구 활용법, 숏폼 콘텐츠 최적화, 퍼포먼스 광고 효율 개선 등 실전 노하우를 전합니다.
+          </p>
+          <div style="display:flex;flex-direction:column;gap:.75rem;margin-bottom:1.5rem">
+            <div style="display:flex;align-items:center;gap:.5rem;font-size:.875rem">
+              <span>📅</span> 2024년 4월 15일 (월) 14:00~16:00
+            </div>
+            <div style="display:flex;align-items:center;gap:.5rem;font-size:.875rem">
+              <span>💻</span> Zoom 온라인 (링크 별도 안내)
+            </div>
+            <div style="display:flex;align-items:center;gap:.5rem;font-size:.875rem">
+              <span>👤</span> WAVE.DIGITAL 전 팀장 + 게스트 연사
+            </div>
+            <div style="display:flex;align-items:center;gap:.5rem;font-size:.875rem">
+              <span>💰</span> 무료 (사전등록 필수, 100명 한정)
+            </div>
+          </div>
+          <a href="#" class="btn btn-primary">사전등록 신청 →</a>
+        </div>
+        <div style="display:flex;align-items:center">
+          <div style="border-radius:var(--radius-md);overflow:hidden;width:100%">
+            <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80" alt="웨비나" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related / Recommended -->
+  <section class="section">
+    <div class="container">
+      <div class="text-center reveal" style="margin-bottom:2.5rem">
+        <h2 class="heading-md">추천 콘텐츠</h2>
+        <p style="color:var(--gray-600);margin-top:.5rem">놓치면 아까운 인사이트</p>
+      </div>
+
+      <div class="blog-grid">
+        <article class="blog-card reveal">
+          <div class="blog-img">
+            <img src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&q=80" alt="콘텐츠 전략" loading="lazy">
+          </div>
+          <div class="blog-body">
+            <p class="blog-category">SNS 마케팅</p>
+            <h3>콘텐츠 캘린더 만들기: 한 달 치를 하루에 기획하는 법</h3>
+            <p class="blog-excerpt">매번 콘텐츠 아이디어에 고민하시나요? 효율적인 콘텐츠 캘린더 작성법과 아이디어 발굴 프레임워크를 소개합니다.</p>
+            <div class="blog-meta">
+              <span>2023.11.10</span>
+              <span>·</span>
+              <span>5분 읽기</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="blog-card reveal">
+          <div class="blog-img">
+            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80" alt="마케팅 예산" loading="lazy">
+          </div>
+          <div class="blog-body">
+            <p class="blog-category">퍼포먼스</p>
+            <h3>스타트업을 위한 마케팅 예산 가이드</h3>
+            <p class="blog-excerpt">한정된 예산으로 최대 효과를 내려면? 스타트업 단계별(시드/시리즈A/B) 적정 마케팅 예산 배분 전략을 제시합니다.</p>
+            <div class="blog-meta">
+              <span>2023.11.05</span>
+              <span>·</span>
+              <span>7분 읽기</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="blog-card reveal">
+          <div class="blog-img">
+            <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&q=80" alt="고객 페르소나" loading="lazy">
+          </div>
+          <div class="blog-body">
+            <p class="blog-category" style="color:var(--coral)">브랜딩</p>
+            <h3>고객 페르소나 만들기: 실전 워크시트 포함</h3>
+            <p class="blog-excerpt">효과적인 고객 페르소나를 만드는 단계별 가이드. 실제 사용할 수 있는 워크시트 템플릿도 함께 제공합니다.</p>
+            <div class="blog-meta">
+              <span>2023.10.28</span>
+              <span>·</span>
+              <span>8분 읽기</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="reveal">
+        <p class="overline" style="color:rgba(255,255,255,.6)">NEWSLETTER</p>
+        <h2 class="heading-lg" style="color:#fff;margin-top:.75rem">마케팅 인사이트를<br>놓치지 마세요</h2>
+        <p style="color:rgba(255,255,255,.8);max-width:500px;margin:1rem auto 2rem;font-size:1.0625rem;line-height:1.8">
+          매주 월요일 아침, 최신 마케팅 트렌드와<br>실전 전략을 이메일로 받아보세요.
+        </p>
+        <form style="display:flex;gap:.75rem;max-width:480px;margin:0 auto;flex-wrap:wrap;justify-content:center">
+          <input type="email" placeholder="이메일 주소 입력" style="flex:1;min-width:240px;padding:.875rem 1.5rem;border-radius:var(--radius-pill);font-size:.9375rem;border:none" aria-label="이메일 주소">
+          <button type="submit" class="btn btn-white">무료 구독 →</button>
+        </form>
+        <p style="font-size:.8125rem;color:rgba(255,255,255,.5);margin-top:1rem">1,247명이 이미 구독 중 · 언제든 해지 가능</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">WAVE<span>.</span>DIGITAL</div>
+          <p>데이터 기반 디지털 마케팅 에이전시.<br>브랜드의 파도를 만듭니다.</p>
+          <p style="margin-top:1rem">📍 서울특별시 강남구 역삼동 123-45</p>
+          <p>📞 02-000-0000</p>
+          <p>✉️ hello@wavedigital.kr</p>
+          <div class="footer-newsletter">
+            <p style="font-size:.875rem;color:#fff;font-weight:600">뉴스레터 구독</p>
+            <form class="footer-newsletter-form">
+              <input type="email" placeholder="이메일 주소 입력" aria-label="이메일 주소">
+              <button type="submit">구독</button>
+            </form>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-heading">서비스</h4>
+          <div class="footer-links">
+            <a href="services.html#naver">네이버 마케팅</a>
+            <a href="services.html#instagram">인스타그램 마케팅</a>
+            <a href="services.html#youtube">유튜브 마케팅</a>
+            <a href="services.html#tiktok">틱톡 마케팅</a>
+            <a href="services.html#performance">퍼포먼스 광고</a>
+            <a href="services.html#branding">브랜드 컨설팅</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-heading">인사이트</h4>
+          <div class="footer-links">
+            <a href="blog.html">SNS 마케팅</a>
+            <a href="blog.html">브랜딩 전략</a>
+            <a href="blog.html">퍼포먼스</a>
+            <a href="blog.html">트렌드 리포트</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-heading">소셜</h4>
+          <div class="footer-social">
+            <a href="#">
+              <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+              인스타그램
+            </a>
+            <a href="#">
+              <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              유튜브
+            </a>
+            <a href="#">
+              <svg viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.568 8.16c-.18 1.897-.962 6.502-1.36 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.9-.903-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.244-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.14.12.098.153.228.168.329.016.1.035.323.02.498z"/></svg>
+              블로그
+            </a>
+            <a href="#">
+              <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              링크드인
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2024 WAVE DIGITAL. All rights reserved.</p>
+        <p>사업자등록번호: 000-00-00000</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>
