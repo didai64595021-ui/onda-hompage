@@ -34,17 +34,74 @@ document.addEventListener('DOMContentLoaded', () => {
   const navToggle = document.querySelector('.nav-toggle');
   const navLinks = document.querySelector('.nav-links');
 
+  // Create backdrop element for mobile menu
+  const backdrop = document.createElement('div');
+  backdrop.className = 'nav-backdrop';
+  document.body.appendChild(backdrop);
+
+  function closeMobileMenu() {
+    navToggle.classList.remove('active');
+    navLinks.classList.remove('open');
+    backdrop.classList.remove('active');
+    document.body.classList.remove('menu-open');
+  }
+
+  function openMobileMenu() {
+    navToggle.classList.add('active');
+    navLinks.classList.add('open');
+    backdrop.classList.add('active');
+    document.body.classList.add('menu-open');
+  }
+
   if (navToggle) {
     navToggle.addEventListener('click', () => {
-      navToggle.classList.toggle('active');
-      navLinks.classList.toggle('open');
+      if (navLinks.classList.contains('open')) {
+        closeMobileMenu();
+      } else {
+        openMobileMenu();
+      }
     });
+
+    // Close on backdrop click
+    backdrop.addEventListener('click', closeMobileMenu);
 
     // Close on link click
     navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', closeMobileMenu);
+    });
+  }
+
+  // --- Mobile Menu (index/products variant) ---
+  const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+  const mobileMenu = document.querySelector('.mobile-menu');
+  const mobileMenuClose = document.querySelector('.mobile-menu-close');
+  
+  if (mobileMenuBtn && mobileMenu) {
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.add('active');
+      document.body.classList.add('menu-open');
+    });
+    
+    if (mobileMenuClose) {
+      mobileMenuClose.addEventListener('click', () => {
+        mobileMenu.classList.remove('active');
+        document.body.classList.remove('menu-open');
+      });
+    }
+    
+    // Close on backdrop click
+    mobileMenu.addEventListener('click', (e) => {
+      if (e.target === mobileMenu) {
+        mobileMenu.classList.remove('active');
+        document.body.classList.remove('menu-open');
+      }
+    });
+    
+    // Close on link click
+    mobileMenu.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
-        navToggle.classList.remove('active');
-        navLinks.classList.remove('open');
+        mobileMenu.classList.remove('active');
+        document.body.classList.remove('menu-open');
       });
     });
   }
