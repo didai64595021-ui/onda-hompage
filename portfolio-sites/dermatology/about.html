@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>병원 소개 — 글로우 스킨 클리닉</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:'Lato',sans-serif;color:#2d2d2d;background:#fefefe;word-break:keep-all;overflow-x:hidden;line-height:1.7}
+a{text-decoration:none;color:inherit}img{max-width:100%;display:block}
+h1,h2,h3,h4,h5{font-family:'Cormorant Garamond',serif;font-weight:600;line-height:1.3}
+:root{--pink:#FDE8E8;--lavender:#EDE9FE;--mint:#ECFDF5;--rose:#E91E63;--lav-accent:#B794F6;--dark:#1a1a2e;--text:#2d2d2d;--text-light:#6b7280;--white:#ffffff;--shadow:0 8px 32px rgba(0,0,0,0.08);--shadow-lg:0 16px 48px rgba(0,0,0,0.12);--radius:24px;--pill:50px}
+
+.nav-wrapper{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:1000}
+.nav-pill{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.85);backdrop-filter:blur(20px);border-radius:var(--pill);padding:8px 12px;box-shadow:0 4px 24px rgba(0,0,0,0.1);border:1px solid rgba(255,255,255,0.6)}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.1rem;color:var(--rose);padding:0 12px;white-space:nowrap}
+.nav-pill a{padding:10px 16px;border-radius:var(--pill);font-size:0.85rem;font-weight:700;color:var(--text);transition:all 0.3s;white-space:nowrap}
+.nav-pill a:hover,.nav-pill a.active{background:var(--rose);color:var(--white)}
+.nav-cta{background:linear-gradient(135deg,var(--rose),var(--lav-accent));color:var(--white)!important}
+.mobile-toggle{display:none;background:none;border:none;font-size:1.5rem;cursor:pointer;padding:8px;color:var(--rose)}
+.nav-links{display:flex;gap:4px;align-items:center}
+
+.page-hero{padding:160px 20px 80px;text-align:center;background:linear-gradient(135deg,var(--pink),var(--mint),var(--lavender));background-size:300% 300%;animation:gm 12s ease infinite}
+@keyframes gm{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.page-hero h1{font-size:clamp(2.2rem,5vw,3.5rem);color:var(--dark);margin-bottom:16px}
+.page-hero p{font-size:1.1rem;color:var(--text-light);max-width:600px;margin:0 auto}
+
+.container{max-width:1200px;margin:0 auto;padding:0 20px}
+.section{padding:100px 20px}
+.section-header{text-align:center;margin-bottom:60px}
+.section-label{font-size:0.85rem;letter-spacing:4px;text-transform:uppercase;color:var(--rose);font-weight:700;margin-bottom:12px}
+.section-title{font-size:clamp(2rem,4vw,3rem);color:var(--dark);margin-bottom:16px}
+.section-desc{font-size:1.05rem;color:var(--text-light);max-width:600px;margin:0 auto}
+
+/* PHILOSOPHY */
+.philosophy{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;margin-bottom:80px}
+.philosophy-img{border-radius:var(--radius);overflow:hidden;position:relative}
+.philosophy-img img{width:100%;height:450px;object-fit:cover}
+.philosophy-img::before{content:'';position:absolute;inset:0;border-radius:var(--radius);border:3px solid var(--lav-accent);transform:translate(-12px,-12px);z-index:-1}
+.philosophy-content h2{font-size:2.2rem;color:var(--dark);margin-bottom:20px}
+.philosophy-content p{color:var(--text-light);line-height:1.9;margin-bottom:16px;font-size:0.95rem}
+.philosophy-values{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:24px}
+.value-card{background:var(--lavender);border-radius:16px;padding:20px;text-align:center;transition:transform 0.3s}
+.value-card:hover{transform:translateY(-4px)}
+.value-icon{font-size:1.8rem;margin-bottom:8px}
+.value-card h4{font-family:'Lato',sans-serif;font-size:0.9rem;font-weight:700;color:var(--dark)}
+
+/* INTERIOR GALLERY */
+.interior-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:250px;gap:16px}
+.interior-item{border-radius:var(--radius);overflow:hidden;position:relative;cursor:pointer}
+.interior-item img{width:100%;height:100%;object-fit:cover;transition:transform 0.5s}
+.interior-item:hover img{transform:scale(1.08)}
+.interior-item.wide{grid-column:span 2}
+.interior-item.tall{grid-row:span 2}
+.interior-overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,rgba(0,0,0,0.5));opacity:0;transition:opacity 0.3s}
+.interior-item:hover .interior-overlay{opacity:1}
+.interior-label{position:absolute;bottom:16px;left:16px;color:var(--white);font-weight:700;font-size:0.9rem;opacity:0;transition:opacity 0.3s}
+.interior-item:hover .interior-label{opacity:1}
+
+/* EQUIPMENT BENTO */
+.equip-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.equip-card{background:var(--white);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:all 0.4s cubic-bezier(0.23,1,0.32,1)}
+.equip-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg)}
+.equip-card-img{height:200px;overflow:hidden}
+.equip-card-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.5s}
+.equip-card:hover .equip-card-img img{transform:scale(1.05)}
+.equip-card-body{padding:24px}
+.equip-card-body h4{font-size:1.2rem;color:var(--dark);margin-bottom:8px}
+.equip-card-body p{font-size:0.85rem;color:var(--text-light);line-height:1.7;margin-bottom:12px}
+.equip-badge{display:inline-block;padding:4px 12px;border-radius:var(--pill);background:var(--mint);font-size:0.75rem;font-weight:700;color:#065f46}
+
+/* MAP / LOCATION */
+.location-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+.map-wrap{border-radius:var(--radius);overflow:hidden;height:400px;background:var(--lavender);display:flex;align-items:center;justify-content:center;position:relative}
+.map-placeholder{text-align:center;color:var(--text-light)}
+.map-placeholder .map-icon{font-size:3rem;margin-bottom:16px}
+.location-info h3{font-size:1.8rem;color:var(--dark);margin-bottom:24px}
+.loc-item{display:flex;gap:16px;margin-bottom:24px;align-items:flex-start}
+.loc-icon{width:48px;height:48px;border-radius:50%;background:var(--pink);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.loc-text h4{font-family:'Lato',sans-serif;font-size:0.95rem;font-weight:700;color:var(--dark);margin-bottom:4px}
+.loc-text p{font-size:0.88rem;color:var(--text-light);line-height:1.6}
+
+/* HOURS */
+.hours-table{width:100%;border-collapse:collapse;margin-top:20px}
+.hours-table th,.hours-table td{padding:14px 20px;text-align:left;font-size:0.9rem}
+.hours-table th{background:var(--lavender);color:var(--dark);font-weight:700;border-radius:8px 8px 0 0}
+.hours-table tr{border-bottom:1px solid var(--lavender)}
+.hours-table td:first-child{font-weight:700;color:var(--dark)}
+.hours-table td:last-child{color:var(--rose);font-weight:700}
+.hours-note{margin-top:16px;padding:16px;background:var(--mint);border-radius:12px;font-size:0.85rem;color:#065f46}
+
+.btn-pill{display:inline-flex;align-items:center;gap:8px;padding:14px 36px;border-radius:var(--pill);font-size:0.95rem;font-weight:700;border:none;cursor:pointer;transition:all 0.4s;min-height:48px}
+.btn-primary{background:linear-gradient(135deg,var(--rose),var(--lav-accent));color:var(--white)}
+.btn-primary:hover{transform:translateY(-3px)}
+
+.footer{background:var(--dark);color:rgba(255,255,255,0.7);padding:60px 20px 30px}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px}
+.footer-brand{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:var(--white)}
+.footer-copy{font-size:0.82rem}
+
+.reveal{opacity:0;transform:translateY(40px);transition:opacity 0.8s,transform 0.8s}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:1024px){
+  .philosophy{grid-template-columns:1fr;gap:32px}
+  .interior-grid{grid-template-columns:repeat(2,1fr)}
+  .interior-item.wide{grid-column:span 1}
+  .equip-grid{grid-template-columns:1fr 1fr}
+  .location-grid{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .nav-links{display:none}
+  .nav-links.open{display:flex;flex-direction:column;position:absolute;top:60px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-lg);min-width:220px}
+  .mobile-toggle{display:block}
+  .interior-grid{grid-template-columns:1fr;grid-auto-rows:220px}
+  .interior-item.wide,.interior-item.tall{grid-column:span 1;grid-row:span 1}
+  .equip-grid{grid-template-columns:1fr}
+  .philosophy-values{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav-wrapper">
+  <div class="nav-pill">
+    <span class="nav-logo">GLOW SKIN</span>
+    <button class="mobile-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="메뉴">☰</button>
+    <div class="nav-links">
+      <a href="index.html">홈</a>
+      <a href="treatments.html">시술 안내</a>
+      <a href="doctors.html">의료진</a>
+      <a href="gallery.html">비포/애프터</a>
+      <a href="about.html" class="active">병원 소개</a>
+      <a href="contact.html" class="nav-cta">상담 예약</a>
+    </div>
+  </div>
+</nav>
+
+<section class="page-hero">
+  <h1>병원 소개</h1>
+  <p>환자 중심의 진료 철학과 최첨단 시설로 신뢰받는 피부과 클리닉</p>
+</section>
+
+<!-- PHILOSOPHY -->
+<section class="section" style="background:var(--white)">
+  <div class="container">
+    <div class="philosophy reveal">
+      <div class="philosophy-img">
+        <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=700&q=80" alt="병원 인테리어">
+      </div>
+      <div class="philosophy-content">
+        <p class="section-label">Our Philosophy</p>
+        <h2>자연스러운 아름다움을<br>추구합니다</h2>
+        <p>글로우 스킨 클리닉은 '과하지 않은 자연스러움'을 추구합니다. 인위적인 변화가 아닌, 본연의 아름다움을 극대화하는 것이 우리의 철학입니다.</p>
+        <p>피부과 전문의 3인이 각자의 전문 분야에서 최선의 결과를 위해 협진하며, 환자 한 분 한 분의 피부 상태와 라이프스타일을 고려한 맞춤 치료 계획을 수립합니다.</p>
+        <div class="philosophy-values">
+          <div class="value-card">
+            <div class="value-icon">🔬</div>
+            <h4>과학적 진단</h4>
+          </div>
+          <div class="value-card">
+            <div class="value-icon">🤝</div>
+            <h4>신뢰와 소통</h4>
+          </div>
+          <div class="value-card">
+            <div class="value-icon">✨</div>
+            <h4>자연스러운 결과</h4>
+          </div>
+          <div class="value-card">
+            <div class="value-icon">🛡️</div>
+            <h4>안전 최우선</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTERIOR -->
+<section class="section" style="background:var(--lavender)">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="section-label">Interior</p>
+      <h2 class="section-title">편안하고 깨끗한 공간</h2>
+      <p class="section-desc">환자분들이 편안하게 진료받으실 수 있도록 세심하게 설계된 공간입니다</p>
+    </div>
+    <div class="interior-grid reveal">
+      <div class="interior-item wide">
+        <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&q=80" alt="로비">
+        <div class="interior-overlay"></div>
+        <span class="interior-label">리셉션 & 대기 공간</span>
+      </div>
+      <div class="interior-item">
+        <img src="https://images.unsplash.com/photo-1631815588090-d4bfec5b1ccb?w=500&q=80" alt="진료실">
+        <div class="interior-overlay"></div>
+        <span class="interior-label">개인 진료실</span>
+      </div>
+      <div class="interior-item">
+        <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=500&q=80" alt="레이저실">
+        <div class="interior-overlay"></div>
+        <span class="interior-label">레이저 시술실</span>
+      </div>
+      <div class="interior-item tall">
+        <img src="https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=500&q=80" alt="상담실">
+        <div class="interior-overlay"></div>
+        <span class="interior-label">프라이빗 상담실</span>
+      </div>
+      <div class="interior-item">
+        <img src="https://images.unsplash.com/photo-1540555700478-4be289fbec6d?w=500&q=80" alt="회복실">
+        <div class="interior-overlay"></div>
+        <span class="interior-label">회복 공간</span>
+      </div>
+      <div class="interior-item wide">
+        <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80" alt="장비실">
+        <div class="interior-overlay"></div>
+        <span class="interior-label">최첨단 장비 보유</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EQUIPMENT -->
+<section class="section" style="background:var(--white)">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="section-label">Equipment</p>
+      <h2 class="section-title">최첨단 의료 장비</h2>
+      <p class="section-desc">정품 인증 장비만을 사용하여 안전하고 효과적인 시술을 보장합니다</p>
+    </div>
+    <div class="equip-grid reveal">
+      <div class="equip-card">
+        <div class="equip-card-img">
+          <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=500&q=80" alt="울쎄라">
+        </div>
+        <div class="equip-card-body">
+          <h4>울쎄라 (Ultherapy)</h4>
+          <p>미국 FDA 승인 HIFU 리프팅 장비. SMAS층까지 초음파 에너지를 전달하여 비수술적 리프팅을 실현합니다.</p>
+          <span class="equip-badge">FDA 승인</span>
+        </div>
+      </div>
+      <div class="equip-card">
+        <div class="equip-card-img">
+          <img src="https://images.unsplash.com/photo-1551076805-e1869033e561?w=500&q=80" alt="써마지">
+        </div>
+        <div class="equip-card-body">
+          <h4>써마지 FLX</h4>
+          <p>4세대 고주파 장비로 기존 대비 25% 빠른 시술과 향상된 쿨링 시스템을 통해 편안한 시술 경험을 제공합니다.</p>
+          <span class="equip-badge">정품 인증</span>
+        </div>
+      </div>
+      <div class="equip-card">
+        <div class="equip-card-img">
+          <img src="https://images.unsplash.com/photo-1530026405186-ed1f139313f8?w=500&q=80" alt="피코슈어">
+        </div>
+        <div class="equip-card-body">
+          <h4>피코슈어 (PicoSure)</h4>
+          <p>755nm 알렉산드라이트 레이저로 색소 치료에 최적화된 피코초 레이저입니다. 통증과 다운타임을 최소화합니다.</p>
+          <span class="equip-badge">색소 전문</span>
+        </div>
+      </div>
+      <div class="equip-card">
+        <div class="equip-card-img">
+          <img src="https://images.unsplash.com/photo-1583912267550-d974311a9a6e?w=500&q=80" alt="듀얼토닝">
+        </div>
+        <div class="equip-card-body">
+          <h4>듀얼 토닝 레이저</h4>
+          <p>1064nm + 532nm 듀얼 파장으로 깊은 색소부터 표피 색소까지 동시에 치료 가능한 프리미엄 레이저입니다.</p>
+          <span class="equip-badge">듀얼 파장</span>
+        </div>
+      </div>
+      <div class="equip-card">
+        <div class="equip-card-img">
+          <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=500&q=80" alt="AI피부분석">
+        </div>
+        <div class="equip-card-body">
+          <h4>AI 피부 분석 시스템</h4>
+          <p>인공지능 기반 피부 분석 시스템으로 피부 상태를 객관적으로 진단하고, 맞춤 시술 계획 수립에 활용합니다.</p>
+          <span class="equip-badge">AI 분석</span>
+        </div>
+      </div>
+      <div class="equip-card">
+        <div class="equip-card-img">
+          <img src="https://images.unsplash.com/photo-1516549655169-df83a0774514?w=500&q=80" alt="쿨스컬프팅">
+        </div>
+        <div class="equip-card-body">
+          <h4>쿨스컬프팅 엘리트</h4>
+          <p>듀얼 어플리케이터로 2부위 동시 시술 가능. 비침습적 지방 감소 시술의 글로벌 리더 장비입니다.</p>
+          <span class="equip-badge">듀얼 시술</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOCATION & HOURS -->
+<section class="section" style="background:var(--pink)">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="section-label">Location</p>
+      <h2 class="section-title">오시는 길</h2>
+    </div>
+    <div class="location-grid reveal">
+      <div class="map-wrap">
+        <div class="map-placeholder">
+          <div class="map-icon">📍</div>
+          <p style="font-size:1.1rem;font-weight:700;color:var(--dark);margin-bottom:8px">글로우 스킨 클리닉</p>
+          <p>서울특별시 강남구 테헤란로 152<br>글로우타워 3~5층</p>
+          <a href="https://map.naver.com" target="_blank" class="btn-pill btn-primary" style="margin-top:20px">네이버 지도에서 보기 →</a>
+        </div>
+      </div>
+      <div class="location-info">
+        <h3>방문 안내</h3>
+        <div class="loc-item">
+          <div class="loc-icon">📍</div>
+          <div class="loc-text">
+            <h4>주소</h4>
+            <p>서울특별시 강남구 테헤란로 152 글로우타워 3~5층</p>
+          </div>
+        </div>
+        <div class="loc-item">
+          <div class="loc-icon">🚇</div>
+          <div class="loc-text">
+            <h4>대중교통</h4>
+            <p>2호선 강남역 3번 출구 도보 5분<br>신분당선 강남역 5번 출구 도보 3분</p>
+          </div>
+        </div>
+        <div class="loc-item">
+          <div class="loc-icon">🚗</div>
+          <div class="loc-text">
+            <h4>주차 안내</h4>
+            <p>글로우타워 지하 주차장 이용 (시술 당일 2시간 무료)<br>만차 시 인근 공영주차장 이용 가능</p>
+          </div>
+        </div>
+        <div class="loc-item">
+          <div class="loc-icon">📞</div>
+          <div class="loc-text">
+            <h4>전화 예약</h4>
+            <p>02-1234-5678 (평일/토요일 진료시간 내)</p>
+          </div>
+        </div>
+
+        <table class="hours-table">
+          <tr><th colspan="2">진료 시간</th></tr>
+          <tr><td>월요일 ~ 금요일</td><td>10:00 – 20:00</td></tr>
+          <tr><td>토요일</td><td>10:00 – 17:00</td></tr>
+          <tr><td>점심시간</td><td>13:00 – 14:00</td></tr>
+          <tr><td>일요일 · 공휴일</td><td>휴진</td></tr>
+        </table>
+        <div class="hours-note">
+          ⚡ 야간 진료: 매주 화·목 20:00까지 연장 진료 가능 (사전 예약 필수)
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section style="background:linear-gradient(135deg,var(--rose),var(--lav-accent));padding:80px 20px;text-align:center">
+  <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,3vw,2.5rem);color:var(--white);margin-bottom:16px">글로우 스킨 클리닉에 방문하세요</h2>
+  <p style="color:rgba(255,255,255,0.85);margin-bottom:32px;font-size:1rem">편안한 공간에서 전문 의료진의 맞춤 상담을 받으실 수 있습니다</p>
+  <a href="contact.html" class="btn-pill" style="background:var(--white);color:var(--rose)">📞 상담 예약하기</a>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">GLOW SKIN CLINIC</div>
+    <div class="footer-copy">© 2025 글로우 스킨 클리닉. All Rights Reserved.</div>
+  </div>
+</footer>
+
+<script>
+const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:0.15});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
