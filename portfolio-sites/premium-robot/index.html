@@ -489,6 +489,17 @@ section { position: relative; overflow: hidden; }
 .clip-reveal.visible {
   clip-path: inset(0% 0 0 0);
 }
+
+/* Safety net — forced reveal */
+.revealed, .reveal.revealed, .clip-reveal.revealed, .stagger-parent.revealed {
+  opacity: 1 !important;
+  transform: none !important;
+  clip-path: none !important;
+}
+.revealed > *, .stagger-parent.revealed .stagger-child {
+  opacity: 1 !important;
+  transform: none !important;
+}
 .stagger-parent .stagger-child {
   opacity: 0;
   transform: translateY(20px);
@@ -510,7 +521,7 @@ section { position: relative; overflow: hidden; }
 
 /* ===== ABOUT SECTION ===== */
 #about {
-  padding: 160px 0;
+  padding: 120px 0;
   background: var(--bg-primary);
 }
 .about-mega {
@@ -605,7 +616,7 @@ section { position: relative; overflow: hidden; }
 
 /* ===== SOLUTIONS SECTION ===== */
 #solutions {
-  padding: 160px 0;
+  padding: 120px 0;
   background: var(--bg-surface);
 }
 .section-header {
@@ -719,7 +730,7 @@ section { position: relative; overflow: hidden; }
 
 /* ===== TECHNOLOGY — HORIZONTAL SCROLL ===== */
 #technology {
-  padding: 160px 0 0;
+  padding: 120px 0 0;
   background: var(--bg-primary);
 }
 .tech-sticky-outer {
@@ -827,7 +838,7 @@ section { position: relative; overflow: hidden; }
 
 /* ===== CASE STUDIES — BENTO GRID ===== */
 #case-studies {
-  padding: 160px 0;
+  padding: 120px 0;
   background: var(--bg-surface);
 }
 .bento-grid {
@@ -927,11 +938,11 @@ section { position: relative; overflow: hidden; }
 .partners-label {
   text-align: center;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.3em;
   color: var(--text-secondary);
   margin-bottom: 48px;
-  opacity: 0.5;
+  opacity: 0.7;
 }
 .marquee-row {
   display: flex;
@@ -952,14 +963,14 @@ section { position: relative; overflow: hidden; }
 }
 .marquee-item {
   font-family: var(--font-mono);
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 24px;
+  font-weight: 600;
   letter-spacing: 0.15em;
   color: var(--text-secondary);
-  opacity: 0.4;
+  opacity: 0.6;
   transition: opacity 0.3s;
   flex-shrink: 0;
-  padding: 0 32px;
+  padding: 0 40px;
 }
 .marquee-item:hover { opacity: 0.8; }
 @keyframes marquee-left {
@@ -973,7 +984,7 @@ section { position: relative; overflow: hidden; }
 
 /* ===== NEWS ===== */
 #news {
-  padding: 160px 0;
+  padding: 120px 0;
   background: var(--bg-primary);
 }
 .news-grid {
@@ -1008,7 +1019,7 @@ section { position: relative; overflow: hidden; }
 .news-tag {
   display: inline-block;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.1em;
   color: var(--accent);
   border: 1px solid rgba(0,212,255,0.3);
@@ -1026,7 +1037,7 @@ section { position: relative; overflow: hidden; }
 
 /* ===== CONTACT CTA ===== */
 #contact {
-  padding: 160px 0;
+  padding: 120px 0;
   background: var(--bg-surface);
   text-align: center;
 }
@@ -2196,6 +2207,43 @@ document.addEventListener('keydown', e => {
     closeMobileNav();
   }
 });
+
+/* ===== SAFETY NET — Force all reveals visible ===== */
+setTimeout(() => {
+  document.querySelectorAll('.reveal, .clip-reveal, .stagger-parent, [class*="reveal"]').forEach(el => {
+    el.style.opacity = '1';
+    el.style.transform = 'none';
+    el.style.clipPath = 'none';
+    el.classList.add('visible');
+    el.classList.add('revealed');
+  });
+  document.querySelectorAll('.stagger-child').forEach(el => {
+    el.style.opacity = '1';
+    el.style.transform = 'none';
+  });
+  document.querySelectorAll('[style*="opacity"]').forEach(el => {
+    if (!el.classList.contains('cursor-dot') && !el.classList.contains('cursor-ring') &&
+        !el.closest('#preloader') && !el.closest('header')) {
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+    }
+  });
+}, 2000);
+
+let safetyTriggered = false;
+window.addEventListener('scroll', () => {
+  if (!safetyTriggered) {
+    safetyTriggered = true;
+    document.querySelectorAll('.reveal:not(.visible), .clip-reveal:not(.visible), .stagger-parent:not(.visible)').forEach(el => {
+      el.classList.add('visible');
+      el.classList.add('revealed');
+    });
+    document.querySelectorAll('.stagger-child').forEach(el => {
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+    });
+  }
+}, { once: true });
 </script>
 </body>
 </html>

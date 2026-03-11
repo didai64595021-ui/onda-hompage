@@ -514,6 +514,17 @@ section { overflow: hidden; }
   clip-path: inset(0% 0 0 0);
 }
 
+/* Safety net — forced reveal */
+.revealed, .reveal.revealed, .reveal-clip.revealed, .stagger.revealed {
+  opacity: 1 !important;
+  transform: none !important;
+  clip-path: none !important;
+}
+.revealed > *, .stagger.revealed > * {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 .stagger > * {
   opacity: 0;
   transform: translateY(24px);
@@ -532,7 +543,7 @@ section { overflow: hidden; }
    ============================================= */
 #manifesto {
   background: var(--bg-primary);
-  padding: 160px 0;
+  padding: 120px 0;
   position: relative;
 }
 
@@ -778,7 +789,7 @@ section { overflow: hidden; }
    ============================================= */
 #floor-plans {
   background: var(--bg-surface);
-  padding: 160px 0;
+  padding: 120px 0;
 }
 
 @media (max-width: 768px) { #floor-plans { padding: 96px 0; } }
@@ -911,7 +922,7 @@ section { overflow: hidden; }
    ============================================= */
 #location {
   background: var(--bg-primary);
-  padding: 160px 0;
+  padding: 120px 0;
 }
 
 @media (max-width: 768px) { #location { padding: 96px 0; } }
@@ -980,7 +991,7 @@ section { overflow: hidden; }
    ============================================= */
 #amenities {
   background: var(--bg-light);
-  padding: 160px 0;
+  padding: 120px 0;
 }
 
 @media (max-width: 768px) { #amenities { padding: 96px 0; } }
@@ -1095,7 +1106,7 @@ section { overflow: hidden; }
    ============================================= */
 #timeline {
   background: var(--bg-primary);
-  padding: 160px 0;
+  padding: 120px 0;
   position: relative;
 }
 
@@ -1231,7 +1242,7 @@ section { overflow: hidden; }
    ============================================= */
 #cta {
   background: var(--bg-primary);
-  padding: 160px 0;
+  padding: 120px 0;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -1263,14 +1274,15 @@ section { overflow: hidden; }
 
 .cta-title {
   font-family: var(--font-display);
-  font-size: clamp(32px, 5vw, 80px);
+  font-size: clamp(40px, 6vw, 96px);
   font-weight: 500;
-  color: var(--text-primary);
+  color: #FFFFFF;
   line-height: 1.15;
   letter-spacing: -0.02em;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
   position: relative;
   display: inline-block;
+  text-shadow: 0 2px 40px rgba(200,169,125,0.3);
 }
 
 .cta-title .underline-anim {
@@ -1972,6 +1984,14 @@ section { overflow: hidden; }
           <div class="distance-item">
             <span class="distance-label">김포공항</span>
             <span class="distance-value">25분</span>
+          </div>
+          <div class="distance-item">
+            <span class="distance-label">반포한강공원</span>
+            <span class="distance-value">3분</span>
+          </div>
+          <div class="distance-item">
+            <span class="distance-label">세빛섬·센트럴파크</span>
+            <span class="distance-value">8분</span>
           </div>
         </div>
       </div>
@@ -2740,6 +2760,40 @@ section { overflow: hidden; }
   document.querySelectorAll('.gallery-img-wrap').forEach(function (el) {
     galleryImgObserver.observe(el);
   });
+
+  /* ──────────────────────────────────────────
+     SAFETY NET — Force all reveals visible
+  ────────────────────────────────────────── */
+  setTimeout(function () {
+    document.querySelectorAll('.reveal, .reveal-clip, .stagger, [class*="reveal"]').forEach(function (el) {
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+      el.style.clipPath = 'none';
+      el.classList.add('visible');
+      el.classList.add('revealed');
+    });
+    document.querySelectorAll('[style*="opacity"]').forEach(function (el) {
+      if (!el.classList.contains('cursor-dot') && !el.classList.contains('cursor-ring') &&
+          !el.closest('#preloader') && !el.closest('header') && !el.closest('#nav')) {
+        el.style.opacity = '1';
+        el.style.transform = 'none';
+      }
+    });
+    document.querySelectorAll('.distance-item, .timeline-event, .bento-img, .cta-title').forEach(function (el) {
+      el.classList.add('visible');
+    });
+  }, 2000);
+
+  var safetyTriggered = false;
+  window.addEventListener('scroll', function () {
+    if (!safetyTriggered) {
+      safetyTriggered = true;
+      document.querySelectorAll('.reveal:not(.visible), .reveal-clip:not(.visible), .stagger:not(.visible)').forEach(function (el) {
+        el.classList.add('visible');
+        el.classList.add('revealed');
+      });
+    }
+  }, { once: true });
 
 })();
 </script>
