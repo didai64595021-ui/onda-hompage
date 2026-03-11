@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>서비스 — WAVE DIGITAL | 웨이브 디지털</title>
+  <meta name="description" content="네이버, 인스타그램, 유튜브, 틱톡 마케팅 전문. 데이터 기반 전략으로 브랜드 성장을 설계합니다.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <style>
+    /* ============================================
+       RESET & ROOT
+       ============================================ */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0A0A0F;
+      --bg-surface: #12121A;
+      --bg-card: #16161F;
+      --accent: #7C3AED;
+      --accent-light: #A78BFA;
+      --accent-glow: rgba(124, 58, 237, 0.15);
+      --naver: #03C75A;
+      --youtube: #FF0000;
+      --tiktok-cyan: #00F2EA;
+      --tiktok-pink: #FF0050;
+      --text: #E8E4DF;
+      --text-dim: #8A8580;
+      --text-muted: #555;
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-body: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+      --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --grid: 8px;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      word-break: keep-all;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+      cursor: none;
+    }
+
+    button {
+      border: none;
+      background: none;
+      font-family: inherit;
+      cursor: none;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    ul, ol {
+      list-style: none;
+    }
+
+    /* ============================================
+       CUSTOM CURSOR
+       ============================================ */
+    .cursor-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 10001;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s var(--ease);
+    }
+
+    .cursor-ring {
+      width: 36px;
+      height: 36px;
+      border: 1.5px solid rgba(124, 58, 237, 0.5);
+      border-radius: 50%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 10001;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s var(--ease), height 0.3s var(--ease), border-color 0.3s var(--ease);
+    }
+
+    .cursor-ring.hover {
+      width: 56px;
+      height: 56px;
+      border-color: rgba(124, 58, 237, 0.8);
+    }
+
+    @media (max-width: 768px) {
+      .cursor-dot,
+      .cursor-ring {
+        display: none;
+      }
+      body {
+        cursor: auto;
+      }
+      a, button {
+        cursor: pointer;
+      }
+    }
+
+    /* ============================================
+       SCROLL PROGRESS BAR
+       ============================================ */
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: transparent;
+      z-index: 10000;
+    }
+
+    .scroll-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      transform-origin: left;
+      transform: scaleX(0);
+      will-change: transform;
+    }
+
+    /* ============================================
+       GRAIN TEXTURE OVERLAY
+       ============================================ */
+    .grain-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9998;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 128px 128px;
+    }
+
+    /* ============================================
+       HEADER
+       ============================================ */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 900;
+      padding: 20px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.4s var(--ease), padding 0.4s var(--ease), box-shadow 0.4s var(--ease);
+    }
+
+    .header.scrolled {
+      background: rgba(10, 10, 15, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 14px 48px;
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .header-logo {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+    }
+
+    .header-nav a {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      transition: color 0.3s var(--ease);
+      position: relative;
+      font-weight: 500;
+    }
+
+    .header-nav a:hover {
+      color: var(--text);
+    }
+
+    .header-nav a.active {
+      color: var(--accent);
+    }
+
+    .header-nav a.active::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 1px;
+    }
+
+    .header-cta {
+      background: var(--accent);
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: transform 0.3s var(--spring), box-shadow 0.3s var(--ease), background 0.3s var(--ease);
+      display: inline-block;
+    }
+
+    .header-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(124, 58, 237, 0.3);
+      background: #6D28D9;
+    }
+
+    /* Hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      width: 28px;
+      padding: 4px 0;
+      z-index: 1001;
+    }
+
+    .hamburger span {
+      display: block;
+      width: 100%;
+      height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: transform 0.3s var(--ease), opacity 0.3s var(--ease);
+    }
+
+    .hamburger.open span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+    .hamburger.open span:nth-child(2) {
+      opacity: 0;
+    }
+    .hamburger.open span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
+    /* Mobile Menu Overlay */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 15, 0.98);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s var(--ease);
+    }
+
+    .mobile-menu.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .mobile-menu a {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      transition: color 0.3s var(--ease);
+    }
+
+    .mobile-menu a:hover,
+    .mobile-menu a.active {
+      color: var(--accent);
+    }
+
+    .mobile-menu .header-cta {
+      margin-top: 16px;
+      font-size: 1rem;
+      padding: 14px 32px;
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        padding: 16px 20px;
+      }
+      .header.scrolled {
+        padding: 12px 20px;
+      }
+      .header-nav {
+        display: none;
+      }
+      .hamburger {
+        display: flex;
+      }
+      .mobile-menu {
+        display: flex;
+      }
+    }
+
+    /* ============================================
+       SCROLL REVEAL
+       ============================================ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+    .reveal-delay-5 { transition-delay: 0.5s; }
+
+    /* ============================================
+       HERO SECTION
+       ============================================ */
+    .hero {
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 140px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 0%, rgba(124, 58, 237, 0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 30% 60%, rgba(124, 58, 237, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 70% 60%, rgba(167, 139, 250, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-breadcrumb {
+      font-size: 0.875rem;
+      color: var(--text-dim);
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-breadcrumb a {
+      color: var(--text-dim);
+      transition: color 0.3s var(--ease);
+    }
+
+    .hero-breadcrumb a:hover {
+      color: var(--accent-light);
+    }
+
+    .hero-breadcrumb .sep {
+      color: var(--text-muted);
+    }
+
+    .hero-breadcrumb .current {
+      color: var(--accent-light);
+    }
+
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero h1 .accent-word {
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 1.5vw, 1.25rem);
+      color: var(--text-dim);
+      max-width: 600px;
+      line-height: 1.8;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ============================================
+       PLATFORM SECTION (BASE)
+       ============================================ */
+    .platform-section {
+      padding: 120px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .platform-section:nth-child(even) {
+      background: var(--bg-surface);
+    }
+
+    .platform-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .platform-inner.reversed {
+      direction: rtl;
+    }
+
+    .platform-inner.reversed > * {
+      direction: ltr;
+    }
+
+    /* Platform visual area */
+    .platform-visual {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+    }
+
+    .platform-icon-wrap {
+      width: 280px;
+      height: 280px;
+      border-radius: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .platform-icon-wrap::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 34px;
+      padding: 2px;
+      background: var(--platform-gradient);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+
+    .platform-icon-wrap .icon-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 32px;
+      background: var(--bg-card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .platform-icon-wrap .icon-inner::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--platform-glow);
+      opacity: 0.15;
+    }
+
+    .platform-icon-wrap svg {
+      width: 80px;
+      height: 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .platform-glow-orb {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: var(--platform-glow);
+      filter: blur(100px);
+      opacity: 0.2;
+      animation: pulseGlow 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      0% { opacity: 0.15; transform: scale(0.9); }
+      100% { opacity: 0.25; transform: scale(1.1); }
+    }
+
+    /* Floating elements around icon */
+    .float-element {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      animation: floatAnim 6s ease-in-out infinite;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .float-element:nth-child(1) { top: 10%; right: 5%; animation-delay: 0s; }
+    .float-element:nth-child(2) { bottom: 15%; left: 5%; animation-delay: 1.5s; }
+    .float-element:nth-child(3) { top: 50%; right: -5%; animation-delay: 3s; }
+
+    @keyframes floatAnim {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    /* Platform content */
+    .platform-content {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .platform-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: var(--platform-glow);
+      color: var(--platform-color);
+      width: fit-content;
+    }
+
+    .platform-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .platform-title .highlight {
+      color: var(--platform-color);
+    }
+
+    .platform-desc {
+      font-size: 1.05rem;
+      color: var(--text-dim);
+      line-height: 1.8;
+      max-width: 520px;
+    }
+
+    /* ============================================
+       SERVICE CARDS (3D TILT)
+       ============================================ */
+    .service-cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      max-width: 1200px;
+      margin: 64px auto 0;
+      padding: 0 24px;
+    }
+
+    .service-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 16px;
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+      transform-style: preserve-3d;
+      transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
+      transition: transform 0.15s ease-out, border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
+      will-change: transform;
+    }
+
+    .service-card:hover {
+      border-color: var(--card-accent-dim);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 40px var(--card-glow);
+    }
+
+    .service-card .card-shine {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.06) 0%, transparent 60%);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s var(--ease);
+    }
+
+    .service-card:hover .card-shine {
+      opacity: 1;
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 1.4rem;
+      background: var(--card-accent-dim);
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-desc {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-result {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: var(--card-accent-dim);
+      color: var(--card-accent);
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-result::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--card-accent);
+    }
+
+    /* ============================================
+       NAVER SECTION COLORS
+       ============================================ */
+    .section-naver {
+      --platform-color: #03C75A;
+      --platform-glow: rgba(3, 199, 90, 0.15);
+      --platform-gradient: linear-gradient(135deg, #03C75A, #02A34A);
+      --card-accent: #03C75A;
+      --card-accent-dim: rgba(3, 199, 90, 0.1);
+      --card-glow: rgba(3, 199, 90, 0.08);
+    }
+
+    /* ============================================
+       INSTAGRAM SECTION COLORS
+       ============================================ */
+    .section-instagram {
+      --platform-color: #E6683C;
+      --platform-glow: rgba(230, 104, 60, 0.15);
+      --platform-gradient: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+      --card-accent: #E6683C;
+      --card-accent-dim: rgba(230, 104, 60, 0.1);
+      --card-glow: rgba(230, 104, 60, 0.08);
+    }
+
+    /* ============================================
+       YOUTUBE SECTION COLORS
+       ============================================ */
+    .section-youtube {
+      --platform-color: #FF0000;
+      --platform-glow: rgba(255, 0, 0, 0.15);
+      --platform-gradient: linear-gradient(135deg, #FF0000, #CC0000);
+      --card-accent: #FF0000;
+      --card-accent-dim: rgba(255, 0, 0, 0.1);
+      --card-glow: rgba(255, 0, 0, 0.08);
+    }
+
+    /* ============================================
+       TIKTOK SECTION COLORS
+       ============================================ */
+    .section-tiktok {
+      --platform-color: #00F2EA;
+      --platform-glow: rgba(0, 242, 234, 0.15);
+      --platform-gradient: linear-gradient(135deg, #00F2EA, #FF0050);
+      --card-accent: #00F2EA;
+      --card-accent-dim: rgba(0, 242, 234, 0.1);
+      --card-glow: rgba(0, 242, 234, 0.08);
+    }
+
+    .section-tiktok .card-result {
+      color: var(--tiktok-cyan);
+    }
+
+    .section-tiktok .card-result::before {
+      background: linear-gradient(135deg, var(--tiktok-cyan), var(--tiktok-pink));
+    }
+
+    /* ============================================
+       PROCESS SECTION
+       ============================================ */
+    .process-section {
+      padding: 120px 24px;
+      background: var(--bg);
+      position: relative;
+    }
+
+    .process-section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: -0.02em;
+      margin-bottom: 80px;
+    }
+
+    .process-section-title .highlight {
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .process-track {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .process-track::before {
+      content: '';
+      position: absolute;
+      top: 40px;
+      left: 60px;
+      right: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light), var(--accent));
+      opacity: 0.3;
+    }
+
+    .process-step {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      padding: 0 12px;
+    }
+
+    .process-step-num {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 2px solid rgba(124, 58, 237, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent-light);
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 2;
+      transition: border-color 0.4s var(--ease), box-shadow 0.4s var(--ease), transform 0.4s var(--spring);
+    }
+
+    .process-step:hover .process-step-num {
+      border-color: var(--accent);
+      box-shadow: 0 0 30px rgba(124, 58, 237, 0.3);
+      transform: scale(1.1);
+    }
+
+    .process-step-icon {
+      font-size: 1.6rem;
+      margin-bottom: 4px;
+    }
+
+    .process-step-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .process-step-desc {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+      max-width: 160px;
+    }
+
+    @media (max-width: 768px) {
+      .process-track {
+        flex-direction: column;
+        gap: 48px;
+        align-items: flex-start;
+        padding-left: 60px;
+      }
+
+      .process-track::before {
+        top: 0;
+        bottom: 0;
+        left: 40px;
+        right: auto;
+        width: 2px;
+        height: 100%;
+      }
+
+      .process-step {
+        flex-direction: row;
+        text-align: left;
+        gap: 24px;
+        align-items: flex-start;
+      }
+
+      .process-step-num {
+        width: 60px;
+        height: 60px;
+        flex-shrink: 0;
+        margin-bottom: 0;
+        position: absolute;
+        left: -60px;
+      }
+
+      .process-step-content {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .process-step-desc {
+        max-width: 100%;
+      }
+    }
+
+    /* ============================================
+       BOTTOM CTA
+       ============================================ */
+    .bottom-cta {
+      padding: 120px 24px;
+      text-align: center;
+      background: var(--bg-surface);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bottom-cta::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(124, 58, 237, 0.1) 0%, transparent 70%);
+      filter: blur(60px);
+      pointer-events: none;
+    }
+
+    .bottom-cta h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .bottom-cta p {
+      font-size: 1.1rem;
+      color: var(--text-dim);
+      margin-bottom: 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--accent);
+      color: #fff;
+      padding: 18px 40px;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: transform 0.3s var(--spring), box-shadow 0.3s var(--ease), background 0.3s var(--ease);
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 48px rgba(124, 58, 237, 0.35);
+      background: #6D28D9;
+    }
+
+    .cta-btn svg {
+      width: 20px;
+      height: 20px;
+      transition: transform 0.3s var(--ease);
+    }
+
+    .cta-btn:hover svg {
+      transform: translateX(4px);
+    }
+
+    /* ============================================
+       FOOTER
+       ============================================ */
+    .footer {
+      background: #08080D;
+      padding: 80px 48px 40px;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .footer-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 64px;
+    }
+
+    .footer-brand .footer-logo {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .footer-brand p {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+      max-width: 280px;
+    }
+
+    .footer-col-title {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .footer-links a {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      transition: color 0.3s var(--ease);
+    }
+
+    .footer-links a:hover {
+      color: var(--accent-light);
+    }
+
+    .footer-contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .footer-contact-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .footer-contact-item svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      margin-top: 3px;
+      opacity: 0.6;
+    }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: 32px;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 768px) {
+      .footer {
+        padding: 60px 20px 30px;
+      }
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ============================================
+       RESPONSIVE PLATFORM SECTIONS
+       ============================================ */
+    @media (max-width: 1024px) {
+      .platform-inner {
+        grid-template-columns: 1fr;
+        gap: 48px;
+      }
+
+      .platform-inner.reversed {
+        direction: ltr;
+      }
+
+      .platform-visual {
+        min-height: 300px;
+      }
+
+      .service-cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .platform-section {
+        padding: 80px 20px;
+      }
+
+      .platform-visual {
+        min-height: 240px;
+      }
+
+      .platform-icon-wrap {
+        width: 200px;
+        height: 200px;
+      }
+
+      .platform-icon-wrap svg {
+        width: 56px;
+        height: 56px;
+      }
+
+      .service-cards {
+        grid-template-columns: 1fr;
+        padding: 0 20px;
+      }
+
+      .service-card {
+        padding: 24px;
+      }
+
+      .hero {
+        padding: 120px 20px 60px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .platform-icon-wrap {
+        width: 160px;
+        height: 160px;
+      }
+
+      .float-element {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+      }
+    }
+
+    /* ============================================
+       TOUCH TARGETS
+       ============================================ */
+    @media (max-width: 768px) {
+      .header-cta,
+      .cta-btn,
+      .footer-links a,
+      .mobile-menu a,
+      .hamburger {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+      }
+    }
+
+    /* ============================================
+       ANIMATIONS
+       ============================================ */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero h1,
+    .hero-subtitle,
+    .hero-breadcrumb {
+      animation: fadeInUp 0.8s var(--ease) forwards;
+      opacity: 0;
+    }
+
+    .hero-breadcrumb { animation-delay: 0.1s; }
+    .hero h1 { animation-delay: 0.25s; }
+    .hero-subtitle { animation-delay: 0.4s; }
+  </style>
+</head>
+<body>
+
+  <!-- Custom Cursor -->
+  <div class="cursor-dot"></div>
+  <div class="cursor-ring"></div>
+
+  <!-- Scroll Progress Bar -->
+  <div class="scroll-progress">
+    <div class="scroll-progress-bar"></div>
+  </div>
+
+  <!-- Grain Overlay -->
+  <div class="grain-overlay"></div>
+
+  <!-- ========================================
+       HEADER
+       ======================================== -->
+  <header class="header" id="header">
+    <a href="index.html" class="header-logo">WAVE DIGITAL</a>
+    <nav class="header-nav">
+      <a href="services.html" class="active">서비스</a>
+      <a href="portfolio.html">포트폴리오</a>
+      <a href="about.html">회사소개</a>
+      <a href="blog.html">인사이트</a>
+      <a href="contact.html">문의하기</a>
+      <a href="contact.html" class="header-cta">무료 상담</a>
+    </nav>
+    <button class="hamburger" id="hamburger" aria-label="메뉴 열기">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="services.html" class="active">서비스</a>
+    <a href="portfolio.html">포트폴리오</a>
+    <a href="about.html">회사소개</a>
+    <a href="blog.html">인사이트</a>
+    <a href="contact.html">문의하기</a>
+    <a href="contact.html" class="header-cta">무료 상담</a>
+  </div>
+
+  <!-- ========================================
+       HERO
+       ======================================== -->
+  <section class="hero">
+    <div class="hero-breadcrumb">
+      <a href="index.html">홈</a>
+      <span class="sep">›</span>
+      <span class="current">서비스</span>
+    </div>
+    <h1><span class="accent-word">성장</span>을 설계하는 서비스</h1>
+    <p class="hero-subtitle">각 플랫폼의 특성을 이해하고, 데이터 기반 전략으로 브랜드의 성장을 이끕니다</p>
+  </section>
+
+  <!-- ========================================
+       NAVER MARKETING
+       ======================================== -->
+  <section class="platform-section section-naver" id="naver">
+    <div class="platform-inner reveal">
+      <!-- Visual -->
+      <div class="platform-visual">
+        <div class="platform-glow-orb"></div>
+        <div class="platform-icon-wrap">
+          <div class="icon-inner">
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 20h12v16.5L48 20h12v40H48V43.5L36 60H20V20Z" fill="#03C75A"/>
+            </svg>
+          </div>
+        </div>
+        <div class="float-element" style="top:12%;right:8%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#03C75A" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <div class="float-element" style="bottom:18%;left:8%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#03C75A" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div class="float-element" style="top:55%;right:-2%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#03C75A" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="platform-content">
+        <span class="platform-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 5h5v6l4-6h5v14h-5v-6l-4 6H5V5Z"/></svg>
+          NAVER
+        </span>
+        <h2 class="platform-title"><span class="highlight">네이버</span> 마케팅</h2>
+        <p class="platform-desc">대한민국 최대 검색 플랫폼에서 브랜드의 존재감을 극대화합니다. 검색 알고리즘을 분석하고, 최적화된 콘텐츠로 상위 노출을 실현합니다.</p>
+      </div>
+    </div>
+
+    <!-- Service Cards -->
+    <div class="service-cards">
+      <div class="service-card reveal reveal-delay-1" data-platform="naver">
+        <div class="card-shine"></div>
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#03C75A" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <h3 class="card-title">플레이스 상위노출</h3>
+        <p class="card-desc">네이버 지도 검색 시 상위에 노출되도록 플레이스를 최적화합니다. 리뷰 관리, 키워드 설정, 사진 최적화까지.</p>
+        <span class="card-result">평균 상위 3위 달성</span>
+      </div>
+
+      <div class="service-card reveal reveal-delay-2" data-platform="naver">
+        <div class="card-shine"></div>
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#03C75A" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+        <h3 class="card-title">블로그 마케팅</h3>
+        <p class="card-desc">검색 최적화된 블로그 콘텐츠로 자연 유입을 극대화합니다. 키워드 분석부터 콘텐츠 제작, 배포까지.</p>
+        <span class="card-result">월 평균 10만 뷰 달성</span>
+      </div>
+
+      <div class="service-card reveal reveal-delay-3" data-platform="naver">
+        <div class="card-shine"></div>
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#03C75A" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        </div>
+        <h3 class="card-title">스마트스토어 최적화</h3>
+        <p class="card-desc">상품 상세페이지 최적화, 키워드 세팅, 리뷰 마케팅으로 매출을 극대화합니다.</p>
+        <span class="card-result">매출 평균 280% 증가</span>
+      </div>
+
+      <div class="service-card reveal reveal-delay-4" data-platform="naver">
+        <div class="card-shine"></div>
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#03C75A" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <h3 class="card-title">검색광고 (SA)</h3>
+        <p class="card-desc">파워링크, 쇼핑검색 등 네이버 검색광고를 전략적으로 운영합니다. ROAS 극대화가 목표입니다.</p>
+        <span class="card-result">ROAS 평균 450%</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       INSTAGRAM MARKETING
+       ======================================== -->
+  <section class="platform-section section-instagram" id="instagram">
+    <div class="platform-inner reversed reveal">
+      <!-- Content -->
+      <div class="platform-content">
+        <span class="platform-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5"/></svg>
+          INSTAGRAM
+        </span>
+        <h2 class="platform-title"><span class="highlight">인스타그램</span> 마케팅</h2>
+        <p class="platform-desc">비주얼 중심 플랫폼에서 브랜드 아이덴티티를 구축합니다. 감각적인 콘텐츠와 데이터 기반 전략으로 팔로워를 충성 고객으로 전환합니다.</p>
+      </div>
+
+      <!-- Visual -->
+      <div class="platform-visual">
+        <div class="platform-glow-orb"></div>
+        <div class="platform-icon-wrap">
+          <div class="icon-inner">
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="igGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#f09433"/>
+                  <stop offset="25%" stop-color="#e6683c"/>
+                  <stop offset="50%" stop-color="#dc2743"/>
+                  <stop offset="75%" stop-color="#cc2366"/>
+                  <stop offset="100%" stop-color="#bc1888"/>
+                </linearGradient>
+              </defs>
+              <rect x="16" y="16" width="48" height="48" rx="12" stroke="url(#igGrad)" stroke-width="4" fill="none"/>
+              <circle cx="40" cy="40" r="12" stroke="url(#igGrad)" stroke-width="4" fill="none"/>
+              <circle cx="54" cy="26" r="3.5" fill="url(#igGrad)"/>
+            </svg>
+          </div>
+        </div>
+        <div class="float-element" style="top:8%;right:10%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E6683C" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <div class="float-element" style="bottom:12%;left:6%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#cc2366" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="float-element" style="top:50%;right:-4%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#bc1888" stroke-width="2"><path d="M23 6l-9.5 9.5-5-5L1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Service Cards -->
+    <div class="service-cards">
+      <div class="service-card reveal reveal-delay-1" data-platform="instagram">
+        <div class="card-shine"></div>
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E6683C" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        </div>
+        <h3 class="card-title">피드 & 릴스 제작</h3>
+        <p class="card-desc">트렌드에 맞는 피드 디자인과 릴스 영상을 기획·제작합니다. 브랜드 톤앤매너에 맞춘 콘텐츠 전략.</p>
+        <span class="card-result">평균 인게이지먼트 8.5%</span>
+      </div>
+
+      <div class="service-card reveal reveal-delay-2" data-platform="instagram">
+        <div class="card-shine"></div>
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E6683C" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3 class="card-title">인플루언서 마케팅</h3>
+        <p class="card-desc">브랜드에 최적화된 인플루언서를 매칭하고 캠페인을 설계합니다. 마이크로부터 메가까지.</p>
+        <span class="card-result">캠페인당 평균 도달 50만</span>
+      </div>
+
+      <div class="service-card reveal reveal-delay-3" data-platform="instagram">
+        <div class="card-shine"></div>
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E6683C" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        </div>
+        <h3 class="card-title">광고 운영</h3>
+        <p class="card-desc">메타 광고 시스템을 활용한 정밀 타겟팅 광고를 운영합니다. A/B 테스트와 지속적 최적화.</p>
+        <span class="card-result">CPA 평균 40% 절감</span>
+      </div>
+
+      <div class="service-card reveal reveal-delay-4" data-platform="instagram">
+        <div class="card-shine"></div>
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E6683C" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        </div>
+        <h3 class="card-title">계정 성장 관리</h3>
+        <p class="card-desc">팔로워 증가, 해시태그 전략, 인사이트 분석까지. 계정을 체계적으로 성장시킵니다.</p>
+        <span class="card-result">월 평균 팔로워 3,000명 증가</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       YOUTUBE MARKETING
+       ======================================== -->
+  <section class="platform-section section-youtube" id="youtube">
+    <div class="platform-inner reveal">
+      <!-- Visual -->
+      <div class="platform-visual">
+        <div class="platform-glow-orb"></div>
+        <div class="platform-icon-wrap">
+          <div class="icon-inner">
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="12" y="20" width="56" height="40" rx="10" fill="#FF0000"/>
+              <polygon points="34,30 54,40 34,50" fill="#fff"/>
+            </svg>
+          </div>
+        </div>
+        <div class="float-element" style="top:10%;right:6%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF0000" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
+        <div class="float-element" style="bottom:14%;left:10%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF0000" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="float-element" style="top:52%;right:-3%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF0000" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="platform-content">
+        <span class="platform-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          YOUTUBE
+        </span>
+        <h2 class="platform-title"><span class="highlight">유튜브</span> 마케팅</h2>
+        <p class="platform-desc">세계 최대 영상 플랫폼에서 브랜드 채널을 성장시킵니다. 기획, 제작, 최적화, 광고까지 원스톱으로 제공합니다.</p>
+      </div>
+    </div>
+
+    <!-- Service Cards -->
+    <div class="service-cards">
+      <div class="service-card reveal reveal-delay-1" data-platform="youtube">
+        <div class="card-shine"></div>
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF0000" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <h3 class="card-title">채널 기획 & 브랜딩</h3>
+        <p class="card-desc">채널 컨셉부터 디자인, 콘텐츠 전략까지. 브랜드에 최적화된 유튜브 채널을 구축합니다.</p>
+        <span class="card-result">구독자 평균 200% 증가</span>
+      </div>
+
+      <div class="service-card reveal reveal-delay-2" data-platform="youtube">
+        <div class="card-shine"></div>
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF0000" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        </div>
+        <h3 class="card-title">쇼츠 & 롱폼 제작</h3>
+        <p class="card-desc">트렌드에 맞는 쇼츠부터 깊이 있는 롱폼 콘텐츠까지. 기획·촬영·편집 올인원 서비스.</p>
+        <span class="card-result">평균 조회수 30만</span>
+      </div>
+
+      <div class="service-card reveal reveal-delay-3" data-platform="youtube">
+        <div class="card-shine"></div>
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF0000" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <h3 class="card-title">유튜브 SEO</h3>
+        <p class="card-desc">제목, 태그, 썸네일, 설명 최적화로 검색 노출을 극대화합니다. 알고리즘 분석 기반 전략.</p>
+        <span class="card-result">검색 유입 350% 증가</span>
+      </div>
+
+      <div class="service-card reveal reveal-delay-4" data-platform="youtube">
+        <div class="card-shine"></div>
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF0000" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <h3 class="card-title">광고 캠페인</h3>
+        <p class="card-desc">인스트림, 디스커버리, 범퍼 등 유튜브 광고를 전략적으로 집행합니다.</p>
+        <span class="card-result">CPV 평균 35% 절감</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       TIKTOK MARKETING
+       ======================================== -->
+  <section class="platform-section section-tiktok" id="tiktok">
+    <div class="platform-inner reversed reveal">
+      <!-- Content -->
+      <div class="platform-content">
+        <span class="platform-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+          TIKTOK
+        </span>
+        <h2 class="platform-title"><span class="highlight">틱톡</span> 마케팅</h2>
+        <p class="platform-desc">Z세대와 MZ세대를 사로잡는 숏폼 전략. 바이럴 콘텐츠 기획부터 챌린지, 크리에이터 협업까지.</p>
+      </div>
+
+      <!-- Visual -->
+      <div class="platform-visual">
+        <div class="platform-glow-orb"></div>
+        <div class="platform-icon-wrap">
+          <div class="icon-inner">
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M52 18h-6a10 10 0 0 1-10 10v20a12 12 0 1 1-12-12v8a4 4 0 1 0 4 4V18h10a10 10 0 0 0 10 10h4v-10z" fill="#00F2EA"/>
+              <path d="M50 16h-6a10 10 0 0 1-10 10v20a12 12 0 1 1-12-12v8a4 4 0 1 0 4 4V16h10a10 10 0 0 0 10 10h4v-10z" fill="#FF0050" opacity="0.6"/>
+            </svg>
+          </div>
+        </div>
+        <div class="float-element" style="top:8%;right:12%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00F2EA" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        </div>
+        <div class="float-element" style="bottom:16%;left:8%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF0050" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div class="float-element" style="top:55%;right:-2%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00F2EA" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Service Cards -->
+    <div class="service-cards">
+      <div class="service-card reveal reveal-delay-1" data-platform="tiktok">
+        <div class="card-shine"></div>
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00F2EA" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <h3 class="card-title">바이럴 콘텐츠</h3>
+        <p class="card-desc">틱톡 알고리즘에 최적화된 바이럴 콘텐츠를 기획·제작합니다. 트렌드 분석 기반 전략.</p>
+        <span class="card-result">평균 조회수 100만+</span>
+      </div>
+
+      <div class="service-card reveal reveal-delay-2" data-platform="tiktok">
+        <div class="card-shine"></div>
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00F2EA" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+        </div>
+        <h3 class="card-title">챌린지 기획</h3>
+        <p class="card-desc">브랜드 챌린지를 기획하고 바이럴을 유도합니다. 해시태그 전략과 참여 유도 설계.</p>
+        <span class="card-result">참여자 평균 5만명</span>
+      </div>
+
+      <div class="service-card reveal reveal-delay-3" data-platform="tiktok">
+        <div class="card-shine"></div>
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00F2EA" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3 class="card-title">크리에이터 협업</h3>
+        <p class="card-desc">틱톡 크리에이터와의 전략적 협업으로 브랜드 인지도를 확산합니다.</p>
+        <span class="card-result">브랜드 인지도 180% 상승</span>
+      </div>
+
+      <div class="service-card reveal reveal-delay-4" data-platform="tiktok">
+        <div class="card-shine"></div>
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00F2EA" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg>
+        </div>
+        <h3 class="card-title">틱톡 광고</h3>
+        <p class="card-desc">인피드, 브랜드 테이크오버, 스파크 애즈 등 틱톡 광고를 운영합니다.</p>
+        <span class="card-result">CTR 평균 2.8%</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       PROCESS SECTION
+       ======================================== -->
+  <section class="process-section">
+    <h2 class="process-section-title reveal">데이터 기반 <span class="highlight">성장 프로세스</span></h2>
+
+    <div class="process-track">
+      <div class="process-step reveal reveal-delay-1">
+        <div class="process-step-num">
+          <span class="process-step-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
+        </div>
+        <div class="process-step-content">
+          <h3 class="process-step-title">분석</h3>
+          <p class="process-step-desc">브랜드·시장·경쟁사 데이터 분석</p>
+        </div>
+      </div>
+
+      <div class="process-step reveal reveal-delay-2">
+        <div class="process-step-num">
+          <span class="process-step-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" stroke-width="1.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          </span>
+        </div>
+        <div class="process-step-content">
+          <h3 class="process-step-title">전략</h3>
+          <p class="process-step-desc">맞춤 마케팅 전략 수립</p>
+        </div>
+      </div>
+
+      <div class="process-step reveal reveal-delay-3">
+        <div class="process-step-num">
+          <span class="process-step-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </span>
+        </div>
+        <div class="process-step-content">
+          <h3 class="process-step-title">실행</h3>
+          <p class="process-step-desc">콘텐츠 제작 & 캠페인 실행</p>
+        </div>
+      </div>
+
+      <div class="process-step reveal reveal-delay-4">
+        <div class="process-step-num">
+          <span class="process-step-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </span>
+        </div>
+        <div class="process-step-content">
+          <h3 class="process-step-title">최적화</h3>
+          <p class="process-step-desc">실시간 데이터 기반 최적화</p>
+        </div>
+      </div>
+
+      <div class="process-step reveal reveal-delay-5">
+        <div class="process-step-num">
+          <span class="process-step-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" stroke-width="1.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </span>
+        </div>
+        <div class="process-step-content">
+          <h3 class="process-step-title">성장</h3>
+          <p class="process-step-desc">지속적 성장 & 스케일업</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       BOTTOM CTA
+       ======================================== -->
+  <section class="bottom-cta">
+    <h2 class="reveal">지금 시작하세요</h2>
+    <p class="reveal reveal-delay-1">맞춤 마케팅 전략을 무료로 제안받으세요</p>
+    <a href="contact.html" class="cta-btn reveal reveal-delay-2">
+      무료 상담 신청
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </section>
+
+  <!-- ========================================
+       FOOTER
+       ======================================== -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <!-- Brand -->
+      <div class="footer-brand">
+        <div class="footer-logo">WAVE DIGITAL</div>
+        <p>데이터 기반 디지털 마케팅 에이전시. 네이버, 인스타그램, 유튜브, 틱톡 등 주요 플랫폼에서 브랜드 성장을 설계합니다.</p>
+      </div>
+
+      <!-- 서비스 -->
+      <div class="footer-col">
+        <h4 class="footer-col-title">서비스</h4>
+        <div class="footer-links">
+          <a href="services.html#naver">네이버 마케팅</a>
+          <a href="services.html#instagram">인스타그램 마케팅</a>
+          <a href="services.html#youtube">유튜브 마케팅</a>
+          <a href="services.html#tiktok">틱톡 마케팅</a>
+        </div>
+      </div>
+
+      <!-- 고객지원 -->
+      <div class="footer-col">
+        <h4 class="footer-col-title">고객지원</h4>
+        <div class="footer-links">
+          <a href="portfolio.html">포트폴리오</a>
+          <a href="blog.html">인사이트</a>
+          <a href="about.html">회사소개</a>
+          <a href="contact.html">문의하기</a>
+        </div>
+      </div>
+
+      <!-- 연락처 -->
+      <div class="footer-col">
+        <h4 class="footer-col-title">연락처</h4>
+        <div class="footer-contact-info">
+          <div class="footer-contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>서울특별시 강남구 테헤란로 427, 14층</span>
+          </div>
+          <div class="footer-contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <span>info@wavedigital.kr</span>
+          </div>
+          <div class="footer-contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <span>02-555-7890</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      &copy; 2025 WAVE DIGITAL. All rights reserved.
+    </div>
+  </footer>
+
+  <!-- ========================================
+       JAVASCRIPT
+       ======================================== -->
+  <script>
+    /* ============================================
+       CUSTOM CURSOR
+       ============================================ */
+    (function() {
+      const dot = document.querySelector('.cursor-dot');
+      const ring = document.querySelector('.cursor-ring');
+      if (!dot || !ring) return;
+
+      let mouseX = 0, mouseY = 0;
+      let ringX = 0, ringY = 0;
+
+      document.addEventListener('mousemove', function(e) {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        dot.style.left = mouseX + 'px';
+        dot.style.top = mouseY + 'px';
+      });
+
+      function animateRing() {
+        ringX += (mouseX - ringX) * 0.15;
+        ringY += (mouseY - ringY) * 0.15;
+        ring.style.left = ringX + 'px';
+        ring.style.top = ringY + 'px';
+        requestAnimationFrame(animateRing);
+      }
+      animateRing();
+
+      // Hover effects
+      var hoverTargets = document.querySelectorAll('a, button, .service-card, .cta-btn');
+      hoverTargets.forEach(function(el) {
+        el.addEventListener('mouseenter', function() {
+          ring.classList.add('hover');
+        });
+        el.addEventListener('mouseleave', function() {
+          ring.classList.remove('hover');
+        });
+      });
+    })();
+
+    /* ============================================
+       SCROLL PROGRESS BAR
+       ============================================ */
+    (function() {
+      var bar = document.querySelector('.scroll-progress-bar');
+      if (!bar) return;
+
+      function updateProgress() {
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        var docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        var progress = docHeight > 0 ? scrollTop / docHeight : 0;
+        bar.style.transform = 'scaleX(' + Math.min(progress, 1) + ')';
+      }
+
+      window.addEventListener('scroll', updateProgress, { passive: true });
+      updateProgress();
+    })();
+
+    /* ============================================
+       HEADER SCROLL
+       ============================================ */
+    (function() {
+      var header = document.getElementById('header');
+      if (!header) return;
+
+      function onScroll() {
+        if (window.pageYOffset > 60) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
+
+    /* ============================================
+       HAMBURGER MENU
+       ============================================ */
+    (function() {
+      var hamburger = document.getElementById('hamburger');
+      var mobileMenu = document.getElementById('mobileMenu');
+      if (!hamburger || !mobileMenu) return;
+
+      hamburger.addEventListener('click', function() {
+        hamburger.classList.toggle('open');
+        mobileMenu.classList.toggle('open');
+        document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+      });
+
+      // Close menu on link click
+      mobileMenu.querySelectorAll('a').forEach(function(link) {
+        link.addEventListener('click', function() {
+          hamburger.classList.remove('open');
+          mobileMenu.classList.remove('open');
+          document.body.style.overflow = '';
+        });
+      });
+    })();
+
+    /* ============================================
+       SCROLL REVEAL (IntersectionObserver)
+       ============================================ */
+    (function() {
+      var reveals = document.querySelectorAll('.reveal');
+      if (!reveals.length) return;
+
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -40px 0px'
+      });
+
+      reveals.forEach(function(el) {
+        observer.observe(el);
+      });
+    })();
+
+    /* ============================================
+       3D TILT CARD EFFECT
+       ============================================ */
+    (function() {
+      var cards = document.querySelectorAll('.service-card');
+      if (!cards.length) return;
+
+      // Skip on touch devices
+      var isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+      if (isTouch) return;
+
+      cards.forEach(function(card) {
+        var shine = card.querySelector('.card-shine');
+
+        card.addEventListener('mousemove', function(e) {
+          var rect = card.getBoundingClientRect();
+          var cardW = rect.width;
+          var cardH = rect.height;
+          var mouseX = e.clientX - rect.left;
+          var mouseY = e.clientY - rect.top;
+
+          // Normalize to -1 to 1
+          var normalX = (mouseX / cardW) * 2 - 1;
+          var normalY = (mouseY / cardH) * 2 - 1;
+
+          // Rotation (inverted for natural feel)
+          var rotateX = -normalY * 10; // max ±10deg
+          var rotateY = normalX * 10;
+
+          card.style.transform = 'perspective(1000px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) scale3d(1.02, 1.02, 1.02)';
+
+          // Shine position
+          if (shine) {
+            var percentX = (mouseX / cardW) * 100;
+            var percentY = (mouseY / cardH) * 100;
+            card.style.setProperty('--mouse-x', percentX + '%');
+            card.style.setProperty('--mouse-y', percentY + '%');
+          }
+        });
+
+        card.addEventListener('mouseleave', function() {
+          card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+          card.style.transition = 'transform 0.5s var(--ease), border-color 0.4s var(--ease), box-shadow 0.4s var(--ease)';
+        });
+
+        card.addEventListener('mouseenter', function() {
+          card.style.transition = 'transform 0.15s ease-out, border-color 0.4s var(--ease), box-shadow 0.4s var(--ease)';
+        });
+      });
+    })();
+
+    /* ============================================
+       SMOOTH SCROLL FOR ANCHOR LINKS
+       ============================================ */
+    (function() {
+      document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+        anchor.addEventListener('click', function(e) {
+          var targetId = this.getAttribute('href');
+          if (targetId === '#') return;
+          var target = document.querySelector(targetId);
+          if (target) {
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

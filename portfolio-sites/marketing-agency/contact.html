@@ -1,0 +1,2664 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>문의하기 | WAVE DIGITAL - 웨이브 디지털</title>
+<meta name="description" content="WAVE DIGITAL에 무료 컨설팅을 신청하세요. 맞춤 마케팅 전략을 전문가가 직접 분석하고 설계해 드립니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+/* ============================================
+   CSS VARIABLES & RESET
+   ============================================ */
+:root {
+  --bg: #0A0A0F;
+  --bg-surface: #12121A;
+  --bg-card: #16161F;
+  --accent: #7C3AED;
+  --accent-light: #A78BFA;
+  --accent-glow: rgba(124, 58, 237, 0.15);
+  --naver: #03C75A;
+  --youtube: #FF0000;
+  --tiktok-cyan: #00F2EA;
+  --tiktok-pink: #FF0050;
+  --text: #E8E4DF;
+  --text-dim: #8A8580;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --grid: 8px;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  word-break: keep-all;
+  overflow-x: hidden;
+  cursor: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: none;
+  font-family: inherit;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  cursor: none;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ============================================
+   SCROLL PROGRESS BAR
+   ============================================ */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  z-index: 10000;
+  transition: width 0.1s linear;
+}
+
+/* ============================================
+   CUSTOM CURSOR
+   ============================================ */
+.cursor-dot {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  background: var(--accent-light);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s var(--ease), background 0.2s;
+}
+
+.cursor-ring {
+  position: fixed;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid rgba(167, 139, 250, 0.4);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s var(--spring), height 0.3s var(--spring), border-color 0.3s;
+}
+
+.cursor-dot.hover {
+  transform: translate(-50%, -50%) scale(2);
+  background: #fff;
+}
+
+.cursor-ring.hover {
+  width: 56px;
+  height: 56px;
+  border-color: rgba(167, 139, 250, 0.7);
+}
+
+/* ============================================
+   GRAIN OVERLAY
+   ============================================ */
+.grain-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.035;
+}
+
+.grain-overlay svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  padding: 0 48px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(10, 10, 15, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: transform 0.4s var(--ease), background 0.3s;
+}
+
+.header.scrolled {
+  background: rgba(10, 10, 15, 0.95);
+}
+
+.header-logo {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-logo .logo-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: inline-block;
+  animation: logoPulse 2s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.8); }
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+
+.header-nav a {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-dim);
+  transition: color 0.3s;
+  position: relative;
+}
+
+.header-nav a:hover,
+.header-nav a.active {
+  color: #fff;
+}
+
+.header-nav a.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+.header-cta {
+  padding: 10px 24px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.3s, transform 0.2s var(--spring);
+}
+
+.header-cta:hover {
+  background: #6d28d9;
+  transform: scale(1.03);
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  width: 28px;
+  padding: 4px 0;
+  background: none;
+  border: none;
+}
+
+.hamburger span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--text);
+  border-radius: 1px;
+  transition: transform 0.3s var(--ease), opacity 0.3s;
+}
+
+.hamburger.open span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.open span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* Mobile Menu */
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: rgba(10, 10, 15, 0.98);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s var(--ease);
+}
+
+.mobile-menu.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.mobile-menu a {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text-dim);
+  transition: color 0.3s;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: color 0.3s, transform 0.5s var(--ease), opacity 0.5s;
+}
+
+.mobile-menu.open a {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.mobile-menu.open a:nth-child(1) { transition-delay: 0.1s; }
+.mobile-menu.open a:nth-child(2) { transition-delay: 0.15s; }
+.mobile-menu.open a:nth-child(3) { transition-delay: 0.2s; }
+.mobile-menu.open a:nth-child(4) { transition-delay: 0.25s; }
+.mobile-menu.open a:nth-child(5) { transition-delay: 0.3s; }
+.mobile-menu.open a:nth-child(6) { transition-delay: 0.35s; }
+
+.mobile-menu a:hover,
+.mobile-menu a.active {
+  color: #fff;
+}
+
+/* ============================================
+   REVEAL SYSTEM
+   ============================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+.hero {
+  min-height: 50vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 140px 48px 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -30%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-breadcrumb {
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-breadcrumb a {
+  transition: color 0.3s;
+}
+
+.hero-breadcrumb a:hover {
+  color: var(--accent-light);
+}
+
+.hero-breadcrumb .separator {
+  font-size: 11px;
+  opacity: 0.5;
+}
+
+.hero-breadcrumb .current {
+  color: var(--accent-light);
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 6vw, 64px);
+  font-weight: 700;
+  letter-spacing: -1.5px;
+  line-height: 1.15;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #fff 0%, var(--accent-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: clamp(15px, 2vw, 18px);
+  color: var(--text-dim);
+  max-width: 580px;
+  line-height: 1.7;
+}
+
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+.contact-section {
+  padding: 40px 48px 100px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 60px;
+  align-items: flex-start;
+}
+
+/* ============================================
+   FORM PROGRESS BAR
+   ============================================ */
+.form-progress-wrap {
+  margin-bottom: 40px;
+}
+
+.form-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.form-progress-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+
+.form-progress-percent {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-light);
+  transition: color 0.3s;
+}
+
+.form-progress-percent.complete {
+  color: #22c55e;
+}
+
+.form-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-card);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.form-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light), #c084fc);
+  background-size: 200% 100%;
+  border-radius: 3px;
+  transition: width 0.5s var(--ease);
+  animation: progressShimmer 2s ease-in-out infinite;
+  position: relative;
+}
+
+.form-progress-fill::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  background: var(--accent-light);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--accent), 0 0 24px var(--accent-glow);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.form-progress-fill.active::after {
+  opacity: 1;
+}
+
+@keyframes progressShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ============================================
+   FORM STYLING
+   ============================================ */
+.consultation-form {
+  background: var(--bg-surface);
+  border-radius: 20px;
+  padding: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.form-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+.form-desc {
+  font-size: 15px;
+  color: var(--text-dim);
+  margin-bottom: 36px;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.form-group label .required {
+  color: var(--accent-light);
+  margin-left: 2px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid #2a2a35;
+  border-radius: 12px;
+  padding: 16px;
+  color: var(--text);
+  font-size: 15px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  outline: none;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: #4a4a55;
+}
+
+.form-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A8580' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 44px;
+}
+
+.form-select option {
+  background: var(--bg-card);
+  color: var(--text);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Checkbox Group */
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid #2a2a35;
+  border-radius: 12px;
+  cursor: none;
+  transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+  user-select: none;
+}
+
+.checkbox-item:hover {
+  border-color: #3a3a45;
+  background: rgba(22, 22, 31, 0.8);
+}
+
+.checkbox-item.checked {
+  border-color: var(--accent);
+  background: rgba(124, 58, 237, 0.08);
+  box-shadow: 0 0 0 1px var(--accent-glow);
+}
+
+.checkbox-item input[type="checkbox"] {
+  display: none;
+}
+
+.checkbox-custom {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  border: 2px solid #3a3a45;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.3s, background 0.3s, transform 0.2s var(--spring);
+}
+
+.checkbox-item.checked .checkbox-custom {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.05);
+}
+
+.checkbox-custom svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.2s, transform 0.2s var(--spring);
+}
+
+.checkbox-item.checked .checkbox-custom svg {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.checkbox-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* Privacy Agreement */
+.privacy-group {
+  margin-bottom: 32px;
+}
+
+.privacy-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.privacy-check .checkbox-custom {
+  margin-top: 2px;
+}
+
+.privacy-check input[type="checkbox"] {
+  display: none;
+}
+
+.privacy-check label {
+  font-size: 14px;
+  color: var(--text);
+  cursor: none;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.privacy-toggle {
+  font-size: 13px;
+  color: var(--accent-light);
+  cursor: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+  transition: color 0.3s;
+  background: none;
+  border: none;
+  font-family: inherit;
+}
+
+.privacy-toggle:hover {
+  color: #c4b5fd;
+}
+
+.privacy-toggle .toggle-icon {
+  display: inline-block;
+  transition: transform 0.3s var(--ease);
+  font-size: 11px;
+}
+
+.privacy-toggle.open .toggle-icon {
+  transform: rotate(180deg);
+}
+
+.privacy-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s var(--ease);
+  border-radius: 10px;
+}
+
+.privacy-content.open {
+  max-height: 300px;
+}
+
+.privacy-content-inner {
+  padding: 16px;
+  background: var(--bg-card);
+  border-radius: 10px;
+  border: 1px solid #2a2a35;
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  margin-top: 8px;
+}
+
+/* Submit Button */
+.submit-btn {
+  width: 100%;
+  height: 56px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 14px;
+  border: none;
+  cursor: none;
+  transition: background 0.3s, transform 0.2s var(--spring), box-shadow 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-btn:hover {
+  background: #6d28d9;
+  transform: scale(1.01);
+  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.3);
+}
+
+.submit-btn:active {
+  transform: scale(0.99);
+}
+
+.submit-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 0.6s;
+}
+
+.submit-btn:hover::before {
+  left: 100%;
+}
+
+/* Form Validation */
+.form-input.error,
+.form-select.error,
+.form-textarea.error {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.checkbox-grid.error .checkbox-item {
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.error-message {
+  font-size: 13px;
+  color: #ef4444;
+  margin-top: 6px;
+  display: none;
+}
+
+.error-message.show {
+  display: block;
+}
+
+/* ============================================
+   CONTACT INFO (RIGHT COLUMN)
+   ============================================ */
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: sticky;
+  top: 104px;
+}
+
+/* Kakao Button */
+.kakao-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 56px;
+  background: #FEE500;
+  color: #3A1D1D;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 14px;
+  border: none;
+  cursor: none;
+  transition: background 0.3s, transform 0.2s var(--spring), box-shadow 0.3s;
+}
+
+.kakao-btn:hover {
+  background: #f5da00;
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(254, 229, 0, 0.2);
+}
+
+.kakao-btn:active {
+  transform: scale(0.98);
+}
+
+.kakao-icon {
+  width: 22px;
+  height: 22px;
+}
+
+/* Contact Cards */
+.contact-card {
+  background: var(--bg-surface);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 24px;
+  transition: border-color 0.3s, transform 0.2s var(--spring);
+}
+
+.contact-card:hover {
+  border-color: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.contact-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.contact-card-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--accent-glow);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.contact-card-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--accent-light);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.contact-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.contact-card-value {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 6px;
+  letter-spacing: -0.3px;
+}
+
+.contact-card-value.email-val {
+  font-size: 17px;
+}
+
+.contact-card-desc {
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+/* Map Placeholder */
+.map-placeholder {
+  width: 100%;
+  height: 180px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+  border-radius: 12px;
+  margin-top: 14px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(124, 58, 237, 0.06) 24px, rgba(124, 58, 237, 0.06) 25px),
+    repeating-linear-gradient(90deg, transparent, transparent 24px, rgba(124, 58, 237, 0.06) 24px, rgba(124, 58, 237, 0.06) 25px);
+}
+
+.map-placeholder::after {
+  content: '';
+  position: absolute;
+  bottom: 20%;
+  left: 10%;
+  width: 80%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.3), transparent);
+}
+
+.map-building {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.map-pin {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pinBounce 2s ease-in-out infinite;
+}
+
+.map-pin svg {
+  width: 28px;
+  height: 28px;
+}
+
+@keyframes pinBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.map-pin-shadow {
+  width: 20px;
+  height: 6px;
+  background: rgba(124, 58, 237, 0.3);
+  border-radius: 50%;
+  animation: pinShadow 2s ease-in-out infinite;
+}
+
+@keyframes pinShadow {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(0.7); opacity: 0.15; }
+}
+
+.map-label {
+  font-size: 12px;
+  color: var(--accent-light);
+  font-weight: 500;
+  background: rgba(124, 58, 237, 0.15);
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+/* Business Hours */
+.hours-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hours-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.hours-day {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.hours-time {
+  color: var(--text-dim);
+}
+
+.hours-row.closed .hours-time {
+  color: #ef4444;
+  font-size: 13px;
+}
+
+.hours-row .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  display: inline-block;
+}
+
+.status-dot.open {
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+}
+
+.status-dot.limited {
+  background: #f59e0b;
+}
+
+.status-dot.off {
+  background: #ef4444;
+}
+
+/* ============================================
+   FAQ SECTION
+   ============================================ */
+.faq-section {
+  padding: 80px 48px 100px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.faq-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.faq-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+
+.faq-subtitle {
+  font-size: 16px;
+  color: var(--text-dim);
+  margin-top: 12px;
+}
+
+.faq-list {
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.faq-item {
+  background: var(--bg-surface);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+
+.faq-item:hover {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.faq-item.open {
+  border-color: rgba(124, 58, 237, 0.2);
+}
+
+.faq-question {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  text-align: left;
+  cursor: none;
+  gap: 16px;
+  transition: color 0.3s;
+  background: none;
+  border: none;
+  font-family: inherit;
+}
+
+.faq-question:hover {
+  color: var(--accent-light);
+}
+
+.faq-icon {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 8px;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.4s var(--ease), background 0.3s;
+}
+
+.faq-item.open .faq-icon {
+  transform: rotate(45deg);
+  background: var(--accent);
+}
+
+.faq-icon svg {
+  width: 14px;
+  height: 14px;
+  stroke: var(--text-dim);
+  stroke-width: 2;
+  stroke-linecap: round;
+  transition: stroke 0.3s;
+}
+
+.faq-item.open .faq-icon svg {
+  stroke: #fff;
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s var(--ease);
+}
+
+.faq-answer-inner {
+  padding: 0 28px 24px;
+  font-size: 15px;
+  color: var(--text-dim);
+  line-height: 1.8;
+}
+
+/* ============================================
+   BOTTOM CTA
+   ============================================ */
+.bottom-cta {
+  padding: 80px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.bottom-cta::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.2), transparent);
+}
+
+.bottom-cta-inner {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.bottom-cta-title {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+
+.bottom-cta-desc {
+  font-size: 16px;
+  color: var(--text-dim);
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.bottom-cta-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 40px;
+  background: var(--bg-surface);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  border-radius: 16px;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+  transition: border-color 0.3s, transform 0.2s var(--spring), box-shadow 0.3s;
+}
+
+.bottom-cta-phone:hover {
+  border-color: var(--accent);
+  transform: scale(1.03);
+  box-shadow: 0 8px 32px var(--accent-glow);
+}
+
+.bottom-cta-phone svg {
+  width: 28px;
+  height: 28px;
+  stroke: var(--accent-light);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  animation: phoneRing 2s ease-in-out infinite;
+}
+
+@keyframes phoneRing {
+  0%, 100% { transform: rotate(0deg); }
+  10% { transform: rotate(-12deg); }
+  20% { transform: rotate(12deg); }
+  30% { transform: rotate(-8deg); }
+  40% { transform: rotate(8deg); }
+  50%, 100% { transform: rotate(0deg); }
+}
+
+/* ============================================
+   SUCCESS TOAST
+   ============================================ */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  background: linear-gradient(135deg, var(--accent), #6d28d9);
+  color: #fff;
+  padding: 24px 32px;
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(124, 58, 237, 0.3), 0 0 0 1px rgba(255,255,255,0.1) inset;
+  z-index: 10001;
+  transform: translateX(120%);
+  opacity: 0;
+  transition: transform 0.5s var(--spring), opacity 0.5s;
+  max-width: 380px;
+}
+
+.toast.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.toast-check {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toast-check .check-icon {
+  width: 22px;
+  height: 22px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-check .check-icon svg {
+  width: 12px;
+  height: 12px;
+  stroke: #fff;
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.toast-sub {
+  font-size: 14px;
+  opacity: 0.85;
+  line-height: 1.5;
+}
+
+.toast-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: none;
+  transition: background 0.3s;
+}
+
+.toast-close:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+.toast-close svg {
+  width: 10px;
+  height: 10px;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.footer {
+  padding: 80px 48px 40px;
+  background: var(--bg-surface);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.footer-grid {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 60px;
+}
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.footer-logo {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-logo .logo-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.footer-desc {
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  max-width: 280px;
+}
+
+.footer-col-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer-links a {
+  font-size: 14px;
+  color: var(--text-dim);
+  transition: color 0.3s;
+}
+
+.footer-links a:hover {
+  color: var(--accent-light);
+}
+
+.footer-bottom {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-copyright {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.footer-legal {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-legal a {
+  font-size: 13px;
+  color: var(--text-dim);
+  transition: color 0.3s;
+}
+
+.footer-legal a:hover {
+  color: var(--text);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1024px) {
+  .header {
+    padding: 0 32px;
+  }
+
+  .header-nav {
+    display: none;
+  }
+
+  .header-cta {
+    display: none;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .hero {
+    padding: 120px 32px 50px;
+  }
+
+  .contact-section {
+    padding: 32px 32px 80px;
+  }
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .contact-info {
+    position: static;
+    order: -1;
+  }
+
+  .faq-section {
+    padding: 60px 32px 80px;
+  }
+
+  .bottom-cta {
+    padding: 60px 32px;
+  }
+
+  .footer {
+    padding: 60px 32px 32px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 0 20px;
+    height: 64px;
+  }
+
+  .hero {
+    padding: 100px 20px 40px;
+    min-height: 40vh;
+  }
+
+  .hero-title {
+    font-size: 32px;
+  }
+
+  .contact-section {
+    padding: 24px 20px 60px;
+  }
+
+  .consultation-form {
+    padding: 28px 20px;
+    border-radius: 16px;
+  }
+
+  .checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .faq-section {
+    padding: 48px 20px 60px;
+  }
+
+  .faq-question {
+    padding: 18px 20px;
+    font-size: 15px;
+  }
+
+  .faq-answer-inner {
+    padding: 0 20px 20px;
+    font-size: 14px;
+  }
+
+  .bottom-cta {
+    padding: 48px 20px;
+  }
+
+  .bottom-cta-phone {
+    font-size: 22px;
+    padding: 16px 28px;
+  }
+
+  .footer {
+    padding: 48px 20px 24px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .toast {
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    max-width: none;
+  }
+
+  /* Hide custom cursor on mobile / touch */
+  .cursor-dot,
+  .cursor-ring {
+    display: none !important;
+  }
+
+  body {
+    cursor: auto;
+  }
+
+  button, a, input, textarea, select, .checkbox-item, .privacy-toggle, .faq-question, .toast-close {
+    cursor: auto;
+  }
+}
+
+@media (max-width: 375px) {
+  .hero-title {
+    font-size: 28px;
+  }
+
+  .hero-subtitle {
+    font-size: 14px;
+  }
+
+  .consultation-form {
+    padding: 24px 16px;
+  }
+
+  .contact-card {
+    padding: 20px;
+  }
+}
+</style>
+</head>
+<body>
+<!-- Scroll Progress Bar -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- Custom Cursor -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Grain Overlay -->
+<div class="grain-overlay">
+  <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+    <rect width="100%" height="100%" filter="url(#grain)"/>
+  </svg>
+</div>
+
+<!-- Header -->
+<header class="header" id="header">
+  <a href="index.html" class="header-logo">
+    <span class="logo-dot"></span>
+    WAVE DIGITAL
+  </a>
+  <nav class="header-nav">
+    <a href="services.html">서비스</a>
+    <a href="portfolio.html">포트폴리오</a>
+    <a href="about.html">회사소개</a>
+    <a href="insights.html">인사이트</a>
+    <a href="contact.html" class="active">문의하기</a>
+  </nav>
+  <a href="contact.html" class="header-cta">무료 상담</a>
+  <button class="hamburger" id="hamburger" aria-label="메뉴 열기">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</header>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="services.html">서비스</a>
+  <a href="portfolio.html">포트폴리오</a>
+  <a href="about.html">회사소개</a>
+  <a href="insights.html">인사이트</a>
+  <a href="contact.html" class="active">문의하기</a>
+  <a href="contact.html" style="color: var(--accent-light); font-size: 20px;">무료 상담</a>
+</div>
+
+<!-- ============================================
+     HERO SECTION
+     ============================================ -->
+<section class="hero">
+  <div class="hero-breadcrumb reveal">
+    <a href="index.html">홈</a>
+    <span class="separator">&#9656;</span>
+    <span class="current">문의하기</span>
+  </div>
+  <h1 class="hero-title reveal reveal-delay-1">함께 시작하세요</h1>
+  <p class="hero-subtitle reveal reveal-delay-2">무료 컨설팅으로 맞춤 마케팅 전략을 제안받으세요.<br>전문가가 직접 분석하고 최적의 방안을 설계해 드립니다.</p>
+</section>
+
+<!-- ============================================
+     MAIN CONTENT
+     ============================================ -->
+<section class="contact-section">
+  <div class="contact-grid">
+    <!-- LEFT: Consultation Form -->
+    <div class="reveal">
+      <div class="consultation-form">
+        <h2 class="form-title">무료 컨설팅 신청</h2>
+        <p class="form-desc">아래 양식을 작성해주시면, 전문 컨설턴트가 24시간 이내에 연락드립니다.</p>
+
+        <!-- Form Progress -->
+        <div class="form-progress-wrap">
+          <div class="form-progress-header">
+            <span class="form-progress-label">작성 진행률</span>
+            <span class="form-progress-percent" id="progressPercent">0% 완료</span>
+          </div>
+          <div class="form-progress-bar">
+            <div class="form-progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <form id="consultForm" novalidate>
+          <!-- 1. 회사명/브랜드명 -->
+          <div class="form-group">
+            <label for="companyName">회사명/브랜드명 <span class="required">*</span></label>
+            <input type="text" id="companyName" name="companyName" class="form-input" placeholder="회사명 또는 브랜드명을 입력하세요" required>
+            <div class="error-message" id="companyNameError">회사명/브랜드명을 입력해주세요.</div>
+          </div>
+
+          <!-- 2. 담당자 성함 -->
+          <div class="form-group">
+            <label for="contactName">담당자 성함 <span class="required">*</span></label>
+            <input type="text" id="contactName" name="contactName" class="form-input" placeholder="성함을 입력하세요" required>
+            <div class="error-message" id="contactNameError">담당자 성함을 입력해주세요.</div>
+          </div>
+
+          <!-- 3. 연락처 -->
+          <div class="form-group">
+            <label for="phone">연락처 <span class="required">*</span></label>
+            <input type="tel" id="phone" name="phone" class="form-input" placeholder="010-0000-0000" required>
+            <div class="error-message" id="phoneError">연락처를 입력해주세요.</div>
+          </div>
+
+          <!-- 4. 이메일 -->
+          <div class="form-group">
+            <label for="email">이메일 <span class="required">*</span></label>
+            <input type="email" id="email" name="email" class="form-input" placeholder="email@example.com" required>
+            <div class="error-message" id="emailError">올바른 이메일 주소를 입력해주세요.</div>
+          </div>
+
+          <!-- 5. 관심 서비스 -->
+          <div class="form-group">
+            <label>관심 서비스 <span class="required">*</span></label>
+            <div class="checkbox-grid" id="serviceCheckboxes">
+              <label class="checkbox-item" data-service="naver">
+                <input type="checkbox" name="services" value="네이버 마케팅">
+                <span class="checkbox-custom">
+                  <svg viewBox="0 0 12 12"><polyline points="2 6 5 9 10 3"/></svg>
+                </span>
+                <span class="checkbox-label">네이버 마케팅</span>
+              </label>
+              <label class="checkbox-item" data-service="instagram">
+                <input type="checkbox" name="services" value="인스타그램 마케팅">
+                <span class="checkbox-custom">
+                  <svg viewBox="0 0 12 12"><polyline points="2 6 5 9 10 3"/></svg>
+                </span>
+                <span class="checkbox-label">인스타그램 마케팅</span>
+              </label>
+              <label class="checkbox-item" data-service="youtube">
+                <input type="checkbox" name="services" value="유튜브 마케팅">
+                <span class="checkbox-custom">
+                  <svg viewBox="0 0 12 12"><polyline points="2 6 5 9 10 3"/></svg>
+                </span>
+                <span class="checkbox-label">유튜브 마케팅</span>
+              </label>
+              <label class="checkbox-item" data-service="tiktok">
+                <input type="checkbox" name="services" value="틱톡 마케팅">
+                <span class="checkbox-custom">
+                  <svg viewBox="0 0 12 12"><polyline points="2 6 5 9 10 3"/></svg>
+                </span>
+                <span class="checkbox-label">틱톡 마케팅</span>
+              </label>
+              <label class="checkbox-item" data-service="integrated">
+                <input type="checkbox" name="services" value="통합 마케팅">
+                <span class="checkbox-custom">
+                  <svg viewBox="0 0 12 12"><polyline points="2 6 5 9 10 3"/></svg>
+                </span>
+                <span class="checkbox-label">통합 마케팅</span>
+              </label>
+              <label class="checkbox-item" data-service="etc">
+                <input type="checkbox" name="services" value="기타">
+                <span class="checkbox-custom">
+                  <svg viewBox="0 0 12 12"><polyline points="2 6 5 9 10 3"/></svg>
+                </span>
+                <span class="checkbox-label">기타</span>
+              </label>
+            </div>
+            <div class="error-message" id="servicesError">관심 서비스를 1개 이상 선택해주세요.</div>
+          </div>
+
+          <!-- 6. 월 예산 범위 -->
+          <div class="form-group">
+            <label for="budget">월 예산 범위 <span class="required">*</span></label>
+            <select id="budget" name="budget" class="form-select" required>
+              <option value="" disabled selected>선택해주세요</option>
+              <option value="under100">100만원 미만</option>
+              <option value="100-300">100만원 ~ 300만원</option>
+              <option value="300-500">300만원 ~ 500만원</option>
+              <option value="500-1000">500만원 ~ 1,000만원</option>
+              <option value="over1000">1,000만원 이상</option>
+              <option value="undecided">미정 (상담 후 결정)</option>
+            </select>
+            <div class="error-message" id="budgetError">월 예산 범위를 선택해주세요.</div>
+          </div>
+
+          <!-- 7. 현재 마케팅 상황 -->
+          <div class="form-group">
+            <label for="currentSituation">현재 마케팅 상황</label>
+            <textarea id="currentSituation" name="currentSituation" class="form-textarea" rows="5" placeholder="현재 마케팅 상황이나 고민을 자유롭게 작성해주세요. (예: 현재 네이버 블로그를 운영 중이지만 효과가 미미합니다.)"></textarea>
+          </div>
+
+          <!-- 8. 문의 내용 -->
+          <div class="form-group">
+            <label for="inquiry">문의 내용 <span class="required">*</span></label>
+            <textarea id="inquiry" name="inquiry" class="form-textarea" rows="4" placeholder="원하시는 서비스나 목표를 구체적으로 작성해주세요." required></textarea>
+            <div class="error-message" id="inquiryError">문의 내용을 입력해주세요.</div>
+          </div>
+
+          <!-- 9. 개인정보 수집 동의 -->
+          <div class="form-group privacy-group">
+            <div class="privacy-check">
+              <label>
+                <input type="checkbox" id="privacyAgree" name="privacyAgree" required>
+                <span class="checkbox-custom">
+                  <svg viewBox="0 0 12 12"><polyline points="2 6 5 9 10 3"/></svg>
+                </span>
+                개인정보 수집 및 이용에 동의합니다. <span class="required">(필수)</span>
+              </label>
+            </div>
+            <button type="button" class="privacy-toggle" id="privacyToggle">
+              개인정보 처리방침 보기 <span class="toggle-icon">&#9662;</span>
+            </button>
+            <div class="privacy-content" id="privacyContent">
+              <div class="privacy-content-inner">
+                <strong>개인정보 수집 및 이용 동의</strong><br><br>
+                <strong>1. 수집 항목:</strong> 회사명, 담당자 성함, 연락처, 이메일, 문의 내용<br>
+                <strong>2. 수집 목적:</strong> 마케팅 컨설팅 상담 및 서비스 제안<br>
+                <strong>3. 보유 기간:</strong> 상담 완료 후 1년 또는 동의 철회 시까지<br>
+                <strong>4. 동의 거부 권리:</strong> 귀하는 개인정보 수집 및 이용에 대한 동의를 거부할 수 있으며, 이 경우 상담 신청이 제한될 수 있습니다.<br><br>
+                WAVE DIGITAL은 「개인정보 보호법」에 따라 귀하의 개인정보를 안전하게 관리합니다.
+              </div>
+            </div>
+            <div class="error-message" id="privacyError">개인정보 수집 및 이용에 동의해주세요.</div>
+          </div>
+
+          <!-- 10. Submit -->
+          <button type="submit" class="submit-btn">무료 컨설팅 신청하기</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- RIGHT: Contact Info -->
+    <div class="contact-info">
+      <!-- KakaoTalk Button -->
+      <div class="reveal reveal-delay-1">
+        <a href="#" class="kakao-btn">
+          <svg class="kakao-icon" viewBox="0 0 24 24" fill="#3A1D1D">
+            <path d="M12 3C6.48 3 2 6.58 2 10.9c0 2.78 1.8 5.22 4.5 6.6-.2.73-.72 2.65-.82 3.06-.13.52.19.51.4.37.17-.11 2.63-1.78 3.7-2.5.7.1 1.44.16 2.22.16 5.52 0 10-3.58 10-7.99S17.52 3 12 3z"/>
+          </svg>
+          카카오톡으로 상담하기
+        </a>
+      </div>
+
+      <!-- 전화 상담 -->
+      <div class="contact-card reveal reveal-delay-2">
+        <div class="contact-card-header">
+          <div class="contact-card-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+            </svg>
+          </div>
+          <span class="contact-card-title">전화 상담</span>
+        </div>
+        <div class="contact-card-value">02-555-7890</div>
+        <div class="contact-card-desc">평일 09:00 - 18:00 (점심 12:00 - 13:00)</div>
+      </div>
+
+      <!-- 이메일 -->
+      <div class="contact-card reveal reveal-delay-3">
+        <div class="contact-card-header">
+          <div class="contact-card-icon">
+            <svg viewBox="0 0 24 24">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <polyline points="22,4 12,13 2,4"/>
+            </svg>
+          </div>
+          <span class="contact-card-title">이메일</span>
+        </div>
+        <div class="contact-card-value email-val">info@wavedigital.kr</div>
+        <div class="contact-card-desc">24시간 이내 회신</div>
+      </div>
+
+      <!-- 오시는 길 -->
+      <div class="contact-card reveal reveal-delay-4">
+        <div class="contact-card-header">
+          <div class="contact-card-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <span class="contact-card-title">오시는 길</span>
+        </div>
+        <div class="contact-card-value" style="font-size:15px; font-family: var(--font-body);">서울특별시 강남구 테헤란로 427, 14층</div>
+        <div class="contact-card-desc">강남역 2번 출구에서 도보 5분</div>
+
+        <!-- Map Placeholder -->
+        <div class="map-placeholder">
+          <div class="map-building">
+            <div class="map-pin">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="var(--accent)" opacity="0.8"/>
+                <circle cx="12" cy="9" r="2.5" fill="#fff"/>
+              </svg>
+            </div>
+            <div class="map-pin-shadow"></div>
+            <span class="map-label">WAVE DIGITAL</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 영업 시간 -->
+      <div class="contact-card reveal reveal-delay-5">
+        <div class="contact-card-header">
+          <div class="contact-card-icon">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <span class="contact-card-title">영업 시간</span>
+        </div>
+        <div class="hours-grid">
+          <div class="hours-row">
+            <span class="hours-day"><span class="status-dot open"></span>평일</span>
+            <span class="hours-time">09:00 - 18:00</span>
+          </div>
+          <div class="hours-row">
+            <span class="hours-day"><span class="status-dot limited"></span>토요일</span>
+            <span class="hours-time">10:00 - 14:00 (사전 예약)</span>
+          </div>
+          <div class="hours-row closed">
+            <span class="hours-day"><span class="status-dot off"></span>일요일/공휴일</span>
+            <span class="hours-time">휴무</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     FAQ SECTION
+     ============================================ -->
+<section class="faq-section">
+  <div class="faq-header reveal">
+    <h2 class="faq-title">자주 묻는 질문</h2>
+    <p class="faq-subtitle">궁금하신 점을 빠르게 확인하세요</p>
+  </div>
+
+  <div class="faq-list">
+    <!-- FAQ 1 -->
+    <div class="faq-item reveal reveal-delay-1">
+      <button class="faq-question" aria-expanded="false">
+        <span>최소 계약 기간이 있나요?</span>
+        <span class="faq-icon">
+          <svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg>
+        </span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">기본 계약 기간은 3개월입니다. 마케팅 효과를 정확히 측정하고 최적화하기 위해 최소 3개월의 운영 기간을 권장합니다. 단, 단발성 프로젝트(이벤트, 캠페인 등)는 별도 협의가 가능합니다.</div>
+      </div>
+    </div>
+
+    <!-- FAQ 2 -->
+    <div class="faq-item reveal reveal-delay-2">
+      <button class="faq-question" aria-expanded="false">
+        <span>비용은 어떻게 책정되나요?</span>
+        <span class="faq-icon">
+          <svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg>
+        </span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">서비스 종류, 범위, 기간에 따라 맞춤 견적을 제공합니다. 무료 컨설팅을 통해 브랜드 상황을 분석한 후, 최적의 서비스와 예산을 제안드립니다. 투명한 비용 구조로 숨겨진 추가 비용은 없습니다.</div>
+      </div>
+    </div>
+
+    <!-- FAQ 3 -->
+    <div class="faq-item reveal reveal-delay-3">
+      <button class="faq-question" aria-expanded="false">
+        <span>성과 보고는 어떻게 받나요?</span>
+        <span class="faq-icon">
+          <svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg>
+        </span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">월 1회 정기 리포트를 제공하며, 주요 KPI 대시보드를 실시간으로 확인하실 수 있습니다. 리포트에는 핵심 지표 분석, 인사이트, 다음 달 전략이 포함됩니다.</div>
+      </div>
+    </div>
+
+    <!-- FAQ 4 -->
+    <div class="faq-item reveal reveal-delay-4">
+      <button class="faq-question" aria-expanded="false">
+        <span>여러 플랫폼을 동시에 진행할 수 있나요?</span>
+        <span class="faq-icon">
+          <svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg>
+        </span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">네, 통합 마케팅 패키지를 통해 여러 플랫폼을 동시에 운영할 수 있습니다. 플랫폼 간 시너지를 극대화하는 전략을 설계하며, 통합 운영 시 할인 혜택도 제공됩니다.</div>
+      </div>
+    </div>
+
+    <!-- FAQ 5 -->
+    <div class="faq-item reveal reveal-delay-5">
+      <button class="faq-question" aria-expanded="false">
+        <span>기존 마케팅 대행사에서 이전이 가능한가요?</span>
+        <span class="faq-icon">
+          <svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg>
+        </span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">물론입니다. 기존 운영 데이터와 계정을 분석한 후, 원활한 인수인계를 진행합니다. 기존 성과를 유지하면서 더 높은 목표를 향한 전략을 수립합니다.</div>
+      </div>
+    </div>
+
+    <!-- FAQ 6 -->
+    <div class="faq-item reveal">
+      <button class="faq-question" aria-expanded="false">
+        <span>콘텐츠 제작도 대행해주나요?</span>
+        <span class="faq-icon">
+          <svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg>
+        </span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">네, 사진 촬영, 영상 제작, 그래픽 디자인, 카피라이팅 등 콘텐츠 제작 전반을 대행합니다. 전문 크리에이티브 팀이 브랜드에 최적화된 콘텐츠를 제작합니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     BOTTOM CTA
+     ============================================ -->
+<section class="bottom-cta">
+  <div class="bottom-cta-inner reveal">
+    <h2 class="bottom-cta-title">전화 상담을 원하시나요?</h2>
+    <p class="bottom-cta-desc">지금 바로 전화하세요. 전문 상담원이 친절하게 안내해 드립니다.</p>
+    <a href="tel:02-555-7890" class="bottom-cta-phone">
+      <svg viewBox="0 0 24 24">
+        <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+      </svg>
+      02-555-7890
+    </a>
+  </div>
+</section>
+
+<!-- ============================================
+     FOOTER
+     ============================================ -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="footer-logo">
+        <span class="logo-dot"></span>
+        WAVE DIGITAL
+      </div>
+      <p class="footer-desc">데이터 기반의 디지털 마케팅 전문 에이전시. 네이버, 인스타그램, 유튜브, 틱톡 등 모든 플랫폼에서 브랜드의 성장을 이끕니다.</p>
+    </div>
+    <div>
+      <h4 class="footer-col-title">서비스</h4>
+      <div class="footer-links">
+        <a href="services.html">네이버 마케팅</a>
+        <a href="services.html">인스타그램 마케팅</a>
+        <a href="services.html">유튜브 마케팅</a>
+        <a href="services.html">틱톡 마케팅</a>
+        <a href="services.html">통합 마케팅</a>
+      </div>
+    </div>
+    <div>
+      <h4 class="footer-col-title">회사</h4>
+      <div class="footer-links">
+        <a href="about.html">회사소개</a>
+        <a href="portfolio.html">포트폴리오</a>
+        <a href="insights.html">인사이트</a>
+        <a href="contact.html">문의하기</a>
+      </div>
+    </div>
+    <div>
+      <h4 class="footer-col-title">연락처</h4>
+      <div class="footer-links">
+        <a href="tel:02-555-7890">02-555-7890</a>
+        <a href="mailto:info@wavedigital.kr">info@wavedigital.kr</a>
+        <span style="font-size:14px; color: var(--text-dim);">서울특별시 강남구<br>테헤란로 427, 14층</span>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-copyright">&copy; 2025 WAVE DIGITAL. All rights reserved.</p>
+    <div class="footer-legal">
+      <a href="#">이용약관</a>
+      <a href="#">개인정보처리방침</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================
+     SUCCESS TOAST
+     ============================================ -->
+<div class="toast" id="toast">
+  <button class="toast-close" id="toastClose" aria-label="닫기">
+    <svg viewBox="0 0 10 10"><line x1="1" y1="1" x2="9" y2="9"/><line x1="9" y1="1" x2="1" y2="9"/></svg>
+  </button>
+  <div class="toast-check">
+    <span class="check-icon">
+      <svg viewBox="0 0 12 12"><polyline points="2 6 5 9 10 3"/></svg>
+    </span>
+    문의가 접수되었습니다!
+  </div>
+  <div class="toast-sub">24시간 이내에 담당자가 연락드리겠습니다.</div>
+</div>
+
+<!-- ============================================
+     JAVASCRIPT
+     ============================================ -->
+<script>
+(function() {
+  'use strict';
+
+  /* ============================================
+     CUSTOM CURSOR
+     ============================================ */
+  const cursorDot = document.getElementById('cursorDot');
+  const cursorRing = document.getElementById('cursorRing');
+  let mouseX = 0, mouseY = 0;
+  let ringX = 0, ringY = 0;
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+  if (!isTouchDevice) {
+    document.addEventListener('mousemove', function(e) {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      cursorDot.style.left = mouseX + 'px';
+      cursorDot.style.top = mouseY + 'px';
+    });
+
+    function animateRing() {
+      ringX += (mouseX - ringX) * 0.15;
+      ringY += (mouseY - ringY) * 0.15;
+      cursorRing.style.left = ringX + 'px';
+      cursorRing.style.top = ringY + 'px';
+      requestAnimationFrame(animateRing);
+    }
+    animateRing();
+
+    // Hover effect on interactive elements
+    const interactiveElements = document.querySelectorAll('a, button, input, textarea, select, .checkbox-item, .faq-question');
+    interactiveElements.forEach(function(el) {
+      el.addEventListener('mouseenter', function() {
+        cursorDot.classList.add('hover');
+        cursorRing.classList.add('hover');
+      });
+      el.addEventListener('mouseleave', function() {
+        cursorDot.classList.remove('hover');
+        cursorRing.classList.remove('hover');
+      });
+    });
+  } else {
+    cursorDot.style.display = 'none';
+    cursorRing.style.display = 'none';
+  }
+
+  /* ============================================
+     SCROLL PROGRESS BAR
+     ============================================ */
+  const scrollProgress = document.getElementById('scrollProgress');
+
+  function updateScrollProgress() {
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    var scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    var progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+    scrollProgress.style.width = progress + '%';
+  }
+
+  window.addEventListener('scroll', updateScrollProgress, { passive: true });
+  updateScrollProgress();
+
+  /* ============================================
+     HEADER SCROLL BEHAVIOR
+     ============================================ */
+  const header = document.getElementById('header');
+  var lastScrollY = 0;
+
+  window.addEventListener('scroll', function() {
+    var currentScrollY = window.pageYOffset;
+    if (currentScrollY > 80) {
+      header.classList.add('scrolled');
+    } else {
+      header.classList.remove('scrolled');
+    }
+    lastScrollY = currentScrollY;
+  }, { passive: true });
+
+  /* ============================================
+     MOBILE MENU
+     ============================================ */
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+
+  hamburger.addEventListener('click', function() {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+    document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+  });
+
+  // Close mobile menu on link click
+  mobileMenu.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() {
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+
+  /* ============================================
+     REVEAL SYSTEM (IntersectionObserver)
+     ============================================ */
+  var revealElements = document.querySelectorAll('.reveal');
+
+  if ('IntersectionObserver' in window) {
+    var revealObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -40px 0px'
+    });
+
+    revealElements.forEach(function(el) {
+      revealObserver.observe(el);
+    });
+  } else {
+    // Fallback: show all
+    revealElements.forEach(function(el) {
+      el.classList.add('visible');
+    });
+  }
+
+  /* ============================================
+     FORM PROGRESS BAR
+     ============================================ */
+  const progressFill = document.getElementById('progressFill');
+  const progressPercent = document.getElementById('progressPercent');
+
+  // Required fields tracking
+  var requiredInputs = ['companyName', 'contactName', 'phone', 'email'];
+  var requiredIds = {
+    companyName: false,
+    contactName: false,
+    phone: false,
+    email: false,
+    services: false,
+    budget: false,
+    inquiry: false,
+    privacyAgree: false
+  };
+
+  var totalRequired = Object.keys(requiredIds).length;
+
+  function updateProgress() {
+    var filled = 0;
+
+    // Text inputs
+    requiredInputs.forEach(function(id) {
+      var input = document.getElementById(id);
+      if (input && input.value.trim().length > 0) {
+        filled++;
+        requiredIds[id] = true;
+      } else {
+        requiredIds[id] = false;
+      }
+    });
+
+    // Checkboxes (services)
+    var serviceChecked = document.querySelectorAll('#serviceCheckboxes input[type="checkbox"]:checked');
+    if (serviceChecked.length > 0) {
+      filled++;
+      requiredIds.services = true;
+    } else {
+      requiredIds.services = false;
+    }
+
+    // Budget select
+    var budgetSelect = document.getElementById('budget');
+    if (budgetSelect.value) {
+      filled++;
+      requiredIds.budget = true;
+    } else {
+      requiredIds.budget = false;
+    }
+
+    // Inquiry textarea
+    var inquiry = document.getElementById('inquiry');
+    if (inquiry.value.trim().length > 0) {
+      filled++;
+      requiredIds.inquiry = true;
+    } else {
+      requiredIds.inquiry = false;
+    }
+
+    // Privacy checkbox
+    var privacy = document.getElementById('privacyAgree');
+    if (privacy.checked) {
+      filled++;
+      requiredIds.privacyAgree = true;
+    } else {
+      requiredIds.privacyAgree = false;
+    }
+
+    var percent = Math.round((filled / totalRequired) * 100);
+    progressFill.style.width = percent + '%';
+    progressPercent.textContent = percent + '% 완료';
+
+    if (percent > 0) {
+      progressFill.classList.add('active');
+    } else {
+      progressFill.classList.remove('active');
+    }
+
+    if (percent === 100) {
+      progressPercent.classList.add('complete');
+    } else {
+      progressPercent.classList.remove('complete');
+    }
+  }
+
+  // Attach progress listeners to all form elements
+  document.querySelectorAll('#consultForm input, #consultForm textarea, #consultForm select').forEach(function(el) {
+    el.addEventListener('input', updateProgress);
+    el.addEventListener('change', updateProgress);
+  });
+
+  /* ============================================
+     CUSTOM CHECKBOX BEHAVIOR
+     ============================================ */
+  document.querySelectorAll('.checkbox-item').forEach(function(item) {
+    item.addEventListener('click', function(e) {
+      // Prevent double-firing if click is on the hidden input
+      if (e.target.tagName === 'INPUT') return;
+
+      var checkbox = item.querySelector('input[type="checkbox"]');
+      checkbox.checked = !checkbox.checked;
+      item.classList.toggle('checked', checkbox.checked);
+      updateProgress();
+    });
+
+    // Sync initial state
+    var checkbox = item.querySelector('input[type="checkbox"]');
+    checkbox.addEventListener('change', function() {
+      item.classList.toggle('checked', checkbox.checked);
+      updateProgress();
+    });
+  });
+
+  /* ============================================
+     PRIVACY AGREEMENT CHECKBOX
+     ============================================ */
+  var privacyLabel = document.querySelector('.privacy-check label');
+  var privacyCheckbox = document.getElementById('privacyAgree');
+  var privacyCustom = privacyLabel.querySelector('.checkbox-custom');
+
+  privacyLabel.addEventListener('click', function(e) {
+    if (e.target.tagName === 'INPUT') return;
+    e.preventDefault();
+    privacyCheckbox.checked = !privacyCheckbox.checked;
+    updatePrivacyVisual();
+    updateProgress();
+  });
+
+  privacyCheckbox.addEventListener('change', function() {
+    updatePrivacyVisual();
+    updateProgress();
+  });
+
+  function updatePrivacyVisual() {
+    if (privacyCheckbox.checked) {
+      privacyCustom.style.background = 'var(--accent)';
+      privacyCustom.style.borderColor = 'var(--accent)';
+      privacyCustom.querySelector('svg').style.opacity = '1';
+      privacyCustom.querySelector('svg').style.transform = 'scale(1)';
+    } else {
+      privacyCustom.style.background = '';
+      privacyCustom.style.borderColor = '';
+      privacyCustom.querySelector('svg').style.opacity = '0';
+      privacyCustom.querySelector('svg').style.transform = 'scale(0.5)';
+    }
+  }
+
+  /* ============================================
+     PRIVACY TOGGLE
+     ============================================ */
+  var privacyToggle = document.getElementById('privacyToggle');
+  var privacyContent = document.getElementById('privacyContent');
+
+  privacyToggle.addEventListener('click', function() {
+    privacyToggle.classList.toggle('open');
+    privacyContent.classList.toggle('open');
+    var text = privacyToggle.classList.contains('open') ? '개인정보 처리방침 닫기' : '개인정보 처리방침 보기';
+    privacyToggle.innerHTML = text + ' <span class="toggle-icon">&#9662;</span>';
+    if (privacyToggle.classList.contains('open')) {
+      privacyToggle.querySelector('.toggle-icon').style.transform = 'rotate(180deg)';
+    }
+  });
+
+  /* ============================================
+     FORM VALIDATION & SUBMIT
+     ============================================ */
+  var consultForm = document.getElementById('consultForm');
+
+  function clearErrors() {
+    document.querySelectorAll('.form-input.error, .form-select.error, .form-textarea.error').forEach(function(el) {
+      el.classList.remove('error');
+    });
+    document.querySelectorAll('.checkbox-grid.error').forEach(function(el) {
+      el.classList.remove('error');
+    });
+    document.querySelectorAll('.error-message.show').forEach(function(el) {
+      el.classList.remove('show');
+    });
+  }
+
+  function showError(inputId, errorId) {
+    var input = document.getElementById(inputId);
+    var error = document.getElementById(errorId);
+    if (input) input.classList.add('error');
+    if (error) error.classList.add('show');
+  }
+
+  function validateEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  consultForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    clearErrors();
+
+    var isValid = true;
+    var firstError = null;
+
+    // Company name
+    var companyName = document.getElementById('companyName');
+    if (!companyName.value.trim()) {
+      showError('companyName', 'companyNameError');
+      isValid = false;
+      if (!firstError) firstError = companyName;
+    }
+
+    // Contact name
+    var contactName = document.getElementById('contactName');
+    if (!contactName.value.trim()) {
+      showError('contactName', 'contactNameError');
+      isValid = false;
+      if (!firstError) firstError = contactName;
+    }
+
+    // Phone
+    var phone = document.getElementById('phone');
+    if (!phone.value.trim()) {
+      showError('phone', 'phoneError');
+      isValid = false;
+      if (!firstError) firstError = phone;
+    }
+
+    // Email
+    var email = document.getElementById('email');
+    if (!email.value.trim() || !validateEmail(email.value.trim())) {
+      showError('email', 'emailError');
+      isValid = false;
+      if (!firstError) firstError = email;
+    }
+
+    // Services
+    var serviceChecked = document.querySelectorAll('#serviceCheckboxes input[type="checkbox"]:checked');
+    if (serviceChecked.length === 0) {
+      document.getElementById('serviceCheckboxes').classList.add('error');
+      document.getElementById('servicesError').classList.add('show');
+      isValid = false;
+      if (!firstError) firstError = document.getElementById('serviceCheckboxes');
+    }
+
+    // Budget
+    var budget = document.getElementById('budget');
+    if (!budget.value) {
+      showError('budget', 'budgetError');
+      isValid = false;
+      if (!firstError) firstError = budget;
+    }
+
+    // Inquiry
+    var inquiry = document.getElementById('inquiry');
+    if (!inquiry.value.trim()) {
+      showError('inquiry', 'inquiryError');
+      isValid = false;
+      if (!firstError) firstError = inquiry;
+    }
+
+    // Privacy
+    var privacy = document.getElementById('privacyAgree');
+    if (!privacy.checked) {
+      document.getElementById('privacyError').classList.add('show');
+      isValid = false;
+      if (!firstError) firstError = privacy;
+    }
+
+    if (!isValid) {
+      if (firstError) {
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (firstError.focus) firstError.focus();
+      }
+      return;
+    }
+
+    // Show success toast
+    showToast();
+
+    // Reset form
+    consultForm.reset();
+    document.querySelectorAll('.checkbox-item.checked').forEach(function(item) {
+      item.classList.remove('checked');
+    });
+    updatePrivacyVisual();
+    updateProgress();
+  });
+
+  // Remove error on input
+  document.querySelectorAll('#consultForm .form-input, #consultForm .form-textarea, #consultForm .form-select').forEach(function(el) {
+    el.addEventListener('input', function() {
+      el.classList.remove('error');
+      var errorEl = el.parentElement.querySelector('.error-message');
+      if (errorEl) errorEl.classList.remove('show');
+    });
+    el.addEventListener('change', function() {
+      el.classList.remove('error');
+      var errorEl = el.parentElement.querySelector('.error-message');
+      if (errorEl) errorEl.classList.remove('show');
+    });
+  });
+
+  /* ============================================
+     SUCCESS TOAST
+     ============================================ */
+  var toast = document.getElementById('toast');
+  var toastClose = document.getElementById('toastClose');
+  var toastTimeout;
+
+  function showToast() {
+    toast.classList.add('show');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(function() {
+      hideToast();
+    }, 5000);
+  }
+
+  function hideToast() {
+    toast.classList.remove('show');
+  }
+
+  toastClose.addEventListener('click', function() {
+    hideToast();
+    clearTimeout(toastTimeout);
+  });
+
+  /* ============================================
+     FAQ ACCORDION
+     ============================================ */
+  var faqItems = document.querySelectorAll('.faq-item');
+
+  faqItems.forEach(function(item) {
+    var question = item.querySelector('.faq-question');
+    var answer = item.querySelector('.faq-answer');
+    var answerInner = item.querySelector('.faq-answer-inner');
+
+    question.addEventListener('click', function() {
+      var isOpen = item.classList.contains('open');
+
+      // Close all other items
+      faqItems.forEach(function(otherItem) {
+        if (otherItem !== item && otherItem.classList.contains('open')) {
+          otherItem.classList.remove('open');
+          otherItem.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+          otherItem.querySelector('.faq-answer').style.maxHeight = '0';
+        }
+      });
+
+      // Toggle current item
+      if (isOpen) {
+        item.classList.remove('open');
+        question.setAttribute('aria-expanded', 'false');
+        answer.style.maxHeight = '0';
+      } else {
+        item.classList.add('open');
+        question.setAttribute('aria-expanded', 'true');
+        answer.style.maxHeight = answerInner.scrollHeight + 24 + 'px';
+      }
+    });
+  });
+
+  /* ============================================
+     INPUT FOCUS ANIMATION (subtle)
+     ============================================ */
+  document.querySelectorAll('.form-input, .form-textarea, .form-select').forEach(function(input) {
+    input.addEventListener('focus', function() {
+      var group = input.closest('.form-group');
+      if (group) {
+        group.style.transform = 'translateX(4px)';
+        group.style.transition = 'transform 0.3s var(--spring)';
+      }
+    });
+    input.addEventListener('blur', function() {
+      var group = input.closest('.form-group');
+      if (group) {
+        group.style.transform = 'translateX(0)';
+      }
+    });
+  });
+
+  /* ============================================
+     PHONE NUMBER AUTO-FORMAT
+     ============================================ */
+  var phoneInput = document.getElementById('phone');
+  phoneInput.addEventListener('input', function(e) {
+    var value = e.target.value.replace(/[^0-9]/g, '');
+    if (value.length > 11) value = value.slice(0, 11);
+
+    if (value.length >= 8) {
+      if (value.startsWith('02')) {
+        value = value.slice(0, 2) + '-' + value.slice(2, 6) + '-' + value.slice(6);
+      } else {
+        value = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7);
+      }
+    } else if (value.length >= 4) {
+      if (value.startsWith('02')) {
+        value = value.slice(0, 2) + '-' + value.slice(2);
+      } else {
+        value = value.slice(0, 3) + '-' + value.slice(3);
+      }
+    }
+
+    e.target.value = value;
+  });
+
+})();
+</script>
+</body>
+</html>

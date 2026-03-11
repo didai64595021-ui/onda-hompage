@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인사이트 — WAVE DIGITAL | 웨이브 디지털</title>
+<meta name="description" content="디지털 마케팅의 최신 트렌드와 실전 노하우를 공유합니다. 데이터 기반의 인사이트로 비즈니스 성장을 도와드립니다.">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+
+<style>
+/* ========================================
+   CSS Reset & Custom Properties
+   ======================================== */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #0A0A0F;
+  --bg-surface: #12121A;
+  --bg-card: #16161F;
+  --accent: #7C3AED;
+  --accent-light: #A78BFA;
+  --accent-glow: rgba(124, 58, 237, 0.15);
+  --naver: #03C75A;
+  --youtube: #FF0000;
+  --tiktok-cyan: #00F2EA;
+  --tiktok-pink: #FF0050;
+  --text: #E8E4DF;
+  --text-dim: #8A8580;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --grid: 8px;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  word-break: keep-all;
+  line-height: 1.6;
+  cursor: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  cursor: none;
+}
+
+button, input {
+  cursor: none;
+  font-family: var(--font-body);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ========================================
+   Scroll Progress Bar
+   ======================================== */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  z-index: 10000;
+  transition: none;
+}
+
+/* ========================================
+   Custom Cursor
+   ======================================== */
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  background: var(--accent-light);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s var(--spring), height 0.3s var(--spring), background 0.3s;
+}
+
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid rgba(167, 139, 250, 0.4);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s var(--spring), height 0.4s var(--spring), border-color 0.3s, background 0.3s;
+}
+
+.cursor-hover .cursor-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+}
+
+.cursor-hover .cursor-ring {
+  width: 52px;
+  height: 52px;
+  border-color: rgba(124, 58, 237, 0.6);
+  background: rgba(124, 58, 237, 0.08);
+}
+
+@media (max-width: 768px) {
+  .cursor-dot, .cursor-ring {
+    display: none !important;
+  }
+  body {
+    cursor: auto;
+  }
+  a, button, input {
+    cursor: auto;
+  }
+}
+
+/* ========================================
+   Grain Overlay
+   ======================================== */
+.grain-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9990;
+  opacity: 0.035;
+}
+
+.grain-overlay svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ========================================
+   Header / Navigation
+   ======================================== */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  padding: 0 clamp(24px, 4vw, 60px);
+  transition: background 0.4s var(--ease), box-shadow 0.4s var(--ease), padding 0.3s var(--ease);
+}
+
+.header.scrolled {
+  background: rgba(10, 10, 15, 0.88);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1440px;
+  margin: 0 auto;
+  height: 80px;
+  transition: height 0.3s var(--ease);
+}
+
+.header.scrolled .header-inner {
+  height: 64px;
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: opacity 0.3s;
+}
+
+.logo:hover {
+  opacity: 0.8;
+}
+
+.logo-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.nav-desktop {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+
+.nav-desktop a {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  transition: color 0.3s;
+  position: relative;
+  padding: 4px 0;
+}
+
+.nav-desktop a:hover,
+.nav-desktop a.active {
+  color: var(--text);
+}
+
+.nav-desktop a.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+.header-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 0.3s, transform 0.3s var(--spring);
+}
+
+.header-cta:hover {
+  background: #6D28D9;
+  transform: scale(1.04);
+}
+
+/* Hamburger */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 8px;
+  z-index: 1100;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: transform 0.3s var(--ease), opacity 0.3s;
+}
+
+.hamburger.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* Mobile Nav */
+.mobile-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100dvh;
+  background: rgba(10, 10, 15, 0.96);
+  -webkit-backdrop-filter: blur(30px);
+  backdrop-filter: blur(30px);
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s var(--ease), visibility 0.4s;
+}
+
+.mobile-nav.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.mobile-nav a {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  transition: color 0.3s, transform 0.3s;
+  padding: 8px 0;
+}
+
+.mobile-nav a:hover,
+.mobile-nav a.active {
+  color: var(--text);
+}
+
+.mobile-nav .mobile-cta {
+  margin-top: 24px;
+  padding: 14px 36px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 100px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+  .nav-desktop, .header-cta {
+    display: none;
+  }
+  .hamburger {
+    display: flex;
+  }
+}
+
+/* ========================================
+   Reveal Animations
+   ======================================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+.reveal-delay-6 { transition-delay: 0.6s; }
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+}
+
+.reveal-scale.revealed {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ========================================
+   Hero Section
+   ======================================== */
+.blog-hero {
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 120px clamp(24px, 4vw, 60px) 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.blog-hero::before {
+  content: '';
+  position: absolute;
+  top: -30%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 60%);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.blog-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 720px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 32px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.breadcrumb a {
+  color: var(--text-dim);
+  transition: color 0.3s;
+}
+
+.breadcrumb a:hover {
+  color: var(--accent-light);
+}
+
+.breadcrumb-sep {
+  font-size: 0.7rem;
+  opacity: 0.5;
+}
+
+.blog-hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, var(--text) 0%, var(--accent-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.blog-hero p {
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  color: var(--text-dim);
+  line-height: 1.7;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ========================================
+   Search & Filter Section
+   ======================================== */
+.filter-section {
+  padding: 0 clamp(24px, 4vw, 60px) 48px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.search-bar {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 16px 20px 16px 52px;
+  background: var(--bg-surface);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  color: var(--text);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.search-bar input::placeholder {
+  color: var(--text-dim);
+  opacity: 0.7;
+}
+
+.search-bar input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.search-icon {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: var(--text-dim);
+  pointer-events: none;
+}
+
+.filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-btn {
+  padding: 10px 22px;
+  background: var(--bg-surface);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 100px;
+  color: var(--text-dim);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.3s var(--ease);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.filter-btn:hover {
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.12);
+  background: var(--bg-card);
+}
+
+.filter-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* ========================================
+   Featured Post
+   ======================================== */
+.featured-section {
+  padding: 0 clamp(24px, 4vw, 60px) 56px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.featured-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  background: var(--bg-card);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease);
+}
+
+.featured-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+}
+
+.featured-img {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16/10;
+}
+
+.featured-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 8s ease;
+  transform: scale(1) translate(0, 0);
+}
+
+.featured-card:hover .featured-img img {
+  transform: scale(1.08) translate(-1%, -1%);
+}
+
+.featured-content {
+  padding: clamp(28px, 3vw, 48px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+.category-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 14px;
+  background: var(--accent-glow);
+  color: var(--accent-light);
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 100px;
+  width: fit-content;
+  letter-spacing: 0.02em;
+}
+
+.category-badge.trend { background: rgba(124, 58, 237, 0.15); color: #A78BFA; }
+.category-badge.platform { background: rgba(3, 199, 90, 0.12); color: #03C75A; }
+.category-badge.success { background: rgba(255, 0, 80, 0.12); color: #FF6B9D; }
+.category-badge.howto { background: rgba(0, 242, 234, 0.1); color: #00F2EA; }
+
+.featured-content h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  transition: color 0.3s;
+}
+
+.featured-card:hover .featured-content h2 {
+  color: var(--accent-light);
+}
+
+.featured-content .excerpt {
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  line-height: 1.7;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  flex-wrap: wrap;
+}
+
+.post-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.meta-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  opacity: 0.5;
+}
+
+@media (max-width: 768px) {
+  .featured-card {
+    grid-template-columns: 1fr;
+  }
+
+  .featured-img {
+    aspect-ratio: 16/9;
+  }
+}
+
+/* ========================================
+   Blog Grid
+   ======================================== */
+.blog-grid-section {
+  padding: 0 clamp(24px, 4vw, 60px) 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+}
+
+.blog-card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease);
+  display: flex;
+  flex-direction: column;
+}
+
+.blog-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+}
+
+.blog-card-img {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16/10;
+}
+
+.blog-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 8s ease;
+  transform: scale(1) translate(0, 0);
+}
+
+.blog-card:hover .blog-card-img img {
+  transform: scale(1.08) translate(-1%, -1%);
+}
+
+.blog-card-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.blog-card-body h3 {
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 1.4vw, 1.2rem);
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+  color: var(--text);
+  transition: color 0.3s;
+}
+
+.blog-card:hover .blog-card-body h3 {
+  color: var(--accent-light);
+}
+
+.blog-card-body .excerpt {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  line-height: 1.65;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+.blog-card-footer {
+  padding: 0 24px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.blog-card-footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Hidden by filter */
+.blog-card.hidden {
+  display: none;
+}
+
+.featured-card.hidden {
+  display: none;
+}
+
+/* No Results */
+.no-results {
+  display: none;
+  text-align: center;
+  padding: 80px 24px;
+  grid-column: 1 / -1;
+}
+
+.no-results.visible {
+  display: block;
+}
+
+.no-results h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.no-results p {
+  color: var(--text-dim);
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .blog-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+/* ========================================
+   Newsletter CTA
+   ======================================== */
+.newsletter-section {
+  padding: 80px clamp(24px, 4vw, 60px);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.newsletter-card {
+  background: var(--bg-surface);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 24px;
+  padding: clamp(40px, 5vw, 72px);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.newsletter-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.newsletter-content {
+  position: relative;
+  z-index: 2;
+}
+
+.newsletter-content h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+.newsletter-content > p {
+  font-size: 1rem;
+  color: var(--text-dim);
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.newsletter-form {
+  display: flex;
+  gap: 12px;
+  max-width: 480px;
+  margin: 0 auto 16px;
+}
+
+.newsletter-form input {
+  flex: 1;
+  padding: 14px 20px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  min-height: 44px;
+}
+
+.newsletter-form input::placeholder {
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+.newsletter-form input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.newsletter-form button {
+  padding: 14px 28px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.3s, transform 0.3s var(--spring);
+  min-height: 44px;
+}
+
+.newsletter-form button:hover {
+  background: #6D28D9;
+  transform: scale(1.04);
+}
+
+.newsletter-disclaimer {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  opacity: 0.7;
+}
+
+@media (max-width: 480px) {
+  .newsletter-form {
+    flex-direction: column;
+  }
+}
+
+/* ========================================
+   Bottom CTA
+   ======================================== */
+.bottom-cta-section {
+  padding: 40px clamp(24px, 4vw, 60px) 120px;
+  text-align: center;
+}
+
+.bottom-cta-inner {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.bottom-cta-inner h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+.btn-cta-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 40px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  transition: background 0.3s, transform 0.3s var(--spring), box-shadow 0.3s;
+}
+
+.btn-cta-primary:hover {
+  background: #6D28D9;
+  transform: scale(1.05);
+  box-shadow: 0 12px 40px rgba(124, 58, 237, 0.35);
+}
+
+.btn-cta-primary svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.3s var(--ease);
+}
+
+.btn-cta-primary:hover svg {
+  transform: translateX(4px);
+}
+
+/* ========================================
+   Footer
+   ======================================== */
+.footer {
+  background: var(--bg-surface);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 64px clamp(24px, 4vw, 60px) 40px;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 48px;
+}
+
+.footer-brand .footer-logo {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-brand .footer-logo-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.footer-brand p {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+
+.footer-col h4 {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+
+.footer-col a {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--text-dim);
+  padding: 6px 0;
+  transition: color 0.3s;
+}
+
+.footer-col a:hover {
+  color: var(--accent-light);
+}
+
+.footer-bottom {
+  max-width: 1200px;
+  margin: 40px auto 0;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-bottom p {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+.footer-bottom-links {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-bottom-links a {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  opacity: 0.6;
+  transition: opacity 0.3s, color 0.3s;
+}
+
+.footer-bottom-links a:hover {
+  opacity: 1;
+  color: var(--accent-light);
+}
+
+@media (max-width: 768px) {
+  .footer-inner {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+
+  .footer-brand {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ========================================
+   Utility
+   ======================================== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- Scroll Progress Bar -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- Custom Cursor -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Grain Overlay -->
+<div class="grain-overlay" aria-hidden="true">
+  <svg>
+    <filter id="noiseFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+    <rect width="100%" height="100%" filter="url(#noiseFilter)"/>
+  </svg>
+</div>
+
+<!-- ====== HEADER ====== -->
+<header class="header" id="header">
+  <div class="header-inner">
+    <a href="index.html" class="logo" data-cursor-hover>
+      <div class="logo-mark">W</div>
+      WAVE DIGITAL
+    </a>
+
+    <nav class="nav-desktop">
+      <a href="services.html" data-cursor-hover>서비스</a>
+      <a href="portfolio.html" data-cursor-hover>포트폴리오</a>
+      <a href="about.html" data-cursor-hover>회사소개</a>
+      <a href="blog.html" class="active" data-cursor-hover>인사이트</a>
+      <a href="contact.html" data-cursor-hover>문의하기</a>
+    </nav>
+
+    <a href="contact.html" class="header-cta" data-cursor-hover>
+      프로젝트 문의
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+
+    <button class="hamburger" id="hamburger" aria-label="메뉴 열기" data-cursor-hover>
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</header>
+
+<!-- Mobile Nav -->
+<nav class="mobile-nav" id="mobileNav">
+  <a href="services.html">서비스</a>
+  <a href="portfolio.html">포트폴리오</a>
+  <a href="about.html">회사소개</a>
+  <a href="blog.html" class="active">인사이트</a>
+  <a href="contact.html">문의하기</a>
+  <a href="contact.html" class="mobile-cta">프로젝트 문의</a>
+</nav>
+
+<!-- ====== MAIN CONTENT ====== -->
+<main>
+
+  <!-- Hero Section -->
+  <section class="blog-hero">
+    <div class="blog-hero-content">
+      <div class="breadcrumb reveal">
+        <a href="index.html" data-cursor-hover>홈</a>
+        <span class="breadcrumb-sep">&#9656;</span>
+        <span>인사이트</span>
+      </div>
+      <h1 class="reveal reveal-delay-1">마케팅 인사이트</h1>
+      <p class="reveal reveal-delay-2">디지털 마케팅의 최신 트렌드와 실전 노하우를 공유합니다. 데이터 기반의 인사이트로 비즈니스 성장을 도와드립니다.</p>
+    </div>
+  </section>
+
+  <!-- Search & Filter -->
+  <section class="filter-section reveal">
+    <div class="search-bar">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" id="searchInput" placeholder="검색어를 입력하세요" aria-label="블로그 검색">
+    </div>
+    <div class="filter-buttons" id="filterButtons">
+      <button class="filter-btn active" data-filter="all" data-cursor-hover>전체</button>
+      <button class="filter-btn" data-filter="trend" data-cursor-hover>마케팅 트렌드</button>
+      <button class="filter-btn" data-filter="platform" data-cursor-hover>플랫폼 업데이트</button>
+      <button class="filter-btn" data-filter="success" data-cursor-hover>성공사례</button>
+      <button class="filter-btn" data-filter="howto" data-cursor-hover>노하우</button>
+    </div>
+  </section>
+
+  <!-- Featured Post -->
+  <section class="featured-section">
+    <a href="#" class="featured-card reveal-scale" data-category="trend" data-title="2025년 디지털 마케팅 트렌드 TOP 10 — AI부터 숏폼까지" data-cursor-hover>
+      <div class="featured-img">
+        <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80" alt="2025년 디지털 마케팅 트렌드" loading="lazy" width="1200" height="750">
+      </div>
+      <div class="featured-content">
+        <span class="category-badge trend">마케팅 트렌드</span>
+        <h2>2025년 디지털 마케팅 트렌드 TOP 10 — AI부터 숏폼까지</h2>
+        <p class="excerpt">급변하는 디지털 마케팅 환경에서 앞서나가기 위한 10가지 핵심 트렌드를 분석합니다. AI 콘텐츠 자동화, 숏폼 마케팅, 소셜 커머스 등 2025년을 이끌 트렌드를 확인하세요.</p>
+        <div class="post-meta">
+          <span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2025.03.08
+          </span>
+          <span class="meta-dot"></span>
+          <span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            8분 읽기
+          </span>
+          <span class="meta-dot"></span>
+          <span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            이서연
+          </span>
+        </div>
+      </div>
+    </a>
+  </section>
+
+  <!-- Blog Grid -->
+  <section class="blog-grid-section">
+    <div class="blog-grid" id="blogGrid">
+
+      <!-- Card 1 -->
+      <a href="#" class="blog-card reveal" data-category="howto" data-title="네이버 플레이스 알고리즘 완벽 분석 — 2025년 최신 가이드" data-cursor-hover>
+        <div class="blog-card-img">
+          <img src="https://images.unsplash.com/photo-1553484771-047a44eee27b?w=800&q=80" alt="네이버 플레이스 알고리즘 분석" loading="lazy" width="800" height="500">
+        </div>
+        <div class="blog-card-body">
+          <span class="category-badge howto">노하우</span>
+          <h3>네이버 플레이스 알고리즘 완벽 분석 — 2025년 최신 가이드</h3>
+          <p class="excerpt">네이버 플레이스 순위를 결정하는 핵심 요소를 분석합니다. 리뷰 수, 방문자 수, 키워드 최적화 등 상위 노출의 비밀을 공개합니다.</p>
+        </div>
+        <div class="blog-card-footer">
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2025.03.05
+          </span>
+          <span class="meta-dot"></span>
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            6분 읽기
+          </span>
+          <span class="meta-dot"></span>
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            김도현
+          </span>
+        </div>
+      </a>
+
+      <!-- Card 2 -->
+      <a href="#" class="blog-card reveal reveal-delay-1" data-category="platform" data-title="인스타그램 릴스 알고리즘 변화와 대응 전략" data-cursor-hover>
+        <div class="blog-card-img">
+          <img src="https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=800&q=80" alt="인스타그램 릴스 알고리즘" loading="lazy" width="800" height="500">
+        </div>
+        <div class="blog-card-body">
+          <span class="category-badge platform">플랫폼 업데이트</span>
+          <h3>인스타그램 릴스 알고리즘 변화와 대응 전략</h3>
+          <p class="excerpt">2025년 인스타그램 릴스 알고리즘이 크게 변화했습니다. 새로운 알고리즘에 맞춘 콘텐츠 전략과 최적화 방법을 안내합니다.</p>
+        </div>
+        <div class="blog-card-footer">
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2025.02.28
+          </span>
+          <span class="meta-dot"></span>
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            5분 읽기
+          </span>
+          <span class="meta-dot"></span>
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            박준혁
+          </span>
+        </div>
+      </a>
+
+      <!-- Card 3 -->
+      <a href="#" class="blog-card reveal" data-category="success" data-title="소규모 카페, 3개월 만에 일 방문자 10배 성장시킨 비결" data-cursor-hover>
+        <div class="blog-card-img">
+          <img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&q=80" alt="소규모 카페 마케팅 성공사례" loading="lazy" width="800" height="500">
+        </div>
+        <div class="blog-card-body">
+          <span class="category-badge success">성공사례</span>
+          <h3>소규모 카페, 3개월 만에 일 방문자 10배 성장시킨 비결</h3>
+          <p class="excerpt">네이버 플레이스 최적화와 블로그 마케팅만으로 일 방문자를 15명에서 180명으로 성장시킨 실제 사례를 공유합니다.</p>
+        </div>
+        <div class="blog-card-footer">
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2025.02.20
+          </span>
+          <span class="meta-dot"></span>
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            7분 읽기
+          </span>
+          <span class="meta-dot"></span>
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            이서연
+          </span>
+        </div>
+      </a>
+
+      <!-- Card 4 -->
+      <a href="#" class="blog-card reveal reveal-delay-1" data-category="howto" data-title="틱톡 광고, ROI를 극대화하는 5가지 전략" data-cursor-hover>
+        <div class="blog-card-img">
+          <img src="https://images.unsplash.com/photo-1596558450268-9c27524ba856?w=800&q=80" alt="틱톡 광고 ROI 전략" loading="lazy" width="800" height="500">
+        </div>
+        <div class="blog-card-body">
+          <span class="category-badge howto">노하우</span>
+          <h3>틱톡 광고, ROI를 극대화하는 5가지 전략</h3>
+          <p class="excerpt">틱톡 광고의 효과를 극대화하는 실전 전략을 소개합니다. 타겟팅 설정부터 크리에이티브 제작, A/B 테스트까지.</p>
+        </div>
+        <div class="blog-card-footer">
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2025.02.15
+          </span>
+          <span class="meta-dot"></span>
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            5분 읽기
+          </span>
+          <span class="meta-dot"></span>
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            최민지
+          </span>
+        </div>
+      </a>
+
+      <!-- Card 5 -->
+      <a href="#" class="blog-card reveal" data-category="trend" data-title="유튜브 쇼츠 vs 틱톡 — 어디에 집중해야 할까?" data-cursor-hover>
+        <div class="blog-card-img">
+          <img src="https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=800&q=80" alt="유튜브 쇼츠 vs 틱톡" loading="lazy" width="800" height="500">
+        </div>
+        <div class="blog-card-body">
+          <span class="category-badge trend">마케팅 트렌드</span>
+          <h3>유튜브 쇼츠 vs 틱톡 — 어디에 집중해야 할까?</h3>
+          <p class="excerpt">숏폼 콘텐츠의 양대 산맥, 유튜브 쇼츠와 틱톡. 각 플랫폼의 특성과 장단점을 비교 분석하고, 비즈니스에 맞는 전략을 제안합니다.</p>
+        </div>
+        <div class="blog-card-footer">
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2025.02.08
+          </span>
+          <span class="meta-dot"></span>
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            6분 읽기
+          </span>
+          <span class="meta-dot"></span>
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            정우성
+          </span>
+        </div>
+      </a>
+
+      <!-- Card 6 -->
+      <a href="#" class="blog-card reveal reveal-delay-1" data-category="platform" data-title="메타 광고 2025 업데이트 — 달라진 점 총정리" data-cursor-hover>
+        <div class="blog-card-img">
+          <img src="https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=800&q=80" alt="메타 광고 2025 업데이트" loading="lazy" width="800" height="500">
+        </div>
+        <div class="blog-card-body">
+          <span class="category-badge platform">플랫폼 업데이트</span>
+          <h3>메타 광고 2025 업데이트 — 달라진 점 총정리</h3>
+          <p class="excerpt">메타(인스타그램/페이스북) 광고 시스템의 2025년 주요 업데이트를 정리합니다. 새로운 AI 타겟팅, 자동 크리에이티브 기능 등.</p>
+        </div>
+        <div class="blog-card-footer">
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2025.01.30
+          </span>
+          <span class="meta-dot"></span>
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            4분 읽기
+          </span>
+          <span class="meta-dot"></span>
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            최민지
+          </span>
+        </div>
+      </a>
+
+      <!-- Card 7 -->
+      <a href="#" class="blog-card reveal" data-category="success" data-title="뷰티 브랜드 인스타 팔로워 0에서 5만까지 — 실전 로드맵" data-cursor-hover>
+        <div class="blog-card-img">
+          <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&q=80" alt="뷰티 브랜드 인스타그램 성장" loading="lazy" width="800" height="500">
+        </div>
+        <div class="blog-card-body">
+          <span class="category-badge success">성공사례</span>
+          <h3>뷰티 브랜드 인스타 팔로워 0에서 5만까지 — 실전 로드맵</h3>
+          <p class="excerpt">뷰티 브랜드 '글로우'의 인스타그램 성장 스토리. 8개월간의 전략과 실행, 그리고 얻은 교훈을 상세하게 공유합니다.</p>
+        </div>
+        <div class="blog-card-footer">
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2025.01.22
+          </span>
+          <span class="meta-dot"></span>
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            8분 읽기
+          </span>
+          <span class="meta-dot"></span>
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            이서연
+          </span>
+        </div>
+      </a>
+
+      <!-- Card 8 -->
+      <a href="#" class="blog-card reveal reveal-delay-1" data-category="howto" data-title="검색광고 ROAS 450% 달성한 키워드 전략 공개" data-cursor-hover>
+        <div class="blog-card-img">
+          <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80" alt="검색광고 ROAS 키워드 전략" loading="lazy" width="800" height="500">
+        </div>
+        <div class="blog-card-body">
+          <span class="category-badge howto">노하우</span>
+          <h3>검색광고 ROAS 450% 달성한 키워드 전략 공개</h3>
+          <p class="excerpt">네이버 검색광고에서 ROAS 450%를 달성한 실전 키워드 전략을 공개합니다. 키워드 선정, 입찰가 설정, 품질 점수 관리까지.</p>
+        </div>
+        <div class="blog-card-footer">
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2025.01.15
+          </span>
+          <span class="meta-dot"></span>
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            6분 읽기
+          </span>
+          <span class="meta-dot"></span>
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            김도현
+          </span>
+        </div>
+      </a>
+
+      <!-- No Results Message -->
+      <div class="no-results" id="noResults">
+        <h3>검색 결과가 없습니다</h3>
+        <p>다른 검색어나 카테고리를 시도해 보세요.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Newsletter CTA -->
+  <section class="newsletter-section">
+    <div class="newsletter-card reveal-scale">
+      <div class="newsletter-content">
+        <h2>마케팅 인사이트를 구독하세요</h2>
+        <p>매주 최신 마케팅 트렌드와 노하우를 이메일로 받아보세요.</p>
+        <form class="newsletter-form" id="newsletterForm" onsubmit="return false;">
+          <input type="email" placeholder="이메일 주소를 입력하세요" aria-label="이메일 주소" required>
+          <button type="submit" data-cursor-hover>구독하기</button>
+        </form>
+        <p class="newsletter-disclaimer">스팸 없이, 유용한 정보만 보내드립니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bottom CTA -->
+  <section class="bottom-cta-section">
+    <div class="bottom-cta-inner reveal">
+      <h2>마케팅 고민이 있으신가요?</h2>
+      <a href="contact.html" class="btn-cta-primary" data-cursor-hover>
+        무료 상담 받기
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<!-- ====== FOOTER ====== -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo">
+        <div class="footer-logo-mark">W</div>
+        WAVE DIGITAL
+      </div>
+      <p>데이터 기반 퍼포먼스 마케팅으로<br>비즈니스 성장을 만듭니다.</p>
+      <p>서울특별시 강남구 테헤란로 427, 12층</p>
+    </div>
+    <div class="footer-col">
+      <h4>Services</h4>
+      <a href="services.html" data-cursor-hover>퍼포먼스 마케팅</a>
+      <a href="services.html" data-cursor-hover>콘텐츠 마케팅</a>
+      <a href="services.html" data-cursor-hover>SNS 운영 대행</a>
+      <a href="services.html" data-cursor-hover>브랜딩 전략</a>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="about.html" data-cursor-hover>회사소개</a>
+      <a href="portfolio.html" data-cursor-hover>포트폴리오</a>
+      <a href="blog.html" data-cursor-hover>인사이트</a>
+      <a href="contact.html" data-cursor-hover>문의하기</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="mailto:hello@wavedigital.kr" data-cursor-hover>hello@wavedigital.kr</a>
+      <a href="tel:02-1234-5678" data-cursor-hover>02-1234-5678</a>
+      <a href="#" data-cursor-hover>카카오톡 채널</a>
+      <a href="#" data-cursor-hover>인스타그램</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2025 Wave Digital. All rights reserved.</p>
+    <div class="footer-bottom-links">
+      <a href="#" data-cursor-hover>개인정보처리방침</a>
+      <a href="#" data-cursor-hover>이용약관</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ========================================
+     JavaScript
+     ======================================== -->
+<script>
+(function() {
+  'use strict';
+
+  /* ============================================
+     Scroll Progress Bar
+     ============================================ */
+  const scrollProgress = document.getElementById('scrollProgress');
+
+  function updateScrollProgress() {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    scrollProgress.style.width = scrollPercent + '%';
+  }
+
+  /* ============================================
+     Custom Cursor
+     ============================================ */
+  const cursorDot = document.getElementById('cursorDot');
+  const cursorRing = document.getElementById('cursorRing');
+  let mouseX = 0, mouseY = 0;
+  let ringX = 0, ringY = 0;
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+  if (!isTouchDevice) {
+    document.addEventListener('mousemove', function(e) {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      cursorDot.style.left = mouseX + 'px';
+      cursorDot.style.top = mouseY + 'px';
+    });
+
+    function animateCursorRing() {
+      ringX += (mouseX - ringX) * 0.15;
+      ringY += (mouseY - ringY) * 0.15;
+      cursorRing.style.left = ringX + 'px';
+      cursorRing.style.top = ringY + 'px';
+      requestAnimationFrame(animateCursorRing);
+    }
+    animateCursorRing();
+
+    // Hover state
+    const hoverTargets = document.querySelectorAll('[data-cursor-hover], a, button, input');
+    hoverTargets.forEach(function(el) {
+      el.addEventListener('mouseenter', function() {
+        document.body.classList.add('cursor-hover');
+      });
+      el.addEventListener('mouseleave', function() {
+        document.body.classList.remove('cursor-hover');
+      });
+    });
+  } else {
+    if (cursorDot) cursorDot.style.display = 'none';
+    if (cursorRing) cursorRing.style.display = 'none';
+  }
+
+  /* ============================================
+     Header Scroll
+     ============================================ */
+  const header = document.getElementById('header');
+  let lastScrollY = 0;
+
+  function handleHeaderScroll() {
+    const scrollY = window.scrollY;
+    if (scrollY > 40) {
+      header.classList.add('scrolled');
+    } else {
+      header.classList.remove('scrolled');
+    }
+    lastScrollY = scrollY;
+  }
+
+  /* ============================================
+     Mobile Navigation
+     ============================================ */
+  const hamburger = document.getElementById('hamburger');
+  const mobileNav = document.getElementById('mobileNav');
+
+  hamburger.addEventListener('click', function() {
+    hamburger.classList.toggle('active');
+    mobileNav.classList.toggle('open');
+    document.body.style.overflow = mobileNav.classList.contains('open') ? 'hidden' : '';
+  });
+
+  // Close mobile nav on link click
+  mobileNav.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() {
+      hamburger.classList.remove('active');
+      mobileNav.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+
+  /* ============================================
+     Reveal on Scroll (IntersectionObserver)
+     ============================================ */
+  const revealElements = document.querySelectorAll('.reveal, .reveal-scale');
+  const revealObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.1,
+    rootMargin: '0px 0px -40px 0px'
+  });
+
+  revealElements.forEach(function(el) {
+    revealObserver.observe(el);
+  });
+
+  /* ============================================
+     Search & Filter Functionality
+     ============================================ */
+  const searchInput = document.getElementById('searchInput');
+  const filterButtons = document.querySelectorAll('.filter-btn');
+  const blogCards = document.querySelectorAll('.blog-card');
+  const featuredCard = document.querySelector('.featured-card');
+  const noResults = document.getElementById('noResults');
+  let activeFilter = 'all';
+
+  function filterAndSearch() {
+    const query = searchInput.value.toLowerCase().trim();
+    let visibleCount = 0;
+
+    // Filter featured card
+    const featuredCategory = featuredCard.getAttribute('data-category');
+    const featuredTitle = featuredCard.getAttribute('data-title').toLowerCase();
+    const featuredMatchCategory = (activeFilter === 'all' || featuredCategory === activeFilter);
+    const featuredMatchSearch = (query === '' || featuredTitle.indexOf(query) !== -1);
+
+    if (featuredMatchCategory && featuredMatchSearch) {
+      featuredCard.classList.remove('hidden');
+      visibleCount++;
+    } else {
+      featuredCard.classList.add('hidden');
+    }
+
+    // Filter blog cards
+    blogCards.forEach(function(card) {
+      const category = card.getAttribute('data-category');
+      const title = card.getAttribute('data-title').toLowerCase();
+      const matchCategory = (activeFilter === 'all' || category === activeFilter);
+      const matchSearch = (query === '' || title.indexOf(query) !== -1);
+
+      if (matchCategory && matchSearch) {
+        card.classList.remove('hidden');
+        visibleCount++;
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+
+    // No results
+    if (visibleCount === 0) {
+      noResults.classList.add('visible');
+    } else {
+      noResults.classList.remove('visible');
+    }
+  }
+
+  // Filter button clicks
+  filterButtons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      filterButtons.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      activeFilter = btn.getAttribute('data-filter');
+      filterAndSearch();
+    });
+  });
+
+  // Search input
+  searchInput.addEventListener('input', filterAndSearch);
+
+  /* ============================================
+     Newsletter Form
+     ============================================ */
+  const newsletterForm = document.getElementById('newsletterForm');
+  newsletterForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var emailInput = newsletterForm.querySelector('input[type="email"]');
+    if (emailInput.value) {
+      var btn = newsletterForm.querySelector('button');
+      var originalText = btn.textContent;
+      btn.textContent = '구독 완료!';
+      btn.style.background = '#03C75A';
+      emailInput.value = '';
+      setTimeout(function() {
+        btn.textContent = originalText;
+        btn.style.background = '';
+      }, 3000);
+    }
+  });
+
+  /* ============================================
+     Scroll Event Handler (throttled with rAF)
+     ============================================ */
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      requestAnimationFrame(function() {
+        updateScrollProgress();
+        handleHeaderScroll();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+
+  // Initial calls
+  updateScrollProgress();
+  handleHeaderScroll();
+
+})();
+</script>
+
+</body>
+</html>
