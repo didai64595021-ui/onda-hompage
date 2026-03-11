@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>반응형 vs 미반응형 비교 — ONDA CMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#1B65A6;--accent:#00C9A7;--dark:#0F1724;--bg:#F7F9FC;--card:#fff;
+  --text:#1A1F36;--text2:#6B7280;--radius:12px;--shadow:0 2px 16px rgba(0,0,0,.06);
+  --danger:#EF4444;--warning:#F59E0B;--success:#10B981;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--text);background:var(--bg);line-height:1.7}
+
+/* Nav */
+.top-nav{position:fixed;top:0;left:0;right:0;height:60px;background:rgba(255,255,255,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:1000;border-bottom:1px solid #e5e7eb}
+.top-nav a{text-decoration:none;color:var(--primary);font-weight:600;font-size:.9rem}
+.top-nav .nav-title{font-weight:700;font-size:1rem;color:var(--text)}
+.top-nav .nav-logo{font-weight:900;font-size:.95rem;color:var(--primary);letter-spacing:1px}
+
+/* Content */
+.content{max-width:1100px;margin:0 auto;padding:100px 24px 60px}
+
+/* Section Header */
+.section-header{text-align:center;margin-bottom:48px}
+.badge{display:inline-block;background:var(--primary);color:#fff;font-size:.75rem;font-weight:700;padding:4px 14px;border-radius:20px;margin-bottom:12px;letter-spacing:1px}
+.section-header h1{font-size:2rem;font-weight:900;margin-bottom:8px}
+.section-header p{color:var(--text2);font-size:1rem;max-width:520px;margin:0 auto}
+
+/* Device Buttons */
+.device-btns{display:flex;justify-content:center;gap:12px;margin-bottom:32px;flex-wrap:wrap}
+.device-btn{padding:10px 20px;border:2px solid #e5e7eb;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;font-size:.9rem;transition:all .3s}
+.device-btn.active{border-color:var(--primary);background:var(--primary);color:#fff}
+
+/* Compare */
+.compare-wrap{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+@media(max-width:768px){.compare-wrap{grid-template-columns:1fr}}
+.compare-box{border:2px solid #e5e7eb;border-radius:var(--radius);overflow:hidden}
+.compare-box.good{border-color:var(--accent)}
+.compare-box.bad{border-color:var(--danger)}
+.compare-label{padding:12px 16px;font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:8px}
+.compare-box.good .compare-label{background:rgba(0,201,167,.1);color:var(--accent)}
+.compare-box.bad .compare-label{background:rgba(239,68,68,.1);color:var(--danger)}
+.compare-viewport{margin:16px;border:2px solid #e5e7eb;border-radius:8px;overflow:hidden;transition:width .5s ease;background:#fff;position:relative}
+.compare-viewport.responsive{width:100%}
+.compare-viewport.non-responsive{overflow-x:auto}
+.compare-inner{min-width:900px;padding:20px}
+.compare-viewport.responsive .compare-inner{min-width:0}
+.demo-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.compare-viewport.responsive .demo-cards{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.demo-card{background:var(--bg);border-radius:8px;padding:16px;text-align:center}
+.demo-card .icon{width:48px;height:48px;border-radius:50%;background:var(--primary);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem}
+.demo-card h4{font-size:.9rem;margin-bottom:4px}
+.demo-card p{font-size:.75rem;color:var(--text2)}
+.overflow-indicator{display:none;position:absolute;right:0;top:0;bottom:0;width:40px;background:linear-gradient(to right,transparent,rgba(239,68,68,.15));pointer-events:none}
+.compare-viewport.non-responsive .overflow-indicator{display:block}
+
+/* Bottom Nav */
+.bottom-nav{text-align:center;margin-top:60px;padding:32px 0}
+.bottom-nav a{display:inline-block;padding:14px 32px;background:var(--primary);color:#fff;text-decoration:none;border-radius:8px;font-weight:700;font-size:1rem;transition:background .2s}
+.bottom-nav a:hover{background:#154f85}
+
+/* Footer */
+.footer{text-align:center;padding:32px 24px;color:var(--text2);font-size:.85rem;border-top:1px solid #e5e7eb;margin-top:20px}
+</style>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<nav class="top-nav">
+  <a href="index.html">← 메인으로</a>
+  <span class="nav-title">반응형 vs 미반응형 비교</span>
+  <span class="nav-logo">ONDA CMS</span>
+</nav>
+
+<!-- Content -->
+<div class="content">
+
+  <!-- Section Header -->
+  <div class="section-header">
+    <span class="badge">SECTION 1</span>
+    <h1>반응형 vs 미반응형 비교</h1>
+    <p>같은 레이아웃이 화면 크기에 따라 어떻게 달라지는지 직접 확인하세요.</p>
+  </div>
+
+  <!-- Device Switch Buttons -->
+  <div class="device-btns">
+    <button class="device-btn active" data-width="100%" onclick="switchDevice(this,'100%')">🖥 데스크톱 (100%)</button>
+    <button class="device-btn" data-width="768px" onclick="switchDevice(this,'768px')">📱 태블릿 (768px)</button>
+    <button class="device-btn" data-width="375px" onclick="switchDevice(this,'375px')">📲 모바일 (375px)</button>
+  </div>
+
+  <!-- Compare Boxes -->
+  <div class="compare-wrap">
+
+    <!-- Left: Responsive -->
+    <div class="compare-box good">
+      <div class="compare-label">✅ 반응형 (온다 CMS)</div>
+      <div class="compare-viewport responsive" id="vpGood">
+        <div class="compare-inner">
+          <div class="demo-cards">
+            <div class="demo-card">
+              <div class="icon">🎨</div>
+              <h4>디자인</h4>
+              <p>드래그&드롭으로 완성</p>
+            </div>
+            <div class="demo-card">
+              <div class="icon">⚡</div>
+              <h4>속도</h4>
+              <p>초고속 로딩</p>
+            </div>
+            <div class="demo-card">
+              <div class="icon">📱</div>
+              <h4>반응형</h4>
+              <p>모든 기기 최적화</p>
+            </div>
+            <div class="demo-card">
+              <div class="icon">🔒</div>
+              <h4>보안</h4>
+              <p>SSL 기본 제공</p>
+            </div>
+            <div class="demo-card">
+              <div class="icon">📊</div>
+              <h4>SEO</h4>
+              <p>검색엔진 최적화</p>
+            </div>
+            <div class="demo-card">
+              <div class="icon">🛠</div>
+              <h4>관리</h4>
+              <p>쉬운 콘텐츠 관리</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Non-responsive -->
+    <div class="compare-box bad">
+      <div class="compare-label">❌ 미반응형 (구형 빌더)</div>
+      <div class="compare-viewport non-responsive" id="vpBad">
+        <div class="compare-inner">
+          <div class="demo-cards">
+            <div class="demo-card">
+              <div class="icon">🎨</div>
+              <h4>디자인</h4>
+              <p>드래그&드롭으로 완성</p>
+            </div>
+            <div class="demo-card">
+              <div class="icon">⚡</div>
+              <h4>속도</h4>
+              <p>초고속 로딩</p>
+            </div>
+            <div class="demo-card">
+              <div class="icon">📱</div>
+              <h4>반응형</h4>
+              <p>모든 기기 최적화</p>
+            </div>
+            <div class="demo-card">
+              <div class="icon">🔒</div>
+              <h4>보안</h4>
+              <p>SSL 기본 제공</p>
+            </div>
+            <div class="demo-card">
+              <div class="icon">📊</div>
+              <h4>SEO</h4>
+              <p>검색엔진 최적화</p>
+            </div>
+            <div class="demo-card">
+              <div class="icon">🛠</div>
+              <h4>관리</h4>
+              <p>쉬운 콘텐츠 관리</p>
+            </div>
+          </div>
+        </div>
+        <div class="overflow-indicator"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <a href="editor.html">다음 기능 보기: CMS 편집기능 →</a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">© 2026 ONDA Marketing. CMS 웹빌더 토탈 기능 데모 페이지.</div>
+
+<script>
+function switchDevice(btn, width) {
+  // Toggle active class
+  document.querySelectorAll('.device-btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  btn.classList.add('active');
+
+  // Set max-width on both viewports
+  var vpGood = document.getElementById('vpGood');
+  var vpBad = document.getElementById('vpBad');
+  vpGood.style.maxWidth = width;
+  vpBad.style.maxWidth = width;
+}
+</script>
+
+</body>
+</html>

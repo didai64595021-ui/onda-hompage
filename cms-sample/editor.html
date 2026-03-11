@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMS 편집기능 체험 — ONDA CMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#1B65A6;--accent:#00C9A7;--dark:#0F1724;--bg:#F7F9FC;--card:#fff;
+  --text:#1A1F36;--text2:#6B7280;--radius:12px;--shadow:0 2px 16px rgba(0,0,0,.06);
+  --danger:#EF4444;--warning:#F59E0B;--success:#10B981;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--text);background:var(--bg);line-height:1.7}
+
+/* Nav */
+.top-nav{position:fixed;top:0;left:0;right:0;height:60px;background:rgba(255,255,255,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:1000;border-bottom:1px solid #e5e7eb}
+.top-nav a{text-decoration:none;color:var(--primary);font-weight:600;font-size:.9rem}
+.top-nav .nav-title{font-weight:700;font-size:1rem;color:var(--text)}
+.top-nav .nav-logo{font-weight:900;font-size:.95rem;color:var(--primary);letter-spacing:1px}
+
+/* Content */
+.content{max-width:1100px;margin:0 auto;padding:100px 24px 60px}
+
+/* Section Header */
+.section-header{text-align:center;margin-bottom:48px}
+.badge{display:inline-block;background:var(--primary);color:#fff;font-size:.75rem;font-weight:700;padding:4px 14px;border-radius:20px;margin-bottom:12px;letter-spacing:1px}
+.section-header h1{font-size:2rem;font-weight:900;margin-bottom:8px}
+.section-header p{color:var(--text2);font-size:1rem;max-width:520px;margin:0 auto}
+
+/* Admin Toggle */
+.admin-toggle-wrap{text-align:center;margin-bottom:32px}
+.admin-toggle{position:relative;display:inline-flex;align-items:center;gap:12px;padding:12px 24px;background:var(--dark);color:#fff;border-radius:30px;cursor:pointer;user-select:none;font-weight:700;font-size:.95rem}
+.admin-toggle .dot{width:20px;height:20px;border-radius:50%;background:#555;transition:background .3s}
+.admin-toggle.on .dot{background:var(--accent)}
+.admin-toggle .status{font-size:.8rem;color:var(--text2)}
+.admin-toggle.on .status{color:var(--accent)}
+
+/* Editor Demo */
+.editor-demo{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;max-width:900px;margin:0 auto}
+.editor-toolbar{background:var(--dark);color:#fff;padding:0 16px;display:flex;align-items:center;gap:12px;font-size:.85rem;opacity:0;height:0;overflow:hidden;transition:all .3s}
+.editor-toolbar.show{opacity:1;height:auto;padding:10px 16px}
+.toolbar-btn{background:rgba(255,255,255,.15);border:none;color:#fff;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:.8rem;transition:background .2s}
+.toolbar-btn:hover{background:rgba(255,255,255,.3)}
+.editor-content{padding:32px}
+
+/* Editable */
+.editable{position:relative;transition:outline .2s}
+.admin-on .editable{cursor:text}
+.admin-on .editable:hover{outline:2px dashed var(--accent);outline-offset:4px}
+.admin-on .editable:focus{outline:2px solid var(--primary);outline-offset:4px}
+
+/* Editable Image */
+.editable-img{position:relative;display:inline-block;width:100%;margin:16px 0}
+.admin-on .editable-img:hover::after{content:'클릭하여 이미지 교체';position:absolute;inset:0;background:rgba(0,0,0,.6);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:600;border-radius:8px;cursor:pointer}
+.editable-img img,.editable-img svg{width:100%;border-radius:8px;display:block}
+
+/* Sortable */
+.drag-handle{display:none;position:absolute;left:-28px;top:50%;transform:translateY(-50%);cursor:grab;color:var(--text2);font-size:1.2rem}
+.admin-on .drag-handle{display:block}
+.sortable-item{position:relative;padding:16px;margin:8px 0;background:var(--bg);border-radius:8px;transition:all .2s}
+.admin-on .sortable-item{padding-left:36px}
+.admin-on .sortable-item:hover{background:#e8f4fd}
+.sortable-item.dragging{opacity:.5;background:#dbeafe}
+.sortable-item .item-delete{display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--danger);color:#fff;border:none;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:.8rem}
+.admin-on .sortable-item .item-delete{display:flex;align-items:center;justify-content:center}
+.add-item-btn{display:none;width:100%;padding:12px;border:2px dashed var(--accent);border-radius:8px;background:transparent;color:var(--accent);font-weight:700;cursor:pointer;margin-top:8px;font-size:.9rem;transition:all .2s}
+.add-item-btn:hover{background:rgba(0,201,167,.08)}
+.admin-on .add-item-btn{display:block}
+
+/* Tooltip */
+.tooltip{position:relative;display:inline-block;margin-left:6px;width:18px;height:18px;background:var(--primary);color:#fff;border-radius:50%;text-align:center;line-height:18px;font-size:.7rem;cursor:help;vertical-align:middle}
+.tooltip::after{content:attr(data-tip);position:absolute;bottom:130%;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;padding:6px 12px;border-radius:6px;font-size:.75rem;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s}
+.tooltip:hover::after{opacity:1}
+
+/* Sub Title */
+.sub-title{font-size:1.15rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.sub-title .tag{font-size:.7rem;background:var(--primary);color:#fff;padding:3px 10px;border-radius:12px}
+
+/* Bottom Nav */
+.bottom-nav{text-align:center;margin-top:60px;padding:32px 0}
+.bottom-nav a{display:inline-block;padding:14px 32px;background:var(--primary);color:#fff;text-decoration:none;border-radius:8px;font-weight:700;font-size:1rem;transition:background .2s}
+.bottom-nav a:hover{background:#154f85}
+
+/* Footer */
+.footer{text-align:center;padding:32px 24px;color:var(--text2);font-size:.85rem;border-top:1px solid #e5e7eb;margin-top:20px}
+</style>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<nav class="top-nav">
+  <a href="index.html">← 메인으로</a>
+  <span class="nav-title">CMS 편집기능 체험</span>
+  <span class="nav-logo">ONDA CMS</span>
+</nav>
+
+<!-- Content -->
+<div class="content" id="editorRoot">
+
+  <!-- Section Header -->
+  <div class="section-header">
+    <span class="badge">SECTION 2</span>
+    <h1>CMS 편집기능 체험</h1>
+    <p>관리자모드를 켜고, 텍스트·이미지·순서를 자유롭게 편집해보세요.</p>
+  </div>
+
+  <!-- Admin Toggle -->
+  <div class="admin-toggle-wrap">
+    <div class="admin-toggle" id="adminToggle" onclick="toggleAdmin()">
+      <span class="dot"></span>
+      <span>관리자 모드</span>
+      <span class="status">OFF</span>
+    </div>
+  </div>
+
+  <!-- Editor Demo -->
+  <div class="editor-demo">
+
+    <!-- Toolbar -->
+    <div class="editor-toolbar" id="editorToolbar">
+      <span style="margin-right:8px;font-weight:600;">편집 도구:</span>
+      <button class="toolbar-btn" onclick="execCmd('bold')" title="굵게"><b>B</b></button>
+      <button class="toolbar-btn" onclick="execCmd('italic')" title="기울임"><i>I</i></button>
+      <button class="toolbar-btn" onclick="execCmd('underline')" title="밑줄"><u>U</u></button>
+      <button class="toolbar-btn" onclick="execColor()" title="색상">🎨 Color</button>
+    </div>
+
+    <!-- Editor Content -->
+    <div class="editor-content">
+
+      <!-- Editable Title -->
+      <h3 class="editable" id="editableTitle">클릭하여 제목을 편집하세요<span class="tooltip" data-tip="클릭 후 텍스트를 수정할 수 있습니다">?</span></h3>
+
+      <!-- Editable Paragraph -->
+      <p class="editable" id="editablePara" style="margin:16px 0;color:var(--text2);">
+        이 문단은 관리자 모드에서 자유롭게 편집할 수 있습니다. 텍스트를 클릭하고 원하는 내용으로 변경해보세요.<span class="tooltip" data-tip="문단 텍스트도 자유롭게 편집 가능합니다">?</span>
+      </p>
+
+      <!-- Editable Image -->
+      <div class="editable-img" id="editableImg">
+        <svg width="400" height="200" viewBox="0 0 400 200" style="width:100%;height:auto;border-radius:8px;">
+          <rect width="400" height="200" rx="8" fill="#1B65A6"/>
+          <text x="50%" y="45%" text-anchor="middle" fill="#fff" font-size="32" font-family="Noto Sans KR, sans-serif">🖼 샘플 이미지</text>
+          <text x="50%" y="65%" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="14" font-family="Noto Sans KR, sans-serif">400 x 200</text>
+        </svg>
+      </div>
+
+      <!-- Sortable List -->
+      <div class="sub-title" style="margin-top:24px;">
+        <span class="tag">드래그</span> 서비스 항목 순서 변경
+      </div>
+      <div id="sortableList">
+        <div class="sortable-item" draggable="false">
+          <span class="drag-handle">⠿</span>
+          <span class="item-text">서비스 항목 1 — 웹사이트 제작</span>
+          <button class="item-delete" onclick="deleteItem(this)">✕</button>
+        </div>
+        <div class="sortable-item" draggable="false">
+          <span class="drag-handle">⠿</span>
+          <span class="item-text">서비스 항목 2 — 쇼핑몰 구축</span>
+          <button class="item-delete" onclick="deleteItem(this)">✕</button>
+        </div>
+        <div class="sortable-item" draggable="false">
+          <span class="drag-handle">⠿</span>
+          <span class="item-text">서비스 항목 3 — 마케팅 자동화</span>
+          <button class="item-delete" onclick="deleteItem(this)">✕</button>
+        </div>
+      </div>
+
+      <!-- Add Item Button -->
+      <button class="add-item-btn" onclick="addSortableItem()">+ 새 항목 추가</button>
+
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <a href="widgets.html">다음 기능 보기: 위젯 쇼케이스 →</a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">© 2026 ONDA Marketing. CMS 웹빌더 토탈 기능 데모 페이지.</div>
+
+<script>
+var isAdmin = false;
+var itemCounter = 3;
+var dragSrcEl = null;
+
+function toggleAdmin() {
+  isAdmin = !isAdmin;
+  var toggle = document.getElementById('adminToggle');
+  var toolbar = document.getElementById('editorToolbar');
+  var root = document.getElementById('editorRoot');
+  var statusEl = toggle.querySelector('.status');
+
+  if (isAdmin) {
+    toggle.classList.add('on');
+    toolbar.classList.add('show');
+    root.classList.add('admin-on');
+    statusEl.textContent = 'ON';
+
+    // Make editable elements contentEditable
+    document.querySelectorAll('.editable').forEach(function(el) {
+      el.contentEditable = 'true';
+    });
+
+    // Enable drag on sortable items
+    document.querySelectorAll('.sortable-item').forEach(function(item) {
+      item.draggable = true;
+    });
+  } else {
+    toggle.classList.remove('on');
+    toolbar.classList.remove('show');
+    root.classList.remove('admin-on');
+    statusEl.textContent = 'OFF';
+
+    // Remove contentEditable
+    document.querySelectorAll('.editable').forEach(function(el) {
+      el.contentEditable = 'false';
+    });
+
+    // Disable drag
+    document.querySelectorAll('.sortable-item').forEach(function(item) {
+      item.draggable = false;
+    });
+  }
+}
+
+function execCmd(command) {
+  document.execCommand(command, false, null);
+}
+
+function execColor() {
+  var color = prompt('색상 코드를 입력하세요 (예: #EF4444, red):', '#1B65A6');
+  if (color) {
+    document.execCommand('foreColor', false, color);
+  }
+}
+
+// Drag & Drop for Sortable List
+var sortableList = document.getElementById('sortableList');
+
+sortableList.addEventListener('dragstart', function(e) {
+  var item = e.target.closest('.sortable-item');
+  if (!item || !isAdmin) return;
+  dragSrcEl = item;
+  item.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/html', item.innerHTML);
+});
+
+sortableList.addEventListener('dragover', function(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  var target = e.target.closest('.sortable-item');
+  if (!target || target === dragSrcEl) return;
+
+  var rect = target.getBoundingClientRect();
+  var midY = rect.top + rect.height / 2;
+
+  if (e.clientY < midY) {
+    sortableList.insertBefore(dragSrcEl, target);
+  } else {
+    sortableList.insertBefore(dragSrcEl, target.nextSibling);
+  }
+});
+
+sortableList.addEventListener('dragend', function(e) {
+  var item = e.target.closest('.sortable-item');
+  if (item) {
+    item.classList.remove('dragging');
+  }
+  dragSrcEl = null;
+});
+
+function addSortableItem() {
+  itemCounter++;
+  var newItem = document.createElement('div');
+  newItem.className = 'sortable-item';
+  newItem.draggable = true;
+  newItem.innerHTML = '<span class="drag-handle">⠿</span>' +
+    '<span class="item-text">서비스 항목 ' + itemCounter + ' — 새 항목</span>' +
+    '<button class="item-delete" onclick="deleteItem(this)">✕</button>';
+  sortableList.appendChild(newItem);
+}
+
+function deleteItem(btn) {
+  if (!isAdmin) return;
+  var item = btn.closest('.sortable-item');
+  if (item && confirm('이 항목을 삭제하시겠습니까?')) {
+    item.remove();
+  }
+}
+
+// Image replacement on click (admin mode)
+document.getElementById('editableImg').addEventListener('click', function() {
+  if (!isAdmin) return;
+  var url = prompt('새 이미지 URL을 입력하세요:', '');
+  if (url) {
+    this.innerHTML = '<img src="' + url + '" alt="사용자 이미지" style="width:100%;border-radius:8px;display:block;">';
+  }
+});
+</script>
+
+</body>
+</html>
