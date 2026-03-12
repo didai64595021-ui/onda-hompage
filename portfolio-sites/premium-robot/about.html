@@ -273,45 +273,26 @@ nav a.active::after { width: 100%; }
   color: var(--text-primary);
   margin-bottom: 32px;
   position: relative;
-}
-.hero-title .char {
-  display: inline-block;
   opacity: 0;
-  transform: translateY(20px);
-  animation: char-fade-up 0.6s var(--ease-expo) forwards;
-  transition: color 0.05s, transform 0.05s;
+  animation: fade-up 0.9s var(--ease-expo) 0.6s forwards;
 }
-@keyframes char-fade-up {
-  to { opacity: 1; transform: translateY(0); }
-}
-.hero-title::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,212,255,0.04) 2px, rgba(0,212,255,0.04) 4px);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.1s;
-}
-.hero-title.glitch-active::after { opacity: 0; }
-/* ===== GLITCH CLONE (index-matching) ===== */
-.glitch-clone {
+.hero-title.glitch-active::before,
+.hero-title.glitch-active::after {
+  content: attr(data-text);
   position: absolute;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  pointer-events: none;
-  opacity: 0;
+  font-size: inherit; font-weight: inherit; line-height: inherit; letter-spacing: inherit;
+  white-space: pre-line;
 }
-.hero-title.glitch-active .glitch-clone-cyan {
-  opacity: 0.85;
-  color: #00d4ff;
-  clip-path: inset(25% 0 55% 0);
+.hero-title.glitch-active::before {
+  color: var(--accent);
+  clip-path: inset(30% 0 50% 0);
   animation: glitch-title-a 0.4s steps(3) forwards;
 }
-.hero-title.glitch-active .glitch-clone-red {
-  opacity: 0.85;
+.hero-title.glitch-active::after {
   color: #FF0040;
-  clip-path: inset(50% 0 25% 0);
+  clip-path: inset(55% 0 20% 0);
   animation: glitch-title-b 0.4s steps(3) forwards;
 }
 @keyframes glitch-title-a {
@@ -1364,40 +1345,17 @@ function closeMobileNav() {
   document.body.style.overflow = '';
 }
 
-/* ===== HERO PER-CHARACTER ANIMATION ===== */
-(function initHeroCharAnim() {
-  const title = document.getElementById('hero-title');
+/* ===== HERO GLITCH (index-matching ::before/::after) ===== */
+(function startHeroGlitch() {
+  var title = document.getElementById('hero-title');
   if (!title) return;
-  const html = title.innerHTML;
-  let idx = 0;
-  const wrapped = html.replace(/(<br\s*\/?>)|([^<])/g, function(m, br, ch) {
-    if (br) return br;
-    if (ch === ' ') return '<span class="char" style="animation-delay:' + (idx++ * 0.04) + 's">&nbsp;</span>';
-    return '<span class="char" style="animation-delay:' + (idx++ * 0.04) + 's">' + ch + '</span>';
-  });
-  title.innerHTML = wrapped;
-  const chars = title.querySelectorAll('.char');
-  const totalDelay = idx * 40 + 800;
-  /* ===== GLITCH CLONE (index-matching) ===== */
-  setTimeout(function() {
-    var cloneCyan = document.createElement('div');
-    cloneCyan.className = 'glitch-clone glitch-clone-cyan';
-    cloneCyan.innerHTML = title.innerHTML;
-    var cloneRed = document.createElement('div');
-    cloneRed.className = 'glitch-clone glitch-clone-red';
-    cloneRed.innerHTML = title.innerHTML;
-    title.appendChild(cloneCyan);
-    title.appendChild(cloneRed);
-    function doGlitch() {
-      var nav = document.getElementById('mobile-nav');
-      if (!nav || !nav.classList.contains('active')) {
-        title.classList.add('glitch-active');
-        setTimeout(function() { title.classList.remove('glitch-active'); }, 400);
-      }
-      setTimeout(doGlitch, 4000 + Math.random() * 2000);
-    }
-    doGlitch();
-  }, totalDelay);
+  title.dataset.text = title.innerText;
+  function doGlitch() {
+    title.classList.add('glitch-active');
+    setTimeout(function() { title.classList.remove('glitch-active'); }, 400);
+    setTimeout(doGlitch, 4000 + Math.random() * 2000);
+  }
+  setTimeout(doGlitch, 1000);
 })();
 
 /* ===== COUNTER ANIMATION ===== */
