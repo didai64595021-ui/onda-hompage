@@ -3,19 +3,29 @@
  * 네이버 플레이스 GraphQL API로 전체 톡톡 재스캔
  * Chrome/OCR 없이 순수 API만 사용
  * 
- * PHASE 1: placeUrl 있는 업체 → placeDetail API
+ * PHASE 1: placeUrl 있는 업체 → placeDetail API (phone 포함)
  * PHASE 2: placeUrl 없는 업체 → places 검색 API
+ * PHASE 3: 여전히 place_id 없는 업체 → 네이버 검색 API로 place_id 찾기
  * 
- * Usage: node api_rescan.js [--test N] [--phase 1|2] [--skip-done]
+ * Usage: node api_rescan.js [--test N] [--phase 1|2|3] [--skip-done]
  */
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
+const https = require('https');
 
 const HISTORY_PATH = path.join(__dirname, '..', 'output', 'history.json');
 const PROXY_HOST = '49.247.137.28';
 const PROXY_PORT = 3100;
 const PROXY_API_KEY = 'onda-proxy-2026-secret';
+
+// 네이버 검색 API 키 2개 (일 25,000 × 2 = 50,000건)
+const NAVER_API_KEYS = [
+  { id: 'Su_kCP4chZNUyLO5wZEQ', secret: 'I4fA34bv0e' },
+  { id: 'yoBUbNSW9MGSPH36zaHN', secret: 'wt0HPPOVKA' }
+];
+let currentKeyIdx = 0;
+let keyUsage = [0, 0];
 
 const DELAY_MS = 400;
 const SAVE_INTERVAL = 25;
@@ -120,6 +130,42 @@ async function searchByName(name, address) {
   return { ok: false };
 }
 
+function naverLocalSearch(query) {
+  return new Promise((resolve) => {
+    const key = NAVER_API_KEYS[currentKeyIdx];
+    if (!key) return resolve('quota');
+    const encoded = encodeURIComponent(query);
+    const req = https.get(`https://openapi.naver.com/v1/search/local.json?query=${encoded}&display=1`, {
+      headers: {
+        'X-Naver-Client-Id': key.id,
+        'X-Naver-Client-Secret': key.secret
+      },
+      timeout: 10000
+    }, (res) => {
+      let data = '';
+      res.on('data', c => data += c);
+      res.on('end', () => {
+        keyUsage[currentKeyIdx]++;
+        try {
+          const d = JSON.parse(data);
+          if (d.errorCode === '010') return resolve('quota'); // 쿼터 초과
+          const items = d.items || [];
+          if (items.length === 0) return resolve(null);
+          // mapx/mapy로 place_id 유추는 어렵지만, link에서 추출 가능
+          const item = items[0];
+          // 네이버 지역검색 결과의 link에서 place_id 추출
+          const pidMatch = (item.link || '').match(/place\/(\d+)/);
+          if (pidMatch) return resolve({ id: pidMatch[1], name: item.title?.replace(/<[^>]*>/g, '') });
+          // link에 place_id 없으면 title로 GraphQL 검색
+          resolve(null);
+        } catch { resolve(null); }
+      });
+    });
+    req.on('error', () => resolve(null));
+    req.on('timeout', () => { req.destroy(); resolve(null); });
+  });
+}
+
 async function main() {
   console.log('🚀 GraphQL API 톡톡 재스캔 시작');
   if (testLimit) console.log(`🧪 테스트 모드: ${testLimit}건`);
@@ -158,6 +204,8 @@ async function main() {
         biz.talktalkVerified = 'api';
         if (r.talktalkUrl) { biz.talkUrl = r.talktalkUrl; talkO++; } else talkX++;
         if (r.category && !biz.category) biz.category = r.category;
+        if (r.phone) biz.phone = r.phone;
+        if (r.roadAddress) biz.roadAddress = r.roadAddress;
       } else {
         fail++;
       }
@@ -236,6 +284,101 @@ async function main() {
     fs.writeFileSync(HISTORY_PATH, JSON.stringify(history, null, 2));
     console.log(`\n✅ PHASE 2 완료: ${done}건 | found:${found} 💬O:${talkO} ❌X:${talkX} notFound:${notFound} fail:${fail}`);
     console.log(`[STEP-DONE] PHASE2 완료`);
+  }
+
+  if (stopping) { console.log('🛑 중단'); return; }
+
+  // ═══ PHASE 3: not_found/fail → 네이버 검색 API로 place_id 찾기 → placeDetail ═══
+  if (!phaseOnly || phaseOnly === 3) {
+    const phase3 = Object.entries(history.crawled).filter(([, b]) => {
+      if (b.talktalkVerified === 'api') return false;
+      if (b.talktalkVerified === 'not_found' && skipDone) return false;
+      const pid = b.placeUrl ? b.placeUrl.match(/(\d{5,})/)?.[1] : '';
+      return !pid;
+    });
+    const p3Total = testLimit ? Math.min(testLimit, phase3.length) : phase3.length;
+
+    console.log(`\n${'═'.repeat(50)}`);
+    console.log(`🔎 PHASE 3: 네이버 검색 API → place_id → placeDetail (${p3Total}건)`);
+    console.log(`  API 키 ${NAVER_API_KEYS.length}개, 일 ${NAVER_API_KEYS.length * 25000}건`);
+    console.log(`${'═'.repeat(50)}`);
+
+    let done = 0, talkO = 0, talkX = 0, found = 0, notFound = 0, fail = 0, quotaExhausted = false;
+    const start = Date.now();
+
+    for (const [key, biz] of phase3) {
+      if (stopping || quotaExhausted || (testLimit && done >= testLimit)) break;
+
+      const cleanName = decodeHtmlEntities(biz.name || '');
+      const addr = decodeHtmlEntities(biz.address || biz.roadAddress || '').split(' ').slice(0, 2).join(' ');
+      const q = `${cleanName} ${addr}`.trim();
+
+      // 네이버 검색 API로 place_id 찾기
+      const searchResult = await naverLocalSearch(q);
+      done++;
+
+      if (searchResult === 'quota') {
+        // 현재 키 소진, 다음 키로
+        currentKeyIdx++;
+        if (currentKeyIdx >= NAVER_API_KEYS.length) {
+          console.log('⚠️ 모든 API 키 쿼터 소진 — PHASE 3 중단');
+          quotaExhausted = true;
+          continue;
+        }
+        console.log(`  🔄 API 키 ${currentKeyIdx + 1}번으로 전환 (사용량: ${keyUsage})`);
+        // 재시도
+        const retry = await naverLocalSearch(q);
+        if (retry === 'quota') { quotaExhausted = true; continue; }
+        if (!retry) { notFound++; biz.talktalkVerified = 'not_found'; biz.talktalkButton = 'X'; continue; }
+        // place_id 찾음 → placeDetail로 톡톡 확인
+        biz.placeUrl = `https://m.place.naver.com/place/${retry.id}`;
+        const detail = await checkByPlaceId(retry.id);
+        if (detail.ok) {
+          found++;
+          biz.talktalkButton = detail.talktalkUrl ? 'O' : 'X';
+          biz.talktalkVerified = 'api';
+          if (detail.talktalkUrl) { biz.talkUrl = detail.talktalkUrl; talkO++; } else talkX++;
+          if (detail.phone) biz.phone = detail.phone;
+          if (detail.category && !biz.category) biz.category = detail.category;
+        } else { fail++; }
+        continue;
+      }
+
+      if (!searchResult) {
+        notFound++;
+        biz.talktalkVerified = 'not_found';
+        biz.talktalkButton = 'X';
+      } else {
+        biz.placeUrl = `https://m.place.naver.com/place/${searchResult.id}`;
+        const detail = await checkByPlaceId(searchResult.id);
+        if (detail.ok) {
+          found++;
+          biz.talktalkButton = detail.talktalkUrl ? 'O' : 'X';
+          biz.talktalkVerified = 'api';
+          if (detail.talktalkUrl) { biz.talkUrl = detail.talktalkUrl; talkO++; } else talkX++;
+          if (detail.phone) biz.phone = detail.phone;
+          if (detail.category && !biz.category) biz.category = detail.category;
+        } else { fail++; }
+      }
+
+      if (done % 10 === 0) {
+        const elapsed = ((Date.now() - start) / 60000).toFixed(1);
+        const rate = (done / ((Date.now() - start) / 1000)).toFixed(2);
+        const eta = ((p3Total - done) / Math.max(0.01, done / ((Date.now() - start) / 60000))).toFixed(0);
+        console.log(`  [P3 ${done}/${p3Total}] found:${found} 💬O:${talkO} ❌X:${talkX} nf:${notFound} fail:${fail} key:${currentKeyIdx+1} usage:${keyUsage} | ${elapsed}분 | ETA:${eta}분`);
+      }
+
+      if (done % SAVE_INTERVAL === 0) {
+        fs.writeFileSync(HISTORY_PATH, JSON.stringify(history, null, 2));
+      }
+
+      await sleep(DELAY_MS);
+    }
+
+    fs.writeFileSync(HISTORY_PATH, JSON.stringify(history, null, 2));
+    console.log(`\n✅ PHASE 3 완료: ${done}건 | found:${found} 💬O:${talkO} ❌X:${talkX} notFound:${notFound} fail:${fail}`);
+    console.log(`  API 사용량: ${keyUsage}`);
+    console.log(`[STEP-DONE] PHASE3 완료`);
   }
 
   // ═══ 최종 통계 ═══
