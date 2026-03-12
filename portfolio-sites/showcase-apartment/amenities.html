@@ -159,9 +159,9 @@ button { font: inherit; border: none; background: none; cursor: none; }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* =============================================
+/* ==============================================
    HEADER
-   ============================================= */
+   ============================================== */
 .header {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -173,8 +173,9 @@ button { font: inherit; border: none; background: none; cursor: none; }
   transition: background 0.4s, padding 0.4s var(--ease), backdrop-filter 0.4s;
 }
 .header.solid {
-  background: rgba(12,12,12,0.92);
-  backdrop-filter: blur(16px);
+  background: rgba(12,12,12,0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   padding: calc(var(--grid) * 2) calc(var(--grid) * 5);
 }
 
@@ -208,15 +209,19 @@ button { font: inherit; border: none; background: none; cursor: none; }
 .header-nav a:hover { color: var(--text); }
 .header-nav a:hover::after { transform: scaleX(1); transform-origin: left; }
 .header-nav a.active { color: var(--accent); }
-.header-nav a.active::after { transform: scaleX(1); }
+.header-nav a.active::after { transform: scaleX(1); transform-origin: left; }
 
 /* Hamburger */
 .hamburger {
   display: none;
   flex-direction: column;
   gap: 6px;
-  padding: 8px;
+  padding: 10px;
   z-index: 1001;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
 }
 .hamburger span {
   display: block;
@@ -280,10 +285,12 @@ button { font: inherit; border: none; background: none; cursor: none; }
   opacity: 0;
   transform: translateY(24px);
   transition: opacity 0.4s var(--ease), transform 0.5s var(--ease), color 0.3s;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 }
 .mobile-nav.open a { opacity: 1; transform: translateY(0); }
 .mobile-nav a:hover { color: var(--accent); }
-.mobile-nav a.active { color: var(--accent); }
 
 /* =============================================
    PAGE HERO (half-height)
@@ -989,12 +996,12 @@ button { font: inherit; border: none; background: none; cursor: none; }
 }
 .cta-btn:hover .cta-btn-arrow { transform: translateX(4px); }
 
-/* =============================================
+/* ==============================================
    FOOTER
-   ============================================= */
+   ============================================== */
 .footer {
   position: relative;
-  padding: calc(var(--grid) * 16) calc(var(--grid) * 5) calc(var(--grid) * 6);
+  padding: calc(var(--grid) * 16) calc(var(--grid) * 5) calc(var(--grid) * 8);
   overflow: hidden;
 }
 
@@ -1015,49 +1022,42 @@ button { font: inherit; border: none; background: none; cursor: none; }
   user-select: none;
 }
 
-.footer-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: calc(var(--grid) * 5);
-  max-width: 1000px;
-  margin: 0 auto calc(var(--grid) * 8);
-  padding-bottom: calc(var(--grid) * 6);
-  border-bottom: 1px solid rgba(200,169,125,0.08);
-}
-
-.footer-col-title {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: calc(var(--grid) * 2);
-}
-
-.footer-links {
-  list-style: none;
+.footer-nav {
   display: flex;
-  flex-direction: column;
-  gap: calc(var(--grid) * 1.5);
+  justify-content: center;
+  gap: calc(var(--grid) * 4);
+  margin-bottom: calc(var(--grid) * 6);
+  flex-wrap: wrap;
 }
-.footer-links a {
-  font-size: 14px;
+.footer-nav a {
+  font-size: 13px;
   color: var(--text-dim);
+  letter-spacing: 0.04em;
   transition: color 0.3s;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 }
-.footer-links a:hover { color: var(--text); }
+.footer-nav a:hover { color: var(--accent); }
 
-.footer-contact-line {
-  font-size: 14px;
+.footer-divider {
+  width: 48px;
+  height: 1px;
+  background: rgba(200,169,125,0.2);
+  margin: 0 auto calc(var(--grid) * 4);
+}
+
+.footer-info {
+  font-size: 12px;
   color: var(--text-dim);
   line-height: 1.8;
+  margin-bottom: calc(var(--grid) * 2);
 }
 
 .footer-copy {
   font-size: 12px;
   color: var(--text-dim);
   letter-spacing: 0.06em;
-  text-align: center;
 }
 
 /* =============================================
@@ -1189,10 +1189,7 @@ button { font: inherit; border: none; background: none; cursor: none; }
 
   .cta { padding: calc(var(--grid) * 12) calc(var(--grid) * 3); }
 
-  .footer-grid {
-    grid-template-columns: 1fr;
-    gap: calc(var(--grid) * 4);
-  }
+  .footer { padding: calc(var(--grid) * 10) calc(var(--grid) * 3) calc(var(--grid) * 6); }
 
   .mobile-nav a { transition-delay: calc(var(--i, 0) * 0.06s); }
 }
@@ -1249,7 +1246,7 @@ button { font: inherit; border: none; background: none; cursor: none; }
   <button class="mobile-nav-close" aria-label="메뉴 닫기" onclick="document.querySelector('.mobile-nav').classList.remove('open');document.querySelector('.hamburger').classList.remove('active')"></button>
   <a href="overview.html" style="--i:0">사업개요</a>
   <a href="floorplan.html" style="--i:1">평면안내</a>
-  <a href="amenities.html" class="active" style="--i:2">커뮤니티</a>
+  <a href="amenities.html" style="--i:2">커뮤니티</a>
   <a href="location.html" style="--i:3">입지환경</a>
   <a href="contact.html" style="--i:4">관심고객</a>
 </nav>
@@ -1658,34 +1655,15 @@ button { font: inherit; border: none; background: none; cursor: none; }
      ============================================= -->
 <footer class="footer">
   <div class="footer-mega reveal">RIVERSIDE PARK</div>
-  <div class="footer-grid reveal">
-    <div>
-      <p class="footer-col-title">Menu</p>
-      <ul class="footer-links">
-        <li><a href="index.html">메인</a></li>
-        <li><a href="overview.html">사업개요</a></li>
-        <li><a href="floorplan.html">평면안내</a></li>
-        <li><a href="amenities.html">커뮤니티</a></li>
-        <li><a href="location.html">입지환경</a></li>
-      </ul>
-    </div>
-    <div>
-      <p class="footer-col-title">Contact</p>
-      <p class="footer-contact-line">
-        분양 문의: 1588-0000<br>
-        이메일: info@riverside-park.kr<br>
-        방문 예약: 온라인 접수
-      </p>
-    </div>
-    <div>
-      <p class="footer-col-title">Location</p>
-      <p class="footer-contact-line">
-        서울특별시 강남구<br>
-        리버사이드 파크<br>
-        268세대 · 42층 · 2027년 입주
-      </p>
-    </div>
-  </div>
+  <nav class="footer-nav reveal">
+    <a href="overview.html">사업개요</a>
+    <a href="floorplan.html">평면안내</a>
+    <a href="amenities.html">커뮤니티</a>
+    <a href="location.html">입지환경</a>
+    <a href="contact.html">관심고객</a>
+  </nav>
+  <div class="footer-divider reveal"></div>
+  <p class="footer-info reveal">시행사: 리버사이드디벨로프먼트(주) | 시공사: 대한건설 | 설계: 정림건축<br>용적률 299% / 건폐율 30% | 대지면적 15,230㎡ / 건축면적 4,569㎡ / 연면적 89,450㎡</p>
   <p class="footer-copy reveal">&copy; 2026 리버사이드 파크. All Rights Reserved.</p>
 </footer>
 

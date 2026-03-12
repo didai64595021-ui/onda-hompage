@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎲 팝업스토어 부루마블</title>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --board-size: 620px;
+  --cell-w: 100px;
+  --cell-h: 80px;
+  --corner: 100px;
+}
+
+body {
+  font-family: 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  background: linear-gradient(135deg, #fce4ec 0%, #e8eaf6 50%, #e0f7fa 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  overflow-x: hidden;
+}
+
+/* ── Header ── */
+.header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+.header h1 {
+  font-size: 2rem;
+  background: linear-gradient(135deg, #ff6b6b, #ffa502, #ff6348);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+}
+.status-bar {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin-top: 8px;
+  font-size: 1rem;
+  color: #555;
+  font-weight: 600;
+}
+.status-bar span { background: #fff; padding: 4px 14px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+
+/* ── Board ── */
+.board-wrapper {
+  position: relative;
+  width: var(--board-size);
+  height: var(--board-size);
+  margin: 0 auto;
+}
+
+.cell {
+  position: absolute;
+  width: var(--cell-w);
+  height: var(--cell-h);
+  border: 2px solid #fff;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: .72rem;
+  font-weight: 700;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+  transition: transform .2s, box-shadow .2s;
+  cursor: default;
+  overflow: hidden;
+  line-height: 1.2;
+}
+.cell:hover { transform: scale(1.08); box-shadow: 0 4px 16px rgba(0,0,0,.18); z-index: 5; }
+.cell .emoji { font-size: 1.4rem; margin-bottom: 2px; }
+.cell .name { font-size: .65rem; }
+
+/* Corner cells */
+.cell.corner { width: var(--corner); height: var(--corner); border-radius: 12px; font-size: .8rem; }
+
+/* ── Piece ── */
+.piece {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  background: radial-gradient(circle at 35% 35%, #ff6b6b, #c0392b);
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 3px 10px rgba(0,0,0,.3);
+  z-index: 10;
+  transition: left .5s cubic-bezier(.4,0,.2,1), top .5s cubic-bezier(.4,0,.2,1);
+  pointer-events: none;
+}
+.piece::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 3px solid #ff6b6b;
+  animation: pulse 1.2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: .7; }
+  50% { transform: scale(1.35); opacity: 0; }
+}
+
+/* ── Center area ── */
+.center-area {
+  position: absolute;
+  top: var(--corner);
+  left: var(--corner);
+  width: calc(var(--board-size) - var(--corner) * 2);
+  height: calc(var(--board-size) - var(--corner) * 2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.center-logo {
+  font-size: 1.6rem;
+  font-weight: 900;
+  text-align: center;
+  background: linear-gradient(135deg, #ff6b6b, #ffa502);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.3;
+}
+.center-logo small { display: block; font-size: .75rem; -webkit-text-fill-color: #999; }
+
+/* ── Dice ── */
+.dice-area { perspective: 300px; margin-top: 4px; }
+
+.dice-btn {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  color: #fff;
+  border: none;
+  padding: 10px 32px;
+  border-radius: 30px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(238,90,36,.4);
+  transition: transform .15s, box-shadow .15s;
+  margin-top: 6px;
+}
+.dice-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(238,90,36,.5); }
+.dice-btn:active { transform: translateY(0); }
+.dice-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+.dice-3d-wrap {
+  width: 72px;
+  height: 72px;
+  perspective: 400px;
+  margin: 0 auto 4px;
+}
+
+.dice-cube {
+  width: 72px;
+  height: 72px;
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(-25deg) rotateY(25deg);
+  transition: transform .15s;
+}
+.dice-cube.rolling {
+  animation: diceRoll 1s ease-out;
+}
+
+@keyframes diceRoll {
+  0%   { transform: rotateX(0) rotateY(0); }
+  20%  { transform: rotateX(400deg) rotateY(200deg); }
+  50%  { transform: rotateX(800deg) rotateY(500deg); }
+  80%  { transform: rotateX(1100deg) rotateY(700deg); }
+  100% { transform: rotateX(var(--rx)) rotateY(var(--ry)); }
+}
+
+.dice-face {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  background: #fff;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  display: grid;
+  padding: 10px;
+  box-shadow: inset 0 0 8px rgba(0,0,0,.05);
+}
+.dice-face .dot {
+  width: 12px;
+  height: 12px;
+  background: #2d3436;
+  border-radius: 50%;
+  align-self: center;
+  justify-self: center;
+}
+
+/* Face positions */
+.face-1 { transform: rotateY(0deg) translateZ(36px); grid-template: 1fr / 1fr; }
+.face-2 { transform: rotateY(180deg) translateZ(36px); grid-template: 1fr 1fr / 1fr; }
+.face-2 .dot:first-child { justify-self: end; }
+.face-2 .dot:last-child { justify-self: start; }
+.face-3 { transform: rotateY(-90deg) translateZ(36px); grid-template: 1fr 1fr 1fr / 1fr; }
+.face-3 .dot:first-child { justify-self: end; }
+.face-3 .dot:last-child { justify-self: start; }
+.face-4 { transform: rotateY(90deg) translateZ(36px); grid-template: 1fr 1fr / 1fr 1fr; }
+.face-5 { transform: rotateX(90deg) translateZ(36px); grid-template: 1fr 1fr 1fr / 1fr 1fr; }
+.face-5 .dot:nth-child(3) { grid-column: 1 / -1; }
+.face-6 { transform: rotateX(-90deg) translateZ(36px); grid-template: 1fr 1fr 1fr / 1fr 1fr; }
+
+/* ── Event Modal ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(3px);
+}
+.modal-overlay.active { display: flex; }
+
+.modal-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 36px 32px 28px;
+  max-width: 380px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,.2);
+  animation: modalIn .35s ease-out;
+}
+@keyframes modalIn {
+  from { transform: scale(.7) translateY(30px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+.modal-card .modal-emoji { font-size: 3rem; margin-bottom: 10px; }
+.modal-card .modal-title { font-size: 1.3rem; font-weight: 800; color: #2d3436; margin-bottom: 6px; }
+.modal-card .modal-desc { font-size: .95rem; color: #636e72; margin-bottom: 18px; line-height: 1.5; }
+.modal-card button {
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  color: #fff;
+  border: none;
+  padding: 10px 36px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(108,92,231,.3);
+}
+.modal-card button:hover { transform: translateY(-1px); }
+
+/* ── Complete Modal ── */
+.complete-card {
+  background: linear-gradient(135deg, #fff9c4, #fff);
+  padding: 40px 32px 32px;
+}
+.complete-card .modal-emoji { font-size: 4rem; }
+
+/* Confetti */
+.confetti-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 150;
+  overflow: hidden;
+}
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: -20px;
+  animation: confettiFall linear forwards;
+}
+@keyframes confettiFall {
+  to { top: 110vh; transform: rotate(720deg); }
+}
+
+/* ── Message Log ── */
+.msg-log {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: .75rem;
+  color: #636e72;
+  background: rgba(255,255,255,.85);
+  padding: 4px 14px;
+  border-radius: 12px;
+  white-space: nowrap;
+  max-width: 380px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity .3s;
+}
+.msg-log.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎲 팝업스토어 부루마블 🎲</h1>
+  <div class="status-bar">
+    <span id="turnCounter">🎯 턴: 1</span>
+    <span id="posLabel">📍 출발</span>
+    <span id="diceLabel">🎲 -</span>
+  </div>
+</div>
+
+<div class="board-wrapper" id="board">
+  <!-- Cells injected by JS -->
+  <div class="piece" id="piece"></div>
+
+  <div class="center-area">
+    <div class="center-logo">
+      🎉 POPUP STORE<br>부루마블
+      <small>팝업스토어 현장 이벤트</small>
+    </div>
+    <div class="dice-area">
+      <div class="dice-3d-wrap">
+        <div class="dice-cube" id="diceCube">
+          <div class="dice-face face-1"><span class="dot"></span></div>
+          <div class="dice-face face-2"><span class="dot"></span><span class="dot"></span></div>
+          <div class="dice-face face-3"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          <div class="dice-face face-4"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          <div class="dice-face face-5"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          <div class="dice-face face-6"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+        </div>
+      </div>
+      <button class="dice-btn" id="rollBtn" onclick="rollDice()">🎲 주사위 굴리기</button>
+    </div>
+    <div class="msg-log" id="msgLog"></div>
+  </div>
+</div>
+
+<!-- Event Modal -->
+<div class="modal-overlay" id="eventModal">
+  <div class="modal-card" id="eventCard">
+    <div class="modal-emoji" id="modalEmoji"></div>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-desc" id="modalDesc"></div>
+    <button onclick="closeModal()">확인</button>
+  </div>
+</div>
+
+<!-- Complete Modal -->
+<div class="modal-overlay" id="completeModal">
+  <div class="modal-card complete-card">
+    <div class="modal-emoji">🎉🎊🏆</div>
+    <div class="modal-title">축하합니다!</div>
+    <div class="modal-desc">한 바퀴 완주! 이벤트 참여가 완료되었습니다.<br>스태프에게 화면을 보여주세요! 🎁</div>
+    <button onclick="resetGame()" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24);">🔄 다시 하기</button>
+  </div>
+</div>
+
+<div class="confetti-container" id="confetti"></div>
+
+<script>
+/* ── Board Data ── */
+const CELLS = [
+  { name: '출발',       emoji: '🚀', color: '#ff6b6b' },
+  { name: '커피숍',     emoji: '☕', color: '#f8b500' },
+  { name: '찬스 카드',  emoji: '🎴', color: '#6c5ce7' },
+  { name: '포토존',     emoji: '📸', color: '#00cec9' },
+  { name: '무인도',     emoji: '🏝️', color: '#fdcb6e' },
+  { name: '팝업스토어A',emoji: '🛍️', color: '#e17055' },
+  { name: '행운주사위',  emoji: '🎲', color: '#0984e3' },
+  { name: '푸드트럭',   emoji: '🍔', color: '#e84393' },
+  { name: '뒤로 2칸',   emoji: '⬅️', color: '#636e72' },
+  { name: '포토존 B',   emoji: '📸', color: '#00cec9' },
+  { name: '무료 주차',  emoji: '🅿️', color: '#55efc4' },
+  { name: 'DJ부스',     emoji: '🎵', color: '#a29bfe' },
+  { name: '찬스 카드',  emoji: '🎴', color: '#6c5ce7' },
+  { name: '네일아트',   emoji: '💅', color: '#fd79a8' },
+  { name: '무인도',     emoji: '🏝️', color: '#fdcb6e' },
+  { name: '팝업스토어B',emoji: '🛍️', color: '#e17055' },
+  { name: '앞으로 3칸', emoji: '➡️', color: '#00b894' },
+  { name: '플리마켓',   emoji: '🧺', color: '#fab1a0' },
+  { name: '포토존 C',   emoji: '📸', color: '#00cec9' },
+  { name: '럭키박스',   emoji: '🎁', color: '#ff7675' },
+];
+
+const TOTAL = CELLS.length; // 20
+
+/* ── Layout: compute cell positions ── */
+// Board: 620x620, corners at indices 0,5,10,15
+// Bottom row (L→R): 0,1,2,3,4,5  (y=bottom)
+// Right col (B→T): 5,6,7,8,9,10  (x=right)
+// Top row (R→L): 10,11,12,13,14,15 (y=top)
+// Left col (T→B): 15,16,17,18,19,0 (x=left)
+
+const BS = 620, CW = 100, CH = 80, CO = 100;
+
+function cellPos(i) {
+  // Bottom row: indices 0-5 (left to right)
+  if (i <= 5) {
+    if (i === 0) return { x: BS - CO, y: BS - CO, w: CO, h: CO, corner: true };
+    if (i === 5) return { x: 0, y: BS - CO, w: CO, h: CO, corner: true };
+    return { x: BS - CO - i * CW, y: BS - CH, w: CW, h: CH };
+  }
+  // Right col: indices 6-9 (bottom to top)
+  if (i <= 9) {
+    const row = i - 5;
+    return { x: 0, y: BS - CO - row * CH, w: CH, h: CW };
+  }
+  // Top row: indices 10-15 (right to left → we reverse so 10=top-left corner)
+  if (i === 10) return { x: 0, y: 0, w: CO, h: CO, corner: true };
+  if (i <= 14) {
+    const col = i - 10;
+    return { x: col * CW, y: 0, w: CW, h: CH };
+  }
+  if (i === 15) return { x: BS - CO, y: 0, w: CO, h: CO, corner: true };
+  // Left col: indices 16-19 (top to bottom)
+  if (i <= 19) {
+    const row = i - 15;
+    return { x: BS - CH, y: row * CH, w: CH, h: CW };
+  }
+}
+
+/* ── Build Board DOM ── */
+const boardEl = document.getElementById('board');
+
+CELLS.forEach((c, i) => {
+  const p = cellPos(i);
+  const div = document.createElement('div');
+  div.className = 'cell' + (p.corner ? ' corner' : '');
+  div.id = 'cell-' + i;
+  div.style.left = p.x + 'px';
+  div.style.top = p.y + 'px';
+  div.style.width = p.w + 'px';
+  div.style.height = p.h + 'px';
+  div.style.background = `linear-gradient(135deg, ${c.color}33, ${c.color}66)`;
+  div.style.borderColor = c.color;
+  div.innerHTML = `<span class="emoji">${c.emoji}</span><span class="name">${c.name}</span>`;
+  boardEl.appendChild(div);
+});
+
+/* ── Game State ── */
+let position = 0;
+let turn = 1;
+let skipTurn = false;
+let extraTurn = false;
+let rolling = false;
+let completed = false;
+
+const piece = document.getElementById('piece');
+const diceCube = document.getElementById('diceCube');
+const rollBtn = document.getElementById('rollBtn');
+
+function movePiece(pos) {
+  const p = cellPos(pos);
+  const cx = p.x + p.w / 2 - 14;
+  const cy = p.y + p.h / 2 - 14;
+  piece.style.left = cx + 'px';
+  piece.style.top = cy + 'px';
+}
+
+function updateStatus() {
+  document.getElementById('turnCounter').textContent = '🎯 턴: ' + turn;
+  document.getElementById('posLabel').textContent = '📍 ' + CELLS[position].name;
+}
+
+function showMsg(text) {
+  const log = document.getElementById('msgLog');
+  log.textContent = text;
+  log.classList.add('show');
+  setTimeout(() => log.classList.remove('show'), 2500);
+}
+
+/* ── Dice ── */
+const FACE_ROT = {
+  1: { rx: 0, ry: 0 },
+  2: { rx: 0, ry: 180 },
+  3: { rx: 0, ry: 90 },
+  4: { rx: 0, ry: -90 },
+  5: { rx: -90, ry: 0 },
+  6: { rx: 90, ry: 0 },
+};
+
+function rollDice() {
+  if (rolling || completed) return;
+
+  // Skip turn for island
+  if (skipTurn) {
+    skipTurn = false;
+    turn++;
+    updateStatus();
+    showMsg('🏝️ 무인도에서 쉬는 중... 턴 스킵!');
+    return;
+  }
+
+  rolling = true;
+  rollBtn.disabled = true;
+  extraTurn = false;
+
+  const result = Math.floor(Math.random() * 6) + 1;
+  const rot = FACE_ROT[result];
+  const spinsX = 1080 + rot.rx;
+  const spinsY = 720 + rot.ry;
+
+  diceCube.style.setProperty('--rx', spinsX + 'deg');
+  diceCube.style.setProperty('--ry', spinsY + 'deg');
+  diceCube.classList.remove('rolling');
+  void diceCube.offsetWidth; // reflow
+  diceCube.classList.add('rolling');
+
+  document.getElementById('diceLabel').textContent = '🎲 ' + result;
+
+  setTimeout(() => {
+    diceCube.style.transform = `rotateX(${rot.rx}deg) rotateY(${rot.ry}deg)`;
+    diceCube.classList.remove('rolling');
+    animateMove(result);
+  }, 1050);
+}
+
+/* ── Movement ── */
+function animateMove(steps) {
+  let moved = 0;
+  let passedStart = false;
+
+  function stepOne() {
+    if (moved >= steps) {
+      onLand();
+      return;
+    }
+    const prevPos = position;
+    position = (position + 1) % TOTAL;
+    moved++;
+    if (position === 0 && prevPos !== 0) passedStart = true;
+    movePiece(position);
+    setTimeout(stepOne, 200);
+  }
+
+  stepOne();
+
+  function onLand() {
+    updateStatus();
+
+    // Check completion
+    if (passedStart || (position === 0 && steps > 0)) {
+      setTimeout(() => showComplete(), 400);
+      rolling = false;
+      return;
+    }
+
+    handleCellEvent(position);
+  }
+}
+
+/* ── Cell Events ── */
+function handleCellEvent(pos) {
+  const cell = CELLS[pos];
+
+  switch (pos) {
+    case 4: case 14: // 무인도
+      skipTurn = true;
+      showEventModal('🏝️', '무인도!', '1턴 동안 쉬어야 합니다. 다음 턴은 자동 스킵!');
+      break;
+
+    case 8: // 뒤로 2칸
+      showEventModal('⬅️', '뒤로 2칸!', '앗! 2칸 뒤로 이동합니다.', () => {
+        position = (position - 2 + TOTAL) % TOTAL;
+        movePiece(position);
+        updateStatus();
+        finishTurn();
+      });
+      return;
+
+    case 16: // 앞으로 3칸
+      showEventModal('➡️', '앞으로 3칸!', '럭키! 3칸 앞으로 이동합니다.', () => {
+        let dest = position + 3;
+        if (dest >= TOTAL) {
+          setTimeout(() => showComplete(), 300);
+          position = dest % TOTAL;
+          movePiece(position);
+          updateStatus();
+          return;
+        }
+        position = dest;
+        movePiece(position);
+        updateStatus();
+        handleCellEvent(position);
+      });
+      return;
+
+    case 6: // 행운의 주사위
+      extraTurn = true;
+      showEventModal('🎲', '행운의 주사위!', '한 번 더 굴릴 수 있습니다! 🎉');
+      break;
+
+    case 2: case 12: // 찬스 카드
+      const chances = [
+        { emoji: '🎫', title: '쿠폰 당첨!', desc: '음료 할인 쿠폰을 받았습니다!' },
+        { emoji: '⏩', title: '2칸 전진!', desc: '찬스! 2칸 앞으로 이동합니다.', action: 'forward2' },
+        { emoji: '⏪', title: '1칸 후퇴!', desc: '아쉽게도 1칸 뒤로 이동합니다.', action: 'back1' },
+        { emoji: '🌟', title: '행운의 별!', desc: '다음 턴에 한 번 더 굴릴 수 있어요!', action: 'extra' },
+      ];
+      const ch = chances[Math.floor(Math.random() * chances.length)];
+      showEventModal(ch.emoji, ch.title, ch.desc, () => {
+        if (ch.action === 'forward2') {
+          let dest = position + 2;
+          if (dest >= TOTAL) {
+            setTimeout(() => showComplete(), 300);
+            position = dest % TOTAL;
+            movePiece(position);
+            updateStatus();
+            return;
+          }
+          position = dest;
+          movePiece(position);
+          updateStatus();
+        } else if (ch.action === 'back1') {
+          position = (position - 1 + TOTAL) % TOTAL;
+          movePiece(position);
+          updateStatus();
+        } else if (ch.action === 'extra') {
+          extraTurn = true;
+        }
+        finishTurn();
+      });
+      return;
+
+    case 19: // 럭키박스
+      showEventModal('🎁', '럭키박스!', '축하합니다! 특별 경품에 당첨되었습니다! 🎊\n스태프에게 화면을 보여주세요!');
+      break;
+
+    case 1:
+      showEventModal('☕', '커피숍 도착!', '향긋한 커피 한 잔의 여유~ 커피 쿠폰 증정!');
+      break;
+    case 3: case 9: case 18:
+      showEventModal('📸', '포토존 도착!', '인생샷 찍고 SNS에 올려보세요! #팝업스토어');
+      break;
+    case 5: case 15:
+      showEventModal('🛍️', '팝업스토어!', '한정판 굿즈를 구경해보세요! 10% 할인 쿠폰 증정!');
+      break;
+    case 7:
+      showEventModal('🍔', '푸드트럭!', '맛있는 간식이 기다리고 있어요! 🍟');
+      break;
+    case 10:
+      showEventModal('🅿️', '무료 주차!', '편하게 쉬어가세요~ 이벤트 없이 안전!');
+      break;
+    case 11:
+      showEventModal('🎵', 'DJ부스!', '신나는 음악과 함께! 다음 이벤트를 기대하세요 🎶');
+      break;
+    case 13:
+      showEventModal('💅', '네일아트!', '무료 네일아트 체험권 당첨! 💖');
+      break;
+    case 17:
+      showEventModal('🧺', '플리마켓!', '보물 같은 아이템을 발견했어요! 🌈');
+      break;
+
+    default:
+      finishTurn();
+      return;
+  }
+}
+
+/* ── Modal ── */
+let modalCallback = null;
+
+function showEventModal(emoji, title, desc, cb) {
+  document.getElementById('modalEmoji').textContent = emoji;
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalDesc').textContent = desc;
+  document.getElementById('eventModal').classList.add('active');
+  modalCallback = cb || null;
+}
+
+function closeModal() {
+  document.getElementById('eventModal').classList.remove('active');
+  if (modalCallback) {
+    const cb = modalCallback;
+    modalCallback = null;
+    cb();
+  } else {
+    finishTurn();
+  }
+}
+
+function finishTurn() {
+  if (extraTurn) {
+    extraTurn = false;
+    showMsg('🎲 한 번 더! 주사위를 굴리세요!');
+  } else {
+    turn++;
+  }
+  updateStatus();
+  rolling = false;
+  rollBtn.disabled = false;
+}
+
+/* ── Complete ── */
+function showComplete() {
+  completed = true;
+  document.getElementById('completeModal').classList.add('active');
+  launchConfetti();
+}
+
+function launchConfetti() {
+  const container = document.getElementById('confetti');
+  const colors = ['#ff6b6b','#ffa502','#2ed573','#1e90ff','#a29bfe','#fd79a8','#fdcb6e','#00cec9'];
+  for (let i = 0; i < 80; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.width = (6 + Math.random() * 8) + 'px';
+    c.style.height = (6 + Math.random() * 8) + 'px';
+    c.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+    c.style.animationDuration = (2 + Math.random() * 3) + 's';
+    c.style.animationDelay = Math.random() * 2 + 's';
+    container.appendChild(c);
+  }
+  setTimeout(() => { container.innerHTML = ''; }, 6000);
+}
+
+/* ── Reset ── */
+function resetGame() {
+  position = 0;
+  turn = 1;
+  skipTurn = false;
+  extraTurn = false;
+  rolling = false;
+  completed = false;
+  movePiece(0);
+  updateStatus();
+  document.getElementById('diceLabel').textContent = '🎲 -';
+  document.getElementById('completeModal').classList.remove('active');
+  document.getElementById('eventModal').classList.remove('active');
+  document.getElementById('confetti').innerHTML = '';
+  rollBtn.disabled = false;
+  diceCube.style.transform = 'rotateX(-25deg) rotateY(25deg)';
+}
+
+/* ── Init ── */
+movePiece(0);
+updateStatus();
+</script>
+</body>
+</html>

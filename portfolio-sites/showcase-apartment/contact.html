@@ -116,7 +116,8 @@ input, select, textarea { cursor: none; }
 }
 .header.solid {
   background: rgba(12,12,12,0.97);
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   padding: calc(var(--grid) * 2) calc(var(--grid) * 5);
 }
 
@@ -157,7 +158,7 @@ input, select, textarea { cursor: none; }
   display: none;
   flex-direction: column;
   gap: 6px;
-  padding: 8px;
+  padding: 10px;
   z-index: 1001;
   min-width: 44px;
   min-height: 44px;
@@ -226,11 +227,11 @@ input, select, textarea { cursor: none; }
   opacity: 0;
   transform: translateY(24px);
   transition: opacity 0.4s var(--ease), transform 0.5s var(--ease), color 0.3s;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 }
-.mobile-nav.open a {
-  opacity: 1;
-  transform: translateY(0);
-}
+.mobile-nav.open a { opacity: 1; transform: translateY(0); }
 .mobile-nav a:hover { color: var(--accent); }
 
 /* =============================================
@@ -1025,15 +1026,15 @@ input, select, textarea { cursor: none; }
   line-height: 1.8;
 }
 
-/* =============================================
+/* ==============================================
    FOOTER
-   ============================================= */
+   ============================================== */
 .footer {
-  padding: calc(var(--grid) * 15) calc(var(--grid) * 5) calc(var(--grid) * 6);
-  text-align: center;
   position: relative;
+  padding: calc(var(--grid) * 16) calc(var(--grid) * 5) calc(var(--grid) * 8);
   overflow: hidden;
 }
+
 .footer-mega {
   font-family: var(--font-display);
   font-size: clamp(36px, 10vw, 160px);
@@ -1043,7 +1044,6 @@ input, select, textarea { cursor: none; }
   overflow: hidden;
   font-weight: 700;
   color: transparent;
-  -webkit-text-fill-color: transparent;
   -webkit-text-stroke: 1px rgba(200,169,125,0.1);
   letter-spacing: 0.05em;
   line-height: 1;
@@ -1051,35 +1051,43 @@ input, select, textarea { cursor: none; }
   margin-bottom: calc(var(--grid) * 8);
   user-select: none;
 }
+
 .footer-nav {
   display: flex;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: calc(var(--grid) * 3) calc(var(--grid) * 5);
+  gap: calc(var(--grid) * 4);
   margin-bottom: calc(var(--grid) * 6);
+  flex-wrap: wrap;
 }
 .footer-nav a {
   font-size: 13px;
   color: var(--text-dim);
   letter-spacing: 0.04em;
   transition: color 0.3s;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 }
-.footer-nav a:hover {
-  color: var(--accent);
-}
+.footer-nav a:hover { color: var(--accent); }
+
 .footer-divider {
   width: 48px;
   height: 1px;
-  background: rgba(138,133,128,0.3);
+  background: rgba(200,169,125,0.2);
   margin: 0 auto calc(var(--grid) * 4);
 }
+
+.footer-info {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.8;
+  margin-bottom: calc(var(--grid) * 2);
+}
+
 .footer-copy {
   font-size: 12px;
   color: var(--text-dim);
-  letter-spacing: 0.04em;
-}
-.footer-copy span {
-  color: var(--accent);
+  letter-spacing: 0.06em;
 }
 
 /* =============================================
@@ -1212,6 +1220,7 @@ input, select, textarea { cursor: none; }
     height: 280px;
     border-radius: 12px;
   }
+  .footer { padding: calc(var(--grid) * 10) calc(var(--grid) * 3) calc(var(--grid) * 6); }
   .footer-mega {
     font-size: clamp(36px, 12vw, 80px);
   }
@@ -1251,29 +1260,28 @@ input, select, textarea { cursor: none; }
 <div class="grain"></div>
 
 <!-- Header -->
-<header class="header" id="header">
-  <a href="index.html" class="header-logo" data-hover>RIVERSIDE PARK</a>
+<header class="header">
+  <a href="index.html" class="header-logo">RIVERSIDE PARK</a>
   <nav class="header-nav">
-    <a href="overview.html" data-hover>사업개요</a>
-    <a href="floorplan.html" data-hover>평면안내</a>
-    <a href="amenities.html" data-hover>커뮤니티</a>
-    <a href="location.html" data-hover>입지환경</a>
-    <a href="contact.html" class="active" data-hover>관심고객</a>
+    <a href="overview.html">사업개요</a>
+    <a href="floorplan.html">평면안내</a>
+    <a href="amenities.html">커뮤니티</a>
+    <a href="location.html">입지환경</a>
+    <a href="contact.html" class="active">관심고객</a>
   </nav>
-  <button class="hamburger" id="hamburger" aria-label="메뉴 열기" data-hover>
-    <span></span>
-    <span></span>
-    <span></span>
+  <button class="hamburger" aria-label="메뉴 열기">
+    <span></span><span></span><span></span>
   </button>
 </header>
 
 <!-- Mobile Nav -->
-<nav class="mobile-nav" id="mobileNav">
-  <a href="overview.html" data-hover>사업개요</a>
-  <a href="floorplan.html" data-hover>평면안내</a>
-  <a href="amenities.html" data-hover>커뮤니티</a>
-  <a href="location.html" data-hover>입지환경</a>
-  <a href="contact.html" data-hover>관심고객</a>
+<nav class="mobile-nav">
+  <button class="mobile-nav-close" aria-label="메뉴 닫기" onclick="document.querySelector('.mobile-nav').classList.remove('open');document.querySelector('.hamburger').classList.remove('active')"></button>
+  <a href="overview.html" style="--i:0">사업개요</a>
+  <a href="floorplan.html" style="--i:1">평면안내</a>
+  <a href="amenities.html" style="--i:2">커뮤니티</a>
+  <a href="location.html" style="--i:3">입지환경</a>
+  <a href="contact.html" style="--i:4">관심고객</a>
 </nav>
 
 <!-- =============================================
@@ -1636,17 +1644,15 @@ input, select, textarea { cursor: none; }
 <footer class="footer">
   <div class="footer-mega reveal">RIVERSIDE PARK</div>
   <nav class="footer-nav reveal">
-    <a href="overview.html" data-hover>사업개요</a>
-    <a href="floorplan.html" data-hover>평면안내</a>
-    <a href="amenities.html" data-hover>커뮤니티</a>
-    <a href="location.html" data-hover>입지환경</a>
-    <a href="contact.html" data-hover>관심고객</a>
+    <a href="overview.html">사업개요</a>
+    <a href="floorplan.html">평면안내</a>
+    <a href="amenities.html">커뮤니티</a>
+    <a href="location.html">입지환경</a>
+    <a href="contact.html">관심고객</a>
   </nav>
-  <div class="footer-divider"></div>
-  <p class="footer-copy">
-    &copy; 2026 <span>RIVERSIDE PARK</span>. All rights reserved.<br>
-    본 사이트의 내용은 분양 광고이며, 실제 시공 시 일부 변경될 수 있습니다.
-  </p>
+  <div class="footer-divider reveal"></div>
+  <p class="footer-info reveal">시행사: 리버사이드디벨로프먼트(주) | 시공사: 대한건설 | 설계: 정림건축<br>용적률 299% / 건폐율 30% | 대지면적 15,230㎡ / 건축면적 4,569㎡ / 연면적 89,450㎡</p>
+  <p class="footer-copy reveal">&copy; 2026 리버사이드 파크. All Rights Reserved.</p>
 </footer>
 
 <!-- =============================================
