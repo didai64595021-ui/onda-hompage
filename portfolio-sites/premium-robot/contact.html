@@ -262,36 +262,33 @@ nav a.active::after { width: 100%; }
 }
 .hero-title.glitch-active::before,
 .hero-title.glitch-active::after {
-  content: attr(data-text);
+  content: '';
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  font-size: inherit;
-  font-weight: inherit;
-  line-height: inherit;
-  letter-spacing: inherit;
+  inset: 0;
 }
 .hero-title.glitch-active::before {
-  color: var(--accent);
-  clip-path: inset(30% 0 50% 0);
-  animation: glitch-title-a 0.4s steps(3) forwards;
+  background: var(--accent);
+  mix-blend-mode: overlay;
+  opacity: 0;
+  animation: glitch-flash-a 0.4s steps(3) forwards;
 }
 .hero-title.glitch-active::after {
-  color: #FF0040;
-  clip-path: inset(55% 0 20% 0);
-  animation: glitch-title-b 0.4s steps(3) forwards;
+  background: #FF0040;
+  mix-blend-mode: overlay;
+  opacity: 0;
+  animation: glitch-flash-b 0.4s steps(3) forwards;
 }
-@keyframes glitch-title-a {
-  0% { transform: translateX(0); }
-  33% { transform: translateX(-8px); }
-  66% { transform: translateX(6px); }
-  100% { transform: translateX(0); }
+@keyframes glitch-flash-a {
+  0% { opacity: 0; transform: translateX(0); }
+  33% { opacity: 0.6; transform: translateX(-4px); }
+  66% { opacity: 0.3; transform: translateX(3px); }
+  100% { opacity: 0; transform: translateX(0); }
 }
-@keyframes glitch-title-b {
-  0% { transform: translateX(0); }
-  33% { transform: translateX(8px); }
-  66% { transform: translateX(-6px); }
-  100% { transform: translateX(0); }
+@keyframes glitch-flash-b {
+  0% { opacity: 0; transform: translateX(0); }
+  33% { opacity: 0.4; transform: translateX(4px); }
+  66% { opacity: 0.6; transform: translateX(-3px); }
+  100% { opacity: 0; transform: translateX(0); }
 }
 .hero-subtitle {
   font-family: var(--font-body);
@@ -421,7 +418,7 @@ section { position: relative; overflow: hidden; }
 .btn-submit {
   display: block;
   width: 100%;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: 16px;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -756,7 +753,7 @@ footer {
 
 /* ===== NAV CTA ===== */
 .nav-cta {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.05em;
