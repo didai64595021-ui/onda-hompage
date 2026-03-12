@@ -263,10 +263,23 @@ nav a.active::after { width: 100%; }
   opacity: 0;
   transform: translateY(20px);
   animation: char-fade-up 0.6s var(--ease-expo) forwards;
+  transition: color 0.05s, transform 0.05s;
 }
 @keyframes char-fade-up {
   to { opacity: 1; transform: translateY(0); }
 }
+.hero-title .char.glitch-cyan { color: #00d4ff !important; transform: translateX(-3px) !important; }
+.hero-title .char.glitch-red { color: #FF0040 !important; transform: translateX(3px) !important; }
+.hero-title::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,212,255,0.04) 2px, rgba(0,212,255,0.04) 4px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+.hero-title.glitch-active::after { opacity: 1; }
 .hero-subtitle {
   font-family: var(--font-body);
   font-size: clamp(16px, 1.8vw, 22px);
@@ -1035,14 +1048,30 @@ function closeMobileNav() {
   title.innerHTML = wrapped;
   const chars = title.querySelectorAll('.char');
   const totalDelay = idx * 40 + 800;
-  function doFlash() {
-    chars.forEach(c => { c.style.color = 'var(--accent)'; });
-    setTimeout(() => { chars.forEach(c => { c.style.color = '#fff'; }); }, 100);
-    setTimeout(() => { chars.forEach(c => { c.style.color = 'var(--accent)'; }); }, 200);
-    setTimeout(() => { chars.forEach(c => { c.style.color = ''; }); }, 300);
-    setTimeout(doFlash, 4000 + Math.random() * 2000);
+  /* ===== 2-COLOR GLITCH (index-level) ===== */
+  var charArr = Array.from(chars);
+  function doGlitch() {
+    var count = 3 + Math.floor(Math.random() * 3);
+    var picks = [];
+    while (picks.length < count && picks.length < charArr.length) {
+      var r = Math.floor(Math.random() * charArr.length);
+      if (picks.indexOf(r) === -1) picks.push(r);
+    }
+    picks.forEach(function(pi) {
+      charArr[pi].classList.add(Math.random() > 0.5 ? 'glitch-cyan' : 'glitch-red');
+    });
+    title.classList.add('glitch-active');
+    title.style.transform = 'scaleX(1.002) skewX(-0.5deg)';
+    setTimeout(function() {
+      picks.forEach(function(pi) {
+        charArr[pi].classList.remove('glitch-cyan', 'glitch-red');
+      });
+      title.classList.remove('glitch-active');
+      title.style.transform = '';
+    }, 100);
+    setTimeout(doGlitch, 3000 + Math.random() * 3000);
   }
-  setTimeout(doFlash, totalDelay);
+  setTimeout(doGlitch, totalDelay);
 })();
 
 /* ===== INTERSECTION OBSERVER ===== */
