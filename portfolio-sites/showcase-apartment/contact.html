@@ -331,11 +331,15 @@ input, select, textarea { cursor: none; }
 
 /* Scroll reveal */
 .reveal {
-  opacity: 0;
-  transform: translateY(40px);
+  opacity: 1;
+  transform: translateY(0);
   transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
 }
-.reveal.visible {
+.js-loaded .reveal {
+  opacity: 0;
+  transform: translateY(40px);
+}
+.js-loaded .reveal.visible {
   opacity: 1;
   transform: translateY(0);
 }
@@ -1689,6 +1693,8 @@ input, select, textarea { cursor: none; }
 (function() {
   'use strict';
 
+  document.documentElement.classList.add('js-loaded');
+
   /* -----------------------------------------
      CUSTOM CURSOR
      ----------------------------------------- */
@@ -1824,7 +1830,7 @@ input, select, textarea { cursor: none; }
   }
 
   // Fallback: if Observer hasn't revealed elements within 5s, force visible
-  setTimeout(revealAllFallback, 5000);
+  setTimeout(revealAllFallback, 2000);
 
   /* -----------------------------------------
      FORM — FLOATING LABELS & VALIDATION
