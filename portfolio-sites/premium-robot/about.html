@@ -293,7 +293,7 @@ nav a.active::after { width: 100%; }
   opacity: 0;
   transition: opacity 0.1s;
 }
-.hero-title.glitch-active::after { opacity: 1; }
+.hero-title.glitch-active::after { opacity: 0; }
 /* ===== GLITCH CLONE (index-matching) ===== */
 .glitch-clone {
   position: absolute;
@@ -303,27 +303,27 @@ nav a.active::after { width: 100%; }
   opacity: 0;
 }
 .hero-title.glitch-active .glitch-clone-cyan {
-  opacity: 1;
+  opacity: 0.85;
   color: #00d4ff;
-  clip-path: inset(30% 0 50% 0);
+  clip-path: inset(25% 0 55% 0);
   animation: glitch-title-a 0.4s steps(3) forwards;
 }
 .hero-title.glitch-active .glitch-clone-red {
-  opacity: 1;
+  opacity: 0.85;
   color: #FF0040;
-  clip-path: inset(55% 0 20% 0);
+  clip-path: inset(50% 0 25% 0);
   animation: glitch-title-b 0.4s steps(3) forwards;
 }
 @keyframes glitch-title-a {
   0% { transform: translateX(0); }
-  33% { transform: translateX(-8px); }
-  66% { transform: translateX(6px); }
+  33% { transform: translateX(-3px); }
+  66% { transform: translateX(3px); }
   100% { transform: translateX(0); }
 }
 @keyframes glitch-title-b {
   0% { transform: translateX(0); }
-  33% { transform: translateX(8px); }
-  66% { transform: translateX(-6px); }
+  33% { transform: translateX(3px); }
+  66% { transform: translateX(-3px); }
   100% { transform: translateX(0); }
 }
 @keyframes fade-up {
@@ -1389,8 +1389,11 @@ function closeMobileNav() {
     title.appendChild(cloneCyan);
     title.appendChild(cloneRed);
     function doGlitch() {
-      title.classList.add('glitch-active');
-      setTimeout(function() { title.classList.remove('glitch-active'); }, 400);
+      var nav = document.getElementById('mobile-nav');
+      if (!nav || !nav.classList.contains('active')) {
+        title.classList.add('glitch-active');
+        setTimeout(function() { title.classList.remove('glitch-active'); }, 400);
+      }
       setTimeout(doGlitch, 4000 + Math.random() * 2000);
     }
     doGlitch();
