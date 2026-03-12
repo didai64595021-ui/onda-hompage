@@ -268,8 +268,6 @@ nav a.active::after { width: 100%; }
 @keyframes char-fade-up {
   to { opacity: 1; transform: translateY(0); }
 }
-.hero-title .char.glitch-cyan { color: #00d4ff !important; transform: translateX(-3px) !important; }
-.hero-title .char.glitch-red { color: #FF0040 !important; transform: translateX(3px) !important; }
 .hero-title::after {
   content: '';
   position: absolute;
@@ -280,6 +278,38 @@ nav a.active::after { width: 100%; }
   transition: opacity 0.1s;
 }
 .hero-title.glitch-active::after { opacity: 1; }
+/* ===== GLITCH CLONE (index-matching) ===== */
+.glitch-clone {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  opacity: 0;
+}
+.hero-title.glitch-active .glitch-clone-cyan {
+  opacity: 1;
+  color: #00d4ff;
+  clip-path: inset(30% 0 50% 0);
+  animation: glitch-title-a 0.4s steps(3) forwards;
+}
+.hero-title.glitch-active .glitch-clone-red {
+  opacity: 1;
+  color: #FF0040;
+  clip-path: inset(55% 0 20% 0);
+  animation: glitch-title-b 0.4s steps(3) forwards;
+}
+@keyframes glitch-title-a {
+  0% { transform: translateX(0); }
+  33% { transform: translateX(-8px); }
+  66% { transform: translateX(6px); }
+  100% { transform: translateX(0); }
+}
+@keyframes glitch-title-b {
+  0% { transform: translateX(0); }
+  33% { transform: translateX(8px); }
+  66% { transform: translateX(-6px); }
+  100% { transform: translateX(0); }
+}
 .hero-subtitle {
   font-family: var(--font-body);
   font-size: clamp(16px, 1.8vw, 22px);
@@ -1048,30 +1078,23 @@ function closeMobileNav() {
   title.innerHTML = wrapped;
   const chars = title.querySelectorAll('.char');
   const totalDelay = idx * 40 + 800;
-  /* ===== 2-COLOR GLITCH (index-level) ===== */
-  var charArr = Array.from(chars);
-  function doGlitch() {
-    var count = 3 + Math.floor(Math.random() * 3);
-    var picks = [];
-    while (picks.length < count && picks.length < charArr.length) {
-      var r = Math.floor(Math.random() * charArr.length);
-      if (picks.indexOf(r) === -1) picks.push(r);
+  /* ===== GLITCH CLONE (index-matching) ===== */
+  setTimeout(function() {
+    var cloneCyan = document.createElement('div');
+    cloneCyan.className = 'glitch-clone glitch-clone-cyan';
+    cloneCyan.innerHTML = title.innerHTML;
+    var cloneRed = document.createElement('div');
+    cloneRed.className = 'glitch-clone glitch-clone-red';
+    cloneRed.innerHTML = title.innerHTML;
+    title.appendChild(cloneCyan);
+    title.appendChild(cloneRed);
+    function doGlitch() {
+      title.classList.add('glitch-active');
+      setTimeout(function() { title.classList.remove('glitch-active'); }, 400);
+      setTimeout(doGlitch, 4000 + Math.random() * 2000);
     }
-    picks.forEach(function(pi) {
-      charArr[pi].classList.add(Math.random() > 0.5 ? 'glitch-cyan' : 'glitch-red');
-    });
-    title.classList.add('glitch-active');
-    title.style.transform = 'scaleX(1.002) skewX(-0.5deg)';
-    setTimeout(function() {
-      picks.forEach(function(pi) {
-        charArr[pi].classList.remove('glitch-cyan', 'glitch-red');
-      });
-      title.classList.remove('glitch-active');
-      title.style.transform = '';
-    }, 100);
-    setTimeout(doGlitch, 3000 + Math.random() * 3000);
-  }
-  setTimeout(doGlitch, totalDelay);
+    doGlitch();
+  }, totalDelay);
 })();
 
 /* ===== INTERSECTION OBSERVER ===== */
