@@ -276,38 +276,15 @@ nav a.active::after { width: 100%; }
   color: var(--text-primary);
   margin-bottom: 32px;
   position: relative;
+}
+.hero-title .char {
+  display: inline-block;
   opacity: 0;
-  animation: fade-up 0.9s var(--ease-expo) 0.5s forwards;
+  transform: translateY(20px);
+  animation: char-fade-up 0.6s var(--ease-expo) forwards;
 }
-.hero-title.glitch-active::before,
-.hero-title.glitch-active::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-}
-.hero-title.glitch-active::before {
-  background: var(--accent);
-  mix-blend-mode: overlay;
-  opacity: 0;
-  animation: glitch-flash-a 0.4s steps(3) forwards;
-}
-.hero-title.glitch-active::after {
-  background: #FF0040;
-  mix-blend-mode: overlay;
-  opacity: 0;
-  animation: glitch-flash-b 0.4s steps(3) forwards;
-}
-@keyframes glitch-flash-a {
-  0% { opacity: 0; transform: translateX(0); }
-  33% { opacity: 0.6; transform: translateX(-4px); }
-  66% { opacity: 0.3; transform: translateX(3px); }
-  100% { opacity: 0; transform: translateX(0); }
-}
-@keyframes glitch-flash-b {
-  0% { opacity: 0; transform: translateX(0); }
-  33% { opacity: 0.4; transform: translateX(4px); }
-  66% { opacity: 0.6; transform: translateX(-3px); }
-  100% { opacity: 0; transform: translateX(0); }
+@keyframes char-fade-up {
+  to { opacity: 1; transform: translateY(0); }
 }
 .hero-sub {
   font-family: var(--font-body);
@@ -999,7 +976,7 @@ footer {
   <div class="hero-dot-bg"></div>
   <div class="hero-content">
     <div class="hero-label">// TECHNOLOGY — NEXABOT</div>
-    <h1 class="hero-title" id="hero-title" data-text="기술이 미래를 만듭니다">기술이 미래를<br>만듭니다</h1>
+    <h1 class="hero-title" id="hero-title">기술이 미래를<br>만듭니다</h1>
     <p class="hero-sub">AI 비전, 정밀 제어, 예측 유지보수, 엣지 컴퓨팅 — 네 가지 핵심 기술이 스마트 팩토리의 근간을 이룹니다.</p>
   </div>
   <div class="hero-scroll">
@@ -1298,16 +1275,29 @@ setTimeout(() => {
   });
 }, 2000);
 
-/* ===== GLITCH EFFECT ON HERO TITLE ===== */
-const heroTitle = document.querySelector('.hero-title');
-if (heroTitle) {
-  function doGlitch() {
-    heroTitle.classList.add('glitch-active');
-    setTimeout(() => heroTitle.classList.remove('glitch-active'), 400);
-    setTimeout(doGlitch, 4000 + Math.random() * 2000);
+/* ===== HERO PER-CHARACTER ANIMATION ===== */
+(function initHeroCharAnim() {
+  const title = document.getElementById('hero-title');
+  if (!title) return;
+  const html = title.innerHTML;
+  let idx = 0;
+  const wrapped = html.replace(/(<br\s*\/?>)|([^<])/g, function(m, br, ch) {
+    if (br) return br;
+    if (ch === ' ') return '<span class="char" style="animation-delay:' + (idx++ * 0.04) + 's">&nbsp;</span>';
+    return '<span class="char" style="animation-delay:' + (idx++ * 0.04) + 's">' + ch + '</span>';
+  });
+  title.innerHTML = wrapped;
+  const chars = title.querySelectorAll('.char');
+  const totalDelay = idx * 40 + 800;
+  function doFlash() {
+    chars.forEach(c => { c.style.color = 'var(--accent)'; });
+    setTimeout(() => { chars.forEach(c => { c.style.color = '#fff'; }); }, 100);
+    setTimeout(() => { chars.forEach(c => { c.style.color = 'var(--accent)'; }); }, 200);
+    setTimeout(() => { chars.forEach(c => { c.style.color = ''; }); }, 300);
+    setTimeout(doFlash, 4000 + Math.random() * 2000);
   }
-  setTimeout(doGlitch, 1000);
-}
+  setTimeout(doFlash, totalDelay);
+})();
 
 /* ===== MAGNETIC BUTTONS ===== */
 document.querySelectorAll('.btn-primary, .nav-cta').forEach(btn => {
