@@ -4,217 +4,217 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🎲 팝업스토어 부루마블</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:#0D0D1A; --bg2:#12122A; --glass:rgba(255,255,255,0.07); --glass-border:rgba(255,255,255,0.1);
+  --orange:#FF6B35; --cyan:#00D4FF; --gold:#FFD700; --pink:#FF4081; --purple:#7C4DFF; --green:#00E676;
+  --text:#E8E8F0; --text-dim:rgba(255,255,255,0.45); --radius:12px;
+}
 body {
-  font-family: 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-  background: linear-gradient(135deg, #fce4ec 0%, #e8eaf6 50%, #e0f7fa 100%);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 16px 20px;
-  overflow-x: hidden;
+  font-family:'Noto Sans KR',-apple-system,sans-serif; background:var(--bg);
+  background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);
+  background-size:40px 40px; min-height:100vh; display:flex; flex-direction:column; align-items:center;
+  padding:20px; color:var(--text); overflow-x:hidden;
 }
+body::before { content:''; position:fixed; inset:0; background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,0.4) 100%); pointer-events:none; z-index:0; }
 
-/* ── Header ── */
-.header { text-align: center; margin-bottom: 12px; }
+.sound-toggle {
+  position:fixed; top:20px; right:20px; z-index:200; width:44px; height:44px; border-radius:50%;
+  background:var(--glass); border:1px solid var(--glass-border); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  color:var(--text); font-size:1.2rem; cursor:pointer; transition:all .3s; display:flex; align-items:center; justify-content:center;
+}
+.sound-toggle:hover { background:rgba(255,255,255,0.12); transform:scale(1.1); }
+
+.header { text-align:center; margin-bottom:16px; z-index:1; }
 .header h1 {
-  font-size: 1.8rem;
-  background: linear-gradient(135deg, #ff6b6b, #ffa502, #ff6348);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-family:'Black Han Sans',sans-serif; font-size:2.2rem;
+  background:linear-gradient(135deg,var(--orange),var(--gold),var(--cyan)); background-size:200% auto;
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  animation:textShine 4s linear infinite; letter-spacing:2px; filter:drop-shadow(0 0 20px rgba(255,107,53,0.3));
 }
-.status-bar {
-  display: flex; gap: 16px; justify-content: center;
-  margin-top: 8px; font-size: .9rem; color: #555; font-weight: 600;
-}
-.status-bar span {
-  background: #fff; padding: 4px 14px; border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.08);
-}
+@keyframes textShine { to { background-position:200% center; } }
 
-/* ── Board ── */
-.board-wrapper { position: relative; width: 640px; height: 640px; }
+.status-bar { display:flex; gap:12px; justify-content:center; margin-top:10px; }
+.status-bar span {
+  background:var(--glass); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  border:1px solid var(--glass-border); padding:6px 18px; border-radius:24px; font-size:.85rem; font-weight:700;
+}
+.status-bar .turn-led { font-family:'Black Han Sans',monospace; color:var(--cyan); text-shadow:0 0 8px var(--cyan); }
+
+.board-wrapper { position:relative; width:640px; height:640px; z-index:1; border-radius:20px; background:rgba(255,255,255,0.02); }
+.board-wrapper::before {
+  content:''; position:absolute; inset:-2px; border-radius:22px;
+  background:linear-gradient(135deg,var(--orange),var(--cyan),var(--purple),var(--pink),var(--orange));
+  background-size:300% 300%; animation:borderGlow 6s linear infinite; z-index:-1; opacity:.5;
+}
+@keyframes borderGlow { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+.board-wrapper::after {
+  content:''; position:absolute; inset:0; border-radius:20px;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.015) 3px,rgba(0,0,0,0.015) 4px);
+  pointer-events:none; z-index:50;
+}
 
 .cell {
-  position: absolute;
-  border: 2px solid rgba(255,255,255,.8);
-  border-radius: 6px;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  font-weight: 700; text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,.1);
-  transition: transform .2s, box-shadow .2s;
-  cursor: default; overflow: hidden; line-height: 1.2;
+  position:absolute; border-radius:var(--radius); display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-weight:700; text-align:center; background:var(--glass); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  border:1px solid var(--glass-border); transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;
+  cursor:default; overflow:hidden; line-height:1.2; opacity:0; animation:cellAppear .5s ease forwards;
 }
-.cell:hover { transform: scale(1.06); box-shadow: 0 4px 16px rgba(0,0,0,.18); z-index: 5; }
-.cell .emoji { font-size: 1.3rem; margin-bottom: 1px; }
-.cell .name { font-size: .6rem; white-space: nowrap; }
-.cell.corner .emoji { font-size: 1.6rem; }
-.cell.corner .name { font-size: .7rem; font-weight: 800; }
+.cell:hover { transform:translateY(-4px) scale(1.02); box-shadow:0 8px 25px rgba(0,0,0,0.3); z-index:5; }
+.cell .emoji { font-size:1.4rem; margin-bottom:2px; }
+.cell .name { font-size:.55rem; color:var(--text-dim); white-space:nowrap; }
+.cell.corner .emoji { font-size:1.8rem; }
+.cell.corner .name { font-family:'Black Han Sans',sans-serif; font-size:.7rem; color:var(--text); }
+.cell.cell-active {
+  z-index:4; border-color:var(--cell-glow,var(--cyan));
+  box-shadow:0 0 15px var(--cell-glow,var(--cyan)),0 0 30px var(--cell-glow,var(--cyan)),inset 0 0 15px rgba(255,255,255,0.05);
+}
+@keyframes cellAppear { from{opacity:0;transform:scale(.6) rotate(-5deg)} to{opacity:1;transform:scale(1) rotate(0)} }
 
-/* ── Piece ── */
 .piece {
-  position: absolute; width: 28px; height: 28px;
-  background: radial-gradient(circle at 35% 35%, #ff6b6b, #c0392b);
-  border-radius: 50%; border: 3px solid #fff;
-  box-shadow: 0 3px 10px rgba(0,0,0,.35);
-  z-index: 10;
-  transition: left .45s cubic-bezier(.4,0,.2,1), top .45s cubic-bezier(.4,0,.2,1);
-  pointer-events: none;
+  position:absolute; width:36px; height:36px; z-index:10; display:flex; align-items:center; justify-content:center;
+  font-size:1.5rem; transition:left .45s cubic-bezier(.34,1.56,.64,1),top .45s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:none; filter:drop-shadow(0 0 8px rgba(255,107,53,0.6));
 }
 .piece::after {
-  content: ''; position: absolute; inset: -6px; border-radius: 50%;
-  border: 3px solid #ff6b6b; animation: pulse 1.2s infinite;
+  content:''; position:absolute; width:40px; height:40px; border-radius:50%;
+  background:radial-gradient(circle,rgba(255,107,53,0.3) 0%,transparent 70%); animation:piecePulse 1.5s ease-in-out infinite;
 }
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: .7; }
-  50% { transform: scale(1.4); opacity: 0; }
-}
+@keyframes piecePulse { 0%,100%{transform:scale(1);opacity:.6} 50%{transform:scale(1.8);opacity:0} }
+@keyframes pieceArrive { 0%{transform:translateY(-12px) scale(1.3)} 60%{transform:translateY(3px) scale(.95)} 100%{transform:translateY(0) scale(1)} }
 
-/* ── Center ── */
 .center-area {
-  position: absolute;
-  top: 100px; left: 100px;
-  width: 440px; height: 440px;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 8px;
-  background: radial-gradient(ellipse at center, rgba(255,255,255,.3) 0%, transparent 70%);
+  position:absolute; top:100px; left:100px; width:440px; height:440px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; overflow:hidden;
 }
+.particle { position:absolute; border-radius:50%; opacity:0; pointer-events:none; animation:particleFloat linear infinite; }
+@keyframes particleFloat { 0%{opacity:0;transform:translateY(0) scale(0)} 15%{opacity:.7;transform:translateY(-15px) scale(1)} 85%{opacity:.2;transform:translateY(-90px) scale(.4)} 100%{opacity:0;transform:translateY(-110px) scale(0)} }
 
 .center-logo {
-  font-size: 1.5rem; font-weight: 900; text-align: center;
-  background: linear-gradient(135deg, #ff6b6b, #ffa502);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  line-height: 1.3;
+  font-family:'Black Han Sans',sans-serif; font-size:1.6rem; text-align:center; line-height:1.4;
+  background:linear-gradient(135deg,var(--orange),var(--gold)); -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; filter:drop-shadow(0 0 15px rgba(255,107,53,0.3));
 }
-.center-logo small { display: block; font-size: .7rem; -webkit-text-fill-color: #999; }
+.center-logo small { display:block; font-size:.65rem; -webkit-text-fill-color:var(--text-dim); font-family:'Noto Sans KR',sans-serif; font-weight:600; }
 
-/* ── Dice ── */
-.dice-3d-wrap { width: 72px; height: 72px; perspective: 400px; margin: 8px auto 4px; }
-
-.dice-cube {
-  width: 72px; height: 72px; position: relative;
-  transform-style: preserve-3d;
-  transform: rotateX(-25deg) rotateY(25deg);
-}
-.dice-cube.rolling { animation: diceRoll 1s ease-out; }
-@keyframes diceRoll {
-  0%   { transform: rotateX(0) rotateY(0); }
-  20%  { transform: rotateX(400deg) rotateY(200deg); }
-  50%  { transform: rotateX(800deg) rotateY(500deg); }
-  80%  { transform: rotateX(1100deg) rotateY(700deg); }
-  100% { transform: rotateX(var(--rx)) rotateY(var(--ry)); }
-}
+.dice-3d-wrap { width:80px; height:80px; perspective:500px; margin:10px auto 6px; }
+.dice-shadow { width:60px; height:10px; margin:0 auto; background:radial-gradient(ellipse,rgba(0,212,255,0.2) 0%,transparent 70%); border-radius:50%; filter:blur(4px); }
+.dice-cube { width:80px; height:80px; position:relative; transform-style:preserve-3d; transform:rotateX(-25deg) rotateY(25deg); }
+.dice-cube.rolling { animation:diceRoll 1s ease-out; }
+@keyframes diceRoll { 0%{transform:rotateX(0) rotateY(0)} 20%{transform:rotateX(400deg) rotateY(200deg)} 50%{transform:rotateX(800deg) rotateY(500deg)} 80%{transform:rotateX(1100deg) rotateY(700deg)} 100%{transform:rotateX(var(--rx)) rotateY(var(--ry))} }
 
 .dice-face {
-  position: absolute; width: 72px; height: 72px;
-  background: #fff; border: 2px solid #ddd; border-radius: 10px;
-  display: grid; padding: 10px;
-  box-shadow: inset 0 0 8px rgba(0,0,0,.05);
+  position:absolute; width:80px; height:80px; background:linear-gradient(135deg,#1a1a2e,#16213e);
+  border:2px solid rgba(0,212,255,0.2); border-radius:12px; display:grid; padding:12px; box-shadow:inset 0 0 15px rgba(0,0,0,0.3);
 }
-.dice-face .dot {
-  width: 12px; height: 12px; background: #2d3436;
-  border-radius: 50%; align-self: center; justify-self: center;
-}
-.face-1 { transform: rotateY(0deg) translateZ(36px); grid-template: 1fr / 1fr; }
-.face-2 { transform: rotateY(180deg) translateZ(36px); grid-template: 1fr 1fr / 1fr; }
-.face-2 .dot:first-child { justify-self: end; }
-.face-2 .dot:last-child { justify-self: start; }
-.face-3 { transform: rotateY(-90deg) translateZ(36px); grid-template: 1fr 1fr 1fr / 1fr; }
-.face-3 .dot:first-child { justify-self: end; }
-.face-3 .dot:last-child { justify-self: start; }
-.face-4 { transform: rotateY(90deg) translateZ(36px); grid-template: 1fr 1fr / 1fr 1fr; }
-.face-5 { transform: rotateX(90deg) translateZ(36px); grid-template: 1fr 1fr 1fr / 1fr 1fr; }
-.face-5 .dot:nth-child(3) { grid-column: 1 / -1; }
-.face-6 { transform: rotateX(-90deg) translateZ(36px); grid-template: 1fr 1fr 1fr / 1fr 1fr; }
+.dice-face .dot { width:14px; height:14px; background:var(--cyan); border-radius:50%; align-self:center; justify-self:center; box-shadow:0 0 6px var(--cyan),0 0 12px var(--cyan); }
+.face-1{transform:rotateY(0deg) translateZ(40px);grid-template:1fr/1fr}
+.face-2{transform:rotateY(180deg) translateZ(40px);grid-template:1fr 1fr/1fr}
+.face-2 .dot:first-child{justify-self:end} .face-2 .dot:last-child{justify-self:start}
+.face-3{transform:rotateY(-90deg) translateZ(40px);grid-template:1fr 1fr 1fr/1fr}
+.face-3 .dot:first-child{justify-self:end} .face-3 .dot:last-child{justify-self:start}
+.face-4{transform:rotateY(90deg) translateZ(40px);grid-template:1fr 1fr/1fr 1fr}
+.face-5{transform:rotateX(90deg) translateZ(40px);grid-template:1fr 1fr 1fr/1fr 1fr}
+.face-5 .dot:nth-child(3){grid-column:1/-1}
+.face-6{transform:rotateX(-90deg) translateZ(40px);grid-template:1fr 1fr 1fr/1fr 1fr}
 
 .dice-btn {
-  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-  color: #fff; border: none; padding: 10px 32px; border-radius: 30px;
-  font-size: 1rem; font-weight: 800; cursor: pointer;
-  box-shadow: 0 4px 15px rgba(238,90,36,.4);
-  transition: transform .15s, box-shadow .15s;
+  position:relative; background:linear-gradient(135deg,var(--orange),#FF8F5C); color:#fff; border:none;
+  padding:12px 36px; border-radius:30px; font-family:'Black Han Sans',sans-serif; font-size:1.05rem;
+  letter-spacing:1px; cursor:pointer; overflow:hidden;
+  box-shadow:0 0 20px rgba(255,107,53,0.3),0 4px 15px rgba(255,107,53,0.2);
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
 }
-.dice-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(238,90,36,.5); }
-.dice-btn:active { transform: translateY(0); }
-.dice-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.dice-btn::before {
+  content:''; position:absolute; inset:-3px; border-radius:33px;
+  background:linear-gradient(135deg,var(--orange),var(--gold)); filter:blur(12px); opacity:.3; z-index:-1; transition:opacity .3s;
+}
+.dice-btn:hover { transform:translateY(-3px) scale(1.05); box-shadow:0 0 30px rgba(255,107,53,0.5),0 8px 25px rgba(255,107,53,0.3); }
+.dice-btn:hover::before { opacity:.6; }
+.dice-btn:active { transform:translateY(0) scale(.98); }
+.dice-btn:disabled { opacity:.4; cursor:not-allowed; transform:none !important; box-shadow:none; }
 
-/* ── Event Modal ── */
 .modal-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,.45); z-index: 100;
-  align-items: center; justify-content: center;
-  backdrop-filter: blur(3px);
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:100;
+  align-items:center; justify-content:center; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
 }
-.modal-overlay.active { display: flex; }
-
+.modal-overlay.active { display:flex; }
 .modal-card {
-  background: #fff; border-radius: 20px; padding: 36px 32px 28px;
-  max-width: 380px; width: 90%; text-align: center;
-  box-shadow: 0 20px 60px rgba(0,0,0,.2);
-  animation: modalIn .35s ease-out;
+  background:linear-gradient(135deg,var(--bg2),#1a1a3e); border:1px solid var(--glass-border);
+  border-radius:24px; padding:40px 36px 32px; max-width:400px; width:90%; text-align:center;
+  box-shadow:0 25px 60px rgba(0,0,0,0.5),0 0 40px rgba(0,212,255,0.1); animation:modalDrop .5s cubic-bezier(.34,1.56,.64,1);
 }
-@keyframes modalIn {
-  from { transform: scale(.7) translateY(30px); opacity: 0; }
-  to { transform: scale(1) translateY(0); opacity: 1; }
-}
-.modal-card .modal-emoji { font-size: 3rem; margin-bottom: 10px; }
-.modal-card .modal-title { font-size: 1.3rem; font-weight: 800; color: #2d3436; margin-bottom: 6px; }
-.modal-card .modal-desc { font-size: .95rem; color: #636e72; margin-bottom: 18px; line-height: 1.5; }
+@keyframes modalDrop { from{transform:translateY(-60px) scale(.8);opacity:0} to{transform:translateY(0) scale(1);opacity:1} }
+.modal-card .modal-emoji { font-size:3.5rem; margin-bottom:12px; }
+.modal-card .modal-title { font-family:'Black Han Sans',sans-serif; font-size:1.4rem; color:var(--text); margin-bottom:8px; }
+.modal-card .modal-desc { font-size:.9rem; color:var(--text-dim); margin-bottom:20px; line-height:1.6; }
 .modal-card button {
-  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
-  color: #fff; border: none; padding: 10px 36px; border-radius: 25px;
-  font-size: 1rem; font-weight: 700; cursor: pointer;
-  box-shadow: 0 4px 15px rgba(108,92,231,.3);
-  transition: transform .15s;
+  background:linear-gradient(135deg,var(--purple),#9B6DFF); color:#fff; border:none; padding:11px 40px;
+  border-radius:25px; font-family:'Black Han Sans',sans-serif; font-size:.95rem; cursor:pointer;
+  box-shadow:0 0 15px rgba(124,77,255,0.3); transition:all .3s;
 }
-.modal-card button:hover { transform: translateY(-1px); }
+.modal-card button:hover { transform:translateY(-2px); box-shadow:0 0 25px rgba(124,77,255,0.5); }
 
-.complete-card { background: linear-gradient(135deg, #fff9c4, #fff); padding: 40px 32px 32px; }
-.complete-card .modal-emoji { font-size: 4rem; }
-
-/* Confetti */
-.confetti-container { position: fixed; inset: 0; pointer-events: none; z-index: 150; overflow: hidden; }
-.confetti {
-  position: absolute; width: 10px; height: 10px; top: -20px;
-  animation: confettiFall linear forwards;
+.complete-card {
+  background:linear-gradient(135deg,#1a1a3e,var(--bg)); border-color:var(--gold);
+  box-shadow:0 25px 60px rgba(0,0,0,0.5),0 0 40px rgba(255,215,0,0.15);
 }
-@keyframes confettiFall { to { top: 110vh; transform: rotate(720deg); } }
+.complete-card .modal-emoji { font-size:4.5rem; }
+.complete-card .modal-title {
+  background:linear-gradient(135deg,var(--gold),var(--orange)); -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; font-size:1.8rem;
+}
 
-/* ── Message bubble ── */
+.confetti-container { position:fixed; inset:0; pointer-events:none; z-index:150; overflow:hidden; }
+.confetti { position:absolute; top:-20px; animation:confettiFall linear forwards; }
+@keyframes confettiFall {
+  0%{transform:translateX(0) rotate(0)} 25%{transform:translateX(15px) rotate(180deg)}
+  50%{transform:translateX(-15px) rotate(360deg)} 75%{transform:translateX(10px) rotate(540deg)}
+  100%{top:110vh;transform:translateX(-10px) rotate(720deg)}
+}
+
 .msg-log {
-  font-size: .8rem; color: #636e72;
-  background: rgba(255,255,255,.9); padding: 6px 16px; border-radius: 14px;
-  white-space: nowrap; max-width: 360px; overflow: hidden; text-overflow: ellipsis;
-  opacity: 0; transition: opacity .3s;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  font-size:.8rem; color:var(--cyan); background:var(--glass); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  border:1px solid var(--glass-border); padding:8px 18px; border-radius:16px; white-space:nowrap;
+  max-width:340px; overflow:hidden; text-overflow:ellipsis; opacity:0; transition:opacity .4s;
+  text-shadow:0 0 8px var(--cyan); min-height:1.6rem;
 }
-.msg-log.show { opacity: 1; }
+.msg-log.show { opacity:1; }
+
+.guide-text { font-size:.75rem; color:var(--text-dim); margin-top:4px; min-height:1.2em; }
+.guide-text .cursor { display:inline-block; width:2px; height:1em; background:var(--cyan); margin-left:2px; animation:cursorBlink .8s step-end infinite; vertical-align:text-bottom; }
+@keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+@media(max-width:768px){
+  body{padding:12px}
+  .board-wrapper{transform:scale(.52);transform-origin:top center;margin-bottom:-280px}
+  .header h1{font-size:1.5rem} .status-bar{gap:6px} .status-bar span{padding:4px 10px;font-size:.75rem}
+}
+@media(min-width:769px) and (max-width:1024px){
+  .board-wrapper{transform:scale(.8);transform-origin:top center;margin-bottom:-100px}
+}
 </style>
 </head>
 <body>
 
+<button class="sound-toggle" id="soundToggle" onclick="toggleSound()">🔊</button>
+
 <div class="header">
   <h1>🎲 팝업스토어 부루마블 🎲</h1>
   <div class="status-bar">
-    <span id="turnCounter">🎯 턴: 1</span>
+    <span class="turn-led" id="turnCounter">🎯 턴: 1</span>
     <span id="posLabel">📍 출발</span>
     <span id="diceLabel">🎲 -</span>
   </div>
 </div>
 
 <div class="board-wrapper" id="board">
-  <div class="piece" id="piece"></div>
-
+  <div class="piece" id="piece">🏃</div>
   <div class="center-area">
-    <div class="center-logo">
-      🎉 POPUP STORE<br>부루마블
-      <small>팝업스토어 현장 이벤트</small>
-    </div>
+    <div class="center-logo">🎉 POPUP STORE<br>부루마블<small>팝업스토어 현장 이벤트</small></div>
     <div class="dice-3d-wrap">
       <div class="dice-cube" id="diceCube">
         <div class="dice-face face-1"><span class="dot"></span></div>
@@ -225,12 +225,13 @@ body {
         <div class="dice-face face-6"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
       </div>
     </div>
+    <div class="dice-shadow"></div>
     <button class="dice-btn" id="rollBtn" onclick="rollDice()">🎲 주사위 굴리기</button>
     <div class="msg-log" id="msgLog"></div>
+    <div class="guide-text" id="guideText"></div>
   </div>
 </div>
 
-<!-- Event Modal -->
 <div class="modal-overlay" id="eventModal">
   <div class="modal-card" id="eventCard">
     <div class="modal-emoji" id="modalEmoji"></div>
@@ -240,398 +241,301 @@ body {
   </div>
 </div>
 
-<!-- Complete Modal -->
 <div class="modal-overlay" id="completeModal">
   <div class="modal-card complete-card">
     <div class="modal-emoji">🎉🎊🏆</div>
     <div class="modal-title">축하합니다!</div>
     <div class="modal-desc">한 바퀴 완주! 이벤트 참여가 완료되었습니다.<br>스태프에게 화면을 보여주세요! 🎁</div>
-    <button onclick="resetGame()" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24);">🔄 다시 하기</button>
+    <button onclick="resetGame()" style="background:linear-gradient(135deg,var(--orange),#FF8F5C)">🔄 다시 하기</button>
   </div>
 </div>
 
 <div class="confetti-container" id="confetti"></div>
 
 <script>
-/* ═══════════════════════════════════════════
-   Board Data — 20 cells, clockwise
-   ═══════════════════════════════════════════ */
-const CELLS = [
-  { name: '출발',        emoji: '🚀', color: '#ff6b6b' },   // 0  — BR corner
-  { name: '커피숍',      emoji: '☕', color: '#f8b500' },   // 1
-  { name: '찬스 카드',   emoji: '🎴', color: '#6c5ce7' },   // 2
-  { name: '포토존',      emoji: '📸', color: '#00cec9' },   // 3
-  { name: '무인도',      emoji: '🏝️', color: '#fdcb6e' },  // 4
-  { name: '팝업스토어A', emoji: '🛍️', color: '#e17055' },  // 5  — BL corner
-  { name: '행운주사위',  emoji: '🎲', color: '#0984e3' },   // 6
-  { name: '푸드트럭',    emoji: '🍔', color: '#e84393' },   // 7
-  { name: '뒤로 2칸',    emoji: '⬅️', color: '#636e72' },   // 8
-  { name: '포토존 B',    emoji: '📸', color: '#00cec9' },   // 9
-  { name: '무료 주차',   emoji: '🅿️', color: '#55efc4' },  // 10 — TL corner
-  { name: 'DJ부스',      emoji: '🎵', color: '#a29bfe' },   // 11
-  { name: '찬스 카드',   emoji: '🎴', color: '#6c5ce7' },   // 12
-  { name: '네일아트',    emoji: '💅', color: '#fd79a8' },   // 13
-  { name: '무인도',      emoji: '🏝️', color: '#fdcb6e' },  // 14
-  { name: '팝업스토어B', emoji: '🛍️', color: '#e17055' },  // 15 — TR corner
-  { name: '앞으로 3칸',  emoji: '➡️', color: '#00b894' },   // 16
-  { name: '플리마켓',    emoji: '🧺', color: '#fab1a0' },   // 17
-  { name: '포토존 C',    emoji: '📸', color: '#00cec9' },   // 18
-  { name: '럭키박스',    emoji: '🎁', color: '#ff7675' },   // 19
-];
+/* ═══ Sound System (Web Audio API) ═══ */
+const SFX = {
+  ctx: null, muted: false,
+  init() { if (this.ctx) return; this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+  beep(freq, dur, delay=0, type='square', vol=0.08) {
+    if (this.muted || !this.ctx) return;
+    const t = this.ctx.currentTime + delay;
+    const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+    osc.connect(gain); gain.connect(this.ctx.destination);
+    osc.frequency.value = freq; osc.type = type;
+    gain.gain.setValueAtTime(vol, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.start(t); osc.stop(t + dur);
+  },
+  roll()  { for (let i=0;i<8;i++) this.beep(200+i*60,.06,i*.05,'square',.06); },
+  step()  { this.beep(600+Math.random()*200,.04,0,'sine',.05); },
+  event() { this.beep(523,.12,0,'sine',.07); this.beep(659,.12,.12,'sine',.07); this.beep(784,.18,.24,'sine',.08); },
+  fanfare(){ [523,659,784,1047].forEach((f,i)=>{ this.beep(f,.4,i*.12,'sine',.06); this.beep(f*1.5,.4,i*.12,'triangle',.03); }); }
+};
+function toggleSound() { SFX.init(); SFX.muted=!SFX.muted; document.getElementById('soundToggle').textContent=SFX.muted?'🔇':'🔊'; }
 
+/* ═══ Board Data — 20 cells, clockwise ═══ */
+const CELLS = [
+  { name:'출발',        emoji:'🚀', color:'#FF6B35' },
+  { name:'커피숍',      emoji:'☕', color:'#F8B500' },
+  { name:'찬스 카드',   emoji:'🎴', color:'#7C4DFF' },
+  { name:'포토존',      emoji:'📸', color:'#00D4FF' },
+  { name:'무인도',      emoji:'🏝️', color:'#FFD700' },
+  { name:'팝업스토어A', emoji:'🛍️', color:'#FF6B35' },
+  { name:'행운주사위',  emoji:'🎲', color:'#00D4FF' },
+  { name:'푸드트럭',    emoji:'🍔', color:'#FF4081' },
+  { name:'뒤로 2칸',    emoji:'⬅️', color:'#636E72' },
+  { name:'포토존 B',    emoji:'📸', color:'#00D4FF' },
+  { name:'무료 주차',   emoji:'🅿️', color:'#00E676' },
+  { name:'DJ부스',      emoji:'🎵', color:'#7C4DFF' },
+  { name:'찬스 카드',   emoji:'🎴', color:'#7C4DFF' },
+  { name:'네일아트',    emoji:'💅', color:'#FF4081' },
+  { name:'무인도',      emoji:'🏝️', color:'#FFD700' },
+  { name:'팝업스토어B', emoji:'🛍️', color:'#FF6B35' },
+  { name:'앞으로 3칸',  emoji:'➡️', color:'#00E676' },
+  { name:'플리마켓',    emoji:'🧺', color:'#FAB1A0' },
+  { name:'포토존 C',    emoji:'📸', color:'#00D4FF' },
+  { name:'럭키박스',    emoji:'🎁', color:'#FF4081' },
+];
 const TOTAL = CELLS.length;
 
-/* ═══════════════════════════════════════════
-   Layout — absolute positioning
-   Board 640×640, corners 100×100
-   4 side cells per edge, each 110 span
-   Cells 80px thick, aligned to outer edge
-   ═══════════════════════════════════════════ */
-const BS = 640, CO = 100, THICK = 80;
-const SPAN = (BS - 2 * CO) / 4; // 110
-
+/* ═══ Layout ═══ */
+const BS=640, CO=100, THICK=80, SPAN=(BS-2*CO)/4;
 function cellPos(i) {
-  /* Bottom row: 0(BR corner)→1→2→3→4→5(BL corner) going RIGHT to LEFT */
-  if (i === 0)
-    return { x: BS - CO, y: BS - CO, w: CO, h: CO, corner: true };
-  if (i >= 1 && i <= 4)
-    return { x: CO + (4 - i) * SPAN, y: BS - THICK, w: SPAN, h: THICK };
-  if (i === 5)
-    return { x: 0, y: BS - CO, w: CO, h: CO, corner: true };
-
-  /* Left column: 6→7→8→9 going BOTTOM to TOP */
-  if (i >= 6 && i <= 9) {
-    var row = i - 6;
-    return { x: 0, y: CO + (3 - row) * SPAN, w: THICK, h: SPAN };
-  }
-
-  /* Top row: 10(TL corner)→11→12→13→14→15(TR corner) going LEFT to RIGHT */
-  if (i === 10)
-    return { x: 0, y: 0, w: CO, h: CO, corner: true };
-  if (i >= 11 && i <= 14) {
-    var col = i - 11;
-    return { x: CO + col * SPAN, y: 0, w: SPAN, h: THICK };
-  }
-  if (i === 15)
-    return { x: BS - CO, y: 0, w: CO, h: CO, corner: true };
-
-  /* Right column: 16→17→18→19 going TOP to BOTTOM */
-  if (i >= 16 && i <= 19) {
-    var row2 = i - 16;
-    return { x: BS - THICK, y: CO + row2 * SPAN, w: THICK, h: SPAN };
-  }
+  if(i===0) return{x:BS-CO,y:BS-CO,w:CO,h:CO,corner:true};
+  if(i>=1&&i<=4) return{x:CO+(4-i)*SPAN,y:BS-THICK,w:SPAN,h:THICK};
+  if(i===5) return{x:0,y:BS-CO,w:CO,h:CO,corner:true};
+  if(i>=6&&i<=9){var r=i-6;return{x:0,y:CO+(3-r)*SPAN,w:THICK,h:SPAN};}
+  if(i===10) return{x:0,y:0,w:CO,h:CO,corner:true};
+  if(i>=11&&i<=14){var c=i-11;return{x:CO+c*SPAN,y:0,w:SPAN,h:THICK};}
+  if(i===15) return{x:BS-CO,y:0,w:CO,h:CO,corner:true};
+  if(i>=16&&i<=19){var r2=i-16;return{x:BS-THICK,y:CO+r2*SPAN,w:THICK,h:SPAN};}
 }
 
-/* ═══════════════════════════════════════════
-   Build Board DOM
-   ═══════════════════════════════════════════ */
-var boardEl = document.getElementById('board');
-
+/* ═══ Build Board DOM ═══ */
+const boardEl = document.getElementById('board');
 CELLS.forEach(function(c, i) {
-  var p = cellPos(i);
-  var div = document.createElement('div');
+  var p = cellPos(i), div = document.createElement('div');
   div.className = 'cell' + (p.corner ? ' corner' : '');
   div.id = 'cell-' + i;
   div.style.cssText =
-    'left:' + p.x + 'px;top:' + p.y + 'px;width:' + p.w + 'px;height:' + p.h + 'px;' +
-    'background:linear-gradient(135deg,' + c.color + '44,' + c.color + '88);' +
-    'border-color:' + c.color + ';';
-  div.innerHTML = '<span class="emoji">' + c.emoji + '</span><span class="name">' + c.name + '</span>';
+    'left:'+p.x+'px;top:'+p.y+'px;width:'+p.w+'px;height:'+p.h+'px;'+
+    '--cell-glow:'+c.color+';'+
+    'background:linear-gradient(135deg,'+c.color+'15,'+c.color+'25);'+
+    'border-color:'+c.color+'40;'+
+    'animation-delay:'+(i*0.06)+'s;';
+  div.innerHTML = '<span class="emoji">'+c.emoji+'</span><span class="name">'+c.name+'</span>';
   boardEl.appendChild(div);
 });
 
-/* ═══════════════════════════════════════════
-   Game State
-   ═══════════════════════════════════════════ */
-var position = 0;
-var turn = 1;
-var skipTurn = false;
-var extraTurn = false;
-var rolling = false;
-var completed = false;
+/* ═══ Particles ═══ */
+(function(){
+  var ctr=document.querySelector('.center-area');
+  var cols=['#FF6B35','#00D4FF','#FFD700','#FF4081','#7C4DFF'];
+  for(var i=0;i<25;i++){
+    var p=document.createElement('div'); p.className='particle';
+    var sz=2+Math.random()*4;
+    p.style.cssText='left:'+(10+Math.random()*80)+'%;top:'+(20+Math.random()*60)+'%;width:'+sz+'px;height:'+sz+'px;'+
+      'background:'+cols[Math.floor(Math.random()*cols.length)]+';'+
+      'animation-delay:'+Math.random()*5+'s;animation-duration:'+(3+Math.random()*4)+'s;';
+    ctr.appendChild(p);
+  }
+})();
 
-var piece = document.getElementById('piece');
-var diceCube = document.getElementById('diceCube');
-var rollBtn = document.getElementById('rollBtn');
+/* ═══ Guide Typing ═══ */
+function typeGuide(text){
+  var el=document.getElementById('guideText'); el.innerHTML=''; var i=0;
+  function t(){ if(i<text.length){ el.innerHTML=text.substring(0,i+1)+'<span class="cursor"></span>'; i++; setTimeout(t,50); } }
+  t();
+}
+typeGuide('주사위를 굴려주세요!');
+
+/* ═══ Game State ═══ */
+var position=0, turn=1, skipTurn=false, extraTurn=false, rolling=false, completed=false;
+var piece=document.getElementById('piece');
+var diceCube=document.getElementById('diceCube');
+var rollBtn=document.getElementById('rollBtn');
 
 function movePieceTo(pos) {
-  var p = cellPos(pos);
-  piece.style.left = (p.x + p.w / 2 - 14) + 'px';
-  piece.style.top  = (p.y + p.h / 2 - 14) + 'px';
+  document.querySelectorAll('.cell.cell-active').forEach(function(c){c.classList.remove('cell-active');});
+  var ac=document.getElementById('cell-'+pos); if(ac) ac.classList.add('cell-active');
+  var p=cellPos(pos);
+  piece.style.left=(p.x+p.w/2-18)+'px';
+  piece.style.top=(p.y+p.h/2-18)+'px';
 }
-
 function updateStatus() {
-  document.getElementById('turnCounter').textContent = '🎯 턴: ' + turn;
-  document.getElementById('posLabel').textContent = '📍 ' + CELLS[position].name;
+  document.getElementById('turnCounter').textContent='🎯 턴: '+turn;
+  document.getElementById('posLabel').textContent='📍 '+CELLS[position].name;
 }
-
 function showMsg(text) {
-  var log = document.getElementById('msgLog');
-  log.textContent = text;
-  log.classList.add('show');
-  setTimeout(function() { log.classList.remove('show'); }, 2500);
+  var log=document.getElementById('msgLog'); log.textContent=text; log.classList.add('show');
+  setTimeout(function(){log.classList.remove('show');},2800);
 }
 
-/* ═══════════════════════════════════════════
-   Dice
-   ═══════════════════════════════════════════ */
-var FACE_ROT = {
-  1: { rx: 0,   ry: 0   },
-  2: { rx: 0,   ry: 180 },
-  3: { rx: 0,   ry: 90  },
-  4: { rx: 0,   ry: -90 },
-  5: { rx: -90, ry: 0   },
-  6: { rx: 90,  ry: 0   },
-};
+/* ═══ Dice ═══ */
+var FACE_ROT={1:{rx:0,ry:0},2:{rx:0,ry:180},3:{rx:0,ry:90},4:{rx:0,ry:-90},5:{rx:-90,ry:0},6:{rx:90,ry:0}};
 
 function rollDice() {
-  if (rolling || completed) return;
-
-  if (skipTurn) {
-    skipTurn = false;
-    turn++;
-    updateStatus();
-    showMsg('🏝️ 무인도에서 쉬는 중… 턴 스킵!');
-    return;
-  }
-
-  rolling = true;
-  rollBtn.disabled = true;
-  extraTurn = false;
-
-  var result = Math.floor(Math.random() * 6) + 1;
-  var rot = FACE_ROT[result];
-  var spinsX = 1080 + rot.rx;
-  var spinsY = 720  + rot.ry;
-
-  diceCube.style.setProperty('--rx', spinsX + 'deg');
-  diceCube.style.setProperty('--ry', spinsY + 'deg');
-  diceCube.classList.remove('rolling');
-  void diceCube.offsetWidth;
-  diceCube.classList.add('rolling');
-
-  document.getElementById('diceLabel').textContent = '🎲 ' + result;
-
-  setTimeout(function() {
-    diceCube.style.transform = 'rotateX(' + rot.rx + 'deg) rotateY(' + rot.ry + 'deg)';
+  if(rolling||completed) return;
+  SFX.init();
+  if(skipTurn){ skipTurn=false; turn++; updateStatus(); showMsg('🏝️ 무인도에서 쉬는 중… 턴 스킵!'); return; }
+  rolling=true; rollBtn.disabled=true; extraTurn=false;
+  SFX.roll();
+  var result=Math.floor(Math.random()*6)+1;
+  var rot=FACE_ROT[result], spinsX=1080+rot.rx, spinsY=720+rot.ry;
+  diceCube.style.setProperty('--rx',spinsX+'deg');
+  diceCube.style.setProperty('--ry',spinsY+'deg');
+  diceCube.classList.remove('rolling'); void diceCube.offsetWidth; diceCube.classList.add('rolling');
+  document.getElementById('diceLabel').textContent='🎲 '+result;
+  setTimeout(function(){
+    diceCube.style.transform='rotateX('+rot.rx+'deg) rotateY('+rot.ry+'deg)';
     diceCube.classList.remove('rolling');
     animateMove(result);
-  }, 1050);
+  },1050);
 }
 
-/* ═══════════════════════════════════════════
-   Movement
-   ═══════════════════════════════════════════ */
+/* ═══ Movement ═══ */
 function animateMove(steps) {
-  var moved = 0;
-  var passedStart = false;
-
-  function stepOne() {
-    if (moved >= steps) { onLand(); return; }
-    var prev = position;
-    position = (position + 1) % TOTAL;
-    moved++;
-    if (position === 0 && prev !== 0) passedStart = true;
-    movePieceTo(position);
-    setTimeout(stepOne, 180);
+  var moved=0, passedStart=false;
+  function stepOne(){
+    if(moved>=steps){onLand();return;}
+    var prev=position; position=(position+1)%TOTAL; moved++;
+    if(position===0&&prev!==0) passedStart=true;
+    SFX.step(); movePieceTo(position); setTimeout(stepOne,200);
   }
   stepOne();
-
-  function onLand() {
+  function onLand(){
+    piece.style.animation='pieceArrive .4s ease'; setTimeout(function(){piece.style.animation='';},400);
     updateStatus();
-    if (passedStart || (position === 0 && steps > 0)) {
-      setTimeout(showComplete, 400);
-      rolling = false;
-      return;
-    }
+    if(passedStart||(position===0&&steps>0)){ setTimeout(showComplete,400); rolling=false; return; }
     handleCellEvent(position);
   }
 }
 
-/* ═══════════════════════════════════════════
-   Cell Events
-   ═══════════════════════════════════════════ */
+/* ═══ Cell Events ═══ */
 function handleCellEvent(pos) {
-  switch (pos) {
-    /* 무인도 */
+  switch(pos) {
     case 4: case 14:
-      skipTurn = true;
-      showEventModal('🏝️', '무인도!', '1턴 동안 쉬어야 합니다.\n다음 턴은 자동 스킵됩니다!');
+      skipTurn=true;
+      showEventModal('🏝️','무인도!','1턴 동안 쉬어야 합니다.\n다음 턴은 자동 스킵됩니다!');
       break;
-
-    /* 뒤로 2칸 */
     case 8:
-      showEventModal('⬅️', '뒤로 2칸!', '앗! 2칸 뒤로 이동합니다.', function() {
-        position = (position - 2 + TOTAL) % TOTAL;
-        movePieceTo(position);
-        updateStatus();
-        finishTurn();
-      });
-      return;
-
-    /* 앞으로 3칸 */
+      showEventModal('⬅️','뒤로 2칸!','앗! 2칸 뒤로 이동합니다.',function(){
+        position=(position-2+TOTAL)%TOTAL; movePieceTo(position); updateStatus(); finishTurn();
+      }); return;
     case 16:
-      showEventModal('➡️', '앞으로 3칸!', '럭키! 3칸 앞으로 이동합니다.', function() {
-        var dest = position + 3;
-        if (dest >= TOTAL) {
-          position = dest % TOTAL;
-          movePieceTo(position);
-          updateStatus();
-          setTimeout(showComplete, 300);
-          return;
-        }
-        position = dest;
-        movePieceTo(position);
-        updateStatus();
-        handleCellEvent(position);
-      });
-      return;
-
-    /* 행운의 주사위 */
+      showEventModal('➡️','앞으로 3칸!','럭키! 3칸 앞으로 이동합니다.',function(){
+        var dest=position+3;
+        if(dest>=TOTAL){position=dest%TOTAL;movePieceTo(position);updateStatus();setTimeout(showComplete,300);return;}
+        position=dest;movePieceTo(position);updateStatus();handleCellEvent(position);
+      }); return;
     case 6:
-      extraTurn = true;
-      showEventModal('🎲', '행운의 주사위!', '한 번 더 굴릴 수 있습니다! 🎉');
+      extraTurn=true;
+      showEventModal('🎲','행운의 주사위!','한 번 더 굴릴 수 있습니다! 🎉');
       break;
-
-    /* 찬스 카드 */
     case 2: case 12:
-      var chances = [
-        { emoji: '🎫', title: '쿠폰 당첨!',   desc: '음료 할인 쿠폰을 받았습니다!', action: '' },
-        { emoji: '⏩', title: '2칸 전진!',     desc: '찬스! 2칸 앞으로 이동합니다.', action: 'fwd2' },
-        { emoji: '⏪', title: '1칸 후퇴!',     desc: '아쉽게도 1칸 뒤로 이동합니다.', action: 'back1' },
-        { emoji: '🌟', title: '행운의 별!',    desc: '다음에 한 번 더 굴릴 수 있어요!', action: 'extra' },
+      var chances=[
+        {emoji:'🎫',title:'쿠폰 당첨!',desc:'음료 할인 쿠폰을 받았습니다!',action:''},
+        {emoji:'⏩',title:'2칸 전진!',desc:'찬스! 2칸 앞으로 이동합니다.',action:'fwd2'},
+        {emoji:'⏪',title:'1칸 후퇴!',desc:'아쉽게도 1칸 뒤로 이동합니다.',action:'back1'},
+        {emoji:'🌟',title:'행운의 별!',desc:'다음에 한 번 더 굴릴 수 있어요!',action:'extra'},
       ];
-      var ch = chances[Math.floor(Math.random() * chances.length)];
-      showEventModal(ch.emoji, ch.title, ch.desc, function() {
-        if (ch.action === 'fwd2') {
-          var d = position + 2;
-          if (d >= TOTAL) { position = d % TOTAL; movePieceTo(position); updateStatus(); setTimeout(showComplete, 300); return; }
-          position = d; movePieceTo(position); updateStatus();
-        } else if (ch.action === 'back1') {
-          position = (position - 1 + TOTAL) % TOTAL; movePieceTo(position); updateStatus();
-        } else if (ch.action === 'extra') {
-          extraTurn = true;
-        }
+      var ch=chances[Math.floor(Math.random()*chances.length)];
+      showEventModal(ch.emoji,ch.title,ch.desc,function(){
+        if(ch.action==='fwd2'){var d=position+2;if(d>=TOTAL){position=d%TOTAL;movePieceTo(position);updateStatus();setTimeout(showComplete,300);return;}position=d;movePieceTo(position);updateStatus();}
+        else if(ch.action==='back1'){position=(position-1+TOTAL)%TOTAL;movePieceTo(position);updateStatus();}
+        else if(ch.action==='extra'){extraTurn=true;}
         finishTurn();
-      });
-      return;
-
-    /* 럭키박스 */
+      }); return;
     case 19:
-      showEventModal('🎁', '럭키박스!', '축하합니다! 특별 경품에 당첨되었습니다! 🎊\n스태프에게 화면을 보여주세요!');
-      break;
-
-    /* 일반 칸들 */
+      showEventModal('🎁','럭키박스!','축하합니다! 특별 경품에 당첨되었습니다! 🎊\n스태프에게 화면을 보여주세요!'); break;
     case 1:
-      showEventModal('☕', '커피숍 도착!', '향긋한 커피 한 잔의 여유~\n커피 쿠폰을 증정합니다!');
-      break;
+      showEventModal('☕','커피숍 도착!','향긋한 커피 한 잔의 여유~\n커피 쿠폰을 증정합니다!'); break;
     case 3: case 9: case 18:
-      showEventModal('📸', '포토존 도착!', '인생샷 찍고 SNS에 올려보세요!\n#팝업스토어');
-      break;
+      showEventModal('📸','포토존 도착!','인생샷 찍고 SNS에 올려보세요!\n#팝업스토어'); break;
     case 5: case 15:
-      showEventModal('🛍️', '팝업스토어!', '한정판 굿즈를 구경해보세요!\n10% 할인 쿠폰 증정!');
-      break;
+      showEventModal('🛍️','팝업스토어!','한정판 굿즈를 구경해보세요!\n10% 할인 쿠폰 증정!'); break;
     case 7:
-      showEventModal('🍔', '푸드트럭!', '맛있는 간식이 기다리고 있어요! 🍟');
-      break;
+      showEventModal('🍔','푸드트럭!','맛있는 간식이 기다리고 있어요! 🍟'); break;
     case 10:
-      showEventModal('🅿️', '무료 주차!', '편하게 쉬어가세요~\n이벤트 없이 안전!');
-      break;
+      showEventModal('🅿️','무료 주차!','편하게 쉬어가세요~\n이벤트 없이 안전!'); break;
     case 11:
-      showEventModal('🎵', 'DJ부스!', '신나는 음악과 함께!\n다음 이벤트를 기대하세요 🎶');
-      break;
+      showEventModal('🎵','DJ부스!','신나는 음악과 함께!\n다음 이벤트를 기대하세요 🎶'); break;
     case 13:
-      showEventModal('💅', '네일아트!', '무료 네일아트 체험권 당첨! 💖');
-      break;
+      showEventModal('💅','네일아트!','무료 네일아트 체험권 당첨! 💖'); break;
     case 17:
-      showEventModal('🧺', '플리마켓!', '보물 같은 아이템을 발견했어요! 🌈');
-      break;
-
-    default:
-      finishTurn();
-      return;
+      showEventModal('🧺','플리마켓!','보물 같은 아이템을 발견했어요! 🌈'); break;
+    default: finishTurn(); return;
   }
 }
 
-/* ═══════════════════════════════════════════
-   Modal
-   ═══════════════════════════════════════════ */
+/* ═══ Modal ═══ */
 var modalCallback = null;
-
-function showEventModal(emoji, title, desc, cb) {
-  document.getElementById('modalEmoji').textContent = emoji;
-  document.getElementById('modalTitle').textContent = title;
-  document.getElementById('modalDesc').innerText = desc;
+function showEventModal(emoji,title,desc,cb) {
+  SFX.event();
+  document.getElementById('modalEmoji').textContent=emoji;
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalDesc').innerText=desc;
   document.getElementById('eventModal').classList.add('active');
-  modalCallback = cb || null;
+  modalCallback=cb||null;
 }
-
 function closeModal() {
   document.getElementById('eventModal').classList.remove('active');
-  if (modalCallback) { var cb = modalCallback; modalCallback = null; cb(); }
-  else { finishTurn(); }
+  if(modalCallback){var cb=modalCallback;modalCallback=null;cb();}
+  else{finishTurn();}
 }
+document.getElementById('eventModal').addEventListener('click',function(e){if(e.target===e.currentTarget)closeModal();});
 
 function finishTurn() {
-  if (extraTurn) {
-    extraTurn = false;
-    showMsg('🎲 한 번 더! 주사위를 굴리세요!');
-  } else {
-    turn++;
-  }
-  updateStatus();
-  rolling = false;
-  rollBtn.disabled = false;
+  if(extraTurn){extraTurn=false;showMsg('🎲 한 번 더! 주사위를 굴리세요!');typeGuide('보너스 턴! 다시 굴려주세요!');}
+  else{turn++;typeGuide('주사위를 굴려주세요!');}
+  updateStatus(); rolling=false; rollBtn.disabled=false;
 }
 
-/* ═══════════════════════════════════════════
-   Complete
-   ═══════════════════════════════════════════ */
-function showComplete() {
-  completed = true;
+/* ═══ Complete ═══ */
+function showComplete(){
+  completed=true; SFX.fanfare();
   document.getElementById('completeModal').classList.add('active');
   launchConfetti();
 }
-
-function launchConfetti() {
-  var ctn = document.getElementById('confetti');
-  var colors = ['#ff6b6b','#ffa502','#2ed573','#1e90ff','#a29bfe','#fd79a8','#fdcb6e','#00cec9'];
-  for (var i = 0; i < 80; i++) {
-    var c = document.createElement('div');
-    c.className = 'confetti';
-    c.style.left = Math.random() * 100 + 'vw';
-    c.style.background = colors[Math.floor(Math.random() * colors.length)];
-    c.style.width  = (6 + Math.random() * 8) + 'px';
-    c.style.height = (6 + Math.random() * 8) + 'px';
-    c.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
-    c.style.animationDuration = (2 + Math.random() * 3) + 's';
-    c.style.animationDelay = Math.random() * 2 + 's';
+function launchConfetti(){
+  var ctn=document.getElementById('confetti');
+  var colors=['#FF6B35','#00D4FF','#FFD700','#FF4081','#7C4DFF','#00E676'];
+  for(var i=0;i<100;i++){
+    var c=document.createElement('div'); c.className='confetti';
+    c.style.left=Math.random()*100+'vw';
+    c.style.background=colors[Math.floor(Math.random()*colors.length)];
+    var sz=6+Math.random()*10;
+    c.style.width=sz+'px'; c.style.height=(sz*(0.4+Math.random()*0.6))+'px';
+    c.style.borderRadius=Math.random()>.5?'50%':'2px';
+    c.style.animationDuration=(2+Math.random()*3)+'s';
+    c.style.animationDelay=Math.random()*2+'s';
+    c.style.opacity=0.8+Math.random()*0.2;
     ctn.appendChild(c);
   }
-  setTimeout(function() { ctn.innerHTML = ''; }, 6000);
+  setTimeout(function(){ctn.innerHTML='';},6000);
 }
 
-/* ═══════════════════════════════════════════
-   Reset
-   ═══════════════════════════════════════════ */
-function resetGame() {
-  position = 0; turn = 1;
-  skipTurn = false; extraTurn = false;
-  rolling = false; completed = false;
-  movePieceTo(0); updateStatus();
-  document.getElementById('diceLabel').textContent = '🎲 -';
+/* ═══ Reset ═══ */
+function resetGame(){
+  position=0;turn=1;skipTurn=false;extraTurn=false;rolling=false;completed=false;
+  movePieceTo(0);updateStatus();
+  document.getElementById('diceLabel').textContent='🎲 -';
   document.getElementById('completeModal').classList.remove('active');
   document.getElementById('eventModal').classList.remove('active');
-  document.getElementById('confetti').innerHTML = '';
-  rollBtn.disabled = false;
-  diceCube.style.transform = 'rotateX(-25deg) rotateY(25deg)';
+  document.getElementById('confetti').innerHTML='';
+  rollBtn.disabled=false;
+  diceCube.style.transform='rotateX(-25deg) rotateY(25deg)';
+  typeGuide('주사위를 굴려주세요!');
 }
 
-/* ═══════════════════════════════════════════
-   Init
-   ═══════════════════════════════════════════ */
-movePieceTo(0);
-updateStatus();
+/* ═══ Keyboard ═══ */
+document.addEventListener('keydown',function(e){
+  if(e.code==='Space'||e.code==='Enter'){e.preventDefault();rollDice();}
+});
+
+/* ═══ Init ═══ */
+movePieceTo(0); updateStatus();
 </script>
 </body>
 </html>
