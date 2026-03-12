@@ -339,6 +339,11 @@ input, select, textarea { cursor: none; }
   opacity: 1;
   transform: translateY(0);
 }
+/* Fallback: guarantee visibility even if IntersectionObserver never fires */
+.reveal.reveal-fallback {
+  opacity: 1;
+  transform: translateY(0);
+}
 
 /* =============================================
    REGISTRATION FORM
@@ -1247,6 +1252,7 @@ input, select, textarea { cursor: none; }
   .cursor { display: none; }
 }
 </style>
+<noscript><style>.reveal { opacity: 1 !important; transform: none !important; }</style></noscript>
 </head>
 <body>
 
@@ -1787,24 +1793,38 @@ input, select, textarea { cursor: none; }
   /* -----------------------------------------
      INTERSECTION OBSERVER — SCROLL REVEAL
      ----------------------------------------- */
-  var revealObserver = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting) {
-        var delay = parseInt(entry.target.getAttribute('data-delay') || '0', 10);
-        setTimeout(function() {
-          entry.target.classList.add('visible');
-        }, delay * 120);
-        revealObserver.unobserve(entry.target);
-      }
+  function revealAllFallback() {
+    document.querySelectorAll('.reveal:not(.visible)').forEach(function(el) {
+      el.classList.add('visible', 'reveal-fallback');
     });
-  }, {
-    threshold: 0.12,
-    rootMargin: '0px 0px -40px 0px'
-  });
+  }
 
-  document.querySelectorAll('.reveal').forEach(function(el) {
-    revealObserver.observe(el);
-  });
+  try {
+    var revealObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var delay = parseInt(entry.target.getAttribute('data-delay') || '0', 10);
+          setTimeout(function() {
+            entry.target.classList.add('visible');
+          }, delay * 120);
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.12,
+      rootMargin: '0px 0px -40px 0px'
+    });
+
+    document.querySelectorAll('.reveal').forEach(function(el) {
+      revealObserver.observe(el);
+    });
+  } catch (e) {
+    // IntersectionObserver failed — show everything immediately
+    revealAllFallback();
+  }
+
+  // Fallback: if Observer hasn't revealed elements within 5s, force visible
+  setTimeout(revealAllFallback, 5000);
 
   /* -----------------------------------------
      FORM — FLOATING LABELS & VALIDATION
