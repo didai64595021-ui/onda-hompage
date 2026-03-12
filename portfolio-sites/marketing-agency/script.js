@@ -1,5 +1,5 @@
 /* ============================================================
-   NOVA MARKETING AGENCY — Global JavaScript
+   ONDA MARKETING AGENCY — Global JavaScript
    Navigation, Mobile Menu, Scroll Reveal, Counter, Carousel
    ============================================================ */
 
