@@ -2074,19 +2074,13 @@ img {
   let mouseX = 0, mouseY = 0;
   let ringX = 0, ringY = 0;
 
+  ring.style.transition = 'transform 0.15s ease-out';
   document.addEventListener('mousemove', function(e) {
     mouseX = e.clientX;
     mouseY = e.clientY;
     dot.style.transform = 'translate(' + (mouseX - 4) + 'px, ' + (mouseY - 4) + 'px)';
+    ring.style.transform = 'translate(' + (mouseX - 20) + 'px, ' + (mouseY - 20) + 'px)';
   });
-
-  function animateRing() {
-    ringX += (mouseX - ringX) * 0.15;
-    ringY += (mouseY - ringY) * 0.15;
-    ring.style.transform = 'translate(' + (ringX - 20) + 'px, ' + (ringY - 20) + 'px)';
-    requestAnimationFrame(animateRing);
-  }
-  animateRing();
 
   // Hover state for interactive elements
   const hoverTargets = document.querySelectorAll('a, button, .project-item, .cta-button, .magnetic-btn');
@@ -2171,7 +2165,7 @@ function startCounters() {
    ============================================ */
 (function() {
   const container = document.getElementById('particles');
-  const particleCount = 30;
+  const particleCount = 8;
 
   for (let i = 0; i < particleCount; i++) {
     const particle = document.createElement('div');
@@ -2248,25 +2242,23 @@ function startCounters() {
   const heroGradient1 = document.querySelector('.hero-gradient-1');
   const heroGradient2 = document.querySelector('.hero-gradient-2');
 
+  let ticking = false;
   window.addEventListener('scroll', function() {
-    const scrollY = window.scrollY;
-    const rate1 = scrollY * 0.3;
-    const rate2 = scrollY * 0.15;
-    const rate3 = scrollY * 0.1;
-
-    if (heroTitle) {
-      heroTitle.style.transform = 'translateY(' + rate2 + 'px)';
+    if (!ticking) {
+      requestAnimationFrame(function() {
+        const scrollY = window.scrollY;
+        const rate1 = scrollY * 0.3;
+        const rate2 = scrollY * 0.15;
+        const rate3 = scrollY * 0.1;
+        if (heroTitle) heroTitle.style.transform = 'translateY(' + rate2 + 'px)';
+        if (heroSubtitle) heroSubtitle.style.transform = 'translateY(' + rate3 + 'px)';
+        if (heroGradient1) heroGradient1.style.transform = 'translateY(' + (-rate1 * 0.5) + 'px)';
+        if (heroGradient2) heroGradient2.style.transform = 'translateY(' + (rate1 * 0.3) + 'px)';
+        ticking = false;
+      });
+      ticking = true;
     }
-    if (heroSubtitle) {
-      heroSubtitle.style.transform = 'translateY(' + rate3 + 'px)';
-    }
-    if (heroGradient1) {
-      heroGradient1.style.transform = 'translateY(' + (-rate1 * 0.5) + 'px)';
-    }
-    if (heroGradient2) {
-      heroGradient2.style.transform = 'translateY(' + (rate1 * 0.3) + 'px)';
-    }
-  });
+  }, { passive: true });
 })();
 
 /* ============================================
