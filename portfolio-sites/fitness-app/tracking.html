@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>VITALITY — 운동 중</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--dark:#0D0D0D;--dark-surface:#1A1A1A;--dark-card:#1E1E1E;--dark-border:#2A2A2A;--lime:#CCFF00;--lime-dim:rgba(204,255,0,0.15);--lime-glow:rgba(204,255,0,0.3);--white:#F5F5F5;--gray:#8A8A8A;--gray-light:#B0B0B0;--red:#FF4757;--blue:#3B82F6;--orange:#FF6B35;--safe-top:44px;--safe-bottom:34px;--nav-height:72px;--radius:16px;--font-body:'Pretendard',-apple-system,sans-serif;--font-display:'Sora',sans-serif;--transition:cubic-bezier(0.4,0,0.2,1)}
+html{font-size:16px}
+body{font-family:var(--font-body);background:var(--dark);color:var(--white);min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
+a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
+::-webkit-scrollbar{width:0;height:0}
+
+@keyframes fadeInUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes heartbeat{0%,100%{transform:scale(1)}15%{transform:scale(1.15)}30%{transform:scale(1)}45%{transform:scale(1.1)}}
+@keyframes ripple{0%{transform:scale(1);opacity:0.4}100%{transform:scale(2.5);opacity:0}}
+@keyframes countIn{from{opacity:0;transform:scale(0.5)}to{opacity:1;transform:scale(1)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
+
+/* TRACKING HEADER */
+.track-header{padding:var(--safe-top) 20px 0;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:10}
+.track-header__back{width:40px;height:40px;border-radius:50%;background:var(--dark-card);border:1px solid var(--dark-border);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+.track-header__back:active{transform:scale(0.9)}
+.track-header__back svg{width:20px;height:20px;stroke:var(--white);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.track-header__title{font-size:16px;font-weight:600}
+.track-header__type{font-size:12px;color:var(--lime);font-family:var(--font-display);font-weight:600;text-transform:uppercase;letter-spacing:1px;background:var(--lime-dim);padding:4px 12px;border-radius:20px}
+
+/* MAIN TRACKING AREA */
+.track-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;position:relative}
+
+/* BIG TIMER */
+.timer-display{text-align:center;margin-bottom:32px;animation:fadeInUp 0.6s var(--transition)}
+.timer-display__time{font-family:var(--font-display);font-size:72px;font-weight:800;letter-spacing:-2px;line-height:1;color:var(--white);transition:color 0.3s}
+.timer-display__time.paused{color:var(--gray)}
+.timer-display__label{font-size:13px;color:var(--gray);margin-top:8px;text-transform:uppercase;letter-spacing:2px;font-family:var(--font-display)}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;width:100%;max-width:360px;margin-bottom:40px;animation:fadeInUp 0.6s 0.1s var(--transition) both}
+.stat-box{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:var(--radius);padding:18px 16px;text-align:center;position:relative;overflow:hidden}
+.stat-box__icon{font-size:20px;margin-bottom:6px}
+.stat-box__value{font-family:var(--font-display);font-size:28px;font-weight:700;line-height:1;margin-bottom:4px;transition:all 0.3s}
+.stat-box__value span{font-size:14px;font-weight:400;color:var(--gray-light)}
+.stat-box__label{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:1px}
+.stat-box--cal .stat-box__value{color:var(--lime)}
+.stat-box--hr .stat-box__value{color:var(--red)}
+.stat-box--dist .stat-box__value{color:var(--blue)}
+.stat-box--pace .stat-box__value{color:var(--orange)}
+
+/* HEART ANIMATION */
+.heart-icon{display:inline-block}
+.heart-icon.beating{animation:heartbeat 0.8s ease-in-out infinite}
+
+/* PROGRESS RING */
+.progress-ring-container{position:relative;width:200px;height:200px;margin-bottom:32px;animation:fadeInUp 0.6s var(--transition);display:none}
+.progress-ring-container.visible{display:block}
+.progress-ring{transform:rotate(-90deg)}
+.progress-ring__bg{fill:none;stroke:var(--dark-border);stroke-width:8}
+.progress-ring__fill{fill:none;stroke:var(--lime);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1s var(--transition)}
+.progress-ring__center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.progress-ring__percent{font-family:var(--font-display);font-size:36px;font-weight:800;color:var(--lime)}
+.progress-ring__sub{font-size:12px;color:var(--gray)}
+
+/* CONTROL BUTTONS */
+.controls{display:flex;gap:16px;align-items:center;justify-content:center;animation:fadeInUp 0.6s 0.2s var(--transition) both;padding-bottom:calc(var(--safe-bottom) + 20px)}
+
+.ctrl-btn{border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all 0.2s var(--transition);-webkit-tap-highlight-color:transparent;position:relative;overflow:hidden}
+.ctrl-btn:active{transform:scale(0.9)}
+
+.ctrl-btn--main{width:80px;height:80px;background:var(--lime);box-shadow:0 0 30px var(--lime-glow)}
+.ctrl-btn--main svg{width:32px;height:32px;fill:var(--dark)}
+.ctrl-btn--main.running{background:var(--orange)}
+.ctrl-btn--main.running svg{fill:var(--white)}
+
+.ctrl-btn--secondary{width:56px;height:56px;background:var(--dark-card);border:1px solid var(--dark-border)}
+.ctrl-btn--secondary svg{width:22px;height:22px;stroke:var(--white);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.ctrl-btn--stop{width:56px;height:56px;background:rgba(255,71,87,0.15);border:1px solid rgba(255,71,87,0.3)}
+.ctrl-btn--stop svg{width:22px;height:22px;fill:var(--red)}
+
+.ctrl-ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,0.2);animation:ripple 0.6s ease-out forwards;pointer-events:none}
+
+/* INTENSITY BAR */
+.intensity-bar{width:100%;max-width:360px;margin-bottom:32px;animation:fadeInUp 0.6s 0.15s var(--transition) both}
+.intensity-bar__header{display:flex;justify-content:space-between;margin-bottom:8px}
+.intensity-bar__label{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;font-family:var(--font-display)}
+.intensity-bar__zone{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px}
+.intensity-bar__zone.zone-1{color:#3B82F6;background:rgba(59,130,246,0.12)}
+.intensity-bar__zone.zone-2{color:#22C55E;background:rgba(34,197,94,0.12)}
+.intensity-bar__zone.zone-3{color:var(--orange);background:rgba(255,107,53,0.12)}
+.intensity-bar__zone.zone-4{color:var(--red);background:rgba(255,71,87,0.12)}
+.intensity-bar__track{height:6px;background:var(--dark-border);border-radius:3px;overflow:hidden;display:flex}
+.intensity-bar__segment{height:100%;transition:width 0.5s}
+.intensity-bar__segment--1{background:#3B82F6}
+.intensity-bar__segment--2{background:#22C55E}
+.intensity-bar__segment--3{background:var(--orange)}
+.intensity-bar__segment--4{background:var(--red)}
+
+/* COUNTDOWN OVERLAY */
+.countdown-overlay{position:fixed;inset:0;background:rgba(13,13,13,0.95);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity 0.3s}
+.countdown-overlay.active{opacity:1;pointer-events:all}
+.countdown-number{font-family:var(--font-display);font-size:120px;font-weight:800;color:var(--lime);animation:countIn 0.5s var(--transition)}
+.countdown-go{font-family:var(--font-display);font-size:64px;font-weight:800;color:var(--lime);text-transform:uppercase;letter-spacing:8px}
+
+/* RESULT MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s}
+.modal-overlay.active{opacity:1;pointer-events:all}
+.modal{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:24px 24px 0 0;padding:32px 24px calc(var(--safe-bottom) + 24px);width:100%;max-width:480px;transform:translateY(100%);transition:transform 0.4s var(--transition)}
+.modal-overlay.active .modal{transform:translateY(0)}
+.modal__handle{width:40px;height:4px;background:var(--dark-border);border-radius:2px;margin:0 auto 24px}
+.modal__emoji{font-size:56px;text-align:center;margin-bottom:16px}
+.modal__title{font-size:24px;font-weight:700;text-align:center;margin-bottom:4px}
+.modal__subtitle{font-size:14px;color:var(--gray-light);text-align:center;margin-bottom:28px}
+.modal-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:28px}
+.modal-stat{background:var(--dark-surface);border-radius:var(--radius);padding:16px;text-align:center}
+.modal-stat__value{font-family:var(--font-display);font-size:24px;font-weight:700;margin-bottom:4px}
+.modal-stat__value--lime{color:var(--lime)}
+.modal-stat__value--blue{color:var(--blue)}
+.modal-stat__value--red{color:var(--red)}
+.modal-stat__value--orange{color:var(--orange)}
+.modal-stat__label{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:1px}
+.modal__actions{display:flex;flex-direction:column;gap:10px}
+.modal__btn{padding:16px;border-radius:var(--radius);font-size:16px;font-weight:600;text-align:center;transition:all 0.2s;-webkit-tap-highlight-color:transparent}
+.modal__btn:active{transform:scale(0.97)}
+.modal__btn--primary{background:var(--lime);color:var(--dark)}
+.modal__btn--secondary{background:var(--dark-surface);color:var(--white);border:1px solid var(--dark-border)}
+
+/* LIVE INDICATOR */
+.live-indicator{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--red);font-weight:600;margin-bottom:8px;justify-content:center}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 1.5s infinite}
+
+/* RESPONSIVE */
+@media(min-width:768px){.timer-display__time{font-size:96px}.stats-grid{max-width:420px}.controls{gap:24px}}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="track-header">
+  <button class="track-header__back" onclick="history.back()">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <span class="track-header__title" id="workoutName">러닝</span>
+  <span class="track-header__type" id="workoutType">RUNNING</span>
+</div>
+
+<!-- Countdown -->
+<div class="countdown-overlay" id="countdownOverlay">
+  <div class="countdown-number" id="countdownNum">3</div>
+</div>
+
+<!-- Main -->
+<div class="track-main">
+  
+  <div class="live-indicator" id="liveIndicator" style="display:none">
+    <span class="live-dot"></span>
+    운동 중
+  </div>
+
+  <!-- Timer -->
+  <div class="timer-display">
+    <div class="timer-display__time" id="timerDisplay">00:00:00</div>
+    <div class="timer-display__label" id="timerLabel">준비</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-box stat-box--cal">
+      <div class="stat-box__icon">🔥</div>
+      <div class="stat-box__value" id="calDisplay">0 <span>kcal</span></div>
+      <div class="stat-box__label">칼로리</div>
+    </div>
+    <div class="stat-box stat-box--hr">
+      <div class="stat-box__icon"><span class="heart-icon" id="heartIcon">❤️</span></div>
+      <div class="stat-box__value" id="hrDisplay">-- <span>bpm</span></div>
+      <div class="stat-box__label">심박수</div>
+    </div>
+    <div class="stat-box stat-box--dist" id="distBox">
+      <div class="stat-box__icon">📍</div>
+      <div class="stat-box__value" id="distDisplay">0.00 <span>km</span></div>
+      <div class="stat-box__label">거리</div>
+    </div>
+    <div class="stat-box stat-box--pace" id="paceBox">
+      <div class="stat-box__icon">⚡</div>
+      <div class="stat-box__value" id="paceDisplay">0:00 <span>/km</span></div>
+      <div class="stat-box__label">페이스</div>
+    </div>
+  </div>
+
+  <!-- Intensity Bar -->
+  <div class="intensity-bar">
+    <div class="intensity-bar__header">
+      <span class="intensity-bar__label">Heart Rate Zone</span>
+      <span class="intensity-bar__zone zone-1" id="zoneLabel">Zone 1</span>
+    </div>
+    <div class="intensity-bar__track">
+      <div class="intensity-bar__segment intensity-bar__segment--1" id="zone1" style="width:100%"></div>
+      <div class="intensity-bar__segment intensity-bar__segment--2" id="zone2" style="width:0"></div>
+      <div class="intensity-bar__segment intensity-bar__segment--3" id="zone3" style="width:0"></div>
+      <div class="intensity-bar__segment intensity-bar__segment--4" id="zone4" style="width:0"></div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="ctrl-btn ctrl-btn--stop" id="stopBtn" onclick="stopWorkout()" style="display:none">
+      <svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+    </button>
+    <button class="ctrl-btn ctrl-btn--main" id="mainBtn" onclick="toggleWorkout()">
+      <svg viewBox="0 0 24 24" id="mainIcon"><polygon points="5,3 19,12 5,21"/></svg>
+    </button>
+    <button class="ctrl-btn ctrl-btn--secondary" id="lapBtn" onclick="markLap()" style="display:none">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Result Modal -->
+<div class="modal-overlay" id="resultModal">
+  <div class="modal">
+    <div class="modal__handle"></div>
+    <div class="modal__emoji">🏆</div>
+    <div class="modal__title">운동 완료!</div>
+    <div class="modal__subtitle" id="resultSubtitle">수고하셨습니다</div>
+    <div class="modal-stats">
+      <div class="modal-stat">
+        <div class="modal-stat__value modal-stat__value--lime" id="resultTime">00:00:00</div>
+        <div class="modal-stat__label">시간</div>
+      </div>
+      <div class="modal-stat">
+        <div class="modal-stat__value modal-stat__value--blue" id="resultCal">0 kcal</div>
+        <div class="modal-stat__label">칼로리</div>
+      </div>
+      <div class="modal-stat">
+        <div class="modal-stat__value modal-stat__value--red" id="resultHr">0 bpm</div>
+        <div class="modal-stat__label">평균 심박</div>
+      </div>
+      <div class="modal-stat">
+        <div class="modal-stat__value modal-stat__value--orange" id="resultDist">0.00 km</div>
+        <div class="modal-stat__label">거리</div>
+      </div>
+    </div>
+    <div class="modal__actions">
+      <button class="modal__btn modal__btn--primary" onclick="saveAndGoHome()">저장하고 홈으로</button>
+      <button class="modal__btn modal__btn--secondary" onclick="location.href='history.html'">기록 보기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================
+   VITALITY — Workout Tracking (Full Interactivity)
+   ============================================ */
+
+// Parse URL params
+const params = new URLSearchParams(location.search);
+const workoutType = params.get('type') || 'running';
+const workoutName = params.get('name') || '러닝';
+
+document.getElementById('workoutName').textContent = decodeURIComponent(workoutName);
+const typeLabels = {running:'RUNNING',strength:'STRENGTH',hiit:'HIIT',yoga:'YOGA'};
+document.getElementById('workoutType').textContent = typeLabels[workoutType] || 'WORKOUT';
+
+// Hide distance/pace for non-running
+if (workoutType !== 'running') {
+  document.getElementById('distBox').querySelector('.stat-box__icon').textContent = '🔁';
+  document.getElementById('distBox').querySelector('.stat-box__label').textContent = '세트';
+  document.getElementById('paceBox').querySelector('.stat-box__icon').textContent = '💪';
+  document.getElementById('paceBox').querySelector('.stat-box__label').textContent = '강도';
+}
+
+// State
+let isRunning = false;
+let isPaused = false;
+let seconds = 0;
+let timerInterval = null;
+let simInterval = null;
+let calories = 0;
+let heartRate = 72;
+let distance = 0;
+let hrSum = 0;
+let hrCount = 0;
+let laps = [];
+let zoneTime = [0,0,0,0];
+
+// Cal burn rate per second by type
+const calRates = {running:0.18, strength:0.12, hiit:0.22, yoga:0.06};
+const distRate = 0.0028; // km per second for running
+
+function formatTime(s) {
+  const h = Math.floor(s/3600);
+  const m = Math.floor((s%3600)/60);
+  const sec = s%60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+function startCountdown(cb) {
+  const overlay = document.getElementById('countdownOverlay');
+  const numEl = document.getElementById('countdownNum');
+  overlay.classList.add('active');
+  let count = 3;
+  numEl.textContent = count;
+  numEl.style.animation = 'none'; numEl.offsetHeight; numEl.style.animation = 'countIn 0.5s var(--transition)';
+  
+  const interval = setInterval(() => {
+    count--;
+    if (count > 0) {
+      numEl.textContent = count;
+      numEl.style.animation = 'none'; numEl.offsetHeight; numEl.style.animation = 'countIn 0.5s var(--transition)';
+    } else if (count === 0) {
+      numEl.innerHTML = '<span class="countdown-go">GO!</span>';
+      numEl.style.animation = 'none'; numEl.offsetHeight; numEl.style.animation = 'countIn 0.5s var(--transition)';
+    } else {
+      clearInterval(interval);
+      overlay.classList.remove('active');
+      cb();
+    }
+  }, 800);
+}
+
+function toggleWorkout() {
+  if (!isRunning && !isPaused) {
+    // First start
+    startCountdown(() => {
+      startWorkout();
+    });
+  } else if (isRunning) {
+    pauseWorkout();
+  } else {
+    resumeWorkout();
+  }
+}
+
+function startWorkout() {
+  isRunning = true;
+  isPaused = false;
+  document.getElementById('timerLabel').textContent = '운동 중';
+  document.getElementById('liveIndicator').style.display = 'flex';
+  document.getElementById('timerDisplay').classList.remove('paused');
+  document.getElementById('heartIcon').classList.add('beating');
+  document.getElementById('stopBtn').style.display = 'flex';
+  document.getElementById('lapBtn').style.display = 'flex';
+  
+  // Update main button to pause
+  const mainBtn = document.getElementById('mainBtn');
+  mainBtn.classList.add('running');
+  document.getElementById('mainIcon').innerHTML = '<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>';
+  
+  timerInterval = setInterval(() => {
+    seconds++;
+    document.getElementById('timerDisplay').textContent = formatTime(seconds);
+  }, 1000);
+  
+  simInterval = setInterval(simulateData, 1000);
+}
+
+function pauseWorkout() {
+  isRunning = false;
+  isPaused = true;
+  clearInterval(timerInterval);
+  clearInterval(simInterval);
+  document.getElementById('timerLabel').textContent = '일시정지';
+  document.getElementById('timerDisplay').classList.add('paused');
+  document.getElementById('heartIcon').classList.remove('beating');
+  document.getElementById('liveIndicator').style.display = 'none';
+  
+  const mainBtn = document.getElementById('mainBtn');
+  mainBtn.classList.remove('running');
+  document.getElementById('mainIcon').innerHTML = '<polygon points="5,3 19,12 5,21"/>';
+}
+
+function resumeWorkout() {
+  isRunning = true;
+  isPaused = false;
+  document.getElementById('timerLabel').textContent = '운동 중';
+  document.getElementById('timerDisplay').classList.remove('paused');
+  document.getElementById('heartIcon').classList.add('beating');
+  document.getElementById('liveIndicator').style.display = 'flex';
+  
+  const mainBtn = document.getElementById('mainBtn');
+  mainBtn.classList.add('running');
+  document.getElementById('mainIcon').innerHTML = '<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>';
+  
+  timerInterval = setInterval(() => {
+    seconds++;
+    document.getElementById('timerDisplay').textContent = formatTime(seconds);
+  }, 1000);
+  
+  simInterval = setInterval(simulateData, 1000);
+}
+
+function simulateData() {
+  // Calories
+  const rate = calRates[workoutType] || 0.15;
+  calories += rate * (0.8 + Math.random() * 0.4);
+  document.getElementById('calDisplay').innerHTML = Math.round(calories) + ' <span>kcal</span>';
+  
+  // Heart rate (120-165 range with noise)
+  const baseHr = {running:145, strength:135, hiit:155, yoga:100}[workoutType] || 140;
+  const range = {running:20, strength:15, hiit:25, yoga:15}[workoutType] || 20;
+  heartRate += (Math.random() - 0.5) * 8;
+  heartRate = Math.max(baseHr - range, Math.min(baseHr + range, heartRate));
+  const hr = Math.round(heartRate);
+  document.getElementById('hrDisplay').innerHTML = hr + ' <span>bpm</span>';
+  hrSum += hr;
+  hrCount++;
+  
+  // Zone tracking
+  let zone = 0;
+  if (hr < 120) zone = 0;
+  else if (hr < 140) zone = 1;
+  else if (hr < 155) zone = 2;
+  else zone = 3;
+  zoneTime[zone]++;
+  
+  const totalZ = zoneTime.reduce((a,b) => a+b, 0);
+  document.getElementById('zone1').style.width = (zoneTime[0]/totalZ*100)+'%';
+  document.getElementById('zone2').style.width = (zoneTime[1]/totalZ*100)+'%';
+  document.getElementById('zone3').style.width = (zoneTime[2]/totalZ*100)+'%';
+  document.getElementById('zone4').style.width = (zoneTime[3]/totalZ*100)+'%';
+  
+  const zoneLabel = document.getElementById('zoneLabel');
+  const zoneNames = ['Zone 1','Zone 2','Zone 3','Zone 4'];
+  const zoneClasses = ['zone-1','zone-2','zone-3','zone-4'];
+  zoneLabel.textContent = zoneNames[zone];
+  zoneLabel.className = 'intensity-bar__zone ' + zoneClasses[zone];
+  
+  // Distance (running)
+  if (workoutType === 'running') {
+    distance += distRate * (0.8 + Math.random() * 0.4);
+    document.getElementById('distDisplay').innerHTML = distance.toFixed(2) + ' <span>km</span>';
+    // Pace
+    if (distance > 0.01) {
+      const paceMin = (seconds / 60) / distance;
+      const pm = Math.floor(paceMin);
+      const ps = Math.round((paceMin - pm) * 60);
+      document.getElementById('paceDisplay').innerHTML = pm + ':' + String(ps).padStart(2,'0') + ' <span>/km</span>';
+    }
+  } else {
+    // Sets/reps simulation
+    const sets = Math.floor(seconds / 45) + 1;
+    document.getElementById('distDisplay').innerHTML = sets + ' <span>세트</span>';
+    const intensityNames = ['낮음','보통','높음','최고'];
+    document.getElementById('paceDisplay').innerHTML = intensityNames[zone] + ' <span></span>';
+  }
+}
+
+function markLap() {
+  laps.push({time: seconds, cal: Math.round(calories)});
+  // Visual feedback
+  const btn = document.getElementById('lapBtn');
+  btn.style.background = 'var(--lime-dim)';
+  btn.style.borderColor = 'var(--lime)';
+  setTimeout(() => {
+    btn.style.background = 'var(--dark-card)';
+    btn.style.borderColor = 'var(--dark-border)';
+  }, 300);
+}
+
+function stopWorkout() {
+  if (seconds < 3) return; // prevent accidental stop
+  clearInterval(timerInterval);
+  clearInterval(simInterval);
+  isRunning = false;
+  isPaused = false;
+  
+  // Show result modal
+  const avgHr = hrCount > 0 ? Math.round(hrSum / hrCount) : 0;
+  document.getElementById('resultTime').textContent = formatTime(seconds);
+  document.getElementById('resultCal').textContent = Math.round(calories) + ' kcal';
+  document.getElementById('resultHr').textContent = avgHr + ' bpm';
+  document.getElementById('resultDist').textContent = workoutType === 'running' ? distance.toFixed(2) + ' km' : Math.floor(seconds/45+1) + ' 세트';
+  
+  // Subtitle
+  if (calories > 300) {
+    document.getElementById('resultSubtitle').textContent = '🔥 대단해요! 목표를 초과 달성했습니다!';
+  } else if (calories > 150) {
+    document.getElementById('resultSubtitle').textContent = '💪 좋은 운동이었어요!';
+  } else {
+    document.getElementById('resultSubtitle').textContent = '👏 꾸준함이 중요합니다!';
+  }
+  
+  document.getElementById('resultModal').classList.add('active');
+}
+
+function saveAndGoHome() {
+  // Save to localStorage
+  const record = {
+    type: workoutType,
+    name: decodeURIComponent(workoutName),
+    duration: seconds,
+    calories: Math.round(calories),
+    heartRate: hrCount > 0 ? Math.round(hrSum / hrCount) : 0,
+    distance: workoutType === 'running' ? parseFloat(distance.toFixed(2)) : 0,
+    date: new Date().toISOString(),
+    laps: laps
+  };
+  
+  const history = JSON.parse(localStorage.getItem('vitality_history') || '[]');
+  history.unshift(record);
+  localStorage.setItem('vitality_history', JSON.stringify(history));
+  
+  // Update today stats
+  const todayKey = new Date().toISOString().slice(0,10);
+  const todayStats = JSON.parse(localStorage.getItem('vitality_today_' + todayKey) || '{"cal":0,"time":0,"hr":[]}');
+  todayStats.cal += record.calories;
+  todayStats.time += Math.round(seconds / 60);
+  if (record.heartRate) todayStats.hr.push(record.heartRate);
+  localStorage.setItem('vitality_today_' + todayKey, JSON.stringify(todayStats));
+  
+  location.href = 'index.html';
+}
+</script>
+</body>
+</html>
