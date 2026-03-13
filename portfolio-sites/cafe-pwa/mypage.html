@@ -10,6 +10,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css">
+<script src="./shared.js"></script>
 <style>
 /* ============================================
    BLOOMING COFFEE — MY PAGE
@@ -1583,12 +1584,12 @@ document.addEventListener('DOMContentLoaded', () => {
    ============================================ */
 function loadMyPageData() {
   // Points
-  const points = parseInt(localStorage.getItem('bloomingPoints') || '0');
+  const points = BC.getPoints();
   const pointEl = document.querySelector('.stat-card:nth-child(1) .stat-value');
   if (pointEl) pointEl.textContent = points.toLocaleString('ko-KR');
 
   // Stamps
-  const stamps = parseInt(localStorage.getItem('bloomingStamps') || '0');
+  const stamps = BC.getStamps();
   const stampDisplay = stamps % 10;
   const stampStatEl = document.querySelector('.stat-card:nth-child(2) .stat-value');
   if (stampStatEl) stampStatEl.textContent = stampDisplay + '/10';
@@ -1619,8 +1620,13 @@ function loadMyPageData() {
   const stampText = document.querySelector('.stamp-text');
   if (stampText) stampText.innerHTML = '<strong>' + (10 - stampDisplay) + '잔</strong> 남음';
 
+  // Coupons count
+  const coupons = BC.getCoupons();
+  const couponStatEl = document.querySelector('.stat-card:nth-child(3) .stat-value');
+  if (couponStatEl) couponStatEl.textContent = coupons.length + '장';
+
   // Orders
-  const orders = JSON.parse(localStorage.getItem('bloomingOrders') || '[]');
+  const orders = BC.getOrders();
   const orderSection = document.querySelector('.order-section');
   if (orderSection && orders.length > 0) {
     // Remove existing order cards
@@ -1657,29 +1663,52 @@ function loadMyPageData() {
   }
 
   // Cart badge
-  const cart = JSON.parse(localStorage.getItem('bloomingCart') || '[]');
-  const navBadge = document.querySelector('.nav-badge');
-  if (navBadge) {
-    const count = cart.reduce((s, i) => s + i.qty, 0);
-    navBadge.textContent = count;
-    navBadge.style.display = count > 0 ? '' : 'none';
+  BC.updateAllBadges();
+
+  // Favorites section
+  const favs = BC.getFavorites();
+  const favSection = document.querySelector('.favorites-section');
+  if (favSection) {
+    const favGrid = favSection.querySelector('.favorites-grid') || document.createElement('div');
+    favGrid.className = 'favorites-grid';
+    favGrid.innerHTML = '';
+    if (favs.length === 0) {
+      favGrid.innerHTML = '<div style="padding:24px;text-align:center;color:var(--gray-400);font-size:14px;">즐겨찾기한 메뉴가 없어요</div>';
+    } else {
+      favs.forEach(fav => {
+        const match = BC.findMenuByName(fav.name);
+        const menuId = match ? match[0] : '';
+        const div = document.createElement('div');
+        div.className = 'fav-item';
+        div.innerHTML = `
+          <img src="${fav.img || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'}" alt="${fav.name}" style="width:48px;height:48px;border-radius:12px;object-fit:cover;" onerror="this.src='https://placehold.co/48x48/1B4332/F5F0E8?text=☕'">
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;font-size:14px;">${fav.name}</div>
+            <div style="font-size:13px;color:var(--gray-400);">${(fav.price||0).toLocaleString('ko-KR')}원</div>
+          </div>
+          <button onclick="quickAddFav('${fav.name}',${fav.price||0},'${fav.img||''}')" style="padding:8px 14px;border:none;background:var(--green);color:white;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;">담기</button>
+        `;
+        div.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-200);';
+        favGrid.appendChild(div);
+      });
+    }
+    if (!favSection.querySelector('.favorites-grid')) favSection.appendChild(favGrid);
   }
 }
 
 function reorder(items) {
   try {
     const parsed = typeof items === 'string' ? JSON.parse(items) : items;
-    const cart = JSON.parse(localStorage.getItem('bloomingCart') || '[]');
-    parsed.forEach(i => { i.id = Date.now().toString() + Math.random(); cart.push(i); });
-    localStorage.setItem('bloomingCart', JSON.stringify(cart));
+    parsed.forEach(i => {
+      BC.addToCart({ name: i.name, price: i.unitPrice || i.price || 5000, img: i.img, options: i.options || '', qty: i.qty || 1 });
+    });
     showToast('장바구니에 담았어요!');
-    const navBadge = document.querySelector('.nav-badge');
-    if (navBadge) {
-      const count = cart.reduce((s, i) => s + i.qty, 0);
-      navBadge.textContent = count;
-      navBadge.style.display = count > 0 ? '' : 'none';
-    }
   } catch(e) { showToast('장바구니에 담았어요!'); }
+}
+
+function quickAddFav(name, price, img) {
+  BC.addToCart({ name, price, img, options: '', qty: 1 });
+  showToast(name + ' 장바구니에 담았어요!');
 }
 
 /* ============================================

@@ -10,6 +10,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css">
+<script src="./shared.js"></script>
 <style>
 /* ============================================
    BLOOMING COFFEE — ORDER COMPLETE PAGE
@@ -1123,7 +1124,7 @@ body {
    LOAD ORDER FROM LOCALSTORAGE
    ============================================ */
 function loadOrderData() {
-  const order = JSON.parse(localStorage.getItem('bloomingLastOrder') || 'null');
+  const order = JSON.parse(localStorage.getItem('bc_last_order') || 'null');
   if (!order) return;
 
   // Order number
@@ -1165,7 +1166,7 @@ function loadOrderData() {
    STAMPS
    ============================================ */
 function renderStamps() {
-  const stamps = parseInt(localStorage.getItem('bloomingStamps') || '0');
+  const stamps = BC.getStamps();
   const display = stamps % 10;
   document.getElementById('stampCountLabel').textContent = display + ' / 10';
   const grid = document.getElementById('stampGrid');

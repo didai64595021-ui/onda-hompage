@@ -20,7 +20,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Georgia:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    
+    <script src="./shared.js"></script>
+
     <style>
         :root {
             --deep-green: #1B4332;
@@ -1568,7 +1569,7 @@
                     <path d="M7 4V2C7 1.45 7.45 1 8 1h8c.55 0 1 .45 1 1v2h4c.55 0 1 .45 1 1s-.45 1-1 1h-1v13c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V6H3c-.55 0-1-.45-1-1s.45-1 1-1h4zm2 0h6V3H9v1zm0 4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1s1-.45 1-1V9c0-.55-.45-1-1-1zm6 0c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1s1-.45 1-1V9c0-.55-.45-1-1-1z"/>
                 </svg>
                 <span class="nav-label">장바구니</span>
-                <span class="cart-badge">3</span>
+                <span class="cart-badge" data-cart-badge>0</span>
             </a>
             <a href="mypage.html" class="nav-item">
                 <svg class="nav-icon" viewBox="0 0 24 24">
@@ -1976,37 +1977,32 @@
 
         // Heart Button
         function toggleHeart(button) {
-            button.classList.toggle('liked');
-            
-            if (button.classList.contains('liked')) {
-                // Save to localStorage or send to server
-                console.log('Added to favorites');
-            } else {
-                console.log('Removed from favorites');
-            }
+            const item = button.closest('.menu-item');
+            const name = item.querySelector('.menu-name').textContent;
+            const priceNum = parseInt(item.dataset.price);
+            const imgEl = item.querySelector('.menu-image');
+            const imgSrc = imgEl ? (imgEl.src || imgEl.dataset.src) : '';
+            const added = BC.toggleFavorite({ name, price: priceNum, img: imgSrc });
+            button.classList.toggle('liked', added);
         }
 
-        // Add to Cart (localStorage)
+        // Add to Cart (localStorage via BC shared layer)
         function addToCart(item) {
             const name = item.querySelector('.menu-name').textContent;
-            const priceText = item.querySelector('.menu-price').textContent;
-            const priceNum = parseInt(priceText.replace(/[^0-9]/g, ''));
+            const priceNum = parseInt(item.dataset.price);
             const imgEl = item.querySelector('.menu-image');
             const imgSrc = imgEl ? (imgEl.src || imgEl.dataset.src) : '';
 
-            const cartItem = {
-              id: Date.now().toString(),
+            BC.addToCart({
               name: name,
               img: imgSrc,
               options: '',
               temp: '',
               unitPrice: priceNum,
+              price: priceNum,
               qty: 1
-            };
-            const cart = JSON.parse(localStorage.getItem('bloomingCart') || '[]');
-            cart.push(cartItem);
-            localStorage.setItem('bloomingCart', JSON.stringify(cart));
-            
+            });
+
             // Visual feedback
             const button = item.querySelector('.quick-add-button');
             const originalText = button.querySelector('span').textContent;
@@ -2018,29 +2014,35 @@
                 button.style.backgroundColor = '';
                 button.style.color = '';
             }, 1000);
-            
-            updateCartBadge();
-        }
 
-        function updateCartBadge() {
-            const cart = JSON.parse(localStorage.getItem('bloomingCart') || '[]');
-            const count = cart.reduce((s, i) => s + i.qty, 0);
-            const badge = document.querySelector('.cart-badge');
-            if (badge) {
-              badge.textContent = count;
-              badge.style.display = count > 0 ? 'flex' : 'none';
-              badge.style.animation = 'none';
-              setTimeout(() => { badge.style.animation = 'cartBadgePulse 0.6s ease'; }, 10);
-            }
+            BC.updateAllBadges();
         }
 
         // Show Item Detail
         function showItemDetail(item) {
-            window.location.href = 'detail.html';
+            const name = item.querySelector('.menu-name').textContent;
+            const engName = item.querySelector('.menu-subtitle').textContent;
+            const price = item.dataset.price;
+            const imgEl = item.querySelector('.menu-image');
+            const img = imgEl ? (imgEl.src || imgEl.dataset.src) : '';
+            const temp = item.dataset.temp || 'both';
+            const category = item.dataset.category || 'coffee';
+            const params = new URLSearchParams({ name, engName, price, img, temp, category });
+            window.location.href = 'detail.html?' + params.toString();
         }
 
-        // Init cart badge from localStorage on load
-        document.addEventListener('DOMContentLoaded', () => { updateCartBadge(); });
+        // Init cart badge + favorites from localStorage on load
+        document.addEventListener('DOMContentLoaded', () => {
+            BC.updateAllBadges();
+            // Restore favorite hearts
+            document.querySelectorAll('.menu-item').forEach(item => {
+                const name = item.querySelector('.menu-name').textContent;
+                if (BC.isFavorite(name)) {
+                    const btn = item.querySelector('.heart-button');
+                    if (btn) btn.classList.add('liked');
+                }
+            });
+        });
 
         // Scroll Handling
         function handleScroll() {
@@ -2071,7 +2073,7 @@
         // PWA Support
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
+                navigator.serviceWorker.register('./service-worker.js')
                     .then(registration => {
                         console.log('SW registered: ', registration);
                     })

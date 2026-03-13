@@ -10,6 +10,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css">
+<script src="./shared.js"></script>
 <style>
 /* ============================================
    BLOOMING COFFEE — DETAIL PAGE
@@ -1816,10 +1817,67 @@ body {
      ============================================ -->
 <script>
 /* ============================================
+   LOAD MENU ITEM FROM URL & BC.menuDB
+   ============================================ */
+(function loadMenuFromURL() {
+  const params = new URLSearchParams(location.search);
+  const menuId = params.get('id');
+  const paramName = params.get('name');
+  
+  let item = null;
+  
+  if (menuId) {
+    item = BC.getMenuItem(menuId);
+  }
+  
+  // Fallback: menu.html passes name/engName/price/img/temp/category
+  if (!item && paramName) {
+    item = {
+      name: paramName,
+      engName: params.get('engName') || '',
+      basePrice: parseInt(params.get('price')) || 5000,
+      img: params.get('img') || '',
+      temp: params.get('temp') || 'both',
+      category: params.get('category') || 'coffee'
+    };
+  }
+  
+  if (!item) return;
+  
+  // Update hero image
+  const heroImg = document.getElementById('heroImg');
+  if (heroImg && item.img) { heroImg.src = item.img; heroImg.alt = item.name; }
+  // Update title
+  const titleEl = document.querySelector('.product-title');
+  if (titleEl) titleEl.textContent = item.name;
+  const subtitleEl = document.querySelector('.product-subtitle');
+  if (subtitleEl && item.engName) subtitleEl.textContent = item.engName;
+  document.title = item.name + ' — 블루밍 커피';
+  // Update base price display
+  const priceEl = document.getElementById('basePrice');
+  if (priceEl) priceEl.innerHTML = item.basePrice.toLocaleString('ko-KR') + '<span class="won">원</span>';
+  // Store for state
+  window._menuItem = item;
+  window._menuId = menuId || '';
+  // Handle temp availability
+  if (item.temp === 'ice') {
+    const hotBtn = document.querySelector('[data-temp="hot"]');
+    if (hotBtn) { hotBtn.style.opacity = '0.4'; hotBtn.style.pointerEvents = 'none'; }
+  } else if (item.temp === 'none') {
+    const tempSection = document.getElementById('tempToggle');
+    if (tempSection) tempSection.closest('.option-section')?.style.setProperty('display','none');
+  }
+  // Favorite state
+  if (BC.isFavorite(item.name)) {
+    window._initLiked = true;
+  }
+})();
+
+/* ============================================
    STATE MANAGEMENT
    ============================================ */
 const state = {
-  basePrice: 5000,
+  basePrice: (window._menuItem ? window._menuItem.basePrice : 5000),
   size: { value: 'regular', price: 500 },
   temp: 'ice',
   shots: 0,
@@ -1827,7 +1885,7 @@ const state = {
   cup: { value: 'store', price: 0 },
   whip: { value: 'no', price: 0 },
   quantity: 1,
-  liked: false
+  liked: window._initLiked || false
 };
 
 /* ============================================
@@ -1985,9 +2043,13 @@ function toggleHeart() {
   state.liked = !state.liked;
   const btn = document.getElementById('heartBtn');
   btn.classList.toggle('liked', state.liked);
-  
+  const itemName = window._menuItem ? window._menuItem.name : '카페라떼';
+  const itemData = window._menuItem || { name: '카페라떼', basePrice: 5000, img: '' };
+  BC.toggleFavorite({ name: itemData.name, price: itemData.basePrice, img: itemData.img });
   if (state.liked) {
     showToast('❤️ 관심 메뉴에 추가했어요');
+  } else {
+    showToast('관심 메뉴에서 제거했어요');
   }
   hapticFeedback();
 }
@@ -2012,8 +2074,8 @@ function buildCartItem() {
 
   return {
     id: Date.now().toString(),
-    name: '카페라떼',
-    img: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&q=80',
+    name: (window._menuItem ? window._menuItem.name : '카페라떼'),
+    img: (window._menuItem ? window._menuItem.img : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&q=80'),
     options: options.join(' · '),
     temp: state.temp === 'hot' ? 'HOT' : 'ICE',
     unitPrice: unitPrice,
@@ -2022,9 +2084,7 @@ function buildCartItem() {
 }
 
 function saveToCart(item) {
-  const cart = JSON.parse(localStorage.getItem('bloomingCart') || '[]');
-  cart.push(item);
-  localStorage.setItem('bloomingCart', JSON.stringify(cart));
+  BC.addToCart({ name: item.name, price: item.unitPrice, img: item.img, options: item.options, qty: item.qty });
 }
 
 function addToCart() {
@@ -2289,7 +2349,6 @@ if ('serviceWorker' in navigator) {
    ============================================ */
 function directOrder() {
   const item = buildCartItem();
-  // Save as last order directly
   const orderItems = [item];
   const total = item.unitPrice * item.qty;
   const orderNum = 'BC-' + String(Math.floor(1000 + Math.random() * 9000));
@@ -2303,17 +2362,8 @@ function directOrder() {
     total: total,
     points: Math.floor(total * 0.05)
   };
-  localStorage.setItem('bloomingLastOrder', JSON.stringify(order));
-  // Save to order history
-  const history = JSON.parse(localStorage.getItem('bloomingOrders') || '[]');
-  history.unshift(order);
-  localStorage.setItem('bloomingOrders', JSON.stringify(history));
-  // Update stamps
-  const stamps = parseInt(localStorage.getItem('bloomingStamps') || '0') + 1;
-  localStorage.setItem('bloomingStamps', String(stamps));
-  // Update points
-  const pts = parseInt(localStorage.getItem('bloomingPoints') || '0') + order.points;
-  localStorage.setItem('bloomingPoints', String(pts));
+  localStorage.setItem('bc_last_order', JSON.stringify(order));
+  BC.addOrder(order);
   window.location.href = 'order.html';
 }
 

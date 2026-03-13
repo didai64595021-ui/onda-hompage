@@ -18,6 +18,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9IiMxQjQzMzIiLz4KPHN2ZyB4PSI0NSIgeT0iNDUiIHdpZHRoPSI5MCIgaGVpZ2h0PSI5MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjRjVGMEU4Ij4KPHA+CjxwYXRoIGQ9Ik0yIDE3aDIwdjJIMnptMS4xNS0zaDEzLjY5Yy4yNiAwIC40OC0uMTEuNjQtLjMzbC45LTEuMjVjLjI3LS4zNy4yNy0uODggMC0xLjI1bC0uOS0xLjI1Yy0uMTYtLjIyLS4zOC0uMzMtLjY0LS4zM0gzLjE1Yy0uNDQgMC0uOTMuMzEtMS4wNy43bC0uNjIgMS42M2MtLjEzLjM1LS4xMy43NyAwIDEuMTJsLjYyIDEuNjNjLjE0LjM5LjYzLjcgMS4wNy43eiIvPgo8Y2lyY2xlIGN4PSIxMiIgY3k9IjguNSIgcj0iMi41Ii8+CjwvcD4KPC9zdmc+Cjwvc3ZnPgo=">
     <link rel="icon" type="image/png" sizes="32x32" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzFCNDMzMiIvPgo8cGF0aCBkPSJNOCAyMGgxNnYySDhWMjB6bTEtNWgxMGwxLTFWMTJsLTEtMUg5bC0xIDFWMTVsMS0xeiIgZmlsbD0iI0Y1RjBFOCIvPgo8Y2lyY2xlIGN4PSIxNCIgY3k9IjEwIiByPSIyIiBmaWxsPSIjRjVGMEU4Ii8+Cjwvc3ZnPgo=">
     <link rel="manifest" href="manifest.json">
+    <script src="./shared.js"></script>
     
     <!-- Fonts -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css">
@@ -1106,6 +1107,9 @@
             setupInteractions();
             registerServiceWorker();
             updateCartBadge();
+            // Update points display from BC
+            const ptsBadge = document.querySelector('.points-badge');
+            if (ptsBadge) ptsBadge.textContent = BC.getPoints().toLocaleString('ko-KR') + 'P';
             
             // Add skeleton loading removal
             setTimeout(() => {
@@ -1360,40 +1364,27 @@
             }, 300);
         }
 
-        // Cart management (localStorage)
+        // Cart management via shared BC layer
         function addToCart(itemId) {
-            // Find menu data by itemId (simplified - just add a generic item)
-            const menuData = {
-              'americano': { name: '아메리카노', unitPrice: 4500, img: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80' },
-              'latte': { name: '카페라떼', unitPrice: 5200, img: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&q=80' },
-              'coldbrew': { name: '콜드브루', unitPrice: 5500, img: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=200&q=80' },
-              'greentea': { name: '녹차라떼', unitPrice: 5600, img: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=200&q=80' },
+            const menuMap = {
+              'signature-blend': { name: '시그니처 블렌드', price: 4500, img: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80' },
+              'vanilla-latte':   { name: '바닐라 라떼',   price: 5500, img: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=200&q=80' },
+              'green-tea':       { name: '말차 라떼',     price: 5800, img: 'https://images.unsplash.com/photo-1534778101976-62847782c213?w=200&q=80' },
+              'cherry-blossom-latte': { name: '체리 블라썸 라떼', price: 6800, img: 'https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=200&q=80' },
             };
-            const data = menuData[itemId] || { name: itemId, unitPrice: 5000, img: '' };
-            const cartItem = {
-              id: Date.now().toString(),
-              name: data.name,
-              img: data.img,
-              options: '',
-              temp: '',
-              unitPrice: data.unitPrice,
-              qty: 1
-            };
-            const lsCart = JSON.parse(localStorage.getItem('bloomingCart') || '[]');
-            lsCart.push(cartItem);
-            localStorage.setItem('bloomingCart', JSON.stringify(lsCart));
-            updateCartBadge();
+            // Also try matching from BC.menuDB
+            let data = menuMap[itemId];
+            if (!data) {
+              const dbItem = BC.getMenuItem(itemId);
+              if (dbItem) data = { name: dbItem.name, price: dbItem.basePrice, img: dbItem.img };
+              else data = { name: itemId, price: 5000, img: '' };
+            }
+            BC.addToCart({ name: data.name, price: data.price, img: data.img, options: '', qty: 1 });
             showToast('장바구니에 추가되었습니다');
         }
 
         function updateCartBadge() {
-            const lsCart = JSON.parse(localStorage.getItem('bloomingCart') || '[]');
-            const count = lsCart.reduce((s, i) => s + i.qty, 0);
-            const badges = document.querySelectorAll('.nav-badge, .floating-cart-badge');
-            badges.forEach(badge => {
-                badge.textContent = count;
-                badge.style.display = count > 0 ? '' : 'none';
-            });
+            BC.updateAllBadges();
         }
 
         // Navigation
@@ -1422,12 +1413,18 @@
         }
 
         function showMenuDetail(menuId) {
-            window.location.href = 'detail.html';
+            window.location.href = 'detail.html?id=' + encodeURIComponent(menuId);
         }
 
         function quickOrder(itemName) {
-            addToCart(itemName.toLowerCase().replace(' ', '-'));
-            showToast(`${itemName} 장바구니에 담았어요!`);
+            // Try to find in menuDB by name for detail page
+            const match = BC.findMenuByName(itemName);
+            if (match) {
+                window.location.href = 'detail.html?id=' + match[0];
+            } else {
+                addToCart(itemName.toLowerCase().replace(' ', '-'));
+                showToast(`${itemName} 장바구니에 담았어요!`);
+            }
         }
 
         function showToast(message) {
@@ -1493,7 +1490,7 @@
         function registerServiceWorker() {
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/sw.js')
+                    navigator.serviceWorker.register('./service-worker.js')
                         .then(registration => {
                             console.log('SW registered: ', registration);
                         })

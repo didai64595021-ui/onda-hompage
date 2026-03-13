@@ -905,9 +905,637 @@ function closeVideoModal() {
   document.getElementById('videoModal').classList.remove('active');
 }
 
-// Init
+// ─── Program Analytics ───
+function getProgramAnalytics() {
+  let totalExercises = 0;
+  let completedExercises = 0;
+  let weeklyCompletion = {};
+
+  for (let w = 1; w <= 4; w++) {
+    let weekTotal = 0;
+    let weekDone = 0;
+    programData[w].forEach((day, di) => {
+      day.exercises.forEach((_, ei) => {
+        totalExercises++;
+        weekTotal++;
+        if (checkedState[`w${w}_d${di}_e${ei}`]) {
+          completedExercises++;
+          weekDone++;
+        }
+      });
+    });
+    weeklyCompletion[w] = {
+      total: weekTotal,
+      done: weekDone,
+      percentage: weekTotal > 0 ? Math.round(weekDone / weekTotal * 100) : 0
+    };
+  }
+
+  return {
+    totalExercises,
+    completedExercises,
+    overallPercentage: totalExercises > 0
+      ? Math.round(completedExercises / totalExercises * 100)
+      : 0,
+    weeklyCompletion,
+    estimatedCalories: completedExercises * 45,
+    estimatedMinutes: completedExercises * 12,
+    daysRemaining: Math.max(0, 28 - Object.keys(checkedState).filter(k => checkedState[k]).length / 4)
+  };
+}
+
+// ─── Day Completion Tracker ───
+function getDayCompletionStatus() {
+  const status = [];
+  for (let w = 1; w <= 4; w++) {
+    programData[w].forEach((day, di) => {
+      const dayKey = `w${w}_d${di}`;
+      const total = day.exercises.length;
+      const done = day.exercises.filter((_, ei) => checkedState[`${dayKey}_e${ei}`]).length;
+      status.push({
+        week: w,
+        dayIndex: di,
+        dayLabel: day.day,
+        dayName: day.label,
+        total,
+        done,
+        percentage: Math.round(done / total * 100),
+        isComplete: done === total,
+        isStarted: done > 0
+      });
+    });
+  }
+  return status;
+}
+
+// ─── Streak Calculator for Program ───
+function getProgramStreak() {
+  const dayStatus = getDayCompletionStatus();
+  let streak = 0;
+  let maxStreak = 0;
+  let currentStreak = 0;
+
+  for (let i = 0; i < dayStatus.length; i++) {
+    if (dayStatus[i].isComplete) {
+      currentStreak++;
+      maxStreak = Math.max(maxStreak, currentStreak);
+    } else {
+      currentStreak = 0;
+    }
+  }
+
+  // Count from the latest completed day
+  for (let i = dayStatus.length - 1; i >= 0; i--) {
+    if (dayStatus[i].isComplete) streak++;
+    else if (dayStatus[i].isStarted) break;
+    else break;
+  }
+
+  return { current: streak, max: maxStreak };
+}
+
+// ─── Estimated Completion Date ───
+function getEstimatedCompletion() {
+  const analytics = getProgramAnalytics();
+  const dayStatus = getDayCompletionStatus();
+  const completedDays = dayStatus.filter(d => d.isComplete).length;
+  const totalDays = dayStatus.length;
+  const remainingDays = totalDays - completedDays;
+
+  if (completedDays === 0) {
+    return {
+      daysRemaining: totalDays,
+      estimatedDate: null,
+      message: '아직 시작하지 않았어요. 지금 시작해볼까요?'
+    };
+  }
+
+  // Calculate average days between completions
+  const startDate = new Date();
+  const daysPerCompletion = 1.5; // Assume 1.5 real days per program day
+  const estimatedRemainingRealDays = Math.ceil(remainingDays * daysPerCompletion);
+
+  const estimatedDate = new Date();
+  estimatedDate.setDate(estimatedDate.getDate() + estimatedRemainingRealDays);
+
+  const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월',
+    '7월', '8월', '9월', '10월', '11월', '12월'];
+
+  return {
+    daysRemaining: remainingDays,
+    estimatedDate: `${monthNames[estimatedDate.getMonth()]} ${estimatedDate.getDate()}일`,
+    message: completedDays === totalDays
+      ? '🎉 프로그램을 완주했습니다!'
+      : `약 ${estimatedRemainingRealDays}일 후 완주 예상`
+  };
+}
+
+// ─── Exercise Difficulty Progression ───
+function getDifficultyProgression() {
+  const progression = [];
+
+  for (let w = 1; w <= 4; w++) {
+    const weekExercises = programData[w].reduce((acc, day) => {
+      return acc.concat(day.exercises);
+    }, []);
+
+    // Estimate difficulty based on sets/reps in detail
+    let totalSets = 0;
+    let totalReps = 0;
+    weekExercises.forEach(ex => {
+      const match = ex.detail.match(/(\d+)세트/);
+      const repMatch = ex.detail.match(/(\d+)회/);
+      if (match) totalSets += parseInt(match[1]);
+      if (repMatch) totalReps += parseInt(repMatch[1]);
+    });
+
+    progression.push({
+      week: w,
+      totalExercises: weekExercises.length,
+      totalSets,
+      totalReps,
+      avgSetsPerExercise: weekExercises.length > 0
+        ? (totalSets / weekExercises.length).toFixed(1)
+        : 0,
+      intensity: w <= 2 ? '보통' : w === 3 ? '높음' : '최고'
+    });
+  }
+
+  return progression;
+}
+
+// ─── Muscle Group Coverage ───
+function getMuscleGroupCoverage() {
+  const muscleGroups = {
+    chest: { name: '가슴', count: 0, emoji: '🫁' },
+    back: { name: '등', count: 0, emoji: '🔙' },
+    shoulders: { name: '어깨', count: 0, emoji: '💪' },
+    arms: { name: '팔', count: 0, emoji: '💪' },
+    legs: { name: '하체', count: 0, emoji: '🦵' },
+    core: { name: '코어', count: 0, emoji: '🎯' },
+    cardio: { name: '유산소', count: 0, emoji: '❤️' },
+    flexibility: { name: '유연성', count: 0, emoji: '🧘' }
+  };
+
+  const keywords = {
+    chest: ['벤치', '푸쉬업', '플라이', '가슴', '인클라인', '크로스오버', '프레스'],
+    back: ['로우', '풀업', '랫', '등', '페이스풀', '데드리프트'],
+    shoulders: ['숄더', '레터럴', '오버헤드', '어깨', '프레스'],
+    arms: ['컬', '바이셉', '트라이셉', '딥스', '해머'],
+    legs: ['스쿼트', '런지', '레그', '힙', '카프', '글루트', '불가리안', '하체'],
+    core: ['플랭크', '코어', '크런치', '트위스트', 'Ab', '레그레이즈', '롤아웃'],
+    cardio: ['러닝', '버피', 'HIIT', '점프', '스프린트', '조깅', '마운틴', '로우잉', '하이니즈', '배틀로프', '바이크'],
+    flexibility: ['요가', '스트레칭', '모빌리티', '폼롤러', '명상', '사바사나', '빈야사']
+  };
+
+  for (let w = 1; w <= 4; w++) {
+    programData[w].forEach(day => {
+      day.exercises.forEach(ex => {
+        Object.entries(keywords).forEach(([group, words]) => {
+          if (words.some(word => ex.name.includes(word) || ex.detail.includes(word))) {
+            muscleGroups[group].count++;
+          }
+        });
+      });
+    });
+  }
+
+  return muscleGroups;
+}
+
+// ─── Program Comparison (Mock) ───
+function getProgramComparison() {
+  return {
+    programs: [
+      {
+        name: '4주 전신 트랜스폼',
+        duration: '4주',
+        frequency: '주 5회',
+        difficulty: '중급',
+        totalExercises: 112,
+        avgCalPerSession: 350,
+        rating: 4.9,
+        completionRate: 78,
+        selected: true
+      },
+      {
+        name: '러너스 부트캠프',
+        duration: '6주',
+        frequency: '주 4회',
+        difficulty: '초급~중급',
+        totalExercises: 96,
+        avgCalPerSession: 280,
+        rating: 4.7,
+        completionRate: 85,
+        selected: false
+      },
+      {
+        name: 'HIIT 지옥 훈련',
+        duration: '2주',
+        frequency: '주 4회',
+        difficulty: '고급',
+        totalExercises: 48,
+        avgCalPerSession: 450,
+        rating: 4.6,
+        completionRate: 62,
+        selected: false
+      }
+    ]
+  };
+}
+
+// ─── Workout Timer Presets ───
+function getTimerPresets() {
+  return {
+    tabata: { work: 20, rest: 10, rounds: 8, sets: 4, totalMin: 16 },
+    emom: { work: 40, rest: 20, rounds: 15, sets: 1, totalMin: 15 },
+    amrap: { duration: 20, exercises: 5 },
+    circuit: { work: 45, rest: 15, exercises: 8, sets: 3, totalMin: 24 }
+  };
+}
+
+// ─── Notes System ───
+function saveNote(dayKey, note) {
+  const notes = JSON.parse(localStorage.getItem('vitality_program_notes') || '{}');
+  notes[dayKey] = {
+    text: note,
+    timestamp: new Date().toISOString()
+  };
+  localStorage.setItem('vitality_program_notes', JSON.stringify(notes));
+}
+
+function getNote(dayKey) {
+  const notes = JSON.parse(localStorage.getItem('vitality_program_notes') || '{}');
+  return notes[dayKey] || null;
+}
+
+// ─── Recovery Recommendations ───
+function getRecoveryRecommendation(dayLabel) {
+  const recommendations = {
+    '전신 기초': '전신 운동 후 충분한 수분 섭취와 경량 스트레칭을 추천합니다.',
+    '상체 집중': '어깨와 가슴 스트레칭을 꼭 해주세요. 48시간 상체 휴식 권장.',
+    '하체 & 코어': '폼롤러로 허벅지와 종아리를 풀어주세요.',
+    'HIIT 카디오': '고강도 운동 후 쿨다운 10분 필수! 다음날 가벼운 운동 추천.',
+    '전신 서킷': '전신이 피로할 수 있어요. 다음날은 요가나 가벼운 산책을 해주세요.',
+    '요가 & 회복': '몸과 마음의 회복에 집중하세요. 따뜻한 물에 목욕 추천.',
+    '휴식': '완전 휴식도 운동의 일부입니다. 충분히 쉬세요!'
+  };
+
+  return recommendations[dayLabel] || '오늘도 수고하셨습니다! 충분한 수분 섭취를 잊지 마세요.';
+}
+
+// ─── Share Progress ───
+function shareProgress() {
+  const analytics = getProgramAnalytics();
+  const text = `💪 VITALITY 4주 전신 트랜스폼\n` +
+    `📊 진행도: ${analytics.overallPercentage}%\n` +
+    `✅ 완료: ${analytics.completedExercises}/${analytics.totalExercises} 운동\n` +
+    `🔥 예상 칼로리: ${analytics.estimatedCalories} kcal\n` +
+    `#VITALITY #운동 #트랜스폼`;
+
+  if (navigator.share) {
+    navigator.share({ title: 'VITALITY 프로그램 진행도', text });
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(text);
+    alert('진행도가 클립보드에 복사되었습니다!');
+  }
+}
+
+// ─── Program Reset ───
+function resetProgram() {
+  if (confirm('프로그램 진행도를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem('vitality_program_notes');
+    checkedState = {};
+    renderDays();
+    updateProgress();
+    alert('프로그램이 초기화되었습니다.');
+  }
+}
+
+// ─── Initialize Everything ───
 renderDays();
 renderVideoGrid();
+
+const analytics = getProgramAnalytics();
+const dayStatus = getDayCompletionStatus();
+const programStreak = getProgramStreak();
+const estimatedCompletion = getEstimatedCompletion();
+const difficultyProgression = getDifficultyProgression();
+const muscleGroups = getMuscleGroupCoverage();
+
+console.log('Program Analytics:', analytics);
+console.log('Day Status:', dayStatus);
+console.log('Program Streak:', programStreak);
+console.log('Estimated Completion:', estimatedCompletion);
+console.log('Difficulty Progression:', difficultyProgression);
+console.log('Muscle Groups:', muscleGroups);
+
+// ─── Calendar Integration ───
+function getProgramCalendar() {
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - 7); // Assume started a week ago
+  const calendar = [];
+
+  let dayCounter = 0;
+  for (let w = 1; w <= 4; w++) {
+    programData[w].forEach((day, di) => {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + dayCounter);
+      const dayKey = `w${w}_d${di}`;
+      const total = day.exercises.length;
+      const done = day.exercises.filter((_, ei) => checkedState[`${dayKey}_e${ei}`]).length;
+
+      calendar.push({
+        date: date.toISOString().slice(0, 10),
+        dayOfWeek: ['일', '월', '화', '수', '목', '금', '토'][date.getDay()],
+        week: w,
+        dayIndex: di,
+        dayLabel: day.day,
+        dayName: day.label,
+        exerciseCount: total,
+        completedCount: done,
+        isComplete: done === total,
+        isToday: date.toISOString().slice(0, 10) === new Date().toISOString().slice(0, 10),
+        isPast: date < new Date(new Date().toISOString().slice(0, 10)),
+        isFuture: date > new Date()
+      });
+
+      dayCounter++;
+    });
+  }
+
+  return calendar;
+}
+
+// ─── Workout Substitution System ───
+function getSubstitutions(exerciseName) {
+  const substitutionMap = {
+    '바디웨이트 스쿼트': ['고블릿 스쿼트', '월 싯', '박스 스쿼트', '점프 스쿼트'],
+    '푸쉬업': ['니 푸쉬업', '인클라인 푸쉬업', '다이아몬드 푸쉬업', '와이드 푸쉬업'],
+    '플랭크': ['사이드 플랭크', '리버스 플랭크', '플랭크 숄더 탭', '플랭크 업다운'],
+    '런지': ['리버스 런지', '워킹 런지', '사이드 런지', '커츠시 런지'],
+    '덤벨 숄더프레스': ['바벨 프레스', '아놀드 프레스', '밀리터리 프레스', '핸드스탠드 푸쉬업'],
+    '덤벨 로우': ['바벨 로우', '시티드 로우', '인버티드 로우', '원암 로우'],
+    '벤치프레스': ['플로어 프레스', '인클라인 프레스', '디클라인 프레스', '덤벨 프레스'],
+    '풀업': ['어시스트 풀업', '네거티브 풀업', '랫풀다운', '친업'],
+    '데드리프트': ['루마니안 데드', '수모 데드', '트랩바 데드', '싱글레그 데드'],
+    '버피': ['하프 버피', '스쿼트 스러스트', '점핑잭', '스타 점프'],
+    '마운틴 클라이머': ['크로스 바디 클라이머', '슬로우 클라이머', '스파이더맨 클라이머', '슬라이딩 클라이머'],
+    '케틀벨 스윙': ['덤벨 스윙', '힙 힌지', '글루트 브릿지', '루마니안 데드리프트']
+  };
+
+  return substitutionMap[exerciseName] || [
+    '유사 동작으로 대체',
+    '같은 근육군 운동 선택',
+    '트레이너에게 문의'
+  ];
+}
+
+// ─── Warm-up Generator ───
+function generateWarmup(dayLabel) {
+  const warmups = {
+    upper: [
+      { name: '암 서클', duration: '30초', desc: '양팔 큰 원 그리기' },
+      { name: '숄더 롤', duration: '30초', desc: '어깨 앞뒤로 돌리기' },
+      { name: '체스트 오프너', duration: '30초', desc: '가슴 스트레칭' },
+      { name: '밴드 풀 어파트', duration: '30초', desc: '밴드 당기기' },
+      { name: '인치웜', duration: '5회', desc: '서서 바닥까지 걸어가기' }
+    ],
+    lower: [
+      { name: '레그 스윙', duration: '각 10회', desc: '다리 앞뒤로 흔들기' },
+      { name: '힙 서클', duration: '각 10회', desc: '골반 원 그리기' },
+      { name: '워킹 런지', duration: '각 5회', desc: '걸으며 런지' },
+      { name: '글루트 브릿지', duration: '10회', desc: '엉덩이 들어올리기' },
+      { name: '앵클 서클', duration: '각 10회', desc: '발목 원 그리기' }
+    ],
+    full: [
+      { name: '점핑잭', duration: '20회', desc: '전신 활성화' },
+      { name: '하이니즈', duration: '20회', desc: '제자리 높은 무릎' },
+      { name: '암 서클 + 레그 스윙', duration: '30초', desc: '복합 워밍업' },
+      { name: '인치웜', duration: '5회', desc: '전신 동적 스트레칭' },
+      { name: '스쿼트 홀드', duration: '30초', desc: '깊은 스쿼트 유지' }
+    ],
+    cardio: [
+      { name: '가벼운 조깅', duration: '3분', desc: '심박수 천천히 올리기' },
+      { name: '다이나믹 스트레칭', duration: '2분', desc: '동적 스트레칭' },
+      { name: '버트킥', duration: '30초', desc: '뒤꿈치 엉덩이 차기' },
+      { name: '카리오카', duration: '30초', desc: '사이드 스텝' },
+      { name: 'A스킵', duration: '30초', desc: '스킵 달리기' }
+    ]
+  };
+
+  if (dayLabel.includes('상체') || dayLabel.includes('푸쉬') || dayLabel.includes('풀')) {
+    return warmups.upper;
+  } else if (dayLabel.includes('하체') || dayLabel.includes('레그')) {
+    return warmups.lower;
+  } else if (dayLabel.includes('HIIT') || dayLabel.includes('카디오') || dayLabel.includes('스프린트')) {
+    return warmups.cardio;
+  }
+  return warmups.full;
+}
+
+// ─── Cool-down Generator ───
+function generateCooldown(dayLabel) {
+  const cooldowns = [
+    { name: '서서 앞으로 굽히기', duration: '30초', desc: '햄스트링 스트레칭' },
+    { name: '쿼드 스트레칭', duration: '각 30초', desc: '대퇴사두근 이완' },
+    { name: '나비 자세', duration: '30초', desc: '내전근 스트레칭' },
+    { name: '고양이-소 자세', duration: '10회', desc: '척추 모빌리티' },
+    { name: '아이 자세', duration: '1분', desc: '등, 어깨 이완' },
+    { name: '누워서 트위스트', duration: '각 30초', desc: '허리 회전 스트레칭' },
+    { name: '사바사나', duration: '2분', desc: '완전 이완 및 호흡' }
+  ];
+
+  return cooldowns;
+}
+
+// ─── Workout Log Integration ───
+function logProgramWorkout(week, dayIndex) {
+  const day = programData[week]?.[dayIndex];
+  if (!day) return;
+
+  const record = {
+    type: 'program',
+    name: `W${week} ${day.day}: ${day.label}`,
+    duration: day.exercises.length * 180, // ~3min per exercise
+    calories: Math.round(day.exercises.length * 45),
+    heartRate: 130 + Math.floor(Math.random() * 20),
+    distance: 0,
+    date: new Date().toISOString(),
+    programWeek: week,
+    programDay: dayIndex
+  };
+
+  const history = JSON.parse(localStorage.getItem('vitality_history') || '[]');
+  history.unshift(record);
+  localStorage.setItem('vitality_history', JSON.stringify(history));
+
+  return record;
+}
+
+// ─── Progress Photos Mock ───
+function getProgressPhotoData() {
+  return {
+    photos: [
+      { date: '2024.01.15', label: '시작', week: 0 },
+      { date: '2024.01.29', label: '2주차', week: 2 },
+      { date: '2024.02.12', label: '4주차 완주', week: 4 }
+    ],
+    measurements: [
+      { label: '체중', start: '75kg', end: '71.5kg', change: '-3.5kg' },
+      { label: '체지방', start: '22%', end: '18.8%', change: '-3.2%' },
+      { label: '허리', start: '84cm', end: '79cm', change: '-5cm' },
+      { label: '가슴', start: '95cm', end: '97cm', change: '+2cm' },
+      { label: '팔', start: '32cm', end: '34cm', change: '+2cm' },
+      { label: '허벅지', start: '55cm', end: '56cm', change: '+1cm' }
+    ]
+  };
+}
+
+// ─── FAQ System ───
+function getProgramFAQ() {
+  return [
+    {
+      q: '프로그램 중 하루를 빠뜨렸어요. 어떻게 해야 하나요?',
+      a: '걱정하지 마세요! 빠뜨린 날의 운동을 다음날 이어서 하시면 됩니다. 무리하게 두 배로 하기보다는 일정을 하루 뒤로 미루는 것이 좋습니다.'
+    },
+    {
+      q: '운동 기구가 없어도 할 수 있나요?',
+      a: '대부분의 운동은 바디웨이트로 대체 가능합니다. 각 운동 카드의 대체 동작 버튼을 참고하세요. 덤벨은 물병이나 배낭으로 대체할 수 있습니다.'
+    },
+    {
+      q: '근육통이 심한데 운동해도 되나요?',
+      a: '가벼운 근육통(DOMS)은 정상입니다. 하지만 통증이 심하면 휴식을 취하거나 가벼운 요가/스트레칭으로 대체하세요. 날카로운 통증은 운동을 중단하고 전문가와 상담하세요.'
+    },
+    {
+      q: '4주 후에는 뭘 하면 좋을까요?',
+      a: '축하합니다! 같은 프로그램을 무게를 높여서 반복하거나, 다른 프로그램(러너스 부트캠프, HIIT 지옥 훈련 등)에 도전해보세요.'
+    }
+  ];
+}
+
+// ─── Final Cleanup and Init ───
+const calendar = getProgramCalendar();
+const faq = getProgramFAQ();
+const photoData = getProgressPhotoData();
+
+console.log('Calendar:', calendar.length + ' days');
+console.log('FAQ:', faq.length + ' items');
+console.log('Photo Data:', photoData);
+
+// ─── Workout Rating System ───
+function rateWorkout(week, dayIndex, rating, notes) {
+  const ratings = JSON.parse(localStorage.getItem('vitality_workout_ratings') || '{}');
+  const key = `w${week}_d${dayIndex}`;
+  ratings[key] = {
+    rating: Math.min(5, Math.max(1, rating)),
+    notes: notes || '',
+    date: new Date().toISOString(),
+    perceived_difficulty: rating <= 2 ? 'easy' : rating <= 4 ? 'moderate' : 'hard'
+  };
+  localStorage.setItem('vitality_workout_ratings', JSON.stringify(ratings));
+  return ratings[key];
+}
+
+function getWorkoutRating(week, dayIndex) {
+  const ratings = JSON.parse(localStorage.getItem('vitality_workout_ratings') || '{}');
+  return ratings[`w${week}_d${dayIndex}`] || null;
+}
+
+function getAverageRating() {
+  const ratings = JSON.parse(localStorage.getItem('vitality_workout_ratings') || '{}');
+  const values = Object.values(ratings).map(r => r.rating);
+  if (values.length === 0) return 0;
+  return (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1);
+}
+
+// ─── Rest Day Planner ───
+function planRestDays() {
+  const completedDays = getDayCompletionStatus().filter(d => d.isComplete);
+  const consecutiveWorkouts = [];
+  let consecutive = 0;
+
+  for (const day of completedDays) {
+    if (day.isComplete) {
+      consecutive++;
+    } else {
+      if (consecutive > 0) consecutiveWorkouts.push(consecutive);
+      consecutive = 0;
+    }
+  }
+  if (consecutive > 0) consecutiveWorkouts.push(consecutive);
+
+  const maxConsecutive = Math.max(0, ...consecutiveWorkouts);
+  const needsRest = maxConsecutive >= 5;
+
+  return {
+    maxConsecutive,
+    needsRest,
+    recommendation: needsRest
+      ? '5일 연속 운동 중! 내일은 가벼운 산책이나 스트레칭만 해주세요.'
+      : maxConsecutive >= 3
+        ? '좋은 흐름이에요! 2~3일 더 하고 하루 쉬세요.'
+        : '적절한 휴식을 취하고 있어요. 계속 진행하세요!',
+    suggestedRestDay: needsRest ? '내일' : `${5 - maxConsecutive}일 후`,
+    restActivities: [
+      '가벼운 산책 20~30분',
+      '폼롤러 전신 릴리즈 10분',
+      '스트레칭 & 요가 15분',
+      '명상 10분',
+      '충분한 수면 8시간+'
+    ]
+  };
+}
+
+// ─── Equipment Checklist ───
+function getEquipmentForWeek(week) {
+  const equipment = new Set();
+  const exerciseEquipment = {
+    '덤벨': ['덤벨 숄더프레스', '덤벨 로우', '해머 컬', '인클라인 덤벨프레스', '덤벨 플라이'],
+    '바벨': ['바벨 로우', '벤치프레스', '백 스쿼트', '데드리프트', '오버헤드프레스'],
+    '풀업바': ['풀업', '가중 풀업', '행잉 레그레이즈'],
+    '벤치': ['벤치프레스', '인클라인 덤벨프레스', '덤벨 플라이'],
+    '케틀벨': ['케틀벨 스윙'],
+    '박스': ['박스 점프'],
+    '밴드': ['페이스풀'],
+    '로잉머신': ['로우잉'],
+    '매트': ['플랭크', '요가 플로우', '사바사나', '명상', '스트레칭'],
+    '폼롤러': ['폼롤러 릴리즈']
+  };
+
+  if (programData[week]) {
+    programData[week].forEach(day => {
+      day.exercises.forEach(ex => {
+        Object.entries(exerciseEquipment).forEach(([equip, exercises]) => {
+          if (exercises.some(e => ex.name.includes(e) || e.includes(ex.name))) {
+            equipment.add(equip);
+          }
+        });
+      });
+    });
+  }
+
+  // Always need these
+  equipment.add('매트');
+  equipment.add('물병');
+  equipment.add('타월');
+
+  return Array.from(equipment).sort();
+}
+
+// ─── Init Equipment Lists ───
+const weekEquipment = {};
+for (let w = 1; w <= 4; w++) {
+  weekEquipment[w] = getEquipmentForWeek(w);
+}
+
+const restPlan = planRestDays();
+const avgRating = getAverageRating();
+
+console.log('Equipment per week:', weekEquipment);
+console.log('Rest Plan:', restPlan);
+console.log('Average Rating:', avgRating);
 </script>
 </body>
 </html>

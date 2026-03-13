@@ -1368,6 +1368,271 @@ console.log('VITALITY History Stats:', {
   goalProgress,
   consistencyScore: consistency
 });
+
+// ─── Monthly Summary Cards ───
+function renderMonthlySummary() {
+  const now = new Date();
+  const monthData = {};
+
+  // Group by month
+  history.forEach(h => {
+    const d = new Date(h.date);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    if (!monthData[key]) {
+      monthData[key] = {
+        count: 0,
+        calories: 0,
+        duration: 0,
+        types: new Set(),
+        bestCalorie: 0,
+        bestDuration: 0
+      };
+    }
+    monthData[key].count++;
+    monthData[key].calories += h.calories;
+    monthData[key].duration += h.duration;
+    monthData[key].types.add(h.type);
+    if (h.calories > monthData[key].bestCalorie) monthData[key].bestCalorie = h.calories;
+    if (h.duration > monthData[key].bestDuration) monthData[key].bestDuration = h.duration;
+  });
+
+  return monthData;
+}
+
+// ─── Weekly Goal Tracker ───
+function getWeeklyGoalData() {
+  const weeklyGoal = 5; // 주 5회 목표
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  startOfWeek.setHours(0, 0, 0, 0);
+
+  const weekWorkouts = history.filter(h => new Date(h.date) >= startOfWeek);
+  const completed = weekWorkouts.length;
+  const remaining = Math.max(0, weeklyGoal - completed);
+  const percentage = Math.min(100, Math.round(completed / weeklyGoal * 100));
+
+  // Day-by-day completion
+  const dayCompletion = [];
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(startOfWeek);
+    date.setDate(startOfWeek.getDate() + i);
+    const dateStr = date.toISOString().slice(0, 10);
+    const dayWorkouts = history.filter(h =>
+      new Date(h.date).toISOString().slice(0, 10) === dateStr
+    );
+    dayCompletion.push({
+      day: ['일', '월', '화', '수', '목', '금', '토'][i],
+      completed: dayWorkouts.length > 0,
+      count: dayWorkouts.length,
+      calories: dayWorkouts.reduce((a, h) => a + h.calories, 0)
+    });
+  }
+
+  return {
+    goal: weeklyGoal,
+    completed,
+    remaining,
+    percentage,
+    dayCompletion,
+    onTrack: completed >= Math.floor(weeklyGoal * (now.getDay() + 1) / 7)
+  };
+}
+
+// ─── Workout Intensity Tracker ───
+function trackIntensityOverTime() {
+  const weeks = [];
+  const now = new Date();
+
+  for (let w = 0; w < 8; w++) {
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - (w + 1) * 7);
+    const weekEnd = new Date(now);
+    weekEnd.setDate(now.getDate() - w * 7);
+
+    const weekWorkouts = history.filter(h => {
+      const d = new Date(h.date);
+      return d >= weekStart && d < weekEnd;
+    });
+
+    const avgCalPerMin = weekWorkouts.length > 0
+      ? weekWorkouts.reduce((a, h) => a + h.calories / (h.duration / 60), 0) / weekWorkouts.length
+      : 0;
+
+    weeks.unshift({
+      weekNum: 8 - w,
+      avgIntensity: avgCalPerMin.toFixed(1),
+      workoutCount: weekWorkouts.length,
+      totalCalories: weekWorkouts.reduce((a, h) => a + h.calories, 0),
+      totalMinutes: Math.round(weekWorkouts.reduce((a, h) => a + h.duration, 0) / 60)
+    });
+  }
+
+  return weeks;
+}
+
+// ─── Exercise Pattern Detection ───
+function detectPatterns() {
+  if (history.length < 7) return { patterns: [], suggestions: [] };
+
+  const patterns = [];
+  const suggestions = [];
+
+  // Check if user always works out at the same time
+  const hours = history.map(h => new Date(h.date).getHours());
+  const avgHour = Math.round(hours.reduce((a, b) => a + b, 0) / hours.length);
+  const hourVariance = hours.reduce((a, h) => a + Math.pow(h - avgHour, 2), 0) / hours.length;
+
+  if (hourVariance < 4) {
+    patterns.push({
+      type: 'time',
+      label: `주로 ${avgHour}시에 운동합니다`,
+      emoji: avgHour < 12 ? '🌅' : avgHour < 18 ? '☀️' : '🌆'
+    });
+  }
+
+  // Check favorite workout type
+  const typeCounts2 = {};
+  history.forEach(h => {
+    typeCounts2[h.type] = (typeCounts2[h.type] || 0) + 1;
+  });
+  const sortedTypes = Object.entries(typeCounts2).sort((a, b) => b[1] - a[1]);
+  if (sortedTypes.length > 0) {
+    const typeEmojis = { running: '🏃', strength: '🏋️', hiit: '⚡', yoga: '🧘' };
+    const typeNames = { running: '러닝', strength: '근력', hiit: 'HIIT', yoga: '요가' };
+    patterns.push({
+      type: 'favorite',
+      label: `가장 좋아하는 운동: ${typeNames[sortedTypes[0][0]] || sortedTypes[0][0]}`,
+      emoji: typeEmojis[sortedTypes[0][0]] || '💪'
+    });
+  }
+
+  // Suggest underexercised types
+  const allTypes = ['running', 'strength', 'hiit', 'yoga'];
+  const typeNames2 = { running: '러닝', strength: '근력', hiit: 'HIIT', yoga: '요가' };
+  allTypes.forEach(type => {
+    if ((typeCounts2[type] || 0) < history.length * 0.1) {
+      suggestions.push(`${typeNames2[type]} 운동을 더 해보는 건 어떨까요?`);
+    }
+  });
+
+  // Check rest day frequency
+  const dates = history.map(h => new Date(h.date).toISOString().slice(0, 10));
+  const uniqueDates = [...new Set(dates)].sort().reverse();
+  let consecutiveDays = 0;
+  for (let i = 0; i < uniqueDates.length - 1; i++) {
+    const diff = (new Date(uniqueDates[i]) - new Date(uniqueDates[i + 1])) / 86400000;
+    if (diff === 1) consecutiveDays++;
+    else break;
+  }
+
+  if (consecutiveDays > 6) {
+    suggestions.push('7일 이상 연속 운동 중! 회복일을 가져보세요.');
+  }
+
+  return { patterns, suggestions };
+}
+
+// ─── Social Comparison (Mock) ───
+function getMockComparison() {
+  const myStats = calculateAdvancedStats();
+  if (!myStats) return null;
+
+  return {
+    percentile: Math.min(99, Math.round(history.length / 0.5)),
+    avgUser: {
+      workoutsPerWeek: 3.2,
+      avgDuration: 35,
+      avgCalories: 280,
+      consistency: 65
+    },
+    myAvg: {
+      workoutsPerWeek: (history.length / Math.max(1, Math.ceil(
+        (Date.now() - new Date(history[history.length - 1]?.date || Date.now()).getTime()) / (7 * 86400000)
+      ))).toFixed(1),
+      avgDuration: myStats.avgDuration,
+      avgCalories: myStats.avgCalories,
+      consistency: calculateConsistencyScore()
+    }
+  };
+}
+
+// ─── Workout Prediction ───
+function predictNextWorkout() {
+  if (history.length < 3) return null;
+
+  // Find most common next-day pattern
+  const recentTypes = history.slice(0, 5).map(h => h.type);
+  const typeRotation = ['running', 'strength', 'hiit', 'yoga'];
+
+  // Find which type is least recently done
+  let leastRecent = 'running';
+  let leastRecentIdx = Infinity;
+
+  typeRotation.forEach(type => {
+    const idx = recentTypes.indexOf(type);
+    if (idx === -1) {
+      leastRecent = type;
+      leastRecentIdx = -1;
+    } else if (idx < leastRecentIdx) {
+      // This type was done most recently - skip
+    }
+  });
+
+  // Actually find least recently done
+  for (const type of typeRotation) {
+    if (!recentTypes.includes(type)) {
+      leastRecent = type;
+      break;
+    }
+  }
+
+  const typeNames3 = { running: '러닝', strength: '근력 운동', hiit: 'HIIT', yoga: '요가' };
+  const typeEmojis2 = { running: '🏃', strength: '🏋️', hiit: '⚡', yoga: '🧘' };
+
+  return {
+    type: leastRecent,
+    name: typeNames3[leastRecent],
+    emoji: typeEmojis2[leastRecent],
+    reason: `최근 ${typeNames3[leastRecent]}을(를) 하지 않았어요`,
+    suggestedTime: `${new Date().getHours() < 12 ? '오후' : '내일 오전'}`
+  };
+}
+
+// ─── Achievement Progress ───
+function getAchievementProgress() {
+  const achievements = [
+    { id: 'workouts_10', name: '10회 달성', target: 10, current: history.length, emoji: '🎯' },
+    { id: 'workouts_50', name: '50회 달성', target: 50, current: history.length, emoji: '🏅' },
+    { id: 'workouts_100', name: '100회 달성', target: 100, current: history.length, emoji: '🏆' },
+    { id: 'cal_10000', name: '1만 칼로리 소모', target: 10000, current: totalCal, emoji: '🔥' },
+    { id: 'cal_50000', name: '5만 칼로리 소모', target: 50000, current: totalCal, emoji: '💥' },
+    { id: 'streak_7', name: '7일 연속 운동', target: 7, current: parseInt(document.getElementById('streakCount').textContent), emoji: '🔥' },
+    { id: 'streak_30', name: '30일 연속 운동', target: 30, current: parseInt(document.getElementById('streakCount').textContent), emoji: '⭐' }
+  ];
+
+  return achievements.map(a => ({
+    ...a,
+    progress: Math.min(100, Math.round(a.current / a.target * 100)),
+    completed: a.current >= a.target
+  }));
+}
+
+// ─── Final Initialization ───
+const monthlySummary = renderMonthlySummary();
+const weeklyGoal = getWeeklyGoalData();
+const intensityData = trackIntensityOverTime();
+const patterns = detectPatterns();
+const comparison = getMockComparison();
+const prediction = predictNextWorkout();
+const achievementProgress = getAchievementProgress();
+
+console.log('Monthly Summary:', monthlySummary);
+console.log('Weekly Goal:', weeklyGoal);
+console.log('Intensity Trend:', intensityData);
+console.log('Patterns:', patterns);
+console.log('Prediction:', prediction);
+console.log('Achievement Progress:', achievementProgress);
 </script>
 </body>
 </html>
