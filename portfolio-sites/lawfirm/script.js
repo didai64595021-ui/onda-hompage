@@ -8,15 +8,30 @@
 (function () {
   'use strict';
 
-  /* ========== Page Loader ========== */
-  window.addEventListener('load', function () {
-    var loader = document.querySelector('.page-loader');
-    if (loader) {
+  /* ========== Page Loader (unified with index.html) ========== */
+  (function () {
+    var loader = document.getElementById('page-loader');
+    var loaderPercent = document.getElementById('loader-percent');
+    var pct = 0;
+    var interval = setInterval(function () {
+      pct = Math.min(pct + Math.random() * 18, 99);
+      if (loaderPercent) loaderPercent.textContent = Math.floor(pct) + '%';
+    }, 100);
+
+    window.addEventListener('load', function () {
+      clearInterval(interval);
+      if (loaderPercent) loaderPercent.textContent = '100%';
       setTimeout(function () {
-        loader.classList.add('loaded');
-      }, 600);
-    }
-  });
+        if (loader) loader.classList.add('hidden');
+      }, 300);
+    });
+
+    // Fallback: hide after 2.5s even if load doesn't fire
+    setTimeout(function () {
+      clearInterval(interval);
+      if (loader) loader.classList.add('hidden');
+    }, 2500);
+  })();
 
   document.addEventListener('DOMContentLoaded', function () {
 
