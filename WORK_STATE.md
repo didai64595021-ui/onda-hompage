@@ -3,30 +3,27 @@
 > 자동 업데이트: 2026-03-13 KST
 
 ## 현재 작업
-블루밍커피 PWA 전체 기능 검증 + localStorage 데이터 연동
+Bright English Academy 포트폴리오 5페이지 제작
 
 ## 진행 상황
-- [ ] Step 1: shared.js 공통 데이터 레이어 생성
-- [ ] Step 2: cart.html — localStorage 연동 (동적 렌더링)
-- [ ] Step 3: menu.html — addToCart + detail 데이터 전달
-- [ ] Step 4: detail.html — URL 파라미터 읽기 + 옵션 저장
-- [ ] Step 5: order.html — 장바구니 데이터 표시 + 주문 완료 처리
-- [ ] Step 6: mypage.html — 주문내역/포인트/스탬프 연동
-- [ ] Step 7: index.html — 장바구니 뱃지 + 빠른주문 + 즐겨찾기
-- [ ] Step 8: service-worker.js 업데이트 + 최종 QA
+- [ ] Step 1: index.html — 메인 (히어로+프로그램+강사+후기+CTA+캠퍼스)
+- [ ] Step 2: programs.html — 프로그램 (카테고리탭+커리큘럼)
+- [ ] Step 3: teachers.html — 강사진 (프로필카드+필터링)
+- [ ] Step 4: community.html — 커뮤니티 (후기/성공사례/FAQ)
+- [ ] Step 5: contact.html — 상담신청 (폼+지도+예약)
+- [ ] Step 6: QA 검증 + 에러 수정
+- [ ] Step 7: 최종 커밋 + 푸시
 
-## 발견된 문제점
-- localStorage 사용 0건 — 모든 데이터 하드코딩
-- 페이지 간 데이터 연동 없음
-- 메뉴→상세 아이템 정보 전달 없음
-- 주문 완료 시 장바구니 미삭제, 주문내역 미저장
-- 장바구니 뱃지 하드코딩 "3"
-
-## 기술 요구사항
-- 순수 HTML/CSS/JS (프레임워크 없음)
-- localStorage로 데이터 관리
-- shared.js 공통 파일 생성하여 중복 최소화
-- 한글 폰트: Pretendard
+## 디자인 사양
+- 테마: T4 (컬러풀 섹션)
+- 메인컬러: #0066FF (일렉트릭 블루) + #FF8F00 (앰버)
+- 폰트: Outfit + Noto Sans KR
+- 레이아웃: 매거진/비대칭 그리드
+- 네비: 사이드바 드로어
+- 히어로: 타이포 애니메이션
+- 섹션전환: 대각선 클립패스
+- 이미지: 마스크/클리핑
+- 버튼: 언더라인 텍스트
 
 ## Git 상태 (자동)
 - **브랜치**: main

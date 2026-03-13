@@ -1,0 +1,1978 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로그램 | Bright English Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* ===== CSS RESET ===== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            color: #212121;
+            overflow-x: hidden;
+            word-break: keep-all;
+            overflow-wrap: break-word;
+            line-height: 1.6;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            object-fit: cover;
+            display: block;
+        }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        button {
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+        ul, ol {
+            list-style: none;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* ===== DESIGN TOKENS ===== */
+        :root {
+            --primary: #0066FF;
+            --primary-dark: #0052CC;
+            --primary-light: #E6F0FF;
+            --accent: #FF8F00;
+            --accent-dark: #E67E00;
+            --accent-light: #FFF3E0;
+            --dark: #1A1A2E;
+            --gray-900: #212121;
+            --gray-800: #333333;
+            --gray-700: #555555;
+            --gray-600: #757575;
+            --gray-400: #BDBDBD;
+            --gray-300: #E0E0E0;
+            --gray-200: #EEEEEE;
+            --gray-100: #F5F5F5;
+            --bg-mint: #E0F7FA;
+            --bg-lavender: #EDE7F6;
+            --bg-peach: #FFF3E0;
+            --bg-sky: #E3F2FD;
+            --bg-rose: #FCE4EC;
+            --bg-lime: #F1F8E9;
+            --font-en: 'Outfit', sans-serif;
+            --font-kr: 'Noto Sans KR', sans-serif;
+            --sidebar-width: 300px;
+            --topbar-height: 64px;
+        }
+
+        /* ===== TOP BAR ===== */
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--topbar-height);
+            background: #fff;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+        .topbar__left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .topbar__hamburger {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .topbar__hamburger:hover {
+            background: var(--gray-100);
+        }
+        .topbar__hamburger span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: var(--gray-900);
+            position: relative;
+        }
+        .topbar__hamburger span::before,
+        .topbar__hamburger span::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 2px;
+            background: var(--gray-900);
+            left: 0;
+        }
+        .topbar__hamburger span::before {
+            top: -7px;
+        }
+        .topbar__hamburger span::after {
+            top: 7px;
+        }
+        .topbar__logo {
+            font-family: var(--font-en);
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary);
+            letter-spacing: -0.02em;
+        }
+        .topbar__right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .topbar__phone {
+            font-family: var(--font-en);
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--gray-700);
+        }
+        .topbar__cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            padding: 0 24px;
+            background: var(--primary);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .topbar__cta:hover {
+            background: var(--primary-dark);
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #fff;
+            z-index: 1001;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 24px rgba(0,0,0,0.1);
+        }
+        .sidebar.active {
+            transform: translateX(0);
+        }
+        .sidebar__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--gray-300);
+        }
+        .sidebar__title {
+            font-family: var(--font-en);
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+        .sidebar__close {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--gray-700);
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .sidebar__close:hover {
+            background: var(--gray-100);
+        }
+        .sidebar__nav {
+            flex: 1;
+            padding: 20px 0;
+        }
+        .sidebar__link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 24px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            transition: background 0.2s, color 0.2s;
+            min-height: 48px;
+        }
+        .sidebar__link:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        .sidebar__link.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 700;
+            border-right: 3px solid var(--primary);
+        }
+        .sidebar__link-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+        .sidebar__bottom {
+            padding: 20px;
+            border-top: 1px solid var(--gray-300);
+        }
+        .sidebar__bottom-cta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 52px;
+            background: var(--accent);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1rem;
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+        .sidebar__bottom-cta:hover {
+            background: var(--accent-dark);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-top: var(--topbar-height);
+        }
+
+        /* ===== PAGE HERO ===== */
+        .page-hero {
+            position: relative;
+            height: 40vh;
+            min-height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .page-hero__bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .page-hero__overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(26,26,46,0.75), rgba(0,102,255,0.5));
+        }
+        .page-hero__content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: #fff;
+        }
+        .page-hero__title {
+            font-family: var(--font-en);
+            font-weight: 800;
+            font-size: 3rem;
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+        .page-hero__title-kr {
+            font-family: var(--font-kr);
+            font-weight: 700;
+            font-size: 2.5rem;
+        }
+        .page-hero__breadcrumb {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            margin-top: 12px;
+            opacity: 0.85;
+        }
+        .page-hero__breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        .page-hero__breadcrumb-sep {
+            font-size: 0.75rem;
+        }
+
+        /* ===== TAB BAR ===== */
+        .tab-bar {
+            position: sticky;
+            top: var(--topbar-height);
+            z-index: 100;
+            background: #fff;
+            border-bottom: 1px solid var(--gray-300);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .tab-bar__inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .tab-bar__inner::-webkit-scrollbar {
+            display: none;
+        }
+        .tab-btn {
+            flex-shrink: 0;
+            min-height: 48px;
+            min-width: 48px;
+            padding: 12px 24px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--gray-600);
+            border-bottom: 3px solid transparent;
+            transition: color 0.2s, border-color 0.2s;
+            white-space: nowrap;
+        }
+        .tab-btn:hover {
+            color: var(--primary);
+        }
+        .tab-btn.active {
+            color: var(--primary);
+            font-weight: 700;
+            border-bottom-color: var(--primary);
+        }
+
+        /* ===== PROGRAM CARDS SECTION ===== */
+        .programs-section {
+            padding: 60px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .programs-section__title {
+            font-family: var(--font-en);
+            font-weight: 800;
+            font-size: 2rem;
+            margin-bottom: 8px;
+            color: var(--gray-900);
+        }
+        .programs-section__subtitle {
+            font-size: 1rem;
+            color: var(--gray-600);
+            margin-bottom: 40px;
+        }
+        .programs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+        .programs-grid .program-card:nth-child(1) {
+            grid-column: span 2;
+        }
+        .programs-grid .program-card:nth-child(4) {
+            grid-column: span 2;
+        }
+
+        /* ===== PROGRAM CARD ===== */
+        .program-card {
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        .program-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.3s;
+        }
+        .program-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 36px rgba(0,0,0,0.14);
+        }
+        .program-card__image-wrap {
+            position: relative;
+            overflow: hidden;
+            height: 220px;
+        }
+        .program-card__image-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+        }
+        .program-card__category-badge {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .badge--adult { background: var(--primary); }
+        .badge--biz { background: #7C4DFF; }
+        .badge--exam { background: #00BFA5; }
+        .badge--kids { background: #FF6D00; }
+        .badge--private { background: #E91E63; }
+
+        .program-card__body {
+            padding: 24px;
+            border-left: 4px solid var(--primary);
+        }
+        .program-card[data-category="성인회화"] .program-card__body {
+            border-left-color: var(--primary);
+        }
+        .program-card[data-category="비즈니스"] .program-card__body {
+            border-left-color: #7C4DFF;
+        }
+        .program-card[data-category="시험대비"]:nth-of-type(odd) .program-card__body {
+            border-left-color: #00BFA5;
+        }
+        .program-card[data-category="시험대비"]:nth-of-type(even) .program-card__body {
+            border-left-color: #26A69A;
+        }
+        .program-card[data-category="키즈/주니어"] .program-card__body {
+            border-left-color: #FF6D00;
+        }
+        .program-card[data-category="1:1 맞춤"] .program-card__body {
+            border-left-color: #E91E63;
+        }
+        .program-card__name {
+            font-family: var(--font-kr);
+            font-weight: 700;
+            font-size: 1.35rem;
+            margin-bottom: 2px;
+            color: var(--gray-900);
+        }
+        .program-card__name-en {
+            font-family: var(--font-en);
+            font-weight: 400;
+            font-size: 0.9rem;
+            color: var(--gray-600);
+            margin-bottom: 12px;
+        }
+        .program-card__desc {
+            font-size: 0.95rem;
+            color: var(--gray-700);
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+        .program-card__badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .program-card__badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            background: var(--gray-100);
+            border-radius: 8px;
+            font-size: 0.82rem;
+            color: var(--gray-700);
+            font-weight: 500;
+        }
+        .program-card__badge--level {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        .program-card__badge--price {
+            background: var(--accent-light);
+            color: var(--accent-dark);
+            font-weight: 700;
+        }
+        .program-card__instructor {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.88rem;
+            color: var(--gray-600);
+            margin-bottom: 16px;
+        }
+        .program-card__instructor-icon {
+            width: 28px;
+            height: 28px;
+            background: var(--primary-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: var(--primary);
+        }
+
+        /* ===== ACCORDION ===== */
+        .accordion-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 12px 0;
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            border-top: 1px solid var(--gray-200);
+            min-height: 48px;
+        }
+        .accordion-toggle__arrow {
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+        }
+        .accordion-toggle.open .accordion-toggle__arrow {
+            transform: rotate(180deg);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+        .accordion-content__inner {
+            padding: 0 0 16px 0;
+        }
+        .accordion-content__list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .accordion-content__item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 0.88rem;
+            color: var(--gray-700);
+            line-height: 1.5;
+        }
+        .accordion-content__item::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--primary);
+            flex-shrink: 0;
+            margin-top: 7px;
+        }
+        .program-card__cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 48px;
+            padding: 12px 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .program-card__cta:hover {
+            color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+        .program-card__cta-arrow {
+            transition: transform 0.2s;
+        }
+        .program-card__cta:hover .program-card__cta-arrow {
+            transform: translateX(4px);
+        }
+
+        /* ===== COMPARISON TABLE SECTION ===== */
+        .comparison-section {
+            background: var(--bg-sky);
+            padding: 80px 20px;
+            position: relative;
+            clip-path: polygon(0 40px, 100% 0, 100% calc(100% - 40px), 0 100%);
+            margin-top: -40px;
+            padding-top: 120px;
+            padding-bottom: 120px;
+        }
+        .comparison-section__inner {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .comparison-section__title {
+            font-family: var(--font-en);
+            font-weight: 800;
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 8px;
+            color: var(--gray-900);
+        }
+        .comparison-section__subtitle {
+            text-align: center;
+            color: var(--gray-600);
+            font-size: 1rem;
+            margin-bottom: 40px;
+        }
+        .comparison-table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+        .comparison-table {
+            width: 100%;
+            min-width: 700px;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .comparison-table thead th {
+            background: var(--primary);
+            color: #fff;
+            font-weight: 700;
+            padding: 16px 14px;
+            font-size: 0.9rem;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .comparison-table thead th:first-child {
+            text-align: left;
+            padding-left: 24px;
+        }
+        .comparison-table tbody tr {
+            transition: background 0.2s;
+        }
+        .comparison-table tbody tr:hover {
+            background: var(--primary-light);
+        }
+        .comparison-table tbody tr:nth-child(even) {
+            background: var(--gray-100);
+        }
+        .comparison-table tbody tr:nth-child(even):hover {
+            background: var(--primary-light);
+        }
+        .comparison-table tbody td {
+            padding: 14px;
+            font-size: 0.88rem;
+            text-align: center;
+            color: var(--gray-800);
+            border-bottom: 1px solid var(--gray-200);
+        }
+        .comparison-table tbody td:first-child {
+            text-align: left;
+            padding-left: 24px;
+            font-weight: 600;
+        }
+        .comparison-table tbody td.price-cell {
+            font-weight: 700;
+            color: var(--accent-dark);
+        }
+
+        /* ===== LEARNING PROCESS SECTION ===== */
+        .process-section {
+            background: var(--bg-lime);
+            padding: 80px 20px;
+            position: relative;
+            clip-path: polygon(0 40px, 100% 0, 100% calc(100% - 40px), 0 100%);
+            margin-top: -40px;
+            padding-top: 120px;
+            padding-bottom: 120px;
+        }
+        .process-section__inner {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .process-section__title {
+            font-family: var(--font-en);
+            font-weight: 800;
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 8px;
+            color: var(--gray-900);
+        }
+        .process-section__subtitle {
+            text-align: center;
+            color: var(--gray-600);
+            font-size: 1rem;
+            margin-bottom: 60px;
+        }
+        .process-steps {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 0;
+            position: relative;
+        }
+        .process-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex: 1;
+            max-width: 200px;
+            position: relative;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .process-step.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .process-step__icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 2;
+        }
+        .process-step__number {
+            font-family: var(--font-en);
+            font-weight: 800;
+            font-size: 0.75rem;
+            color: #fff;
+            background: var(--primary);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: -4px;
+            right: -4px;
+        }
+        .process-step__title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 6px;
+            color: var(--gray-900);
+        }
+        .process-step__desc {
+            font-size: 0.82rem;
+            color: var(--gray-600);
+            line-height: 1.5;
+        }
+        .process-arrow {
+            display: flex;
+            align-items: center;
+            padding-top: 32px;
+            font-size: 1.2rem;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        /* ===== CTA SECTION ===== */
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            padding: 80px 20px;
+            text-align: center;
+            margin-top: -40px;
+            padding-top: 100px;
+        }
+        .cta-section__inner {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .cta-section__title {
+            font-family: var(--font-kr);
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+        .cta-section__desc {
+            font-size: 1.05rem;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 32px;
+            line-height: 1.7;
+        }
+        .cta-section__btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 56px;
+            padding: 0 40px;
+            background: var(--accent);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-radius: 12px;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .cta-section__btn:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: var(--dark);
+            color: #fff;
+            padding: 60px 20px 30px;
+        }
+        .footer__inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+        }
+        .footer__col-title {
+            font-family: var(--font-en);
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            color: #fff;
+        }
+        .footer__brand {
+            font-family: var(--font-en);
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        .footer__tagline {
+            font-family: var(--font-en);
+            font-weight: 300;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+            font-style: italic;
+        }
+        .footer__link {
+            display: block;
+            padding: 4px 0;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+            transition: color 0.2s;
+        }
+        .footer__link:hover {
+            color: #fff;
+        }
+        .footer__info {
+            font-size: 0.88rem;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.7;
+        }
+        .footer__social {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .footer__social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.7);
+            transition: background 0.2s, color 0.2s;
+        }
+        .footer__social-link:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+        .footer__bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 24px;
+            margin-top: 40px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* ===== MOUSE TRAIL ===== */
+        .mouse-trail {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9999;
+            transition: opacity 0.3s;
+        }
+
+        /* ===== HIDDEN UTILITY ===== */
+        .hidden {
+            display: none !important;
+        }
+
+        /* ===== RESPONSIVE 1440px ===== */
+        @media (max-width: 1440px) {
+            .programs-grid {
+                gap: 28px;
+            }
+        }
+
+        /* ===== DESKTOP SIDEBAR 1024px+ ===== */
+        @media (min-width: 1025px) {
+            .sidebar {
+                transform: translateX(0);
+                box-shadow: 1px 0 8px rgba(0,0,0,0.05);
+                top: var(--topbar-height);
+                height: calc(100vh - var(--topbar-height));
+            }
+            .sidebar-overlay {
+                display: none !important;
+            }
+            .main-content {
+                margin-left: var(--sidebar-width);
+            }
+            .topbar {
+                padding-left: calc(var(--sidebar-width) + 20px);
+            }
+            .topbar__hamburger {
+                display: none;
+            }
+            .sidebar__header {
+                display: none;
+            }
+        }
+
+        /* ===== RESPONSIVE 1024px ===== */
+        @media (max-width: 1024px) {
+            .programs-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .programs-grid .program-card:nth-child(1),
+            .programs-grid .program-card:nth-child(4) {
+                grid-column: span 1;
+            }
+            .footer__inner {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .process-steps {
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+            .process-arrow {
+                display: none;
+            }
+            .process-step {
+                flex: 0 0 calc(33.333% - 12px);
+                max-width: none;
+            }
+        }
+
+        /* ===== RESPONSIVE 768px ===== */
+        @media (max-width: 768px) {
+            .programs-grid {
+                grid-template-columns: 1fr;
+            }
+            .page-hero__title {
+                font-size: 2rem;
+            }
+            .page-hero__title-kr {
+                font-size: 1.8rem;
+            }
+            .comparison-section,
+            .process-section {
+                clip-path: polygon(0 20px, 100% 0, 100% calc(100% - 20px), 0 100%);
+                padding-top: 80px;
+                padding-bottom: 80px;
+            }
+            .process-step {
+                flex: 0 0 calc(50% - 12px);
+            }
+            .footer__inner {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+        }
+
+        /* ===== RESPONSIVE 480px ===== */
+        @media (max-width: 480px) {
+            .topbar__phone {
+                display: none;
+            }
+            .topbar__logo {
+                font-size: 1rem;
+            }
+            .topbar__cta {
+                padding: 0 16px;
+                font-size: 0.85rem;
+            }
+            .page-hero {
+                height: 30vh;
+                min-height: 220px;
+            }
+            .page-hero__title {
+                font-size: 1.6rem;
+            }
+            .page-hero__title-kr {
+                font-size: 1.4rem;
+            }
+            .programs-section {
+                padding: 40px 16px;
+            }
+            .programs-section__title {
+                font-size: 1.5rem;
+            }
+            .tab-btn {
+                padding: 12px 16px;
+                font-size: 0.88rem;
+            }
+            .program-card__body {
+                padding: 18px;
+            }
+            .program-card__image-wrap {
+                height: 180px;
+            }
+            .comparison-section,
+            .process-section {
+                padding: 60px 16px;
+                padding-top: 80px;
+                padding-bottom: 80px;
+            }
+            .cta-section__title {
+                font-size: 1.4rem;
+            }
+            .process-step {
+                flex: 0 0 100%;
+            }
+        }
+
+        /* ===== RESPONSIVE 375px ===== */
+        @media (max-width: 375px) {
+            .topbar__logo {
+                font-size: 0.9rem;
+            }
+            .topbar__cta {
+                padding: 0 12px;
+                font-size: 0.8rem;
+                min-height: 42px;
+            }
+            .page-hero__title {
+                font-size: 1.3rem;
+            }
+            .page-hero__title-kr {
+                font-size: 1.15rem;
+            }
+            .program-card__name {
+                font-size: 1.15rem;
+            }
+            .program-card__desc {
+                font-size: 0.88rem;
+            }
+            .cta-section__title {
+                font-size: 1.2rem;
+            }
+            .cta-section__btn {
+                width: 100%;
+            }
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== MOUSE TRAIL ELEMENTS ===== -->
+    <div class="mouse-trail" id="trail1"></div>
+    <div class="mouse-trail" id="trail2"></div>
+    <div class="mouse-trail" id="trail3"></div>
+    <div class="mouse-trail" id="trail4"></div>
+    <div class="mouse-trail" id="trail5"></div>
+
+    <!-- ===== TOP BAR ===== -->
+    <header class="topbar" role="banner">
+        <div class="topbar__left">
+            <button class="topbar__hamburger" id="menuToggle" aria-label="메뉴 열기">
+                <span></span>
+            </button>
+            <a href="index.html" class="topbar__logo">Bright English Academy</a>
+        </div>
+        <div class="topbar__right">
+            <span class="topbar__phone">02-1234-5678</span>
+            <a href="contact.html" class="topbar__cta">무료 상담</a>
+        </div>
+    </header>
+
+    <!-- ===== SIDEBAR OVERLAY ===== -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ===== SIDEBAR ===== -->
+    <nav class="sidebar" id="sidebar" role="navigation" aria-label="메인 네비게이션">
+        <div class="sidebar__header">
+            <span class="sidebar__title">Bright English</span>
+            <button class="sidebar__close" id="sidebarClose" aria-label="메뉴 닫기">&times;</button>
+        </div>
+        <div class="sidebar__nav">
+            <a href="index.html" class="sidebar__link">
+                <span class="sidebar__link-icon">&#127968;</span>
+                홈
+            </a>
+            <a href="programs.html" class="sidebar__link active">
+                <span class="sidebar__link-icon">&#128218;</span>
+                프로그램
+            </a>
+            <a href="teachers.html" class="sidebar__link">
+                <span class="sidebar__link-icon">&#128105;&#8205;&#127891;</span>
+                강사진
+            </a>
+            <a href="community.html" class="sidebar__link">
+                <span class="sidebar__link-icon">&#128172;</span>
+                커뮤니티
+            </a>
+            <a href="contact.html" class="sidebar__link">
+                <span class="sidebar__link-icon">&#128233;</span>
+                상담신청
+            </a>
+        </div>
+        <div class="sidebar__bottom">
+            <a href="contact.html" class="sidebar__bottom-cta">무료 레벨테스트</a>
+        </div>
+    </nav>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+
+        <!-- ===== PAGE HERO ===== -->
+        <section class="page-hero">
+            <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1400&h=600&fit=crop" alt="영어 수업 강의실 풍경" class="page-hero__bg" width="1400" height="600" loading="eager">
+            <div class="page-hero__overlay"></div>
+            <div class="page-hero__content">
+                <h1>
+                    <span class="page-hero__title">Programs</span><br>
+                    <span class="page-hero__title-kr">프로그램</span>
+                </h1>
+                <div class="page-hero__breadcrumb">
+                    <a href="index.html">홈</a>
+                    <span class="page-hero__breadcrumb-sep">&#9654;</span>
+                    <span>프로그램</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== TAB BAR ===== -->
+        <div class="tab-bar">
+            <div class="tab-bar__inner">
+                <button class="tab-btn active" data-filter="전체" aria-pressed="true">전체</button>
+                <button class="tab-btn" data-filter="성인회화" aria-pressed="false">성인회화</button>
+                <button class="tab-btn" data-filter="비즈니스" aria-pressed="false">비즈니스</button>
+                <button class="tab-btn" data-filter="시험대비" aria-pressed="false">시험대비</button>
+                <button class="tab-btn" data-filter="키즈/주니어" aria-pressed="false">키즈/주니어</button>
+                <button class="tab-btn" data-filter="1:1 맞춤" aria-pressed="false">1:1 맞춤</button>
+            </div>
+        </div>
+
+        <!-- ===== PROGRAMS SECTION ===== -->
+        <section class="programs-section">
+            <h2 class="programs-section__title fade-in">Our Programs</h2>
+            <p class="programs-section__subtitle fade-in">목표와 수준에 맞는 최적의 프로그램을 찾아보세요</p>
+
+            <div class="programs-grid" id="programsGrid">
+
+                <!-- Program 1: 성인회화 -->
+                <article class="program-card" data-category="성인회화">
+                    <div class="program-card__image-wrap">
+                        <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=400&fit=crop" alt="성인 영어 회화 수업에서 대화하는 학생들" width="600" height="400" loading="lazy">
+                        <span class="program-card__category-badge badge--adult">성인회화</span>
+                    </div>
+                    <div class="program-card__body">
+                        <h3 class="program-card__name">성인회화</h3>
+                        <p class="program-card__name-en">Daily English</p>
+                        <p class="program-card__desc">일상에서 자주 사용하는 영어 표현을 중심으로 말하기, 듣기 능력을 향상시킵니다. 원어민 강사와 함께 실전 회화를 연습하며 자연스러운 영어 구사력을 키워보세요.</p>
+                        <div class="program-card__badges">
+                            <span class="program-card__badge program-card__badge--level">&#127919; 초급~중급</span>
+                            <span class="program-card__badge">&#128197; 주 3회 (월/수/금) 50분</span>
+                            <span class="program-card__badge">&#128101; 6-8명</span>
+                            <span class="program-card__badge program-card__badge--price">월 280,000원</span>
+                        </div>
+                        <div class="program-card__instructor">
+                            <span class="program-card__instructor-icon">&#128100;</span>
+                            담당 강사: Sarah Mitchell
+                        </div>
+                        <button class="accordion-toggle" aria-expanded="false">
+                            <span>커리큘럼 상세보기</span>
+                            <span class="accordion-toggle__arrow">&#9660;</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="accordion-content__inner">
+                                <div class="accordion-content__list">
+                                    <div class="accordion-content__item">일상회화 패턴 학습 및 반복 연습</div>
+                                    <div class="accordion-content__item">발음 교정 및 인토네이션 훈련</div>
+                                    <div class="accordion-content__item">다양한 상황별 리스닝 훈련</div>
+                                    <div class="accordion-content__item">실전 롤플레이 실습</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="contact.html" class="program-card__cta">
+                            상담 신청 <span class="program-card__cta-arrow">&rarr;</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Program 2: 비즈니스영어 -->
+                <article class="program-card" data-category="비즈니스">
+                    <div class="program-card__image-wrap">
+                        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop" alt="비즈니스 미팅에서 프레젠테이션하는 모습" width="600" height="400" loading="lazy">
+                        <span class="program-card__category-badge badge--biz">비즈니스</span>
+                    </div>
+                    <div class="program-card__body">
+                        <h3 class="program-card__name">비즈니스영어</h3>
+                        <p class="program-card__name-en">Business Pro</p>
+                        <p class="program-card__desc">글로벌 비즈니스 환경에서 필요한 영어 커뮤니케이션 스킬을 집중 훈련합니다. 이메일, 프레젠테이션, 미팅, 협상 등 실무 중심 커리큘럼으로 구성되어 있습니다.</p>
+                        <div class="program-card__badges">
+                            <span class="program-card__badge program-card__badge--level">&#127919; 중급~고급</span>
+                            <span class="program-card__badge">&#128197; 주 2회 (화/목) 60분</span>
+                            <span class="program-card__badge">&#128101; 4-6명</span>
+                            <span class="program-card__badge program-card__badge--price">월 350,000원</span>
+                        </div>
+                        <div class="program-card__instructor">
+                            <span class="program-card__instructor-icon">&#128100;</span>
+                            담당 강사: 박준영
+                        </div>
+                        <button class="accordion-toggle" aria-expanded="false">
+                            <span>커리큘럼 상세보기</span>
+                            <span class="accordion-toggle__arrow">&#9660;</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="accordion-content__inner">
+                                <div class="accordion-content__list">
+                                    <div class="accordion-content__item">비즈니스 이메일 작성법</div>
+                                    <div class="accordion-content__item">프레젠테이션 스킬 향상</div>
+                                    <div class="accordion-content__item">회의 진행 및 참여 영어</div>
+                                    <div class="accordion-content__item">협상 영어 전략 및 표현</div>
+                                    <div class="accordion-content__item">산업별 전문 용어 학습</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="contact.html" class="program-card__cta">
+                            상담 신청 <span class="program-card__cta-arrow">&rarr;</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Program 3: TOEIC 집중반 -->
+                <article class="program-card" data-category="시험대비">
+                    <div class="program-card__image-wrap">
+                        <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&h=400&fit=crop" alt="시험 준비를 위해 공부하는 학생" width="600" height="400" loading="lazy">
+                        <span class="program-card__category-badge badge--exam">시험대비</span>
+                    </div>
+                    <div class="program-card__body">
+                        <h3 class="program-card__name">TOEIC 집중반</h3>
+                        <p class="program-card__name-en">TOEIC Intensive</p>
+                        <p class="program-card__desc">체계적인 문제 풀이 전략과 실전 모의고사를 통해 목표 점수를 달성합니다. 파트별 공략법과 시간 관리 노하우를 배울 수 있습니다.</p>
+                        <div class="program-card__badges">
+                            <span class="program-card__badge program-card__badge--level">&#127919; 전 레벨</span>
+                            <span class="program-card__badge">&#128197; 주 5회 (월-금) 90분</span>
+                            <span class="program-card__badge">&#128101; 10-15명</span>
+                            <span class="program-card__badge program-card__badge--price">월 450,000원</span>
+                        </div>
+                        <div class="program-card__instructor">
+                            <span class="program-card__instructor-icon">&#128100;</span>
+                            담당 강사: 김지현
+                        </div>
+                        <button class="accordion-toggle" aria-expanded="false">
+                            <span>커리큘럼 상세보기</span>
+                            <span class="accordion-toggle__arrow">&#9660;</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="accordion-content__inner">
+                                <div class="accordion-content__list">
+                                    <div class="accordion-content__item">LC/RC 파트별 공략 전략</div>
+                                    <div class="accordion-content__item">실전 모의고사 및 해설</div>
+                                    <div class="accordion-content__item">오답 분석 및 취약점 보완</div>
+                                    <div class="accordion-content__item">시간 관리 전략 훈련</div>
+                                    <div class="accordion-content__item">핵심 어휘 및 문법 정리</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="contact.html" class="program-card__cta">
+                            상담 신청 <span class="program-card__cta-arrow">&rarr;</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Program 4: IELTS 준비반 -->
+                <article class="program-card" data-category="시험대비">
+                    <div class="program-card__image-wrap">
+                        <img src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&h=400&fit=crop" alt="도서관에서 IELTS 시험을 준비하는 모습" width="600" height="400" loading="lazy">
+                        <span class="program-card__category-badge badge--exam">시험대비</span>
+                    </div>
+                    <div class="program-card__body">
+                        <h3 class="program-card__name">IELTS 준비반</h3>
+                        <p class="program-card__name-en">IELTS Preparation</p>
+                        <p class="program-card__desc">Speaking, Writing, Listening, Reading 4개 영역을 균형 있게 학습합니다. 실제 시험과 동일한 환경에서 모의 테스트를 진행하며 밴드 스코어 향상을 목표로 합니다.</p>
+                        <div class="program-card__badges">
+                            <span class="program-card__badge program-card__badge--level">&#127919; 중급~고급</span>
+                            <span class="program-card__badge">&#128197; 주 3회 (월/수/금) 90분</span>
+                            <span class="program-card__badge">&#128101; 6-8명</span>
+                            <span class="program-card__badge program-card__badge--price">월 500,000원</span>
+                        </div>
+                        <div class="program-card__instructor">
+                            <span class="program-card__instructor-icon">&#128100;</span>
+                            담당 강사: James Park
+                        </div>
+                        <button class="accordion-toggle" aria-expanded="false">
+                            <span>커리큘럼 상세보기</span>
+                            <span class="accordion-toggle__arrow">&#9660;</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="accordion-content__inner">
+                                <div class="accordion-content__list">
+                                    <div class="accordion-content__item">Speaking 모의 인터뷰 연습</div>
+                                    <div class="accordion-content__item">Writing Task 1 &amp; 2 집중 훈련</div>
+                                    <div class="accordion-content__item">아카데믹 리딩 전략 학습</div>
+                                    <div class="accordion-content__item">리스닝 노트테이킹 기법</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="contact.html" class="program-card__cta">
+                            상담 신청 <span class="program-card__cta-arrow">&rarr;</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Program 5: 키즈영어 -->
+                <article class="program-card" data-category="키즈/주니어">
+                    <div class="program-card__image-wrap">
+                        <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&h=400&fit=crop" alt="어린이 영어 수업에서 즐겁게 활동하는 아이들" width="600" height="400" loading="lazy">
+                        <span class="program-card__category-badge badge--kids">키즈/주니어</span>
+                    </div>
+                    <div class="program-card__body">
+                        <h3 class="program-card__name">키즈영어</h3>
+                        <p class="program-card__name-en">Kids Fun</p>
+                        <p class="program-card__desc">놀이와 활동 중심의 영어 수업으로 아이들이 영어에 대한 흥미와 자신감을 키울 수 있습니다. 노래, 게임, 스토리텔링 등 다양한 활동으로 자연스러운 영어 환경을 제공합니다.</p>
+                        <div class="program-card__badges">
+                            <span class="program-card__badge program-card__badge--level">&#127919; 유아~초등</span>
+                            <span class="program-card__badge">&#128197; 주 3회 (월/수/금) 40분</span>
+                            <span class="program-card__badge">&#128101; 4-6명</span>
+                            <span class="program-card__badge program-card__badge--price">월 220,000원</span>
+                        </div>
+                        <div class="program-card__instructor">
+                            <span class="program-card__instructor-icon">&#128100;</span>
+                            담당 강사: Emily Chen
+                        </div>
+                        <button class="accordion-toggle" aria-expanded="false">
+                            <span>커리큘럼 상세보기</span>
+                            <span class="accordion-toggle__arrow">&#9660;</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="accordion-content__inner">
+                                <div class="accordion-content__list">
+                                    <div class="accordion-content__item">파닉스 기초부터 응용까지</div>
+                                    <div class="accordion-content__item">영어 동요 및 챈트 활동</div>
+                                    <div class="accordion-content__item">스토리텔링을 통한 독해력 향상</div>
+                                    <div class="accordion-content__item">역할놀이로 배우는 생활 영어</div>
+                                    <div class="accordion-content__item">영어 게임 및 액티비티</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="contact.html" class="program-card__cta">
+                            상담 신청 <span class="program-card__cta-arrow">&rarr;</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Program 6: 1:1 맞춤수업 -->
+                <article class="program-card" data-category="1:1 맞춤">
+                    <div class="program-card__image-wrap">
+                        <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?w=600&h=400&fit=crop" alt="1대1 개인 영어 튜터링 수업 장면" width="600" height="400" loading="lazy">
+                        <span class="program-card__category-badge badge--private">1:1 맞춤</span>
+                    </div>
+                    <div class="program-card__body">
+                        <h3 class="program-card__name">1:1 맞춤수업</h3>
+                        <p class="program-card__name-en">Private Lesson</p>
+                        <p class="program-card__desc">학습자의 목표와 수준에 맞춘 완전 개인화 수업입니다. 원하는 시간에, 원하는 주제로, 전담 강사와 함께 가장 효율적인 학습을 경험하세요.</p>
+                        <div class="program-card__badges">
+                            <span class="program-card__badge program-card__badge--level">&#127919; 전 레벨</span>
+                            <span class="program-card__badge">&#128197; 주 1-5회 (자유 선택) 50분</span>
+                            <span class="program-card__badge">&#128101; 1명</span>
+                            <span class="program-card__badge program-card__badge--price">회당 80,000원</span>
+                        </div>
+                        <div class="program-card__instructor">
+                            <span class="program-card__instructor-icon">&#128100;</span>
+                            담당 강사: 선택 가능
+                        </div>
+                        <button class="accordion-toggle" aria-expanded="false">
+                            <span>커리큘럼 상세보기</span>
+                            <span class="accordion-toggle__arrow">&#9660;</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="accordion-content__inner">
+                                <div class="accordion-content__list">
+                                    <div class="accordion-content__item">맞춤 커리큘럼 설계</div>
+                                    <div class="accordion-content__item">자유 주제 선택 수업</div>
+                                    <div class="accordion-content__item">약점 집중 보완 학습</div>
+                                    <div class="accordion-content__item">진도 유연 조정 가능</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="contact.html" class="program-card__cta">
+                            상담 신청 <span class="program-card__cta-arrow">&rarr;</span>
+                        </a>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- ===== COMPARISON TABLE SECTION ===== -->
+        <section class="comparison-section">
+            <div class="comparison-section__inner">
+                <h2 class="comparison-section__title fade-in">Program Comparison</h2>
+                <p class="comparison-section__subtitle fade-in">프로그램 비교</p>
+                <div class="comparison-table-wrap fade-in">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>프로그램명</th>
+                                <th>대상</th>
+                                <th>정원</th>
+                                <th>수업횟수</th>
+                                <th>시간</th>
+                                <th>가격</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>성인회화 (Daily English)</td>
+                                <td>초급~중급</td>
+                                <td>6-8명</td>
+                                <td>주 3회</td>
+                                <td>50분</td>
+                                <td class="price-cell">월 280,000원</td>
+                            </tr>
+                            <tr>
+                                <td>비즈니스영어 (Business Pro)</td>
+                                <td>중급~고급</td>
+                                <td>4-6명</td>
+                                <td>주 2회</td>
+                                <td>60분</td>
+                                <td class="price-cell">월 350,000원</td>
+                            </tr>
+                            <tr>
+                                <td>TOEIC 집중반</td>
+                                <td>전 레벨</td>
+                                <td>10-15명</td>
+                                <td>주 5회</td>
+                                <td>90분</td>
+                                <td class="price-cell">월 450,000원</td>
+                            </tr>
+                            <tr>
+                                <td>IELTS 준비반</td>
+                                <td>중급~고급</td>
+                                <td>6-8명</td>
+                                <td>주 3회</td>
+                                <td>90분</td>
+                                <td class="price-cell">월 500,000원</td>
+                            </tr>
+                            <tr>
+                                <td>키즈영어 (Kids Fun)</td>
+                                <td>유아~초등</td>
+                                <td>4-6명</td>
+                                <td>주 3회</td>
+                                <td>40분</td>
+                                <td class="price-cell">월 220,000원</td>
+                            </tr>
+                            <tr>
+                                <td>1:1 맞춤수업 (Private)</td>
+                                <td>전 레벨</td>
+                                <td>1명</td>
+                                <td>주 1-5회</td>
+                                <td>50분</td>
+                                <td class="price-cell">회당 80,000원</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== LEARNING PROCESS SECTION ===== -->
+        <section class="process-section">
+            <div class="process-section__inner">
+                <h2 class="process-section__title fade-in">Learning Process</h2>
+                <p class="process-section__subtitle fade-in">학습 프로세스</p>
+                <div class="process-steps" id="processSteps">
+                    <div class="process-step" data-step="1">
+                        <div class="process-step__icon">
+                            <span class="process-step__number">1</span>
+                            &#128203;
+                        </div>
+                        <h3 class="process-step__title">레벨테스트</h3>
+                        <p class="process-step__desc">정확한 실력 진단으로 현재 영어 수준을 파악합니다</p>
+                    </div>
+                    <div class="process-arrow">&#10132;</div>
+                    <div class="process-step" data-step="2">
+                        <div class="process-step__icon">
+                            <span class="process-step__number">2</span>
+                            &#128221;
+                        </div>
+                        <h3 class="process-step__title">맞춤 커리큘럼 설계</h3>
+                        <p class="process-step__desc">목표와 수준에 맞는 최적의 학습 계획을 수립합니다</p>
+                    </div>
+                    <div class="process-arrow">&#10132;</div>
+                    <div class="process-step" data-step="3">
+                        <div class="process-step__icon">
+                            <span class="process-step__number">3</span>
+                            &#128218;
+                        </div>
+                        <h3 class="process-step__title">수업 진행</h3>
+                        <p class="process-step__desc">전문 강사와 함께 체계적인 수업을 진행합니다</p>
+                    </div>
+                    <div class="process-arrow">&#10132;</div>
+                    <div class="process-step" data-step="4">
+                        <div class="process-step__icon">
+                            <span class="process-step__number">4</span>
+                            &#128200;
+                        </div>
+                        <h3 class="process-step__title">월별 평가</h3>
+                        <p class="process-step__desc">정기 평가를 통해 학습 성과를 점검하고 피드백합니다</p>
+                    </div>
+                    <div class="process-arrow">&#10132;</div>
+                    <div class="process-step" data-step="5">
+                        <div class="process-step__icon">
+                            <span class="process-step__number">5</span>
+                            &#127942;
+                        </div>
+                        <h3 class="process-step__title">레벨업</h3>
+                        <p class="process-step__desc">목표 달성 후 다음 단계로 도약합니다</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== CTA SECTION ===== -->
+        <section class="cta-section">
+            <div class="cta-section__inner fade-in">
+                <h2 class="cta-section__title">어떤 프로그램이 맞을지 고민되시나요?</h2>
+                <p class="cta-section__desc">무료 레벨테스트로 나에게 맞는 프로그램을 찾아보세요. 전문 상담사가 최적의 학습 플랜을 제안해 드립니다.</p>
+                <a href="contact.html" class="cta-section__btn">무료 레벨테스트 신청</a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer" role="contentinfo">
+        <div class="footer__inner">
+            <div class="footer__col">
+                <div class="footer__brand">Bright English Academy</div>
+                <p class="footer__tagline">Your English, Our Mission</p>
+                <div class="footer__social">
+                    <a href="#" class="footer__social-link" aria-label="인스타그램">IG</a>
+                    <a href="#" class="footer__social-link" aria-label="유튜브">YT</a>
+                    <a href="#" class="footer__social-link" aria-label="블로그">BL</a>
+                </div>
+            </div>
+            <div class="footer__col">
+                <h3 class="footer__col-title">빠른 링크</h3>
+                <a href="index.html" class="footer__link">홈</a>
+                <a href="programs.html" class="footer__link">프로그램</a>
+                <a href="teachers.html" class="footer__link">강사진</a>
+                <a href="community.html" class="footer__link">커뮤니티</a>
+                <a href="contact.html" class="footer__link">상담신청</a>
+            </div>
+            <div class="footer__col">
+                <h3 class="footer__col-title">캠퍼스</h3>
+                <p class="footer__info">
+                    <strong>강남점</strong><br>
+                    서울시 강남구 테헤란로 123
+                </p>
+                <p class="footer__info" style="margin-top: 12px;">
+                    <strong>홍대점</strong><br>
+                    서울시 마포구 와우산로 45
+                </p>
+            </div>
+            <div class="footer__col">
+                <h3 class="footer__col-title">문의</h3>
+                <p class="footer__info">
+                    &#128222; 02-1234-5678<br>
+                    &#128231; info@brightenglish.kr
+                </p>
+            </div>
+        </div>
+        <div class="footer__bottom">
+            &copy; 2024 Bright English Academy. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- ===== JAVASCRIPT ===== -->
+    <script>
+        /* =========================================
+         * 1. SIDEBAR DRAWER TOGGLE
+         * ========================================= */
+        (function() {
+            var menuToggle = document.getElementById('menuToggle');
+            var sidebar = document.getElementById('sidebar');
+            var sidebarOverlay = document.getElementById('sidebarOverlay');
+            var sidebarClose = document.getElementById('sidebarClose');
+
+            function openSidebar() {
+                sidebar.classList.add('active');
+                sidebarOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                menuToggle.setAttribute('aria-label', '메뉴 닫기');
+            }
+
+            function closeSidebar() {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+                menuToggle.setAttribute('aria-label', '메뉴 열기');
+            }
+
+            menuToggle.addEventListener('click', function() {
+                if (sidebar.classList.contains('active')) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            });
+
+            sidebarClose.addEventListener('click', closeSidebar);
+            sidebarOverlay.addEventListener('click', closeSidebar);
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+                    closeSidebar();
+                }
+            });
+
+            /* Close sidebar on desktop resize */
+            var mediaQuery = window.matchMedia('(min-width: 1025px)');
+            function handleResize(mq) {
+                if (mq.matches) {
+                    closeSidebar();
+                }
+            }
+            mediaQuery.addEventListener('change', handleResize);
+        })();
+
+        /* =========================================
+         * 2. TAB FILTERING
+         * ========================================= */
+        (function() {
+            var tabBtns = document.querySelectorAll('.tab-btn');
+            var programCards = document.querySelectorAll('.program-card');
+            var programsGrid = document.getElementById('programsGrid');
+
+            tabBtns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var filter = this.getAttribute('data-filter');
+
+                    /* Update active tab */
+                    tabBtns.forEach(function(b) {
+                        b.classList.remove('active');
+                        b.setAttribute('aria-pressed', 'false');
+                    });
+                    this.classList.add('active');
+                    this.setAttribute('aria-pressed', 'true');
+
+                    /* Filter cards */
+                    programCards.forEach(function(card) {
+                        var category = card.getAttribute('data-category');
+                        if (filter === '전체' || category === filter) {
+                            card.classList.remove('hidden');
+                            /* Re-trigger visible class for animation */
+                            card.classList.remove('visible');
+                            requestAnimationFrame(function() {
+                                requestAnimationFrame(function() {
+                                    card.classList.add('visible');
+                                });
+                            });
+                        } else {
+                            card.classList.add('hidden');
+                            card.classList.remove('visible');
+                        }
+                    });
+
+                    /* Reset grid layout based on visible cards */
+                    updateGridLayout();
+                });
+            });
+
+            function updateGridLayout() {
+                var visibleCards = programsGrid.querySelectorAll('.program-card:not(.hidden)');
+                visibleCards.forEach(function(card) {
+                    card.style.gridColumn = '';
+                });
+                if (visibleCards.length >= 4 && window.innerWidth > 1024) {
+                    visibleCards[0].style.gridColumn = 'span 2';
+                    if (visibleCards.length >= 4) {
+                        visibleCards[3].style.gridColumn = 'span 2';
+                    }
+                }
+            }
+        })();
+
+        /* =========================================
+         * 3. ACCORDION EXPAND/COLLAPSE
+         * ========================================= */
+        (function() {
+            var toggles = document.querySelectorAll('.accordion-toggle');
+
+            toggles.forEach(function(toggle) {
+                toggle.addEventListener('click', function() {
+                    var content = this.nextElementSibling;
+                    var isOpen = this.classList.contains('open');
+
+                    if (isOpen) {
+                        this.classList.remove('open');
+                        this.setAttribute('aria-expanded', 'false');
+                        content.style.maxHeight = '0';
+                    } else {
+                        this.classList.add('open');
+                        this.setAttribute('aria-expanded', 'true');
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                    }
+                });
+            });
+        })();
+
+        /* =========================================
+         * 4. SCROLL ANIMATIONS (IntersectionObserver)
+         * ========================================= */
+        (function() {
+            var fadeElements = document.querySelectorAll('.fade-in');
+            var programCards = document.querySelectorAll('.program-card');
+
+            var observerOptions = {
+                root: null,
+                rootMargin: '0px 0px -50px 0px',
+                threshold: 0.1
+            };
+
+            var fadeObserver = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        fadeObserver.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            fadeElements.forEach(function(el) {
+                fadeObserver.observe(el);
+            });
+
+            /* Program cards with staggered delay */
+            var cardObserver = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        var index = Array.from(programCards).indexOf(entry.target);
+                        setTimeout(function() {
+                            entry.target.classList.add('visible');
+                        }, index * 100);
+                        cardObserver.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            programCards.forEach(function(card) {
+                cardObserver.observe(card);
+            });
+        })();
+
+        /* =========================================
+         * 5. LEARNING PROCESS SEQUENTIAL ANIMATION
+         * ========================================= */
+        (function() {
+            var processSteps = document.querySelectorAll('.process-step');
+            var processSection = document.getElementById('processSteps');
+
+            var processObserver = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        processSteps.forEach(function(step, index) {
+                            setTimeout(function() {
+                                step.classList.add('visible');
+                            }, index * 200);
+                        });
+                        processObserver.unobserve(entry.target);
+                    }
+                });
+            }, {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.2
+            });
+
+            processObserver.observe(processSection);
+        })();
+
+        /* =========================================
+         * 6. MOUSE TRAIL (DESKTOP ONLY)
+         * ========================================= */
+        (function() {
+            var isDesktop = window.matchMedia('(min-width: 1025px) and (hover: hover)').matches;
+            if (!isDesktop) return;
+
+            var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (prefersReduced) return;
+
+            var trails = [];
+            for (var i = 1; i <= 5; i++) {
+                trails.push(document.getElementById('trail' + i));
+            }
+
+            var mouseX = 0;
+            var mouseY = 0;
+            var trailPositions = [];
+
+            for (var j = 0; j < trails.length; j++) {
+                trailPositions.push({ x: 0, y: 0 });
+            }
+
+            document.addEventListener('mousemove', function(e) {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                trails.forEach(function(t) {
+                    t.style.opacity = '0.3';
+                });
+            });
+
+            document.addEventListener('mouseleave', function() {
+                trails.forEach(function(t) {
+                    t.style.opacity = '0';
+                });
+            });
+
+            function animateTrails() {
+                var prevX = mouseX;
+                var prevY = mouseY;
+
+                for (var k = 0; k < trails.length; k++) {
+                    var pos = trailPositions[k];
+                    var speed = 0.3 - (k * 0.04);
+
+                    pos.x += (prevX - pos.x) * speed;
+                    pos.y += (prevY - pos.y) * speed;
+
+                    trails[k].style.left = pos.x - 6 + 'px';
+                    trails[k].style.top = pos.y - 6 + 'px';
+                    trails[k].style.transform = 'scale(' + (1 - k * 0.15) + ')';
+                    trails[k].style.opacity = String(0.3 - k * 0.05);
+
+                    prevX = pos.x;
+                    prevY = pos.y;
+                }
+
+                requestAnimationFrame(animateTrails);
+            }
+
+            animateTrails();
+        })();
+
+        /* =========================================
+         * 7. SMOOTH SCROLL FOR ANCHOR LINKS
+         * ========================================= */
+        (function() {
+            document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+                anchor.addEventListener('click', function(e) {
+                    var href = this.getAttribute('href');
+                    if (href === '#') return;
+                    e.preventDefault();
+                    var target = document.querySelector(href);
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+        })();
+
+        /* =========================================
+         * 8. TAB BAR SCROLL INDICATOR
+         * ========================================= */
+        (function() {
+            var tabBar = document.querySelector('.tab-bar__inner');
+            var tabBtns = tabBar.querySelectorAll('.tab-btn');
+
+            tabBtns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    /* Scroll active tab into view on mobile */
+                    var scrollLeft = btn.offsetLeft - (tabBar.offsetWidth / 2) + (btn.offsetWidth / 2);
+                    tabBar.scrollTo({
+                        left: scrollLeft,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
