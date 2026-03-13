@@ -29,7 +29,7 @@
       localStorage.setItem('jungui-theme', theme);
       var label = document.querySelector('.toggle-label');
       if (label) {
-        label.textContent = theme === 'dark' ? 'Dark Mode' : 'Light Mode';
+        label.textContent = theme === 'dark' ? '다크 모드' : '라이트 모드';
       }
     }
 
