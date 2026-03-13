@@ -1105,6 +1105,7 @@
             setupPullToRefresh();
             setupInteractions();
             registerServiceWorker();
+            updateCartBadge();
             
             // Add skeleton loading removal
             setTimeout(() => {
@@ -1359,19 +1360,39 @@
             }, 300);
         }
 
-        // Cart management
+        // Cart management (localStorage)
         function addToCart(itemId) {
-            cart.push(itemId);
+            // Find menu data by itemId (simplified - just add a generic item)
+            const menuData = {
+              'americano': { name: '아메리카노', unitPrice: 4500, img: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80' },
+              'latte': { name: '카페라떼', unitPrice: 5200, img: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&q=80' },
+              'coldbrew': { name: '콜드브루', unitPrice: 5500, img: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=200&q=80' },
+              'greentea': { name: '녹차라떼', unitPrice: 5600, img: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=200&q=80' },
+            };
+            const data = menuData[itemId] || { name: itemId, unitPrice: 5000, img: '' };
+            const cartItem = {
+              id: Date.now().toString(),
+              name: data.name,
+              img: data.img,
+              options: '',
+              temp: '',
+              unitPrice: data.unitPrice,
+              qty: 1
+            };
+            const lsCart = JSON.parse(localStorage.getItem('bloomingCart') || '[]');
+            lsCart.push(cartItem);
+            localStorage.setItem('bloomingCart', JSON.stringify(lsCart));
             updateCartBadge();
-            
-            // Show brief success message
             showToast('장바구니에 추가되었습니다');
         }
 
         function updateCartBadge() {
+            const lsCart = JSON.parse(localStorage.getItem('bloomingCart') || '[]');
+            const count = lsCart.reduce((s, i) => s + i.qty, 0);
             const badges = document.querySelectorAll('.nav-badge, .floating-cart-badge');
             badges.forEach(badge => {
-                badge.textContent = cart.length;
+                badge.textContent = count;
+                badge.style.display = count > 0 ? '' : 'none';
             });
         }
 

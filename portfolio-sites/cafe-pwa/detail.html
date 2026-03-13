@@ -1751,7 +1751,7 @@ body {
     <span>장바구니 담기</span>
     <span class="btn-price" id="ctaPrice">· 5,500원</span>
   </button>
-  <button class="cta-add-btn" onclick="window.location.href='order.html'" style="flex:0.7;background:var(--gold);color:var(--deep-green);margin-left:8px;border-radius:14px;">
+  <button class="cta-add-btn" onclick="directOrder()" style="flex:0.7;background:var(--gold);color:var(--deep-green);margin-left:8px;border-radius:14px;">
     <span>바로 주문</span>
   </button>
 </div>
@@ -1995,9 +1995,43 @@ function toggleHeart() {
 /* ============================================
    ADD TO CART
    ============================================ */
+function buildCartItem() {
+  const { unitPrice, total } = calculateTotal();
+  const sizeNames = { small: 'Small', regular: 'Regular', large: 'Large' };
+  const options = [];
+  options.push(sizeNames[state.size.value] || state.size.value);
+  if (state.temp === 'hot') options.push('HOT'); else options.push('ICE');
+  if (state.shots > 0) options.push('샷 추가 ' + state.shots);
+  state.syrups.forEach(s => {
+    const names = { vanilla: '바닐라시럽', hazelnut: '헤이즐넛시럽', caramel: '카라멜시럽' };
+    options.push(names[s] || s);
+  });
+  if (state.whip.value === 'yes') options.push('휘핑크림');
+  const cupNames = { store: '매장컵', personal: '개인컵', disposable: '일회용' };
+  options.push(cupNames[state.cup.value] || '');
+
+  return {
+    id: Date.now().toString(),
+    name: '카페라떼',
+    img: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&q=80',
+    options: options.join(' · '),
+    temp: state.temp === 'hot' ? 'HOT' : 'ICE',
+    unitPrice: unitPrice,
+    qty: state.quantity
+  };
+}
+
+function saveToCart(item) {
+  const cart = JSON.parse(localStorage.getItem('bloomingCart') || '[]');
+  cart.push(item);
+  localStorage.setItem('bloomingCart', JSON.stringify(cart));
+}
+
 function addToCart() {
   const btn = document.getElementById('addToCartBtn');
-  
+  const item = buildCartItem();
+  saveToCart(item);
+
   // Ripple effect
   const ripple = document.createElement('span');
   ripple.className = 'btn-ripple';
@@ -2008,18 +2042,16 @@ function addToCart() {
   ripple.style.marginTop = '-50px';
   btn.appendChild(ripple);
   setTimeout(() => ripple.remove(), 600);
-  
+
   // Fly animation
   const heroImg = document.getElementById('heroImg');
   const heroRect = heroImg.getBoundingClientRect();
-  
   const flyEl = document.createElement('img');
   flyEl.src = heroImg.src;
   flyEl.className = 'fly-item';
   flyEl.style.left = heroRect.left + heroRect.width / 2 - 30 + 'px';
   flyEl.style.top = heroRect.top + heroRect.height / 2 - 30 + 'px';
   document.body.appendChild(flyEl);
-  
   requestAnimationFrame(() => {
     flyEl.style.left = window.innerWidth - 60 + 'px';
     flyEl.style.top = window.innerHeight - 60 + 'px';
@@ -2027,12 +2059,7 @@ function addToCart() {
     flyEl.style.height = '20px';
     flyEl.style.opacity = '0.3';
   });
-  
-  setTimeout(() => {
-    flyEl.remove();
-    showToast('장바구니에 담았어요! 🛒');
-  }, 700);
-  
+  setTimeout(() => { flyEl.remove(); showToast('장바구니에 담겼습니다 🛒'); }, 700);
   hapticFeedback();
 }
 
@@ -2256,6 +2283,39 @@ if ('serviceWorker' in navigator) {
   
   document.querySelectorAll('img[data-src]').forEach(img => imgObserver.observe(img));
 })();
+
+/* ============================================
+   DIRECT ORDER
+   ============================================ */
+function directOrder() {
+  const item = buildCartItem();
+  // Save as last order directly
+  const orderItems = [item];
+  const total = item.unitPrice * item.qty;
+  const orderNum = 'BC-' + String(Math.floor(1000 + Math.random() * 9000));
+  const now = new Date();
+  const order = {
+    orderNum,
+    date: now.toISOString(),
+    items: orderItems,
+    subtotal: total,
+    discount: 0,
+    total: total,
+    points: Math.floor(total * 0.05)
+  };
+  localStorage.setItem('bloomingLastOrder', JSON.stringify(order));
+  // Save to order history
+  const history = JSON.parse(localStorage.getItem('bloomingOrders') || '[]');
+  history.unshift(order);
+  localStorage.setItem('bloomingOrders', JSON.stringify(history));
+  // Update stamps
+  const stamps = parseInt(localStorage.getItem('bloomingStamps') || '0') + 1;
+  localStorage.setItem('bloomingStamps', String(stamps));
+  // Update points
+  const pts = parseInt(localStorage.getItem('bloomingPoints') || '0') + order.points;
+  localStorage.setItem('bloomingPoints', String(pts));
+  window.location.href = 'order.html';
+}
 
 /* ============================================
    DOUBLE TAP HEART ON HERO IMAGE

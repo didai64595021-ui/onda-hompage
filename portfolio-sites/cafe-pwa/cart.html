@@ -10,6 +10,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css">
+<script src="./shared.js"></script>
 <style>
 /* ============================================
    BLOOMING COFFEE — CART PAGE
@@ -1042,75 +1043,7 @@ body {
 <div class="cart-section" id="cartSection">
   <div class="cart-section-title">주문 메뉴</div>
   <div class="swipe-hint">← 밀어서 삭제</div>
-  
-  <!-- Item 1 -->
-  <div class="cart-item fade-in" id="item1">
-    <button class="cart-item-delete" onclick="removeItem('item1')" aria-label="삭제">
-      <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
-    </button>
-    <div class="cart-item-top">
-      <img class="cart-item-img" src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&q=80" alt="카페라떼" loading="lazy">
-      <div class="cart-item-info">
-        <div class="cart-item-name">카페라떼 <span class="item-badge">ICE</span></div>
-        <div class="cart-item-options">Regular · 샷 추가 1 · 바닐라시럽</div>
-        <div class="cart-item-price">6,500원</div>
-      </div>
-    </div>
-    <div class="cart-item-bottom">
-      <div class="item-qty-controls">
-        <button class="item-qty-btn" onclick="adjustItemQty('item1', -1)">−</button>
-        <span class="item-qty-value" id="qty-item1">2</span>
-        <button class="item-qty-btn" onclick="adjustItemQty('item1', 1)">+</button>
-      </div>
-      <span class="item-subtotal" id="sub-item1">13,000원</span>
-    </div>
-  </div>
-  
-  <!-- Item 2 -->
-  <div class="cart-item fade-in" id="item2">
-    <button class="cart-item-delete" onclick="removeItem('item2')" aria-label="삭제">
-      <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
-    </button>
-    <div class="cart-item-top">
-      <img class="cart-item-img" src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80" alt="아메리카노" loading="lazy">
-      <div class="cart-item-info">
-        <div class="cart-item-name">아메리카노 <span class="item-badge" style="background:#FEE2E2;color:#DC2626;">HOT</span></div>
-        <div class="cart-item-options">Large · 샷 추가 2</div>
-        <div class="cart-item-price">6,500원</div>
-      </div>
-    </div>
-    <div class="cart-item-bottom">
-      <div class="item-qty-controls">
-        <button class="item-qty-btn" onclick="adjustItemQty('item2', -1)">−</button>
-        <span class="item-qty-value" id="qty-item2">1</span>
-        <button class="item-qty-btn" onclick="adjustItemQty('item2', 1)">+</button>
-      </div>
-      <span class="item-subtotal" id="sub-item2">6,500원</span>
-    </div>
-  </div>
-  
-  <!-- Item 3 -->
-  <div class="cart-item fade-in" id="item3">
-    <button class="cart-item-delete" onclick="removeItem('item3')" aria-label="삭제">
-      <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
-    </button>
-    <div class="cart-item-top">
-      <img class="cart-item-img" src="https://images.unsplash.com/photo-1555507036-ab1f4038024a?w=200&q=80" alt="크루아상" loading="lazy">
-      <div class="cart-item-info">
-        <div class="cart-item-name">크루아상</div>
-        <div class="cart-item-options">플레인</div>
-        <div class="cart-item-price">4,500원</div>
-      </div>
-    </div>
-    <div class="cart-item-bottom">
-      <div class="item-qty-controls">
-        <button class="item-qty-btn" onclick="adjustItemQty('item3', -1)">−</button>
-        <span class="item-qty-value" id="qty-item3">1</span>
-        <button class="item-qty-btn" onclick="adjustItemQty('item3', 1)">+</button>
-      </div>
-      <span class="item-subtotal" id="sub-item3">4,500원</span>
-    </div>
-  </div>
+  <!-- Items rendered dynamically from localStorage -->
 </div>
 
 <!-- ADD MORE -->
@@ -1257,145 +1190,160 @@ body {
 
 <script>
 /* ============================================
-   CART STATE
+   CART — powered by BC shared data layer
    ============================================ */
-const cartItems = {
-  item1: { name: '카페라떼', price: 6500, qty: 2 },
-  item2: { name: '아메리카노', price: 6500, qty: 1 },
-  item3: { name: '크루아상', price: 4500, qty: 1 },
-};
-
 let appliedCoupon = null;
-const coupons = {
-  coupon1: { name: '웰컴 쿠폰', discount: 2000, type: 'fixed' },
-  coupon2: { name: '커피 10%', discount: 0.1, type: 'percent' },
-};
 
-/* ============================================
-   UPDATE TOTALS
-   ============================================ */
-function updateTotals() {
-  const ids = Object.keys(cartItems);
-  let subtotal = 0;
-  let itemCount = 0;
-  
-  ids.forEach(id => {
-    const item = cartItems[id];
-    const sub = item.price * item.qty;
-    subtotal += sub;
-    itemCount += item.qty;
-    
-    const subEl = document.getElementById(`sub-${id}`);
-    if (subEl) subEl.textContent = sub.toLocaleString('ko-KR') + '원';
+/* ---------- RENDER ---------- */
+function renderCart() {
+  const cart = BC.getCart();
+  const section = document.getElementById('cartSection');
+  section.querySelectorAll('.cart-item').forEach(el => el.remove());
+
+  // Render coupon cards from BC
+  renderCoupons();
+
+  cart.forEach((item, idx) => {
+    const badgeStyle = item.temp === 'HOT' ? 'background:#FEE2E2;color:#DC2626;' : '';
+    const imgSrc = item.img || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGM0Y0RjYiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zNWVtIiBmaWxsPSIjOUNBM0FGIiBmb250LXNpemU9IjQwIj7imJU8L3RleHQ+PC9zdmc+';
+    const up = item.unitPrice || item.price || 0;
+    const div = document.createElement('div');
+    div.className = 'cart-item fade-in';
+    div.id = 'item-' + idx;
+    div.innerHTML = `
+      <button class="cart-item-delete" onclick="removeItem(${idx})" aria-label="삭제">
+        <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+      <div class="cart-item-top">
+        <img class="cart-item-img" src="${imgSrc}" alt="${item.name}" loading="lazy"
+          onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGM0Y0RjYiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zNWVtIiBmaWxsPSIjOUNBM0FGIiBmb250LXNpemU9IjQwIj7imJU8L3RleHQ+PC9zdmc+'">
+        <div class="cart-item-info">
+          <div class="cart-item-name">${item.name} ${item.temp ? '<span class="item-badge" style="'+badgeStyle+'">'+item.temp+'</span>' : ''}</div>
+          <div class="cart-item-options">${item.options || ''}</div>
+          <div class="cart-item-price">${formatPrice(up)}</div>
+        </div>
+      </div>
+      <div class="cart-item-bottom">
+        <div class="item-qty-controls">
+          <button class="item-qty-btn" onclick="adjustItemQty(${idx}, -1)">−</button>
+          <span class="item-qty-value" id="qty-${idx}">${item.qty}</span>
+          <button class="item-qty-btn" onclick="adjustItemQty(${idx}, 1)">+</button>
+        </div>
+        <span class="item-subtotal" id="sub-${idx}">${formatPrice(up * item.qty)}</span>
+      </div>
+    `;
+    section.appendChild(div);
   });
-  
-  let discount = 0;
-  if (appliedCoupon) {
-    const c = coupons[appliedCoupon];
-    if (c.type === 'fixed') discount = c.discount;
-    else discount = Math.round(subtotal * c.discount);
-  }
-  
-  const total = Math.max(0, subtotal - discount);
-  const points = Math.floor(total * 0.01);
-  
-  document.getElementById('cartCount').textContent = itemCount;
-  document.getElementById('sumSubtotal').textContent = subtotal.toLocaleString('ko-KR') + '원';
-  document.getElementById('sumDiscount').textContent = '-' + discount.toLocaleString('ko-KR') + '원';
-  document.getElementById('sumTotal').innerHTML = total.toLocaleString('ko-KR') + '<span class="won">원</span>';
-  document.getElementById('bottomTotal').textContent = total.toLocaleString('ko-KR') + '원';
-  document.getElementById('bottomCount').textContent = itemCount + '개';
-  
-  const pointsEl = document.querySelector('.summary-points-text');
-  if (pointsEl) pointsEl.textContent = `🌟 ${points}P 적립 예정`;
-  
-  // Show/hide empty state
-  if (ids.length === 0) {
-    document.getElementById('emptyCart').classList.add('visible');
-    document.getElementById('bottomOrder').style.display = 'none';
-    document.querySelector('.cart-section').style.display = 'none';
-    document.querySelector('.add-more').style.display = 'none';
-    document.querySelector('.coupon-section').style.display = 'none';
-    document.querySelector('.summary-section').style.display = 'none';
-    document.querySelector('.payment-note').style.display = 'none';
-    document.querySelector('.recommend-section').style.display = 'none';
-  }
+
+  updateTotals();
 }
 
-/* ============================================
-   ADJUST ITEM QTY
-   ============================================ */
-function adjustItemQty(id, delta) {
-  const item = cartItems[id];
-  if (!item) return;
-  
-  item.qty = Math.max(1, Math.min(10, item.qty + delta));
-  
-  const el = document.getElementById(`qty-${id}`);
-  if (el) {
-    el.textContent = item.qty;
-    el.style.transform = 'scale(1.3)';
-    setTimeout(() => el.style.transform = '', 200);
+/* ---------- RENDER COUPONS ---------- */
+function renderCoupons() {
+  const container = document.querySelector('.coupon-available');
+  if (!container) return;
+  container.innerHTML = '';
+  const coupons = BC.getCoupons();
+  coupons.forEach(c => {
+    const valueText = c.type === 'fixed' ? `-${c.discount.toLocaleString('ko-KR')}원` : `${Math.round(c.discount * 100)}%`;
+    const div = document.createElement('div');
+    div.className = 'coupon-card' + (appliedCoupon === c.id ? ' applied' : '');
+    div.id = c.id;
+    div.onclick = () => toggleCoupon(c.id);
+    div.innerHTML = `
+      <div class="coupon-info">
+        <span class="coupon-name">${c.icon || '🎟️'} ${c.name}</span>
+        <span class="coupon-desc">${c.desc} · ${c.expiry}</span>
+      </div>
+      <div style="display:flex;align-items:center;">
+        <span class="coupon-value">${valueText}</span>
+        <div class="coupon-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+/* ---------- TOTALS ---------- */
+function updateTotals() {
+  const cart = BC.getCart();
+  let subtotal = 0, itemCount = 0;
+
+  cart.forEach((item, idx) => {
+    const up = item.unitPrice || item.price || 0;
+    const sub = up * item.qty;
+    subtotal += sub;
+    itemCount += item.qty;
+    const subEl = document.getElementById(`sub-${idx}`);
+    if (subEl) subEl.textContent = formatPrice(sub);
+  });
+
+  let discount = 0;
+  if (appliedCoupon) {
+    const coupon = BC.getCoupons().find(c => c.id === appliedCoupon);
+    if (coupon) {
+      if (coupon.type === 'fixed') discount = coupon.discount;
+      else discount = Math.round(subtotal * coupon.discount);
+    }
   }
-  
+
+  const total = Math.max(0, subtotal - discount);
+  const points = Math.floor(total * 0.01);
+
+  document.getElementById('cartCount').textContent = itemCount;
+  document.getElementById('sumSubtotal').textContent = formatPrice(subtotal);
+  document.getElementById('sumDiscount').textContent = '-' + formatPrice(discount);
+  document.getElementById('sumTotal').innerHTML = formatPriceNoUnit(total) + '<span class="won">원</span>';
+  document.getElementById('bottomTotal').textContent = formatPrice(total);
+  document.getElementById('bottomCount').textContent = itemCount + '개';
+
+  const pointsEl = document.querySelector('.summary-points-text');
+  if (pointsEl) pointsEl.textContent = `🌟 ${points.toLocaleString('ko-KR')}P 적립 예정`;
+
+  const showSections = cart.length > 0;
+  document.getElementById('emptyCart').classList.toggle('visible', !showSections);
+  document.getElementById('bottomOrder').style.display = showSections ? '' : 'none';
+  ['.cart-section','.add-more','.coupon-section','.summary-section','.payment-note','.recommend-section'].forEach(sel => {
+    const el = document.querySelector(sel);
+    if (el) el.style.display = showSections ? '' : 'none';
+  });
+
+  BC.updateAllBadges();
+}
+
+/* ---------- QTY / REMOVE ---------- */
+function adjustItemQty(idx, delta) {
+  const cart = BC.getCart();
+  if (!cart[idx]) return;
+  cart[idx].qty = Math.max(1, Math.min(10, cart[idx].qty + delta));
+  BC.setCart(cart);
+  const el = document.getElementById(`qty-${idx}`);
+  if (el) { el.textContent = cart[idx].qty; el.style.transform='scale(1.3)'; setTimeout(()=>el.style.transform='',200); }
   updateTotals();
   haptic();
 }
 
-/* ============================================
-   REMOVE ITEM
-   ============================================ */
-function removeItem(id) {
-  const el = document.getElementById(id);
+function removeItem(idx) {
+  const el = document.getElementById('item-' + idx);
   if (el) {
     el.classList.add('removing');
-    setTimeout(() => {
-      el.remove();
-      delete cartItems[id];
-      updateTotals();
-    }, 400);
+    setTimeout(() => { BC.removeFromCart(idx); renderCart(); }, 400);
   }
   haptic();
 }
 
-/* ============================================
-   CLEAR ALL
-   ============================================ */
-function showClearDialog() {
-  document.getElementById('dialogOverlay').classList.add('active');
-}
+/* ---------- CLEAR ALL ---------- */
+function showClearDialog() { document.getElementById('dialogOverlay').classList.add('active'); }
+function closeDialog() { document.getElementById('dialogOverlay').classList.remove('active'); }
+function clearAll() { closeDialog(); BC.clearCart(); renderCart(); }
 
-function closeDialog() {
-  document.getElementById('dialogOverlay').classList.remove('active');
-}
-
-function clearAll() {
-  closeDialog();
-  Object.keys(cartItems).forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.add('removing');
-  });
-  setTimeout(() => {
-    Object.keys(cartItems).forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.remove();
-      delete cartItems[id];
-    });
-    updateTotals();
-  }, 400);
-}
-
-/* ============================================
-   COUPON
-   ============================================ */
+/* ---------- COUPON ---------- */
 function toggleCoupon(id) {
   if (appliedCoupon === id) {
     appliedCoupon = null;
     document.getElementById(id).classList.remove('applied');
   } else {
-    if (appliedCoupon) {
-      document.getElementById(appliedCoupon).classList.remove('applied');
-    }
+    if (appliedCoupon) { const prev = document.getElementById(appliedCoupon); if (prev) prev.classList.remove('applied'); }
     appliedCoupon = id;
     document.getElementById(id).classList.add('applied');
     showToast('쿠폰이 적용되었어요! 🎉');
@@ -1403,105 +1351,109 @@ function toggleCoupon(id) {
   updateTotals();
   haptic();
 }
-
 function applyCouponCode() {
   const code = document.getElementById('couponInput').value.trim();
-  if (code) {
-    showToast('유효하지 않은 쿠폰 코드예요');
-  }
+  if (code) showToast('유효하지 않은 쿠폰 코드예요');
 }
 
-/* ============================================
-   ORDER TYPE
-   ============================================ */
+/* ---------- ORDER TYPE ---------- */
 function setOrderType(type) {
   const toggle = document.getElementById('orderType');
   const btns = toggle.querySelectorAll('.order-type-btn');
-  
-  if (type === 'takeout') {
-    toggle.classList.add('takeout');
-    btns[0].classList.remove('active');
-    btns[1].classList.add('active');
-  } else {
-    toggle.classList.remove('takeout');
-    btns[0].classList.add('active');
-    btns[1].classList.remove('active');
-  }
+  if (type === 'takeout') { toggle.classList.add('takeout'); btns[0].classList.remove('active'); btns[1].classList.add('active'); }
+  else { toggle.classList.remove('takeout'); btns[0].classList.add('active'); btns[1].classList.remove('active'); }
   haptic();
 }
 
-/* ============================================
-   PLACE ORDER
-   ============================================ */
+/* ---------- PLACE ORDER ---------- */
 function placeOrder() {
+  const cart = BC.getCart();
+  if (cart.length === 0) return;
+
   const btn = document.querySelector('.order-btn');
   btn.textContent = '주문 접수 중...';
   btn.style.opacity = '0.7';
   btn.disabled = true;
-  
-  setTimeout(() => {
-    window.location.href = 'order.html';
-  }, 1200);
+
+  let subtotal = 0;
+  cart.forEach(i => subtotal += (i.unitPrice || i.price || 0) * i.qty);
+  let discount = 0;
+  let couponName = '';
+  if (appliedCoupon) {
+    const coupon = BC.getCoupons().find(c => c.id === appliedCoupon);
+    if (coupon) {
+      couponName = coupon.name;
+      discount = coupon.type === 'fixed' ? coupon.discount : Math.round(subtotal * coupon.discount);
+    }
+  }
+  const total = Math.max(0, subtotal - discount);
+  const orderNum = 'B-' + String(100 + Math.floor(Math.random() * 900));
+  const now = new Date();
+  const order = {
+    orderNum,
+    date: now.toISOString(),
+    dateStr: `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`,
+    items: cart,
+    subtotal,
+    discount,
+    couponName,
+    total,
+    points: Math.floor(total * 0.01),
+    store: '블루밍 커피 강남점'
+  };
+
+  // Save last order for order.html to display
+  localStorage.setItem('bc_last_order', JSON.stringify(order));
+  // Add to history + update points/stamps
+  BC.addOrder(order);
+  // Use coupon if applied
+  if (appliedCoupon) BC.useCoupon(appliedCoupon);
+  // Clear cart
+  BC.clearCart();
+
+  setTimeout(() => { window.location.href = 'order.html'; }, 1000);
 }
 
-/* ============================================
-   SWIPE TO DELETE
-   ============================================ */
+/* ---------- RECOMMEND → ADD ---------- */
+function addRecommend(name, price, img) {
+  BC.addToCart({ name, price, unitPrice: price, img, qty: 1, options: '', temp: '' });
+  showToast('장바구니에 추가했어요! 🛒');
+  renderCart();
+}
+
+/* ---------- SWIPE TO DELETE ---------- */
 (function() {
-  let startX = 0;
-  let currentItem = null;
-  
+  let startX = 0, currentItem = null;
   document.addEventListener('touchstart', (e) => {
     const item = e.target.closest('.cart-item');
-    if (item) {
-      startX = e.touches[0].clientX;
-      currentItem = item;
-    }
+    if (item) { startX = e.touches[0].clientX; currentItem = item; }
   }, { passive: true });
-  
   document.addEventListener('touchmove', (e) => {
     if (!currentItem) return;
     const diff = e.touches[0].clientX - startX;
-    if (diff < -10) {
-      currentItem.style.transform = `translateX(${Math.max(diff, -100)}px)`;
-      currentItem.style.transition = 'none';
-    }
+    if (diff < -10) { currentItem.style.transform = `translateX(${Math.max(diff,-100)}px)`; currentItem.style.transition = 'none'; }
   }, { passive: true });
-  
   document.addEventListener('touchend', (e) => {
     if (!currentItem) return;
     const diff = e.changedTouches[0].clientX - startX;
     currentItem.style.transition = '';
-    
-    if (diff < -80) {
-      const id = currentItem.id;
-      removeItem(id);
-    } else {
-      currentItem.style.transform = '';
-    }
+    if (diff < -80) { const idx = parseInt(currentItem.id.replace('item-','')); removeItem(idx); }
+    else { currentItem.style.transform = ''; }
     currentItem = null;
   });
 })();
 
-/* ============================================
-   UTILS
-   ============================================ */
+/* ---------- UTILS ---------- */
 function showToast(text) {
   const t = document.getElementById('toast');
   t.textContent = text;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
+function haptic() { if (navigator.vibrate) navigator.vibrate(10); }
 
-function haptic() {
-  if (navigator.vibrate) navigator.vibrate(10);
-}
-
-/* ============================================
-   INIT
-   ============================================ */
-updateTotals();
-
+/* ---------- INIT ---------- */
+renderCart();
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./service-worker.js').catch(() => {});
 }

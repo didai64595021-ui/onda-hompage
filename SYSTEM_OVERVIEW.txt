@@ -1,0 +1,542 @@
+# ONDA Logic Monitor — 전체 시스템 명세서
+> 최종 업데이트: 2026-03-11
+
+---
+
+## 1. 프로젝트 개요
+
+**목적:** 네이버 플레이스 순위 상승 로직 발견 + 관리업체 순위 관리 자동화
+
+**스택:**
+- Frontend: Next.js 14 (App Router) + Tailwind CSS
+- Backend: Next.js API Routes + Vercel Serverless
+- DB: Supabase (PostgreSQL)
+- 크롤러: PM2 + TypeScript (서버 상시 가동)
+- AI 분석: Anthropic Claude API + Google Gemini
+- 알림: Telegram Bot API
+- 배포: Vercel (프로덕션) + PM2 (크롤러/스케줄러)
+
+**서버:** ubuntu-4gb-hel1-3 (Hetzner 핀란드)
+**URL:** https://onda-logic-monitor.vercel.app
+**GitHub:** didai64595021-ui/onda-logic-monitor
+
+---
+
+## 2. 데이터 수집 (크롤링)
+
+### 2.1 AdLog 크롤러 (`crawler/adlog.ts`, 1,606줄)
+**핵심 데이터 소스.** AdLog(adlog.kr)에서 네이버 플레이스 순위/N2/리뷰 데이터 수집.
+
+**수집 데이터:**
+| 필드 | 설명 | 파싱 위치 |
+|---|---|---|
+| rank | 네이버 플레이스 순위 | cells[0] |
+| business_name | 업체명 | cells[1] |
+| visitor_review_count | 방문자 리뷰 수 | cells[2] |
+| blog_review_count | 블로그 리뷰 수 | cells[3] |
+| n1_score | N1 (저품질 판별) | cells[4] |
+| n2_score | N2 (핵심 순위 지표) | cells[5] |
+| n3_score | N3 (무시) | cells[6] |
+| place_id | 네이버 플레이스 고유 ID | `<tr class='tr_PLACEID'>` |
+
+**API 엔드포인트:**
+- 로그인: `POST https://adlog.kr/bbs/login_check.php` (mb_id, mb_password)
+- 순위 조회: `POST https://adlog.kr/adlog/ajax_place_list.php`
+  - 파라미터: api_section=10, api_type=90, place_keyword, master_disp=1, place_date
+  - 응답: `{ code: '0000', items: '<HTML table>', place_date: 'YYYY-MM-DD' }`
+
+**구조 변경 자동 감지 (2026-03-11 구현):**
+- 헤더 기반 동적 컬럼 매핑 (`buildColumnMapping()`)
+- 파싱 성공률 50% 미만 → 구조 변경 감지 알림
+- 3개 키워드 연속 실패 → 크롤링 자동 중단 + 텔레그램 긴급 알림
+- 저장 전 데이터 검증 (rank ≤ 0, n2=0, 전일 대비 10배 차이 등)
+
+### 2.2 스케줄러 (`scripts/scheduler.ts`, PM2)
+**PM2 프로세스명:** `onda-crawler-scheduler`
+
+| 시간 (KST) | 작업 | 설명 |
+|---|---|---|
+| 16:00 | 1차 크롤링 | 전체 managed 키워드 순위 수집 |
+| 17:00 | 블로그 크롤 | 경쟁사 블로그 데이터 수집 |
+| 18:00 | 블로그 보고 | 텔레그램 블로그 분석 보고 |
+| 20:00 | 2차 검증 크롤 | 미수집 키워드 재수집 + 복구 |
+
+**자동복구:** 로그인 실패 시 3회 재시도, 미수집 키워드 자동 재크롤
+
+### 2.3 커뮤니티 크롤러 (`crawler/iboss.ts`, `crawler/sellclub.ts`)
+- 아이보스 + 셀클럽 마케팅 커뮤니티 크롤링
+- community_signals 테이블에 저장
+- Vercel Cron: 매일 UTC 21:00 (KST 06:00)
+
+### 2.4 블로그 트래커 (`crawler/blog-tracker.ts`)
+- 경쟁사 블로그 게시물 추적
+- blog_posts 테이블에 저장
+
+---
+
+## 3. 데이터베이스 (Supabase)
+
+### 3.1 핵심 테이블
+
+**businesses** — 업체 마스터
+```
+id, name, place_id (네이버 고유ID), place_url, keyword_id (FK),
+is_managed (관리업체 여부), contract_start, contract_end,
+is_blacklisted, industry_id, assigned_staff_id
+```
+- `is_managed=true`: UI에 노출되는 실제 관리업체 (현재 ~25개)
+- `is_managed=false`: 크롤링 수집 업체 (87,000+개, 분석용)
+
+**keywords** — 키워드 마스터
+```
+id, keyword, is_managed, monthly_search_volume, difficulty_grade,
+n2_avg_top5, keyword_category, is_paused
+```
+
+**daily_snapshots** — 일일 순위 스냅샷 (핵심)
+```
+keyword_id, business_id, snapshot_date,
+rank, n1_score, n2_score, n3_score, n2_change,
+blog_review_count, visitor_review_count, save_count,
+total_business_count, confidence_score
+```
+- UNIQUE: (keyword_id, business_id, snapshot_date)
+- 매일 ~30,000건 적재
+
+**daily_inputs** — 트래픽 투입 기록
+```
+business_id, input_date, source_id (FK→sources),
+action_type_id (FK→action_types), quantity
+```
+
+**contract_tracking** — 계약 관리
+```
+business_id, contract_start, contract_end,
+guarantee_days (25일), achieved_days,
+target_rank (5위), status (active/cancelled/completed/extended)
+```
+
+**sources** — 매체사
+```
+id, name (뭉치 플러스, 퍼플페퍼, 말차, 애드앤에이, 애드온, 레이서 등)
+```
+
+**action_types** — 액션 유형
+```
+id, name (유입, 길찾기, 메뉴찾기, 영업시간 등)
+```
+
+### 3.2 분석 테이블
+
+| 테이블 | 용도 |
+|---|---|
+| correlation_results | N2-순위 상관관계 분석 결과 |
+| anomaly_logs | 이상치 감지 기록 |
+| traffic_efficiency_logs | 트래픽 효율 분석 (경쟁사 N2 비교 포함) |
+| auto_learning_results | AI 자동학습 결과 |
+| learned_rules | 발견된 순위 로직 규칙 |
+| hypotheses | 가설 관리 (테스트 큐) |
+| competitor_strategy_reports | 경쟁사 전략 분석 |
+| community_signals | 커뮤니티 트렌드 |
+| blog_posts / blog_clusters | 블로그 분석 |
+| broad_snapshots / broad_keywords | 광역 키워드 스냅샷 |
+
+### 3.3 운영 테이블
+
+| 테이블 | 용도 |
+|---|---|
+| users | 사용자 (admin/staff/client/agency) |
+| invitations | 초대 링크 |
+| agencies / agency_business_assignments | 대행사 관리 |
+| crawl_logs / crawl_failed_items | 크롤링 로그/실패 기록 |
+| alerts / alert_acknowledgments | 알림 |
+| memos / memo_acknowledgments | 메모 |
+| execution_guides | AI 실행 가이드 |
+| weekly_reports | 주간 리포트 |
+
+---
+
+## 4. 대시보드 UI (관리자)
+
+### 4.1 메인 대시보드 (`app/dashboard/page.tsx`, 633줄)
+**URL:** /dashboard
+
+**카드 구성 (업체별):**
+- 순위 배지 (1~5위 초록, 6~10위 노랑, 11+ 빨강)
+- 업체명 + 키워드
+- N2 점수 + 변동
+- 블로그/방문자 리뷰 수 + 변동
+- 저장수 + 예약 리뷰
+- 30일 추이 차트 (N2/순위)
+- 기간별 비교 (1일/5일/10일/20일/30일)
+- 경쟁사 Top5 테이블 (순위/N2/리뷰)
+
+**상태 판단:**
+- 🟢 안정: rank ≤ 5 + N2 유지/상승
+- 🟡 정상: rank > 5이지만 추세 상승
+- 🟠 주의: rank > 5 + N2 정체
+- 🔴 위기: N2 4일 연속 하락 또는 rank > 10
+
+### 4.2 매체관리 (`app/dashboard/businesses/page.tsx`, 1,661줄)
+**URL:** /dashboard/businesses
+
+**탭 구성:**
+| 탭 | 설명 |
+|---|---|
+| 전체 | 계약중 + 미계약 (계약종료 제외) |
+| 계약중 | active 계약이 있는 관리업체 |
+| 미계약 | 관리업체 중 계약 미등록 |
+| 계약종료 | status=cancelled/completed + is_managed=false |
+| 투입내역 | 트래픽 투입 기록 |
+
+**카드 기능:**
+- 현재 순위 + 계약 기간 + 보장일/진행일 표시
+- 진행 중인 투입 내역 (매체/액션/타수/기간)
+- 수정/중단/연장/투입등록 버튼
+- ⚠️ 계약 만료 경고 배지 (만료되어도 자동 이동 안 함)
+- 계약종료 버튼 → 확인 모달 → 계약종료 탭 이동
+- 재계약 버튼 → 새 계약기간 입력
+
+**업체 등록:**
+- place_id URL 파싱 (`/place\/(\d+)/`)
+- 중복 체크 (same place_id → 409 에러)
+- 비활성 업체 자동 재활성화
+- 키워드 중복 생성 방지 (getOrCreateKeyword)
+
+**투입 등록:**
+- 매체 선택 (sources 테이블)
+- 액션타입 선택 (action_types 테이블)
+- 타수 입력 (100타 단위, 퍼플페퍼는 50타)
+- 시작일/종료일
+- 새 투입 등록 시 기존 활성 투입 자동 종료
+
+### 4.3 계약관리 (`app/dashboard/contracts/page.tsx`, 485줄)
+**URL:** /dashboard/contracts
+
+- 계약 목록 (진행중/만료/취소)
+- 보장일 달성 현황
+- 결제 D-day 알림
+- 갱신 알림
+
+### 4.4 추가 대시보드 페이지
+
+| 페이지 | URL | 설명 |
+|---|---|---|
+| AI 인사이트 | /dashboard/ai-insights | AI 분석 결과 |
+| 트렌드 분석 | /dashboard/trend-analysis | 순위/N2 트렌드 |
+| 상관관계 | /dashboard/correlation | N2-순위 상관분석 |
+| 이상감지 | /dashboard/anomalies | 순위 급변/N2 이상 |
+| 경쟁사 전략 | /dashboard/competitor-strategy | 경쟁사 분석 |
+| 경쟁사 블로그 | /dashboard/competitor-blogs | 블로그 클러스터 |
+| 같은 키워드 | /dashboard/same-keyword | 동일 키워드 경쟁 |
+| 같은 업종 | /dashboard/same-industry | 업종별 비교 |
+| 키워드 분석 | /dashboard/keyword-analysis | 키워드 난이도/검색량 |
+| N2 예측 | /dashboard/n2-prediction | N2 변동 예측 |
+| 로직 발견 | /dashboard/logic-discovery | 발견된 순위 로직 |
+| 로직 메모 | /dashboard/logic-memo | 수동 로직 메모 |
+| 실행 가이드 | /dashboard/execution-guide | AI 실행 제안 |
+| 주간 리포트 | /dashboard/weekly-report | 주간 요약 |
+| 매체 성과 | /dashboard/source-performance | 매체별 효율 |
+| 시장 동향 | /dashboard/market-intelligence | 시장 전체 분석 |
+| 실시간 | /dashboard/realtime | 크롤링 실시간 모니터 |
+| 크롤 실패 | /dashboard/crawl-failures | 크롤링 실패 목록 |
+| 데이터 품질 | /dashboard/data-quality | 데이터 품질 점검 |
+| 학습 | /dashboard/learning | AI 학습 결과 |
+| 알림 | /dashboard/alerts | 시스템 알림 |
+| 원가 추적 | /dashboard/cost-tracking | 매체 비용 |
+| 매출 관리 | /dashboard/my-sales | 매출 기록 |
+| 시세 | /dashboard/market-price | 업종별 시세 |
+| 크롤 상태 | /dashboard/crawl-status | 크롤러 상태 |
+| 내부 데이터 | /dashboard/internal-data | 내부 분석 |
+| 업종 분석 | /dashboard/industry-analysis | 업종별 심층 |
+
+---
+
+## 5. 클라이언트 포털 (고객용)
+
+**URL:** /client
+
+| 페이지 | 설명 |
+|---|---|
+| /client | 대시보드 (본인 업체 순위/N2) |
+| /client/competitors | 경쟁사 비교 |
+| /client/anomalies | 이상 알림 |
+| /client/weekly-report | 주간 리포트 |
+| /client/rank-changes | 순위 변동 이력 |
+| /client/quotes | 견적서 |
+
+---
+
+## 6. 대행사 포털
+
+**URL:** /agency
+
+| 페이지 | 설명 |
+|---|---|
+| /agency | 대시보드 |
+| /agency/clients | 관리 클라이언트 |
+| /agency/competitors | 경쟁사 |
+| /agency/weekly-report | 주간 리포트 |
+| /agency/quotes | 견적 관리 |
+| /agency/renewal | 갱신 관리 |
+| /agency/settings | 설정 |
+
+---
+
+## 7. 관리자 패널
+
+**URL:** /admin
+
+| 페이지 | 설명 |
+|---|---|
+| /admin | 전체 현황 |
+| /admin/businesses | 업체 관리 |
+| /admin/keywords | 키워드 관리 |
+| /admin/sources | 매체사 관리 |
+| /admin/actions | 액션타입 관리 |
+| /admin/contracts | 계약 관리 |
+| /admin/users | 사용자 관리 |
+| /admin/clients | 고객 관리 |
+| /admin/agencies | 대행사 관리 |
+| /admin/input | 투입 관리 |
+| /admin/crawl | 크롤링 관리 |
+| /admin/broad-analysis | 광역 분석 |
+| /admin/benchmark | 벤치마크 |
+| /admin/forecast | 예측 |
+| /admin/performance | 성과 |
+| /admin/settlement | 정산 |
+| /admin/revenue | 매출 |
+| /admin/customer-db | 고객 DB |
+| /admin/quote-settings | 견적 설정 |
+
+---
+
+## 8. Vercel Cron 작업
+
+| 시간 (UTC→KST) | 엔드포인트 | 설명 |
+|---|---|---|
+| 00:00→09:00 | /api/cron/daily-recommend | 일일 매체 추천 |
+| 00:00→09:00 | /api/cron/contract-renewal | 계약 갱신 체크 |
+| 00:00→09:00 | /api/cron/traffic-efficiency | 트래픽 효율 분석 (경쟁사 N2 비교) |
+| 03:00→12:00 | /api/cron/search-volume | 월간 검색량 업데이트 (매월 1일) |
+| 07:00→16:00 | /api/cron/crawl | 크롤링 트리거 (deprecated, PM2로 대체) |
+| 07:00→16:00 | /api/cron/market-crawl | 시장 크롤링 |
+| 07:30→16:30 | /api/cron/crawl-exploratory | 탐색적 크롤링 |
+| 08:00→17:00 | /api/cron/anomaly-detect | 이상치 감지 |
+| 09:00→18:00 | /api/cron/auto-learn | AI 자동학습 |
+| 10:00→19:00 | /api/cron/competitor-alert | 경쟁사 알림 |
+| 10:00→19:00 | /api/cron/post-crawl-analysis | 크롤 후 분석 |
+| 12:00→21:00 | /api/cron/data-verify | **AdLog vs DB 데이터 일치성 검증** |
+| 14:00→23:00 (일) | /api/cron/competitor-strategy | 경쟁사 전략 (주간) |
+| 15:00→00:00 | /api/cron/guarantee-check | 보장일 체크 |
+| 21:00→06:00 | /api/cron/community-crawl | 커뮤니티 크롤링 |
+| 22:00→07:00 (일) | /api/cron/weekly-report | 주간 리포트 |
+| 23:00→08:00 | /api/cron/daily-analysis | 일일 AI 분석 |
+| 23:30→08:30 | /api/cron/staff-guide | 직원 실행 가이드 |
+
+---
+
+## 9. AI 분석 시스템
+
+### 9.1 일일 분석 (`/api/cron/daily-analysis`)
+- 각 키워드별 순위/N2 변동 분석
+- 업종별 broad context (20개 카테고리)
+- 이상치 감지 + 원인 추론
+- 텔레그램 보고
+
+### 9.2 트래픽 효율 분석 (`/api/cron/traffic-efficiency`)
+- 투입 매체별 N2 상승 효과 측정
+- **경쟁사 N2 비교 (2026-03-11 추가):**
+  - 같은 키워드 상위5위 경쟁사 평균 N2 변동 계산
+  - 경쟁사↑ + 우리↓ → 🔴 긴급
+  - 둘 다↓ → 시장 하락
+
+### 9.3 자동학습 (`/api/cron/auto-learn`)
+- 과거 투입→결과 데이터 패턴 학습
+- learned_rules 테이블에 규칙 저장
+
+### 9.4 AI API 엔드포인트
+
+| API | 설명 |
+|---|---|
+| /api/ai/analyze | 범용 AI 분석 |
+| /api/ai/auto-recommend | 자동 매체 추천 |
+| /api/ai/execution-guide | 실행 가이드 생성 |
+| /api/ai/logic-discovery | 로직 발견 |
+| /api/ai/advanced-correlation | 고급 상관분석 |
+| /api/ai/competitor-entry | 경쟁사 진입 감지 |
+| /api/ai/churn-prediction | 이탈 예측 |
+| /api/ai/emergency-plan | 긴급 대응 계획 |
+| /api/ai/gap-rate | 격차율 분석 |
+| /api/ai/cost-summary | 비용 요약 |
+| /api/ai/ceo-report | CEO 리포트 |
+| /api/ai/blacklist | 블랙리스트 판단 |
+| /api/ai/cannibalization | 자기잠식 분석 |
+| /api/ai/circuit-breaker | 서킷 브레이커 |
+
+---
+
+## 10. 데이터 무결성 시스템
+
+### 10.1 데이터 일치성 검증 (`/api/cron/data-verify`)
+- 매일 21:00 KST 자동 실행
+- AdLog API 직접 호출 → DB daily_snapshots 대조
+- 순위/N2/블로그리뷰 비교
+- 불일치 시 텔레그램 알림 + crawl_failed_items 기록
+- 불일치 원인 분류: 구조변경/place_id 오류/데이터 지연/크롤링 실패
+
+### 10.2 중복 방지 (`/api/admin/data-integrity`)
+- 같은 keyword 텍스트 중복 감지
+- 같은 place_id 중복 업체 감지
+- GET → `{ duplicateKeywords, duplicateBusinesses, summary }`
+
+### 10.3 AdLog 구조 변경 자동 감지 (`crawler/adlog.ts`)
+- 헤더 기반 동적 컬럼 매핑
+- 파싱 성공률 모니터링
+- 연속 실패 시 크롤링 중단 + 긴급 알림
+
+---
+
+## 11. 알림 시스템
+
+### 텔레그램 알림
+**채팅방:** -1003804670860 (온다 로직 모니터)
+
+| 알림 유형 | 트리거 |
+|---|---|
+| 🔴 순위 급락 | rank > 10 또는 N2 4일 연속 하락 |
+| 🚨 크롤링 실패 | 3개+ 키워드 연속 파싱 실패 |
+| ⚠️ 경쟁사 추월 | 경쟁사 N2↑ + 우리 N2↓ |
+| 📊 일일 분석 | 매일 08:00 KST |
+| 📝 주간 리포트 | 매주 일요일 |
+| ✅ 데이터 검증 | 매일 21:00 KST |
+| 💳 계약 만료 | D-3, D-1, D-Day |
+| 🆕 신규 경쟁사 진입 | Top5에 새 업체 |
+
+---
+
+## 12. 인증/권한
+
+### 사용자 역할
+| 역할 | 접근 범위 |
+|---|---|
+| admin | 전체 (관리자 패널 포함) |
+| staff | 대시보드 + 투입 관리 |
+| client | 본인 업체 포털만 |
+| agency | 대행사 포털 |
+
+### 인증 방식
+- Supabase Auth (JWT)
+- API 라우트: `Authorization: Bearer {token}` 또는 Supabase RLS
+- Cron: `CRON_SECRET` 환경변수 검증
+
+---
+
+## 13. 핵심 비즈니스 로직
+
+### 13.1 N2 지표 체계
+- **N1**: 저품질 판별 지표 (참고용)
+- **N2**: 핵심 순위 지표 (이것이 올라야 순위가 오름)
+- **N3**: 무시
+
+### 13.2 매체 운영 규칙
+- 기본 투입: 100타 단위
+- 퍼플페퍼: 50타 단위 가능
+- 2주 로테이션 필수 (동일 매체 지속 시 작업 감지)
+- 업종별 로직 다름 (맛집/술집/카페 완전 별개)
+
+### 13.3 계약 체계
+- 30일 단위, 25일 보장
+- 5위 이내 보장
+- 미달 시 연장
+- 계약 만료 시 수동 종료/재계약 확인 (자동 이동 안 함)
+
+### 13.4 투입 자동 종료
+- 새 투입 등록 시 같은 업체의 기존 활성 투입 → 종료일을 전날로 변경
+- 매체 무관 (다른 매체여도 기존 투입 종료)
+
+### 13.5 데이터 보존
+- UI 삭제 = 소프트 삭제 (is_managed=false)
+- 하드 삭제 절대 금지
+- 모든 이력 데이터 영구 보존
+
+---
+
+## 14. 진행 중인 테스트
+
+### 테스트 #1: 매체 분산 투입 (2026-03-11~)
+- **현재**: 단일매체 300~500타
+- **가설**: 100타씩 3개 매체 분산 투입 시 N2 상승 효과 더 클 수 있음
+- **A/B 페어**: 블리비 안양(단일) vs 영등포(분산) / VIP주차(단일) vs 헬로파킹(분산)
+- **측정**: N2 변동폭 1일/3일/7일, 순위 변동, 지속기간
+
+### 지속적 로직 테스트 체계
+- 순위 안 오르면 계속 새 가설 테스트
+- 데이터 분석 → 가설 생성 → 테스트 설계 → 직원 제안 → 결과 추적 → 다음 가설
+- 매 분석 리포트마다 "이번 주 테스트 제안" 포함
+
+---
+
+## 15. 파일 구조 요약
+
+```
+onda-logic-monitor/
+├── app/
+│   ├── dashboard/          # 관리자 대시보드 (25+ 페이지)
+│   ├── client/             # 고객 포털
+│   ├── agency/             # 대행사 포털
+│   ├── admin/              # 관리자 패널
+│   ├── api/
+│   │   ├── admin/          # 관리 API (20+)
+│   │   ├── agency/         # 대행사 API
+│   │   ├── ai/             # AI 분석 API (15+)
+│   │   ├── client/         # 고객 API
+│   │   ├── cron/           # 스케줄 작업 (18개)
+│   │   ├── dashboard/      # 대시보드 API
+│   │   └── auth/           # 인증 API
+│   └── login/              # 로그인 페이지
+├── crawler/
+│   ├── adlog.ts            # AdLog 크롤러 (1,606줄)
+│   ├── blog-tracker.ts     # 블로그 트래커
+│   ├── blog-meta.ts        # 블로그 메타
+│   ├── iboss.ts            # 아이보스 크롤러
+│   ├── sellclub.ts         # 셀클럽 크롤러
+│   ├── n2-benchmark.ts     # N2 벤치마크
+│   └── config.ts           # 크롤러 설정
+├── scripts/
+│   ├── scheduler.ts        # PM2 스케줄러 (메인)
+│   ├── backfill-reviews.ts # 리뷰 데이터 백필
+│   ├── verify-data.ts      # 데이터 검증 스크립트
+│   ├── broad-crawler.js    # 광역 크롤러
+│   └── ...                 # 마이그레이션/유틸
+├── lib/
+│   ├── ai/                 # AI 분석 모듈
+│   └── hooks/              # React 훅
+├── vercel.json             # Cron 설정 (18개)
+├── .env                    # 환경변수
+└── docs/
+    └── SYSTEM_OVERVIEW.md  # 이 문서
+```
+
+---
+
+## 16. 환경변수
+
+| 변수 | 용도 |
+|---|---|
+| NEXT_PUBLIC_SUPABASE_URL | Supabase URL |
+| NEXT_PUBLIC_SUPABASE_ANON_KEY | Supabase 공개키 |
+| SUPABASE_SERVICE_ROLE_KEY | Supabase 서비스키 |
+| ANTHROPIC_API_KEY | Claude AI |
+| GEMINI_API_KEY | Google Gemini |
+| ADLOG_EMAIL / ADLOG_PASSWORD | AdLog 로그인 |
+| TELEGRAM_BOT_TOKEN | 텔레그램 봇 |
+| TELEGRAM_CHAT_ID | 텔레그램 채팅방 |
+| CRON_SECRET | Cron 인증 |
+| VERCEL_TOKEN | Vercel 배포 |
+| AI_MODEL / AI_MAX_TOKENS_PER_CALL | AI 설정 |
+| AI_DAILY_TOKEN_LIMIT / AI_DAILY_COST_LIMIT | AI 비용 제한 |
+
+---
+
+*이 문서는 2026-03-11 기준 전체 시스템 현황입니다.*

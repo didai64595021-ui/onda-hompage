@@ -1533,6 +1533,7 @@ function closeSettings() {
    FADE-UP OBSERVER
    ============================================ */
 document.addEventListener('DOMContentLoaded', () => {
+  loadMyPageData();
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -1576,6 +1577,110 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 50);
   });
 })();
+
+/* ============================================
+   LOAD DATA FROM LOCALSTORAGE
+   ============================================ */
+function loadMyPageData() {
+  // Points
+  const points = parseInt(localStorage.getItem('bloomingPoints') || '0');
+  const pointEl = document.querySelector('.stat-card:nth-child(1) .stat-value');
+  if (pointEl) pointEl.textContent = points.toLocaleString('ko-KR');
+
+  // Stamps
+  const stamps = parseInt(localStorage.getItem('bloomingStamps') || '0');
+  const stampDisplay = stamps % 10;
+  const stampStatEl = document.querySelector('.stat-card:nth-child(2) .stat-value');
+  if (stampStatEl) stampStatEl.textContent = stampDisplay + '/10';
+
+  // Update stamp section
+  const stampCountBadge = document.querySelector('.stamp-count-badge');
+  if (stampCountBadge) stampCountBadge.textContent = stampDisplay + ' / 10';
+
+  const stampGrid = document.querySelector('.stamp-grid');
+  if (stampGrid) {
+    stampGrid.innerHTML = '';
+    for (let i = 1; i <= 10; i++) {
+      const div = document.createElement('div');
+      if (i === 10) {
+        div.className = 'stamp-item reward';
+      } else if (i <= stampDisplay) {
+        div.className = 'stamp-item filled';
+      } else {
+        div.className = 'stamp-item';
+        div.setAttribute('data-num', i);
+      }
+      stampGrid.appendChild(div);
+    }
+  }
+
+  const stampBarFill = document.querySelector('.stamp-bar-fill');
+  if (stampBarFill) stampBarFill.style.width = (stampDisplay * 10) + '%';
+  const stampText = document.querySelector('.stamp-text');
+  if (stampText) stampText.innerHTML = '<strong>' + (10 - stampDisplay) + '잔</strong> 남음';
+
+  // Orders
+  const orders = JSON.parse(localStorage.getItem('bloomingOrders') || '[]');
+  const orderSection = document.querySelector('.order-section');
+  if (orderSection && orders.length > 0) {
+    // Remove existing order cards
+    orderSection.querySelectorAll('.order-card').forEach(el => el.remove());
+    // Render from localStorage
+    orders.slice(0, 5).forEach(order => {
+      const d = new Date(order.date);
+      const dateStr = d.getFullYear() + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + String(d.getDate()).padStart(2,'0');
+      const isToday = new Date().toDateString() === d.toDateString();
+      const firstItem = order.items[0] || {};
+      const extraCount = order.items.length - 1;
+      const nameStr = firstItem.name + (extraCount > 0 ? ' 외 ' + extraCount + '건' : '');
+      const card = document.createElement('div');
+      card.className = 'order-card';
+      card.innerHTML = `
+        <div class="order-top">
+          <span class="order-date">${dateStr}${isToday ? ' (오늘)' : ''}</span>
+          <span class="order-status completed">완료</span>
+        </div>
+        <div class="order-items">
+          <img class="order-thumb" src="${firstItem.img || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'}" alt="${firstItem.name}" loading="lazy">
+          <div class="order-item-info">
+            <div class="order-item-name">${nameStr}</div>
+            <div class="order-item-detail">블루밍 커피 강남점</div>
+          </div>
+        </div>
+        <div class="order-bottom">
+          <span class="order-price">${(order.total || 0).toLocaleString('ko-KR')}원</span>
+          <button class="order-reorder" onclick="reorder(${JSON.stringify(order.items).replace(/"/g, '&quot;')})">재주문</button>
+        </div>
+      `;
+      orderSection.appendChild(card);
+    });
+  }
+
+  // Cart badge
+  const cart = JSON.parse(localStorage.getItem('bloomingCart') || '[]');
+  const navBadge = document.querySelector('.nav-badge');
+  if (navBadge) {
+    const count = cart.reduce((s, i) => s + i.qty, 0);
+    navBadge.textContent = count;
+    navBadge.style.display = count > 0 ? '' : 'none';
+  }
+}
+
+function reorder(items) {
+  try {
+    const parsed = typeof items === 'string' ? JSON.parse(items) : items;
+    const cart = JSON.parse(localStorage.getItem('bloomingCart') || '[]');
+    parsed.forEach(i => { i.id = Date.now().toString() + Math.random(); cart.push(i); });
+    localStorage.setItem('bloomingCart', JSON.stringify(cart));
+    showToast('장바구니에 담았어요!');
+    const navBadge = document.querySelector('.nav-badge');
+    if (navBadge) {
+      const count = cart.reduce((s, i) => s + i.qty, 0);
+      navBadge.textContent = count;
+      navBadge.style.display = count > 0 ? '' : 'none';
+    }
+  } catch(e) { showToast('장바구니에 담았어요!'); }
+}
 
 /* ============================================
    STAT CARD COUNTER ANIMATION

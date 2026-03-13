@@ -9,34 +9,93 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--dark:#0D0D0D;--dark-surface:#1A1A1A;--dark-card:#1E1E1E;--dark-border:#2A2A2A;--lime:#CCFF00;--lime-dim:rgba(204,255,0,0.15);--lime-glow:rgba(204,255,0,0.3);--white:#F5F5F5;--gray:#8A8A8A;--gray-light:#B0B0B0;--red:#FF4757;--blue:#3B82F6;--orange:#FF6B35;--purple:#A855F7;--safe-top:44px;--safe-bottom:34px;--nav-height:72px;--radius:16px;--radius-sm:10px;--font-body:'Pretendard',-apple-system,sans-serif;--font-display:'Sora',sans-serif;--transition:cubic-bezier(0.4,0,0.2,1)}
+:root{
+  --dark:#0D0D0D;--dark-surface:#1A1A1A;--dark-card:#1E1E1E;--dark-border:#2A2A2A;
+  --lime:#CCFF00;--lime-dim:rgba(204,255,0,0.15);--lime-glow:rgba(204,255,0,0.3);
+  --white:#F5F5F5;--gray:#8A8A8A;--gray-light:#B0B0B0;
+  --red:#FF4757;--blue:#3B82F6;--orange:#FF6B35;--purple:#A855F7;
+  --safe-top:44px;--safe-bottom:34px;--nav-height:72px;
+  --radius:16px;--radius-sm:10px;
+  --font-body:'Pretendard',-apple-system,sans-serif;
+  --font-display:'Sora',sans-serif;
+  --transition:cubic-bezier(0.4,0,0.2,1)
+}
 html{font-size:16px;scroll-behavior:smooth}
-body{font-family:var(--font-body);background:var(--dark);color:var(--white);min-height:100dvh;overflow-x:hidden;padding-top:0;padding-bottom:calc(var(--nav-height)+var(--safe-bottom));-webkit-font-smoothing:antialiased}
-a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}img{max-width:100%;display:block}
+body{
+  font-family:var(--font-body);background:var(--dark);color:var(--white);
+  min-height:100dvh;overflow-x:hidden;word-break:keep-all;
+  padding-top:0;padding-bottom:calc(var(--nav-height)+var(--safe-bottom));
+  -webkit-font-smoothing:antialiased
+}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
+img{max-width:100%;display:block}
 ::-webkit-scrollbar{width:0;height:0}
 
 @keyframes fadeInUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 @keyframes scaleIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}
 @keyframes checkPop{0%{transform:scale(0)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
 @keyframes progressFill{from{width:0}to{width:var(--progress)}}
+@keyframes starPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
 
 /* HERO */
-.hero{position:relative;height:280px;overflow:hidden}
+.hero{position:relative;height:320px;overflow:hidden}
 .hero__img{width:100%;height:100%;object-fit:cover}
-.hero__overlay{position:absolute;inset:0;background:linear-gradient(transparent 30%,var(--dark))}
-.hero__back{position:absolute;top:var(--safe-top);left:16px;width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:10;-webkit-tap-highlight-color:transparent}
+.hero__overlay{position:absolute;inset:0;background:linear-gradient(transparent 20%,var(--dark) 95%)}
+.hero__back{
+  position:absolute;top:var(--safe-top);left:16px;width:40px;height:40px;
+  border-radius:50%;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;z-index:10;
+  -webkit-tap-highlight-color:transparent
+}
 .hero__back:active{transform:scale(0.9)}
 .hero__back svg{width:20px;height:20px;stroke:var(--white);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hero__share{
+  position:absolute;top:var(--safe-top);right:16px;width:40px;height:40px;
+  border-radius:50%;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;z-index:10
+}
+.hero__share svg{width:18px;height:18px;stroke:var(--white);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .hero__content{position:absolute;bottom:0;left:0;right:0;padding:0 20px 20px}
-.hero__tag{font-size:10px;color:var(--lime);background:var(--lime-dim);padding:4px 10px;border-radius:6px;display:inline-block;margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
-.hero__title{font-size:28px;font-weight:800;line-height:1.2;margin-bottom:4px}
-.hero__meta{font-size:13px;color:var(--gray-light);display:flex;gap:12px;align-items:center}
+.hero__tag{
+  font-size:10px;color:var(--lime);background:var(--lime-dim);
+  padding:4px 10px;border-radius:6px;display:inline-block;margin-bottom:8px;
+  font-weight:700;text-transform:uppercase;letter-spacing:0.5px
+}
+.hero__title{font-size:28px;font-weight:800;line-height:1.2;margin-bottom:6px}
+.hero__meta{font-size:13px;color:var(--gray-light);display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.hero__stats{display:flex;gap:12px}
+.hero__stat{
+  background:rgba(255,255,255,0.08);backdrop-filter:blur(8px);
+  border-radius:10px;padding:8px 14px;text-align:center
+}
+.hero__stat-value{font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--lime)}
+.hero__stat-label{font-size:10px;color:var(--gray-light)}
 
 /* MAIN */
 .main-content{padding:0 20px;max-width:480px;margin:0 auto}
+.section-label{
+  font-size:13px;color:var(--gray);text-transform:uppercase;
+  letter-spacing:1.5px;font-family:var(--font-display);margin-bottom:14px
+}
+
+/* PROGRAM INTRO */
+.program-intro{
+  background:var(--dark-card);border:1px solid var(--dark-border);
+  border-radius:var(--radius);padding:20px;margin-bottom:24px;
+  animation:fadeInUp 0.5s var(--transition)
+}
+.program-intro__title{font-size:16px;font-weight:700;margin-bottom:10px}
+.program-intro__text{font-size:13px;color:var(--gray-light);line-height:1.7;margin-bottom:16px}
+.program-intro__benefits{display:flex;flex-direction:column;gap:10px}
+.benefit-item{display:flex;align-items:center;gap:10px;font-size:13px}
+.benefit-item__icon{
+  width:32px;height:32px;border-radius:8px;background:var(--lime-dim);
+  display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0
+}
 
 /* PROGRESS BAR */
-.overall-progress{margin:24px 0;animation:fadeInUp 0.5s var(--transition)}
+.overall-progress{margin:24px 0;animation:fadeInUp 0.5s 0.05s var(--transition) both}
 .overall-progress__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .overall-progress__label{font-size:13px;font-weight:600}
 .overall-progress__percent{font-family:var(--font-display);font-size:14px;color:var(--lime);font-weight:700}
@@ -44,67 +103,239 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
 .overall-progress__fill{height:100%;background:linear-gradient(90deg,var(--lime),#E5FF66);border-radius:5px;transition:width 0.8s var(--transition)}
 
 /* STATS ROW */
-.program-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:28px;animation:fadeInUp 0.5s 0.1s var(--transition) both}
-.program-stat{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:var(--radius-sm);padding:12px 8px;text-align:center}
+.program-stats{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+  margin-bottom:28px;animation:fadeInUp 0.5s 0.1s var(--transition) both
+}
+.program-stat{
+  background:var(--dark-card);border:1px solid var(--dark-border);
+  border-radius:var(--radius-sm);padding:12px 8px;text-align:center
+}
 .program-stat__value{font-family:var(--font-display);font-size:18px;font-weight:700;line-height:1;margin-bottom:3px}
 .program-stat__label{font-size:10px;color:var(--gray)}
 
 /* WEEK TABS */
-.week-tabs{display:flex;gap:8px;margin-bottom:24px;animation:fadeInUp 0.5s 0.15s var(--transition) both}
-.week-tab{flex:1;padding:12px 8px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;text-align:center;background:var(--dark-card);border:1px solid var(--dark-border);color:var(--gray-light);transition:all 0.25s;-webkit-tap-highlight-color:transparent}
+.week-tabs{
+  display:flex;gap:8px;margin-bottom:24px;
+  animation:fadeInUp 0.5s 0.15s var(--transition) both
+}
+.week-tab{
+  flex:1;padding:12px 8px;border-radius:var(--radius-sm);font-size:13px;
+  font-weight:600;text-align:center;background:var(--dark-card);
+  border:1px solid var(--dark-border);color:var(--gray-light);
+  transition:all 0.25s;-webkit-tap-highlight-color:transparent
+}
 .week-tab:active{transform:scale(0.95)}
 .week-tab--active{background:var(--lime);color:var(--dark);border-color:var(--lime)}
 .week-tab__num{font-family:var(--font-display);font-size:16px;font-weight:800;display:block;line-height:1}
 .week-tab__label{font-size:10px;margin-top:2px}
 
-/* DAY CHECKLIST */
-.day-card{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;animation:fadeInUp 0.4s var(--transition)}
-.day-card__header{padding:16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;-webkit-tap-highlight-color:transparent}
+/* DAY CARD */
+.day-card{
+  background:var(--dark-card);border:1px solid var(--dark-border);
+  border-radius:var(--radius);margin-bottom:12px;overflow:hidden;
+  animation:fadeInUp 0.4s var(--transition)
+}
+.day-card__header{
+  padding:16px;display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;-webkit-tap-highlight-color:transparent
+}
 .day-card__header:active{opacity:0.8}
 .day-card__day{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
-.day-card__day-num{font-family:var(--font-display);font-size:12px;color:var(--lime);background:var(--lime-dim);width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.day-card__day-num{
+  font-family:var(--font-display);font-size:12px;color:var(--lime);
+  background:var(--lime-dim);width:28px;height:28px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-weight:700
+}
 .day-card__check-count{font-size:12px;color:var(--gray);font-family:var(--font-display)}
 .day-card__exercises{padding:0 16px 16px;display:none}
 .day-card__exercises.open{display:block}
 
 /* EXERCISE ITEM */
-.exercise-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--dark-border)}
+.exercise-item{
+  display:flex;align-items:center;gap:12px;padding:12px 0;
+  border-bottom:1px solid var(--dark-border)
+}
 .exercise-item:last-child{border-bottom:none}
-.exercise-check{width:28px;height:28px;border-radius:8px;border:2px solid var(--dark-border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.exercise-check{
+  width:28px;height:28px;border-radius:8px;border:2px solid var(--dark-border);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all 0.2s;cursor:pointer;-webkit-tap-highlight-color:transparent
+}
 .exercise-check:active{transform:scale(0.85)}
 .exercise-check.checked{background:var(--lime);border-color:var(--lime);animation:checkPop 0.3s var(--transition)}
-.exercise-check svg{width:16px;height:16px;stroke:var(--dark);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity 0.2s}
+.exercise-check svg{
+  width:16px;height:16px;stroke:var(--dark);stroke-width:3;fill:none;
+  stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity 0.2s
+}
 .exercise-check.checked svg{opacity:1}
 .exercise-info{flex:1}
 .exercise-name{font-size:14px;font-weight:500;transition:all 0.2s}
 .exercise-name.done{text-decoration:line-through;color:var(--gray)}
 .exercise-detail{font-size:12px;color:var(--gray);margin-top:2px}
-.exercise-thumb{width:48px;height:48px;border-radius:10px;overflow:hidden;flex-shrink:0;position:relative;cursor:pointer}
+.exercise-thumb{
+  width:48px;height:48px;border-radius:10px;overflow:hidden;
+  flex-shrink:0;position:relative;cursor:pointer
+}
 .exercise-thumb img{width:100%;height:100%;object-fit:cover}
-.exercise-thumb__play{position:absolute;inset:0;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center}
+.exercise-thumb__play{
+  position:absolute;inset:0;background:rgba(0,0,0,0.3);
+  display:flex;align-items:center;justify-content:center
+}
 .exercise-thumb__play svg{width:16px;height:16px;fill:var(--white)}
 
+/* VIDEO THUMBNAILS GRID */
+.video-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:12px;
+  margin-bottom:28px;animation:fadeInUp 0.5s 0.2s var(--transition) both
+}
+.video-thumb{
+  border-radius:var(--radius);overflow:hidden;position:relative;
+  cursor:pointer;aspect-ratio:16/9;transition:all 0.2s
+}
+.video-thumb:active{transform:scale(0.97)}
+.video-thumb img{width:100%;height:100%;object-fit:cover}
+.video-thumb__overlay{
+  position:absolute;inset:0;background:linear-gradient(transparent 50%,rgba(0,0,0,0.7));
+  display:flex;flex-direction:column;justify-content:flex-end;padding:10px
+}
+.video-thumb__play{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,0.2);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center
+}
+.video-thumb__play svg{width:16px;height:16px;fill:var(--white);margin-left:2px}
+.video-thumb__name{font-size:11px;font-weight:600}
+.video-thumb__dur{font-size:10px;color:var(--gray-light)}
+
+/* TRAINER CARD */
+.trainer-section{margin-bottom:28px;animation:fadeInUp 0.5s 0.25s var(--transition) both}
+.trainer-card{
+  background:var(--dark-card);border:1px solid var(--dark-border);
+  border-radius:var(--radius);padding:24px;display:flex;gap:16px;
+  align-items:center
+}
+.trainer-card__avatar{
+  width:72px;height:72px;border-radius:50%;overflow:hidden;flex-shrink:0;
+  border:3px solid var(--lime)
+}
+.trainer-card__avatar img{width:100%;height:100%;object-fit:cover}
+.trainer-card__info{flex:1}
+.trainer-card__name{font-size:18px;font-weight:700;margin-bottom:2px}
+.trainer-card__title{font-size:12px;color:var(--lime);font-weight:600;margin-bottom:6px}
+.trainer-card__bio{font-size:12px;color:var(--gray-light);line-height:1.5;margin-bottom:10px}
+.trainer-card__stats{display:flex;gap:16px}
+.trainer-card__stat{text-align:center}
+.trainer-card__stat-value{font-family:var(--font-display);font-size:14px;font-weight:700}
+.trainer-card__stat-label{font-size:10px;color:var(--gray)}
+
+/* REVIEWS */
+.reviews-section{margin-bottom:28px;animation:fadeInUp 0.5s 0.28s var(--transition) both}
+.review-card{
+  background:var(--dark-card);border:1px solid var(--dark-border);
+  border-radius:var(--radius);padding:20px;margin-bottom:12px
+}
+.review-card__header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.review-card__avatar{
+  width:40px;height:40px;border-radius:50%;
+  background:linear-gradient(135deg,var(--lime-dim),var(--dark-surface));
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0
+}
+.review-card__info{flex:1}
+.review-card__name{font-size:14px;font-weight:600}
+.review-card__date{font-size:11px;color:var(--gray)}
+.review-card__stars{display:flex;gap:2px;font-size:14px}
+.review-card__text{font-size:13px;color:var(--gray-light);line-height:1.6}
+.review-card__result{
+  margin-top:10px;padding:10px;background:var(--dark-surface);
+  border-radius:8px;font-size:12px;color:var(--lime);
+  display:flex;align-items:center;gap:6px
+}
+
+/* OTHER PROGRAMS */
+.other-programs{margin-bottom:28px;animation:fadeInUp 0.5s 0.3s var(--transition) both}
+.other-scroll{
+  display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;
+  -webkit-overflow-scrolling:touch
+}
+.other-scroll::-webkit-scrollbar{display:none}
+.other-card{
+  min-width:200px;max-width:200px;flex-shrink:0;
+  background:var(--dark-card);border:1px solid var(--dark-border);
+  border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all 0.2s
+}
+.other-card:active{transform:scale(0.97)}
+.other-card__img{width:100%;height:100px;object-fit:cover}
+.other-card__body{padding:12px}
+.other-card__title{font-size:13px;font-weight:700;margin-bottom:4px}
+.other-card__meta{font-size:11px;color:var(--gray)}
+.other-card__difficulty{
+  display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;
+  margin-top:6px;font-weight:600
+}
+.other-card__difficulty--easy{color:#22C55E;background:rgba(34,197,94,0.12)}
+.other-card__difficulty--medium{color:var(--orange);background:rgba(255,107,53,0.12)}
+.other-card__difficulty--hard{color:var(--red);background:rgba(255,71,87,0.12)}
+
+/* CTA BUTTON */
+.cta-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:16px;background:var(--lime);color:var(--dark);
+  font-size:16px;font-weight:700;border-radius:var(--radius);
+  transition:all 0.2s;margin-bottom:28px;-webkit-tap-highlight-color:transparent
+}
+.cta-btn:active{transform:scale(0.97);opacity:0.9}
+
 /* VIDEO MODAL */
-.video-modal{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s}
+.video-modal{
+  position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);
+  z-index:300;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity 0.3s
+}
 .video-modal.active{opacity:1;pointer-events:all}
-.video-modal__content{width:90%;max-width:400px;border-radius:var(--radius);overflow:hidden;background:var(--dark-card)}
+.video-modal__content{
+  width:90%;max-width:400px;border-radius:var(--radius);overflow:hidden;
+  background:var(--dark-card)
+}
 .video-modal__img{width:100%;height:200px;object-fit:cover;position:relative}
-.video-modal__close{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center}
+.video-modal__close{
+  position:absolute;top:12px;right:12px;width:32px;height:32px;
+  border-radius:50%;background:rgba(0,0,0,0.5);
+  display:flex;align-items:center;justify-content:center
+}
 .video-modal__close svg{width:16px;height:16px;stroke:var(--white);fill:none;stroke-width:2}
 .video-modal__info{padding:16px}
 .video-modal__title{font-size:16px;font-weight:600;margin-bottom:4px}
 .video-modal__desc{font-size:13px;color:var(--gray)}
 
 /* BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-height)+var(--safe-bottom));padding-bottom:var(--safe-bottom);background:rgba(13,13,13,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--dark-border);display:flex;align-items:center;justify-content:space-around;z-index:100}
-.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 16px;border-radius:12px;transition:all 0.2s;position:relative;-webkit-tap-highlight-color:transparent}
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  height:calc(var(--nav-height)+var(--safe-bottom));padding-bottom:var(--safe-bottom);
+  background:rgba(13,13,13,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-top:1px solid var(--dark-border);
+  display:flex;align-items:center;justify-content:space-around;z-index:100
+}
+.nav-item{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:8px 16px;border-radius:12px;transition:all 0.2s;
+  position:relative;-webkit-tap-highlight-color:transparent
+}
 .nav-item:active{transform:scale(0.9)}
 .nav-item--active{color:var(--lime)}
-.nav-item--active::before{content:'';position:absolute;top:-1px;left:50%;transform:translateX(-50%);width:20px;height:3px;background:var(--lime);border-radius:0 0 3px 3px}
+.nav-item--active::before{
+  content:'';position:absolute;top:-1px;left:50%;transform:translateX(-50%);
+  width:20px;height:3px;background:var(--lime);border-radius:0 0 3px 3px
+}
 .nav-item__icon svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .nav-item__label{font-size:10px;font-weight:500}
 
-@media(min-width:768px){.main-content{max-width:600px}.bottom-nav{max-width:480px;left:50%;transform:translateX(-50%);border-radius:20px 20px 0 0}}
+@media(min-width:768px){
+  .main-content{max-width:600px}
+  .video-grid{grid-template-columns:repeat(4,1fr)}
+  .bottom-nav{max-width:480px;left:50%;transform:translateX(-50%);border-radius:20px 20px 0 0}
+}
 </style>
 </head>
 <body>
@@ -116,20 +347,50 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
   <button class="hero__back" onclick="history.back()">
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
   </button>
+  <button class="hero__share">
+    <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+  </button>
   <div class="hero__content">
     <span class="hero__tag">인기 프로그램</span>
     <h1 class="hero__title">4주 전신 트랜스폼</h1>
     <div class="hero__meta">
-      <span>4주</span>
-      <span>·</span>
-      <span>주 5회</span>
-      <span>·</span>
-      <span>중급</span>
+      <span>4주</span><span>·</span><span>주 5회</span><span>·</span><span>중급</span>
+    </div>
+    <div class="hero__stats">
+      <div class="hero__stat">
+        <div class="hero__stat-value">28</div>
+        <div class="hero__stat-label">총 운동</div>
+      </div>
+      <div class="hero__stat">
+        <div class="hero__stat-value">112</div>
+        <div class="hero__stat-label">총 동작</div>
+      </div>
+      <div class="hero__stat">
+        <div class="hero__stat-value">~8K</div>
+        <div class="hero__stat-label">예상 kcal</div>
+      </div>
     </div>
   </div>
 </div>
 
 <main class="main-content">
+
+  <!-- Program Intro -->
+  <div class="program-intro">
+    <div class="program-intro__title">💡 프로그램 소개</div>
+    <div class="program-intro__text">
+      4주간 체계적으로 설계된 전신 트랜스폼 프로그램입니다.
+      근력, 유산소, HIIT, 유연성을 모두 포함하여 균형 잡힌 피트니스를 만들어갑니다.
+      주 5회 운동으로 최적의 결과를 얻을 수 있으며, 주차별로 강도가 점진적으로 증가합니다.
+    </div>
+    <div class="program-intro__benefits">
+      <div class="benefit-item"><div class="benefit-item__icon">💪</div> 전신 근력 향상 및 체형 개선</div>
+      <div class="benefit-item"><div class="benefit-item__icon">🔥</div> 효과적인 체지방 감소</div>
+      <div class="benefit-item"><div class="benefit-item__icon">❤️</div> 심폐 지구력 강화</div>
+      <div class="benefit-item"><div class="benefit-item__icon">🧘</div> 유연성 및 회복력 개선</div>
+      <div class="benefit-item"><div class="benefit-item__icon">🧠</div> 운동 습관 형성 및 멘탈 강화</div>
+    </div>
+  </div>
 
   <!-- Overall Progress -->
   <div class="overall-progress">
@@ -153,7 +414,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
       <div class="program-stat__label">완료 운동</div>
     </div>
     <div class="program-stat">
-      <div class="program-stat__value" style="color:var(--orange)">20</div>
+      <div class="program-stat__value" style="color:var(--orange)">28</div>
       <div class="program-stat__label">총 일수</div>
     </div>
     <div class="program-stat">
@@ -165,25 +426,145 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
   <!-- Week Tabs -->
   <div class="week-tabs" id="weekTabs">
     <button class="week-tab week-tab--active" data-week="1" onclick="switchWeek(1,this)">
-      <span class="week-tab__num">W1</span>
-      <span class="week-tab__label">1주차</span>
+      <span class="week-tab__num">W1</span><span class="week-tab__label">1주차</span>
     </button>
     <button class="week-tab" data-week="2" onclick="switchWeek(2,this)">
-      <span class="week-tab__num">W2</span>
-      <span class="week-tab__label">2주차</span>
+      <span class="week-tab__num">W2</span><span class="week-tab__label">2주차</span>
     </button>
     <button class="week-tab" data-week="3" onclick="switchWeek(3,this)">
-      <span class="week-tab__num">W3</span>
-      <span class="week-tab__label">3주차</span>
+      <span class="week-tab__num">W3</span><span class="week-tab__label">3주차</span>
     </button>
     <button class="week-tab" data-week="4" onclick="switchWeek(4,this)">
-      <span class="week-tab__num">W4</span>
-      <span class="week-tab__label">4주차</span>
+      <span class="week-tab__num">W4</span><span class="week-tab__label">4주차</span>
     </button>
   </div>
 
   <!-- Day Cards Container -->
   <div id="dayCards"></div>
+
+  <!-- CTA -->
+  <button class="cta-btn" onclick="location.href='workout.html'">
+    운동 시작하기 →
+  </button>
+
+  <!-- Video Thumbnails Grid -->
+  <div>
+    <p class="section-label">Exercise Videos</p>
+    <div class="video-grid" id="videoGrid"></div>
+  </div>
+
+  <!-- Trainer Profile -->
+  <div class="trainer-section">
+    <p class="section-label">Trainer</p>
+    <div class="trainer-card">
+      <div class="trainer-card__avatar">
+        <img src="https://images.unsplash.com/photo-1567013127542-490d757e51fc?w=200&h=200&fit=crop" alt="Trainer" loading="lazy">
+      </div>
+      <div class="trainer-card__info">
+        <div class="trainer-card__name">김진수 트레이너</div>
+        <div class="trainer-card__title">NASM CPT · CrossFit L2</div>
+        <div class="trainer-card__bio">10년 경력의 퍼스널 트레이너. 체계적인 프로그래밍과 올바른 폼 교정으로 안전하고 효과적인 운동을 지도합니다.</div>
+        <div class="trainer-card__stats">
+          <div class="trainer-card__stat">
+            <div class="trainer-card__stat-value" style="color:var(--lime)">500+</div>
+            <div class="trainer-card__stat-label">수강생</div>
+          </div>
+          <div class="trainer-card__stat">
+            <div class="trainer-card__stat-value" style="color:var(--blue)">10년</div>
+            <div class="trainer-card__stat-label">경력</div>
+          </div>
+          <div class="trainer-card__stat">
+            <div class="trainer-card__stat-value" style="color:var(--orange)">4.9</div>
+            <div class="trainer-card__stat-label">평점</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reviews -->
+  <div class="reviews-section">
+    <p class="section-label">참여자 후기</p>
+    <div class="review-card">
+      <div class="review-card__header">
+        <div class="review-card__avatar">👩</div>
+        <div class="review-card__info">
+          <div class="review-card__name">이서연</div>
+          <div class="review-card__date">2024.12 완주</div>
+        </div>
+        <div class="review-card__stars">⭐⭐⭐⭐⭐</div>
+      </div>
+      <div class="review-card__text">운동을 처음 시작하는 분에게 정말 추천합니다! 주차별로 강도가 올라가서 자연스럽게 실력이 늘어요. 4주 후에 확실히 체형 변화가 보였습니다.</div>
+      <div class="review-card__result">📊 체지방 -3.2% · 근육량 +1.5kg</div>
+    </div>
+    <div class="review-card">
+      <div class="review-card__header">
+        <div class="review-card__avatar">👨</div>
+        <div class="review-card__info">
+          <div class="review-card__name">박준혁</div>
+          <div class="review-card__date">2025.01 완주</div>
+        </div>
+        <div class="review-card__stars">⭐⭐⭐⭐⭐</div>
+      </div>
+      <div class="review-card__text">헬스장 없이 집에서도 충분히 할 수 있어서 좋았어요. 트레이너 영상 설명이 상세해서 자세 교정도 되고, HIIT 날은 정말 힘들지만 보람찹니다.</div>
+      <div class="review-card__result">📊 체중 -4.5kg · 러닝 2km 기록 단축</div>
+    </div>
+    <div class="review-card">
+      <div class="review-card__header">
+        <div class="review-card__avatar">👩‍💼</div>
+        <div class="review-card__info">
+          <div class="review-card__name">최민지</div>
+          <div class="review-card__date">2025.02 완주</div>
+        </div>
+        <div class="review-card__stars">⭐⭐⭐⭐</div>
+      </div>
+      <div class="review-card__text">바쁜 직장인인데 45분 내외로 끝나서 시간 관리하기 좋았어요. 3주차부터 확실히 체력이 좋아진 걸 느꼈습니다. 다음 프로그램도 기대됩니다!</div>
+      <div class="review-card__result">📊 체력 테스트 점수 +25% 향상</div>
+    </div>
+    <div class="review-card">
+      <div class="review-card__header">
+        <div class="review-card__avatar">🧑</div>
+        <div class="review-card__info">
+          <div class="review-card__name">김도윤</div>
+          <div class="review-card__date">2025.02 완주</div>
+        </div>
+        <div class="review-card__stars">⭐⭐⭐⭐⭐</div>
+      </div>
+      <div class="review-card__text">요가와 근력이 번갈아 있어서 지루하지 않아요. 체크리스트 기능이 동기부여가 되고, 완주했을 때의 성취감이 대단합니다. 두 번째 사이클 돌리는 중!</div>
+      <div class="review-card__result">📊 전체 완주 2회 · 벤치프레스 +15kg</div>
+    </div>
+  </div>
+
+  <!-- Other Programs -->
+  <div class="other-programs">
+    <p class="section-label">다른 추천 프로그램</p>
+    <div class="other-scroll">
+      <div class="other-card" onclick="alert('곧 오픈됩니다!')">
+        <img src="https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=400&h=200&fit=crop" alt="Runner" class="other-card__img" loading="lazy">
+        <div class="other-card__body">
+          <div class="other-card__title">러너스 부트캠프</div>
+          <div class="other-card__meta">6주 · 주 4회</div>
+          <span class="other-card__difficulty other-card__difficulty--easy">초급~중급</span>
+        </div>
+      </div>
+      <div class="other-card" onclick="alert('곧 오픈됩니다!')">
+        <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400&h=200&fit=crop" alt="HIIT" class="other-card__img" loading="lazy">
+        <div class="other-card__body">
+          <div class="other-card__title">HIIT 지옥 훈련</div>
+          <div class="other-card__meta">2주 · 주 4회</div>
+          <span class="other-card__difficulty other-card__difficulty--hard">고급</span>
+        </div>
+      </div>
+      <div class="other-card" onclick="alert('곧 오픈됩니다!')">
+        <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=200&fit=crop" alt="Yoga" class="other-card__img" loading="lazy">
+        <div class="other-card__body">
+          <div class="other-card__title">30일 요가 챌린지</div>
+          <div class="other-card__meta">4주 · 주 6회</div>
+          <span class="other-card__difficulty other-card__difficulty--easy">초급</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </main>
 
@@ -221,7 +602,7 @@ const programData = {
       {name:'바디웨이트 스쿼트',detail:'3세트 × 15회',img:'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=200&h=200&fit=crop'},
       {name:'푸쉬업',detail:'3세트 × 10회',img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop'},
       {name:'플랭크',detail:'3세트 × 30초',img:'https://images.unsplash.com/photo-1566241142559-40e1dab266c6?w=200&h=200&fit=crop'},
-      {name:'런지',detail:'3세트 × 12회 (양쪽)',img:'https://images.unsplash.com/photo-1434682881908-b43d0467b798?w=200&h=200&fit=crop'}
+      {name:'런지',detail:'3세트 × 12회',img:'https://images.unsplash.com/photo-1434682881908-b43d0467b798?w=200&h=200&fit=crop'}
     ]},
     {day:'Day 2',label:'상체 집중',exercises:[
       {name:'덤벨 숄더프레스',detail:'4세트 × 12회',img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=200&h=200&fit=crop'},
@@ -246,110 +627,169 @@ const programData = {
       {name:'벤치프레스',detail:'4세트 × 10회',img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=200&h=200&fit=crop'},
       {name:'풀업',detail:'3세트 × 8회',img:'https://images.unsplash.com/photo-1597452485669-2c7bb5fef90d?w=200&h=200&fit=crop'},
       {name:'레그프레스',detail:'4세트 × 12회',img:'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=200&h=200&fit=crop'}
+    ]},
+    {day:'Day 6',label:'요가 & 회복',exercises:[
+      {name:'선 앞으로 굽히기',detail:'3세트 × 30초',img:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200&h=200&fit=crop'},
+      {name:'비둘기 자세',detail:'양쪽 각 30초',img:'https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?w=200&h=200&fit=crop'},
+      {name:'코브라 자세',detail:'3세트 × 20초',img:'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=200&h=200&fit=crop'},
+      {name:'사바사나',detail:'5분 이완',img:'https://images.unsplash.com/photo-1510894347713-fc3ed6fdf539?w=200&h=200&fit=crop'}
+    ]},
+    {day:'Day 7',label:'휴식',exercises:[
+      {name:'가벼운 산책',detail:'20~30분',img:'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=200&h=200&fit=crop'},
+      {name:'폼롤러 릴리즈',detail:'전신 10분',img:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200&h=200&fit=crop'},
+      {name:'명상',detail:'10분',img:'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=200&h=200&fit=crop'},
+      {name:'수분 보충',detail:'2L 이상',img:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200&h=200&fit=crop'}
     ]}
   ],
   2: [
-    {day:'Day 6',label:'푸쉬 데이',exercises:[
+    {day:'Day 8',label:'푸쉬 데이',exercises:[
       {name:'인클라인 덤벨프레스',detail:'4세트 × 10회',img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=200&h=200&fit=crop'},
       {name:'오버헤드프레스',detail:'4세트 × 10회',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200&h=200&fit=crop'},
       {name:'다이아몬드 푸쉬업',detail:'3세트 × 12회',img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop'},
       {name:'사이드 레터럴레이즈',detail:'3세트 × 15회',img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=200&h=200&fit=crop'}
     ]},
-    {day:'Day 7',label:'풀 데이',exercises:[
+    {day:'Day 9',label:'풀 데이',exercises:[
       {name:'바벨 로우',detail:'4세트 × 10회',img:'https://images.unsplash.com/photo-1597452485669-2c7bb5fef90d?w=200&h=200&fit=crop'},
       {name:'랫풀다운',detail:'4세트 × 12회',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200&h=200&fit=crop'},
       {name:'페이스풀',detail:'3세트 × 15회',img:'https://images.unsplash.com/photo-1597452485669-2c7bb5fef90d?w=200&h=200&fit=crop'},
       {name:'해머 컬',detail:'3세트 × 12회',img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=200&h=200&fit=crop'}
     ]},
-    {day:'Day 8',label:'레그 데이',exercises:[
+    {day:'Day 10',label:'레그 데이',exercises:[
       {name:'프론트 스쿼트',detail:'4세트 × 10회',img:'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=200&h=200&fit=crop'},
-      {name:'불가리안 스플릿 스쿼트',detail:'3세트 × 10회',img:'https://images.unsplash.com/photo-1434682881908-b43d0467b798?w=200&h=200&fit=crop'},
+      {name:'불가리안 스플릿',detail:'3세트 × 10회',img:'https://images.unsplash.com/photo-1434682881908-b43d0467b798?w=200&h=200&fit=crop'},
       {name:'레그 컬',detail:'3세트 × 15회',img:'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=200&h=200&fit=crop'},
       {name:'힙 쓰러스트',detail:'4세트 × 12회',img:'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=200&h=200&fit=crop'}
     ]},
-    {day:'Day 9',label:'전신 AMRAP',exercises:[
+    {day:'Day 11',label:'전신 AMRAP',exercises:[
       {name:'케틀벨 스윙',detail:'5세트 × 15회',img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200&h=200&fit=crop'},
       {name:'박스 점프',detail:'4세트 × 10회',img:'https://images.unsplash.com/photo-1434682881908-b43d0467b798?w=200&h=200&fit=crop'},
       {name:'월볼',detail:'4세트 × 15회',img:'https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=200&h=200&fit=crop'},
       {name:'배틀로프',detail:'4세트 × 30초',img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200&h=200&fit=crop'}
     ]},
-    {day:'Day 10',label:'코어 & 유연성',exercises:[
+    {day:'Day 12',label:'코어 & 유연성',exercises:[
       {name:'행잉 레그레이즈',detail:'3세트 × 12회',img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop'},
       {name:'Ab 롤아웃',detail:'3세트 × 10회',img:'https://images.unsplash.com/photo-1566241142559-40e1dab266c6?w=200&h=200&fit=crop'},
       {name:'요가 플로우',detail:'15분',img:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200&h=200&fit=crop'},
       {name:'폼롤러 릴리즈',detail:'10분',img:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200&h=200&fit=crop'}
+    ]},
+    {day:'Day 13',label:'파워 전신',exercises:[
+      {name:'클린 앤 프레스',detail:'4세트 × 8회',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200&h=200&fit=crop'},
+      {name:'스러스터',detail:'4세트 × 10회',img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200&h=200&fit=crop'},
+      {name:'로우잉',detail:'4세트 × 500m',img:'https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=200&h=200&fit=crop'},
+      {name:'파머스 워크',detail:'3세트 × 40m',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200&h=200&fit=crop'}
+    ]},
+    {day:'Day 14',label:'액티브 리커버리',exercises:[
+      {name:'가벼운 조깅',detail:'20분',img:'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=200&h=200&fit=crop'},
+      {name:'스트레칭',detail:'전신 15분',img:'https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?w=200&h=200&fit=crop'},
+      {name:'모빌리티 워크',detail:'10분',img:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200&h=200&fit=crop'},
+      {name:'명상',detail:'10분',img:'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=200&h=200&fit=crop'}
     ]}
   ],
   3: [
-    {day:'Day 11',label:'파워 상체',exercises:[
+    {day:'Day 15',label:'파워 상체',exercises:[
       {name:'벤치프레스 (무거운)',detail:'5세트 × 5회',img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=200&h=200&fit=crop'},
       {name:'가중 풀업',detail:'4세트 × 6회',img:'https://images.unsplash.com/photo-1597452485669-2c7bb5fef90d?w=200&h=200&fit=crop'},
       {name:'덤벨 플라이',detail:'3세트 × 12회',img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=200&h=200&fit=crop'},
       {name:'케이블 크로스오버',detail:'3세트 × 15회',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200&h=200&fit=crop'}
     ]},
-    {day:'Day 12',label:'파워 하체',exercises:[
+    {day:'Day 16',label:'파워 하체',exercises:[
       {name:'백 스쿼트 (무거운)',detail:'5세트 × 5회',img:'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=200&h=200&fit=crop'},
       {name:'수모 데드리프트',detail:'4세트 × 8회',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200&h=200&fit=crop'},
       {name:'레그 익스텐션',detail:'3세트 × 15회',img:'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=200&h=200&fit=crop'},
       {name:'글루트 브릿지',detail:'3세트 × 20회',img:'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=200&h=200&fit=crop'}
     ]},
-    {day:'Day 13',label:'메타콘',exercises:[
+    {day:'Day 17',label:'메타콘',exercises:[
       {name:'스러스터',detail:'5세트 × 10회',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200&h=200&fit=crop'},
       {name:'로우잉',detail:'4세트 × 500m',img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200&h=200&fit=crop'},
       {name:'더블언더',detail:'4세트 × 50회',img:'https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=200&h=200&fit=crop'},
       {name:'월 워크',detail:'3세트 × 5회',img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop'}
     ]},
-    {day:'Day 14',label:'펌프 데이',exercises:[
+    {day:'Day 18',label:'펌프 데이',exercises:[
       {name:'슈퍼셋: 벤치+로우',detail:'4세트 × 12회',img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=200&h=200&fit=crop'},
       {name:'슈퍼셋: 컬+딥스',detail:'3세트 × 15회',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200&h=200&fit=crop'},
       {name:'슈퍼셋: 스쿼트+런지',detail:'3세트 × 12회',img:'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=200&h=200&fit=crop'},
       {name:'파머스 워크',detail:'3세트 × 40m',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200&h=200&fit=crop'}
     ]},
-    {day:'Day 15',label:'액티브 리커버리',exercises:[
-      {name:'가벼운 조깅',detail:'20분',img:'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=200&h=200&fit=crop'},
-      {name:'다이나믹 스트레칭',detail:'15분',img:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200&h=200&fit=crop'},
-      {name:'모빌리티 워크',detail:'10분',img:'https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?w=200&h=200&fit=crop'},
-      {name:'명상',detail:'10분',img:'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=200&h=200&fit=crop'}
+    {day:'Day 19',label:'파워 요가',exercises:[
+      {name:'워리어 시퀀스',detail:'각 자세 30초',img:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200&h=200&fit=crop'},
+      {name:'밸런스 홀드',detail:'양쪽 각 20초',img:'https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?w=200&h=200&fit=crop'},
+      {name:'코어 요가',detail:'15분',img:'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=200&h=200&fit=crop'},
+      {name:'딥 스트레칭',detail:'10분',img:'https://images.unsplash.com/photo-1510894347713-fc3ed6fdf539?w=200&h=200&fit=crop'}
+    ]},
+    {day:'Day 20',label:'스프린트 데이',exercises:[
+      {name:'100m 스프린트',detail:'8회 반복',img:'https://images.unsplash.com/photo-1461896836934-bd45ba8fcf9b?w=200&h=200&fit=crop'},
+      {name:'계단 달리기',detail:'5세트',img:'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=200&h=200&fit=crop'},
+      {name:'어질리티 드릴',detail:'4세트 × 30초',img:'https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=200&h=200&fit=crop'},
+      {name:'쿨다운 조깅',detail:'10분',img:'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=200&h=200&fit=crop'}
+    ]},
+    {day:'Day 21',label:'완전 휴식',exercises:[
+      {name:'산책',detail:'30분',img:'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=200&h=200&fit=crop'},
+      {name:'스트레칭',detail:'15분',img:'https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?w=200&h=200&fit=crop'},
+      {name:'식단 점검',detail:'영양소 체크',img:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200&h=200&fit=crop'},
+      {name:'수면 관리',detail:'8시간 이상',img:'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=200&h=200&fit=crop'}
     ]}
   ],
   4: [
-    {day:'Day 16',label:'테스트 상체',exercises:[
+    {day:'Day 22',label:'테스트 상체',exercises:[
       {name:'1RM 벤치프레스',detail:'워크업 → 1RM',img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=200&h=200&fit=crop'},
       {name:'맥스 풀업',detail:'최대 횟수',img:'https://images.unsplash.com/photo-1597452485669-2c7bb5fef90d?w=200&h=200&fit=crop'},
       {name:'푸쉬업 맥스',detail:'최대 횟수',img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop'},
       {name:'플랭크 맥스',detail:'최대 시간',img:'https://images.unsplash.com/photo-1566241142559-40e1dab266c6?w=200&h=200&fit=crop'}
     ]},
-    {day:'Day 17',label:'테스트 하체',exercises:[
+    {day:'Day 23',label:'테스트 하체',exercises:[
       {name:'1RM 스쿼트',detail:'워크업 → 1RM',img:'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=200&h=200&fit=crop'},
       {name:'1RM 데드리프트',detail:'워크업 → 1RM',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200&h=200&fit=crop'},
       {name:'벽 스쿼트 홀드',detail:'최대 시간',img:'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=200&h=200&fit=crop'},
       {name:'100m 스프린트',detail:'3회 측정',img:'https://images.unsplash.com/photo-1461896836934-bd45ba8fcf9b?w=200&h=200&fit=crop'}
     ]},
-    {day:'Day 18',label:'파이널 HIIT',exercises:[
-      {name:'타바타 풀코스',detail:'8라운드 × 4세트',img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200&h=200&fit=crop'},
+    {day:'Day 24',label:'파이널 HIIT',exercises:[
+      {name:'타바타 풀코스',detail:'8R × 4세트',img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200&h=200&fit=crop'},
       {name:'100 버피 챌린지',detail:'최단시간',img:'https://images.unsplash.com/photo-1601422407692-ec4eeec1d9b3?w=200&h=200&fit=crop'},
       {name:'에어 스쿼트 200',detail:'최단시간',img:'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=200&h=200&fit=crop'},
       {name:'2km 러닝',detail:'기록 측정',img:'https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=200&h=200&fit=crop'}
     ]},
-    {day:'Day 19',label:'영광의 전신',exercises:[
+    {day:'Day 25',label:'전신 파이널',exercises:[
       {name:'복합 서킷 A',detail:'5라운드',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200&h=200&fit=crop'},
       {name:'복합 서킷 B',detail:'5라운드',img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200&h=200&fit=crop'},
-      {name:'피니셔: 어쌜트 바이크',detail:'5분 전력',img:'https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=200&h=200&fit=crop'},
-      {name:'쿨다운 스트레칭',detail:'15분',img:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200&h=200&fit=crop'}
+      {name:'어쌜트 바이크',detail:'5분 전력',img:'https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=200&h=200&fit=crop'},
+      {name:'쿨다운',detail:'15분',img:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200&h=200&fit=crop'}
     ]},
-    {day:'Day 20',label:'축하 & 마무리',exercises:[
-      {name:'가벼운 전신 운동',detail:'자유 선택 30분',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200&h=200&fit=crop'},
+    {day:'Day 26',label:'마무리 근력',exercises:[
+      {name:'벤치프레스 5×5',detail:'5세트 × 5회',img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=200&h=200&fit=crop'},
+      {name:'스쿼트 5×5',detail:'5세트 × 5회',img:'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=200&h=200&fit=crop'},
+      {name:'데드리프트 5×5',detail:'5세트 × 5회',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200&h=200&fit=crop'},
+      {name:'오버헤드프레스 5×5',detail:'5세트 × 5회',img:'https://images.unsplash.com/photo-1597452485669-2c7bb5fef90d?w=200&h=200&fit=crop'}
+    ]},
+    {day:'Day 27',label:'마무리 요가',exercises:[
+      {name:'전신 빈야사',detail:'30분 플로우',img:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200&h=200&fit=crop'},
+      {name:'딥 스트레칭',detail:'20분',img:'https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?w=200&h=200&fit=crop'},
+      {name:'호흡 명상',detail:'10분',img:'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=200&h=200&fit=crop'},
+      {name:'사바사나',detail:'10분 이완',img:'https://images.unsplash.com/photo-1510894347713-fc3ed6fdf539?w=200&h=200&fit=crop'}
+    ]},
+    {day:'Day 28',label:'🎉 축하 & 마무리',exercises:[
+      {name:'자유 운동',detail:'30분 자유 선택',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200&h=200&fit=crop'},
       {name:'스트레칭 & 요가',detail:'20분',img:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200&h=200&fit=crop'},
-      {name:'진행 사진 촬영',detail:'비포&애프터',img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop'},
+      {name:'진행 사진 촬영',detail:'비포 & 애프터',img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop'},
       {name:'목표 재설정',detail:'다음 프로그램 선택',img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200&h=200&fit=crop'}
     ]}
   ]
 };
 
-// Load checked state from localStorage
+// ─── Video Thumbnails Data ───
+const videoData = [
+  {name:'스쿼트 바른 자세',dur:'3:45',img:'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=400&h=225&fit=crop'},
+  {name:'데드리프트 가이드',dur:'5:20',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=225&fit=crop'},
+  {name:'벤치프레스 폼',dur:'4:10',img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=225&fit=crop'},
+  {name:'풀업 마스터',dur:'6:00',img:'https://images.unsplash.com/photo-1597452485669-2c7bb5fef90d?w=400&h=225&fit=crop'},
+  {name:'버피 올바른 방법',dur:'2:30',img:'https://images.unsplash.com/photo-1601422407692-ec4eeec1d9b3?w=400&h=225&fit=crop'},
+  {name:'요가 기초 플로우',dur:'8:15',img:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=225&fit=crop'},
+  {name:'코어 운동 루틴',dur:'4:45',img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=225&fit=crop'},
+  {name:'HIIT 타바타',dur:'3:00',img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400&h=225&fit=crop'}
+];
+
+// ─── Load checked state ───
 const STORAGE_KEY = 'vitality_program_checks';
 let checkedState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-
 let currentWeek = 1;
 
 function switchWeek(week, btn) {
@@ -362,12 +802,10 @@ function switchWeek(week, btn) {
 function renderDays() {
   const container = document.getElementById('dayCards');
   const days = programData[currentWeek];
-  
   container.innerHTML = days.map((day, di) => {
     const dayKey = `w${currentWeek}_d${di}`;
     const totalEx = day.exercises.length;
     const checkedCount = day.exercises.filter((_, ei) => checkedState[`${dayKey}_e${ei}`]).length;
-    
     return `
       <div class="day-card" style="animation:fadeInUp 0.4s ${di*0.08}s var(--transition) both">
         <div class="day-card__header" onclick="toggleDay(this)">
@@ -394,40 +832,29 @@ function renderDays() {
                   <img src="${ex.img}" alt="${ex.name}" loading="lazy">
                   <div class="exercise-thumb__play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
                 </div>
-              </div>
-            `;
+              </div>`;
           }).join('')}
         </div>
-      </div>
-    `;
+      </div>`;
   }).join('');
-  
-  // Open first day by default
-  const firstExercises = container.querySelector('.day-card__exercises');
-  if (firstExercises) firstExercises.classList.add('open');
-  
+  const firstEx = container.querySelector('.day-card__exercises');
+  if (firstEx) firstEx.classList.add('open');
   updateProgress();
 }
 
 function toggleDay(header) {
-  const exercises = header.nextElementSibling;
-  exercises.classList.toggle('open');
+  header.nextElementSibling.classList.toggle('open');
 }
 
 function toggleCheck(key, el) {
   checkedState[key] = !checkedState[key];
   localStorage.setItem(STORAGE_KEY, JSON.stringify(checkedState));
-  
   el.classList.toggle('checked');
-  const nameEl = el.nextElementSibling.querySelector('.exercise-name');
-  nameEl.classList.toggle('done');
-  
-  // Update day count
+  el.nextElementSibling.querySelector('.exercise-name').classList.toggle('done');
   const dayCard = el.closest('.day-card');
   const checks = dayCard.querySelectorAll('.exercise-check');
   const checked = dayCard.querySelectorAll('.exercise-check.checked');
   dayCard.querySelector('.day-card__check-count').textContent = `${checked.length}/${checks.length}`;
-  
   updateProgress();
 }
 
@@ -441,37 +868,46 @@ function updateProgress() {
       });
     });
   }
-  
   const pct = total > 0 ? Math.round(done / total * 100) : 0;
   document.getElementById('overallPercent').textContent = pct + '%';
   document.getElementById('overallFill').style.width = pct + '%';
   document.getElementById('statExercises').textContent = done;
-  
-  // Count completed days
   let completedDays = 0;
   for (let w = 1; w <= 4; w++) {
     programData[w].forEach((day, di) => {
-      const allDone = day.exercises.every((_, ei) => checkedState[`w${w}_d${di}_e${ei}`]);
-      if (allDone) completedDays++;
+      if (day.exercises.every((_, ei) => checkedState[`w${w}_d${di}_e${ei}`])) completedDays++;
     });
   }
   document.getElementById('statDays').textContent = completedDays;
-  document.getElementById('statStreak').textContent = Math.min(completedDays, 5);
+  document.getElementById('statStreak').textContent = Math.min(completedDays, 7);
+}
+
+function renderVideoGrid() {
+  document.getElementById('videoGrid').innerHTML = videoData.map((v, i) => `
+    <div class="video-thumb" onclick="openVideo('${v.img}','${v.name}','${v.dur}')" style="animation:fadeInUp 0.3s ${i*0.06}s var(--transition) both">
+      <img src="${v.img}" alt="${v.name}" loading="lazy">
+      <div class="video-thumb__overlay">
+        <div class="video-thumb__play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
+        <div class="video-thumb__name">${v.name}</div>
+        <div class="video-thumb__dur">${v.dur}</div>
+      </div>
+    </div>
+  `).join('');
 }
 
 function openVideo(img, name, detail) {
   document.getElementById('videoModalImg').src = img;
   document.getElementById('videoModalTitle').textContent = name;
-  document.getElementById('videoModalDesc').textContent = detail + ' — 영상 준비 중입니다. 곧 업데이트됩니다!';
+  document.getElementById('videoModalDesc').textContent = detail + ' — 영상 준비 중입니다.';
   document.getElementById('videoModal').classList.add('active');
 }
-
 function closeVideoModal() {
   document.getElementById('videoModal').classList.remove('active');
 }
 
 // Init
 renderDays();
+renderVideoGrid();
 </script>
 </body>
 </html>

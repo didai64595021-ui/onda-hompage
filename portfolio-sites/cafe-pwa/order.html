@@ -1020,69 +1020,25 @@ body {
 </div>
 
 <!-- ORDER DETAILS -->
-<div class="order-details">
+<div class="order-details" id="orderDetails">
   <div class="details-title">📋 주문 내역</div>
-  
-  <div class="order-item">
-    <div class="order-item-left">
-      <img class="order-item-thumb" src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&q=80" alt="카페라떼" loading="lazy">
-      <div class="order-item-info">
-        <div class="order-item-name">카페라떼 (ICE)</div>
-        <div class="order-item-opts">Regular · 샷추가1 · 바닐라시럽</div>
-      </div>
-    </div>
-    <div class="order-item-right">
-      <div class="order-item-qty">x2</div>
-      <div class="order-item-price">13,000원</div>
-    </div>
-  </div>
-  
-  <div class="order-item">
-    <div class="order-item-left">
-      <img class="order-item-thumb" src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80" alt="아메리카노" loading="lazy">
-      <div class="order-item-info">
-        <div class="order-item-name">아메리카노 (HOT)</div>
-        <div class="order-item-opts">Large · 샷추가2</div>
-      </div>
-    </div>
-    <div class="order-item-right">
-      <div class="order-item-qty">x1</div>
-      <div class="order-item-price">6,500원</div>
-    </div>
-  </div>
-  
-  <div class="order-item">
-    <div class="order-item-left">
-      <img class="order-item-thumb" src="https://images.unsplash.com/photo-1555507036-ab1f4038024a?w=200&q=80" alt="크루아상" loading="lazy">
-      <div class="order-item-info">
-        <div class="order-item-name">크루아상</div>
-        <div class="order-item-opts">플레인</div>
-      </div>
-    </div>
-    <div class="order-item-right">
-      <div class="order-item-qty">x1</div>
-      <div class="order-item-price">4,500원</div>
-    </div>
-  </div>
-  
+  <div id="orderItemsList"></div>
   <div class="receipt-divider"><span>결제 정보</span></div>
-  
   <div class="order-summary-row">
     <span class="label">주문금액</span>
-    <span class="value">24,000원</span>
+    <span class="value" id="orderSubtotal">0원</span>
   </div>
   <div class="order-summary-row">
     <span class="label">쿠폰 할인</span>
-    <span class="discount">-2,000원</span>
+    <span class="discount" id="orderDiscount">-0원</span>
   </div>
   <div class="order-summary-row">
     <span class="label">적립 포인트</span>
-    <span class="value" style="color:var(--gold);">+220P</span>
+    <span class="value" id="orderPoints" style="color:var(--gold);">+0P</span>
   </div>
-  
   <div class="order-total-row">
     <span class="order-total-label">결제금액</span>
-    <span class="order-total-value">22,000원</span>
+    <span class="order-total-value" id="orderTotal">0원</span>
   </div>
 </div>
 
@@ -1130,26 +1086,13 @@ body {
 </div>
 
 <!-- STAMP CARD -->
-<div class="stamp-card">
+<div class="stamp-card" id="stampCard">
   <div class="stamp-header">
     <span class="stamp-title">🌸 스탬프 적립</span>
-    <span class="stamp-count">8 / 10</span>
+    <span class="stamp-count" id="stampCountLabel">0 / 10</span>
   </div>
-  <div class="stamp-grid">
-    <div class="stamp-item filled">☕</div>
-    <div class="stamp-item filled">☕</div>
-    <div class="stamp-item filled">☕</div>
-    <div class="stamp-item filled">☕</div>
-    <div class="stamp-item filled">☕</div>
-    <div class="stamp-item filled">☕</div>
-    <div class="stamp-item filled">☕</div>
-    <div class="stamp-item filled new">☕</div>
-    <div class="stamp-item"><span class="stamp-num">9</span></div>
-    <div class="stamp-item reward">🎁</div>
-  </div>
-  <p class="stamp-progress-text">
-    <strong>2잔</strong> 더 마시면 무료 음료 쿠폰! 🎉
-  </p>
+  <div class="stamp-grid" id="stampGrid"></div>
+  <p class="stamp-progress-text" id="stampProgressText"></p>
 </div>
 
 <!-- ACTION BUTTONS -->
@@ -1177,6 +1120,123 @@ body {
 
 <script>
 /* ============================================
+   LOAD ORDER FROM LOCALSTORAGE
+   ============================================ */
+function loadOrderData() {
+  const order = JSON.parse(localStorage.getItem('bloomingLastOrder') || 'null');
+  if (!order) return;
+
+  // Order number
+  document.getElementById('orderNum').textContent = order.orderNum || 'BC-0000';
+  // Order time
+  const d = new Date(order.date);
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+  const h = String(d.getHours()).padStart(2,'0'), min = String(d.getMinutes()).padStart(2,'0');
+  document.getElementById('orderTime').textContent = `${y}.${m}.${day} ${h}:${min}`;
+
+  // Order items
+  const list = document.getElementById('orderItemsList');
+  list.innerHTML = '';
+  (order.items || []).forEach(item => {
+    const price = (item.unitPrice * item.qty).toLocaleString('ko-KR');
+    list.innerHTML += `
+      <div class="order-item">
+        <div class="order-item-left">
+          <img class="order-item-thumb" src="${item.img || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'}" alt="${item.name}" loading="lazy">
+          <div class="order-item-info">
+            <div class="order-item-name">${item.name} ${item.temp ? '('+item.temp+')' : ''}</div>
+            <div class="order-item-opts">${item.options || ''}</div>
+          </div>
+        </div>
+        <div class="order-item-right">
+          <div class="order-item-qty">x${item.qty}</div>
+          <div class="order-item-price">${price}원</div>
+        </div>
+      </div>`;
+  });
+
+  document.getElementById('orderSubtotal').textContent = (order.subtotal || 0).toLocaleString('ko-KR') + '원';
+  document.getElementById('orderDiscount').textContent = '-' + (order.discount || 0).toLocaleString('ko-KR') + '원';
+  document.getElementById('orderPoints').textContent = '+' + (order.points || 0) + 'P';
+  document.getElementById('orderTotal').textContent = (order.total || 0).toLocaleString('ko-KR') + '원';
+}
+
+/* ============================================
+   STAMPS
+   ============================================ */
+function renderStamps() {
+  const stamps = parseInt(localStorage.getItem('bloomingStamps') || '0');
+  const display = stamps % 10;
+  document.getElementById('stampCountLabel').textContent = display + ' / 10';
+  const grid = document.getElementById('stampGrid');
+  grid.innerHTML = '';
+  for (let i = 1; i <= 10; i++) {
+    const div = document.createElement('div');
+    if (i === 10) {
+      div.className = 'stamp-item reward';
+      div.textContent = '🎁';
+    } else if (i <= display) {
+      div.className = 'stamp-item filled';
+      if (i === display) div.classList.add('new');
+      div.textContent = '☕';
+    } else {
+      div.className = 'stamp-item';
+      div.innerHTML = '<span class="stamp-num">' + i + '</span>';
+    }
+    grid.appendChild(div);
+  }
+  const remaining = 10 - display;
+  document.getElementById('stampProgressText').innerHTML = `<strong>${remaining}잔</strong> 더 마시면 무료 음료 쿠폰! 🎉`;
+}
+
+/* ============================================
+   5-MIN COUNTDOWN
+   ============================================ */
+function startCountdown() {
+  let remaining = 300; // 5 minutes
+  const el = document.getElementById('waitMin');
+  const interval = setInterval(() => {
+    remaining--;
+    const mins = Math.ceil(remaining / 60);
+    el.textContent = mins;
+
+    const pct = ((300 - remaining) / 300) * 100;
+    document.getElementById('progressBar').style.width = Math.min(pct, 100) + '%';
+    const fillPct = Math.min(pct / 100 * 66 + 33, 100);
+    document.getElementById('progressFill').style.width = fillPct + '%';
+
+    // Progress steps
+    if (pct >= 33 && pct < 66) {
+      document.getElementById('statusText').textContent = '바리스타가 음료를 만들고 있어요 ☕';
+    } else if (pct >= 66 && pct < 90) {
+      document.getElementById('step2').classList.remove('active');
+      document.getElementById('step2').classList.add('done');
+      document.getElementById('step2').querySelector('.step-circle').innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+      document.getElementById('step3').classList.add('active');
+      document.getElementById('statusText').textContent = '거의 다 됐어요! 조금만 기다려주세요 ✨';
+      document.getElementById('progressFill').style.width = '66%';
+    }
+
+    if (remaining <= 0) {
+      clearInterval(interval);
+      el.textContent = '0';
+      document.getElementById('statusText').textContent = '음료가 준비되었어요! 🎉';
+      document.getElementById('progressBar').style.width = '100%';
+      document.getElementById('progressFill').style.width = '100%';
+      document.getElementById('step2').classList.remove('active');
+      document.getElementById('step2').classList.add('done');
+      document.getElementById('step2').querySelector('.step-circle').innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+      document.getElementById('step3').classList.remove('active');
+      document.getElementById('step3').classList.add('done');
+      document.getElementById('step3').querySelector('.step-circle').innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+      document.getElementById('step4').classList.add('active');
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      showToast('🎉 음료가 준비되었어요! 카운터에서 수령해주세요.');
+    }
+  }, 1000);
+}
+
+/* ============================================
    CONFETTI
    ============================================ */
 function createConfetti() {
@@ -1199,64 +1259,7 @@ function createConfetti() {
   setTimeout(() => container.innerHTML = '', 5000);
 }
 
-/* ============================================
-   PROGRESS ANIMATION
-   ============================================ */
-function animateProgress() {
-  setTimeout(() => {
-    document.getElementById('progressBar').style.width = '35%';
-  }, 500);
-  
-  // Simulate progress
-  let wait = 8;
-  const interval = setInterval(() => {
-    wait--;
-    if (wait <= 0) {
-      clearInterval(interval);
-      document.getElementById('waitMin').textContent = '0';
-      document.getElementById('statusText').textContent = '음료가 준비되었어요! 🎉';
-      document.getElementById('progressBar').style.width = '100%';
-      document.getElementById('step2').classList.remove('active');
-      document.getElementById('step2').classList.add('done');
-      document.getElementById('step2').querySelector('.step-circle').innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
-      document.getElementById('step3').classList.add('active');
-      document.getElementById('progressFill').style.width = '66%';
-      return;
-    }
-    document.getElementById('waitMin').textContent = wait;
-    
-    const pct = ((8 - wait) / 8) * 100;
-    document.getElementById('progressBar').style.width = Math.min(pct, 90) + '%';
-    
-    const fillPct = Math.min(((8 - wait) / 8) * 33 + 33, 60);
-    document.getElementById('progressFill').style.width = fillPct + '%';
-    
-    const messages = [
-      '바리스타가 음료를 만들고 있어요',
-      '원두를 갈고 있어요 ☕',
-      '에스프레소를 추출하고 있어요',
-      '우유를 스팀하고 있어요 🥛',
-      '거의 다 됐어요! 조금만 기다려주세요',
-    ];
-    document.getElementById('statusText').textContent = messages[Math.floor(Math.random() * messages.length)];
-  }, 3000);
-}
-
-/* ============================================
-   ORDER NUMBER
-   ============================================ */
-function setOrderInfo() {
-  const now = new Date();
-  const num = 'B-' + (100 + Math.floor(Math.random() * 200));
-  document.getElementById('orderNum').textContent = num;
-  
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const d = String(now.getDate()).padStart(2, '0');
-  const h = String(now.getHours()).padStart(2, '0');
-  const min = String(now.getMinutes()).padStart(2, '0');
-  document.getElementById('orderTime').textContent = `${y}.${m}.${d} ${h}:${min}`;
-}
+/* animateProgress and setOrderInfo replaced by loadOrderData + startCountdown */
 
 /* ============================================
    SHARE
@@ -1291,9 +1294,10 @@ function showToast(text) {
    INIT
    ============================================ */
 document.addEventListener('DOMContentLoaded', () => {
-  setOrderInfo();
+  loadOrderData();
+  renderStamps();
   createConfetti();
-  animateProgress();
+  startCountdown();
 });
 
 if ('serviceWorker' in navigator) {

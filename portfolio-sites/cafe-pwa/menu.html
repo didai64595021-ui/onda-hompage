@@ -1416,7 +1416,7 @@
                 <!-- Dessert Items -->
                 <article class="menu-item" data-category="dessert" data-price="4900" data-popularity="90" data-temp="none">
                     <div class="menu-image-wrapper">
-                        <img class="menu-image" data-src="https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=400" alt="크루아상">
+                        <img class="menu-image" data-src="https://images.unsplash.com/photo-1555507036-ab1f4038024a?w=400" alt="크루아상">
                         <div class="best-badge">BEST</div>
                         <button class="heart-button">
                             <svg class="heart-icon" viewBox="0 0 24 24">
@@ -1986,48 +1986,61 @@
             }
         }
 
-        // Add to Cart
+        // Add to Cart (localStorage)
         function addToCart(item) {
             const name = item.querySelector('.menu-name').textContent;
-            const price = item.querySelector('.menu-price').textContent;
+            const priceText = item.querySelector('.menu-price').textContent;
+            const priceNum = parseInt(priceText.replace(/[^0-9]/g, ''));
+            const imgEl = item.querySelector('.menu-image');
+            const imgSrc = imgEl ? (imgEl.src || imgEl.dataset.src) : '';
+
+            const cartItem = {
+              id: Date.now().toString(),
+              name: name,
+              img: imgSrc,
+              options: '',
+              temp: '',
+              unitPrice: priceNum,
+              qty: 1
+            };
+            const cart = JSON.parse(localStorage.getItem('bloomingCart') || '[]');
+            cart.push(cartItem);
+            localStorage.setItem('bloomingCart', JSON.stringify(cart));
             
-            // Add visual feedback
+            // Visual feedback
             const button = item.querySelector('.quick-add-button');
             const originalText = button.querySelector('span').textContent;
-            
             button.querySelector('span').textContent = '담김!';
             button.style.backgroundColor = 'var(--deep-green)';
             button.style.color = 'white';
-            
             setTimeout(() => {
                 button.querySelector('span').textContent = originalText;
                 button.style.backgroundColor = '';
                 button.style.color = '';
             }, 1000);
             
-            // Update cart badge
             updateCartBadge();
-            
-            console.log(`Added ${name} (${price}) to cart`);
         }
 
         function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('bloomingCart') || '[]');
+            const count = cart.reduce((s, i) => s + i.qty, 0);
             const badge = document.querySelector('.cart-badge');
-            let count = parseInt(badge.textContent);
-            count++;
-            badge.textContent = count;
-            
-            // Animate badge
-            badge.style.animation = 'none';
-            setTimeout(() => {
-                badge.style.animation = 'cartBadgePulse 0.6s ease';
-            }, 10);
+            if (badge) {
+              badge.textContent = count;
+              badge.style.display = count > 0 ? 'flex' : 'none';
+              badge.style.animation = 'none';
+              setTimeout(() => { badge.style.animation = 'cartBadgePulse 0.6s ease'; }, 10);
+            }
         }
 
-        // Show Item Detail (placeholder)
+        // Show Item Detail
         function showItemDetail(item) {
             window.location.href = 'detail.html';
         }
+
+        // Init cart badge from localStorage on load
+        document.addEventListener('DOMContentLoaded', () => { updateCartBadge(); });
 
         // Scroll Handling
         function handleScroll() {
