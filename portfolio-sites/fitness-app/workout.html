@@ -10,13 +10,15 @@
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{--dark:#0D0D0D;--dark-surface:#1A1A1A;--dark-card:#1E1E1E;--dark-border:#2A2A2A;--lime:#CCFF00;--lime-dim:rgba(204,255,0,0.15);--lime-glow:rgba(204,255,0,0.3);--white:#F5F5F5;--gray:#8A8A8A;--gray-light:#B0B0B0;--red:#FF4757;--blue:#3B82F6;--orange:#FF6B35;--purple:#A855F7;--safe-top:44px;--safe-bottom:34px;--nav-height:72px;--radius:16px;--radius-sm:10px;--font-body:'Pretendard',-apple-system,sans-serif;--font-display:'Sora',sans-serif;--transition:cubic-bezier(0.4,0,0.2,1)}
-html{font-size:16px;scroll-behavior:smooth}
-body{font-family:var(--font-body);background:var(--dark);color:var(--white);min-height:100dvh;overflow-x:hidden;padding-top:var(--safe-top);padding-bottom:calc(var(--nav-height)+var(--safe-bottom));-webkit-font-smoothing:antialiased}
+html{font-size:16px;scroll-behavior:smooth;word-break:keep-all}
+body{font-family:var(--font-body);background:var(--dark);color:var(--white);min-height:100dvh;overflow-x:hidden;padding-top:var(--safe-top);padding-bottom:calc(var(--nav-height)+var(--safe-bottom));-webkit-font-smoothing:antialiased;word-break:keep-all}
 a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}img{max-width:100%;display:block}ul{list-style:none}
 ::-webkit-scrollbar{width:0;height:0}
 
 @keyframes fadeInUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 @keyframes scaleIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 
 /* HEADER */
 .app-header{position:fixed;top:0;left:0;right:0;height:var(--safe-top);background:rgba(13,13,13,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100;border-bottom:1px solid var(--dark-border)}
@@ -41,15 +43,71 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
 .search-bar input{background:none;border:none;color:var(--white);font-size:14px;width:100%;outline:none}
 .search-bar input::placeholder{color:var(--gray)}
 
+/* 오늘의 추천 BANNER */
+.today-recommendation{margin-bottom:28px;animation:fadeInUp 0.5s 0.15s var(--transition) both}
+.today-hero{position:relative;height:280px;border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:transform 0.3s var(--transition)}
+.today-hero:active{transform:scale(0.97)}
+.today-hero__bg{position:absolute;inset:0;background:linear-gradient(135deg,var(--lime),var(--orange));opacity:0.1}
+.today-hero__img{width:100%;height:100%;object-fit:cover;opacity:0.7}
+.today-hero__content{position:absolute;inset:0;background:linear-gradient(transparent 30%,rgba(0,0,0,0.9));padding:24px;display:flex;flex-direction:column;justify-content:flex-end}
+.today-hero__badge{font-size:11px;color:var(--dark);background:var(--lime);padding:6px 12px;border-radius:20px;display:inline-block;width:fit-content;margin-bottom:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.today-hero__title{font-size:24px;font-weight:800;margin-bottom:6px;font-family:var(--font-display)}
+.today-hero__subtitle{font-size:14px;color:var(--gray-light);margin-bottom:16px}
+.today-hero__stats{display:flex;gap:16px;margin-bottom:16px}
+.today-hero__stat{display:flex;align-items:center;gap:6px;font-size:12px}
+.today-hero__stat svg{width:14px;height:14px;stroke:var(--lime);fill:none;stroke-width:2}
+.today-hero__action{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--lime);color:var(--dark);padding:12px 20px;border-radius:24px;font-size:14px;font-weight:600;width:fit-content;margin-left:auto}
+.today-hero__action svg{width:16px;height:16px;fill:var(--dark)}
+
 /* TABS */
-.tabs{display:flex;gap:8px;margin-bottom:24px;overflow-x:auto;padding-bottom:4px;animation:fadeInUp 0.5s 0.15s var(--transition) both;-webkit-overflow-scrolling:touch}
+.tabs{display:flex;gap:8px;margin-bottom:24px;overflow-x:auto;padding-bottom:4px;animation:fadeInUp 0.5s 0.2s var(--transition) both;-webkit-overflow-scrolling:touch}
 .tabs::-webkit-scrollbar{display:none}
 .tab{padding:10px 20px;border-radius:24px;font-size:14px;font-weight:600;white-space:nowrap;transition:all 0.25s var(--transition);background:var(--dark-card);border:1px solid var(--dark-border);color:var(--gray-light);-webkit-tap-highlight-color:transparent}
 .tab:active{transform:scale(0.95)}
 .tab--active{background:var(--lime);color:var(--dark);border-color:var(--lime)}
 
+/* QUICK START */
+.quick-start{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px;animation:fadeInUp 0.5s 0.25s var(--transition) both}
+.quick-card{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:var(--radius);padding:20px 16px;text-align:center;cursor:pointer;transition:all 0.2s var(--transition);-webkit-tap-highlight-color:transparent}
+.quick-card:active{transform:scale(0.95);background:var(--dark-surface)}
+.quick-card__icon{font-size:36px;margin-bottom:10px}
+.quick-card__name{font-size:14px;font-weight:600;margin-bottom:4px}
+.quick-card__desc{font-size:11px;color:var(--gray)}
+
+/* 추천 프로그램 SECTION */
+.programs-section{margin-bottom:28px;animation:fadeInUp 0.5s 0.3s var(--transition) both}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section-title{font-size:16px;font-weight:700;color:var(--white)}
+.section-link{font-size:12px;color:var(--lime);font-weight:600;text-decoration:none;padding:4px 8px;border-radius:6px;transition:background 0.2s}
+.section-link:hover{background:var(--lime-dim)}
+.programs-scroll{display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+.programs-scroll::-webkit-scrollbar{display:none}
+.program-card{flex:none;width:240px;background:var(--dark-card);border:1px solid var(--dark-border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:transform 0.2s}
+.program-card:active{transform:scale(0.95)}
+.program-card__img{width:100%;height:120px;object-fit:cover}
+.program-card__content{padding:16px}
+.program-card__tag{font-size:10px;color:var(--blue);background:rgba(59,130,246,0.12);padding:3px 8px;border-radius:6px;display:inline-block;margin-bottom:8px;font-weight:600}
+.program-card__title{font-size:14px;font-weight:600;margin-bottom:4px}
+.program-card__desc{font-size:12px;color:var(--gray);margin-bottom:10px}
+.program-card__meta{display:flex;gap:12px;font-size:11px}
+.program-card__meta span{color:var(--gray-light)}
+
+/* 최근 운동 히스토리 */
+.history-section{margin-bottom:28px;animation:fadeInUp 0.5s 0.35s var(--transition) both}
+.history-list{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:var(--radius);overflow:hidden}
+.history-item{padding:16px;border-bottom:1px solid var(--dark-border);display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.2s}
+.history-item:last-child{border-bottom:none}
+.history-item:hover{background:var(--dark-surface)}
+.history-item__icon{width:36px;height:36px;background:var(--lime-dim);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.history-item__icon svg{width:16px;height:16px;stroke:var(--lime);fill:none;stroke-width:2}
+.history-item__info{flex:1}
+.history-item__name{font-size:14px;font-weight:600;margin-bottom:2px}
+.history-item__meta{font-size:12px;color:var(--gray);display:flex;gap:8px}
+.history-item__time{font-size:11px;color:var(--gray-light);text-align:right}
+.history-empty{padding:32px;text-align:center;color:var(--gray);font-size:14px}
+
 /* FEATURED */
-.featured{margin-bottom:28px;animation:fadeInUp 0.5s 0.2s var(--transition) both}
+.featured{margin-bottom:28px;animation:fadeInUp 0.5s 0.4s var(--transition) both}
 .featured__card{border-radius:var(--radius);overflow:hidden;position:relative;height:200px;cursor:pointer;transition:transform 0.2s}
 .featured__card:active{transform:scale(0.97)}
 .featured__img{width:100%;height:100%;object-fit:cover}
@@ -79,21 +137,35 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
 .workout-item__tag--time{background:rgba(59,130,246,0.12);color:var(--blue)}
 .workout-item__tag--cal{background:rgba(204,255,0,0.12);color:var(--lime)}
 .workout-item__tag--level{background:rgba(168,85,247,0.12);color:var(--purple)}
+.workout-item__difficulty{position:absolute;top:6px;right:6px;font-size:8px;padding:2px 6px;border-radius:4px;font-weight:600}
+.workout-item__difficulty--초급{background:rgba(34,197,94,0.15);color:#22C55E}
+.workout-item__difficulty--중급{background:rgba(251,191,36,0.15);color:#FBBF24}
+.workout-item__difficulty--고급{background:rgba(239,68,68,0.15);color:#EF4444}
 .workout-item__arrow{width:32px;height:32px;border-radius:50%;background:var(--dark-border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .workout-item__arrow svg{width:16px;height:16px;stroke:var(--gray-light);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* 운동 팁 ACCORDION */
+.tips-section{margin-bottom:28px;animation:fadeInUp 0.5s 0.45s var(--transition) both}
+.tips-accordion{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:var(--radius);overflow:hidden}
+.tip-item{border-bottom:1px solid var(--dark-border)}
+.tip-item:last-child{border-bottom:none}
+.tip-header{padding:16px;cursor:pointer;display:flex;align-items:center;justify-content:between;transition:background 0.2s;user-select:none}
+.tip-header:hover{background:var(--dark-surface)}
+.tip-header__content{flex:1}
+.tip-header__title{font-size:14px;font-weight:600;margin-bottom:4px}
+.tip-header__desc{font-size:12px;color:var(--gray)}
+.tip-header__icon{width:32px;height:32px;display:flex;align-items:center;justify-content:center;transition:transform 0.3s}
+.tip-header__icon svg{width:16px;height:16px;stroke:var(--gray-light);fill:none;stroke-width:2}
+.tip-item.active .tip-header__icon{transform:rotate(180deg)}
+.tip-content{max-height:0;overflow:hidden;transition:max-height 0.3s ease-out}
+.tip-content.active{max-height:500px}
+.tip-content__inner{padding:0 16px 16px;font-size:13px;line-height:1.6;color:var(--gray-light)}
+.tip-content__highlight{color:var(--lime);font-weight:600}
 
 /* START BTN */
 .start-workout-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;background:var(--lime);color:var(--dark);font-size:16px;font-weight:700;border-radius:var(--radius);transition:all 0.2s var(--transition);margin-bottom:20px;-webkit-tap-highlight-color:transparent}
 .start-workout-btn:active{transform:scale(0.97);opacity:0.9}
 .start-workout-btn svg{width:20px;height:20px;fill:var(--dark)}
-
-/* QUICK START */
-.quick-start{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px;animation:fadeInUp 0.5s 0.25s var(--transition) both}
-.quick-card{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:var(--radius);padding:20px 16px;text-align:center;cursor:pointer;transition:all 0.2s var(--transition);-webkit-tap-highlight-color:transparent}
-.quick-card:active{transform:scale(0.95);background:var(--dark-surface)}
-.quick-card__icon{font-size:36px;margin-bottom:10px}
-.quick-card__name{font-size:14px;font-weight:600;margin-bottom:4px}
-.quick-card__desc{font-size:11px;color:var(--gray)}
 
 /* BOTTOM NAV */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-height)+var(--safe-bottom));padding-bottom:var(--safe-bottom);background:rgba(13,13,13,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--dark-border);display:flex;align-items:center;justify-content:space-around;z-index:100}
@@ -106,7 +178,14 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
 .nav-item__label{font-size:10px;font-weight:500}
 
 /* RESPONSIVE */
-@media(min-width:768px){.main-content{max-width:600px}.quick-start{grid-template-columns:repeat(4,1fr)}.bottom-nav{max-width:480px;left:50%;transform:translateX(-50%);border-radius:20px 20px 0 0}}
+@media(min-width:768px){
+  .main-content{max-width:600px}
+  .quick-start{grid-template-columns:repeat(4,1fr)}
+  .bottom-nav{max-width:480px;left:50%;transform:translateX(-50%);border-radius:20px 20px 0 0}
+  .programs-scroll{gap:20px}
+  .program-card{width:280px}
+  .today-hero{height:320px}
+}
 </style>
 </head>
 <body>
@@ -127,6 +206,33 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
   <div class="search-bar">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
     <input type="text" placeholder="운동 검색..." id="searchInput">
+  </div>
+
+  <!-- 오늘의 추천 Banner -->
+  <div class="today-recommendation">
+    <div class="today-hero" onclick="location.href='tracking.html?type=featured&name=' + encodeURIComponent('웰니스 풀 바디')">
+      <div class="today-hero__bg"></div>
+      <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&h=600&fit=crop" alt="Today's Workout" class="today-hero__img" loading="lazy">
+      <div class="today-hero__content">
+        <div class="today-hero__badge">오늘의 추천</div>
+        <div class="today-hero__title">웰니스 풀 바디</div>
+        <div class="today-hero__subtitle">균형잡힌 전신 운동으로 하루를 시작해보세요</div>
+        <div class="today-hero__stats">
+          <div class="today-hero__stat">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+            <span>45분</span>
+          </div>
+          <div class="today-hero__stat">
+            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <span>420 kcal</span>
+          </div>
+        </div>
+        <div class="today-hero__action">
+          <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+          지금 시작
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Quick Start -->
@@ -153,6 +259,94 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
     </div>
   </div>
 
+  <!-- 추천 프로그램 -->
+  <div class="programs-section">
+    <div class="section-header">
+      <h2 class="section-title">추천 프로그램</h2>
+      <a href="program.html" class="section-link">전체보기 →</a>
+    </div>
+    <div class="programs-scroll">
+      <div class="program-card" onclick="location.href='program.html?id=beginner'">
+        <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop" alt="초급자 프로그램" class="program-card__img" loading="lazy">
+        <div class="program-card__content">
+          <span class="program-card__tag">BEGINNER</span>
+          <h3 class="program-card__title">운동 입문자 패키지</h3>
+          <p class="program-card__desc">차근차근 시작하는 첫 운동 프로그램</p>
+          <div class="program-card__meta">
+            <span>4주 코스</span>
+            <span>•</span>
+            <span>주 3회</span>
+          </div>
+        </div>
+      </div>
+      <div class="program-card" onclick="location.href='program.html?id=weight-loss'">
+        <img src="https://images.unsplash.com/photo-1576678927484-cc907957088c?w=300&h=200&fit=crop" alt="다이어트 프로그램" class="program-card__img" loading="lazy">
+        <div class="program-card__content">
+          <span class="program-card__tag">WEIGHT LOSS</span>
+          <h3 class="program-card__title">스마트 다이어트</h3>
+          <p class="program-card__desc">효과적인 체중감량 운동 플랜</p>
+          <div class="program-card__meta">
+            <span>8주 코스</span>
+            <span>•</span>
+            <span>주 4회</span>
+          </div>
+        </div>
+      </div>
+      <div class="program-card" onclick="location.href='program.html?id=muscle-gain'">
+        <img src="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=300&h=200&fit=crop" alt="근육증량 프로그램" class="program-card__img" loading="lazy">
+        <div class="program-card__content">
+          <span class="program-card__tag">MUSCLE GAIN</span>
+          <h3 class="program-card__title">근육량 늘리기</h3>
+          <p class="program-card__desc">체계적인 근력증가 프로그램</p>
+          <div class="program-card__meta">
+            <span>12주 코스</span>
+            <span>•</span>
+            <span>주 5회</span>
+          </div>
+        </div>
+      </div>
+      <div class="program-card" onclick="location.href='program.html?id=flexibility'">
+        <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=300&h=200&fit=crop" alt="유연성 프로그램" class="program-card__img" loading="lazy">
+        <div class="program-card__content">
+          <span class="program-card__tag">FLEXIBILITY</span>
+          <h3 class="program-card__title">스트레칭 마스터</h3>
+          <p class="program-card__desc">몸의 유연성을 키우는 특별한 프로그램</p>
+          <div class="program-card__meta">
+            <span>6주 코스</span>
+            <span>•</span>
+            <span>주 3회</span>
+          </div>
+        </div>
+      </div>
+      <div class="program-card" onclick="location.href='program.html?id=endurance'">
+        <img src="https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=300&h=200&fit=crop" alt="지구력 프로그램" class="program-card__img" loading="lazy">
+        <div class="program-card__content">
+          <span class="program-card__tag">ENDURANCE</span>
+          <h3 class="program-card__title">지구력 향상</h3>
+          <p class="program-card__desc">심폐지구력 증진을 위한 훈련</p>
+          <div class="program-card__meta">
+            <span>10주 코스</span>
+            <span>•</span>
+            <span>주 4회</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 최근 운동 히스토리 -->
+  <div class="history-section">
+    <div class="section-header">
+      <h2 class="section-title">최근 운동 히스토리</h2>
+      <a href="history.html" class="section-link">전체보기 →</a>
+    </div>
+    <div class="history-list" id="historyList">
+      <div class="history-empty">
+        아직 운동 기록이 없어요.<br>첫 운동을 시작해보세요! 💪
+      </div>
+    </div>
+  </div>
+
   <!-- Tabs -->
   <div class="tabs" id="tabs">
     <button class="tab tab--active" data-tab="running" onclick="switchTab('running')">🏃 러닝</button>
@@ -166,7 +360,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
     <div class="featured__card" onclick="location.href='tracking.html?type=running&name='+encodeURIComponent('인터벌 러닝')">
       <img src="https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=600&h=400&fit=crop" alt="Running" class="featured__img" loading="lazy">
       <div class="featured__overlay">
-        <span class="featured__tag">오늘의 추천</span>
+        <span class="featured__tag">POPULAR</span>
         <div class="featured__name">인터벌 러닝</div>
         <div class="featured__meta">30분 · 중급 · 약 350 kcal</div>
       </div>
@@ -178,6 +372,135 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
   <div id="workoutListContainer">
     <p class="section-label" id="sectionLabel">러닝 프로그램</p>
     <div class="workout-list" id="workoutList"></div>
+  </div>
+
+  <!-- 운동 팁 Accordion -->
+  <div class="tips-section">
+    <div class="section-header">
+      <h2 class="section-title">운동 팁 & 가이드</h2>
+    </div>
+    <div class="tips-accordion">
+      <div class="tip-item">
+        <div class="tip-header" onclick="toggleTip(this)">
+          <div class="tip-header__content">
+            <div class="tip-header__title">운동 전 워밍업이 중요한 이유</div>
+            <div class="tip-header__desc">부상 방지와 운동 효과 극대화</div>
+          </div>
+          <div class="tip-header__icon">
+            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="tip-content">
+          <div class="tip-content__inner">
+            운동 전 5-10분의 워밍업은 <span class="tip-content__highlight">부상 방지</span>와 <span class="tip-content__highlight">운동 능력 향상</span>에 필수적입니다.<br><br>
+            • 관절과 근육의 가동범위 증가<br>
+            • 혈액순환 촉진으로 산소 공급량 증가<br>
+            • 신경계 활성화로 반사신경 향상<br>
+            • 체온 상승으로 근육 수축력 개선
+          </div>
+        </div>
+      </div>
+      <div class="tip-item">
+        <div class="tip-header" onclick="toggleTip(this)">
+          <div class="tip-header__content">
+            <div class="tip-header__title">운동 후 쿨다운의 중요성</div>
+            <div class="tip-header__desc">회복을 위한 마무리 운동</div>
+          </div>
+          <div class="tip-header__icon">
+            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="tip-content">
+          <div class="tip-content__inner">
+            운동 후 쿨다운은 <span class="tip-content__highlight">빠른 회복</span>과 <span class="tip-content__highlight">근육통 완화</span>에 도움을 줍니다.<br><br>
+            • 심박수를 점진적으로 안정화<br>
+            • 근육의 젖산 제거 촉진<br>
+            • 정맥혈 순환 개선<br>
+            • 스트레칭으로 근육 이완 및 유연성 향상
+          </div>
+        </div>
+      </div>
+      <div class="tip-item">
+        <div class="tip-header" onclick="toggleTip(this)">
+          <div class="tip-header__content">
+            <div class="tip-header__title">올바른 수분 섭취 방법</div>
+            <div class="tip-header__desc">운동 전후 물 마시는 타이밍</div>
+          </div>
+          <div class="tip-header__icon">
+            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="tip-content">
+          <div class="tip-content__inner">
+            적절한 수분 섭취는 <span class="tip-content__highlight">운동 성능 유지</span>와 <span class="tip-content__highlight">체온 조절</span>에 핵심적입니다.<br><br>
+            • 운동 2-3시간 전: 500-600ml<br>
+            • 운동 15-20분 전: 200-300ml<br>
+            • 운동 중: 15-20분마다 150-250ml<br>
+            • 운동 후: 손실된 수분의 125-150% 보충
+          </div>
+        </div>
+      </div>
+      <div class="tip-item">
+        <div class="tip-header" onclick="toggleTip(this)">
+          <div class="tip-header__content">
+            <div class="tip-header__title">적절한 휴식의 중요성</div>
+            <div class="tip-header__desc">과훈련 방지와 근육 성장</div>
+          </div>
+          <div class="tip-header__icon">
+            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="tip-content">
+          <div class="tip-content__inner">
+            충분한 휴식은 <span class="tip-content__highlight">근육 성장</span>과 <span class="tip-content__highlight">부상 방지</span>를 위해 반드시 필요합니다.<br><br>
+            • 같은 근육군: 48-72시간 휴식<br>
+            • 충분한 수면: 7-9시간<br>
+            • 스트레스 관리와 영양 섭취<br>
+            • 오버트레이닝 증상 주의 (피로, 성능 저하, 수면 장애)
+          </div>
+        </div>
+      </div>
+      <div class="tip-item">
+        <div class="tip-header" onclick="toggleTip(this)">
+          <div class="tip-header__content">
+            <div class="tip-header__title">운동 강도 조절하기</div>
+            <div class="tip-header__desc">심박수를 이용한 운동 강도 측정</div>
+          </div>
+          <div class="tip-header__icon">
+            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="tip-content">
+          <div class="tip-content__inner">
+            심박수를 활용한 <span class="tip-content__highlight">과학적인 강도 조절</span>로 효과적인 운동이 가능합니다.<br><br>
+            • 최대심박수: 220 - 나이<br>
+            • 지방연소구간: 최대심박수의 60-70%<br>
+            • 유산소운동구간: 70-85%<br>
+            • 무산소운동구간: 85-95%
+          </div>
+        </div>
+      </div>
+      <div class="tip-item">
+        <div class="tip-header" onclick="toggleTip(this)">
+          <div class="tip-header__content">
+            <div class="tip-header__title">영양 타이밍과 운동 효과</div>
+            <div class="tip-header__desc">운동 전후 식사 가이드</div>
+          </div>
+          <div class="tip-header__icon">
+            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="tip-content">
+          <div class="tip-content__inner">
+            올바른 <span class="tip-content__highlight">영양 타이밍</span>은 운동 효과를 극대화하고 회복을 도와줍니다.<br><br>
+            • 운동 3-4시간 전: 균형잡힌 식사<br>
+            • 운동 1시간 전: 가벼운 탄수화물<br>
+            • 운동 후 30분 이내: 단백질 + 탄수화물<br>
+            • 수면 전: 카제인 단백질 섭취 권장
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Start Workout Button -->
@@ -195,55 +518,135 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
 </nav>
 
 <script>
+// Enhanced workout data with 7+ items per category
 const workoutData = {
   running: {
     label: '러닝 프로그램',
-    featured: {img:'https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=600&h=400&fit=crop',tag:'오늘의 추천',name:'인터벌 러닝',meta:'30분 · 중급 · 약 350 kcal'},
+    featured: {img:'https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=600&h=400&fit=crop',tag:'POPULAR',name:'인터벌 러닝',meta:'30분 · 중급 · 약 350 kcal'},
     items: [
       {name:'이지 러닝',desc:'가벼운 페이스로 30분 달리기',time:'30분',cal:'220 kcal',level:'초급',img:'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=200&h=200&fit=crop'},
       {name:'인터벌 러닝',desc:'1분 전력질주 + 2분 조깅 반복',time:'25분',cal:'350 kcal',level:'중급',img:'https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=200&h=200&fit=crop'},
       {name:'힐 러닝',desc:'경사면을 활용한 러닝',time:'40분',cal:'420 kcal',level:'고급',img:'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=200&h=200&fit=crop'},
       {name:'템포 러닝',desc:'일정 페이스 유지 러닝',time:'35분',cal:'310 kcal',level:'중급',img:'https://images.unsplash.com/photo-1461896836934-bd45ba8fcf9b?w=200&h=200&fit=crop'},
-      {name:'롱 러닝',desc:'장거리 지구력 훈련',time:'60분',cal:'550 kcal',level:'고급',img:'https://images.unsplash.com/photo-1594882645126-14020914d58d?w=200&h=200&fit=crop'}
+      {name:'롱 러닝',desc:'장거리 지구력 훈련',time:'60분',cal:'550 kcal',level:'고급',img:'https://images.unsplash.com/photo-1594882645126-14020914d58d?w=200&h=200&fit=crop'},
+      {name:'스프린트 트레이닝',desc:'단거리 최대속도 훈련',time:'20분',cal:'280 kcal',level:'고급',img:'https://images.unsplash.com/photo-1566906823203-c01b6e5dc3c0?w=200&h=200&fit=crop'},
+      {name:'파틀렉 러닝',desc:'자유로운 변속 러닝',time:'45분',cal:'400 kcal',level:'중급',img:'https://images.unsplash.com/photo-1569351518337-9237f30001bd?w=200&h=200&fit=crop'}
     ]
   },
   strength: {
     label: '근력 트레이닝',
-    featured: {img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=400&fit=crop',tag:'POPULAR',name:'전신 근력 서킷',meta:'45분 · 중급 · 약 400 kcal'},
+    featured: {img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=400&fit=crop',tag:'POWER',name:'전신 근력 서킷',meta:'45분 · 중급 · 약 400 kcal'},
     items: [
       {name:'상체 푸쉬',desc:'가슴, 어깨, 삼두 집중',time:'40분',cal:'320 kcal',level:'중급',img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=200&h=200&fit=crop'},
       {name:'상체 풀',desc:'등, 이두, 전완근 집중',time:'40분',cal:'300 kcal',level:'중급',img:'https://images.unsplash.com/photo-1597452485669-2c7bb5fef90d?w=200&h=200&fit=crop'},
       {name:'하체 데이',desc:'스쿼트, 런지, 레그프레스',time:'50분',cal:'380 kcal',level:'중급',img:'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=200&h=200&fit=crop'},
       {name:'코어 블래스터',desc:'복근 & 코어 강화',time:'25분',cal:'200 kcal',level:'초급',img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop'},
-      {name:'전신 근력',desc:'모든 근육군 종합 훈련',time:'55분',cal:'450 kcal',level:'고급',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200&h=200&fit=crop'}
+      {name:'전신 근력',desc:'모든 근육군 종합 훈련',time:'55분',cal:'450 kcal',level:'고급',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200&h=200&fit=crop'},
+      {name:'파워리프팅',desc:'빅3 중심 최대근력 향상',time:'60분',cal:'350 kcal',level:'고급',img:'https://images.unsplash.com/photo-1583500178690-f7fd68885ab3?w=200&h=200&fit=crop'},
+      {name:'바디웨이트',desc:'맨몸운동 중심 근력훈련',time:'30분',cal:'250 kcal',level:'초급',img:'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=200&h=200&fit=crop'}
     ]
   },
   hiit: {
     label: 'HIIT 트레이닝',
-    featured: {img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&h=400&fit=crop',tag:'고강도',name:'타바타 챌린지',meta:'20분 · 고급 · 약 400 kcal'},
+    featured: {img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&h=400&fit=crop',tag:'HIGH INTENSITY',name:'타바타 챌린지',meta:'20분 · 고급 · 약 400 kcal'},
     items: [
       {name:'타바타 4분',desc:'20초 운동 + 10초 휴식 × 8세트',time:'20분',cal:'300 kcal',level:'고급',img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200&h=200&fit=crop'},
       {name:'EMOM 15',desc:'매 분마다 운동 수행',time:'15분',cal:'250 kcal',level:'중급',img:'https://images.unsplash.com/photo-1549576490-b0b4831ef60a?w=200&h=200&fit=crop'},
       {name:'버피 챌린지',desc:'100 버피 최단시간 도전',time:'20분',cal:'350 kcal',level:'고급',img:'https://images.unsplash.com/photo-1601422407692-ec4eeec1d9b3?w=200&h=200&fit=crop'},
       {name:'점프 서킷',desc:'점프 동작 중심 서킷',time:'25분',cal:'380 kcal',level:'중급',img:'https://images.unsplash.com/photo-1434682881908-b43d0467b798?w=200&h=200&fit=crop'},
-      {name:'풀 바디 HIIT',desc:'전신 고강도 인터벌',time:'30분',cal:'420 kcal',level:'고급',img:'https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=200&h=200&fit=crop'}
+      {name:'풀 바디 HIIT',desc:'전신 고강도 인터벌',time:'30분',cal:'420 kcal',level:'고급',img:'https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=200&h=200&fit=crop'},
+      {name:'케틀벨 HIIT',desc:'케틀벨을 이용한 고강도 훈련',time:'25분',cal:'380 kcal',level:'중급',img:'https://images.unsplash.com/photo-1517438476312-10d79c077509?w=200&h=200&fit=crop'},
+      {name:'배틀로프',desc:'전투줄을 활용한 강화훈련',time:'15분',cal:'320 kcal',level:'고급',img:'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=200&h=200&fit=crop'}
     ]
   },
   yoga: {
     label: '요가 & 스트레칭',
-    featured: {img:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&h=400&fit=crop',tag:'CALM',name:'모닝 빈야사',meta:'40분 · 모든 레벨 · 약 180 kcal'},
+    featured: {img:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&h=400&fit=crop',tag:'MINDFUL',name:'모닝 빈야사',meta:'40분 · 모든 레벨 · 약 180 kcal'},
     items: [
       {name:'모닝 빈야사',desc:'아침 에너지 충전 플로우',time:'40분',cal:'180 kcal',level:'모든 레벨',img:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200&h=200&fit=crop'},
       {name:'파워 요가',desc:'근력 강화 요가',time:'45분',cal:'250 kcal',level:'중급',img:'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=200&h=200&fit=crop'},
       {name:'리스토어 요가',desc:'깊은 이완과 회복',time:'30분',cal:'100 kcal',level:'초급',img:'https://images.unsplash.com/photo-1510894347713-fc3ed6fdf539?w=200&h=200&fit=crop'},
       {name:'힙 오프너',desc:'골반과 엉덩이 유연성',time:'25분',cal:'120 kcal',level:'초급',img:'https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?w=200&h=200&fit=crop'},
-      {name:'밸런스 플로우',desc:'균형감각 향상 시퀀스',time:'35분',cal:'160 kcal',level:'중급',img:'https://images.unsplash.com/photo-1562088287-bde35a1ea917?w=200&h=200&fit=crop'}
+      {name:'밸런스 플로우',desc:'균형감각 향상 시퀀스',time:'35분',cal:'160 kcal',level:'중급',img:'https://images.unsplash.com/photo-1562088287-bde35a1ea917?w=200&h=200&fit=crop'},
+      {name:'핫 요가',desc:'고온에서 하는 강도 높은 요가',time:'60분',cal:'400 kcal',level:'고급',img:'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=200&h=200&fit=crop'},
+      {name:'명상 요가',desc:'마음 챙김과 깊은 이완',time:'45분',cal:'140 kcal',level:'초급',img:'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=200&h=200&fit=crop'}
     ]
   }
 };
 
 let currentTab = 'running';
 let selectedWorkout = null;
+
+// 최근 운동 히스토리 로드
+function loadWorkoutHistory() {
+  const history = JSON.parse(localStorage.getItem('vitality_history') || '[]');
+  const historyContainer = document.getElementById('historyList');
+  
+  if (history.length === 0) {
+    historyContainer.innerHTML = '<div class="history-empty">아직 운동 기록이 없어요.<br>첫 운동을 시작해보세요! 💪</div>';
+    return;
+  }
+
+  const recentHistory = history.slice(-5).reverse(); // 최근 5개만 역순으로
+  const iconMap = {
+    running: '🏃‍♀️',
+    strength: '🏋️‍♀️', 
+    hiit: '⚡',
+    yoga: '🧘‍♀️'
+  };
+
+  historyContainer.innerHTML = recentHistory.map(item => {
+    const date = new Date(item.date);
+    const timeAgo = getTimeAgo(date);
+    
+    return `
+      <div class="history-item" onclick="location.href='tracking.html?type=${item.type}&name=${encodeURIComponent(item.name)}'">
+        <div class="history-item__icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+        </div>
+        <div class="history-item__info">
+          <div class="history-item__name">${iconMap[item.type]} ${item.name}</div>
+          <div class="history-item__meta">
+            <span>${item.duration || '30분'}</span>
+            <span>•</span>
+            <span>${item.calories || '250'} kcal</span>
+          </div>
+        </div>
+        <div class="history-item__time">${timeAgo}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function getTimeAgo(date) {
+  const now = new Date();
+  const diffMs = now - date;
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffHours / 24);
+  
+  if (diffDays > 0) return `${diffDays}일 전`;
+  if (diffHours > 0) return `${diffHours}시간 전`;
+  return '방금 전';
+}
+
+// 운동 팁 아코디언 토글
+function toggleTip(header) {
+  const tipItem = header.parentElement;
+  const tipContent = tipItem.querySelector('.tip-content');
+  const isActive = tipItem.classList.contains('active');
+  
+  // 모든 tip 닫기
+  document.querySelectorAll('.tip-item').forEach(item => {
+    item.classList.remove('active');
+    item.querySelector('.tip-content').classList.remove('active');
+  });
+  
+  // 선택된 tip만 열기 (이미 열린 경우 닫기)
+  if (!isActive) {
+    tipItem.classList.add('active');
+    tipContent.classList.add('active');
+  }
+}
 
 function switchTab(tab) {
   currentTab = tab;
@@ -284,6 +687,7 @@ function renderWorkoutList(items, type) {
       <div class="workout-item__thumb">
         <img src="${item.img}" alt="${item.name}" loading="lazy">
         <div class="workout-item__thumb-overlay"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
+        <div class="workout-item__difficulty workout-item__difficulty--${item.level}">${item.level}</div>
       </div>
       <div class="workout-item__info">
         <div class="workout-item__name">${item.name}</div>
@@ -294,7 +698,9 @@ function renderWorkoutList(items, type) {
           <span class="workout-item__tag workout-item__tag--level">${item.level}</span>
         </div>
       </div>
-      <div class="workout-item__arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="workout-item__arrow">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
     </div>
   `).join('');
 }
@@ -306,18 +712,86 @@ function selectWorkout(type, name, el) {
   document.getElementById('startBtn').href = `tracking.html?type=${type}&name=${encodeURIComponent(name)}`;
 }
 
-// Search
+// Search functionality
 document.getElementById('searchInput').addEventListener('input', function(e) {
-  const q = e.target.value.toLowerCase();
-  document.querySelectorAll('.workout-item').forEach(item => {
+  const query = e.target.value.toLowerCase();
+  const workoutItems = document.querySelectorAll('.workout-item');
+  const programCards = document.querySelectorAll('.program-card');
+  
+  // Search workout items
+  workoutItems.forEach(item => {
     const name = item.querySelector('.workout-item__name').textContent.toLowerCase();
     const desc = item.querySelector('.workout-item__desc').textContent.toLowerCase();
-    item.style.display = (name.includes(q) || desc.includes(q)) ? 'flex' : 'none';
+    const isMatch = name.includes(query) || desc.includes(query);
+    item.style.display = isMatch ? 'flex' : 'none';
   });
+  
+  // Search program cards
+  programCards.forEach(card => {
+    const title = card.querySelector('.program-card__title').textContent.toLowerCase();
+    const desc = card.querySelector('.program-card__desc').textContent.toLowerCase();
+    const isMatch = title.includes(query) || desc.includes(query);
+    card.style.display = isMatch ? 'block' : 'none';
+  });
+  
+  // Show/hide sections based on search
+  if (query.trim()) {
+    document.querySelector('.today-recommendation').style.display = 'none';
+    document.querySelector('.quick-start').style.display = 'none';
+    document.querySelector('.tips-section').style.display = 'none';
+    document.querySelector('.history-section').style.display = 'none';
+    document.querySelector('.tabs').style.display = 'none';
+    
+    // Check if any program matches
+    const anyProgramMatch = Array.from(programCards).some(card => 
+      card.style.display !== 'none');
+    document.querySelector('.programs-section').style.display = 
+      anyProgramMatch ? 'block' : 'none';
+  } else {
+    // Reset all sections visibility
+    document.querySelector('.today-recommendation').style.display = 'block';
+    document.querySelector('.quick-start').style.display = 'grid';
+    document.querySelector('.programs-section').style.display = 'block';
+    document.querySelector('.tips-section').style.display = 'block';
+    document.querySelector('.history-section').style.display = 'block';
+    document.querySelector('.tabs').style.display = 'flex';
+    
+    // Reset all cards visibility
+    programCards.forEach(card => card.style.display = 'block');
+  }
 });
 
-// Init
-switchTab('running');
+// 더미 히스토리 데이터 생성 (테스트용)
+function createDummyHistory() {
+  const dummyHistory = [
+    {type: 'running', name: '인터벌 러닝', date: Date.now() - 2 * 60 * 60 * 1000, duration: '25분', calories: '350'},
+    {type: 'strength', name: '상체 푸쉬', date: Date.now() - 1 * 24 * 60 * 60 * 1000, duration: '40분', calories: '320'},
+    {type: 'yoga', name: '모닝 빈야사', date: Date.now() - 2 * 24 * 60 * 60 * 1000, duration: '40분', calories: '180'},
+    {type: 'hiit', name: '타바타 4분', date: Date.now() - 3 * 24 * 60 * 60 * 1000, duration: '20분', calories: '300'},
+    {type: 'running', name: '이지 러닝', date: Date.now() - 5 * 24 * 60 * 60 * 1000, duration: '30분', calories: '220'}
+  ];
+  
+  if (!localStorage.getItem('vitality_history')) {
+    localStorage.setItem('vitality_history', JSON.stringify(dummyHistory));
+  }
+}
+
+// 초기화
+document.addEventListener('DOMContentLoaded', function() {
+  createDummyHistory(); // 더미 데이터 생성 (실제 앱에서는 제거)
+  loadWorkoutHistory();
+  switchTab('running');
+});
+
+// 키보드 접근성
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && e.target.classList.contains('tip-header')) {
+    toggleTip(e.target);
+  }
+});
+
+// 터치 이벤트 최적화
+document.addEventListener('touchstart', function() {}, {passive: true});
 </script>
 </body>
 </html>
