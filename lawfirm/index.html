@@ -1460,18 +1460,37 @@
       color: var(--white);
     }
 
+    /* Hide custom cursor on touch devices */
+    @media (pointer: coarse) {
+      .cursor-circle, .cursor-dot { display: none !important; }
+      *, body, button, a { cursor: auto !important; }
+    }
+
+    /* Reduce motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .reveal, .reveal-left, .reveal-right {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
     /* ============================================================
        RESPONSIVE BREAKPOINTS
     ============================================================ */
 
     /* 1440px+ */
     @media (min-width: 1440px) {
-      .section { padding: 120px 100px; }
-      #practice-areas { padding: 140px 100px; }
-      #stats { padding: 160px 100px; }
-      #attorneys { padding: 140px 100px; }
-      #cta { padding: 180px 100px; }
-      #footer { padding: 100px 100px 50px; }
+      .section { padding: 120px 100px; max-width: 1600px; margin: 0 auto; }
+      #practice-areas { padding: 140px 100px; max-width: 1600px; margin: 0 auto; }
+      #stats { padding: 160px 100px; max-width: 1600px; margin: 0 auto; }
+      #attorneys { padding: 140px 100px; max-width: 1600px; margin: 0 auto; }
+      #cta { padding: 180px 100px; max-width: 1600px; margin: 0 auto; }
+      #footer { padding: 100px 100px 50px; max-width: 1600px; margin: 0 auto; }
     }
 
     /* 1024px */
@@ -1550,10 +1569,51 @@
       }
     }
 
-    /* 375px (mobile) */
+    /* 768px (tablet) */
+    @media (max-width: 768px) {
+      .cursor-circle, .cursor-dot {
+        display: none !important;
+      }
+
+      .section { padding: 60px 32px; }
+      #practice-areas { padding: 60px 32px; }
+      #stats { padding: 60px 32px; }
+      #attorneys { padding: 60px 32px; }
+      #cta { padding: 80px 32px; }
+      #footer { padding: 48px 32px 24px; }
+
+      .practice-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+    }
+
+    /* 480px (mobile) */
     @media (max-width: 480px) {
+      body {
+        cursor: auto !important;
+      }
+
       .hero-left {
         padding: 100px 24px 48px;
+      }
+
+      .hero-right {
+        height: 40vh;
       }
 
       .hero-buttons {
@@ -1578,7 +1638,7 @@
       }
 
       .stats-grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
       }
 
       .stat-item {
@@ -1614,6 +1674,36 @@
       #back-to-top {
         right: 20px;
         bottom: 20px;
+      }
+
+      /* Ensure minimum font sizes */
+      body {
+        font-size: 14px;
+      }
+    }
+
+    /* 375px (small mobile) */
+    @media (max-width: 375px) {
+      .section { padding: 48px 16px; }
+      #practice-areas { padding: 48px 16px; }
+      #stats { padding: 48px 16px; }
+      #attorneys { padding: 48px 16px; }
+      #cta { padding: 60px 16px; }
+
+      .hero-left {
+        padding: 80px 16px 40px;
+      }
+
+      .hero-title {
+        font-size: clamp(24px, 7vw, 32px);
+      }
+
+      .stat-item {
+        padding: 24px 12px;
+      }
+
+      #footer {
+        padding: 36px 16px 20px;
       }
     }
   </style>
