@@ -16,7 +16,7 @@ const PROXY_HOST = '49.247.137.28';
 const PROXY_PORT = 3100;
 const PROXY_API_KEY = 'onda-proxy-2026-secret';
 
-const DELAY_MS = 500;
+const DELAY_MS = 2000; // 차단 방지
 const args = process.argv.slice(2);
 const testLimit = args.includes('--test') ? parseInt(args[args.indexOf('--test') + 1]) || 5 : 0;
 
@@ -47,6 +47,7 @@ function graphqlSearch(query) {
       res.on('data', c => data += c);
       res.on('end', () => {
         try {
+          if (data.startsWith('<')) { resolve('blocked'); return; } // HTML = 차단
           const parsed = JSON.parse(data);
           const d = Array.isArray(parsed) ? parsed[0] : parsed;
           resolve(d?.data?.places?.items || []);
@@ -109,14 +110,27 @@ async function main() {
   
   console.log(`🚀 우선 크롤링 시작 (${startIdx}부터, ${total}건)`);
   
-  let queriesDone = 0, newBiz = 0, talkO = 0, talkX = 0;
+  let queriesDone = 0, newBiz = 0, talkO = 0, talkX = 0, consecutiveEmpty = 0;
   const start = Date.now();
 
   for (let i = startIdx; i < queue.length; i++) {
     if (stopping || (testLimit && queriesDone >= testLimit)) break;
     
     const keyword = queue[i];
-    const items = await graphqlSearch(keyword);
+    let items = await graphqlSearch(keyword);
+    
+    // 차단 감지 → 120초 대기 후 재시도
+    if (items === 'blocked') {
+      console.log('  🚫 차단 감지 — 120초 대기...');
+      await sleep(120000);
+      items = await graphqlSearch(keyword);
+      if (items === 'blocked') {
+        console.log('  🚫 여전히 차단 — 300초 대기...');
+        await sleep(300000);
+        items = await graphqlSearch(keyword);
+        if (items === 'blocked') items = [];
+      }
+    }
     queriesDone++;
 
     let qNew = 0, qTalk = 0;
