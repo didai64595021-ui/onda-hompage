@@ -1,1421 +1,715 @@
 /* ============================================================
-   Bright English Academy - Interactive Scripts
-   Version: 1.0
+   Bright English Academy — Common Scripts (script.js)
    ============================================================ */
 
-document.addEventListener('DOMContentLoaded', () => {
+(function () {
+  'use strict';
 
-    // ============================================================
-    // 1. Header Scroll Effect
-    // ============================================================
-    const initHeaderScroll = () => {
-        const header = document.querySelector('.header');
-        if (!header) return;
+  /* ==========================================================
+     1. DARK MODE TOGGLE
+     ========================================================== */
+  const DarkMode = {
+    key: 'bright-english-theme',
 
-        let lastScrollY = 0;
-        let ticking = false;
+    init() {
+      const saved = localStorage.getItem(this.key);
+      if (saved === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else if (saved === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
 
-        const handleScroll = () => {
-            const currentScrollY = window.scrollY;
+      const toggleBtn = document.querySelector('.dark-mode-toggle');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => this.toggle());
+      }
+    },
 
-            if (currentScrollY > 80) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
+    toggle() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem(this.key, next);
+    }
+  };
 
-            // Optional: hide header on scroll down, show on scroll up
-            if (currentScrollY > lastScrollY && currentScrollY > 300) {
-                header.style.transform = 'translateY(-100%)';
-            } else {
-                header.style.transform = 'translateY(0)';
-            }
+  /* ==========================================================
+     2. SIDE DRAWER NAVIGATION
+     ========================================================== */
+  const Drawer = {
+    init() {
+      this.hamburger = document.querySelector('.hamburger-btn');
+      this.drawer = document.querySelector('.side-drawer');
+      this.overlay = document.querySelector('.drawer-overlay');
+      this.body = document.body;
 
-            lastScrollY = currentScrollY;
-            ticking = false;
-        };
+      if (!this.hamburger || !this.drawer) return;
 
-        window.addEventListener('scroll', () => {
-            if (!ticking) {
-                requestAnimationFrame(handleScroll);
-                ticking = true;
-            }
-        }, { passive: true });
-    };
+      this.hamburger.addEventListener('click', () => this.toggle());
 
+      if (this.overlay) {
+        this.overlay.addEventListener('click', () => this.close());
+      }
 
-    // ============================================================
-    // 2. Mobile Nav Toggle
-    // ============================================================
-    const initMobileNav = () => {
-        const navToggle = document.querySelector('.nav-toggle');
-        const nav = document.querySelector('.nav');
-        if (!navToggle || !nav) return;
-
-        const navLinks = nav.querySelectorAll('.nav-link');
-
-        const toggleNav = () => {
-            const isActive = navToggle.classList.toggle('active');
-            nav.classList.toggle('active');
-
-            if (isActive) {
-                document.body.classList.add('nav-open');
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.body.classList.remove('nav-open');
-                document.body.style.overflow = '';
-            }
-        };
-
-        navToggle.addEventListener('click', toggleNav);
-
-        // Close nav when a link is clicked
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                if (nav.classList.contains('active')) {
-                    toggleNav();
-                }
-            });
-        });
-
-        // Close nav on escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && nav.classList.contains('active')) {
-                toggleNav();
-            }
-        });
-
-        // Close nav on clicking outside
-        document.addEventListener('click', (e) => {
-            if (nav.classList.contains('active') &&
-                !nav.contains(e.target) &&
-                !navToggle.contains(e.target)) {
-                toggleNav();
-            }
-        });
-    };
-
-
-    // ============================================================
-    // 3. Scroll Progress Bar
-    // ============================================================
-    const initScrollProgress = () => {
-        const progressBar = document.querySelector('.scroll-progress-bar');
-        if (!progressBar) return;
-
-        let ticking = false;
-
-        const updateProgress = () => {
-            const scrollTop = window.scrollY;
-            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-            const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-            progressBar.style.width = scrollPercent + '%';
-            ticking = false;
-        };
-
-        window.addEventListener('scroll', () => {
-            if (!ticking) {
-                requestAnimationFrame(updateProgress);
-                ticking = true;
-            }
-        }, { passive: true });
-
-        // Initial call
-        updateProgress();
-    };
-
-
-    // ============================================================
-    // 4. Particle Animation
-    // ============================================================
-    const initParticles = () => {
-        const canvas = document.getElementById('particles');
-        if (!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        let width, height;
-        let particles = [];
-        let mouse = { x: null, y: null, radius: 150 };
-        let animationId = null;
-
-        const PARTICLE_COUNT = 85;
-        const MAX_LINE_DIST = 120;
-        const PARTICLE_COLORS = [
-            'rgba(0, 102, 255, 0.5)',
-            'rgba(0, 180, 216, 0.4)',
-            'rgba(255, 143, 0, 0.3)',
-            'rgba(0, 102, 255, 0.3)',
-            'rgba(0, 180, 216, 0.3)'
-        ];
-
-        class Particle {
-            constructor() {
-                this.reset();
-            }
-
-            reset() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.size = Math.random() * 3 + 1;
-                this.baseSize = this.size;
-                this.speedX = (Math.random() - 0.5) * 0.8;
-                this.speedY = (Math.random() - 0.5) * 0.8;
-                this.opacity = Math.random() * 0.5 + 0.2;
-                this.color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)];
-            }
-
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-
-                // Mouse interaction: particles attract toward cursor
-                if (mouse.x !== null && mouse.y !== null) {
-                    const dx = mouse.x - this.x;
-                    const dy = mouse.y - this.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-
-                    if (dist < mouse.radius) {
-                        const force = (mouse.radius - dist) / mouse.radius;
-                        const angle = Math.atan2(dy, dx);
-                        this.x += Math.cos(angle) * force * 1.5;
-                        this.y += Math.sin(angle) * force * 1.5;
-                        this.size = this.baseSize + force * 2;
-                    } else {
-                        this.size += (this.baseSize - this.size) * 0.05;
-                    }
-                }
-
-                // Wrap around edges
-                if (this.x < -10) this.x = width + 10;
-                if (this.x > width + 10) this.x = -10;
-                if (this.y < -10) this.y = height + 10;
-                if (this.y > height + 10) this.y = -10;
-            }
-
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                ctx.globalAlpha = this.opacity;
-                ctx.fill();
-                ctx.globalAlpha = 1;
-            }
+      // Close on ESC
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.isOpen()) {
+          this.close();
         }
+      });
 
-        const initCanvas = () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        };
+      // Close on link click
+      const links = this.drawer.querySelectorAll('a');
+      links.forEach(link => {
+        link.addEventListener('click', () => this.close());
+      });
+    },
 
-        const createParticles = () => {
-            particles = [];
-            for (let i = 0; i < PARTICLE_COUNT; i++) {
-                particles.push(new Particle());
-            }
-        };
+    isOpen() {
+      return this.drawer && this.drawer.classList.contains('active');
+    },
 
-        const drawLines = () => {
-            for (let i = 0; i < particles.length; i++) {
-                for (let j = i + 1; j < particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
+    toggle() {
+      if (this.isOpen()) {
+        this.close();
+      } else {
+        this.open();
+      }
+    },
 
-                    if (dist < MAX_LINE_DIST) {
-                        const opacity = (1 - dist / MAX_LINE_DIST) * 0.15;
-                        ctx.beginPath();
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = `rgba(0, 102, 255, ${opacity})`;
-                        ctx.lineWidth = 0.5;
-                        ctx.stroke();
-                    }
-                }
-            }
-        };
+    open() {
+      this.drawer.classList.add('active');
+      this.hamburger.classList.add('active');
+      if (this.overlay) this.overlay.classList.add('active');
+      this.body.classList.add('drawer-open');
+    },
 
-        const animate = () => {
-            ctx.clearRect(0, 0, width, height);
+    close() {
+      this.drawer.classList.remove('active');
+      this.hamburger.classList.remove('active');
+      if (this.overlay) this.overlay.classList.remove('active');
+      this.body.classList.remove('drawer-open');
+    }
+  };
 
-            particles.forEach(p => {
-                p.update();
-                p.draw();
+  /* ==========================================================
+     3. CUSTOM CURSOR
+     ========================================================== */
+  const CustomCursor = {
+    init() {
+      // Only on non-touch devices
+      if ('ontouchstart' in window || navigator.maxTouchPoints > 0) return;
+
+      this.cursor = document.querySelector('.custom-cursor');
+      this.cursorDot = document.querySelector('.custom-cursor-dot');
+      if (!this.cursor || !this.cursorDot) return;
+
+      this.mouseX = 0;
+      this.mouseY = 0;
+      this.cursorX = 0;
+      this.cursorY = 0;
+      this.dotX = 0;
+      this.dotY = 0;
+
+      document.addEventListener('mousemove', (e) => {
+        this.mouseX = e.clientX;
+        this.mouseY = e.clientY;
+
+        if (!this.cursor.classList.contains('visible')) {
+          this.cursor.classList.add('visible');
+          this.cursorDot.classList.add('visible');
+        }
+      });
+
+      document.addEventListener('mouseleave', () => {
+        this.cursor.classList.remove('visible');
+        this.cursorDot.classList.remove('visible');
+      });
+
+      // Hover effect for interactive elements
+      const hoverTargets = document.querySelectorAll('a, button, .card, .masonry-item, .review-card, [role="button"]');
+      hoverTargets.forEach(el => {
+        el.addEventListener('mouseenter', () => this.cursor.classList.add('hovering'));
+        el.addEventListener('mouseleave', () => this.cursor.classList.remove('hovering'));
+      });
+
+      this.animate();
+    },
+
+    animate() {
+      // Smooth follow with lerp
+      this.cursorX += (this.mouseX - this.cursorX) * 0.15;
+      this.cursorY += (this.mouseY - this.cursorY) * 0.15;
+      this.dotX += (this.mouseX - this.dotX) * 0.8;
+      this.dotY += (this.mouseY - this.dotY) * 0.8;
+
+      if (this.cursor) {
+        this.cursor.style.left = this.cursorX + 'px';
+        this.cursor.style.top = this.cursorY + 'px';
+      }
+      if (this.cursorDot) {
+        this.cursorDot.style.left = this.dotX + 'px';
+        this.cursorDot.style.top = this.dotY + 'px';
+      }
+
+      requestAnimationFrame(() => this.animate());
+    }
+  };
+
+  /* ==========================================================
+     4. SCROLL-TRIGGERED ANIMATIONS
+     ========================================================== */
+  const ScrollAnimations = {
+    init() {
+      const targets = document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right, .scale-in');
+      if (!targets.length) return;
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      });
+
+      targets.forEach(el => observer.observe(el));
+
+      // Stagger children
+      const staggerParents = document.querySelectorAll('[data-stagger]');
+      const staggerObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const children = entry.target.querySelectorAll('.stagger-child');
+            children.forEach((child, i) => {
+              setTimeout(() => {
+                child.classList.add('visible');
+              }, i * 100);
             });
-
-            drawLines();
-            animationId = requestAnimationFrame(animate);
-        };
-
-        // Event listeners
-        window.addEventListener('mousemove', (e) => {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
+            staggerObserver.unobserve(entry.target);
+          }
         });
+      }, {
+        threshold: 0.1
+      });
 
-        window.addEventListener('mouseleave', () => {
-            mouse.x = null;
-            mouse.y = null;
+      staggerParents.forEach(el => staggerObserver.observe(el));
+    }
+  };
+
+  /* ==========================================================
+     5. COUNTER ANIMATION
+     ========================================================== */
+  const CounterAnimation = {
+    init() {
+      const counters = document.querySelectorAll('[data-counter]');
+      if (!counters.length) return;
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            this.animateCounter(entry.target);
+            observer.unobserve(entry.target);
+          }
         });
+      }, {
+        threshold: 0.3
+      });
 
-        window.addEventListener('resize', () => {
-            initCanvas();
-            // Don't recreate particles on resize, just update canvas size
+      counters.forEach(el => observer.observe(el));
+    },
+
+    animateCounter(el) {
+      const target = parseInt(el.getAttribute('data-counter'), 10);
+      const duration = parseInt(el.getAttribute('data-duration') || '2000', 10);
+      const startTime = performance.now();
+
+      const step = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // Ease out cubic
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const current = Math.floor(easeOut * target);
+
+        el.textContent = current.toLocaleString();
+
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          el.textContent = target.toLocaleString();
+        }
+      };
+
+      requestAnimationFrame(step);
+    }
+  };
+
+  /* ==========================================================
+     6. PARALLAX EFFECT
+     ========================================================== */
+  const Parallax = {
+    init() {
+      this.elements = document.querySelectorAll('[data-parallax]');
+      if (!this.elements.length) return;
+
+      // Only on non-touch devices
+      if ('ontouchstart' in window || navigator.maxTouchPoints > 0) return;
+
+      let ticking = false;
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            this.update();
+            ticking = false;
+          });
+          ticking = true;
+        }
+      });
+    },
+
+    update() {
+      const scrollY = window.pageYOffset;
+
+      this.elements.forEach(el => {
+        const speed = parseFloat(el.getAttribute('data-parallax')) || 0.5;
+        const rect = el.getBoundingClientRect();
+        const elTop = rect.top + scrollY;
+        const offset = (scrollY - elTop) * speed;
+
+        el.style.transform = `translateY(${offset}px)`;
+      });
+    }
+  };
+
+  /* ==========================================================
+     7. TAB UI
+     ========================================================== */
+  const TabUI = {
+    init() {
+      const tabGroups = document.querySelectorAll('[data-tabs]');
+      if (!tabGroups.length) return;
+
+      tabGroups.forEach(group => {
+        const buttons = group.querySelectorAll('.tab-btn');
+        const tabId = group.getAttribute('data-tabs');
+        const contentContainer = document.querySelector(`[data-tab-content="${tabId}"]`);
+
+        if (!contentContainer) return;
+
+        const contents = contentContainer.querySelectorAll('.tab-content');
+
+        buttons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const target = btn.getAttribute('data-tab');
+
+            // Deactivate all
+            buttons.forEach(b => b.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+
+            // Activate target
+            btn.classList.add('active');
+            const targetContent = contentContainer.querySelector(`[data-tab-id="${target}"]`);
+            if (targetContent) {
+              targetContent.classList.add('active');
+            }
+          });
         });
+      });
+    }
+  };
 
-        // Pause when tab is not visible
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                if (animationId) cancelAnimationFrame(animationId);
+  /* ==========================================================
+     8. ACCORDION
+     ========================================================== */
+  const Accordion = {
+    init() {
+      const headers = document.querySelectorAll('.accordion-header');
+      if (!headers.length) return;
+
+      headers.forEach(header => {
+        header.addEventListener('click', () => {
+          const item = header.closest('.accordion-item');
+          if (!item) return;
+
+          const isActive = item.classList.contains('active');
+          const parent = item.closest('.accordion-group');
+
+          // Close siblings if in a group
+          if (parent) {
+            const siblings = parent.querySelectorAll('.accordion-item');
+            siblings.forEach(sib => sib.classList.remove('active'));
+          }
+
+          // Toggle current
+          if (!isActive) {
+            item.classList.add('active');
+          }
+        });
+      });
+    }
+  };
+
+  /* ==========================================================
+     9. SMOOTH SCROLL FOR ANCHOR LINKS
+     ========================================================== */
+  const SmoothScroll = {
+    init() {
+      document.querySelectorAll('a[href^="#"]').forEach(link => {
+        link.addEventListener('click', (e) => {
+          const href = link.getAttribute('href');
+          if (href === '#' || href === '#!') return;
+
+          const target = document.querySelector(href);
+          if (!target) return;
+
+          e.preventDefault();
+          const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height'), 10) || 72;
+          const top = target.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
+
+          window.scrollTo({
+            top,
+            behavior: 'smooth'
+          });
+        });
+      });
+    }
+  };
+
+  /* ==========================================================
+     10. HEADER SCROLL EFFECT
+     ========================================================== */
+  const HeaderScroll = {
+    init() {
+      const header = document.querySelector('.site-header');
+      if (!header) return;
+
+      let ticking = false;
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            if (window.scrollY > 50) {
+              header.classList.add('scrolled');
             } else {
-                animate();
+              header.classList.remove('scrolled');
             }
-        });
+            ticking = false;
+          });
+          ticking = true;
+        }
+      });
+    }
+  };
 
-        // Init
-        initCanvas();
-        createParticles();
-        animate();
-    };
+  /* ==========================================================
+     11. BACK TO TOP BUTTON
+     ========================================================== */
+  const BackToTop = {
+    init() {
+      const btn = document.querySelector('.back-to-top');
+      if (!btn) return;
 
-
-    // ============================================================
-    // 5. Scroll Trigger Animations
-    // ============================================================
-    const initScrollAnimations = () => {
-        const elements = document.querySelectorAll('[data-animate]');
-        if (!elements.length) return;
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const el = entry.target;
-                    const delay = el.getAttribute('data-delay');
-
-                    if (delay) {
-                        const ms = parseInt(delay, 10) * 100;
-                        setTimeout(() => {
-                            el.classList.add('animated');
-                        }, ms);
-                    } else {
-                        el.classList.add('animated');
-                    }
-
-                    // Unobserve after animating (animate once)
-                    observer.unobserve(el);
-                }
-            });
-        }, {
-            threshold: 0.15,
-            rootMargin: '0px 0px -40px 0px'
-        });
-
-        elements.forEach(el => observer.observe(el));
-    };
-
-
-    // ============================================================
-    // 6. Counter Animation
-    // ============================================================
-    const initCounters = () => {
-        const counters = document.querySelectorAll('[data-target]');
-        if (!counters.length) return;
-
-        const animateCounter = (el) => {
-            const target = parseInt(el.getAttribute('data-target'), 10);
-            if (isNaN(target)) return;
-
-            const suffix = el.getAttribute('data-suffix') || '';
-            const prefix = el.getAttribute('data-prefix') || '';
-            const duration = 2000;
-            const startTime = performance.now();
-            const startValue = 0;
-
-            const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
-
-            const updateCounter = (currentTime) => {
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                const easedProgress = easeOutCubic(progress);
-                const currentValue = Math.round(startValue + (target - startValue) * easedProgress);
-
-                el.textContent = prefix + currentValue.toLocaleString() + suffix;
-
-                if (progress < 1) {
-                    requestAnimationFrame(updateCounter);
-                }
-            };
-
-            requestAnimationFrame(updateCounter);
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    animateCounter(entry.target);
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, {
-            threshold: 0.5
-        });
-
-        counters.forEach(el => observer.observe(el));
-    };
-
-
-    // ============================================================
-    // 7. Tab Switching
-    // ============================================================
-    const initTabs = () => {
-        const tabNavs = document.querySelectorAll('.tab-nav');
-        if (!tabNavs.length) return;
-
-        tabNavs.forEach(tabNav => {
-            const tabBtns = tabNav.querySelectorAll('.tab-btn');
-            const tabContentId = tabNav.getAttribute('data-tab-content');
-            const tabContent = tabContentId
-                ? document.getElementById(tabContentId)
-                : tabNav.nextElementSibling;
-
-            if (!tabContent) return;
-
-            const tabPanes = tabContent.querySelectorAll('.tab-pane');
-
-            tabBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const targetId = btn.getAttribute('data-tab');
-
-                    // Update active button
-                    tabBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-
-                    // Update active pane
-                    tabPanes.forEach(pane => {
-                        pane.classList.remove('active');
-                        if (pane.id === targetId || pane.getAttribute('data-tab-id') === targetId) {
-                            pane.classList.add('active');
-                        }
-                    });
-                });
-            });
-        });
-    };
-
-
-    // ============================================================
-    // 8. Drag Slider
-    // ============================================================
-    const initSliders = () => {
-        const sliders = document.querySelectorAll('.slider');
-        if (!sliders.length) return;
-
-        sliders.forEach(slider => {
-            const track = slider.querySelector('.slider-track');
-            if (!track) return;
-
-            const slides = slider.querySelectorAll('.slider-slide');
-            const dots = slider.querySelectorAll('.slider-dot');
-            const prevBtn = slider.querySelector('.slider-prev') || slider.parentElement?.querySelector('.slider-prev');
-            const nextBtn = slider.querySelector('.slider-next') || slider.parentElement?.querySelector('.slider-next');
-
-            if (!slides.length) return;
-
-            let currentIndex = 0;
-            let isDragging = false;
-            let startX = 0;
-            let currentTranslate = 0;
-            let prevTranslate = 0;
-            let startTime = 0;
-            let velocity = 0;
-            let lastX = 0;
-            let lastTime = 0;
-            let autoplayTimer = null;
-            let isHovering = false;
-
-            const getSlideWidth = () => {
-                return slides[0].offsetWidth;
-            };
-
-            const getMaxIndex = () => {
-                return slides.length - 1;
-            };
-
-            const setPosition = (translate, smooth = true) => {
-                if (smooth) {
-                    track.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                } else {
-                    track.style.transition = 'none';
-                }
-                track.style.transform = `translateX(${translate}px)`;
-                currentTranslate = translate;
-            };
-
-            const goToSlide = (index, smooth = true) => {
-                const maxIndex = getMaxIndex();
-                if (index < 0) index = 0;
-                if (index > maxIndex) index = maxIndex;
-
-                currentIndex = index;
-                const slideWidth = getSlideWidth();
-                const translate = -currentIndex * slideWidth;
-
-                setPosition(translate, smooth);
-                prevTranslate = translate;
-
-                updateDots();
-            };
-
-            const updateDots = () => {
-                dots.forEach((dot, i) => {
-                    dot.classList.toggle('active', i === currentIndex);
-                });
-            };
-
-            // Mouse Events
-            const dragStart = (e) => {
-                isDragging = true;
-                slider.classList.add('dragging');
-                startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
-                startTime = Date.now();
-                lastX = startX;
-                lastTime = startTime;
-                velocity = 0;
-
-                track.style.transition = 'none';
-
-                // Prevent default only for mouse
-                if (e.type === 'mousedown') {
-                    e.preventDefault();
-                }
-            };
-
-            const dragMove = (e) => {
-                if (!isDragging) return;
-
-                const currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-                const diff = currentX - startX;
-                const currentTime = Date.now();
-
-                // Calculate velocity for momentum
-                const timeDiff = currentTime - lastTime;
-                if (timeDiff > 0) {
-                    velocity = (currentX - lastX) / timeDiff;
-                }
-                lastX = currentX;
-                lastTime = currentTime;
-
-                const translate = prevTranslate + diff;
-                track.style.transform = `translateX(${translate}px)`;
-                currentTranslate = translate;
-            };
-
-            const dragEnd = () => {
-                if (!isDragging) return;
-
-                isDragging = false;
-                slider.classList.remove('dragging');
-
-                const diff = currentTranslate - prevTranslate;
-                const slideWidth = getSlideWidth();
-                const threshold = slideWidth * 0.2;
-
-                // Use velocity for momentum effect
-                const momentumDistance = velocity * 150;
-                const totalDiff = diff + momentumDistance;
-
-                if (Math.abs(totalDiff) > threshold) {
-                    if (totalDiff < 0) {
-                        goToSlide(currentIndex + 1);
-                    } else {
-                        goToSlide(currentIndex - 1);
-                    }
-                } else {
-                    goToSlide(currentIndex);
-                }
-            };
-
-            // Bind drag events
-            slider.addEventListener('mousedown', dragStart);
-            slider.addEventListener('touchstart', dragStart, { passive: true });
-
-            window.addEventListener('mousemove', dragMove);
-            window.addEventListener('touchmove', dragMove, { passive: true });
-
-            window.addEventListener('mouseup', dragEnd);
-            window.addEventListener('touchend', dragEnd);
-
-            // Prevent link clicks while dragging
-            slider.addEventListener('click', (e) => {
-                const diff = Math.abs(currentTranslate - prevTranslate);
-                if (diff > 5) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-            });
-
-            // Dot navigation
-            dots.forEach((dot, i) => {
-                dot.addEventListener('click', () => {
-                    goToSlide(i);
-                    resetAutoplay();
-                });
-            });
-
-            // Arrow navigation
-            if (prevBtn) {
-                prevBtn.addEventListener('click', () => {
-                    goToSlide(currentIndex - 1);
-                    resetAutoplay();
-                });
+      let ticking = false;
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            if (window.scrollY > 600) {
+              btn.classList.add('visible');
+            } else {
+              btn.classList.remove('visible');
             }
+            ticking = false;
+          });
+          ticking = true;
+        }
+      });
 
-            if (nextBtn) {
-                nextBtn.addEventListener('click', () => {
-                    goToSlide(currentIndex + 1);
-                    resetAutoplay();
-                });
-            }
+      btn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+  };
 
-            // Auto-advance every 5 seconds
-            const startAutoplay = () => {
-                if (autoplayTimer) clearInterval(autoplayTimer);
-                autoplayTimer = setInterval(() => {
-                    if (!isHovering && !isDragging) {
-                        const nextIndex = currentIndex + 1 > getMaxIndex() ? 0 : currentIndex + 1;
-                        goToSlide(nextIndex);
-                    }
-                }, 5000);
-            };
+  /* ==========================================================
+     12. LIGHTBOX (Gallery)
+     ========================================================== */
+  const Lightbox = {
+    init() {
+      this.overlay = document.querySelector('.lightbox-overlay');
+      this.content = document.querySelector('.lightbox-content');
+      this.closeBtn = document.querySelector('.lightbox-close');
+      if (!this.overlay) return;
 
-            const resetAutoplay = () => {
-                if (autoplayTimer) clearInterval(autoplayTimer);
-                startAutoplay();
-            };
+      // Open triggers
+      document.querySelectorAll('[data-lightbox]').forEach(trigger => {
+        trigger.addEventListener('click', () => {
+          const html = trigger.getAttribute('data-lightbox-content') || '';
+          const bgColor = trigger.getAttribute('data-lightbox-color') || '#DBEAFE';
+          const caption = trigger.getAttribute('data-lightbox-caption') || '';
 
-            // Pause on hover
-            slider.addEventListener('mouseenter', () => {
-                isHovering = true;
-            });
-
-            slider.addEventListener('mouseleave', () => {
-                isHovering = false;
-            });
-
-            // Handle resize
-            window.addEventListener('resize', () => {
-                goToSlide(currentIndex, false);
-            });
-
-            // Keyboard navigation when slider is focused
-            slider.setAttribute('tabindex', '0');
-            slider.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowLeft') {
-                    goToSlide(currentIndex - 1);
-                    resetAutoplay();
-                } else if (e.key === 'ArrowRight') {
-                    goToSlide(currentIndex + 1);
-                    resetAutoplay();
-                }
-            });
-
-            // Initialize
-            updateDots();
-            startAutoplay();
-        });
-    };
-
-
-    // ============================================================
-    // 9. Lightbox
-    // ============================================================
-    const initLightbox = () => {
-        const galleryItems = document.querySelectorAll('.gallery-item');
-        if (!galleryItems.length) return;
-
-        // Create lightbox DOM if it doesn't exist
-        let lightbox = document.querySelector('.lightbox');
-        if (!lightbox) {
-            lightbox = document.createElement('div');
-            lightbox.className = 'lightbox';
-            lightbox.innerHTML = `
-                <button class="lightbox-close" aria-label="Close">&times;</button>
-                <button class="lightbox-nav lightbox-prev" aria-label="Previous">&#10094;</button>
-                <button class="lightbox-nav lightbox-next" aria-label="Next">&#10095;</button>
-                <img class="lightbox-content" src="" alt="">
-                <div class="lightbox-caption"></div>
-                <div class="lightbox-counter"></div>
+          if (this.content) {
+            this.content.innerHTML = `
+              <div style="width: 80vw; max-width: 800px; aspect-ratio: 16/10; background: ${bgColor}; display: flex; align-items: center; justify-content: center; font-family: var(--font-body); color: rgba(0,0,0,0.3); font-size: 1.2rem;">${html || caption}</div>
             `;
-            document.body.appendChild(lightbox);
+          }
+          this.open();
+        });
+      });
+
+      // Close
+      if (this.closeBtn) {
+        this.closeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.close();
+        });
+      }
+      this.overlay.addEventListener('click', (e) => {
+        if (e.target === this.overlay) this.close();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.overlay.classList.contains('active')) {
+          this.close();
         }
-
-        const lightboxImg = lightbox.querySelector('.lightbox-content');
-        const lightboxCaption = lightbox.querySelector('.lightbox-caption');
-        const lightboxCounter = lightbox.querySelector('.lightbox-counter');
-        const closeBtn = lightbox.querySelector('.lightbox-close');
-        const prevBtn = lightbox.querySelector('.lightbox-prev');
-        const nextBtn = lightbox.querySelector('.lightbox-next');
-
-        let currentLightboxIndex = 0;
-        const images = [];
-
-        // Collect all gallery images
-        galleryItems.forEach((item, index) => {
-            const img = item.querySelector('img');
-            if (img) {
-                images.push({
-                    src: img.getAttribute('data-full') || img.src,
-                    caption: img.alt || item.querySelector('.gallery-item-caption')?.textContent || '',
-                    index: index
-                });
-            }
-        });
-
-        const openLightbox = (index) => {
-            if (index < 0 || index >= images.length) return;
-
-            currentLightboxIndex = index;
-            lightboxImg.src = images[index].src;
-            lightboxImg.alt = images[index].caption;
-            lightboxCaption.textContent = images[index].caption;
-            lightboxCounter.textContent = `${index + 1} / ${images.length}`;
-
-            lightbox.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        };
-
-        const closeLightbox = () => {
-            lightbox.classList.remove('active');
-            document.body.style.overflow = '';
-        };
-
-        const prevImage = () => {
-            const newIndex = currentLightboxIndex <= 0 ? images.length - 1 : currentLightboxIndex - 1;
-            openLightbox(newIndex);
-        };
-
-        const nextImage = () => {
-            const newIndex = currentLightboxIndex >= images.length - 1 ? 0 : currentLightboxIndex + 1;
-            openLightbox(newIndex);
-        };
-
-        // Event: open on gallery item click
-        galleryItems.forEach((item, index) => {
-            item.addEventListener('click', () => {
-                openLightbox(index);
-            });
-        });
-
-        // Event: close
-        if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
-
-        lightbox.addEventListener('click', (e) => {
-            if (e.target === lightbox) closeLightbox();
-        });
-
-        // Event: navigation
-        if (prevBtn) prevBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            prevImage();
-        });
-
-        if (nextBtn) nextBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            nextImage();
-        });
-
-        // Event: keyboard
-        document.addEventListener('keydown', (e) => {
-            if (!lightbox.classList.contains('active')) return;
-
-            switch (e.key) {
-                case 'Escape':
-                    closeLightbox();
-                    break;
-                case 'ArrowLeft':
-                    prevImage();
-                    break;
-                case 'ArrowRight':
-                    nextImage();
-                    break;
-            }
-        });
-
-        // Touch swipe support for lightbox
-        let touchStartX = 0;
-        let touchEndX = 0;
-
-        lightbox.addEventListener('touchstart', (e) => {
-            touchStartX = e.changedTouches[0].clientX;
-        }, { passive: true });
-
-        lightbox.addEventListener('touchend', (e) => {
-            touchEndX = e.changedTouches[0].clientX;
-            const diff = touchStartX - touchEndX;
-
-            if (Math.abs(diff) > 50) {
-                if (diff > 0) {
-                    nextImage();
-                } else {
-                    prevImage();
-                }
-            }
-        });
-    };
-
-
-    // ============================================================
-    // 10. FAQ Accordion
-    // ============================================================
-    const initFAQ = () => {
-        const faqItems = document.querySelectorAll('.faq-item');
-        if (!faqItems.length) return;
-
-        faqItems.forEach(item => {
-            const question = item.querySelector('.faq-question');
-            if (!question) return;
-
-            question.addEventListener('click', () => {
-                const isActive = item.classList.contains('active');
-
-                // Close all other items
-                faqItems.forEach(other => {
-                    if (other !== item) {
-                        other.classList.remove('active');
-                        const otherAnswer = other.querySelector('.faq-answer');
-                        if (otherAnswer) {
-                            otherAnswer.style.maxHeight = '0';
-                        }
-                    }
-                });
-
-                // Toggle clicked item
-                item.classList.toggle('active');
-
-                const answer = item.querySelector('.faq-answer');
-                if (answer) {
-                    if (isActive) {
-                        answer.style.maxHeight = '0';
-                    } else {
-                        answer.style.maxHeight = answer.scrollHeight + 'px';
-                    }
-                }
-            });
-        });
-    };
-
-
-    // ============================================================
-    // 11. Active Nav Link
-    // ============================================================
-    const initActiveNavLink = () => {
-        const navLinks = document.querySelectorAll('.nav-link');
-        if (!navLinks.length) return;
-
-        const currentPath = window.location.pathname;
-        const currentPage = currentPath.split('/').pop() || 'index.html';
-
-        navLinks.forEach(link => {
-            const href = link.getAttribute('href');
-            if (!href) return;
-
-            const linkPage = href.split('/').pop();
-
-            if (linkPage === currentPage ||
-                (currentPage === '' && linkPage === 'index.html') ||
-                (currentPage === 'index.html' && linkPage === '')) {
-                link.classList.add('active');
-            }
-        });
-
-        // Scroll spy for single-page sections
-        const sections = document.querySelectorAll('section[id]');
-        if (!sections.length) return;
-
-        const observerOptions = {
-            threshold: 0.3,
-            rootMargin: '-80px 0px -50% 0px'
-        };
-
-        const sectionObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const sectionId = entry.target.id;
-                    navLinks.forEach(link => {
-                        link.classList.remove('active');
-                        const href = link.getAttribute('href');
-                        if (href && href.includes('#' + sectionId)) {
-                            link.classList.add('active');
-                        }
-                    });
-                }
-            });
-        }, observerOptions);
-
-        sections.forEach(section => sectionObserver.observe(section));
-    };
-
-
-    // ============================================================
-    // 12. Form Validation
-    // ============================================================
-    const initFormValidation = () => {
-        const forms = document.querySelectorAll('form[data-validate]');
-        if (!forms.length) return;
-
-        const validators = {
-            required: (value) => value.trim().length > 0,
-            email: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
-            phone: (value) => /^[\d\-\+\(\)\s]{8,}$/.test(value),
-            minlength: (value, length) => value.trim().length >= parseInt(length, 10)
-        };
-
-        const messages = {
-            required: '필수 입력 항목입니다.',
-            email: '올바른 이메일 형식을 입력해주세요.',
-            phone: '올바른 전화번호를 입력해주세요.',
-            minlength: (len) => `최소 ${len}자 이상 입력해주세요.`
-        };
-
-        const showError = (group, message) => {
-            group.classList.add('error');
-            const errorEl = group.querySelector('.form-error');
-            if (errorEl) {
-                errorEl.textContent = message;
-                errorEl.style.display = 'block';
-            }
-        };
-
-        const clearError = (group) => {
-            group.classList.remove('error');
-            const errorEl = group.querySelector('.form-error');
-            if (errorEl) {
-                errorEl.textContent = '';
-                errorEl.style.display = 'none';
-            }
-        };
-
-        const validateField = (input) => {
-            const group = input.closest('.form-group');
-            if (!group) return true;
-
-            const value = input.value;
-            let isValid = true;
-
-            // Check required
-            if (input.hasAttribute('required') || input.getAttribute('data-validate-required')) {
-                if (!validators.required(value)) {
-                    showError(group, messages.required);
-                    return false;
-                }
-            }
-
-            // Check email
-            if (input.type === 'email' || input.getAttribute('data-validate-email')) {
-                if (value.trim() && !validators.email(value)) {
-                    showError(group, messages.email);
-                    return false;
-                }
-            }
-
-            // Check phone
-            if (input.type === 'tel' || input.getAttribute('data-validate-phone')) {
-                if (value.trim() && !validators.phone(value)) {
-                    showError(group, messages.phone);
-                    return false;
-                }
-            }
-
-            // Check minlength
-            const minLength = input.getAttribute('data-validate-minlength') || input.getAttribute('minlength');
-            if (minLength && value.trim()) {
-                if (!validators.minlength(value, minLength)) {
-                    showError(group, messages.minlength(minLength));
-                    return false;
-                }
-            }
-
-            clearError(group);
-            return true;
-        };
-
-        forms.forEach(form => {
-            const inputs = form.querySelectorAll('.form-input, .form-select, .form-textarea');
-
-            // Live validation on blur
-            inputs.forEach(input => {
-                input.addEventListener('blur', () => validateField(input));
-                input.addEventListener('input', () => {
-                    const group = input.closest('.form-group');
-                    if (group && group.classList.contains('error')) {
-                        validateField(input);
-                    }
-                });
-            });
-
-            // Form submission
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-
-                let isFormValid = true;
-
-                inputs.forEach(input => {
-                    if (!validateField(input)) {
-                        isFormValid = false;
-                    }
-                });
-
-                if (isFormValid) {
-                    // Show success message
-                    const successEl = form.querySelector('.form-success');
-                    if (successEl) {
-                        successEl.style.display = 'block';
-                        successEl.textContent = '문의가 성공적으로 접수되었습니다. 감사합니다!';
-                    }
-
-                    // Optional: submit via fetch or reset form
-                    form.reset();
-
-                    // Hide success after 5 seconds
-                    setTimeout(() => {
-                        if (successEl) successEl.style.display = 'none';
-                    }, 5000);
-                } else {
-                    // Scroll to first error
-                    const firstError = form.querySelector('.form-group.error');
-                    if (firstError) {
-                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                }
-            });
-        });
-    };
-
-
-    // ============================================================
-    // 13. Smooth Scroll
-    // ============================================================
-    const initSmoothScroll = () => {
-        const anchors = document.querySelectorAll('a[href^="#"]');
-        if (!anchors.length) return;
-
-        anchors.forEach(anchor => {
-            anchor.addEventListener('click', (e) => {
-                const href = anchor.getAttribute('href');
-                if (!href || href === '#') return;
-
-                const target = document.querySelector(href);
-                if (!target) return;
-
-                e.preventDefault();
-
-                const headerHeight = document.querySelector('.header')?.offsetHeight || 80;
-                const targetPosition = target.getBoundingClientRect().top + window.scrollY - headerHeight;
-
-                window.scrollTo({
-                    top: targetPosition,
-                    behavior: 'smooth'
-                });
-
-                // Update URL without scroll
-                history.pushState(null, null, href);
-            });
-        });
-    };
-
-
-    // ============================================================
-    // 14. Back to Top Button
-    // ============================================================
-    const initBackToTop = () => {
-        // Check if button already exists in HTML
-        let btn = document.querySelector('.back-to-top');
-
-        if (!btn) {
-            btn = document.createElement('button');
-            btn.className = 'back-to-top';
-            btn.setAttribute('aria-label', 'Back to top');
-            btn.innerHTML = '&#8593;';
-            document.body.appendChild(btn);
-        }
-
-        let ticking = false;
-
-        const toggleVisibility = () => {
-            if (window.scrollY > 400) {
-                btn.classList.add('visible');
-            } else {
-                btn.classList.remove('visible');
-            }
-            ticking = false;
-        };
-
-        window.addEventListener('scroll', () => {
-            if (!ticking) {
-                requestAnimationFrame(toggleVisibility);
-                ticking = true;
-            }
-        }, { passive: true });
-
+      });
+    },
+
+    open() {
+      this.overlay.classList.add('active');
+      document.body.classList.add('lightbox-open');
+    },
+
+    close() {
+      this.overlay.classList.remove('active');
+      document.body.classList.remove('lightbox-open');
+    }
+  };
+
+  /* ==========================================================
+     13. GALLERY FILTER
+     ========================================================== */
+  const GalleryFilter = {
+    init() {
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      const items = document.querySelectorAll('[data-filter-category]');
+      if (!filterBtns.length || !items.length) return;
+
+      filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
+          const category = btn.getAttribute('data-filter');
+
+          // Update active button
+          filterBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          // Filter items
+          items.forEach(item => {
+            const itemCat = item.getAttribute('data-filter-category');
+            if (category === 'all' || itemCat === category) {
+              item.style.display = '';
+              item.style.opacity = '0';
+              item.style.transform = 'scale(0.9)';
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  item.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                  item.style.opacity = '1';
+                  item.style.transform = 'scale(1)';
+                });
+              });
+            } else {
+              item.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+              item.style.opacity = '0';
+              item.style.transform = 'scale(0.9)';
+              setTimeout(() => {
+                item.style.display = 'none';
+              }, 300);
+            }
+          });
+        });
+      });
+    }
+  };
+
+  /* ==========================================================
+     14. MARQUEE PAUSE ON HOVER (already in CSS, but ensure JS backup)
+     ========================================================== */
+  const MarqueePause = {
+    init() {
+      const tracks = document.querySelectorAll('.marquee-track');
+      tracks.forEach(track => {
+        track.addEventListener('mouseenter', () => {
+          track.style.animationPlayState = 'paused';
+        });
+        track.addEventListener('mouseleave', () => {
+          track.style.animationPlayState = 'running';
+        });
+      });
+    }
+  };
+
+  /* ==========================================================
+     15. HORIZONTAL SCROLL (TIMELINE)
+     ========================================================== */
+  const HorizontalScroll = {
+    init() {
+      const containers = document.querySelectorAll('.horizontal-scroll');
+      containers.forEach(container => {
+        // Allow mouse wheel horizontal scroll
+        container.addEventListener('wheel', (e) => {
+          if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+            e.preventDefault();
+            container.scrollLeft += e.deltaY;
+          }
+        }, { passive: false });
+      });
+    }
+  };
+
+  /* ==========================================================
+     16. FORM VALIDATION (Contact page)
+     ========================================================== */
+  const FormValidation = {
+    init() {
+      const form = document.querySelector('#contact-form');
+      if (!form) return;
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const name = form.querySelector('[name="name"]');
+        const email = form.querySelector('[name="email"]');
+        const message = form.querySelector('[name="message"]');
+        let valid = true;
+
+        // Simple validation
+        [name, email, message].forEach(field => {
+          if (field && !field.value.trim()) {
+            field.style.borderColor = '#EF4444';
+            valid = false;
+          } else if (field) {
+            field.style.borderColor = '';
+          }
         });
 
-        // Initial check
-        toggleVisibility();
-    };
-
-
-    // ============================================================
-    // 15. Typing Effect
-    // ============================================================
-    const initTypingEffect = () => {
-        const typingElements = document.querySelectorAll('[data-typing]');
-        if (!typingElements.length) return;
-
-        typingElements.forEach(el => {
-            const words = (el.getAttribute('data-typing') || '').split(',').map(w => w.trim());
-            if (!words.length) return;
-
-            const speed = parseInt(el.getAttribute('data-typing-speed'), 10) || 100;
-            const deleteSpeed = parseInt(el.getAttribute('data-typing-delete-speed'), 10) || 50;
-            const pauseDuration = parseInt(el.getAttribute('data-typing-pause'), 10) || 2000;
-
-            let wordIndex = 0;
-            let charIndex = 0;
-            let isDeleting = false;
-            let currentText = '';
-
-            const type = () => {
-                const currentWord = words[wordIndex];
-
-                if (isDeleting) {
-                    currentText = currentWord.substring(0, charIndex - 1);
-                    charIndex--;
-                } else {
-                    currentText = currentWord.substring(0, charIndex + 1);
-                    charIndex++;
-                }
-
-                el.textContent = currentText;
-
-                let nextDelay = isDeleting ? deleteSpeed : speed;
-
-                if (!isDeleting && charIndex === currentWord.length) {
-                    nextDelay = pauseDuration;
-                    isDeleting = true;
-                } else if (isDeleting && charIndex === 0) {
-                    isDeleting = false;
-                    wordIndex = (wordIndex + 1) % words.length;
-                    nextDelay = 300;
-                }
-
-                setTimeout(type, nextDelay);
-            };
-
-            // Start with a small delay
-            setTimeout(type, 500);
-        });
-    };
-
-
-    // ============================================================
-    // 16. Image Lazy Loading
-    // ============================================================
-    const initLazyLoading = () => {
-        const lazyImages = document.querySelectorAll('img[data-src]');
-        if (!lazyImages.length) return;
-
-        // Use native lazy loading if supported
-        if ('loading' in HTMLImageElement.prototype) {
-            lazyImages.forEach(img => {
-                img.src = img.getAttribute('data-src');
-                img.removeAttribute('data-src');
-                const srcset = img.getAttribute('data-srcset');
-                if (srcset) {
-                    img.srcset = srcset;
-                    img.removeAttribute('data-srcset');
-                }
-            });
-            return;
+        if (email && email.value && !email.value.includes('@')) {
+          email.style.borderColor = '#EF4444';
+          valid = false;
         }
 
-        // Fallback with IntersectionObserver
-        const imageObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
+        if (valid) {
+          // Show success message
+          const btn = form.querySelector('button[type="submit"]');
+          if (btn) {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span>전송 완료!</span>';
+            btn.style.background = '#10B981';
+            btn.style.borderColor = '#10B981';
+            btn.style.color = '#fff';
+            btn.disabled = true;
 
-                    // Create a temp image to preload
-                    const tempImg = new Image();
-                    tempImg.onload = () => {
-                        img.src = img.getAttribute('data-src');
-                        img.removeAttribute('data-src');
-                        img.classList.add('loaded');
-                    };
-                    tempImg.src = img.getAttribute('data-src');
-
-                    const srcset = img.getAttribute('data-srcset');
-                    if (srcset) {
-                        img.srcset = srcset;
-                        img.removeAttribute('data-srcset');
-                    }
-
-                    imageObserver.unobserve(img);
-                }
-            });
-        }, {
-            rootMargin: '200px 0px',
-            threshold: 0.01
-        });
-
-        lazyImages.forEach(img => imageObserver.observe(img));
-    };
-
-
-    // ============================================================
-    // 17. Parallax Effect
-    // ============================================================
-    const initParallax = () => {
-        const hero = document.querySelector('.hero');
-        if (!hero) return;
-
-        const parallaxElements = document.querySelectorAll('[data-parallax]');
-        const heroShapes = hero.querySelectorAll('.hero-shape');
-
-        let ticking = false;
-
-        const updateParallax = () => {
-            const scrollY = window.scrollY;
-            const viewportHeight = window.innerHeight;
-
-            // Hero section parallax
-            if (scrollY < viewportHeight) {
-                const heroContent = hero.querySelector('.hero-content');
-                if (heroContent) {
-                    const speed = 0.3;
-                    heroContent.style.transform = `translateY(${scrollY * speed}px)`;
-                    heroContent.style.opacity = 1 - (scrollY / viewportHeight) * 0.8;
-                }
-
-                // Hero background parallax
-                const heroBg = hero.querySelector('.hero-bg');
-                if (heroBg) {
-                    heroBg.style.transform = `translateY(${scrollY * 0.5}px)`;
-                }
-
-                // Floating shapes parallax
-                heroShapes.forEach((shape, i) => {
-                    const speed = 0.1 + (i * 0.08);
-                    shape.style.transform = `translateY(${scrollY * speed}px)`;
-                });
-            }
-
-            // Custom parallax elements
-            parallaxElements.forEach(el => {
-                const speed = parseFloat(el.getAttribute('data-parallax')) || 0.2;
-                const rect = el.getBoundingClientRect();
-
-                if (rect.top < viewportHeight && rect.bottom > 0) {
-                    const scrollProgress = (viewportHeight - rect.top) / (viewportHeight + rect.height);
-                    const translateY = (scrollProgress - 0.5) * 100 * speed;
-                    el.style.transform = `translateY(${translateY}px)`;
-                }
-            });
-
-            ticking = false;
-        };
-
-        window.addEventListener('scroll', () => {
-            if (!ticking) {
-                requestAnimationFrame(updateParallax);
-                ticking = true;
-            }
-        }, { passive: true });
-
-        // Initial call
-        updateParallax();
-    };
-
-
-    // ============================================================
-    // 18. Gallery Filter
-    // ============================================================
-    const initGalleryFilter = () => {
-        const filterBtns = document.querySelectorAll('.gallery-filter-btn');
-        const galleryItems = document.querySelectorAll('.gallery-item[data-category]');
-
-        if (!filterBtns.length || !galleryItems.length) return;
-
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const filter = btn.getAttribute('data-filter');
-
-                // Update active button
-                filterBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                // Filter items with animation
-                galleryItems.forEach(item => {
-                    const category = item.getAttribute('data-category');
-                    const shouldShow = filter === 'all' || category === filter;
-
-                    if (shouldShow) {
-                        item.style.opacity = '0';
-                        item.style.transform = 'scale(0.8)';
-                        item.style.display = '';
-
-                        requestAnimationFrame(() => {
-                            item.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-                            item.style.opacity = '1';
-                            item.style.transform = 'scale(1)';
-                        });
-                    } else {
-                        item.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                        item.style.opacity = '0';
-                        item.style.transform = 'scale(0.8)';
-
-                        setTimeout(() => {
-                            item.style.display = 'none';
-                        }, 300);
-                    }
-                });
-            });
-        });
-    };
-
-
-    // ============================================================
-    // 19. Number Format Helper
-    // ============================================================
-    const formatNumber = (num) => {
-        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    };
-
-
-    // ============================================================
-    // 20. Preloader
-    // ============================================================
-    const initPreloader = () => {
-        const preloader = document.querySelector('.preloader');
-        if (!preloader) return;
-
-        window.addEventListener('load', () => {
-            preloader.classList.add('fade-out');
             setTimeout(() => {
-                preloader.style.display = 'none';
-            }, 500);
+              btn.innerHTML = originalText;
+              btn.style.background = '';
+              btn.style.borderColor = '';
+              btn.style.color = '';
+              btn.disabled = false;
+              form.reset();
+            }, 3000);
+          }
+        }
+      });
+    }
+  };
+
+  /* ==========================================================
+     17. HERO LETTER ANIMATION
+     ========================================================== */
+  const HeroLetterAnimation = {
+    init() {
+      const heroTitle = document.querySelector('[data-hero-animate]');
+      if (!heroTitle) return;
+
+      const text = heroTitle.textContent;
+      heroTitle.textContent = '';
+      heroTitle.style.opacity = '1';
+
+      text.split('').forEach((char, i) => {
+        const span = document.createElement('span');
+        span.textContent = char === ' ' ? '\u00A0' : char;
+        span.style.display = 'inline-block';
+        span.style.opacity = '0';
+        span.style.transform = 'translateY(40px)';
+        span.style.transition = `opacity 0.5s ease ${i * 0.05}s, transform 0.5s ease ${i * 0.05}s`;
+        heroTitle.appendChild(span);
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            span.style.opacity = '1';
+            span.style.transform = 'translateY(0)';
+          });
         });
-    };
+      });
+    }
+  };
 
+  /* ==========================================================
+     18. PAGE TRANSITION
+     ========================================================== */
+  const PageTransition = {
+    init() {
+      // Fade in on load
+      document.body.style.opacity = '0';
+      document.body.style.transition = 'opacity 0.4s ease';
+      requestAnimationFrame(() => {
+        document.body.style.opacity = '1';
+      });
+    }
+  };
 
-    // ============================================================
-    // 21. Scroll-based section color transitions
-    // ============================================================
-    const initSectionTransitions = () => {
-        const sections = document.querySelectorAll('.section[data-bg-transition]');
-        if (!sections.length) return;
+  /* ==========================================================
+     19. ACTIVE NAV LINK HIGHLIGHT
+     ========================================================== */
+  const ActiveNav = {
+    init() {
+      const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+      const links = document.querySelectorAll('.drawer-nav-item a');
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('section-visible');
-                } else {
-                    entry.target.classList.remove('section-visible');
-                }
-            });
-        }, {
-            threshold: 0.1
-        });
+      links.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href === currentPath || (currentPath === '' && href === 'index.html')) {
+          link.classList.add('active');
+        }
+      });
+    }
+  };
 
-        sections.forEach(section => observer.observe(section));
-    };
+  /* ==========================================================
+     INITIALIZE ALL MODULES
+     ========================================================== */
+  document.addEventListener('DOMContentLoaded', () => {
+    DarkMode.init();
+    Drawer.init();
+    CustomCursor.init();
+    ScrollAnimations.init();
+    CounterAnimation.init();
+    Parallax.init();
+    TabUI.init();
+    Accordion.init();
+    SmoothScroll.init();
+    HeaderScroll.init();
+    BackToTop.init();
+    Lightbox.init();
+    GalleryFilter.init();
+    MarqueePause.init();
+    HorizontalScroll.init();
+    FormValidation.init();
+    HeroLetterAnimation.init();
+    PageTransition.init();
+    ActiveNav.init();
+  });
 
-
-    // ============================================================
-    // 22. Tooltip
-    // ============================================================
-    const initTooltips = () => {
-        const tooltipTriggers = document.querySelectorAll('[data-tooltip]');
-        if (!tooltipTriggers.length) return;
-
-        tooltipTriggers.forEach(trigger => {
-            const tooltipText = trigger.getAttribute('data-tooltip');
-            if (!tooltipText) return;
-
-            const tooltip = document.createElement('div');
-            tooltip.className = 'tooltip';
-            tooltip.textContent = tooltipText;
-            tooltip.style.cssText = `
-                position: absolute;
-                background: rgba(26, 26, 46, 0.9);
-                color: #fff;
-                padding: 6px 12px;
-                border-radius: 8px;
-                font-size: 12px;
-                white-space: nowrap;
-                pointer-events: none;
-                opacity: 0;
-                transition: opacity 0.2s ease;
-                z-index: 11000;
-                transform: translateX(-50%);
-            `;
-
-            trigger.style.position = 'relative';
-
-            trigger.addEventListener('mouseenter', () => {
-                document.body.appendChild(tooltip);
-                const rect = trigger.getBoundingClientRect();
-                tooltip.style.top = (rect.top - tooltip.offsetHeight - 8 + window.scrollY) + 'px';
-                tooltip.style.left = (rect.left + rect.width / 2) + 'px';
-                requestAnimationFrame(() => {
-                    tooltip.style.opacity = '1';
-                });
-            });
-
-            trigger.addEventListener('mouseleave', () => {
-                tooltip.style.opacity = '0';
-                setTimeout(() => {
-                    if (tooltip.parentNode) {
-                        tooltip.parentNode.removeChild(tooltip);
-                    }
-                }, 200);
-            });
-        });
-    };
-
-
-    // ============================================================
-    // Initialize All Modules
-    // ============================================================
-    const init = () => {
-        initHeaderScroll();
-        initMobileNav();
-        initScrollProgress();
-        initParticles();
-        initScrollAnimations();
-        initCounters();
-        initTabs();
-        initSliders();
-        initLightbox();
-        initFAQ();
-        initActiveNavLink();
-        initFormValidation();
-        initSmoothScroll();
-        initBackToTop();
-        initTypingEffect();
-        initLazyLoading();
-        initParallax();
-        initGalleryFilter();
-        initPreloader();
-        initSectionTransitions();
-        initTooltips();
-    };
-
-    init();
-
-});
+})();

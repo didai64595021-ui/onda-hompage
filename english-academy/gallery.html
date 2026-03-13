@@ -1,1719 +1,1515 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>갤러리 - Bright English Academy</title>
-    <meta name="description" content="브라이트 영어학원 갤러리 - 수업 현장, 학생 인터뷰, 이벤트 사진">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        /* ============================================================
-           Gallery Page - Additional Styles
-           ============================================================ */
-
-        /* --- Page Hero --- */
-        .page-hero {
-            position: relative;
-            min-height: 60vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            padding-top: var(--header-height);
-            background: var(--gradient-hero);
-        }
-
-        .page-hero-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1600') center/cover no-repeat;
-            z-index: 0;
-        }
-
-        .page-hero-bg::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.7) 100%);
-            z-index: 1;
-        }
-
-        .page-hero-content {
-            position: relative;
-            z-index: 2;
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: var(--space-2xl) var(--container-padding);
-        }
-
-        .page-hero .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(var(--white-rgb), 0.2);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(var(--white-rgb), 0.3);
-            color: var(--white);
-            font-family: var(--font-heading);
-            font-size: var(--font-size-sm);
-            font-weight: 600;
-            padding: 8px 24px;
-            border-radius: var(--radius-pill);
-            margin-bottom: var(--space-lg);
-            letter-spacing: 2px;
-            animation: fadeInUp 0.8s ease forwards;
-        }
-
-        .page-hero .hero-title {
-            font-family: var(--font-heading);
-            font-size: var(--font-size-hero);
-            font-weight: 800;
-            color: var(--white);
-            line-height: 1.15;
-            margin-bottom: var(--space-lg);
-            letter-spacing: -0.03em;
-            animation: fadeInUp 0.8s ease 0.2s both;
-        }
-
-        .page-hero .hero-desc {
-            font-size: var(--font-size-md);
-            color: rgba(var(--white-rgb), 0.85);
-            max-width: 560px;
-            margin: 0 auto;
-            line-height: 1.8;
-            animation: fadeInUp 0.8s ease 0.4s both;
-        }
-
-        /* --- Interview Cards --- */
-        .interview-card {
-            background: var(--white);
-            border-radius: var(--radius-lg);
-            padding: var(--space-xl);
-            box-shadow: var(--shadow-card);
-            transition: all var(--transition-base);
-            overflow: hidden;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-md);
-        }
-
-        .interview-card:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-card-hover);
-        }
-
-        .interview-card-header {
-            display: flex;
-            align-items: center;
-            gap: var(--space-md);
-        }
-
-        .interview-card-photo {
-            width: 72px;
-            height: 72px;
-            border-radius: var(--radius-circle);
-            object-fit: cover;
-            border: 3px solid var(--primary-light);
-            flex-shrink: 0;
-        }
-
-        .interview-card-info {
-            flex: 1;
-        }
-
-        .interview-card-name {
-            font-family: var(--font-heading);
-            font-size: var(--font-size-lg);
-            font-weight: 700;
-            color: var(--dark);
-            margin-bottom: 2px;
-        }
-
-        .interview-card-meta {
-            font-size: var(--font-size-sm);
-            color: var(--text-light);
-        }
-
-        .interview-card-course {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--primary-light);
-            color: var(--primary);
-            font-size: var(--font-size-xs);
-            font-weight: 600;
-            padding: 4px 12px;
-            border-radius: var(--radius-pill);
-            margin-bottom: var(--space-xs);
-        }
-
-        .interview-card-achievement {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: linear-gradient(135deg, #FFF8E1, #FFECB3);
-            color: var(--accent-dark);
-            font-size: var(--font-size-xs);
-            font-weight: 700;
-            padding: 6px 14px;
-            border-radius: var(--radius-pill);
-            margin-bottom: var(--space-sm);
-        }
-
-        .interview-card-stars {
-            color: #FFB300;
-            font-size: var(--font-size-base);
-            letter-spacing: 2px;
-            margin-bottom: var(--space-xs);
-        }
-
-        .interview-card-quote {
-            font-size: var(--font-size-sm);
-            color: var(--text-light);
-            line-height: 1.8;
-            position: relative;
-            padding-left: var(--space-md);
-            border-left: 3px solid var(--primary-light);
-        }
-
-        .interview-card-link {
-            font-size: var(--font-size-sm);
-            font-weight: 600;
-            color: var(--primary);
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            margin-top: auto;
-            transition: color var(--transition-fast);
-        }
-
-        .interview-card-link:hover {
-            color: var(--primary-dark);
-        }
-
-        .interview-card-link::after {
-            content: '\2192';
-            transition: transform var(--transition-fast);
-        }
-
-        .interview-card-link:hover::after {
-            transform: translateX(4px);
-        }
-
-        /* --- Event Cards in Bento --- */
-        .event-card {
-            position: relative;
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            background: var(--white);
-            box-shadow: var(--shadow-card);
-            transition: all var(--transition-base);
-            cursor: pointer;
-        }
-
-        .event-card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-card-hover);
-        }
-
-        .event-card-img {
-            width: 100%;
-            height: 240px;
-            object-fit: cover;
-            transition: transform var(--transition-slow);
-        }
-
-        .event-card:hover .event-card-img {
-            transform: scale(1.08);
-        }
-
-        .event-card-img-wrapper {
-            overflow: hidden;
-            position: relative;
-        }
-
-        .event-card-date {
-            position: absolute;
-            top: 16px;
-            left: 16px;
-            background: var(--primary);
-            color: var(--white);
-            font-family: var(--font-heading);
-            font-size: var(--font-size-xs);
-            font-weight: 600;
-            padding: 6px 14px;
-            border-radius: var(--radius-pill);
-            z-index: 2;
-        }
-
-        .event-card-body {
-            padding: var(--space-lg);
-        }
-
-        .event-card-title {
-            font-family: var(--font-heading);
-            font-size: var(--font-size-lg);
-            font-weight: 700;
-            color: var(--dark);
-            margin-bottom: var(--space-sm);
-        }
-
-        .event-card-desc {
-            font-size: var(--font-size-sm);
-            color: var(--text-light);
-            line-height: 1.7;
-        }
-
-        .event-card-lg .event-card-img {
-            height: 300px;
-        }
-
-        /* --- Video Cards --- */
-        .video-card {
-            position: relative;
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            background: var(--white);
-            box-shadow: var(--shadow-card);
-            transition: all var(--transition-base);
-            cursor: pointer;
-        }
-
-        .video-card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-card-hover);
-        }
-
-        .video-card-thumb {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .video-card-thumb img {
-            width: 100%;
-            height: 220px;
-            object-fit: cover;
-            transition: transform var(--transition-slow);
-        }
-
-        .video-card:hover .video-card-thumb img {
-            transform: scale(1.06);
-        }
-
-        .video-card-play {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 64px;
-            height: 64px;
-            background: rgba(var(--primary-rgb), 0.9);
-            border-radius: var(--radius-circle);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--white);
-            font-size: 1.5rem;
-            z-index: 2;
-            transition: all var(--transition-base);
-            box-shadow: 0 4px 20px rgba(var(--primary-rgb), 0.4);
-        }
-
-        .video-card:hover .video-card-play {
-            transform: translate(-50%, -50%) scale(1.1);
-            background: rgba(var(--primary-rgb), 1);
-        }
-
-        .video-card-duration {
-            position: absolute;
-            bottom: 12px;
-            right: 12px;
-            background: rgba(0, 0, 0, 0.75);
-            color: var(--white);
-            font-family: var(--font-heading);
-            font-size: var(--font-size-xs);
-            font-weight: 500;
-            padding: 4px 10px;
-            border-radius: var(--radius-sm);
-            z-index: 2;
-        }
-
-        .video-card-body {
-            padding: var(--space-lg);
-        }
-
-        .video-card-title {
-            font-family: var(--font-heading);
-            font-size: var(--font-size-base);
-            font-weight: 600;
-            color: var(--dark);
-            margin-bottom: var(--space-xs);
-        }
-
-        .video-card-meta {
-            font-size: var(--font-size-xs);
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: var(--space-sm);
-        }
-
-        /* --- Instagram Grid --- */
-        .insta-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-        }
-
-        .insta-item {
-            position: relative;
-            border-radius: var(--radius-md);
-            overflow: hidden;
-            aspect-ratio: 1 / 1;
-            cursor: pointer;
-        }
-
-        .insta-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform var(--transition-slow);
-        }
-
-        .insta-item:hover img {
-            transform: scale(1.1);
-        }
-
-        .insta-item-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity var(--transition-base);
-        }
-
-        .insta-item:hover .insta-item-overlay {
-            opacity: 1;
-        }
-
-        .insta-item-likes {
-            color: var(--white);
-            font-family: var(--font-heading);
-            font-size: var(--font-size-base);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .insta-follow-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: var(--space-xl);
-        }
-
-        /* --- Responsive Adjustments --- */
-        @media (max-width: 1024px) {
-            .page-hero .hero-title {
-                font-size: var(--font-size-4xl);
-            }
-
-            .event-card-lg .event-card-img {
-                height: 240px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .page-hero {
-                min-height: 50vh;
-            }
-
-            .page-hero .hero-title {
-                font-size: var(--font-size-3xl);
-            }
-
-            .page-hero .hero-desc {
-                font-size: var(--font-size-sm);
-            }
-
-            .interview-card {
-                padding: var(--space-lg);
-            }
-
-            .interview-card-photo {
-                width: 56px;
-                height: 56px;
-            }
-
-            .insta-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .video-card-thumb img {
-                height: 180px;
-            }
-
-            .event-card-img {
-                height: 200px;
-            }
-
-            .event-card-lg .event-card-img {
-                height: 200px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .page-hero .hero-title {
-                font-size: var(--font-size-2xl);
-            }
-
-            .interview-card-header {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .video-card-play {
-                width: 48px;
-                height: 48px;
-                font-size: 1.2rem;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="브라이트 영어학원 갤러리 - 수업 풍경, 행사, 시설 등 브라이트의 생생한 모습을 사진으로 만나보세요.">
+  <meta name="keywords" content="브라이트 영어학원, 갤러리, 수업사진, 학원행사, 시설">
+  <title>갤러리 - 브라이트 영어학원</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* ===== GALLERY PAGE SPECIFIC STYLES ===== */
+
+    /* ---------- Hero: Mosaic / collage style ---------- */
+    .hero-gallery {
+      min-height: 50vh;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      padding: calc(var(--header-height) + var(--space-12)) var(--space-6) var(--space-12);
+      background: var(--bg-body);
+    }
+
+    .hero-gallery-bg {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 50%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 4px;
+      opacity: 0.3;
+    }
+
+    .hero-gallery-bg div {
+      overflow: hidden;
+    }
+
+    .hero-gallery-content {
+      position: relative;
+      z-index: 1;
+      max-width: var(--container-xl);
+      margin: 0 auto;
+      padding: 0 var(--space-6);
+      width: 100%;
+    }
+
+    .hero-gallery-content .hero-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      margin-bottom: var(--space-6);
+    }
+
+    .hero-gallery-content .hero-breadcrumb a {
+      color: var(--text-tertiary);
+    }
+
+    .hero-gallery-content .hero-breadcrumb a:hover {
+      color: var(--color-primary);
+    }
+
+    .hero-gallery-content h1 {
+      font-family: var(--font-heading);
+      font-size: var(--text-7xl);
+      font-weight: 900;
+      margin-bottom: var(--space-4);
+    }
+
+    .hero-gallery-content p {
+      font-size: var(--text-xl);
+      max-width: 560px;
+      line-height: 1.8;
+    }
+
+    .hero-gallery-stats {
+      display: flex;
+      gap: var(--space-8);
+      margin-top: var(--space-8);
+    }
+
+    .hero-gallery-stats .stat {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .hero-gallery-stats .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-gallery-stats .stat span {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
+
+    .hero-gallery-stats .stat strong {
+      font-family: var(--font-heading);
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    /* ---------- Gallery Grid Section ---------- */
+    .gallery-section {
+      position: relative;
+    }
+
+    /* ---------- Video Grid Section ---------- */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: var(--space-6);
+    }
+
+    .video-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      transition: all var(--transition-base);
+    }
+
+    .video-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .video-thumb {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      cursor: pointer;
+    }
+
+    .video-thumb .img-placeholder {
+      width: 100%;
+      height: 100%;
+    }
+
+    .video-play-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 56px;
+      height: 56px;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-base);
+    }
+
+    .video-card:hover .video-play-btn {
+      background: var(--color-primary);
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    .video-play-btn svg {
+      color: white;
+      margin-left: 3px;
+    }
+
+    .video-info {
+      padding: var(--space-5);
+    }
+
+    .video-info h4 {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: var(--text-base);
+      margin-bottom: var(--space-2);
+    }
+
+    .video-info p {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+    }
+
+    /* ---------- Facilities Section ---------- */
+    .facilities-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-6);
+    }
+
+    .facility-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-2xl);
+      overflow: hidden;
+      transition: all var(--transition-base);
+    }
+
+    .facility-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .facility-image {
+      aspect-ratio: 4 / 3;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .facility-image .img-placeholder {
+      width: 100%;
+      height: 100%;
+      transition: transform var(--transition-slow);
+    }
+
+    .facility-card:hover .facility-image .img-placeholder {
+      transform: scale(1.1);
+    }
+
+    .facility-info {
+      padding: var(--space-6);
+    }
+
+    .facility-info h4 {
+      font-family: var(--font-body);
+      font-weight: 700;
+      margin-bottom: var(--space-2);
+    }
+
+    .facility-info p {
+      font-size: var(--text-sm);
+      line-height: 1.7;
+    }
+
+    /* ---------- Gallery responsive ---------- */
+    @media (max-width: 1024px) {
+      .facilities-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero-gallery {
+        min-height: auto;
+      }
+
+      .hero-gallery-bg {
+        display: none;
+      }
+
+      .hero-gallery-content h1 {
+        font-size: var(--text-5xl);
+      }
+
+      .hero-gallery-stats {
+        flex-direction: column;
+        gap: var(--space-4);
+      }
+
+      .video-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .facilities-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-gallery-content h1 {
+        font-size: var(--text-4xl);
+      }
+    }
+
+    /* ---------- Annual Events Timeline ---------- */
+    .events-timeline-item {
+      position: relative;
+      margin-bottom: var(--space-8);
+      padding-left: var(--space-6);
+    }
+
+    .events-timeline-dot {
+      position: absolute;
+      left: -33px;
+      top: 4px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+    }
+
+    /* ---------- Achievement Cards ---------- */
+    .achievement-card {
+      background: var(--bg-body);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8);
+      display: flex;
+      gap: var(--space-6);
+      align-items: flex-start;
+      transition: all var(--transition-base);
+    }
+
+    .achievement-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .achievement-icon {
+      flex-shrink: 0;
+      width: 80px;
+      height: 80px;
+      border-radius: var(--radius-xl);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ---------- Behind the Scenes Grid ---------- */
+    .bts-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      transition: all var(--transition-base);
+    }
+
+    .bts-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .bts-card-body {
+      padding: var(--space-6);
+    }
+
+    .bts-check-list {
+      margin-top: var(--space-3);
+      list-style: none;
+      padding: 0;
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
+
+    .bts-check-list li {
+      padding: var(--space-1) 0;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    /* ---------- Gallery Statistics Bar ---------- */
+    .gallery-stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-6);
+      margin-top: var(--space-12);
+      padding: var(--space-8);
+      background: linear-gradient(135deg, var(--color-primary), #1E40AF);
+      border-radius: var(--radius-2xl);
+    }
+
+    .gallery-stats-bar .stat-item {
+      text-align: center;
+    }
+
+    .gallery-stats-bar .stat-number {
+      font-family: var(--font-heading);
+      font-size: var(--text-4xl);
+      font-weight: 800;
+      color: white;
+    }
+
+    .gallery-stats-bar .stat-label {
+      font-size: var(--text-sm);
+      color: rgba(255,255,255,0.7);
+      margin-top: var(--space-1);
+    }
+
+    @media (max-width: 768px) {
+      .gallery-stats-bar {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .achievement-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .gallery-stats-bar {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+      }
+    }
+  </style>
 </head>
-
 <body>
-    <!-- ============================================================
-         Scroll Progress Bar
-         ============================================================ -->
-    <div class="scroll-progress">
-        <div class="scroll-progress-bar" id="scrollProgress"></div>
+
+  <div class="custom-cursor"></div>
+  <div class="custom-cursor-dot"></div>
+
+  <!-- ========== HEADER ========== -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="header-logo">
+        <div class="logo-icon">B</div>
+        <div class="logo-text">브라이트 <span>영어학원</span></div>
+      </a>
+      <div class="header-actions">
+        <button class="dark-mode-toggle" aria-label="다크모드 전환">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+        <button class="hamburger-btn" aria-label="메뉴 열기">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+      </div>
     </div>
+  </header>
 
-    <!-- ============================================================
-         Particle Canvas
-         ============================================================ -->
-    <canvas id="particles"></canvas>
+  <div class="drawer-overlay"></div>
+  <nav class="side-drawer" aria-label="메인 네비게이션">
+    <div class="drawer-header"><h3 style="font-family:var(--font-body);">메뉴</h3><p>브라이트 영어학원에 오신 것을 환영합니다</p></div>
+    <div class="drawer-nav">
+      <ul class="drawer-nav-list">
+        <li class="drawer-nav-item"><a href="index.html"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></span><span class="nav-label">홈</span></a></li>
+        <li class="drawer-nav-item"><a href="about.html"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></span><span class="nav-label">소개</span></a></li>
+        <li class="drawer-nav-item"><a href="programs.html"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></span><span class="nav-label">프로그램</span></a></li>
+        <li class="drawer-nav-item"><a href="gallery.html"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></span><span class="nav-label">갤러리</span></a></li>
+        <li class="drawer-nav-item"><a href="contact.html"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></span><span class="nav-label">문의</span></a></li>
+      </ul>
+    </div>
+    <div class="drawer-footer">
+      <div class="drawer-contact-info">
+        <div class="contact-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><span>02-123-4567</span></div>
+      </div>
+      <div class="drawer-social-links">
+        <a href="https://instagram.com/bright_english" target="_blank" rel="noopener" aria-label="인스타그램"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path></svg></a>
+        <a href="https://youtube.com/@bright-english" target="_blank" rel="noopener" aria-label="유튜브"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.08c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.41z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg></a>
+      </div>
+    </div>
+  </nav>
 
-    <!-- ============================================================
-         Header
-         ============================================================ -->
-    <header class="header" id="header">
-        <div class="header-inner">
-            <a href="index.html" class="logo">
-                <span class="logo-icon">🎓</span>
-                <span class="logo-text">BRIGHT <span class="logo-accent">English</span></span>
+  <!-- ========== MAIN CONTENT ========== -->
+  <main>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero-gallery">
+      <div class="hero-gallery-bg">
+        <div><div class="img-placeholder img-placeholder--blue" style="width:100%;height:100%;"></div></div>
+        <div><div class="img-placeholder img-placeholder--green" style="width:100%;height:100%;"></div></div>
+        <div><div class="img-placeholder img-placeholder--amber" style="width:100%;height:100%;"></div></div>
+        <div><div class="img-placeholder img-placeholder--purple" style="width:100%;height:100%;"></div></div>
+      </div>
+
+      <div class="hero-gallery-content">
+        <div class="hero-breadcrumb">
+          <a href="index.html">홈</a>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          <span>갤러리</span>
+        </div>
+        <h1>Gallery</h1>
+        <p>브라이트 영어학원의 생생한 현장을 사진과 영상으로 만나보세요. 수업 풍경, 학원 행사, 시설 안내까지 다양한 모습을 담았습니다.</p>
+        <div class="hero-gallery-stats" data-stagger>
+          <div class="stat stagger-child">
+            <div class="stat-icon" style="background: var(--color-primary-bg); color: var(--color-primary);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            </div>
+            <div>
+              <strong data-counter="120" data-duration="1500">0</strong>
+              <span>장의 사진</span>
+            </div>
+          </div>
+          <div class="stat stagger-child">
+            <div class="stat-icon" style="background: #FFEDD5; color: var(--color-coral);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+            </div>
+            <div>
+              <strong data-counter="15" data-duration="1200">0</strong>
+              <span>개의 영상</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PHOTO GALLERY WITH FILTER ===== -->
+    <section class="section section--white gallery-section" id="photos">
+      <div class="container">
+        <div class="section-header fade-in">
+          <span class="section-label">Photo Gallery</span>
+          <h2>포토 갤러리</h2>
+          <p>카테고리를 선택하여 원하는 사진을 찾아보세요.</p>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="filter-nav fade-in">
+          <button class="filter-btn active" data-filter="all">전체</button>
+          <button class="filter-btn" data-filter="class">수업</button>
+          <button class="filter-btn" data-filter="event">행사</button>
+          <button class="filter-btn" data-filter="facility">시설</button>
+        </div>
+
+        <!-- Masonry Grid -->
+        <div class="masonry-grid">
+          <div class="masonry-item" data-filter-category="class" data-lightbox data-lightbox-color="linear-gradient(135deg, #DBEAFE, #93C5FD)" data-lightbox-caption="원어민 회화 수업 진행 모습">
+            <div class="img-placeholder img-placeholder--blue" style="height:260px;display:flex;align-items:center;justify-content:center;">
+              <div style="text-align:center;opacity:0.5;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <br><span style="font-size:var(--text-xs);">원어민 회화 수업</span>
+              </div>
+            </div>
+            <div class="masonry-overlay"><span class="masonry-caption">원어민 회화 수업 진행 모습</span></div>
+          </div>
+
+          <div class="masonry-item" data-filter-category="event" data-lightbox data-lightbox-color="linear-gradient(135deg, #FEF3C7, #FCD34D)" data-lightbox-caption="2025 크리스마스 파티">
+            <div class="img-placeholder img-placeholder--amber" style="height:320px;display:flex;align-items:center;justify-content:center;">
+              <div style="text-align:center;opacity:0.5;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                <br><span style="font-size:var(--text-xs);">크리스마스 파티</span>
+              </div>
+            </div>
+            <div class="masonry-overlay"><span class="masonry-caption">2025 크리스마스 파티</span></div>
+          </div>
+
+          <div class="masonry-item" data-filter-category="facility" data-lightbox data-lightbox-color="linear-gradient(135deg, #D1FAE5, #6EE7B7)" data-lightbox-caption="멀티미디어 교실">
+            <div class="img-placeholder img-placeholder--green" style="height:200px;display:flex;align-items:center;justify-content:center;">
+              <div style="text-align:center;opacity:0.5;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                <br><span style="font-size:var(--text-xs);">멀티미디어 교실</span>
+              </div>
+            </div>
+            <div class="masonry-overlay"><span class="masonry-caption">최신 멀티미디어 교실</span></div>
+          </div>
+
+          <div class="masonry-item" data-filter-category="class" data-lightbox data-lightbox-color="linear-gradient(135deg, #EDE9FE, #C4B5FD)" data-lightbox-caption="초등반 그룹 수업">
+            <div class="img-placeholder img-placeholder--purple" style="height:280px;display:flex;align-items:center;justify-content:center;">
+              <div style="text-align:center;opacity:0.5;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                <br><span style="font-size:var(--text-xs);">초등반 그룹 수업</span>
+              </div>
+            </div>
+            <div class="masonry-overlay"><span class="masonry-caption">초등반 그룹 수업</span></div>
+          </div>
+
+          <div class="masonry-item" data-filter-category="event" data-lightbox data-lightbox-color="linear-gradient(135deg, #FCE7F3, #F9A8D4)" data-lightbox-caption="영어 말하기 대회">
+            <div class="img-placeholder img-placeholder--pink" style="height:240px;display:flex;align-items:center;justify-content:center;">
+              <div style="text-align:center;opacity:0.5;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                <br><span style="font-size:var(--text-xs);">영어 말하기 대회</span>
+              </div>
+            </div>
+            <div class="masonry-overlay"><span class="masonry-caption">2025 영어 말하기 대회</span></div>
+          </div>
+
+          <div class="masonry-item" data-filter-category="facility" data-lightbox data-lightbox-color="linear-gradient(135deg, #FFEDD5, #FDBA74)" data-lightbox-caption="학생 자습실">
+            <div class="img-placeholder img-placeholder--coral" style="height:300px;display:flex;align-items:center;justify-content:center;">
+              <div style="text-align:center;opacity:0.5;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                <br><span style="font-size:var(--text-xs);">학생 자습실</span>
+              </div>
+            </div>
+            <div class="masonry-overlay"><span class="masonry-caption">쾌적한 학생 자습실</span></div>
+          </div>
+
+          <div class="masonry-item" data-filter-category="class" data-lightbox data-lightbox-color="linear-gradient(135deg, #F1F5F9, #CBD5E1)" data-lightbox-caption="고등반 모의고사 시간">
+            <div class="img-placeholder img-placeholder--gray" style="height:220px;display:flex;align-items:center;justify-content:center;">
+              <div style="text-align:center;opacity:0.5;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                <br><span style="font-size:var(--text-xs);">모의고사 시간</span>
+              </div>
+            </div>
+            <div class="masonry-overlay"><span class="masonry-caption">고등반 실전 모의고사</span></div>
+          </div>
+
+          <div class="masonry-item" data-filter-category="event" data-lightbox data-lightbox-color="linear-gradient(135deg, #DBEAFE, #93C5FD)" data-lightbox-caption="봄학기 오픈하우스">
+            <div class="img-placeholder img-placeholder--blue" style="height:260px;display:flex;align-items:center;justify-content:center;">
+              <div style="text-align:center;opacity:0.5;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <br><span style="font-size:var(--text-xs);">오픈하우스</span>
+              </div>
+            </div>
+            <div class="masonry-overlay"><span class="masonry-caption">2026 봄학기 오픈하우스</span></div>
+          </div>
+
+          <div class="masonry-item" data-filter-category="facility" data-lightbox data-lightbox-color="linear-gradient(135deg, #D1FAE5, #6EE7B7)" data-lightbox-caption="학원 로비">
+            <div class="img-placeholder img-placeholder--green" style="height:240px;display:flex;align-items:center;justify-content:center;">
+              <div style="text-align:center;opacity:0.5;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <br><span style="font-size:var(--text-xs);">학원 로비</span>
+              </div>
+            </div>
+            <div class="masonry-overlay"><span class="masonry-caption">밝고 쾌적한 학원 로비</span></div>
+          </div>
+
+          <div class="masonry-item" data-filter-category="class" data-lightbox data-lightbox-color="linear-gradient(135deg, #FEF3C7, #FCD34D)" data-lightbox-caption="비즈니스 영어 프레젠테이션 수업">
+            <div class="img-placeholder img-placeholder--amber" style="height:300px;display:flex;align-items:center;justify-content:center;">
+              <div style="text-align:center;opacity:0.5;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                <br><span style="font-size:var(--text-xs);">비즈니스 영어</span>
+              </div>
+            </div>
+            <div class="masonry-overlay"><span class="masonry-caption">비즈니스 영어 프레젠테이션</span></div>
+          </div>
+
+          <div class="masonry-item" data-filter-category="event" data-lightbox data-lightbox-color="linear-gradient(135deg, #EDE9FE, #C4B5FD)" data-lightbox-caption="수료식 단체 사진">
+            <div class="img-placeholder img-placeholder--purple" style="height:280px;display:flex;align-items:center;justify-content:center;">
+              <div style="text-align:center;opacity:0.5;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <br><span style="font-size:var(--text-xs);">수료식</span>
+              </div>
+            </div>
+            <div class="masonry-overlay"><span class="masonry-caption">2025 겨울학기 수료식</span></div>
+          </div>
+
+          <div class="masonry-item" data-filter-category="facility" data-lightbox data-lightbox-color="linear-gradient(135deg, #FCE7F3, #F9A8D4)" data-lightbox-caption="학생 휴게 공간">
+            <div class="img-placeholder img-placeholder--pink" style="height:200px;display:flex;align-items:center;justify-content:center;">
+              <div style="text-align:center;opacity:0.5;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>
+                <br><span style="font-size:var(--text-xs);">휴게 공간</span>
+              </div>
+            </div>
+            <div class="masonry-overlay"><span class="masonry-caption">아늑한 학생 휴게 공간</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== VIDEO SECTION ===== -->
+    <section class="section section--blue" id="videos">
+      <div class="container">
+        <div class="section-header fade-in">
+          <span class="section-label">Videos</span>
+          <h2>영상 갤러리</h2>
+          <p>수업 현장과 학원 소개 영상을 확인하세요.</p>
+        </div>
+
+        <div class="video-grid" data-stagger>
+          <div class="video-card stagger-child">
+            <div class="video-thumb" data-lightbox data-lightbox-color="linear-gradient(135deg, #1E293B, #0F172A)" data-lightbox-caption="브라이트 영어학원 소개 영상">
+              <div class="img-placeholder img-placeholder--blue" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                <span style="opacity:0.4;">Video Thumbnail</span>
+              </div>
+              <div class="video-play-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              </div>
+            </div>
+            <div class="video-info">
+              <h4>브라이트 영어학원 소개</h4>
+              <p>3:45 | 학원 시설과 프로그램을 한눈에 확인하세요</p>
+            </div>
+          </div>
+
+          <div class="video-card stagger-child">
+            <div class="video-thumb" data-lightbox data-lightbox-color="linear-gradient(135deg, #1E293B, #0F172A)" data-lightbox-caption="원어민 회화 수업 하이라이트">
+              <div class="img-placeholder img-placeholder--green" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                <span style="opacity:0.4;">Video Thumbnail</span>
+              </div>
+              <div class="video-play-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              </div>
+            </div>
+            <div class="video-info">
+              <h4>원어민 회화 수업 하이라이트</h4>
+              <p>2:30 | 소규모 원어민 수업의 생생한 현장</p>
+            </div>
+          </div>
+
+          <div class="video-card stagger-child">
+            <div class="video-thumb" data-lightbox data-lightbox-color="linear-gradient(135deg, #1E293B, #0F172A)" data-lightbox-caption="학부모 인터뷰">
+              <div class="img-placeholder img-placeholder--amber" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                <span style="opacity:0.4;">Video Thumbnail</span>
+              </div>
+              <div class="video-play-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              </div>
+            </div>
+            <div class="video-info">
+              <h4>학부모 인터뷰 - 만족도 98%의 비결</h4>
+              <p>4:12 | 실제 학부모님들의 생생한 이야기</p>
+            </div>
+          </div>
+
+          <div class="video-card stagger-child">
+            <div class="video-thumb" data-lightbox data-lightbox-color="linear-gradient(135deg, #1E293B, #0F172A)" data-lightbox-caption="수능 1등급 합격 수기">
+              <div class="img-placeholder img-placeholder--coral" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                <span style="opacity:0.4;">Video Thumbnail</span>
+              </div>
+              <div class="video-play-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              </div>
+            </div>
+            <div class="video-info">
+              <h4>수능 영어 1등급 합격 수기</h4>
+              <p>5:20 | 브라이트 졸업생들의 성공 스토리</p>
+            </div>
+          </div>
+
+          <div class="video-card stagger-child">
+            <div class="video-thumb" data-lightbox data-lightbox-color="linear-gradient(135deg, #1E293B, #0F172A)" data-lightbox-caption="크리스마스 파티 현장">
+              <div class="img-placeholder img-placeholder--purple" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                <span style="opacity:0.4;">Video Thumbnail</span>
+              </div>
+              <div class="video-play-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              </div>
+            </div>
+            <div class="video-info">
+              <h4>2025 크리스마스 파티 하이라이트</h4>
+              <p>3:00 | 학생들과 함께한 즐거운 파티 현장</p>
+            </div>
+          </div>
+
+          <div class="video-card stagger-child">
+            <div class="video-thumb" data-lightbox data-lightbox-color="linear-gradient(135deg, #1E293B, #0F172A)" data-lightbox-caption="영어 말하기 대회">
+              <div class="img-placeholder img-placeholder--pink" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                <span style="opacity:0.4;">Video Thumbnail</span>
+              </div>
+              <div class="video-play-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              </div>
+            </div>
+            <div class="video-info">
+              <h4>제5회 영어 말하기 대회</h4>
+              <p>6:15 | 학생들의 영어 실력 발표 무대</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FACILITIES SECTION ===== -->
+    <section class="section section--cream" id="facilities">
+      <div class="container">
+        <div class="section-header fade-in">
+          <span class="section-label">Facilities</span>
+          <h2>학원 시설 안내</h2>
+          <p>최적의 학습 환경을 위해 최신 시설을 갖추고 있습니다.</p>
+        </div>
+
+        <div class="facilities-grid" data-stagger>
+          <div class="facility-card stagger-child">
+            <div class="facility-image">
+              <div class="img-placeholder img-placeholder--blue" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                <div style="text-align:center;opacity:0.4;">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                  <br><span style="font-size:var(--text-xs);">Smart Classroom</span>
+                </div>
+              </div>
+            </div>
+            <div class="facility-info">
+              <h4>스마트 교실 (8실)</h4>
+              <p>75인치 대형 터치 디스플레이, 고품질 음향 시스템, 개별 태블릿 PC가 구비된 최신 멀티미디어 교실입니다. 인터랙티브한 수업이 가능합니다.</p>
+            </div>
+          </div>
+
+          <div class="facility-card stagger-child">
+            <div class="facility-image">
+              <div class="img-placeholder img-placeholder--green" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                <div style="text-align:center;opacity:0.4;">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                  <br><span style="font-size:var(--text-xs);">Study Room</span>
+                </div>
+              </div>
+            </div>
+            <div class="facility-info">
+              <h4>자습실 (24시간 개방)</h4>
+              <p>개인 부스형 좌석 40석을 갖춘 쾌적한 자습실입니다. 냉난방 완비, 무료 Wi-Fi, 충전 시설이 제공되어 집중 학습에 최적화되어 있습니다.</p>
+            </div>
+          </div>
+
+          <div class="facility-card stagger-child">
+            <div class="facility-image">
+              <div class="img-placeholder img-placeholder--amber" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                <div style="text-align:center;opacity:0.4;">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                  <br><span style="font-size:var(--text-xs);">Counseling Room</span>
+                </div>
+              </div>
+            </div>
+            <div class="facility-info">
+              <h4>상담실 (2실)</h4>
+              <p>프라이버시가 보장되는 독립 상담실에서 1:1 학습 상담, 학부모 상담, 진로 상담 등을 진행합니다. 편안한 분위기에서 심도 있는 대화가 가능합니다.</p>
+            </div>
+          </div>
+
+          <div class="facility-card stagger-child">
+            <div class="facility-image">
+              <div class="img-placeholder img-placeholder--coral" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                <div style="text-align:center;opacity:0.4;">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path></svg>
+                  <br><span style="font-size:var(--text-xs);">Lounge</span>
+                </div>
+              </div>
+            </div>
+            <div class="facility-info">
+              <h4>학생 라운지</h4>
+              <p>수업 전후 편하게 쉴 수 있는 학생 휴게 공간입니다. 무료 음료, 간식 자판기, 편안한 소파가 구비되어 있어 학생들이 릴렉스할 수 있습니다.</p>
+            </div>
+          </div>
+
+          <div class="facility-card stagger-child">
+            <div class="facility-image">
+              <div class="img-placeholder img-placeholder--purple" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                <div style="text-align:center;opacity:0.4;">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                  <br><span style="font-size:var(--text-xs);">Library</span>
+                </div>
+              </div>
+            </div>
+            <div class="facility-info">
+              <h4>영어 도서관</h4>
+              <p>3,000권 이상의 영어 원서를 보유한 미니 도서관입니다. 레벨별로 분류된 원서를 자유롭게 대출하여 다독을 통한 영어 실력 향상에 활용할 수 있습니다.</p>
+            </div>
+          </div>
+
+          <div class="facility-card stagger-child">
+            <div class="facility-image">
+              <div class="img-placeholder img-placeholder--pink" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                <div style="text-align:center;opacity:0.4;">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path></svg>
+                  <br><span style="font-size:var(--text-xs);">Recording Studio</span>
+                </div>
+              </div>
+            </div>
+            <div class="facility-info">
+              <h4>녹음/녹화 스튜디오</h4>
+              <p>발음 교정과 스피킹 테스트를 위한 전용 녹음 스튜디오입니다. 학생들이 자신의 발음을 녹음하여 비교 분석하고 개선할 수 있습니다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== STUDENT ACTIVITIES ===== -->
+    <section class="section section--pink" id="activities">
+      <div class="container">
+        <div class="section-header fade-in">
+          <span class="section-label">Activities</span>
+          <h2>학생 활동</h2>
+          <p>브라이트 영어학원에서는 수업 외에도 다양한 활동을 통해 영어에 대한 흥미와 자신감을 키웁니다.</p>
+        </div>
+
+        <div class="magazine-grid" data-stagger>
+          <div class="col-span-6 stagger-child">
+            <div class="card">
+              <div class="card-image">
+                <div class="img-placeholder img-placeholder--blue" style="display:flex;align-items:center;justify-content:center;font-size:var(--text-base);">
+                  <div style="text-align:center;opacity:0.5;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                    <br>English Speech Contest
+                  </div>
+                </div>
+              </div>
+              <div class="card-body">
+                <span class="card-tag">연례 행사</span>
+                <h3 class="card-title">영어 말하기 대회</h3>
+                <p class="card-desc">매년 개최되는 영어 말하기 대회입니다. 초등부, 중등부, 고등부, 성인부로 나뉘어 진행되며, 학생들이 그동안 갈고닦은 영어 실력을 선보이는 무대입니다. 우수 참가자에게는 장학금과 상장이 수여됩니다. 학부모님도 참관하실 수 있습니다.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-span-6 stagger-child">
+            <div class="card">
+              <div class="card-image">
+                <div class="img-placeholder img-placeholder--amber" style="display:flex;align-items:center;justify-content:center;font-size:var(--text-base);">
+                  <div style="text-align:center;opacity:0.5;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <br>Special Events
+                  </div>
+                </div>
+              </div>
+              <div class="card-body">
+                <span class="card-tag" style="background: #FEF3C7; color: var(--color-secondary-dark);">시즌 이벤트</span>
+                <h3 class="card-title">크리스마스 & 할로윈 파티</h3>
+                <p class="card-desc">할로윈, 크리스마스, 발렌타인데이 등 서양 문화를 직접 체험하는 특별 이벤트를 진행합니다. 코스튬 파티, 게임, 영어 노래, 간식 만들기 등 즐거운 활동을 통해 영미 문화를 자연스럽게 이해하고 영어로 소통하는 경험을 합니다.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-span-4 stagger-child">
+            <div class="card">
+              <div class="card-body">
+                <span class="card-tag" style="background: #D1FAE5; color: var(--color-success-dark);">정기 활동</span>
+                <h3 class="card-title" style="font-size: var(--text-lg);">영어 독서 클럽</h3>
+                <p class="card-desc">월 1회 영어 원서 독서 모임을 운영합니다. 레벨에 맞는 원서를 함께 읽고 토론하며 독해력과 사고력을 동시에 키웁니다.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-span-4 stagger-child">
+            <div class="card">
+              <div class="card-body">
+                <span class="card-tag" style="background: #FFEDD5; color: var(--color-coral-dark);">워크숍</span>
+                <h3 class="card-title" style="font-size: var(--text-lg);">영어 영화 감상회</h3>
+                <p class="card-desc">원어 자막으로 영화를 감상하고, 영화 속 표현을 학습하는 프로그램입니다. 월 2회 진행되며 재미와 학습을 동시에 잡습니다.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-span-4 stagger-child">
+            <div class="card">
+              <div class="card-body">
+                <span class="card-tag" style="background: #EDE9FE; color: var(--color-purple);">대외 활동</span>
+                <h3 class="card-title" style="font-size: var(--text-lg);">영어 봉사 활동</h3>
+                <p class="card-desc">지역 사회 외국인 주민을 위한 통역 봉사, 다문화 센터 영어 교육 봉사 등 영어를 활용한 사회 공헌 활동에 참여합니다.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional gallery items for more content -->
+        <div style="margin-top: var(--space-12);">
+          <div class="section-header fade-in">
+            <span class="section-label">Moments</span>
+            <h2>특별한 순간들</h2>
+            <p>브라이트에서 함께한 소중한 추억들입니다.</p>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-6);" data-stagger>
+            <div class="stagger-child" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-xl); overflow: hidden; transition: all var(--transition-base);">
+              <div class="img-placeholder img-placeholder--green" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                <div style="text-align: center; opacity: 0.4;">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                  <br><span style="font-size: var(--text-xs);">Group Photo</span>
+                </div>
+              </div>
+              <div style="padding: var(--space-4);">
+                <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-base); margin-bottom: var(--space-1);">2025 겨울방학 특강 수료식</h4>
+                <p style="font-size: var(--text-xs); color: var(--text-tertiary);">2026.01.15</p>
+              </div>
+            </div>
+
+            <div class="stagger-child" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-xl); overflow: hidden; transition: all var(--transition-base);">
+              <div class="img-placeholder img-placeholder--purple" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                <div style="text-align: center; opacity: 0.4;">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                  <br><span style="font-size: var(--text-xs);">Awards Ceremony</span>
+                </div>
+              </div>
+              <div style="padding: var(--space-4);">
+                <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-base); margin-bottom: var(--space-1);">영어 우수 학생 시상식</h4>
+                <p style="font-size: var(--text-xs); color: var(--text-tertiary);">2025.12.20</p>
+              </div>
+            </div>
+
+            <div class="stagger-child" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-xl); overflow: hidden; transition: all var(--transition-base);">
+              <div class="img-placeholder img-placeholder--coral" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                <div style="text-align: center; opacity: 0.4;">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                  <br><span style="font-size: var(--text-xs);">Halloween Party</span>
+                </div>
+              </div>
+              <div style="padding: var(--space-4);">
+                <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-base); margin-bottom: var(--space-1);">2025 할로윈 코스튬 파티</h4>
+                <p style="font-size: var(--text-xs); color: var(--text-tertiary);">2025.10.31</p>
+              </div>
+            </div>
+
+            <div class="stagger-child" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-xl); overflow: hidden; transition: all var(--transition-base);">
+              <div class="img-placeholder img-placeholder--blue" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                <div style="text-align: center; opacity: 0.4;">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                  <br><span style="font-size: var(--text-xs);">English Camp</span>
+                </div>
+              </div>
+              <div style="padding: var(--space-4);">
+                <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-base); margin-bottom: var(--space-1);">여름 영어 캠프 현장</h4>
+                <p style="font-size: var(--text-xs); color: var(--text-tertiary);">2025.08.10</p>
+              </div>
+            </div>
+
+            <div class="stagger-child" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-xl); overflow: hidden; transition: all var(--transition-base);">
+              <div class="img-placeholder img-placeholder--pink" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                <div style="text-align: center; opacity: 0.4;">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                  <br><span style="font-size: var(--text-xs);">Book Fair</span>
+                </div>
+              </div>
+              <div style="padding: var(--space-4);">
+                <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-base); margin-bottom: var(--space-1);">영어 원서 독서 페스티벌</h4>
+                <p style="font-size: var(--text-xs); color: var(--text-tertiary);">2025.09.15</p>
+              </div>
+            </div>
+
+            <div class="stagger-child" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-xl); overflow: hidden; transition: all var(--transition-base);">
+              <div class="img-placeholder img-placeholder--amber" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                <div style="text-align: center; opacity: 0.4;">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                  <br><span style="font-size: var(--text-xs);">Parents Day</span>
+                </div>
+              </div>
+              <div style="padding: var(--space-4);">
+                <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-base); margin-bottom: var(--space-1);">학부모 참관 수업의 날</h4>
+                <p style="font-size: var(--text-xs); color: var(--text-tertiary);">2025.11.08</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ANNUAL EVENTS TIMELINE ===== -->
+    <section class="section" style="background: var(--bg-blue);">
+      <div class="container">
+        <div class="section-header fade-in">
+          <span class="section-label">Annual Events</span>
+          <h2>연간 주요 행사 일정</h2>
+          <p>브라이트 영어학원은 매월 다채로운 행사와 프로그램을 운영하여 학생들에게 특별한 경험을 선사합니다.</p>
+        </div>
+
+        <div style="max-width: 800px; margin: 0 auto; position: relative; padding-left: 40px;">
+          <!-- Timeline vertical line -->
+          <div style="position: absolute; left: 15px; top: 0; bottom: 0; width: 2px; background: var(--color-primary); opacity: 0.3;"></div>
+
+          <!-- January -->
+          <div class="fade-in-left" style="position: relative; margin-bottom: var(--space-8); padding-left: var(--space-6);">
+            <div style="position: absolute; left: -33px; top: 4px; width: 16px; height: 16px; background: var(--color-primary); border-radius: 50%; border: 3px solid var(--bg-blue);"></div>
+            <div style="background: var(--bg-surface); border-radius: var(--radius-xl); padding: var(--space-6); border: 1px solid var(--border-color);">
+              <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3);">
+                <span style="background: var(--color-primary); color: white; padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 600;">1월</span>
+                <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-base); margin: 0;">겨울방학 집중 캠프 시작</h4>
+              </div>
+              <p style="font-size: var(--text-sm); color: var(--text-secondary); margin: 0;">4주간의 겨울방학 집중 영어 캠프가 시작됩니다. 원어민 선생님과 함께하는 몰입형 영어 수업, 영어 뮤지컬 워크숍, 영어 요리 교실 등 다양한 체험 활동이 준비되어 있습니다. 방학 동안 한 단계 성장할 수 있는 기회입니다.</p>
+            </div>
+          </div>
+
+          <!-- March -->
+          <div class="fade-in-right" style="position: relative; margin-bottom: var(--space-8); padding-left: var(--space-6);">
+            <div style="position: absolute; left: -33px; top: 4px; width: 16px; height: 16px; background: #10B981; border-radius: 50%; border: 3px solid var(--bg-blue);"></div>
+            <div style="background: var(--bg-surface); border-radius: var(--radius-xl); padding: var(--space-6); border: 1px solid var(--border-color);">
+              <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3);">
+                <span style="background: #10B981; color: white; padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 600;">3월</span>
+                <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-base); margin: 0;">신학기 개강 & 레벨 테스트</h4>
+              </div>
+              <p style="font-size: var(--text-sm); color: var(--text-secondary); margin: 0;">새 학기를 맞이하여 전 학생 대상 무료 레벨 테스트를 진행합니다. 정확한 실력 진단을 기반으로 최적의 반 배정이 이루어지며, 신규 등록 학생을 위한 오리엔테이션과 학부모 설명회도 함께 진행됩니다.</p>
+            </div>
+          </div>
+
+          <!-- May -->
+          <div class="fade-in-left" style="position: relative; margin-bottom: var(--space-8); padding-left: var(--space-6);">
+            <div style="position: absolute; left: -33px; top: 4px; width: 16px; height: 16px; background: #F59E0B; border-radius: 50%; border: 3px solid var(--bg-blue);"></div>
+            <div style="background: var(--bg-surface); border-radius: var(--radius-xl); padding: var(--space-6); border: 1px solid var(--border-color);">
+              <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3);">
+                <span style="background: #F59E0B; color: white; padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 600;">5월</span>
+                <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-base); margin: 0;">영어 스피치 대회</h4>
+              </div>
+              <p style="font-size: var(--text-sm); color: var(--text-secondary); margin: 0;">학생들의 영어 발표 능력을 키우기 위한 연례 스피치 대회입니다. 초등부, 중등부, 고등부로 나뉘어 진행되며, 원어민 심사위원단의 공정한 심사를 통해 시상합니다. 수상 학생에게는 장학금과 영어 도서 세트가 수여됩니다.</p>
+            </div>
+          </div>
+
+          <!-- July -->
+          <div class="fade-in-right" style="position: relative; margin-bottom: var(--space-8); padding-left: var(--space-6);">
+            <div style="position: absolute; left: -33px; top: 4px; width: 16px; height: 16px; background: #EC4899; border-radius: 50%; border: 3px solid var(--bg-blue);"></div>
+            <div style="background: var(--bg-surface); border-radius: var(--radius-xl); padding: var(--space-6); border: 1px solid var(--border-color);">
+              <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3);">
+                <span style="background: #EC4899; color: white; padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 600;">7월</span>
+                <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-base); margin: 0;">여름 영어 캠프 & 해외 연수</h4>
+              </div>
+              <p style="font-size: var(--text-sm); color: var(--text-secondary); margin: 0;">4주간의 여름 영어 캠프와 함께, 선발된 우수 학생 대상 2주간 해외 연수 프로그램을 운영합니다. 미국 LA, 영국 런던, 호주 시드니 중 선택 가능하며, 현지 어학원에서의 수업과 문화 체험이 포함됩니다.</p>
+            </div>
+          </div>
+
+          <!-- September -->
+          <div class="fade-in-left" style="position: relative; margin-bottom: var(--space-8); padding-left: var(--space-6);">
+            <div style="position: absolute; left: -33px; top: 4px; width: 16px; height: 16px; background: #8B5CF6; border-radius: 50%; border: 3px solid var(--bg-blue);"></div>
+            <div style="background: var(--bg-surface); border-radius: var(--radius-xl); padding: var(--space-6); border: 1px solid var(--border-color);">
+              <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3);">
+                <span style="background: #8B5CF6; color: white; padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 600;">9월</span>
+                <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-base); margin: 0;">영어 원서 독서 축제</h4>
+              </div>
+              <p style="font-size: var(--text-sm); color: var(--text-secondary); margin: 0;">영어 원서 읽기 문화 확산을 위한 독서 축제를 개최합니다. 영어 원서 전시 및 할인 판매, 북 토크 세션, 독후감 쓰기 대회, 작가 초청 강연 등 다양한 프로그램이 준비됩니다. 학생들의 독서 습관 형성에 큰 도움이 됩니다.</p>
+            </div>
+          </div>
+
+          <!-- October -->
+          <div class="fade-in-right" style="position: relative; margin-bottom: var(--space-8); padding-left: var(--space-6);">
+            <div style="position: absolute; left: -33px; top: 4px; width: 16px; height: 16px; background: #EF4444; border-radius: 50%; border: 3px solid var(--bg-blue);"></div>
+            <div style="background: var(--bg-surface); border-radius: var(--radius-xl); padding: var(--space-6); border: 1px solid var(--border-color);">
+              <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3);">
+                <span style="background: #EF4444; color: white; padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 600;">10월</span>
+                <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-base); margin: 0;">할로윈 코스튬 파티</h4>
+              </div>
+              <p style="font-size: var(--text-sm); color: var(--text-secondary); margin: 0;">브라이트의 가장 인기 있는 연례 행사! 학생과 선생님 모두가 코스튬을 입고 참여하는 할로윈 파티입니다. 트릭 오어 트릿, 잭오랜턴 만들기, 할로윈 관련 영어 게임, 코스튬 콘테스트 등 신나는 이벤트가 가득합니다.</p>
+            </div>
+          </div>
+
+          <!-- November -->
+          <div class="fade-in-left" style="position: relative; margin-bottom: var(--space-8); padding-left: var(--space-6);">
+            <div style="position: absolute; left: -33px; top: 4px; width: 16px; height: 16px; background: #06B6D4; border-radius: 50%; border: 3px solid var(--bg-blue);"></div>
+            <div style="background: var(--bg-surface); border-radius: var(--radius-xl); padding: var(--space-6); border: 1px solid var(--border-color);">
+              <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3);">
+                <span style="background: #06B6D4; color: white; padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 600;">11월</span>
+                <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-base); margin: 0;">학부모 참관 수업 & 성과 발표회</h4>
+              </div>
+              <p style="font-size: var(--text-sm); color: var(--text-secondary); margin: 0;">학부모님을 초대하여 실제 수업을 참관하고, 한 해 동안의 학습 성과를 확인하는 자리입니다. 학생들이 직접 영어로 프레젠테이션, 역할극, 토론을 시연하며, 이후 개별 학습 상담이 진행됩니다. 만족도 조사 결과 학부모 98%가 "매우 만족"으로 응답합니다.</p>
+            </div>
+          </div>
+
+          <!-- December -->
+          <div class="fade-in-right" style="position: relative; padding-left: var(--space-6);">
+            <div style="position: absolute; left: -33px; top: 4px; width: 16px; height: 16px; background: #14B8A6; border-radius: 50%; border: 3px solid var(--bg-blue);"></div>
+            <div style="background: var(--bg-surface); border-radius: var(--radius-xl); padding: var(--space-6); border: 1px solid var(--border-color);">
+              <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3);">
+                <span style="background: #14B8A6; color: white; padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 600;">12월</span>
+                <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-base); margin: 0;">크리스마스 이벤트 & 연말 시상식</h4>
+              </div>
+              <p style="font-size: var(--text-sm); color: var(--text-secondary); margin: 0;">크리스마스 장식, 영어 캐럴 합창, 선물 교환 이벤트와 함께 한 해를 마무리합니다. 연간 출석왕, 성적 향상왕, 봉사왕 등 다양한 부문의 시상식이 진행되며, 우수 학생에게는 다음 학기 장학금이 수여됩니다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== BEHIND THE SCENES ===== -->
+    <section class="section" style="background: var(--bg-body);">
+      <div class="container">
+        <div class="section-header fade-in">
+          <span class="section-label">Behind the Scenes</span>
+          <h2>수업 준비의 모든 과정</h2>
+          <p>브라이트 영어학원의 수업은 치밀한 준비와 끊임없는 연구를 통해 완성됩니다.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6);" data-stagger>
+          <!-- Card 1 -->
+          <div class="stagger-child" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-xl); overflow: hidden;">
+            <div class="img-placeholder img-placeholder--blue" style="height: 220px; display: flex; align-items: center; justify-content: center;">
+              <div style="text-align: center; opacity: 0.4;">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                </svg>
+                <br><span style="font-size: var(--text-xs);">Curriculum Design</span>
+              </div>
+            </div>
+            <div style="padding: var(--space-6);">
+              <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-lg); margin-bottom: var(--space-3);">커리큘럼 설계</h4>
+              <p style="font-size: var(--text-sm); color: var(--text-secondary); line-height: 1.7;">교육 전문가 팀이 최신 영어 교육 트렌드와 학생들의 니즈를 분석하여 매 학기 커리큘럼을 업데이트합니다. EBS, Cambridge, Oxford 교재를 기반으로 자체 개발한 보충 자료와 워크시트를 활용하여 체계적인 학습이 이루어집니다.</p>
+              <ul style="margin-top: var(--space-3); list-style: none; padding: 0; font-size: var(--text-sm); color: var(--text-secondary);">
+                <li style="padding: var(--space-1) 0; display: flex; align-items: center; gap: var(--space-2);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  학기별 커리큘럼 리뉴얼
+                </li>
+                <li style="padding: var(--space-1) 0; display: flex; align-items: center; gap: var(--space-2);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  자체 개발 워크시트 200종+
+                </li>
+                <li style="padding: var(--space-1) 0; display: flex; align-items: center; gap: var(--space-2);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  레벨별 맞춤 학습 자료
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="stagger-child" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-xl); overflow: hidden;">
+            <div class="img-placeholder img-placeholder--green" style="height: 220px; display: flex; align-items: center; justify-content: center;">
+              <div style="text-align: center; opacity: 0.4;">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <br><span style="font-size: var(--text-xs);">Teacher Training</span>
+              </div>
+            </div>
+            <div style="padding: var(--space-6);">
+              <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-lg); margin-bottom: var(--space-3);">교사 연수 & 워크숍</h4>
+              <p style="font-size: var(--text-sm); color: var(--text-secondary); line-height: 1.7;">매월 정기적인 교사 연수와 워크숍을 통해 강사진의 전문성을 지속적으로 향상시킵니다. 외부 전문가 초청 강연, 교수법 세미나, 수업 피드백 세션 등을 통해 최고의 수업 품질을 유지합니다.</p>
+              <ul style="margin-top: var(--space-3); list-style: none; padding: 0; font-size: var(--text-sm); color: var(--text-secondary);">
+                <li style="padding: var(--space-1) 0; display: flex; align-items: center; gap: var(--space-2);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  월 1회 정기 교사 연수
+                </li>
+                <li style="padding: var(--space-1) 0; display: flex; align-items: center; gap: var(--space-2);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  분기별 외부 전문가 초청
+                </li>
+                <li style="padding: var(--space-1) 0; display: flex; align-items: center; gap: var(--space-2);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  수업 녹화 & 상호 피드백
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="stagger-child" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-xl); overflow: hidden;">
+            <div class="img-placeholder img-placeholder--amber" style="height: 220px; display: flex; align-items: center; justify-content: center;">
+              <div style="text-align: center; opacity: 0.4;">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                  <line x1="8" y1="21" x2="16" y2="21"></line>
+                  <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+                <br><span style="font-size: var(--text-xs);">Digital Tools</span>
+              </div>
+            </div>
+            <div style="padding: var(--space-6);">
+              <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-lg); margin-bottom: var(--space-3);">디지털 학습 환경</h4>
+              <p style="font-size: var(--text-sm); color: var(--text-secondary); line-height: 1.7;">최신 에듀테크를 활용한 스마트 학습 환경을 구축하고 있습니다. 전자칠판, 태블릿 기반 학습 앱, AI 발음 교정 시스템, 온라인 학습 관리 플랫폼(LMS) 등을 통해 효과적인 학습을 지원합니다.</p>
+              <ul style="margin-top: var(--space-3); list-style: none; padding: 0; font-size: var(--text-sm); color: var(--text-secondary);">
+                <li style="padding: var(--space-1) 0; display: flex; align-items: center; gap: var(--space-2);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  전 교실 전자칠판 설치
+                </li>
+                <li style="padding: var(--space-1) 0; display: flex; align-items: center; gap: var(--space-2);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  AI 발음 교정 시스템
+                </li>
+                <li style="padding: var(--space-1) 0; display: flex; align-items: center; gap: var(--space-2);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  온라인 LMS 운영
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== STUDENT ACHIEVEMENTS SHOWCASE ===== -->
+    <section class="section" style="background: var(--bg-surface);">
+      <div class="container">
+        <div class="section-header fade-in">
+          <span class="section-label">Achievements</span>
+          <h2>자랑스러운 학생들의 성과</h2>
+          <p>브라이트 영어학원 학생들이 이루어낸 빛나는 성과를 소개합니다.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-6);" data-stagger>
+          <!-- Achievement 1 -->
+          <div class="stagger-child" style="background: var(--bg-body); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: var(--space-8); display: flex; gap: var(--space-6); align-items: flex-start;">
+            <div style="flex-shrink: 0; width: 80px; height: 80px; background: linear-gradient(135deg, #FFD700, #FFA500); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center;">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <circle cx="12" cy="8" r="7"></circle>
+                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+              </svg>
+            </div>
+            <div>
+              <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-lg); margin-bottom: var(--space-2);">2025 전국 영어 말하기 대회 대상</h4>
+              <p style="font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: var(--space-3); line-height: 1.7;">중등부 김민지 학생이 전국 500여 명의 참가자 중 당당히 대상을 수상했습니다. 'Climate Change and Youth Action'이라는 주제로 3분간의 열정적인 스피치를 선보여 심사위원 만장일치로 선정되었습니다.</p>
+              <span style="font-size: var(--text-xs); color: var(--color-primary); font-weight: 600;">김민지 (중등 3학년) | 2025.06</span>
+            </div>
+          </div>
+
+          <!-- Achievement 2 -->
+          <div class="stagger-child" style="background: var(--bg-body); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: var(--space-8); display: flex; gap: var(--space-6); align-items: flex-start;">
+            <div style="flex-shrink: 0; width: 80px; height: 80px; background: linear-gradient(135deg, #C0C0C0, #808080); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center;">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                <line x1="4" y1="22" x2="4" y2="15"></line>
+              </svg>
+            </div>
+            <div>
+              <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-lg); margin-bottom: var(--space-2);">TOEFL iBT 만점 (120점) 달성</h4>
+              <p style="font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: var(--space-3); line-height: 1.7;">고등부 Premium 과정 수강생 박서현 학생이 TOEFL iBT에서 만점인 120점을 달성했습니다. 특히 Speaking과 Writing 영역에서의 체계적인 학원 수업이 큰 도움이 되었다고 소감을 전했습니다.</p>
+              <span style="font-size: var(--text-xs); color: var(--color-primary); font-weight: 600;">박서현 (고등 2학년) | 2025.09</span>
+            </div>
+          </div>
+
+          <!-- Achievement 3 -->
+          <div class="stagger-child" style="background: var(--bg-body); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: var(--space-8); display: flex; gap: var(--space-6); align-items: flex-start;">
+            <div style="flex-shrink: 0; width: 80px; height: 80px; background: linear-gradient(135deg, #2563EB, #1E40AF); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center;">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
+            <div>
+              <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-lg); margin-bottom: var(--space-2);">내신 영어 전교 1등 3연속 달성</h4>
+              <p style="font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: var(--space-3); line-height: 1.7;">고등부 Standard 과정 수강생 이준혁 학생이 3학기 연속 학교 내신 영어 1등급(전교 1등)을 달성했습니다. 내신 문법 특강과 서술형 대비 수업의 효과를 체감하고 있다며 후배들에게도 추천한다고 합니다.</p>
+              <span style="font-size: var(--text-xs); color: var(--color-primary); font-weight: 600;">이준혁 (고등 1학년) | 2025.12</span>
+            </div>
+          </div>
+
+          <!-- Achievement 4 -->
+          <div class="stagger-child" style="background: var(--bg-body); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: var(--space-8); display: flex; gap: var(--space-6); align-items: flex-start;">
+            <div style="flex-shrink: 0; width: 80px; height: 80px; background: linear-gradient(135deg, #10B981, #059669); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center;">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M2 12h20"></path>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+            </div>
+            <div>
+              <h4 style="font-family: var(--font-body); font-weight: 700; font-size: var(--text-lg); margin-bottom: var(--space-2);">해외 명문대 합격 (MIT, NYU)</h4>
+              <p style="font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: var(--space-3); line-height: 1.7;">성인반 유학 준비 과정을 수강한 정다은 학생이 MIT 컴퓨터공학과, 최윤서 학생이 NYU 경영학과에 합격했습니다. 에세이 첨삭, 인터뷰 준비, SAT/ACT 대비 등 브라이트의 종합적인 유학 준비 지원이 합격의 열쇠였습니다.</p>
+              <span style="font-size: var(--text-xs); color: var(--color-primary); font-weight: 600;">정다은, 최윤서 | 2025.03</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats row -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-6); margin-top: var(--space-12); padding: var(--space-8); background: linear-gradient(135deg, var(--color-primary), #1E40AF); border-radius: var(--radius-2xl);" data-stagger>
+          <div class="stagger-child" style="text-align: center;">
+            <div style="font-family: var(--font-heading); font-size: var(--text-4xl); font-weight: 800; color: white;" data-counter="47">0</div>
+            <div style="font-size: var(--text-sm); color: rgba(255,255,255,0.7); margin-top: var(--space-1);">전국대회 수상</div>
+          </div>
+          <div class="stagger-child" style="text-align: center;">
+            <div style="font-family: var(--font-heading); font-size: var(--text-4xl); font-weight: 800; color: white;" data-counter="95">0</div>
+            <div style="font-size: var(--text-sm); color: rgba(255,255,255,0.7); margin-top: var(--space-1);">1등급 비율 (%)</div>
+          </div>
+          <div class="stagger-child" style="text-align: center;">
+            <div style="font-family: var(--font-heading); font-size: var(--text-4xl); font-weight: 800; color: white;" data-counter="23">0</div>
+            <div style="font-size: var(--text-sm); color: rgba(255,255,255,0.7); margin-top: var(--space-1);">해외 명문대 합격</div>
+          </div>
+          <div class="stagger-child" style="text-align: center;">
+            <div style="font-family: var(--font-heading); font-size: var(--text-4xl); font-weight: 800; color: white;" data-counter="850">0</div>
+            <div style="font-size: var(--text-sm); color: rgba(255,255,255,0.7); margin-top: var(--space-1);">TOEIC 900+ 달성</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== GALLERY FAQ ===== -->
+    <section class="section" style="background: var(--bg-blue);">
+      <div class="container">
+        <div class="section-header fade-in">
+          <span class="section-label">FAQ</span>
+          <h2>갤러리 관련 자주 묻는 질문</h2>
+          <p>사진/영상 사용 및 행사 참여에 관한 궁금한 점을 확인하세요.</p>
+        </div>
+
+        <div style="max-width: 800px; margin: 0 auto;">
+          <div class="accordion-group">
+            <div class="accordion-item fade-in">
+              <div class="accordion-header">
+                <span>갤러리 사진을 다운로드할 수 있나요?</span>
+                <svg class="accordion-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
+              <div class="accordion-body">
+                <div class="accordion-body-inner">
+                  <p>네, 재원생 학부모님께는 고화질 원본 사진 다운로드 서비스를 제공합니다. 카카오톡 채널로 요청하시면 Google Drive 링크를 통해 수업 사진, 행사 사진을 받으실 수 있습니다. 개인 SNS 게시 시에는 다른 학생의 초상권 보호를 위해 태그나 언급을 자제해 주시기 바랍니다.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item fade-in">
+              <div class="accordion-header">
+                <span>학원 행사에 학부모도 참여할 수 있나요?</span>
+                <svg class="accordion-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
+              <div class="accordion-body">
+                <div class="accordion-body-inner">
+                  <p>물론입니다! 할로윈 파티, 크리스마스 이벤트, 학부모 참관 수업, 성과 발표회 등 대부분의 행사에 학부모님의 참여를 환영합니다. 행사 2주 전에 카카오톡 채널을 통해 안내 및 참석 여부 확인 메시지를 보내드리니 확인해 주세요.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item fade-in">
+              <div class="accordion-header">
+                <span>촬영된 사진의 초상권은 어떻게 보호되나요?</span>
+                <svg class="accordion-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
+              <div class="accordion-body">
+                <div class="accordion-body-inner">
+                  <p>입학 시 촬영 동의서를 받고 있으며, 동의하지 않으신 학생의 사진은 촬영하지 않거나 모자이크 처리합니다. 웹사이트 및 SNS 게시 전 해당 학생의 학부모님께 별도 동의를 구하고 있으며, 삭제 요청 시 즉시 처리합니다. 모든 사진 자료는 개인정보보호법에 따라 안전하게 관리됩니다.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item fade-in">
+              <div class="accordion-header">
+                <span>영상 수업 녹화본은 어떻게 확인하나요?</span>
+                <svg class="accordion-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
+              <div class="accordion-body">
+                <div class="accordion-body-inner">
+                  <p>Standard 및 Premium 플랜 수강생에게는 온라인 학습 플랫폼(LMS)에서 수업 녹화 영상을 제공합니다. 결석 시 보충 학습이나 복습 용도로 활용하실 수 있으며, 수업 후 24시간 이내에 업로드됩니다. 녹화본은 해당 학기 종료 후 3개월간 보관됩니다.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item fade-in">
+              <div class="accordion-header">
+                <span>학원 시설을 직접 둘러볼 수 있나요?</span>
+                <svg class="accordion-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
+              <div class="accordion-body">
+                <div class="accordion-body-inner">
+                  <p>네, 방문 상담 시 학원 시설을 직접 둘러보실 수 있습니다. 평일 오전 10시~오후 1시 사이에 수업이 없는 시간대에 방문하시면 여유 있게 시설을 확인하실 수 있으며, 수업 중인 교실도 창문을 통해 살짝 참관하실 수 있습니다. 전화(02-123-4567) 또는 카카오톡으로 사전 예약해 주시면 감사하겠습니다.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item fade-in">
+              <div class="accordion-header">
+                <span>행사 영상을 유튜브에서 볼 수 있나요?</span>
+                <svg class="accordion-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
+              <div class="accordion-body">
+                <div class="accordion-body-inner">
+                  <p>주요 행사(스피치 대회, 할로윈 파티, 크리스마스 이벤트, 성과 발표회 등)의 하이라이트 영상은 브라이트 영어학원 공식 유튜브 채널(@bright-english)에 업로드됩니다. 구독과 알림 설정을 해두시면 새 영상이 업로드될 때마다 알림을 받으실 수 있습니다. 무료 영어 강의 콘텐츠도 매주 업로드하고 있으니 학습에 활용해 보세요.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== UPCOMING EVENT BANNER ===== -->
+    <section class="section" style="background: var(--bg-body); padding: var(--space-12) 0;">
+      <div class="container">
+        <div class="fade-in" style="background: linear-gradient(135deg, #FEF3C7, #FDE68A); border: 2px solid #F59E0B; border-radius: var(--radius-2xl); padding: var(--space-8); display: flex; align-items: center; gap: var(--space-8); flex-wrap: wrap;">
+          <div style="flex-shrink: 0; width: 100px; height: 100px; background: #F59E0B; border-radius: var(--radius-xl); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;">
+            <span style="font-size: var(--text-xs); font-weight: 600; text-transform: uppercase;">MAR</span>
+            <span style="font-family: var(--font-heading); font-size: var(--text-4xl); font-weight: 900; line-height: 1;">22</span>
+          </div>
+          <div style="flex: 1; min-width: 200px;">
+            <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2);">
+              <span style="background: #EF4444; color: white; padding: 2px 8px; border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 700;">D-8</span>
+              <span style="font-size: var(--text-xs); color: #92400E; font-weight: 600;">다가오는 행사</span>
+            </div>
+            <h3 style="font-family: var(--font-body); font-weight: 800; font-size: var(--text-xl); color: #78350F; margin-bottom: var(--space-2);">2026 봄학기 레벨 테스트 & 학부모 설명회</h3>
+            <p style="font-size: var(--text-sm); color: #92400E; line-height: 1.7;">새 학기를 앞두고 전 학생 대상 무료 레벨 테스트와 학부모 설명회를 진행합니다. 정확한 실력 진단으로 최적의 반 배정을 도와드리며, 2026년 커리큘럼 소개와 Q&A 시간이 마련됩니다.</p>
+            <div style="display: flex; align-items: center; gap: var(--space-4); margin-top: var(--space-3); font-size: var(--text-xs); color: #92400E;">
+              <span style="display: flex; align-items: center; gap: 4px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                오후 2:00 ~ 5:00
+              </span>
+              <span style="display: flex; align-items: center; gap: 4px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                브라이트 영어학원 본관 3층 대강당
+              </span>
+            </div>
+          </div>
+          <div style="flex-shrink: 0;">
+            <a href="contact.html" class="btn btn-primary btn-lg" style="background: #F59E0B; border-color: #F59E0B;">
+              <span>참석 신청하기</span>
             </a>
-            <nav class="nav" id="nav">
-                <ul class="nav-list">
-                    <li><a href="index.html" class="nav-link">Home</a></li>
-                    <li><a href="about.html" class="nav-link">About</a></li>
-                    <li><a href="programs.html" class="nav-link">Programs</a></li>
-                    <li><a href="gallery.html" class="nav-link active">Gallery</a></li>
-                    <li><a href="contact.html" class="nav-link">Contact</a></li>
-                </ul>
-            </nav>
-            <div class="header-actions">
-                <a href="contact.html" class="btn btn-primary btn-sm">레벨테스트 예약</a>
-                <button class="nav-toggle" id="navToggle" aria-label="메뉴">
-                    <span></span><span></span><span></span>
-                </button>
-            </div>
+          </div>
         </div>
-    </header>
-
-    <!-- ============================================================
-         Section 1: Page Hero
-         ============================================================ -->
-    <section class="page-hero">
-        <div class="page-hero-bg"></div>
-        <div class="page-hero-content">
-            <div class="hero-badge" data-animate="fade-up">
-                <span class="hero-badge-dot"></span>
-                GALLERY
-            </div>
-            <h1 class="hero-title" data-animate="fade-up" data-delay="100">
-                브라이트의 <span>생생한 현장</span>
-            </h1>
-            <p class="hero-desc" data-animate="fade-up" data-delay="200">
-                수업 현장, 학생들의 이야기, 다양한 이벤트를 사진과 영상으로 만나보세요.
-            </p>
-        </div>
+      </div>
     </section>
 
-    <!-- ============================================================
-         Section 2: Gallery Filter + Grid with Lightbox
-         ============================================================ -->
-    <section class="section" id="gallery">
-        <div class="container">
-            <!-- Section Header -->
-            <div class="section-header" data-animate="fade-up">
-                <span class="section-label">CLASS GALLERY</span>
-                <h2 class="section-title">수업 갤러리</h2>
-                <p class="section-subtitle">브라이트 영어학원의 활기찬 수업 현장을 만나보세요</p>
-            </div>
-
-            <!-- Gallery Filter Buttons -->
-            <div class="gallery-filter" data-animate="fade-up" data-delay="100">
-                <button class="gallery-filter-btn active" data-filter="all">전체</button>
-                <button class="gallery-filter-btn" data-filter="class">수업 현장</button>
-                <button class="gallery-filter-btn" data-filter="facility">시설</button>
-                <button class="gallery-filter-btn" data-filter="event">이벤트</button>
-                <button class="gallery-filter-btn" data-filter="graduation">수료식</button>
-            </div>
-
-            <!-- Gallery Grid -->
-            <div class="gallery-grid">
-                <!-- Item 1 -->
-                <div class="gallery-item"
-                     data-category="class"
-                     data-src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1200"
-                     data-caption="토익 집중반 수업"
-                     data-animate="zoom-in"
-                     data-delay="0">
-                    <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=600"
-                         alt="토익 집중반 수업"
-                         class="img-round"
-                         loading="lazy">
-                    <div class="gallery-item-caption">
-                        <h4>토익 집중반 수업</h4>
-                        <span>수업 현장</span>
-                    </div>
-                </div>
-
-                <!-- Item 2 -->
-                <div class="gallery-item"
-                     data-category="class"
-                     data-src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200"
-                     data-caption="영어회화 그룹 수업"
-                     data-animate="zoom-in"
-                     data-delay="50">
-                    <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600"
-                         alt="영어회화 그룹 수업"
-                         class="img-round"
-                         loading="lazy">
-                    <div class="gallery-item-caption">
-                        <h4>영어회화 그룹 수업</h4>
-                        <span>수업 현장</span>
-                    </div>
-                </div>
-
-                <!-- Item 3 -->
-                <div class="gallery-item"
-                     data-category="facility"
-                     data-src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200"
-                     data-caption="최신 시설의 강의실"
-                     data-animate="zoom-in"
-                     data-delay="100">
-                    <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=600"
-                         alt="최신 시설의 강의실"
-                         class="img-round"
-                         loading="lazy">
-                    <div class="gallery-item-caption">
-                        <h4>최신 시설의 강의실</h4>
-                        <span>시설</span>
-                    </div>
-                </div>
-
-                <!-- Item 4 -->
-                <div class="gallery-item"
-                     data-category="class"
-                     data-src="https://images.unsplash.com/photo-1543269865-cbf427effbad?w=1200"
-                     data-caption="소그룹 토론 수업"
-                     data-animate="zoom-in"
-                     data-delay="150">
-                    <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?w=600"
-                         alt="소그룹 토론 수업"
-                         class="img-round"
-                         loading="lazy">
-                    <div class="gallery-item-caption">
-                        <h4>소그룹 토론 수업</h4>
-                        <span>수업 현장</span>
-                    </div>
-                </div>
-
-                <!-- Item 5 -->
-                <div class="gallery-item"
-                     data-category="event"
-                     data-src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200"
-                     data-caption="비즈니스 영어 워크숍"
-                     data-animate="zoom-in"
-                     data-delay="200">
-                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600"
-                         alt="비즈니스 영어 워크숍"
-                         class="img-round"
-                         loading="lazy">
-                    <div class="gallery-item-caption">
-                        <h4>비즈니스 영어 워크숍</h4>
-                        <span>이벤트</span>
-                    </div>
-                </div>
-
-                <!-- Item 6 -->
-                <div class="gallery-item"
-                     data-category="class"
-                     data-src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200"
-                     data-caption="주니어 영어 수업"
-                     data-animate="zoom-in"
-                     data-delay="250">
-                    <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600"
-                         alt="주니어 영어 수업"
-                         class="img-round"
-                         loading="lazy">
-                    <div class="gallery-item-caption">
-                        <h4>주니어 영어 수업</h4>
-                        <span>수업 현장</span>
-                    </div>
-                </div>
-
-                <!-- Item 7 -->
-                <div class="gallery-item"
-                     data-category="facility"
-                     data-src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=1200"
-                     data-caption="자습실"
-                     data-animate="zoom-in"
-                     data-delay="300">
-                    <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=600"
-                         alt="자습실"
-                         class="img-round"
-                         loading="lazy">
-                    <div class="gallery-item-caption">
-                        <h4>자습실</h4>
-                        <span>시설</span>
-                    </div>
-                </div>
-
-                <!-- Item 8 -->
-                <div class="gallery-item"
-                     data-category="class"
-                     data-src="https://images.unsplash.com/photo-1529390079861-591de354faf5?w=1200"
-                     data-caption="원어민 1:1 수업"
-                     data-animate="zoom-in"
-                     data-delay="350">
-                    <img src="https://images.unsplash.com/photo-1529390079861-591de354faf5?w=600"
-                         alt="원어민 1:1 수업"
-                         class="img-round"
-                         loading="lazy">
-                    <div class="gallery-item-caption">
-                        <h4>원어민 1:1 수업</h4>
-                        <span>수업 현장</span>
-                    </div>
-                </div>
-
-                <!-- Item 9 -->
-                <div class="gallery-item"
-                     data-category="facility"
-                     data-src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200"
-                     data-caption="미디어 학습실"
-                     data-animate="zoom-in"
-                     data-delay="400">
-                    <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600"
-                         alt="미디어 학습실"
-                         class="img-round"
-                         loading="lazy">
-                    <div class="gallery-item-caption">
-                        <h4>미디어 학습실</h4>
-                        <span>시설</span>
-                    </div>
-                </div>
-
-                <!-- Item 10 -->
-                <div class="gallery-item"
-                     data-category="graduation"
-                     data-src="https://images.unsplash.com/photo-1523050854058-8df90110c476?w=1200"
-                     data-caption="2024 수료식"
-                     data-animate="zoom-in"
-                     data-delay="450">
-                    <img src="https://images.unsplash.com/photo-1523050854058-8df90110c476?w=600"
-                         alt="2024 수료식"
-                         class="img-round"
-                         loading="lazy">
-                    <div class="gallery-item-caption">
-                        <h4>2024 수료식</h4>
-                        <span>수료식</span>
-                    </div>
-                </div>
-
-                <!-- Item 11 -->
-                <div class="gallery-item"
-                     data-category="event"
-                     data-src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=1200"
-                     data-caption="영어 말하기 대회"
-                     data-animate="zoom-in"
-                     data-delay="500">
-                    <img src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=600"
-                         alt="영어 말하기 대회"
-                         class="img-round"
-                         loading="lazy">
-                    <div class="gallery-item-caption">
-                        <h4>영어 말하기 대회</h4>
-                        <span>이벤트</span>
-                    </div>
-                </div>
-
-                <!-- Item 12 -->
-                <div class="gallery-item"
-                     data-category="class"
-                     data-src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200"
-                     data-caption="그룹 프로젝트"
-                     data-animate="zoom-in"
-                     data-delay="550">
-                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600"
-                         alt="그룹 프로젝트"
-                         class="img-round"
-                         loading="lazy">
-                    <div class="gallery-item-caption">
-                        <h4>그룹 프로젝트</h4>
-                        <span>수업 현장</span>
-                    </div>
-                </div>
-
-                <!-- Item 13 -->
-                <div class="gallery-item"
-                     data-category="class"
-                     data-src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1200"
-                     data-caption="시험 준비반"
-                     data-animate="zoom-in"
-                     data-delay="600">
-                    <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600"
-                         alt="시험 준비반"
-                         class="img-round"
-                         loading="lazy">
-                    <div class="gallery-item-caption">
-                        <h4>시험 준비반</h4>
-                        <span>수업 현장</span>
-                    </div>
-                </div>
-
-                <!-- Item 14 -->
-                <div class="gallery-item"
-                     data-category="facility"
-                     data-src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200"
-                     data-caption="학생 라운지"
-                     data-animate="zoom-in"
-                     data-delay="650">
-                    <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600"
-                         alt="학생 라운지"
-                         class="img-round"
-                         loading="lazy">
-                    <div class="gallery-item-caption">
-                        <h4>학생 라운지</h4>
-                        <span>시설</span>
-                    </div>
-                </div>
-
-                <!-- Item 15 -->
-                <div class="gallery-item"
-                     data-category="event"
-                     data-src="https://images.unsplash.com/photo-1511629091441-ee46146481b6?w=1200"
-                     data-caption="크리스마스 파티"
-                     data-animate="zoom-in"
-                     data-delay="700">
-                    <img src="https://images.unsplash.com/photo-1511629091441-ee46146481b6?w=600"
-                         alt="크리스마스 파티"
-                         class="img-round"
-                         loading="lazy">
-                    <div class="gallery-item-caption">
-                        <h4>크리스마스 파티</h4>
-                        <span>이벤트</span>
-                    </div>
-                </div>
-
-                <!-- Item 16 -->
-                <div class="gallery-item"
-                     data-category="class"
-                     data-src="https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?w=1200"
-                     data-caption="모의시험"
-                     data-animate="zoom-in"
-                     data-delay="750">
-                    <img src="https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?w=600"
-                         alt="모의시험"
-                         class="img-round"
-                         loading="lazy">
-                    <div class="gallery-item-caption">
-                        <h4>모의시험</h4>
-                        <span>수업 현장</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Lightbox -->
-            <div class="lightbox" id="lightbox">
-                <button class="lightbox-close" id="lightboxClose">&times;</button>
-                <button class="lightbox-nav lightbox-prev" id="lightboxPrev">&#10094;</button>
-                <button class="lightbox-nav lightbox-next" id="lightboxNext">&#10095;</button>
-                <div class="lightbox-content">
-                    <img src="" alt="" id="lightboxImg">
-                    <div class="lightbox-caption" id="lightboxCaption"></div>
-                </div>
-            </div>
+    <!-- ===== CTA ===== -->
+    <section class="section" style="background: linear-gradient(135deg, var(--color-primary) 0%, #1E3A8A 100%); color: white; position:relative; overflow:hidden;">
+      <div style="position:absolute;top:-100px;right:-100px;width:400px;height:400px;background:rgba(255,255,255,0.05);border-radius:50%;"></div>
+      <div class="container" style="position:relative;z-index:1;">
+        <div class="text-center fade-in" style="max-width:700px;margin:0 auto;">
+          <h2 style="color:white;margin-bottom:var(--space-4);">직접 방문하여 확인하세요</h2>
+          <p style="color:rgba(255,255,255,0.8);font-size:var(--text-lg);margin-bottom:var(--space-8);">사진과 영상으로 다 담을 수 없는 브라이트의 매력, 직접 눈으로 확인해 보세요.</p>
+          <div style="display:flex;justify-content:center;gap:var(--space-4);flex-wrap:wrap;">
+            <a href="contact.html" class="btn btn-white btn-lg"><span>방문 상담 예약</span></a>
+            <a href="tel:02-123-4567" class="btn btn-lg" style="border-color:rgba(255,255,255,0.4);color:rgba(255,255,255,0.9);"><span>02-123-4567</span></a>
+          </div>
         </div>
+      </div>
     </section>
 
-    <!-- ============================================================
-         Section 3: Student Interviews
-         ============================================================ -->
-    <section class="section section-blue" id="interviews">
-        <div class="container">
-            <!-- Section Header -->
-            <div class="section-header" data-animate="fade-up">
-                <span class="section-label">INTERVIEWS</span>
-                <h2 class="section-title">학생 인터뷰</h2>
-                <p class="section-subtitle">브라이트 수강생들의 생생한 후기를 들어보세요</p>
-            </div>
+  </main>
 
-            <!-- Interview Cards Grid -->
-            <div class="grid-2">
-                <!-- Interview 1: 김지수 -->
-                <div class="interview-card" data-animate="fade-up" data-delay="0">
-                    <div class="interview-card-header">
-                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400"
-                             alt="김지수"
-                             class="interview-card-photo img-circle"
-                             loading="lazy">
-                        <div class="interview-card-info">
-                            <h4 class="interview-card-name">김지수</h4>
-                            <p class="interview-card-meta">직장인, 29세</p>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="interview-card-course">📚 TOEIC 집중반</span>
-                    </div>
-                    <div>
-                        <span class="interview-card-achievement">🏆 620 → 890 (270점 상승!)</span>
-                    </div>
-                    <div class="interview-card-stars">★★★★★</div>
-                    <blockquote class="interview-card-quote">
-                        "직장 다니면서 토익 공부하기 정말 힘들었는데, 브라이트의 저녁반 덕분에 꾸준히 다닐 수 있었어요. 특히 James 선생님의 파트별 전략이 정말 큰 도움이 됐습니다. 3개월 만에 270점이나 올랐다는 게 아직도 믿기지 않아요!"
-                    </blockquote>
-                    <a href="#" class="interview-card-link">더 보기</a>
-                </div>
-
-                <!-- Interview 2: 이하늘 -->
-                <div class="interview-card" data-animate="fade-up" data-delay="100">
-                    <div class="interview-card-header">
-                        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400"
-                             alt="이하늘"
-                             class="interview-card-photo img-circle"
-                             loading="lazy">
-                        <div class="interview-card-info">
-                            <h4 class="interview-card-name">이하늘</h4>
-                            <p class="interview-card-meta">대학생, 22세</p>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="interview-card-course">📚 TOEFL iBT 대비반</span>
-                    </div>
-                    <div>
-                        <span class="interview-card-achievement">🏆 TOEFL 95점 달성 (목표: 90점)</span>
-                    </div>
-                    <div class="interview-card-stars">★★★★★</div>
-                    <blockquote class="interview-card-quote">
-                        "유학 준비를 위해 토플 90점이 필요했는데, 목표를 넘어 95점을 받았습니다! Speaking과 Writing이 약했는데, 매일 연습하고 피드백 받으면서 자신감이 많이 생겼어요."
-                    </blockquote>
-                    <a href="#" class="interview-card-link">더 보기</a>
-                </div>
-
-                <!-- Interview 3: 박서연 -->
-                <div class="interview-card" data-animate="fade-up" data-delay="200">
-                    <div class="interview-card-header">
-                        <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400"
-                             alt="박서연"
-                             class="interview-card-photo img-circle"
-                             loading="lazy">
-                        <div class="interview-card-info">
-                            <h4 class="interview-card-name">박서연</h4>
-                            <p class="interview-card-meta">주부, 35세</p>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="interview-card-course">📚 영어회화 + 주니어반 (자녀와 함께)</span>
-                    </div>
-                    <div>
-                        <span class="interview-card-achievement">🏆 일상 영어 소통 가능</span>
-                    </div>
-                    <div class="interview-card-stars">★★★★★</div>
-                    <blockquote class="interview-card-quote">
-                        "아이와 함께 영어를 배우면서 가족 모두의 영어 실력이 좋아졌어요. 특히 David 선생님이 아이를 정말 잘 이끌어주셔서 아이가 영어를 좋아하게 되었답니다."
-                    </blockquote>
-                    <a href="#" class="interview-card-link">더 보기</a>
-                </div>
-
-                <!-- Interview 4: 최민준 -->
-                <div class="interview-card" data-animate="fade-up" data-delay="300">
-                    <div class="interview-card-header">
-                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400"
-                             alt="최민준"
-                             class="interview-card-photo img-circle"
-                             loading="lazy">
-                        <div class="interview-card-info">
-                            <h4 class="interview-card-name">최민준</h4>
-                            <p class="interview-card-meta">사업가, 42세</p>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="interview-card-course">📚 비즈니스 영어 VIP</span>
-                    </div>
-                    <div>
-                        <span class="interview-card-achievement">🏆 해외 거래처와 자유로운 소통</span>
-                    </div>
-                    <div class="interview-card-stars">★★★★★</div>
-                    <blockquote class="interview-card-quote">
-                        "해외 바이어와의 미팅에서 항상 통역에 의존했는데, Emily 선생님의 비즈니스 영어 수업 후 직접 협상할 수 있게 되었습니다. 특히 이메일 작성법과 프레젠테이션 스킬이 실무에 바로 적용할 수 있어 좋았어요."
-                    </blockquote>
-                    <a href="#" class="interview-card-link">더 보기</a>
-                </div>
-
-                <!-- Interview 5: 정유진 -->
-                <div class="interview-card" data-animate="fade-up" data-delay="400">
-                    <div class="interview-card-header">
-                        <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400"
-                             alt="정유진"
-                             class="interview-card-photo img-circle"
-                             loading="lazy">
-                        <div class="interview-card-info">
-                            <h4 class="interview-card-name">정유진</h4>
-                            <p class="interview-card-meta">고등학생, 18세</p>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="interview-card-course">📚 수능 영어 대비반</span>
-                    </div>
-                    <div>
-                        <span class="interview-card-achievement">🏆 수능 영어 1등급 (모의고사 4등급 → 수능 1등급)</span>
-                    </div>
-                    <div class="interview-card-stars">★★★★★</div>
-                    <blockquote class="interview-card-quote">
-                        "모의고사에서 계속 4등급이었는데, 브라이트에서 6개월 집중 수업 받고 수능에서 1등급을 받았어요! 문법과 독해 기초부터 다시 잡아주신 덕분이에요."
-                    </blockquote>
-                    <a href="#" class="interview-card-link">더 보기</a>
-                </div>
-
-                <!-- Interview 6: 한승우 -->
-                <div class="interview-card" data-animate="fade-up" data-delay="500">
-                    <div class="interview-card-header">
-                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400"
-                             alt="한승우"
-                             class="interview-card-photo img-circle"
-                             loading="lazy">
-                        <div class="interview-card-info">
-                            <h4 class="interview-card-name">한승우</h4>
-                            <p class="interview-card-meta">IT 개발자, 31세</p>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="interview-card-course">📚 원어민 1:1 회화</span>
-                    </div>
-                    <div>
-                        <span class="interview-card-achievement">🏆 영어 면접 통과, 외국계 기업 이직 성공</span>
-                    </div>
-                    <div class="interview-card-stars">★★★★★</div>
-                    <blockquote class="interview-card-quote">
-                        "개발 문서는 읽을 수 있었는데 말하기가 안 됐거든요. 원어민 1:1 수업으로 3개월 집중 훈련하니까 영어 인터뷰도 자신 있게 볼 수 있었어요. 외국계 기업 이직에 성공했습니다!"
-                    </blockquote>
-                    <a href="#" class="interview-card-link">더 보기</a>
-                </div>
-            </div>
+  <!-- ========== FOOTER ========== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo"><div class="footer-logo-icon">B</div><span class="footer-logo-text">브라이트 영어학원</span></div>
+          <p class="footer-desc">2010년부터 15년 전통의 영어 전문 교육 기관입니다. 체계적인 커리큘럼과 열정적인 강사진이 학생 한 명 한 명의 영어 실력 향상을 위해 최선을 다합니다.</p>
+          <div class="footer-social">
+            <a href="https://instagram.com/bright_english" target="_blank" rel="noopener" aria-label="인스타그램"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path></svg></a>
+            <a href="https://youtube.com/@bright-english" target="_blank" rel="noopener" aria-label="유튜브"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.08c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.41z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg></a>
+            <a href="https://blog.naver.com/bright_english" target="_blank" rel="noopener" aria-label="블로그"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg></a>
+            <a href="https://pf.kakao.com/bright_english" target="_blank" rel="noopener" aria-label="카카오톡"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></a>
+          </div>
         </div>
-    </section>
-
-    <!-- ============================================================
-         Section 4: Event Photos (Bento Grid)
-         ============================================================ -->
-    <section class="section section-amber" id="events">
-        <div class="container">
-            <!-- Section Header -->
-            <div class="section-header" data-animate="fade-up">
-                <span class="section-label section-label--accent">EVENTS</span>
-                <h2 class="section-title">이벤트 &amp; 활동</h2>
-                <p class="section-subtitle">브라이트에서는 수업 외에도 다양한 영어 활동이 진행됩니다</p>
-            </div>
-
-            <!-- Bento Grid -->
-            <div class="bento-grid">
-                <!-- Event 1 (Large) -->
-                <div class="event-card event-card-lg bento-item-lg" data-animate="fade-up" data-delay="0">
-                    <div class="event-card-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=800"
-                             alt="2024 영어 말하기 대회"
-                             class="event-card-img img-round"
-                             loading="lazy">
-                        <span class="event-card-date">2024.03.15</span>
-                    </div>
-                    <div class="event-card-body">
-                        <h4 class="event-card-title">2024 영어 말하기 대회</h4>
-                        <p class="event-card-desc">학생들의 영어 실력을 겨루는 연례 말하기 대회. 초급부터 고급까지 각 레벨별 시상</p>
-                    </div>
-                </div>
-
-                <!-- Event 2 -->
-                <div class="event-card" data-animate="fade-up" data-delay="100">
-                    <div class="event-card-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1509557965875-b88c97052f0e?w=600"
-                             alt="할로윈 영어 파티"
-                             class="event-card-img img-round"
-                             loading="lazy">
-                        <span class="event-card-date">2024.10.31</span>
-                    </div>
-                    <div class="event-card-body">
-                        <h4 class="event-card-title">할로윈 영어 파티</h4>
-                        <p class="event-card-desc">원어민 강사들과 함께하는 할로윈 영어 파티</p>
-                    </div>
-                </div>
-
-                <!-- Event 3 -->
-                <div class="event-card" data-animate="fade-up" data-delay="150">
-                    <div class="event-card-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1511629091441-ee46146481b6?w=600"
-                             alt="크리스마스 캐롤 나이트"
-                             class="event-card-img img-round"
-                             loading="lazy">
-                        <span class="event-card-date">2024.12.20</span>
-                    </div>
-                    <div class="event-card-body">
-                        <h4 class="event-card-title">크리스마스 캐롤 나이트</h4>
-                        <p class="event-card-desc">영어 캐롤을 부르며 즐기는 크리스마스 이브 이벤트</p>
-                    </div>
-                </div>
-
-                <!-- Event 4 (Large) -->
-                <div class="event-card event-card-lg bento-item-lg" data-animate="fade-up" data-delay="200">
-                    <div class="event-card-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1472653431158-6364773b2a56?w=800"
-                             alt="여름 영어 캠프"
-                             class="event-card-img img-round"
-                             loading="lazy">
-                        <span class="event-card-date">2024.07.22-08.02</span>
-                    </div>
-                    <div class="event-card-body">
-                        <h4 class="event-card-title">여름 영어 캠프</h4>
-                        <p class="event-card-desc">2주간의 몰입형 영어 캠프. 원어민 강사와 함께하는 야외 활동과 영어 수업</p>
-                    </div>
-                </div>
-
-                <!-- Event 5 -->
-                <div class="event-card" data-animate="fade-up" data-delay="250">
-                    <div class="event-card-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1455390582262-044cdead277a?w=600"
-                             alt="영어 에세이 콘테스트"
-                             class="event-card-img img-round"
-                             loading="lazy">
-                        <span class="event-card-date">2024.05.10</span>
-                    </div>
-                    <div class="event-card-body">
-                        <h4 class="event-card-title">영어 에세이 콘테스트</h4>
-                        <p class="event-card-desc">학생들의 영작 실력을 겨루는 에세이 대회</p>
-                    </div>
-                </div>
-
-                <!-- Event 6 -->
-                <div class="event-card" data-animate="fade-up" data-delay="300">
-                    <div class="event-card-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1523050854058-8df90110c476?w=600"
-                             alt="수료식 & 장학금 시상"
-                             class="event-card-img img-round"
-                             loading="lazy">
-                        <span class="event-card-date">2024.02.28</span>
-                    </div>
-                    <div class="event-card-body">
-                        <h4 class="event-card-title">수료식 &amp; 장학금 시상</h4>
-                        <p class="event-card-desc">한 학기를 마무리하는 수료식과 우수 학생 장학금 시상</p>
-                    </div>
-                </div>
-
-                <!-- Event 7 -->
-                <div class="event-card" data-animate="fade-up" data-delay="350">
-                    <div class="event-card-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600"
-                             alt="영어 영화 감상회"
-                             class="event-card-img img-round"
-                             loading="lazy">
-                        <span class="event-card-date">매월 마지막 금요일</span>
-                    </div>
-                    <div class="event-card-body">
-                        <h4 class="event-card-title">영어 영화 감상회</h4>
-                        <p class="event-card-desc">영어 자막으로 영화를 감상하고 토론하는 월례 행사</p>
-                    </div>
-                </div>
-
-                <!-- Event 8 -->
-                <div class="event-card" data-animate="fade-up" data-delay="400">
-                    <div class="event-card-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600"
-                             alt="문화 교류의 날"
-                             class="event-card-img img-round"
-                             loading="lazy">
-                        <span class="event-card-date">분기별</span>
-                    </div>
-                    <div class="event-card-body">
-                        <h4 class="event-card-title">문화 교류의 날</h4>
-                        <p class="event-card-desc">다양한 나라의 문화를 영어로 배우고 체험하는 행사</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================
-         Section 5: Video Section
-         ============================================================ -->
-    <section class="section section-gray" id="videos">
-        <div class="container">
-            <!-- Section Header -->
-            <div class="section-header" data-animate="fade-up">
-                <span class="section-label">VIDEO</span>
-                <h2 class="section-title">영상으로 만나는 브라이트</h2>
-                <p class="section-subtitle">브라이트 영어학원의 생생한 모습을 영상으로 확인하세요</p>
-            </div>
-
-            <!-- Video Grid -->
-            <div class="grid-2">
-                <!-- Video 1 -->
-                <div class="video-card" data-animate="fade-left" data-delay="0">
-                    <div class="video-card-thumb">
-                        <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800"
-                             alt="브라이트 영어학원 소개 영상"
-                             class="img-round"
-                             loading="lazy">
-                        <div class="video-card-play">&#9654;</div>
-                        <span class="video-card-duration">3:24</span>
-                    </div>
-                    <div class="video-card-body">
-                        <h4 class="video-card-title">브라이트 영어학원 소개 영상</h4>
-                        <div class="video-card-meta">
-                            <span>조회수 12,482회</span>
-                            <span>2024.01.15</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Video 2 -->
-                <div class="video-card" data-animate="fade-right" data-delay="100">
-                    <div class="video-card-thumb">
-                        <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800"
-                             alt="토익 900점 달성 비법 공개"
-                             class="img-round"
-                             loading="lazy">
-                        <div class="video-card-play">&#9654;</div>
-                        <span class="video-card-duration">8:51</span>
-                    </div>
-                    <div class="video-card-body">
-                        <h4 class="video-card-title">토익 900점 달성 비법 공개</h4>
-                        <div class="video-card-meta">
-                            <span>조회수 28,934회</span>
-                            <span>2024.02.20</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Video 3 -->
-                <div class="video-card" data-animate="fade-left" data-delay="200">
-                    <div class="video-card-thumb">
-                        <img src="https://images.unsplash.com/photo-1529390079861-591de354faf5?w=800"
-                             alt="원어민 강사 인터뷰"
-                             class="img-round"
-                             loading="lazy">
-                        <div class="video-card-play">&#9654;</div>
-                        <span class="video-card-duration">5:12</span>
-                    </div>
-                    <div class="video-card-body">
-                        <h4 class="video-card-title">원어민 강사 인터뷰</h4>
-                        <div class="video-card-meta">
-                            <span>조회수 8,271회</span>
-                            <span>2024.03.05</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Video 4 -->
-                <div class="video-card" data-animate="fade-right" data-delay="300">
-                    <div class="video-card-thumb">
-                        <img src="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=800"
-                             alt="2024 영어 말하기 대회 하이라이트"
-                             class="img-round"
-                             loading="lazy">
-                        <div class="video-card-play">&#9654;</div>
-                        <span class="video-card-duration">12:07</span>
-                    </div>
-                    <div class="video-card-body">
-                        <h4 class="video-card-title">2024 영어 말하기 대회 하이라이트</h4>
-                        <div class="video-card-meta">
-                            <span>조회수 15,603회</span>
-                            <span>2024.03.20</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================
-         Section 6: Instagram Feed
-         ============================================================ -->
-    <section class="section" id="instagram">
-        <div class="container">
-            <!-- Section Header -->
-            <div class="section-header" data-animate="fade-up">
-                <span class="section-label">INSTAGRAM</span>
-                <h2 class="section-title">@bright_english_academy</h2>
-                <p class="section-subtitle">인스타그램에서 브라이트의 일상을 만나보세요</p>
-            </div>
-
-            <!-- Instagram Grid -->
-            <div class="insta-grid">
-                <!-- Insta Item 1 -->
-                <div class="insta-item" data-animate="zoom-in" data-delay="0">
-                    <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=400"
-                         alt="브라이트 일상 1"
-                         loading="lazy">
-                    <div class="insta-item-overlay">
-                        <span class="insta-item-likes">&#9829; 284</span>
-                    </div>
-                </div>
-
-                <!-- Insta Item 2 -->
-                <div class="insta-item" data-animate="zoom-in" data-delay="50">
-                    <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?w=400"
-                         alt="브라이트 일상 2"
-                         loading="lazy">
-                    <div class="insta-item-overlay">
-                        <span class="insta-item-likes">&#9829; 512</span>
-                    </div>
-                </div>
-
-                <!-- Insta Item 3 -->
-                <div class="insta-item" data-animate="zoom-in" data-delay="100">
-                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400"
-                         alt="브라이트 일상 3"
-                         loading="lazy">
-                    <div class="insta-item-overlay">
-                        <span class="insta-item-likes">&#9829; 198</span>
-                    </div>
-                </div>
-
-                <!-- Insta Item 4 -->
-                <div class="insta-item" data-animate="zoom-in" data-delay="150">
-                    <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400"
-                         alt="브라이트 일상 4"
-                         loading="lazy">
-                    <div class="insta-item-overlay">
-                        <span class="insta-item-likes">&#9829; 347</span>
-                    </div>
-                </div>
-
-                <!-- Insta Item 5 -->
-                <div class="insta-item" data-animate="zoom-in" data-delay="200">
-                    <img src="https://images.unsplash.com/photo-1529390079861-591de354faf5?w=400"
-                         alt="브라이트 일상 5"
-                         loading="lazy">
-                    <div class="insta-item-overlay">
-                        <span class="insta-item-likes">&#9829; 423</span>
-                    </div>
-                </div>
-
-                <!-- Insta Item 6 -->
-                <div class="insta-item" data-animate="zoom-in" data-delay="250">
-                    <img src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=400"
-                         alt="브라이트 일상 6"
-                         loading="lazy">
-                    <div class="insta-item-overlay">
-                        <span class="insta-item-likes">&#9829; 156</span>
-                    </div>
-                </div>
-
-                <!-- Insta Item 7 -->
-                <div class="insta-item" data-animate="zoom-in" data-delay="300">
-                    <img src="https://images.unsplash.com/photo-1511629091441-ee46146481b6?w=400"
-                         alt="브라이트 일상 7"
-                         loading="lazy">
-                    <div class="insta-item-overlay">
-                        <span class="insta-item-likes">&#9829; 631</span>
-                    </div>
-                </div>
-
-                <!-- Insta Item 8 -->
-                <div class="insta-item" data-animate="zoom-in" data-delay="350">
-                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=400"
-                         alt="브라이트 일상 8"
-                         loading="lazy">
-                    <div class="insta-item-overlay">
-                        <span class="insta-item-likes">&#9829; 289</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Follow Button -->
-            <div style="text-align: center; margin-top: 48px;" data-animate="fade-up" data-delay="400">
-                <a href="#" class="btn btn-primary insta-follow-btn">
-                    📷 인스타그램 팔로우하기
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================
-         Section 7: CTA Section
-         ============================================================ -->
-    <section class="cta-section" id="cta">
-        <div class="container">
-            <h2 class="cta-title" data-animate="fade-up">
-                브라이트의 다음 주인공은<br>바로 여러분입니다
-            </h2>
-            <p class="cta-desc" data-animate="fade-up" data-delay="100">
-                지금 무료 레벨테스트를 신청하고, 나만의 학습 계획을 세워보세요.
-            </p>
-            <div class="cta-buttons" data-animate="fade-up" data-delay="200">
-                <a href="contact.html" class="btn btn-white">무료 레벨테스트</a>
-                <a href="contact.html" class="btn btn-outline--white">상담 예약</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================
-         Footer
-         ============================================================ -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <a href="index.html" class="footer-logo">
-                        <span class="logo-icon">🎓</span>
-                        <span class="logo-text">BRIGHT <span class="logo-accent">English</span></span>
-                    </a>
-                    <p class="footer-desc">영어의 밝은 미래를 열어가는 브라이트 영어학원. 체계적인 커리큘럼과 검증된 강사진이 여러분의 영어 실력 향상을 책임집니다.</p>
-                    <div class="footer-social">
-                        <a href="#" aria-label="Instagram">📷</a>
-                        <a href="#" aria-label="YouTube">🎬</a>
-                        <a href="#" aria-label="Blog">📝</a>
-                        <a href="#" aria-label="KakaoTalk">💬</a>
-                    </div>
-                </div>
-                <div class="footer-col">
-                    <h4>바로가기</h4>
-                    <ul>
-                        <li><a href="about.html">학원 소개</a></li>
-                        <li><a href="programs.html">프로그램</a></li>
-                        <li><a href="gallery.html">갤러리</a></li>
-                        <li><a href="contact.html">상담 예약</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>프로그램</h4>
-                    <ul>
-                        <li><a href="programs.html">토익/토플</a></li>
-                        <li><a href="programs.html">영어회화</a></li>
-                        <li><a href="programs.html">비즈니스 영어</a></li>
-                        <li><a href="programs.html">주니어 영어</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>연락처</h4>
-                    <div class="footer-contact-item">📍 서울시 강남구 테헤란로 123</div>
-                    <div class="footer-contact-item">📞 02-1234-5678</div>
-                    <div class="footer-contact-item">📧 info@brightenglish.kr</div>
-                    <div class="footer-contact-item">⏰ 평일 07:00-22:00 / 토 09:00-18:00</div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 Bright English Academy. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- ============================================================
-         JavaScript - Main Script
-         ============================================================ -->
-    <script src="script.js"></script>
-
-    <!-- ============================================================
-         Gallery Page - Inline Scripts
-         ============================================================ -->
-    <script>
-    /* ============================================================
-       Gallery Filter Logic
-       ============================================================ */
-    (function() {
-        'use strict';
-
-        // --- Gallery Filter ---
-        const filterBtns = document.querySelectorAll('.gallery-filter-btn');
-        const galleryItems = document.querySelectorAll('.gallery-item');
-
-        if (filterBtns.length && galleryItems.length) {
-            filterBtns.forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    // Update active state
-                    filterBtns.forEach(function(b) {
-                        b.classList.remove('active');
-                    });
-                    btn.classList.add('active');
-
-                    var filter = btn.getAttribute('data-filter');
-
-                    galleryItems.forEach(function(item) {
-                        var category = item.getAttribute('data-category');
-
-                        if (filter === 'all' || category === filter) {
-                            item.style.opacity = '0';
-                            item.style.transform = 'scale(0.8)';
-                            item.style.display = '';
-
-                            requestAnimationFrame(function() {
-                                requestAnimationFrame(function() {
-                                    item.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-                                    item.style.opacity = '1';
-                                    item.style.transform = 'scale(1)';
-                                });
-                            });
-                        } else {
-                            item.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                            item.style.opacity = '0';
-                            item.style.transform = 'scale(0.8)';
-
-                            setTimeout(function() {
-                                item.style.display = 'none';
-                            }, 300);
-                        }
-                    });
-                });
-            });
-        }
-
-        // --- Lightbox Logic ---
-        var lightbox = document.getElementById('lightbox');
-        var lightboxImg = document.getElementById('lightboxImg');
-        var lightboxCaption = document.getElementById('lightboxCaption');
-        var lightboxClose = document.getElementById('lightboxClose');
-        var lightboxPrev = document.getElementById('lightboxPrev');
-        var lightboxNext = document.getElementById('lightboxNext');
-
-        var currentItems = [];
-        var currentIndex = 0;
-
-        function getVisibleItems() {
-            var items = [];
-            galleryItems.forEach(function(item) {
-                if (item.style.display !== 'none') {
-                    items.push(item);
-                }
-            });
-            return items;
-        }
-
-        function openLightbox(index) {
-            currentItems = getVisibleItems();
-            currentIndex = index;
-
-            if (!currentItems[currentIndex]) return;
-
-            var item = currentItems[currentIndex];
-            var src = item.getAttribute('data-src');
-            var caption = item.getAttribute('data-caption');
-
-            lightboxImg.src = src;
-            lightboxImg.alt = caption;
-            lightboxCaption.textContent = caption;
-
-            lightbox.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeLightbox() {
-            lightbox.classList.remove('active');
-            document.body.style.overflow = '';
-            lightboxImg.src = '';
-        }
-
-        function navigateLightbox(direction) {
-            currentItems = getVisibleItems();
-            currentIndex += direction;
-
-            if (currentIndex < 0) {
-                currentIndex = currentItems.length - 1;
-            } else if (currentIndex >= currentItems.length) {
-                currentIndex = 0;
-            }
-
-            var item = currentItems[currentIndex];
-            var src = item.getAttribute('data-src');
-            var caption = item.getAttribute('data-caption');
-
-            lightboxImg.style.opacity = '0';
-            lightboxImg.style.transform = 'scale(0.95)';
-
-            setTimeout(function() {
-                lightboxImg.src = src;
-                lightboxImg.alt = caption;
-                lightboxCaption.textContent = caption;
-                lightboxImg.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                lightboxImg.style.opacity = '1';
-                lightboxImg.style.transform = 'scale(1)';
-            }, 200);
-        }
-
-        // Attach click listeners to gallery items
-        galleryItems.forEach(function(item, index) {
-            item.style.cursor = 'pointer';
-            item.addEventListener('click', function() {
-                var visibleItems = getVisibleItems();
-                var visibleIndex = visibleItems.indexOf(item);
-                openLightbox(visibleIndex);
-            });
-        });
-
-        // Close button
-        if (lightboxClose) {
-            lightboxClose.addEventListener('click', closeLightbox);
-        }
-
-        // Navigation buttons
-        if (lightboxPrev) {
-            lightboxPrev.addEventListener('click', function(e) {
-                e.stopPropagation();
-                navigateLightbox(-1);
-            });
-        }
-
-        if (lightboxNext) {
-            lightboxNext.addEventListener('click', function(e) {
-                e.stopPropagation();
-                navigateLightbox(1);
-            });
-        }
-
-        // Close on backdrop click
-        if (lightbox) {
-            lightbox.addEventListener('click', function(e) {
-                if (e.target === lightbox) {
-                    closeLightbox();
-                }
-            });
-        }
-
-        // Keyboard navigation
-        document.addEventListener('keydown', function(e) {
-            if (!lightbox || !lightbox.classList.contains('active')) return;
-
-            switch (e.key) {
-                case 'Escape':
-                    closeLightbox();
-                    break;
-                case 'ArrowLeft':
-                    navigateLightbox(-1);
-                    break;
-                case 'ArrowRight':
-                    navigateLightbox(1);
-                    break;
-            }
-        });
-
-        // --- Scroll Animations ---
-        var animateElements = document.querySelectorAll('[data-animate]');
-
-        function handleScrollAnimation() {
-            animateElements.forEach(function(el) {
-                var rect = el.getBoundingClientRect();
-                var windowHeight = window.innerHeight;
-                var delay = parseInt(el.getAttribute('data-delay') || '0', 10);
-                var animationType = el.getAttribute('data-animate');
-
-                if (rect.top < windowHeight * 0.85 && rect.bottom > 0) {
-                    setTimeout(function() {
-                        el.classList.add('animated');
-                        el.style.opacity = '1';
-                        el.style.transform = 'translate(0, 0) scale(1)';
-                    }, delay);
-                }
-            });
-        }
-
-        // Initialize animation styles
-        animateElements.forEach(function(el) {
-            var animationType = el.getAttribute('data-animate');
-            el.style.opacity = '0';
-            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-
-            switch (animationType) {
-                case 'fade-up':
-                    el.style.transform = 'translateY(40px)';
-                    break;
-                case 'fade-down':
-                    el.style.transform = 'translateY(-40px)';
-                    break;
-                case 'fade-left':
-                    el.style.transform = 'translateX(-40px)';
-                    break;
-                case 'fade-right':
-                    el.style.transform = 'translateX(40px)';
-                    break;
-                case 'zoom-in':
-                    el.style.transform = 'scale(0.85)';
-                    break;
-                default:
-                    el.style.transform = 'translateY(30px)';
-            }
-        });
-
-        // Listen for scroll events (throttled)
-        var scrollTimeout = null;
-        window.addEventListener('scroll', function() {
-            if (scrollTimeout) return;
-            scrollTimeout = setTimeout(function() {
-                scrollTimeout = null;
-                handleScrollAnimation();
-            }, 50);
-        });
-
-        // Trigger initial check
-        handleScrollAnimation();
-
-        // --- Scroll Progress Bar ---
-        var scrollProgressBar = document.getElementById('scrollProgress');
-        if (scrollProgressBar) {
-            window.addEventListener('scroll', function() {
-                var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                var scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-                var progress = (scrollTop / scrollHeight) * 100;
-                scrollProgressBar.style.width = progress + '%';
-            });
-        }
-
-        // --- Video Card Click Handler ---
-        var videoCards = document.querySelectorAll('.video-card');
-        videoCards.forEach(function(card) {
-            card.addEventListener('click', function() {
-                // Placeholder action - in production this would open a video modal
-                var title = card.querySelector('.video-card-title');
-                if (title) {
-                    alert('영상 재생: ' + title.textContent);
-                }
-            });
-        });
-
-        // --- Instagram Item Click Handler ---
-        var instaItems = document.querySelectorAll('.insta-item');
-        instaItems.forEach(function(item) {
-            item.addEventListener('click', function() {
-                // Placeholder - would open Instagram post
-                window.open('#', '_blank');
-            });
-        });
-
-    })();
-    </script>
+        <div class="footer-column"><h4>바로가기</h4><ul><li><a href="index.html">홈</a></li><li><a href="about.html">학원 소개</a></li><li><a href="programs.html">프로그램</a></li><li><a href="gallery.html">갤러리</a></li><li><a href="contact.html">문의하기</a></li></ul></div>
+        <div class="footer-column"><h4>프로그램</h4><ul><li><a href="programs.html">초등반</a></li><li><a href="programs.html">중등반</a></li><li><a href="programs.html">고등반</a></li><li><a href="programs.html">성인반</a></li></ul></div>
+        <div class="footer-column"><h4>연락처</h4><ul class="footer-info-list"><li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg><span>서울시 강남구 테헤란로 123</span></li><li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><span>02-123-4567</span></li></ul></div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 브라이트 영어학원. All rights reserved.</p>
+        <div class="footer-bottom-links"><a href="#!">개인정보처리방침</a><a href="#!">이용약관</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <a href="https://pf.kakao.com/bright_english" target="_blank" rel="noopener" class="kakao-float" aria-label="카카오톡 상담">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.48 3 2 6.58 2 11c0 2.83 1.88 5.31 4.68 6.72l-.96 3.56c-.07.26.2.47.43.34l4.15-2.42c.55.07 1.11.1 1.7.1 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/></svg>
+  </a>
+
+  <button class="back-to-top" aria-label="맨 위로">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+  </button>
+
+  <!-- Lightbox -->
+  <div class="lightbox-overlay">
+    <button class="lightbox-close" aria-label="닫기">&times;</button>
+    <div class="lightbox-content"></div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>

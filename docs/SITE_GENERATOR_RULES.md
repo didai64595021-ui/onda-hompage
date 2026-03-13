@@ -264,6 +264,8 @@
 | prototype-v3 | T1 | C4 | F2 | L2 | I1,I5,I12,I15 | H8 | N6 | S1 | IMG1 | B5 |
 | showcase-apartment | T1 | C1 | F1 | L8 | I1,I2,I3,I4,I5,I19 | H2 | N6 | S1 | IMG1 | B1 |
 | marketing-v1(폐기) | T1 | C5 | F2 | L5 | I1,I2,I3,I5,I11,I15,I16,I20 | H8 | N6 | S1 | IMG1 | B1 |
+| english-academy | T4 | C3 | F3 | L1 | I2,I5,I8,I10,I14 | H5 | N2 | S3 | IMG3 | B3 |
+| dermatology | T5 | C7 | F4 | L4 | I1,I4,I7,I8,I11 | H10 | N3 | S2 | IMG2 | B4 |
 
 ### 금지 조합 (과다 사용)
 - T1+C1+F1 (다크+골드+Playfair) — 5회, 금지
