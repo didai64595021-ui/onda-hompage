@@ -83,7 +83,7 @@ body{
 .game-wrapper{
   position:relative;z-index:2;
   display:flex;flex-direction:column;align-items:center;
-  padding:20px;width:100%;
+  padding:0;width:auto;flex-shrink:0;
 }
 
 /* ===== TOP BAR ===== */
@@ -328,11 +328,11 @@ body{
   padding:36px 32px 28px;
   max-width:360px;width:90%;
   text-align:center;
-  transform:translateY(-40px) scale(.9);
+  transform:translateY(-40px) scale(.9) rotateY(90deg);
   transition:transform .5s cubic-bezier(.175,.885,.32,1.275);
   box-shadow:0 25px 60px rgba(0,0,0,.5);
 }
-.modal-overlay.show .modal-card{transform:translateY(0) scale(1)}
+.modal-overlay.show .modal-card{transform:translateY(0) scale(1) rotateY(0deg)}
 .modal-card .modal-emoji{font-size:3rem;margin-bottom:12px}
 .modal-card .modal-title{
   font-family:'Black Han Sans',sans-serif;
@@ -448,6 +448,8 @@ body{
 <body>
 
 <!-- Background layers -->
+<div class="bg-texture"></div>
+<div class="bg-icons" id="bgIcons"></div>
 <div class="aurora"><div class="blob"></div></div>
 <div class="stars" id="stars"></div>
 <div class="noise"></div>
@@ -542,6 +544,7 @@ let extraTurn = false;
 let soundOn = true;
 let gameFinished = false;
 let passedStart = false;
+const stats = { totalMoves: 0, luckyEvents: 0, penaltyCount: 0, lastDice: 0 };
 
 /* ===== WEB AUDIO ===== */
 let audioCtx = null;

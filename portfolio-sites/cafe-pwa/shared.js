@@ -123,12 +123,13 @@ const BC = {
 
   /* ---------- INIT ---------- */
   init() {
-    if (!localStorage.getItem('bc_initialized')) {
-      localStorage.setItem('bc_initialized', 'true');
-      localStorage.setItem('bc_points', '2450');
-      localStorage.setItem('bc_stamps', '7');
-      this.saveCoupons([...this._defaultCoupons]);
-    }
+    localStorage.removeItem('bc_initialized');
+    localStorage.setItem('bc_cart', '[]');
+    localStorage.setItem('bc_orders', '[]');
+    localStorage.setItem('bc_points', '2450');
+    localStorage.setItem('bc_stamps', '7');
+    localStorage.setItem('bc_favorites', '[]');
+    this.saveCoupons([...this._defaultCoupons]);
     this.updateAllBadges();
   },
 
