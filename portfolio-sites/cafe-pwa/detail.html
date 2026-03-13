@@ -20,7 +20,7 @@
 *, *::before, *::after {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  box-sizing: border-box; word-break: keep-all;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -1383,7 +1383,7 @@ body {
      HERO IMAGE
      ============================================ -->
 <div class="hero-image" id="heroImage">
-  <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=80" alt="카페라떼" id="heroImg" loading="eager">
+  <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=80" alt="카페라떼" id="heroImg" loading="eager" onerror="this.src='https://placehold.co/800x600/1B4332/F5F0E8?text=☕'">
   
   <div class="hero-nav">
     <button class="hero-nav-btn" onclick="history.back()" aria-label="뒤로가기">
@@ -1830,16 +1830,21 @@ body {
     item = BC.getMenuItem(menuId);
   }
   
-  // Fallback: menu.html passes name/engName/price/img/temp/category
+  // Fallback: try finding by name in menuDB
   if (!item && paramName) {
-    item = {
-      name: paramName,
-      engName: params.get('engName') || '',
-      basePrice: parseInt(params.get('price')) || 5000,
-      img: params.get('img') || '',
-      temp: params.get('temp') || 'both',
-      category: params.get('category') || 'coffee'
-    };
+    const match = BC.findMenuByName(paramName);
+    if (match) {
+      item = match[1];
+    } else {
+      item = {
+        name: paramName,
+        engName: params.get('engName') || '',
+        basePrice: parseInt(params.get('price')) || 5000,
+        img: params.get('img') || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=80',
+        temp: params.get('temp') || 'both',
+        category: params.get('category') || 'coffee'
+      };
+    }
   }
   
   if (!item) return;

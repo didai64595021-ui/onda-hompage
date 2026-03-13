@@ -62,7 +62,7 @@
         * {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            box-sizing: border-box; word-break: keep-all;
         }
 
         body {
@@ -1723,6 +1723,10 @@
                             img.addEventListener('load', () => {
                                 img.classList.add('loaded');
                             });
+                            img.addEventListener('error', () => {
+                                img.src = 'https://placehold.co/400x400/1B4332/F5F0E8?text=☕';
+                                img.classList.add('loaded');
+                            });
                             imageObserver.unobserve(img);
                         }
                     }
@@ -1984,6 +1988,7 @@
             const imgSrc = imgEl ? (imgEl.src || imgEl.dataset.src) : '';
             const added = BC.toggleFavorite({ name, price: priceNum, img: imgSrc });
             button.classList.toggle('liked', added);
+            showToast(added ? '❤️ 즐겨찾기에 추가했어요' : '즐겨찾기에서 제거했어요');
         }
 
         // Add to Cart (localStorage via BC shared layer)
@@ -2021,14 +2026,20 @@
         // Show Item Detail
         function showItemDetail(item) {
             const name = item.querySelector('.menu-name').textContent;
-            const engName = item.querySelector('.menu-subtitle').textContent;
-            const price = item.dataset.price;
-            const imgEl = item.querySelector('.menu-image');
-            const img = imgEl ? (imgEl.src || imgEl.dataset.src) : '';
-            const temp = item.dataset.temp || 'both';
-            const category = item.dataset.category || 'coffee';
-            const params = new URLSearchParams({ name, engName, price, img, temp, category });
-            window.location.href = 'detail.html?' + params.toString();
+            const match = BC.findMenuByName(name);
+            if (match) {
+                window.location.href = 'detail.html?id=' + encodeURIComponent(match[0]);
+            } else {
+                // Fallback: pass name-based params
+                const engName = item.querySelector('.menu-subtitle').textContent;
+                const price = item.dataset.price;
+                const imgEl = item.querySelector('.menu-image');
+                const img = imgEl ? (imgEl.src || imgEl.dataset.src) : '';
+                const temp = item.dataset.temp || 'both';
+                const category = item.dataset.category || 'coffee';
+                const params = new URLSearchParams({ name, engName, price, img, temp, category });
+                window.location.href = 'detail.html?' + params.toString();
+            }
         }
 
         // Init cart badge + favorites from localStorage on load

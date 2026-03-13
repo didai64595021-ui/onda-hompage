@@ -16,7 +16,7 @@
    BLOOMING COFFEE — ORDER COMPLETE PAGE
    ============================================ */
 *, *::before, *::after {
-  margin: 0; padding: 0; box-sizing: border-box;
+  margin: 0; padding: 0; box-sizing: border-box; word-break: keep-all;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -52,6 +52,7 @@
 html { scroll-behavior: smooth; }
 
 body {
+  overflow-x: hidden;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   background: var(--cream);
   color: var(--black);
@@ -1299,6 +1300,18 @@ document.addEventListener('DOMContentLoaded', () => {
   renderStamps();
   createConfetti();
   startCountdown();
+  // Quick status simulation: 3s→준비중, 5s→완료 toast
+  setTimeout(() => {
+    const statusEl = document.getElementById('statusText');
+    if (statusEl) statusEl.textContent = '바리스타가 음료를 만들고 있어요 ☕';
+    showToast('☕ 음료 준비 중...');
+  }, 3000);
+  setTimeout(() => {
+    const statusEl = document.getElementById('statusText');
+    if (statusEl) statusEl.textContent = '음료가 준비되었어요! 🎉';
+    showToast('🎉 음료가 준비되었어요! 카운터에서 수령해주세요.');
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  }, 8000);
 });
 
 if ('serviceWorker' in navigator) {

@@ -46,6 +46,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            word-break: keep-all;
         }
 
         html {
@@ -924,27 +925,8 @@
         <!-- Quick Order Section -->
         <section class="quick-order fade-in fade-in-delay-2">
             <h3 class="section-title">빠른 주문</h3>
-            <div class="quick-order-scroll">
-                <div class="quick-item touch-feedback">
-                    <div class="quick-item-image">☕</div>
-                    <p class="quick-item-name">아메리카노</p>
-                </div>
-                <div class="quick-item touch-feedback">
-                    <div class="quick-item-image">🥛</div>
-                    <p class="quick-item-name">카페라떼</p>
-                </div>
-                <div class="quick-item touch-feedback">
-                    <div class="quick-item-image">🧊</div>
-                    <p class="quick-item-name">아이스티</p>
-                </div>
-                <div class="quick-item touch-feedback">
-                    <div class="quick-item-image">🍰</div>
-                    <p class="quick-item-name">케이크</p>
-                </div>
-                <div class="quick-item touch-feedback">
-                    <div class="quick-item-image">🥪</div>
-                    <p class="quick-item-name">샌드위치</p>
-                </div>
+            <div class="quick-order-scroll" id="quickOrderScroll">
+                <!-- Populated by JS from favorites or defaults -->
             </div>
         </section>
 
@@ -1268,15 +1250,15 @@
             document.querySelectorAll('.heart-button').forEach(button => {
                 button.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    const heartId = button.dataset.heart;
-                    button.classList.toggle('active');
-                    
-                    if (button.classList.contains('active')) {
-                        favorites.add(heartId);
-                        animateHeart(button);
-                    } else {
-                        favorites.delete(heartId);
-                    }
+                    const card = button.closest('.menu-card');
+                    const name = card?.querySelector('.menu-card-title')?.textContent || '';
+                    const price = parseInt(card?.querySelector('.menu-price')?.textContent?.replace(/[^0-9]/g,'')) || 5000;
+                    const imgStyle = card?.querySelector('.menu-card-image')?.style.backgroundImage || '';
+                    const img = imgStyle.replace(/url\(['"]?|['"]?\)/g, '');
+                    const added = BC.toggleFavorite({ name, price, img });
+                    button.classList.toggle('active', added);
+                    animateHeart(button);
+                    showToast(added ? '❤️ 즐겨찾기에 추가했어요' : '즐겨찾기에서 제거했어요');
                 });
             });
             
@@ -1322,23 +1304,74 @@
         function setupInteractions() {
             // Menu card interactions
             document.querySelectorAll('.menu-card').forEach(card => {
-                card.addEventListener('click', () => {
+                card.addEventListener('click', (e) => {
+                    if (e.target.closest('.heart-button') || e.target.closest('.add-button')) return;
                     const menuId = card.dataset.menu;
                     showMenuDetail(menuId);
                 });
             });
             
-            // Quick order items
-            document.querySelectorAll('.quick-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const itemName = item.querySelector('.quick-item-name').textContent;
-                    quickOrder(itemName);
-                });
-            });
+            // Build quick order section from favorites (or defaults)
+            buildQuickOrder();
             
             // Special card
             document.querySelector('.special-card').addEventListener('click', () => {
                 showMenuDetail('cherry-blossom-latte');
+            });
+            
+            // Restore heart states
+            document.querySelectorAll('.heart-button').forEach(btn => {
+                const card = btn.closest('.menu-card');
+                if (card) {
+                    const name = card.querySelector('.menu-card-title')?.textContent;
+                    if (name && BC.isFavorite(name)) btn.classList.add('active');
+                }
+            });
+        }
+        
+        function buildQuickOrder() {
+            const container = document.getElementById('quickOrderScroll');
+            const favs = BC.getFavorites();
+            const defaultItems = [
+                { name: '아메리카노', emoji: '☕', id: 'americano' },
+                { name: '카페라떼', emoji: '🥛', id: 'cafe-latte' },
+                { name: '콜드브루', emoji: '🧊', id: 'cold-brew' },
+                { name: '크루아상', emoji: '🥐', id: 'croissant' },
+                { name: '바닐라라떼', emoji: '🍦', id: 'vanilla-latte' }
+            ];
+            
+            let items = [];
+            if (favs.length > 0) {
+                items = favs.slice(0, 5).map(f => {
+                    const match = BC.findMenuByName(f.name);
+                    return { name: f.name, emoji: '❤️', id: match ? match[0] : '' };
+                });
+            }
+            // Fill remaining with defaults
+            while (items.length < 5) {
+                const def = defaultItems[items.length];
+                if (!items.find(i => i.name === def.name)) items.push(def);
+                else items.push(defaultItems[Math.min(items.length, defaultItems.length - 1)]);
+                if (items.length >= 5) break;
+            }
+            
+            container.innerHTML = items.map(item => `
+                <div class="quick-item touch-feedback" data-quick-id="${item.id}">
+                    <div class="quick-item-image">${item.emoji}</div>
+                    <p class="quick-item-name">${item.name}</p>
+                </div>
+            `).join('');
+            
+            container.querySelectorAll('.quick-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    const id = el.dataset.quickId;
+                    if (id) {
+                        window.location.href = 'detail.html?id=' + encodeURIComponent(id);
+                    } else {
+                        const name = el.querySelector('.quick-item-name').textContent;
+                        quickOrder(name);
+                    }
+                });
             });
         }
 

@@ -11,13 +11,17 @@ const BC = {
   setCart(cart) { localStorage.setItem('bc_cart', JSON.stringify(cart)); },
   addToCart(item) {
     const cart = this.getCart();
-    const key = item.name + '|' + (item.options || '');
+    // Normalize: ensure price field is set
+    const normalizedItem = { ...item };
+    if (!normalizedItem.price && normalizedItem.unitPrice) normalizedItem.price = normalizedItem.unitPrice;
+    if (!normalizedItem.unitPrice && normalizedItem.price) normalizedItem.unitPrice = normalizedItem.price;
+    const key = normalizedItem.name + '|' + (normalizedItem.options || '');
     const idx = cart.findIndex(c => (c.name + '|' + (c.options || '')) === key);
     if (idx >= 0) {
-      cart[idx].qty += (item.qty || 1);
+      cart[idx].qty += (normalizedItem.qty || 1);
       if (cart[idx].qty > 10) cart[idx].qty = 10;
     } else {
-      cart.push({ ...item, qty: item.qty || 1 });
+      cart.push({ ...normalizedItem, qty: normalizedItem.qty || 1 });
     }
     this.setCart(cart);
     this.updateAllBadges();
@@ -111,7 +115,7 @@ const BC = {
   /* ---------- BADGES ---------- */
   updateAllBadges() {
     const count = this.getCartCount();
-    document.querySelectorAll('.cart-badge, .nav-badge, [data-cart-badge]').forEach(el => {
+    document.querySelectorAll('.cart-badge, .nav-badge, .floating-cart-badge, [data-cart-badge]').forEach(el => {
       el.textContent = count;
       el.style.display = count > 0 ? '' : 'none';
     });
@@ -134,24 +138,40 @@ const BC = {
     'americano':        { name:'아메리카노',    engName:'Americano',      basePrice:4500, img:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=80', category:'coffee', temp:'both' },
     'cappuccino':       { name:'카푸치노',      engName:'Cappuccino',     basePrice:5000, img:'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=800&q=80', category:'coffee', temp:'both' },
     'cold-brew':        { name:'콜드브루',      engName:'Cold Brew',      basePrice:5000, img:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=800&q=80', category:'coffee', temp:'ice' },
-    'vanilla-latte':    { name:'바닐라 라떼',   engName:'Vanilla Latte',  basePrice:5500, img:'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=800&q=80', category:'coffee', temp:'both' },
-    'caramel-macchiato':{ name:'카라멜 마끼아또',engName:'Caramel Macchiato',basePrice:5800, img:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=80', category:'coffee', temp:'both' },
+    'vanilla-latte':    { name:'바닐라라떼',    engName:'Vanilla Latte',  basePrice:5500, img:'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=800&q=80', category:'coffee', temp:'both' },
+    'caramel-macchiato':{ name:'카라멜마끼아또',engName:'Caramel Macchiato',basePrice:5800, img:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=80', category:'coffee', temp:'both' },
     'flat-white':       { name:'플랫화이트',    engName:'Flat White',     basePrice:5000, img:'https://images.unsplash.com/photo-1514432324607-a09d9b4aefda?w=800&q=80', category:'coffee', temp:'both' },
-    'green-tea-latte':  { name:'녹차 라떼',     engName:'Green Tea Latte',basePrice:5500, img:'https://images.unsplash.com/photo-1534778101976-62847782c213?w=800&q=80', category:'tea', temp:'both' },
-    'croissant':        { name:'크루아상',      engName:'Croissant',      basePrice:4500, img:'https://images.unsplash.com/photo-1555507036-ab1f4038024a?w=800&q=80', category:'dessert', temp:'none' },
-    'tiramisu':         { name:'티라미수',      engName:'Tiramisu',       basePrice:6500, img:'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&q=80', category:'dessert', temp:'none' },
-    'macaron-set':      { name:'마카롱 세트',   engName:'Macaron Set',    basePrice:8900, img:'https://images.unsplash.com/photo-1558024920-b41e1887dc32?w=800&q=80', category:'dessert', temp:'none' },
+    'green-tea-latte':  { name:'녹차라떼',      engName:'Green Tea Latte',basePrice:5600, img:'https://images.unsplash.com/photo-1534778101976-62847782c213?w=800&q=80', category:'non-coffee', temp:'both' },
+    'croissant':        { name:'크루아상',      engName:'Croissant',      basePrice:4900, img:'https://images.unsplash.com/photo-1555507036-ab1f4038024a?w=800&q=80', category:'dessert', temp:'none' },
+    'tiramisu':         { name:'티라미수',      engName:'Tiramisu',       basePrice:6800, img:'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&q=80', category:'dessert', temp:'none' },
+    'macaron-set':      { name:'마카롱세트',    engName:'Macaron Set',    basePrice:8500, img:'https://images.unsplash.com/photo-1558024920-b41e1887dc32?w=800&q=80', category:'dessert', temp:'none' },
     'blooming-special': { name:'블루밍 스페셜', engName:'Blooming Special',basePrice:6500, img:'https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=800&q=80', category:'coffee', temp:'both' },
     'einspanner':       { name:'아인슈페너',    engName:'Einspänner',     basePrice:6000, img:'https://images.unsplash.com/photo-1514432324607-a09d9b4aefda?w=800&q=80', category:'coffee', temp:'ice' },
-    'chai-latte':       { name:'차이 라떼',     engName:'Chai Latte',     basePrice:5500, img:'https://images.unsplash.com/photo-1557006021-b85faa2bc5e2?w=800&q=80', category:'tea', temp:'both' }
+    'chai-latte':       { name:'차이라떼',      engName:'Chai Latte',     basePrice:5500, img:'https://images.unsplash.com/photo-1557006021-b85faa2bc5e2?w=800&q=80', category:'non-coffee', temp:'both' },
+    'espresso':         { name:'에스프레소',    engName:'Espresso',       basePrice:4800, img:'https://images.unsplash.com/photo-1510707577719-ae7c14805e3a?w=800&q=80', category:'coffee', temp:'hot' },
+    'mocha':            { name:'모카',          engName:'Caffè Mocha',    basePrice:5900, img:'https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=800&q=80', category:'coffee', temp:'both' },
+    'grapefruit-ade':   { name:'자몽에이드',    engName:'Grapefruit Ade', basePrice:5300, img:'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=800&q=80', category:'non-coffee', temp:'ice' },
+    'strawberry-smoothie':{ name:'딸기스무디',  engName:'Strawberry Smoothie',basePrice:6100,img:'https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=800&q=80', category:'non-coffee', temp:'ice' },
+    'choco-latte':      { name:'초코라떼',      engName:'Chocolate Latte',basePrice:5700, img:'https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?w=800&q=80', category:'non-coffee', temp:'both' },
+    'cheesecake':       { name:'치즈케이크',    engName:'Cheesecake',     basePrice:7200, img:'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=800&q=80', category:'dessert', temp:'none' },
+    'cherry-blossom-latte':{ name:'체리 블라썸 라떼',engName:'Cherry Blossom Latte',basePrice:6800,img:'https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=800&q=80', category:'coffee', temp:'both' },
+    'signature-blend':  { name:'시그니처 블렌드',engName:'Signature Blend',basePrice:4500, img:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=80', category:'coffee', temp:'both' },
+    'matcha-latte':     { name:'말차 라떼',     engName:'Matcha Latte',   basePrice:5800, img:'https://images.unsplash.com/photo-1534778101976-62847782c213?w=800&q=80', category:'non-coffee', temp:'both' }
   },
   getMenuItem(id) { return this.menuDB[id] || null; },
   findMenuByName(name) {
-    return Object.entries(this.menuDB).find(([, v]) => v.name === name);
+    // Exact match first
+    const exact = Object.entries(this.menuDB).find(([, v]) => v.name === name);
+    if (exact) return exact;
+    // Fuzzy: remove spaces and compare
+    const clean = name.replace(/\s/g, '');
+    return Object.entries(this.menuDB).find(([, v]) => v.name.replace(/\s/g, '') === clean);
   }
 };
 
 BC.init();
+
+
 
 /* ============================================
    FORMAT HELPERS
