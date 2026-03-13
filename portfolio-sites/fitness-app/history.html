@@ -9,14 +9,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--dark:#0D0D0D;--dark-surface:#1A1A1A;--dark-card:#1E1E1E;--dark-border:#2A2A2A;--lime:#CCFF00;--lime-dim:rgba(204,255,0,0.15);--lime-glow:rgba(204,255,0,0.3);--white:#F5F5F5;--gray:#8A8A8A;--gray-light:#B0B0B0;--red:#FF4757;--blue:#3B82F6;--orange:#FF6B35;--purple:#A855F7;--safe-top:44px;--safe-bottom:34px;--nav-height:72px;--radius:16px;--radius-sm:10px;--font-body:'Pretendard',-apple-system,sans-serif;--font-display:'Sora',sans-serif;--transition:cubic-bezier(0.4,0,0.2,1)}
+:root{--dark:#0D0D0D;--dark-surface:#1A1A1A;--dark-card:#1E1E1E;--dark-border:#2A2A2A;--lime:#CCFF00;--lime-dim:rgba(204,255,0,0.15);--lime-glow:rgba(204,255,0,0.3);--white:#F5F5F5;--gray:#8A8A8A;--gray-light:#B0B0B0;--red:#FF4757;--blue:#3B82F6;--orange:#FF6B35;--purple:#A855F7;--green:#2ED573;--yellow:#FFA502;--safe-top:44px;--safe-bottom:34px;--nav-height:72px;--radius:16px;--radius-sm:10px;--font-body:'Pretendard',-apple-system,sans-serif;--font-display:'Sora',sans-serif;--transition:cubic-bezier(0.4,0,0.2,1)}
 html{font-size:16px;scroll-behavior:smooth}
-body{font-family:var(--font-body);background:var(--dark);color:var(--white);min-height:100dvh;overflow-x:hidden;padding-top:var(--safe-top);padding-bottom:calc(var(--nav-height)+var(--safe-bottom));-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-body);background:var(--dark);color:var(--white);min-height:100dvh;overflow-x:hidden;padding-top:var(--safe-top);padding-bottom:calc(var(--nav-height)+var(--safe-bottom));-webkit-font-smoothing:antialiased;word-break:keep-all}
 a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
 ::-webkit-scrollbar{width:0;height:0}
 
 @keyframes fadeInUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 @keyframes scaleIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.7}}
+@keyframes flame{0%,100%{transform:translateY(0) scale(1)}25%{transform:translateY(-2px) scale(1.05)}50%{transform:translateY(-1px) scale(0.95)}75%{transform:translateY(-3px) scale(1.02)}}
+@keyframes glow{0%,100%{box-shadow:0 0 10px var(--lime-glow)}50%{box-shadow:0 0 20px var(--lime-glow),0 0 30px var(--lime-dim)}}
 
 /* HEADER */
 .app-header{position:fixed;top:0;left:0;right:0;height:var(--safe-top);background:rgba(13,13,13,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100;border-bottom:1px solid var(--dark-border)}
@@ -27,25 +32,45 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
 .page-title{font-size:26px;font-weight:700;margin-bottom:4px;animation:fadeInUp 0.5s var(--transition)}
 .page-subtitle{font-size:14px;color:var(--gray-light);margin-bottom:24px;animation:fadeInUp 0.5s 0.05s var(--transition) both}
 
-/* SUMMARY CARDS */
-.summary-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px;animation:fadeInUp 0.5s 0.1s var(--transition) both}
-.summary-card{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:var(--radius-sm);padding:14px 10px;text-align:center}
-.summary-card__value{font-family:var(--font-display);font-size:22px;font-weight:700;line-height:1;margin-bottom:4px}
+/* STREAK COUNTER */
+.streak-section{margin-bottom:20px;animation:fadeInUp 0.5s 0.02s var(--transition) both}
+.streak-card{background:linear-gradient(135deg,var(--dark-card) 0%,rgba(30,30,30,0.8) 100%);border:1px solid var(--dark-border);border-radius:var(--radius);padding:20px;text-align:center;position:relative;overflow:hidden}
+.streak-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--lime) 0%,var(--blue) 50%,var(--purple) 100%);animation:glow 2s ease-in-out infinite}
+.streak-counter{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px}
+.streak-flame{font-size:32px;animation:flame 1.5s ease-in-out infinite}
+.streak-number{font-family:var(--font-display);font-size:36px;font-weight:800;color:var(--lime);line-height:1}
+.streak-label{font-size:13px;color:var(--gray-light);margin-bottom:12px}
+.streak-progress{width:100%;height:6px;background:var(--dark-surface);border-radius:3px;overflow:hidden;margin-bottom:8px}
+.streak-progress-fill{height:100%;background:linear-gradient(90deg,var(--lime) 0%,var(--blue) 100%);border-radius:3px;transition:width 0.8s var(--transition)}
+.streak-goal{font-size:11px;color:var(--gray);display:flex;justify-content:space-between}
+
+/* WEEKLY SUMMARY CARDS */
+.weekly-summary{margin-bottom:24px;animation:fadeInUp 0.5s 0.08s var(--transition) both}
+.weekly-summary__header{display:flex;align-items:center;justify-content:between;margin-bottom:16px}
+.weekly-summary__title{font-size:15px;font-weight:600;color:var(--lime);margin-bottom:14px}
+.summary-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.summary-card{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:var(--radius-sm);padding:16px 12px;text-align:center;position:relative;overflow:hidden}
+.summary-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--lime-dim);opacity:0;transition:opacity 0.3s}
+.summary-card:hover::before{opacity:1}
+.summary-card__icon{font-size:20px;margin-bottom:8px;opacity:0.8}
+.summary-card__value{font-family:var(--font-display);font-size:24px;font-weight:700;line-height:1;margin-bottom:4px}
 .summary-card__value--lime{color:var(--lime)}
 .summary-card__value--blue{color:var(--blue)}
 .summary-card__value--red{color:var(--red)}
-.summary-card__label{font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px}
+.summary-card__value--purple{color:var(--purple)}
+.summary-card__label{font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:0.8px;font-weight:500}
+.summary-card__change{font-size:9px;color:var(--gray-light);margin-top:4px;display:flex;align-items:center;justify-content:center;gap:2px}
+.summary-card__change--up{color:var(--lime)}
+.summary-card__change--down{color:var(--red)}
 
-/* TABS */
-.view-tabs{display:flex;gap:8px;margin-bottom:24px;animation:fadeInUp 0.5s 0.15s var(--transition) both}
-.view-tab{flex:1;padding:10px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;text-align:center;background:var(--dark-card);border:1px solid var(--dark-border);color:var(--gray-light);transition:all 0.2s;-webkit-tap-highlight-color:transparent}
-.view-tab:active{transform:scale(0.95)}
-.view-tab--active{background:var(--lime);color:var(--dark);border-color:var(--lime)}
+/* TOTAL SUMMARY */
+.total-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px;animation:fadeInUp 0.5s 0.1s var(--transition) both}
 
 /* CALENDAR */
-.calendar{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:var(--radius);padding:20px;margin-bottom:28px;animation:fadeInUp 0.5s 0.2s var(--transition) both}
+.calendar{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:var(--radius);padding:20px;margin-bottom:28px;animation:fadeInUp 0.5s 0.12s var(--transition) both}
 .calendar__header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.calendar__nav{width:36px;height:36px;border-radius:50%;background:var(--dark-surface);display:flex;align-items:center;justify-content:center;transition:all 0.2s;-webkit-tap-highlight-color:transparent}
+.calendar__nav{width:36px;height:36px;border-radius:50%;background:var(--dark-surface);display:flex;align-items:center;justify-content:center;transition:all 0.2s;-webkit-tap-highlight-color:transparent;border:1px solid transparent}
+.calendar__nav:hover{border-color:var(--lime-dim);background:var(--lime-dim)}
 .calendar__nav:active{transform:scale(0.9)}
 .calendar__nav svg{width:18px;height:18px;stroke:var(--white);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .calendar__month{font-family:var(--font-display);font-size:16px;font-weight:600}
@@ -54,11 +79,13 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
 .calendar__days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .calendar__day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:10px;font-size:14px;font-family:var(--font-display);cursor:pointer;transition:all 0.2s;-webkit-tap-highlight-color:transparent;position:relative;gap:3px}
 .calendar__day:active{transform:scale(0.9)}
+.calendar__day:hover{background:var(--dark-surface)}
 .calendar__day--empty{pointer-events:none}
-.calendar__day--today{background:var(--dark-surface);font-weight:700;color:var(--lime)}
-.calendar__day--selected{background:var(--lime)!important;color:var(--dark)!important;font-weight:700}
+.calendar__day--today{background:var(--dark-surface);font-weight:700;color:var(--lime);border:1px solid var(--lime-dim)}
+.calendar__day--selected{background:var(--lime)!important;color:var(--dark)!important;font-weight:700;transform:scale(1.05)}
 .calendar__day--selected .calendar__dot{background:var(--dark)!important}
 .calendar__day--has-workout .calendar__dot{display:block}
+.calendar__day--streak .calendar__dot{background:var(--orange);animation:pulse 1.5s ease-in-out infinite}
 .calendar__dot{display:none;width:5px;height:5px;border-radius:50%;background:var(--lime)}
 .calendar__day--other{color:var(--gray);opacity:0.4}
 
@@ -79,40 +106,104 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
 .day-workout__name{font-size:14px;font-weight:600;margin-bottom:2px}
 .day-workout__meta{font-size:12px;color:var(--gray);display:flex;gap:10px}
 
-/* BAR CHART */
-.chart-section{margin-bottom:28px;animation:fadeInUp 0.5s 0.25s var(--transition) both}
+/* BAR CHART SECTION */
+.chart-section{margin-bottom:28px;animation:fadeInUp 0.5s 0.14s var(--transition) both}
 .section-label{font-size:13px;color:var(--gray);text-transform:uppercase;letter-spacing:1.5px;font-family:var(--font-display);margin-bottom:14px}
 .bar-chart{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:var(--radius);padding:20px}
 .bar-chart__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .bar-chart__title{font-size:14px;font-weight:600}
 .bar-chart__toggle{display:flex;gap:4px}
-.bar-chart__toggle-btn{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:500;background:var(--dark-surface);color:var(--gray-light);transition:all 0.2s}
-.bar-chart__toggle-btn--active{background:var(--lime-dim);color:var(--lime)}
+.bar-chart__toggle-btn{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:500;background:var(--dark-surface);color:var(--gray-light);transition:all 0.2s;border:1px solid transparent}
+.bar-chart__toggle-btn:hover{border-color:var(--lime-dim)}
+.bar-chart__toggle-btn--active{background:var(--lime-dim);color:var(--lime);border-color:var(--lime)}
 .bar-chart__bars{display:flex;align-items:flex-end;gap:6px;height:120px;padding-top:10px}
 .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%}
-.bar-col__bar{width:100%;border-radius:4px 4px 0 0;background:var(--lime);transition:height 0.6s var(--transition);margin-top:auto;min-height:4px;position:relative}
-.bar-col__bar::after{content:attr(data-value);position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--gray-light);font-family:var(--font-display);white-space:nowrap;opacity:0;transition:opacity 0.2s}
+.bar-col__bar{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--lime) 0%,var(--lime-glow) 100%);transition:height 0.6s var(--transition);margin-top:auto;min-height:4px;position:relative}
+.bar-col__bar::after{content:attr(data-value);position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--gray-light);font-family:var(--font-display);white-space:nowrap;opacity:0;transition:opacity 0.2s;background:var(--dark-surface);padding:2px 6px;border-radius:4px}
 .bar-col:hover .bar-col__bar::after{opacity:1}
 .bar-col__label{font-size:10px;color:var(--gray);font-family:var(--font-display)}
 
+/* MONTHLY TREND GRAPH */
+.trend-section{margin-bottom:28px;animation:fadeInUp 0.5s 0.16s var(--transition) both}
+.trend-chart{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:var(--radius);padding:20px}
+.trend-chart__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.trend-chart__title{font-size:14px;font-weight:600}
+.trend-chart__period{font-size:12px;color:var(--gray-light)}
+.trend-graph{position:relative;height:140px;margin:20px 0}
+.trend-graph__grid{position:absolute;top:0;left:0;right:0;bottom:0;opacity:0.1}
+.trend-graph__grid-line{position:absolute;left:0;right:0;height:1px;background:var(--white)}
+.trend-graph__line{position:absolute;top:0;left:0;right:0;bottom:0}
+.trend-graph__path{stroke:var(--lime);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px var(--lime-glow))}
+.trend-graph__fill{fill:url(#trendGradient);opacity:0.2}
+.trend-graph__points{position:absolute;top:0;left:0;right:0;bottom:0}
+.trend-graph__point{position:absolute;width:8px;height:8px;background:var(--lime);border:2px solid var(--dark);border-radius:50%;transform:translate(-50%,-50%);cursor:pointer;transition:all 0.2s}
+.trend-graph__point:hover{transform:translate(-50%,-50%) scale(1.3);box-shadow:0 0 12px var(--lime-glow)}
+.trend-labels{display:flex;justify-content:space-between;margin-top:10px}
+.trend-label{font-size:10px;color:var(--gray);font-family:var(--font-display)}
+
+/* FILTER TABS */
+.filter-section{margin-bottom:20px;animation:fadeInUp 0.5s 0.18s var(--transition) both}
+.filter-tabs{display:flex;gap:6px;overflow-x:auto;padding:2px}
+.filter-tab{flex-shrink:0;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;text-align:center;background:var(--dark-card);border:1px solid var(--dark-border);color:var(--gray-light);transition:all 0.2s;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+.filter-tab:active{transform:scale(0.95)}
+.filter-tab--active{background:var(--lime);color:var(--dark);border-color:var(--lime);transform:scale(1.02)}
+.filter-tab__count{margin-left:6px;opacity:0.7}
+
 /* HISTORY LIST */
-.history-section{animation:fadeInUp 0.5s 0.3s var(--transition) both}
+.history-section{animation:fadeInUp 0.5s 0.2s var(--transition) both}
+.history-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.history-count{font-size:12px;color:var(--gray-light)}
+.history-sort{font-size:12px;color:var(--lime);cursor:pointer}
 .history-item{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:var(--radius);padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.2s;-webkit-tap-highlight-color:transparent}
 .history-item:active{transform:scale(0.97)}
-.history-item__icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.history-item:hover{border-color:var(--lime-dim)}
+.history-item__icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;position:relative}
 .history-item__icon--running{background:rgba(204,255,0,0.12)}
 .history-item__icon--strength{background:rgba(59,130,246,0.12)}
 .history-item__icon--hiit{background:rgba(255,71,87,0.12)}
 .history-item__icon--yoga{background:rgba(168,85,247,0.12)}
+.history-item__icon::after{content:'';position:absolute;top:0;right:0;width:8px;height:8px;border-radius:50%;opacity:0}
+.history-item__icon--recent::after{background:var(--lime);opacity:1;animation:pulse 2s ease-in-out infinite}
 .history-item__info{flex:1;min-width:0}
 .history-item__name{font-size:15px;font-weight:600;margin-bottom:3px}
 .history-item__date{font-size:12px;color:var(--gray);margin-bottom:4px}
-.history-item__stats{display:flex;gap:12px;font-size:12px;color:var(--gray-light)}
+.history-item__stats{display:flex;gap:12px;font-size:12px;color:var(--gray-light);flex-wrap:wrap}
 .history-item__stat{display:flex;align-items:center;gap:3px}
 .history-empty{text-align:center;padding:40px 20px;color:var(--gray)}
-.history-empty__icon{font-size:48px;margin-bottom:12px}
+.history-empty__icon{font-size:48px;margin-bottom:12px;opacity:0.5}
 .history-empty__text{font-size:14px;margin-bottom:16px}
-.history-empty__btn{display:inline-block;padding:12px 24px;background:var(--lime);color:var(--dark);border-radius:var(--radius-sm);font-weight:600;font-size:14px}
+.history-empty__btn{display:inline-block;padding:12px 24px;background:var(--lime);color:var(--dark);border-radius:var(--radius-sm);font-weight:600;font-size:14px;transition:all 0.2s}
+.history-empty__btn:hover{transform:translateY(-1px)}
+
+/* PERSONAL BESTS */
+.personal-bests{margin-bottom:28px;animation:fadeInUp 0.5s 0.22s var(--transition) both}
+.personal-bests__title{font-size:15px;font-weight:600;color:var(--lime);margin-bottom:16px}
+.bests-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.best-card{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:var(--radius-sm);padding:16px;text-align:center;position:relative;overflow:hidden}
+.best-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 0%,var(--lime) 50%,transparent 100%);opacity:0;transition:opacity 0.3s}
+.best-card:hover::before{opacity:1}
+.best-card__icon{font-size:24px;margin-bottom:8px}
+.best-card__value{font-family:var(--font-display);font-size:20px;font-weight:700;line-height:1;margin-bottom:4px;color:var(--lime)}
+.best-card__label{font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.best-card__date{font-size:9px;color:var(--gray-light)}
+.best-card--highlight{border-color:var(--lime-dim);animation:glow 3s ease-in-out infinite}
+
+/* ACHIEVEMENTS */
+.achievements-section{margin-bottom:28px;animation:fadeInUp 0.5s 0.24s var(--transition) both}
+.achievements__title{font-size:15px;font-weight:600;color:var(--lime);margin-bottom:16px}
+.achievements-scroll{display:flex;gap:12px;overflow-x:auto;padding:4px 0 8px}
+.achievement{flex-shrink:0;width:100px;background:var(--dark-card);border:1px solid var(--dark-border);border-radius:var(--radius-sm);padding:12px;text-align:center}
+.achievement--unlocked{border-color:var(--lime-dim);background:linear-gradient(135deg,var(--dark-card) 0%,rgba(204,255,0,0.05) 100%)}
+.achievement__icon{font-size:20px;margin-bottom:6px;opacity:0.6}
+.achievement--unlocked .achievement__icon{opacity:1}
+.achievement__name{font-size:10px;font-weight:600;margin-bottom:2px}
+.achievement__desc{font-size:8px;color:var(--gray);line-height:1.2}
+.achievement--unlocked .achievement__desc{color:var(--gray-light)}
+
+/* LOAD MORE */
+.load-more{text-align:center;margin:24px 0;animation:fadeInUp 0.5s 0.26s var(--transition) both}
+.load-more__btn{padding:12px 32px;background:var(--dark-surface);border:1px solid var(--dark-border);color:var(--gray-light);border-radius:var(--radius-sm);font-size:13px;font-weight:600;transition:all 0.2s;cursor:pointer}
+.load-more__btn:hover{border-color:var(--lime);color:var(--lime)}
 
 /* BOTTOM NAV */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-height)+var(--safe-bottom));padding-bottom:var(--safe-bottom);background:rgba(13,13,13,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--dark-border);display:flex;align-items:center;justify-content:space-around;z-index:100}
@@ -123,7 +214,19 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
 .nav-item__icon svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .nav-item__label{font-size:10px;font-weight:500}
 
-@media(min-width:768px){.main-content{max-width:600px}.summary-row{grid-template-columns:repeat(4,1fr)}.bottom-nav{max-width:480px;left:50%;transform:translateX(-50%);border-radius:20px 20px 0 0}}
+/* RESPONSIVE */
+@media(min-width:768px){
+  .main-content{max-width:600px}
+  .summary-row{grid-template-columns:repeat(4,1fr)}
+  .bests-grid{grid-template-columns:repeat(4,1fr)}
+  .bottom-nav{max-width:480px;left:50%;transform:translateX(-50%);border-radius:20px 20px 0 0}
+  .filter-tabs{justify-content:center}
+  .achievements-scroll{justify-content:center;flex-wrap:wrap}
+  .achievement{width:120px}
+}
+
+/* DARK GLASSMORPHISM EFFECTS */
+.glass-card{background:rgba(30,30,30,0.8);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1)}
 </style>
 </head>
 <body>
@@ -136,8 +239,57 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
   <h1 class="page-title">운동 기록 📊</h1>
   <p class="page-subtitle">꾸준함이 실력이 됩니다</p>
 
-  <!-- Summary -->
-  <div class="summary-row">
+  <!-- Streak Counter -->
+  <div class="streak-section">
+    <div class="streak-card">
+      <div class="streak-counter">
+        <span class="streak-flame">🔥</span>
+        <span class="streak-number" id="streakDays">0</span>
+      </div>
+      <div class="streak-label">연속 운동 스트릭</div>
+      <div class="streak-progress">
+        <div class="streak-progress-fill" id="streakProgress" style="width:0%"></div>
+      </div>
+      <div class="streak-goal">
+        <span>목표: 30일</span>
+        <span id="streakGoalText">시작해보세요!</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weekly Summary Cards -->
+  <div class="weekly-summary">
+    <h2 class="weekly-summary__title">🗓 이번 주 운동 요약</h2>
+    <div class="summary-row">
+      <div class="summary-card">
+        <div class="summary-card__icon">⏱</div>
+        <div class="summary-card__value summary-card__value--lime" id="weeklyTime">0h</div>
+        <div class="summary-card__label">운동 시간</div>
+        <div class="summary-card__change" id="weeklyTimeChange">
+          <span>—</span>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-card__icon">🔥</div>
+        <div class="summary-card__value summary-card__value--red" id="weeklyCalories">0</div>
+        <div class="summary-card__label">소모 칼로리</div>
+        <div class="summary-card__change" id="weeklyCaloriesChange">
+          <span>—</span>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-card__icon">💪</div>
+        <div class="summary-card__value summary-card__value--blue" id="weeklyCount">0</div>
+        <div class="summary-card__label">운동 횟수</div>
+        <div class="summary-card__change" id="weeklyCountChange">
+          <span>—</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Total Summary -->
+  <div class="total-summary">
     <div class="summary-card">
       <div class="summary-card__value summary-card__value--lime" id="totalWorkouts">0</div>
       <div class="summary-card__label">총 운동</div>
@@ -181,12 +333,12 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
     <div id="dayDetailContent"></div>
   </div>
 
-  <!-- Bar Chart -->
+  <!-- Weekly Bar Chart -->
   <div class="chart-section">
-    <p class="section-label">Activity Chart</p>
+    <p class="section-label">🗓 Weekly Activity Chart</p>
     <div class="bar-chart">
       <div class="bar-chart__header">
-        <span class="bar-chart__title">칼로리 소모</span>
+        <span class="bar-chart__title">주간 칼로리 소모</span>
         <div class="bar-chart__toggle">
           <button class="bar-chart__toggle-btn bar-chart__toggle-btn--active" onclick="setChartView('week',this)">주간</button>
           <button class="bar-chart__toggle-btn" onclick="setChartView('month',this)">월간</button>
@@ -196,61 +348,338 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
     </div>
   </div>
 
+  <!-- Monthly Trend Graph -->
+  <div class="trend-section">
+    <p class="section-label">📈 Monthly Trends</p>
+    <div class="trend-chart">
+      <div class="trend-chart__header">
+        <span class="trend-chart__title">월간 칼로리 트렌드</span>
+        <span class="trend-chart__period">최근 6개월</span>
+      </div>
+      <div class="trend-graph" id="trendGraph">
+        <div class="trend-graph__grid">
+          <div class="trend-graph__grid-line" style="top:0%"></div>
+          <div class="trend-graph__grid-line" style="top:25%"></div>
+          <div class="trend-graph__grid-line" style="top:50%"></div>
+          <div class="trend-graph__grid-line" style="top:75%"></div>
+          <div class="trend-graph__grid-line" style="top:100%"></div>
+        </div>
+        <div class="trend-graph__line">
+          <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="trendGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:var(--lime);stop-opacity:0.3" />
+                <stop offset="100%" style="stop-color:var(--lime);stop-opacity:0" />
+              </linearGradient>
+            </defs>
+            <path class="trend-graph__fill" id="trendFill" d=""></path>
+            <path class="trend-graph__path" id="trendPath" d=""></path>
+          </svg>
+        </div>
+        <div class="trend-graph__points" id="trendPoints"></div>
+      </div>
+      <div class="trend-labels" id="trendLabels"></div>
+    </div>
+  </div>
+
+  <!-- Personal Bests -->
+  <div class="personal-bests">
+    <h2 class="personal-bests__title">🏆 개인 최고 기록</h2>
+    <div class="bests-grid">
+      <div class="best-card" id="longestRun">
+        <div class="best-card__icon">🏃‍♂️</div>
+        <div class="best-card__value">0km</div>
+        <div class="best-card__label">최장 거리</div>
+        <div class="best-card__date">—</div>
+      </div>
+      <div class="best-card" id="mostCalories">
+        <div class="best-card__icon">🔥</div>
+        <div class="best-card__value">0</div>
+        <div class="best-card__label">최다 칼로리</div>
+        <div class="best-card__date">—</div>
+      </div>
+      <div class="best-card" id="longestWorkout">
+        <div class="best-card__icon">⏱</div>
+        <div class="best-card__value">0분</div>
+        <div class="best-card__label">최장 시간</div>
+        <div class="best-card__date">—</div>
+      </div>
+      <div class="best-card best-card--highlight" id="currentStreak">
+        <div class="best-card__icon">🔥</div>
+        <div class="best-card__value">0일</div>
+        <div class="best-card__label">현재 스트릭</div>
+        <div class="best-card__date">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Achievements -->
+  <div class="achievements-section">
+    <h2 class="achievements__title">🎖 업적</h2>
+    <div class="achievements-scroll">
+      <div class="achievement" id="firstWorkout">
+        <div class="achievement__icon">🎯</div>
+        <div class="achievement__name">첫 걸음</div>
+        <div class="achievement__desc">첫 운동 완료</div>
+      </div>
+      <div class="achievement" id="streak7">
+        <div class="achievement__icon">🔥</div>
+        <div class="achievement__name">일주일</div>
+        <div class="achievement__desc">7일 연속</div>
+      </div>
+      <div class="achievement" id="streak30">
+        <div class="achievement__icon">💪</div>
+        <div class="achievement__name">한 달</div>
+        <div class="achievement__desc">30일 연속</div>
+      </div>
+      <div class="achievement" id="calories1000">
+        <div class="achievement__icon">🔥</div>
+        <div class="achievement__name">칼로리</div>
+        <div class="achievement__desc">1000kcal 달성</div>
+      </div>
+      <div class="achievement" id="workouts50">
+        <div class="achievement__icon">🏋️</div>
+        <div class="achievement__name">베테랑</div>
+        <div class="achievement__desc">50회 운동</div>
+      </div>
+      <div class="achievement" id="allTypes">
+        <div class="achievement__icon">🌟</div>
+        <div class="achievement__name">멀티</div>
+        <div class="achievement__desc">모든 운동 시도</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-section">
+    <div class="filter-tabs" id="filterTabs">
+      <button class="filter-tab filter-tab--active" onclick="setFilter('all',this)">
+        전체 <span class="filter-tab__count" id="countAll">0</span>
+      </button>
+      <button class="filter-tab" onclick="setFilter('running',this)">
+        🏃 러닝 <span class="filter-tab__count" id="countRunning">0</span>
+      </button>
+      <button class="filter-tab" onclick="setFilter('strength',this)">
+        🏋️ 근력 <span class="filter-tab__count" id="countStrength">0</span>
+      </button>
+      <button class="filter-tab" onclick="setFilter('hiit',this)">
+        ⚡ HIIT <span class="filter-tab__count" id="countHiit">0</span>
+      </button>
+      <button class="filter-tab" onclick="setFilter('yoga',this)">
+        🧘 요가 <span class="filter-tab__count" id="countYoga">0</span>
+      </button>
+    </div>
+  </div>
+
   <!-- History List -->
   <div class="history-section">
-    <p class="section-label">All Records</p>
+    <div class="history-header">
+      <p class="section-label">📋 운동 기록 리스트</p>
+      <div style="display:flex;gap:16px;align-items:center">
+        <span class="history-count" id="historyCount">총 0개 기록</span>
+        <span class="history-sort" onclick="toggleSort()">정렬 ↕️</span>
+      </div>
+    </div>
     <div id="historyList"></div>
+    <div class="load-more" id="loadMore" style="display:none">
+      <button class="load-more__btn" onclick="loadMoreHistory()">더 보기</button>
+    </div>
   </div>
 </main>
 
 <nav class="bottom-nav">
   <a href="index.html" class="nav-item"><div class="nav-item__icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><span class="nav-item__label">홈</span></a>
-  <a href="workout.html" class="nav-item"><div class="nav-item__icon"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div><span class="nav-item__label">운동</span></a>
+  <a href="workout.html" class="nav-item"><div class="nav-item__icon"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4-4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div><span class="nav-item__label">운동</span></a>
   <a href="history.html" class="nav-item nav-item--active"><div class="nav-item__icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><span class="nav-item__label">기록</span></a>
   <a href="profile.html" class="nav-item"><div class="nav-item__icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><span class="nav-item__label">프로필</span></a>
 </nav>
 
 <script>
 /* ============================================
-   VITALITY — History & Calendar
+   VITALITY — Enhanced History & Calendar
    ============================================ */
 
-// Load history + generate sample data if empty
+// Global variables
 let history = JSON.parse(localStorage.getItem('vitality_history') || '[]');
+let currentFilter = 'all';
+let currentSort = 'date-desc'; // date-desc, date-asc, calories-desc, time-desc
+let historyDisplayCount = 12;
+let workoutDates = {};
+
+// Initialize sample data if empty
 if (history.length === 0) {
-  // Generate sample data for the past 2 weeks
+  generateSampleData();
+}
+
+function generateSampleData() {
   const types = ['running','strength','hiit','yoga'];
-  const names = {running:['모닝 러닝','인터벌 러닝','이지 러닝'],strength:['상체 푸쉬','하체 데이','전신 근력'],hiit:['타바타','EMOM','풀 바디 HIIT'],yoga:['모닝 빈야사','파워 요가','리스토어 요가']};
+  const names = {
+    running: ['모닝 러닝','인터벌 러닝','이지 러닝','언덕 달리기','파틀렉 런','트랙 런','트레드밀','야외 조깅','스피드 런','거리 런'],
+    strength: ['상체 푸쉬','하체 데이','전신 근력','가슴 운동','등 운동','어깨 운동','팔 운동','코어 운동','스쿼트 데이','데드리프트'],
+    hiit: ['타바타','EMOM','풀 바디 HIIT','점프 트레이닝','서킷 트레이닝','인터벌','부트캠프','크로스핏','카디오 HIIT','파워 HIIT'],
+    yoga: ['모닝 빈야사','파워 요가','리스토어 요가','하타 요가','아쉬탕가','핫 요가','음 요가','프로우 요가','명상 요가','선셋 요가']
+  };
   const emojis = {running:'🏃',strength:'🏋️',hiit:'⚡',yoga:'🧘'};
-  for (let d = 0; d < 14; d++) {
-    if (Math.random() < 0.35) continue; // some rest days
+  
+  // Generate data for past 8 weeks
+  for (let d = 0; d < 56; d++) {
+    if (Math.random() < 0.4) continue; // some rest days
+    
     const date = new Date();
     date.setDate(date.getDate() - d);
-    date.setHours(6 + Math.floor(Math.random()*14), Math.floor(Math.random()*60));
+    date.setHours(6 + Math.floor(Math.random()*14), Math.floor(Math.random()*60), 0, 0);
+    
     const type = types[Math.floor(Math.random()*types.length)];
     const name = names[type][Math.floor(Math.random()*names[type].length)];
-    const dur = 1200 + Math.floor(Math.random()*2400);
+    const baseDuration = type === 'hiit' ? 1200 : type === 'yoga' ? 2700 : type === 'strength' ? 3000 : 2400;
+    const duration = baseDuration + Math.floor(Math.random()*1800);
+    const intensity = 0.08 + Math.random()*0.08;
+    
     history.push({
-      type, name,
-      duration: dur,
-      calories: Math.round(dur * (0.12 + Math.random()*0.1)),
-      heartRate: 120 + Math.floor(Math.random()*30),
-      distance: type === 'running' ? parseFloat((dur*0.0028*(0.8+Math.random()*0.4)).toFixed(2)) : 0,
-      date: date.toISOString()
+      id: Date.now() + Math.random(),
+      type, 
+      name,
+      duration: duration,
+      calories: Math.round(duration * intensity),
+      heartRate: 110 + Math.floor(Math.random()*50),
+      distance: type === 'running' ? parseFloat((duration*0.003*(0.8+Math.random()*0.6)).toFixed(2)) : 0,
+      date: date.toISOString(),
+      notes: Math.random() < 0.3 ? ['좋은 컨디션!','힘들었지만 완주','새 기록 달성','기분 좋은 운동'][Math.floor(Math.random()*4)] : ''
     });
   }
+  
+  // Sort by date descending
+  history.sort((a,b) => new Date(b.date) - new Date(a.date));
   localStorage.setItem('vitality_history', JSON.stringify(history));
 }
 
-// Summary
-const totalWorkouts = history.length;
-const totalSeconds = history.reduce((a,h) => a + h.duration, 0);
-const totalCal = history.reduce((a,h) => a + h.calories, 0);
-document.getElementById('totalWorkouts').textContent = totalWorkouts;
-document.getElementById('totalTime').textContent = Math.round(totalSeconds/3600) + 'h';
-document.getElementById('totalCal').textContent = totalCal.toLocaleString();
+// Calculate streak
+function calculateStreak() {
+  if (history.length === 0) return 0;
+  
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  
+  const workoutDates = new Set();
+  history.forEach(h => {
+    const d = new Date(h.date);
+    d.setHours(0,0,0,0);
+    workoutDates.add(d.getTime());
+  });
+  
+  let streak = 0;
+  let checkDate = new Date(today);
+  
+  // Check if worked out today
+  if (workoutDates.has(checkDate.getTime())) {
+    streak = 1;
+    checkDate.setDate(checkDate.getDate() - 1);
+  } else {
+    // Check yesterday
+    checkDate.setDate(checkDate.getDate() - 1);
+    if (!workoutDates.has(checkDate.getTime())) {
+      return 0; // No workout yesterday or today = broken streak
+    }
+    streak = 1;
+    checkDate.setDate(checkDate.getDate() - 1);
+  }
+  
+  // Count consecutive days
+  while (workoutDates.has(checkDate.getTime())) {
+    streak++;
+    checkDate.setDate(checkDate.getDate() - 1);
+  }
+  
+  return streak;
+}
 
-// Calendar
+// Update streak display
+function updateStreakDisplay() {
+  const streak = calculateStreak();
+  document.getElementById('streakDays').textContent = streak;
+  document.getElementById('streakProgress').style.width = `${Math.min(streak/30*100, 100)}%`;
+  
+  let goalText = 'Keep going!';
+  if (streak === 0) goalText = '시작해보세요!';
+  else if (streak < 7) goalText = `${7-streak}일 더!`;
+  else if (streak < 30) goalText = `${30-streak}일 더!`;
+  else goalText = '목표 달성! 🎉';
+  
+  document.getElementById('streakGoalText').textContent = goalText;
+}
+
+// Calculate weekly stats
+function calculateWeeklyStats() {
+  const now = new Date();
+  const weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - now.getDay()); // Start of this week (Sunday)
+  weekStart.setHours(0,0,0,0);
+  
+  const thisWeek = history.filter(h => {
+    const d = new Date(h.date);
+    return d >= weekStart;
+  });
+  
+  const lastWeekStart = new Date(weekStart);
+  lastWeekStart.setDate(weekStart.getDate() - 7);
+  const lastWeek = history.filter(h => {
+    const d = new Date(h.date);
+    return d >= lastWeekStart && d < weekStart;
+  });
+  
+  const thisWeekTime = thisWeek.reduce((sum, h) => sum + h.duration, 0);
+  const thisWeekCalories = thisWeek.reduce((sum, h) => sum + h.calories, 0);
+  const thisWeekCount = thisWeek.length;
+  
+  const lastWeekTime = lastWeek.reduce((sum, h) => sum + h.duration, 0);
+  const lastWeekCalories = lastWeek.reduce((sum, h) => sum + h.calories, 0);
+  const lastWeekCount = lastWeek.length;
+  
+  document.getElementById('weeklyTime').textContent = Math.round(thisWeekTime/3600) + 'h';
+  document.getElementById('weeklyCalories').textContent = thisWeekCalories.toLocaleString();
+  document.getElementById('weeklyCount').textContent = thisWeekCount;
+  
+  // Show changes
+  function updateChange(elementId, current, previous, unit = '') {
+    const element = document.getElementById(elementId);
+    if (previous === 0) {
+      element.innerHTML = '<span>신규!</span>';
+      element.className = 'summary-card__change summary-card__change--up';
+      return;
+    }
+    
+    const change = current - previous;
+    const percent = Math.round(Math.abs(change) / previous * 100);
+    
+    if (change > 0) {
+      element.innerHTML = `<span>↗ +${percent}%</span>`;
+      element.className = 'summary-card__change summary-card__change--up';
+    } else if (change < 0) {
+      element.innerHTML = `<span>↘ -${percent}%</span>`;
+      element.className = 'summary-card__change summary-card__change--down';
+    } else {
+      element.innerHTML = '<span>—</span>';
+      element.className = 'summary-card__change';
+    }
+  }
+  
+  updateChange('weeklyTimeChange', thisWeekTime, lastWeekTime);
+  updateChange('weeklyCaloriesChange', thisWeekCalories, lastWeekCalories);
+  updateChange('weeklyCountChange', thisWeekCount, lastWeekCount);
+}
+
+// Calculate total stats
+function calculateTotalStats() {
+  const totalWorkouts = history.length;
+  const totalSeconds = history.reduce((a,h) => a + h.duration, 0);
+  const totalCal = history.reduce((a,h) => a + h.calories, 0);
+  
+  document.getElementById('totalWorkouts').textContent = totalWorkouts;
+  document.getElementById('totalTime').textContent = Math.round(totalSeconds/3600) + 'h';
+  document.getElementById('totalCal').textContent = totalCal.toLocaleString();
+}
+
+// Calendar functionality
 let currentYear, currentMonth;
 const today = new Date();
 currentYear = today.getFullYear();
@@ -267,9 +696,8 @@ function getWorkoutDates() {
   return dates;
 }
 
-const workoutDates = getWorkoutDates();
-
 function renderCalendar() {
+  workoutDates = getWorkoutDates();
   const monthNames = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   document.getElementById('calendarMonth').textContent = `${currentYear}년 ${monthNames[currentMonth]}`;
   
@@ -292,6 +720,7 @@ function renderCalendar() {
   const todayDate = today.getDate();
   const todayMonth = today.getMonth();
   const todayYear = today.getFullYear();
+  const streak = calculateStreak();
   
   for (let d = 1; d <= daysInMonth; d++) {
     const el = document.createElement('div');
@@ -299,9 +728,16 @@ function renderCalendar() {
     const hasWorkout = workoutDates[key];
     const isToday = d === todayDate && currentMonth === todayMonth && currentYear === todayYear;
     
+    // Check if this day is part of current streak
+    const checkDate = new Date(currentYear, currentMonth, d);
+    const diffDays = Math.floor((today - checkDate) / (1000*60*60*24));
+    const isInStreak = diffDays >= 0 && diffDays < streak && hasWorkout;
+    
     let cls = 'calendar__day';
     if (isToday) cls += ' calendar__day--today';
     if (hasWorkout) cls += ' calendar__day--has-workout';
+    if (isInStreak) cls += ' calendar__day--streak';
+    
     el.className = cls;
     el.innerHTML = `<span>${d}</span><span class="calendar__dot"></span>`;
     el.onclick = () => selectDay(d, key, hasWorkout);
@@ -324,13 +760,16 @@ function changeMonth(dir) {
   if (currentMonth < 0) { currentMonth = 11; currentYear--; }
   if (currentMonth > 11) { currentMonth = 0; currentYear++; }
   renderCalendar();
+  
   // Animate
   const cal = document.getElementById('calendar');
-  cal.style.animation = 'none'; cal.offsetHeight; cal.style.animation = 'scaleIn 0.3s var(--transition)';
+  cal.style.animation = 'none'; 
+  cal.offsetHeight; 
+  cal.style.animation = 'scaleIn 0.3s var(--transition)';
 }
 
 function selectDay(day, key, workouts) {
-  // Highlight
+  // Highlight selected day
   document.querySelectorAll('.calendar__day--selected').forEach(el => el.classList.remove('calendar__day--selected'));
   const allDays = document.querySelectorAll('.calendar__day:not(.calendar__day--other)');
   allDays.forEach(el => {
@@ -338,7 +777,6 @@ function selectDay(day, key, workouts) {
   });
   
   const detail = document.getElementById('dayDetail');
-  const monthNames = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   document.getElementById('dayDetailTitle').innerHTML = `📅 <span>${currentMonth+1}월 ${day}일</span> 운동 기록`;
   
   const content = document.getElementById('dayDetailContent');
@@ -352,9 +790,10 @@ function selectDay(day, key, workouts) {
         <div class="day-workout__info">
           <div class="day-workout__name">${w.name}</div>
           <div class="day-workout__meta">
-            <span>${Math.round(w.duration/60)}분</span>
-            <span>${w.calories} kcal</span>
-            <span>${w.heartRate} bpm</span>
+            <span>⏱ ${Math.round(w.duration/60)}분</span>
+            <span>🔥 ${w.calories} kcal</span>
+            <span>❤️ ${w.heartRate} bpm</span>
+            ${w.distance ? `<span>🏃 ${w.distance}km</span>` : ''}
           </div>
         </div>
       </div>
@@ -364,9 +803,7 @@ function selectDay(day, key, workouts) {
   detail.classList.add('active');
 }
 
-renderCalendar();
-
-// Bar Chart
+// Bar Chart functionality
 function setChartView(view, btn) {
   document.querySelectorAll('.bar-chart__toggle-btn').forEach(b => b.classList.remove('bar-chart__toggle-btn--active'));
   btn.classList.add('bar-chart__toggle-btn--active');
@@ -380,14 +817,16 @@ function renderChart(view) {
   if (view === 'week') {
     const days = ['일','월','화','수','목','금','토'];
     const data = new Array(7).fill(0);
+    
     history.forEach(h => {
       const d = new Date(h.date);
       const diff = Math.floor((today - d) / (1000*60*60*24));
-      if (diff < 7) {
+      if (diff < 7 && diff >= 0) {
         data[d.getDay()] += h.calories;
       }
     });
-    const max = Math.max(...data, 1);
+    
+    const max = Math.max(...data, 100);
     days.forEach((label, i) => {
       const col = document.createElement('div');
       col.className = 'bar-col';
@@ -404,48 +843,224 @@ function renderChart(view) {
         const diff = Math.floor((today - d) / (1000*60*60*24));
         if (diff >= w*7 && diff < (w+1)*7) cal += h.calories;
       });
+      
       const col = document.createElement('div');
       col.className = 'bar-col';
-      col.innerHTML = `<div class="bar-col__bar" data-value="${cal} kcal" style="height:${Math.max(cal/2000*100,3)}%"></div><span class="bar-col__label">${4-w}주차</span>`;
+      const pct = Math.max(cal/3000*100, 3);
+      col.innerHTML = `<div class="bar-col__bar" data-value="${cal} kcal" style="height:${pct}%"></div><span class="bar-col__label">${4-w}주차</span>`;
       container.appendChild(col);
     }
   }
   
   // Animate bars
   setTimeout(() => {
-    container.querySelectorAll('.bar-col__bar').forEach(bar => {
+    container.querySelectorAll('.bar-col__bar').forEach((bar, index) => {
       const h = bar.style.height;
       bar.style.height = '3%';
-      requestAnimationFrame(() => { bar.style.height = h; });
+      setTimeout(() => { bar.style.height = h; }, index * 100);
     });
   }, 50);
 }
 
-renderChart('week');
+// Monthly trend graph
+function renderTrendGraph() {
+  const months = [];
+  const data = [];
+  
+  for (let i = 5; i >= 0; i--) {
+    const date = new Date();
+    date.setMonth(date.getMonth() - i);
+    months.push(date.toLocaleDateString('ko', { month: 'short' }));
+    
+    const monthCals = history
+      .filter(h => {
+        const d = new Date(h.date);
+        return d.getFullYear() === date.getFullYear() && d.getMonth() === date.getMonth();
+      })
+      .reduce((sum, h) => sum + h.calories, 0);
+    
+    data.push(monthCals);
+  }
+  
+  // Update labels
+  const labelsContainer = document.getElementById('trendLabels');
+  labelsContainer.innerHTML = months.map(month => `<span class="trend-label">${month}</span>`).join('');
+  
+  // Create SVG path
+  const max = Math.max(...data, 1000);
+  const points = data.map((val, i) => `${i * 20},${100 - (val / max * 80)}`).join(' ');
+  
+  const path = `M ${points} L 100,100 L 0,100 Z`;
+  const line = `M ${points}`;
+  
+  document.getElementById('trendFill').setAttribute('d', path);
+  document.getElementById('trendPath').setAttribute('d', line);
+  
+  // Add interactive points
+  const pointsContainer = document.getElementById('trendPoints');
+  pointsContainer.innerHTML = '';
+  
+  data.forEach((val, i) => {
+    const point = document.createElement('div');
+    point.className = 'trend-graph__point';
+    point.style.left = `${i * 20}%`;
+    point.style.top = `${100 - (val / max * 80)}%`;
+    point.title = `${months[i]}: ${val.toLocaleString()} kcal`;
+    pointsContainer.appendChild(point);
+  });
+}
 
-// History List
+// Personal bests calculation
+function calculatePersonalBests() {
+  if (history.length === 0) return;
+  
+  // Longest run
+  const longestRun = history
+    .filter(h => h.type === 'running' && h.distance)
+    .sort((a,b) => b.distance - a.distance)[0];
+  
+  if (longestRun) {
+    document.querySelector('#longestRun .best-card__value').textContent = longestRun.distance + 'km';
+    document.querySelector('#longestRun .best-card__date').textContent = 
+      new Date(longestRun.date).toLocaleDateString('ko');
+  }
+  
+  // Most calories
+  const mostCalories = history.sort((a,b) => b.calories - a.calories)[0];
+  if (mostCalories) {
+    document.querySelector('#mostCalories .best-card__value').textContent = mostCalories.calories;
+    document.querySelector('#mostCalories .best-card__date').textContent = 
+      new Date(mostCalories.date).toLocaleDateString('ko');
+  }
+  
+  // Longest workout
+  const longestWorkout = history.sort((a,b) => b.duration - a.duration)[0];
+  if (longestWorkout) {
+    document.querySelector('#longestWorkout .best-card__value').textContent = 
+      Math.round(longestWorkout.duration/60) + '분';
+    document.querySelector('#longestWorkout .best-card__date').textContent = 
+      new Date(longestWorkout.date).toLocaleDateString('ko');
+  }
+  
+  // Current streak
+  const streak = calculateStreak();
+  document.querySelector('#currentStreak .best-card__value').textContent = streak + '일';
+  if (streak > 0) {
+    document.querySelector('#currentStreak .best-card__date').textContent = 
+      `${streak}일째 진행중`;
+  }
+}
+
+// Achievements system
+function updateAchievements() {
+  const achievements = {
+    firstWorkout: history.length > 0,
+    streak7: calculateStreak() >= 7,
+    streak30: calculateStreak() >= 30,
+    calories1000: history.some(h => h.calories >= 1000),
+    workouts50: history.length >= 50,
+    allTypes: ['running', 'strength', 'hiit', 'yoga'].every(type => 
+      history.some(h => h.type === type))
+  };
+  
+  Object.entries(achievements).forEach(([id, unlocked]) => {
+    const element = document.getElementById(id);
+    if (unlocked) {
+      element.classList.add('achievement--unlocked');
+    }
+  });
+}
+
+// Filter functionality
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('filter-tab--active'));
+  btn.classList.add('filter-tab--active');
+  historyDisplayCount = 12; // Reset display count
+  renderHistory();
+}
+
+function updateFilterCounts() {
+  const counts = {
+    all: history.length,
+    running: history.filter(h => h.type === 'running').length,
+    strength: history.filter(h => h.type === 'strength').length,
+    hiit: history.filter(h => h.type === 'hiit').length,
+    yoga: history.filter(h => h.type === 'yoga').length
+  };
+  
+  Object.entries(counts).forEach(([type, count]) => {
+    const element = document.getElementById(`count${type.charAt(0).toUpperCase() + type.slice(1)}`);
+    if (element) element.textContent = count;
+  });
+}
+
+// Sort functionality
+function toggleSort() {
+  const sorts = ['date-desc', 'date-asc', 'calories-desc', 'time-desc'];
+  const currentIndex = sorts.indexOf(currentSort);
+  currentSort = sorts[(currentIndex + 1) % sorts.length];
+  renderHistory();
+  
+  // Update sort indicator
+  const sortLabels = {
+    'date-desc': '최신순 ↓',
+    'date-asc': '오래된순 ↑', 
+    'calories-desc': '칼로리순 ↓',
+    'time-desc': '시간순 ↓'
+  };
+  document.querySelector('.history-sort').textContent = sortLabels[currentSort];
+}
+
+// History rendering
 function renderHistory() {
+  let filteredHistory = history;
+  
+  // Apply filter
+  if (currentFilter !== 'all') {
+    filteredHistory = history.filter(h => h.type === currentFilter);
+  }
+  
+  // Apply sort
+  filteredHistory.sort((a, b) => {
+    switch(currentSort) {
+      case 'date-asc': return new Date(a.date) - new Date(b.date);
+      case 'calories-desc': return b.calories - a.calories;
+      case 'time-desc': return b.duration - a.duration;
+      default: return new Date(b.date) - new Date(a.date);
+    }
+  });
+  
   const container = document.getElementById('historyList');
   const emojis = {running:'🏃',strength:'🏋️',hiit:'⚡',yoga:'🧘'};
   
-  if (history.length === 0) {
+  // Update count
+  document.getElementById('historyCount').textContent = 
+    `총 ${filteredHistory.length}개 기록`;
+  
+  if (filteredHistory.length === 0) {
     container.innerHTML = `
       <div class="history-empty">
         <div class="history-empty__icon">🏋️</div>
-        <div class="history-empty__text">아직 운동 기록이 없어요<br>첫 운동을 시작해보세요!</div>
+        <div class="history-empty__text">해당하는 운동 기록이 없어요<br>새로운 운동을 시작해보세요!</div>
         <a href="workout.html" class="history-empty__btn">운동 시작하기</a>
       </div>
     `;
+    document.getElementById('loadMore').style.display = 'none';
     return;
   }
   
-  container.innerHTML = history.slice(0, 20).map((h, i) => {
+  const displayHistory = filteredHistory.slice(0, historyDisplayCount);
+  
+  container.innerHTML = displayHistory.map((h, i) => {
     const d = new Date(h.date);
     const dateStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
     const durMin = Math.round(h.duration / 60);
+    const isRecent = (Date.now() - d.getTime()) < 24*60*60*1000; // Last 24h
+    
     return `
-      <div class="history-item" style="animation:fadeInUp 0.4s ${i*0.05}s var(--transition) both">
-        <div class="history-item__icon history-item__icon--${h.type}">${emojis[h.type]||'💪'}</div>
+      <div class="history-item" style="animation:fadeInUp 0.4s ${i*0.03}s var(--transition) both">
+        <div class="history-item__icon history-item__icon--${h.type} ${isRecent ? 'history-item__icon--recent' : ''}">${emojis[h.type]||'💪'}</div>
         <div class="history-item__info">
           <div class="history-item__name">${h.name}</div>
           <div class="history-item__date">${dateStr}</div>
@@ -453,14 +1068,49 @@ function renderHistory() {
             <span class="history-item__stat">⏱ ${durMin}분</span>
             <span class="history-item__stat">🔥 ${h.calories}kcal</span>
             <span class="history-item__stat">❤️ ${h.heartRate}bpm</span>
+            ${h.distance ? `<span class="history-item__stat">🏃 ${h.distance}km</span>` : ''}
           </div>
         </div>
       </div>
     `;
   }).join('');
+  
+  // Show/hide load more button
+  const loadMore = document.getElementById('loadMore');
+  if (filteredHistory.length > historyDisplayCount) {
+    loadMore.style.display = 'block';
+  } else {
+    loadMore.style.display = 'none';
+  }
 }
 
-renderHistory();
+function loadMoreHistory() {
+  historyDisplayCount += 12;
+  renderHistory();
+}
+
+// Initialize everything
+function initializeApp() {
+  updateStreakDisplay();
+  calculateWeeklyStats();
+  calculateTotalStats();
+  renderCalendar();
+  renderChart('week');
+  renderTrendGraph();
+  calculatePersonalBests();
+  updateAchievements();
+  updateFilterCounts();
+  renderHistory();
+}
+
+// Start the app
+initializeApp();
+
+// Auto-refresh every minute to update streaks and "recent" indicators
+setInterval(() => {
+  updateStreakDisplay();
+  renderCalendar();
+}, 60000);
 </script>
 </body>
 </html>
