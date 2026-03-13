@@ -1239,49 +1239,8 @@ body {
     <a href="#" class="section-more">전체보기 ›</a>
   </div>
   
-  <div class="coupon-scroll">
-    <div class="coupon-card" onclick="showToast('쿠폰 상세')">
-      <div class="coupon-badge">D-3</div>
-      <div class="coupon-card-top">
-        <div class="coupon-emoji green">🎉</div>
-        <div class="coupon-info">
-          <div class="coupon-name">웰컴 쿠폰</div>
-          <div class="coupon-desc">전 메뉴 사용 가능</div>
-        </div>
-      </div>
-      <div class="coupon-card-bottom">
-        <span class="coupon-value">2,000원</span>
-        <span class="coupon-expiry">~2025.03.31</span>
-      </div>
-    </div>
-    
-    <div class="coupon-card" onclick="showToast('쿠폰 상세')">
-      <div class="coupon-card-top">
-        <div class="coupon-emoji gold">☕</div>
-        <div class="coupon-info">
-          <div class="coupon-name">커피 할인</div>
-          <div class="coupon-desc">커피 메뉴 한정</div>
-        </div>
-      </div>
-      <div class="coupon-card-bottom">
-        <span class="coupon-value">10% OFF</span>
-        <span class="coupon-expiry">~2025.04.15</span>
-      </div>
-    </div>
-    
-    <div class="coupon-card" onclick="showToast('쿠폰 상세')">
-      <div class="coupon-card-top">
-        <div class="coupon-emoji pink">🎂</div>
-        <div class="coupon-info">
-          <div class="coupon-name">생일 쿠폰</div>
-          <div class="coupon-desc">생일 축하 무료 음료</div>
-        </div>
-      </div>
-      <div class="coupon-card-bottom">
-        <span class="coupon-value">무료 1잔</span>
-        <span class="coupon-expiry">~2025.04.30</span>
-      </div>
-    </div>
+  <div class="coupon-scroll" id="couponScroll">
+    <!-- Dynamically rendered from BC.getCoupons() -->
   </div>
 </div>
 
@@ -1300,22 +1259,7 @@ body {
     <a href="#" class="section-more">전체보기 ›</a>
   </div>
   
-  <div class="order-card">
-    <div class="order-top">
-      <span class="order-date">2025.03.13 (오늘)</span>
-      <span class="order-status completed">완료</span>
-    </div>
-    <div class="order-items">
-      <img class="order-thumb" src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&q=80" alt="카페라떼" loading="lazy">
-      <div class="order-item-info">
-        <div class="order-item-name">카페라떼 외 2건</div>
-        <div class="order-item-detail">블루밍 커피 강남점</div>
-      </div>
-    </div>
-    <div class="order-bottom">
-      <span class="order-price">22,000원</span>
-      <button class="order-reorder" onclick="showToast('장바구니에 담았어요!')">재주문</button>
-    </div>
+  <!-- Dynamic order cards rendered by loadMyPageData() -->
   </div>
   
   <div class="order-card">
@@ -1336,23 +1280,7 @@ body {
     </div>
   </div>
   
-  <div class="order-card">
-    <div class="order-top">
-      <span class="order-date">2025.03.08</span>
-      <span class="order-status completed">완료</span>
-    </div>
-    <div class="order-items">
-      <img class="order-thumb" src="https://images.unsplash.com/photo-1555507036-ab1f4038024a?w=200&q=80" alt="크루아상" loading="lazy">
-      <div class="order-item-info">
-        <div class="order-item-name">크루아상 + 녹차라떼</div>
-        <div class="order-item-detail">블루밍 커피 역삼점</div>
-      </div>
-    </div>
-    <div class="order-bottom">
-      <span class="order-price">10,000원</span>
-      <button class="order-reorder" onclick="showToast('장바구니에 담았어요!')">재주문</button>
-    </div>
-  </div>
+    <div id="emptyOrders" style="padding:24px;text-align:center;color:var(--gray-400);font-size:14px;display:none;">주문 내역이 없어요</div>
 </div>
 
 <!-- FAVORITES -->
@@ -1637,17 +1565,45 @@ function loadMyPageData() {
   const stampText = document.querySelector('.stamp-text');
   if (stampText) stampText.innerHTML = '<strong>' + (10 - stampDisplay) + '잔</strong> 남음';
 
-  // Coupons count
+  // Coupons count + render
   const coupons = BC.getCoupons();
   const couponStatEl = document.querySelector('.stat-card:nth-child(3) .stat-value');
   if (couponStatEl) couponStatEl.textContent = coupons.length + '장';
+  
+  const couponScroll = document.getElementById('couponScroll');
+  if (couponScroll) {
+    couponScroll.innerHTML = coupons.length === 0 
+      ? '<div style="padding:24px;text-align:center;color:var(--gray-400);font-size:14px;">보유한 쿠폰이 없어요</div>'
+      : coupons.map(c => {
+        const valueText = c.type === 'fixed' ? c.discount.toLocaleString('ko-KR') + '원' : Math.round(c.discount * 100) + '% OFF';
+        const emojiClass = c.icon === '🎉' ? 'green' : c.icon === '☕' ? 'gold' : 'pink';
+        return `<div class="coupon-card" onclick="showToast('${c.name} 쿠폰: ${c.desc}')">
+          <div class="coupon-card-top">
+            <div class="coupon-emoji ${emojiClass}">${c.icon || '🎟️'}</div>
+            <div class="coupon-info">
+              <div class="coupon-name">${c.name}</div>
+              <div class="coupon-desc">${c.desc}</div>
+            </div>
+          </div>
+          <div class="coupon-card-bottom">
+            <span class="coupon-value">${valueText}</span>
+            <span class="coupon-expiry">${c.expiry}</span>
+          </div>
+        </div>`;
+      }).join('');
+  }
 
   // Orders
   const orders = BC.getOrders();
   const orderSection = document.querySelector('.order-section');
-  if (orderSection && orders.length > 0) {
+  if (orderSection) {
     // Remove existing order cards
     orderSection.querySelectorAll('.order-card').forEach(el => el.remove());
+    const emptyOrders = document.getElementById('emptyOrders');
+    if (orders.length === 0) {
+      if (emptyOrders) emptyOrders.style.display = 'block';
+    } else {
+    if (emptyOrders) emptyOrders.style.display = 'none';
     // Render from localStorage
     orders.slice(0, 5).forEach(order => {
       const d = new Date(order.date);
@@ -1677,6 +1633,7 @@ function loadMyPageData() {
       `;
       orderSection.appendChild(card);
     });
+    } // end else (orders.length > 0)
   }
 
   // Cart badge

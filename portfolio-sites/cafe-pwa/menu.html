@@ -2021,6 +2021,7 @@
             }, 1000);
 
             BC.updateAllBadges();
+            showToast(name + ' 장바구니에 담았어요! 🛒');
         }
 
         // Show Item Detail
@@ -2198,6 +2199,25 @@
                 trackEvent('add_to_cart', 'menu', itemName);
             });
         });
+
+        // Toast function
+        function showToast(message) {
+            let toast = document.getElementById('menuToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'menuToast';
+                toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(100%);background:var(--deep-green,#1B4332);color:#F5F0E8;padding:12px 24px;border-radius:24px;font-size:14px;font-weight:500;z-index:1000;transition:transform 0.3s ease,opacity 0.3s ease;opacity:0;pointer-events:none;white-space:nowrap;';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateX(-50%) translateY(0)';
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(-50%) translateY(100%)';
+            }, 2500);
+        }
     </script>
 </body>
 </html>
