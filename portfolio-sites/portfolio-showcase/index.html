@@ -209,44 +209,30 @@ img {
   z-index: 0;
 }
 
-.hero-bg-grain {
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  opacity: 0.5;
-  z-index: 1;
-}
+/* hero-bg-grain 제거 — 렉 원인 */
 
-.hero-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-  background-size: 80px 80px;
-  z-index: 1;
-}
+/* hero-grid 제거 — 렉 원인 */
 
 .hero-gradient {
   position: absolute;
   width: 600px;
   height: 600px;
   border-radius: 50%;
-  filter: blur(120px);
   opacity: 0.07;
   z-index: 1;
+  will-change: transform;
 }
 
 .hero-gradient-1 {
   top: -200px;
   right: -100px;
-  background: #ff6b35;
+  background: radial-gradient(circle, #ff6b35 0%, transparent 70%);
 }
 
 .hero-gradient-2 {
   bottom: -200px;
   left: -100px;
-  background: #4a90d9;
+  background: radial-gradient(circle, #4a90d9 0%, transparent 70%);
 }
 
 .hero-content {
@@ -1385,16 +1371,7 @@ img {
 /* ============================================
    NOISE OVERLAY
    ============================================ */
-.noise-overlay {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 99990;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  mix-blend-mode: overlay;
-}
+/* noise-overlay 제거 — GPU 부하 */
 
 /* ============================================
    DIVIDER LINE
@@ -1518,7 +1495,7 @@ img {
 </div>
 
 <!-- NOISE OVERLAY -->
-<div class="noise-overlay"></div>
+
 
 <!-- CUSTOM CURSOR -->
 <div class="cursor-dot" id="cursorDot"></div>
@@ -1547,8 +1524,7 @@ img {
      ========================================== -->
 <section class="hero">
   <div class="hero-bg">
-    <div class="hero-bg-grain"></div>
-    <div class="hero-grid"></div>
+
     <div class="hero-gradient hero-gradient-1"></div>
     <div class="hero-gradient hero-gradient-2"></div>
   </div>
@@ -2148,23 +2124,7 @@ function startCounters() {
   const heroGradient1 = document.querySelector('.hero-gradient-1');
   const heroGradient2 = document.querySelector('.hero-gradient-2');
 
-  let ticking = false;
-  window.addEventListener('scroll', function() {
-    if (!ticking) {
-      requestAnimationFrame(function() {
-        const scrollY = window.scrollY;
-        const rate1 = scrollY * 0.3;
-        const rate2 = scrollY * 0.15;
-        const rate3 = scrollY * 0.1;
-        if (heroTitle) heroTitle.style.transform = 'translateY(' + rate2 + 'px)';
-        if (heroSubtitle) heroSubtitle.style.transform = 'translateY(' + rate3 + 'px)';
-        if (heroGradient1) heroGradient1.style.transform = 'translateY(' + (-rate1 * 0.5) + 'px)';
-        if (heroGradient2) heroGradient2.style.transform = 'translateY(' + (rate1 * 0.3) + 'px)';
-        ticking = false;
-      });
-      ticking = true;
-    }
-  }, { passive: true });
+  /* 패럴랙스 제거 — 히어로 렉 원인 */
 })();
 
 /* ============================================
