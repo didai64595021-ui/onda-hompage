@@ -1,5 +1,5 @@
 /* ============================================================
-   ONDA MARKETING AGENCY — Global JavaScript
+   DIGITAL MARKETING AGENCY — Global JavaScript
    Navigation, Mobile Menu, Scroll Reveal, Counter, Carousel
    ============================================================ */
 
