@@ -3,1295 +3,1912 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>상담 예약 — 글로우스킨클리닉</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23fce4ec'/%3E%3Cpath d='M16 6l1.5 4.5L22 12l-4.5 1.5L16 18l-1.5-4.5L10 12l4.5-1.5Z' fill='%23c9806b'/%3E%3Cpath d='M24 18l1 3 3 1-3 1-1 3-1-3-3-1 3-1Z' fill='%23e8a090' opacity='.7'/%3E%3Cpath d='M8 20l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7Z' fill='%23e8a090' opacity='.5'/%3E%3C/svg%3E">
+  <meta name="description" content="루미에르 피부과 오시는길, 예약 상담, 진료시간 안내. 강남역 2번 출구 도보 5분.">
+  <meta name="keywords" content="루미에르 피부과, 강남 피부과, 예약, 오시는길, 진료시간">
+  <title>오시는길 | LUMIERE DERMATOLOGY</title>
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:wght@300;400;700;900&family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+
+  <!-- Styles -->
   <link rel="stylesheet" href="styles.css">
+
   <style>
-    /* ---- Contact Hero ---- */
-    .contact-hero {
-      min-height: 50vh;
+    /* ========== Page Hero ========== */
+    .page-hero {
+      position: relative;
+      padding: 180px 0 120px;
+      background: linear-gradient(180deg, var(--pastel-lavender) 0%, var(--white) 100%);
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .page-hero::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(183, 148, 246, 0.12) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .page-hero::after {
+      content: '';
+      position: absolute;
+      bottom: -50px;
+      left: -100px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(233, 30, 99, 0.08) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .page-hero .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      background: rgba(183, 148, 246, 0.12);
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--lavender-dark);
+      margin-bottom: 24px;
+    }
+
+    .page-hero .hero-badge svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .page-hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 300;
+      color: var(--gray-900);
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .page-hero .breadcrumb {
       display: flex;
       align-items: center;
       justify-content: center;
-      text-align: center;
-      padding: clamp(120px, 15vw, 200px) 20px var(--section-pad);
-      background: linear-gradient(135deg, var(--bg-lavender) 0%, var(--bg-pink) 50%, var(--bg-mint) 100%);
-      background-size: 300% 300%;
-      animation: gradientMorph 8s ease infinite;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--gray-500);
     }
 
-    /* ---- Contact Main ---- */
-    .contact-main {
-      padding: var(--section-pad) 0;
+    .page-hero .breadcrumb a {
+      color: var(--gray-500);
+      transition: color 0.3s;
     }
-    .contact-grid {
+
+    .page-hero .breadcrumb a:hover {
+      color: var(--rose);
+    }
+
+    .page-hero .breadcrumb span.current {
+      color: var(--rose);
+      font-weight: 600;
+    }
+
+    .page-hero .hero-deco-dots {
+      position: absolute;
+      top: 140px;
+      left: 60px;
       display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: clamp(40px, 6vw, 100px);
-      align-items: start;
+      grid-template-columns: repeat(5, 6px);
+      gap: 10px;
+      opacity: 0.3;
     }
 
-    /* ---- Form ---- */
-    .contact-form-wrap {
-      background: var(--white);
-      border-radius: 32px;
-      padding: clamp(32px, 4vw, 56px);
-      box-shadow: var(--shadow-md);
-      border: 1px solid var(--border-light);
+    .page-hero .hero-deco-dots span {
+      width: 6px;
+      height: 6px;
+      background: var(--lavender);
+      border-radius: 50%;
     }
-    .contact-form-wrap h2 {
-      font-size: var(--fs-h3);
+
+    .page-hero .hero-deco-ring {
+      position: absolute;
+      bottom: 80px;
+      right: 80px;
+      width: 80px;
+      height: 80px;
+      border: 2px solid rgba(233, 30, 99, 0.15);
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .hero-wave-bottom {
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      overflow: hidden;
+      line-height: 0;
+    }
+
+    .hero-wave-bottom svg {
+      display: block;
+      width: 100%;
+      height: 60px;
+    }
+
+    /* ========== Reservation Section ========== */
+    .reservation-section {
+      padding: var(--section-py) 0;
+      background: var(--white);
+      position: relative;
+    }
+
+    .reservation-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--white);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .reservation-form-side {
+      padding: 48px 40px;
+    }
+
+    .reservation-form-side h2 {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 500;
+      color: var(--gray-900);
       margin-bottom: 8px;
     }
-    .contact-form-wrap > p {
-      color: var(--text-secondary);
-      margin-bottom: 36px;
+
+    .reservation-form-side .form-subtitle {
+      font-size: 0.95rem;
+      color: var(--gray-500);
+      margin-bottom: 32px;
+      line-height: 1.6;
     }
+
     .form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
     }
-    .form-submit {
-      margin-top: 12px;
-    }
-    .form-submit .btn-pill {
-      width: 100%;
-    }
-    .form-privacy {
-      font-size: var(--fs-small);
-      color: var(--text-muted);
-      text-align: center;
-      margin-top: 16px;
-      line-height: 1.6;
+
+    .form-group {
+      margin-bottom: 20px;
     }
 
-    /* ---- Info Side ---- */
-    .contact-info {
-      position: sticky;
-      top: 120px;
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--gray-700);
+      margin-bottom: 6px;
     }
-    .info-card {
+
+    .form-group label .required {
+      color: var(--rose);
+      margin-left: 2px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      color: var(--gray-800);
       background: var(--white);
-      border-radius: 24px;
-      padding: 32px;
-      margin-bottom: 20px;
-      border: 1px solid var(--border-light);
-      transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+      transition: all 0.3s var(--ease-out);
+      font-family: var(--font-body);
     }
-    .info-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-md);
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--rose);
+      box-shadow: 0 0 0 4px rgba(233, 30, 99, 0.08);
+      outline: none;
     }
-    .info-card-icon {
-      width: 56px;
-      height: 56px;
-      border-radius: 16px;
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: var(--gray-400);
+    }
+
+    .form-group textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .form-group select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23757575' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+
+    .form-checkbox {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 24px;
+      cursor: pointer;
+    }
+
+    .form-checkbox input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      accent-color: var(--rose);
+      margin-top: 2px;
+      cursor: pointer;
+    }
+
+    .form-checkbox span {
+      font-size: 0.85rem;
+      color: var(--gray-600);
+      line-height: 1.5;
+    }
+
+    .form-checkbox a {
+      color: var(--rose);
+      text-decoration: underline;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 16px 32px;
+      background: var(--gradient-rose-lavender);
+      color: var(--white);
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: all 0.4s var(--ease-out);
+      box-shadow: 0 4px 20px rgba(233, 30, 99, 0.3);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(233, 30, 99, 0.4);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .reservation-image-side {
+      position: relative;
+      background: linear-gradient(135deg, var(--pastel-lavender), var(--pastel-pink));
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
-      margin-bottom: 16px;
+      overflow: hidden;
+      min-height: 500px;
     }
-    .info-card-icon.phone { background: var(--bg-pink); }
-    .info-card-icon.kakao { background: #FEE500; }
-    .info-card-icon.location { background: var(--bg-lavender); }
-    .info-card-icon.clock { background: var(--bg-mint); }
-    .info-card h3 {
-      font-size: var(--fs-h4);
-      margin-bottom: 8px;
-    }
-    .info-card p {
-      color: var(--text-secondary);
-      font-size: var(--fs-small);
-      line-height: 1.8;
-    }
-    .info-card .info-link {
-      display: inline-flex;
+
+    .reservation-image-side .clinic-visual {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 8px;
-      margin-top: 12px;
-      font-weight: 600;
-      color: var(--accent-rose);
-      font-size: var(--fs-small);
-      min-height: 48px;
-      transition: gap 0.3s var(--ease-out);
-    }
-    .info-card .info-link:hover { gap: 12px; }
-
-    /* ---- Quick FAQ ---- */
-    .contact-faq {
-      background: var(--bg-pink);
-      padding: var(--section-pad) 0;
-    }
-    .faq-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-      margin-top: 48px;
-    }
-    .faq-card {
-      background: var(--white);
-      border-radius: 24px;
-      padding: 36px 28px;
-      border: 1px solid var(--border-light);
-      transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
-    }
-    .faq-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-md);
-    }
-    .faq-card-q {
-      font-family: var(--font-heading);
-      font-size: var(--fs-h4);
-      font-weight: 600;
-      margin-bottom: 16px;
-      color: var(--text-primary);
-    }
-    .faq-card-q::before {
-      content: 'Q. ';
-      color: var(--accent-rose);
-    }
-    .faq-card-a {
-      color: var(--text-secondary);
-      line-height: 1.8;
-      font-size: var(--fs-small);
-    }
-
-    /* ---- Contact CTA Banner ---- */
-    .contact-banner {
-      background: var(--text-primary);
-      padding: 60px 0;
+      justify-content: center;
+      padding: 40px;
       text-align: center;
     }
-    .contact-banner h2 {
-      color: var(--white);
-      font-size: var(--fs-h3);
-      margin-bottom: 8px;
-    }
-    .contact-banner p {
-      color: rgba(255,255,255,0.6);
+
+    .clinic-visual-icon {
+      width: 100px;
+      height: 100px;
+      background: var(--white);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-md);
       margin-bottom: 32px;
     }
-    .contact-banner .btn-pill {
-      background: var(--accent-rose);
+
+    .clinic-visual-icon svg {
+      width: 48px;
+      height: 48px;
+      color: var(--rose);
+    }
+
+    .clinic-visual h3 {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: var(--gray-900);
+      margin-bottom: 12px;
+    }
+
+    .clinic-visual p {
+      font-size: 0.95rem;
+      color: var(--gray-600);
+      line-height: 1.7;
+      max-width: 280px;
+    }
+
+    .clinic-visual .clinic-hours-mini {
+      margin-top: 28px;
+      padding: 20px 24px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: var(--radius-md);
+      backdrop-filter: blur(10px);
+      width: 100%;
+      max-width: 280px;
+    }
+
+    .clinic-hours-mini h4 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gray-800);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .clinic-hours-mini ul {
+      list-style: none;
+    }
+
+    .clinic-hours-mini li {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--gray-600);
+      padding: 4px 0;
+    }
+
+    .clinic-hours-mini li span:last-child {
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+
+    .reservation-image-side .deco-float-1 {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      background: rgba(233, 30, 99, 0.1);
+      border-radius: 50%;
+      animation: float 5s ease-in-out infinite;
+    }
+
+    .reservation-image-side .deco-float-2 {
+      position: absolute;
+      bottom: 40px;
+      left: 30px;
+      width: 40px;
+      height: 40px;
+      background: rgba(183, 148, 246, 0.15);
+      border-radius: 50%;
+      animation: float 7s ease-in-out infinite 1s;
+    }
+
+    .reservation-image-side .deco-float-3 {
+      position: absolute;
+      top: 50%;
+      left: 20px;
+      width: 24px;
+      height: 24px;
+      background: rgba(233, 30, 99, 0.08);
+      border-radius: 4px;
+      transform: rotate(45deg);
+      animation: float 4s ease-in-out infinite 0.5s;
+    }
+
+    /* ========== Map Section ========== */
+    .map-section {
+      padding: var(--section-py) 0;
+      background: var(--pastel-lavender);
+      position: relative;
+    }
+
+    .map-wrapper {
+      position: relative;
+      max-width: 1200px;
+      margin: 0 auto;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .map-placeholder {
+      width: 100%;
+      height: 450px;
+      background: linear-gradient(135deg, #e8e0f0 0%, #f0e8f8 50%, #e0d8f0 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .map-placeholder::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(183, 148, 246, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(183, 148, 246, 0.1) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    .map-placeholder .map-pin {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+
+    .map-pin-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--gradient-rose-lavender);
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      box-shadow: var(--shadow-rose);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .map-pin-icon svg {
+      transform: rotate(45deg);
+      width: 28px;
+      height: 28px;
       color: var(--white);
     }
 
-    /* ---- Trust Section ---- */
-    .trust-grid {
-      transition: gap 0.3s var(--ease-smooth);
+    .map-pin-label {
+      font-size: 0.95rem;
+      color: var(--gray-700);
+      font-weight: 500;
     }
 
-    /* ---- Responsive ---- */
+    .map-pin-pulse {
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 20px;
+      background: radial-gradient(ellipse, rgba(233, 30, 99, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .map-roads {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .map-road {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .map-road-h1 {
+      top: 40%;
+      left: 0;
+      right: 0;
+      height: 6px;
+    }
+
+    .map-road-h2 {
+      top: 65%;
+      left: 0;
+      right: 0;
+      height: 4px;
+    }
+
+    .map-road-v1 {
+      top: 0;
+      bottom: 0;
+      left: 35%;
+      width: 6px;
+    }
+
+    .map-road-v2 {
+      top: 0;
+      bottom: 0;
+      left: 60%;
+      width: 4px;
+    }
+
+    .map-road-label {
+      position: absolute;
+      font-size: 0.7rem;
+      color: var(--gray-500);
+      background: rgba(245, 240, 255, 0.8);
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .map-road-label-1 {
+      top: calc(40% - 18px);
+      left: 42%;
+    }
+
+    .map-road-label-2 {
+      top: 20%;
+      left: calc(35% + 12px);
+    }
+
+    .map-address-card {
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border-radius: var(--radius-lg);
+      padding: 24px 28px;
+      box-shadow: var(--shadow-md);
+      z-index: 5;
+      max-width: 360px;
+    }
+
+    .map-address-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .map-address-card h3 svg {
+      width: 20px;
+      height: 20px;
+      color: var(--rose);
+    }
+
+    .map-address-card p {
+      font-size: 0.9rem;
+      color: var(--gray-600);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .map-address-card .map-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: var(--pastel-pink);
+      color: var(--rose);
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      transition: all 0.3s;
+    }
+
+    .map-address-card .map-btn:hover {
+      background: var(--rose);
+      color: var(--white);
+    }
+
+    /* ========== Clinic Hours Section ========== */
+    .hours-section {
+      padding: var(--section-py) 0;
+      background: var(--white);
+      position: relative;
+    }
+
+    .hours-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .hours-card {
+      background: var(--white);
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      padding: 32px 24px;
+      text-align: center;
+      transition: all 0.4s var(--ease-out);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hours-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-rose-lavender);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .hours-card:hover {
+      border-color: var(--rose-light);
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .hours-card:hover::before {
+      opacity: 1;
+    }
+
+    .hours-card-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--pastel-lavender);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      transition: all 0.3s;
+    }
+
+    .hours-card:hover .hours-card-icon {
+      background: var(--gradient-rose-lavender);
+    }
+
+    .hours-card-icon svg {
+      width: 24px;
+      height: 24px;
+      color: var(--lavender-dark);
+      transition: color 0.3s;
+    }
+
+    .hours-card:hover .hours-card-icon svg {
+      color: var(--white);
+    }
+
+    .hours-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+
+    .hours-card .hours-time {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--rose);
+      margin-bottom: 4px;
+    }
+
+    .hours-card .hours-note {
+      font-size: 0.8rem;
+      color: var(--gray-500);
+    }
+
+    .hours-card.closed .hours-time {
+      color: var(--gray-400);
+    }
+
+    /* ========== Contact Info Cards ========== */
+    .contact-info-section {
+      padding: var(--section-py) 0;
+      background: var(--pastel-pink);
+      position: relative;
+    }
+
+    .contact-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .contact-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 36px 24px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.4s var(--ease-out);
+      position: relative;
+    }
+
+    .contact-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .contact-card-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--gradient-soft);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      transition: all 0.3s;
+    }
+
+    .contact-card:hover .contact-card-icon {
+      background: var(--gradient-rose-lavender);
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .contact-card-icon svg {
+      width: 28px;
+      height: 28px;
+      color: var(--rose);
+      transition: color 0.3s;
+    }
+
+    .contact-card:hover .contact-card-icon svg {
+      color: var(--white);
+    }
+
+    .contact-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+
+    .contact-card .contact-value {
+      font-size: 0.95rem;
+      color: var(--gray-600);
+      line-height: 1.6;
+      word-break: break-all;
+    }
+
+    .contact-card .contact-value a {
+      color: var(--rose);
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .contact-card .contact-value a:hover {
+      color: var(--rose-dark);
+    }
+
+    /* ========== Transportation Section ========== */
+    .transport-section {
+      padding: var(--section-py) 0;
+      background: var(--white);
+      position: relative;
+    }
+
+    .transport-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .transport-card {
+      background: var(--white);
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-xl);
+      padding: 40px 32px;
+      text-align: center;
+      transition: all 0.4s var(--ease-out);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .transport-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-rose-lavender);
+      transform: scaleX(0);
+      transition: transform 0.4s var(--ease-out);
+    }
+
+    .transport-card:hover {
+      border-color: var(--lavender-light);
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .transport-card:hover::after {
+      transform: scaleX(1);
+    }
+
+    .transport-icon {
+      width: 72px;
+      height: 72px;
+      background: var(--pastel-lavender);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      transition: all 0.4s var(--ease-out);
+    }
+
+    .transport-card:hover .transport-icon {
+      background: var(--gradient-rose-lavender);
+      transform: scale(1.1);
+    }
+
+    .transport-icon svg {
+      width: 32px;
+      height: 32px;
+      color: var(--lavender-dark);
+      transition: color 0.3s;
+    }
+
+    .transport-card:hover .transport-icon svg {
+      color: var(--white);
+    }
+
+    .transport-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 12px;
+    }
+
+    .transport-card p {
+      font-size: 0.95rem;
+      color: var(--gray-600);
+      line-height: 1.8;
+    }
+
+    .transport-card .transport-detail {
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: var(--pastel-cream);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      color: var(--gray-700);
+      line-height: 1.7;
+    }
+
+    .transport-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin: 2px;
+    }
+
+    .badge-blue {
+      background: #E3F2FD;
+      color: #1565C0;
+    }
+
+    .badge-green {
+      background: #E8F5E9;
+      color: #2E7D32;
+    }
+
+    /* ========== FAQ Section ========== */
+    .faq-section {
+      padding: var(--section-py) 0;
+      background: var(--pastel-lavender);
+      position: relative;
+    }
+
+    .faq-container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .faq-item {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 2px solid transparent;
+      transition: all 0.3s var(--ease-out);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .faq-item:hover {
+      border-color: var(--rose-light);
+    }
+
+    .faq-item.active {
+      border-color: var(--rose);
+      box-shadow: var(--shadow-md);
+    }
+
+    .faq-question {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 28px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--gray-800);
+      transition: all 0.3s;
+      gap: 16px;
+    }
+
+    .faq-question:hover {
+      color: var(--rose);
+    }
+
+    .faq-item.active .faq-question {
+      color: var(--rose);
+      background: var(--pastel-pink);
+    }
+
+    .faq-question .faq-q-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      background: var(--gradient-rose-lavender);
+      color: var(--white);
+      border-radius: 50%;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-right: 14px;
+    }
+
+    .faq-question .faq-q-text {
+      flex: 1;
+    }
+
+    .faq-toggle-icon {
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      position: relative;
+    }
+
+    .faq-toggle-icon::before,
+    .faq-toggle-icon::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      background: currentColor;
+      border-radius: 2px;
+      transition: transform 0.3s var(--ease-out);
+    }
+
+    .faq-toggle-icon::before {
+      width: 14px;
+      height: 2px;
+      transform: translate(-50%, -50%);
+    }
+
+    .faq-toggle-icon::after {
+      width: 2px;
+      height: 14px;
+      transform: translate(-50%, -50%);
+    }
+
+    .faq-item.active .faq-toggle-icon::after {
+      transform: translate(-50%, -50%) rotate(90deg);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s var(--ease-out);
+    }
+
+    .faq-answer-inner {
+      padding: 0 28px 24px;
+      padding-left: 74px;
+      color: var(--gray-600);
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+
+    /* ========== CTA Section ========== */
+    .cta-section {
+      padding: 100px 0;
+      background: var(--gray-900);
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      left: -200px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(233, 30, 99, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .cta-section::after {
+      content: '';
+      position: absolute;
+      bottom: -200px;
+      right: -200px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(183, 148, 246, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .cta-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .cta-section .cta-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 20px;
+      background: rgba(233, 30, 99, 0.15);
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--rose-light);
+      margin-bottom: 24px;
+    }
+
+    .cta-section h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 300;
+      color: var(--white);
+      margin-bottom: 16px;
+      line-height: 1.3;
+    }
+
+    .cta-section p {
+      font-size: 1.05rem;
+      color: var(--gray-400);
+      margin-bottom: 36px;
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.7;
+    }
+
+    .cta-buttons {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .cta-phone-number {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 32px;
+      justify-content: center;
+    }
+
+    .cta-phone-number .phone-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--gradient-rose-lavender);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .cta-phone-number .phone-icon svg {
+      width: 22px;
+      height: 22px;
+      color: var(--white);
+    }
+
+    .cta-phone-number .phone-text {
+      text-align: left;
+    }
+
+    .cta-phone-number .phone-label {
+      font-size: 0.8rem;
+      color: var(--gray-500);
+      display: block;
+    }
+
+    .cta-phone-number .phone-num {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--white);
+      letter-spacing: 0.02em;
+    }
+
+    /* ========== Responsive ========== */
     @media (max-width: 1024px) {
-      .faq-grid {
+      .reservation-card {
         grid-template-columns: 1fr;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
       }
-      .steps-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
+
+      .reservation-image-side {
+        min-height: 300px;
+        order: -1;
       }
-      .testimonial-grid {
-        grid-template-columns: 1fr !important;
-        max-width: 480px;
-        margin-left: auto !important;
-        margin-right: auto !important;
+
+      .hours-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
-      .trust-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
+
+      .contact-cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .transport-grid {
+        grid-template-columns: 1fr;
+        max-width: 560px;
       }
     }
+
     @media (max-width: 768px) {
-      .contact-grid {
-        grid-template-columns: 1fr;
+      .page-hero {
+        padding: 140px 0 80px;
       }
-      .contact-info {
-        position: static;
+
+      .page-hero h1 {
+        font-size: 2rem;
       }
+
+      .reservation-form-side {
+        padding: 32px 20px;
+      }
+
       .form-row {
         grid-template-columns: 1fr;
+        gap: 0;
       }
-      .steps-grid {
-        grid-template-columns: 1fr !important;
-        max-width: 400px;
-        margin-left: auto !important;
-        margin-right: auto !important;
+
+      .map-placeholder {
+        height: 300px;
       }
-      .trust-grid {
-        grid-template-columns: 1fr !important;
+
+      .map-address-card {
+        position: relative;
+        bottom: auto;
+        left: auto;
+        margin: -24px 16px 0;
+        max-width: 100%;
+        border-radius: var(--radius-md);
+      }
+
+      .hours-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      .contact-cards-grid {
+        grid-template-columns: 1fr;
         max-width: 400px;
-        margin-left: auto !important;
-        margin-right: auto !important;
+      }
+
+      .faq-question {
+        padding: 18px 20px;
+        font-size: 0.92rem;
+      }
+
+      .faq-answer-inner {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+
+      .faq-question .faq-q-label {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        font-size: 0.75rem;
+        margin-right: 10px;
+      }
+
+      .cta-section {
+        padding: 60px 0;
+      }
+
+      .cta-section h2 {
+        font-size: 1.6rem;
+      }
+
+      .hero-deco-dots,
+      .hero-deco-ring {
+        display: none;
       }
     }
+
     @media (max-width: 480px) {
-      .contact-hero h1 {
-        font-size: clamp(2rem, 8vw, 3rem);
-      }
-      .contact-form-wrap {
-        padding: 24px 20px;
-      }
-      .info-card {
-        padding: 24px;
-      }
-      .faq-card {
-        padding: 28px 20px;
+      .hours-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- ===== Navigation ===== -->
-  <nav class="nav-pill" id="mainNav">
-    <span class="nav-logo">글로우스킨</span>
-    <div class="nav-links" id="navLinks">
-      <a href="index.html">홈</a>
-      <a href="treatments.html">시술안내</a>
-      <a href="doctors.html">의료진</a>
-      <a href="gallery.html">비포/애프터</a>
-      <a href="about.html">병원소개</a>
-      <a href="contact.html" class="nav-cta active">상담예약</a>
+  <!-- ==================== Page Loader ==================== -->
+  <div class="page-loader">
+    <div class="loader-spinner"></div>
+  </div>
+
+  <!-- ==================== Header (N3 Center Logo) ==================== -->
+  <header class="header">
+    <div class="header-inner">
+      <nav class="nav-left">
+        <a href="index.html" class="nav-link">홈</a>
+        <a href="about.html" class="nav-link">소개</a>
+      </nav>
+      <a href="index.html" class="logo">
+        <span class="logo-text">LUMIERE</span>
+        <span class="logo-sub">DERMATOLOGY</span>
+      </a>
+      <nav class="nav-right">
+        <a href="treatments.html" class="nav-link">시술안내</a>
+        <a href="before-after.html" class="nav-link">전후사진</a>
+        <a href="contact.html" class="nav-link active">오시는길</a>
+      </nav>
+      <button class="menu-toggle" aria-label="메뉴"><span></span><span></span><span></span></button>
     </div>
-    <div class="nav-mobile-toggle" id="navToggle" aria-label="메뉴 열기">
-      <span></span><span></span><span></span>
-    </div>
+  </header>
+  <nav class="mobile-nav">
+    <a href="index.html" class="nav-link">홈</a>
+    <a href="about.html" class="nav-link">소개</a>
+    <a href="treatments.html" class="nav-link">시술안내</a>
+    <a href="before-after.html" class="nav-link">전후사진</a>
+    <a href="contact.html" class="nav-link active">오시는길</a>
   </nav>
 
-  <!-- ===== Hero ===== -->
-  <section class="contact-hero">
-    <div class="page-hero-content">
-      <p class="section-label reveal">Contact Us</p>
-      <h1 class="section-title reveal" style="font-size:var(--fs-h1);">무료 상담을<br>시작하세요</h1>
-      <p class="section-desc centered reveal" style="margin-top:16px;">
-        피부 고민을 전문의에게 직접 상담받으세요.<br>
-        편하신 방법으로 연락해 주시면 신속히 답변드리겠습니다.
+  <!-- ==================== Page Hero ==================== -->
+  <section class="page-hero">
+    <!-- Decorative dots -->
+    <div class="hero-deco-dots" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <!-- Decorative ring -->
+    <div class="hero-deco-ring" aria-hidden="true"></div>
+
+    <div class="container">
+      <div class="hero-badge reveal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        CONTACT & LOCATION
+      </div>
+      <h1 class="reveal">오시는길</h1>
+      <p class="body-lg reveal" style="color: var(--gray-600); max-width: 480px; margin: 0 auto 20px;">
+        루미에르 피부과에서 아름다운 변화를 시작하세요.<br>
+        편리한 예약과 방문 안내를 도와드립니다.
       </p>
+      <nav class="breadcrumb reveal">
+        <a href="index.html">홈</a>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        <span class="current">오시는길</span>
+      </nav>
+    </div>
+
+    <!-- Wave bottom -->
+    <div class="hero-wave-bottom">
+      <svg viewBox="0 0 1440 60" preserveAspectRatio="none">
+        <path d="M0,60 C360,0 1080,0 1440,60 L1440,60 L0,60 Z" fill="#ffffff"/>
+      </svg>
     </div>
   </section>
 
-  <!-- ===== Wave Divider ===== -->
-  <div class="wave-divider">
-    <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
-      <path fill="#FEFBFB" d="M0,40 C360,100 720,0 1080,60 C1260,80 1380,40 1440,50 L1440,100 L0,100 Z"/>
-    </svg>
-  </div>
-
-  <!-- ===== Contact Main ===== -->
-  <section class="contact-main">
+  <!-- ==================== Reservation Form Section ==================== -->
+  <section class="reservation-section" id="reservation">
     <div class="container">
-      <div class="contact-grid">
+      <!-- Section Header -->
+      <div class="section-header reveal">
+        <span class="caption">RESERVATION</span>
+        <h2 class="display-md">예약 상담 신청</h2>
+        <div class="divider divider-center"></div>
+        <p>온라인으로 간편하게 예약하시면, 전문 상담사가 확인 후 연락드립니다.</p>
+      </div>
 
-        <!-- Form -->
-        <div class="contact-form-wrap reveal">
-          <h2>상담 예약 신청</h2>
-          <p>아래 양식을 작성해 주시면 24시간 이내에 연락드리겠습니다.</p>
+      <!-- Reservation Card -->
+      <div class="reservation-card reveal-scale">
+        <!-- Left: Form Side -->
+        <div class="reservation-form-side">
+          <h2>상담 예약 신청서</h2>
+          <p class="form-subtitle">
+            아래 양식을 작성해주시면 빠른 시일 내에 연락드리겠습니다.<br>
+            <span style="color: var(--rose);">*</span> 표시는 필수 입력 항목입니다.
+          </p>
 
-          <form id="contactForm" onsubmit="return handleSubmit(event)">
+          <form data-submit="ajax" id="reservationForm">
+            <!-- 이름 & 연락처 -->
             <div class="form-row">
               <div class="form-group">
-                <input type="text" id="name" placeholder=" " required>
-                <label for="name">이름</label>
+                <label for="name">이름 <span class="required">*</span></label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  class="form-input"
+                  placeholder="홍길동"
+                  required
+                  autocomplete="name"
+                >
               </div>
               <div class="form-group">
-                <input type="tel" id="phone" placeholder=" " required>
-                <label for="phone">연락처</label>
+                <label for="phone">연락처 <span class="required">*</span></label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  class="form-input"
+                  placeholder="010-0000-0000"
+                  required
+                  autocomplete="tel"
+                >
               </div>
             </div>
 
+            <!-- 이메일 -->
             <div class="form-group">
-              <select id="treatment" required>
-                <option value="" disabled selected>희망 시술 선택</option>
-                <option value="laser">레이저토닝 / 피코레이저</option>
-                <option value="ipl">IPL 광선치료</option>
+              <label for="email">이메일</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                class="form-input"
+                placeholder="example@email.com"
+                autocomplete="email"
+              >
+            </div>
+
+            <!-- 희망 예약일 & 희망 시간 -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="date">희망 예약일 <span class="required">*</span></label>
+                <input
+                  type="date"
+                  id="date"
+                  name="date"
+                  class="form-input"
+                  required
+                >
+              </div>
+              <div class="form-group">
+                <label for="time">희망 시간 <span class="required">*</span></label>
+                <select id="time" name="time" class="form-select" required>
+                  <option value="" disabled selected>시간을 선택하세요</option>
+                  <option value="10:00">10:00</option>
+                  <option value="10:30">10:30</option>
+                  <option value="11:00">11:00</option>
+                  <option value="11:30">11:30</option>
+                  <option value="14:00">14:00</option>
+                  <option value="14:30">14:30</option>
+                  <option value="15:00">15:00</option>
+                  <option value="15:30">15:30</option>
+                  <option value="16:00">16:00</option>
+                  <option value="16:30">16:30</option>
+                  <option value="17:00">17:00</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 시술 선택 -->
+            <div class="form-group">
+              <label for="treatment">시술 선택</label>
+              <select id="treatment" name="treatment" class="form-select">
+                <option value="" disabled selected>시술을 선택하세요</option>
+                <option value="laser">레이저</option>
                 <option value="botox">보톡스</option>
                 <option value="filler">필러</option>
-                <option value="ulthera">울쎄라 리프팅</option>
-                <option value="thermage">써마지</option>
-                <option value="skinbooster">스킨부스터</option>
-                <option value="acne">여드름 치료</option>
-                <option value="body">바디 라인</option>
-                <option value="consult">상담 후 결정</option>
+                <option value="lifting">리프팅</option>
+                <option value="skincare">스킨케어</option>
+                <option value="hair">모발</option>
+                <option value="other">기타</option>
               </select>
-              <label for="treatment">희망 시술</label>
             </div>
 
-            <div class="form-row">
-              <div class="form-group">
-                <input type="date" id="date" placeholder=" " required>
-                <label for="date">희망 날짜</label>
-              </div>
-              <div class="form-group">
-                <select id="time" required>
-                  <option value="" disabled selected>시간 선택</option>
-                  <option value="10:00">오전 10:00</option>
-                  <option value="11:00">오전 11:00</option>
-                  <option value="12:00">오후 12:00</option>
-                  <option value="14:00">오후 2:00</option>
-                  <option value="15:00">오후 3:00</option>
-                  <option value="16:00">오후 4:00</option>
-                  <option value="17:00">오후 5:00</option>
-                  <option value="18:00">오후 6:00</option>
-                  <option value="19:00">야간 7:00 (화·목)</option>
-                  <option value="20:00">야간 8:00 (화·목)</option>
-                </select>
-                <label for="time">희망 시간</label>
-              </div>
-            </div>
-
+            <!-- 상담 내용 -->
             <div class="form-group">
-              <textarea id="message" rows="4" placeholder=" "></textarea>
-              <label for="message">추가 메시지 (선택사항)</label>
+              <label for="message">상담 내용</label>
+              <textarea
+                id="message"
+                name="message"
+                class="form-textarea"
+                placeholder="궁금하신 점이나 상담 받고 싶은 내용을 자유롭게 적어주세요."
+                rows="4"
+              ></textarea>
             </div>
 
-            <div class="form-submit">
-              <button type="submit" class="btn-pill btn-rose">상담 예약 신청하기</button>
-            </div>
-            <p class="form-privacy">
-              입력하신 개인정보는 상담 예약 목적으로만 사용되며,<br>
-              개인정보처리방침에 따라 안전하게 관리됩니다.
-            </p>
-          </form>
-        </div>
+            <!-- 개인정보 동의 -->
+            <label class="form-checkbox">
+              <input type="checkbox" name="privacy" required>
+              <span>
+                <a href="#" onclick="return false;">[개인정보 처리방침]</a>에 동의합니다.
+                예약 상담을 위해 성명, 연락처, 이메일 등의 개인정보를 수집하며,
+                상담 완료 후 3개월 이내 파기됩니다.
+              </span>
+            </label>
 
-        <!-- Info Side -->
-        <div class="contact-info">
-          <div class="info-card reveal">
-            <div class="info-card-icon phone">📞</div>
-            <h3>전화 예약</h3>
-            <p>전화로 빠르게 예약하세요.<br>상담 직원이 친절하게 안내해 드립니다.</p>
-            <a href="tel:02-555-0123" class="info-link">02-555-0123 →</a>
-          </div>
-
-          <div class="info-card reveal reveal-delay-1">
-            <div class="info-card-icon kakao">💬</div>
-            <h3>카카오톡 상담</h3>
-            <p>카카오톡으로 편하게 상담하세요.<br>사진 첨부도 가능합니다.</p>
-            <a href="#" class="info-link">카카오톡 상담하기 →</a>
-          </div>
-
-          <div class="info-card reveal reveal-delay-2">
-            <div class="info-card-icon location">📍</div>
-            <h3>위치 안내</h3>
-            <p>서울특별시 강남구 테헤란로 152<br>글로우타워 3층</p>
-            <a href="about.html" class="info-link">오시는 길 보기 →</a>
-          </div>
-
-          <div class="info-card reveal reveal-delay-3">
-            <div class="info-card-icon clock">🕐</div>
-            <h3>진료 시간</h3>
-            <p>
-              평일 10:00 – 19:00<br>
-              토요일 10:00 – 16:00<br>
-              일요일·공휴일 휴진<br>
-              <span style="color:var(--accent-rose); font-weight:600;">야간진료 화·목 21:00까지</span>
-            </p>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Consultation Steps ===== -->
-  <section style="padding:var(--section-pad) 0; background:var(--bg-lavender);">
-    <div class="container">
-      <div class="text-center">
-        <p class="section-label reveal">Process</p>
-        <h2 class="section-title reveal">상담 진행 과정</h2>
-        <p class="section-desc centered reveal">
-          첫 방문부터 시술 완료까지, 체계적인 프로세스로 안내해 드립니다.
-        </p>
-      </div>
-
-      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:24px; margin-top:60px;" class="steps-grid">
-        <div class="reveal" style="text-align:center; padding:36px 24px; background:var(--white); border-radius:24px; border:1px solid var(--border-light);">
-          <div style="width:64px; height:64px; border-radius:50%; background:var(--bg-pink); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:1.5rem; font-family:var(--font-heading); font-weight:700; color:var(--accent-rose);">01</div>
-          <h3 style="font-size:var(--fs-h4); margin-bottom:12px;">온라인 예약</h3>
-          <p style="color:var(--text-secondary); font-size:var(--fs-small); line-height:1.8;">
-            홈페이지, 전화, 카카오톡 중 편하신 방법으로 예약해 주세요. 24시간 이내 확인 연락을 드립니다.
-          </p>
-        </div>
-        <div class="reveal reveal-delay-1" style="text-align:center; padding:36px 24px; background:var(--white); border-radius:24px; border:1px solid var(--border-light);">
-          <div style="width:64px; height:64px; border-radius:50%; background:var(--bg-pink); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:1.5rem; font-family:var(--font-heading); font-weight:700; color:var(--accent-rose);">02</div>
-          <h3 style="font-size:var(--fs-h4); margin-bottom:12px;">전문의 상담</h3>
-          <p style="color:var(--text-secondary); font-size:var(--fs-small); line-height:1.8;">
-            피부 분석 장비를 활용한 정밀 진단 후, 전문의가 1:1로 맞춤 시술 계획을 안내합니다.
-          </p>
-        </div>
-        <div class="reveal reveal-delay-2" style="text-align:center; padding:36px 24px; background:var(--white); border-radius:24px; border:1px solid var(--border-light);">
-          <div style="width:64px; height:64px; border-radius:50%; background:var(--bg-pink); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:1.5rem; font-family:var(--font-heading); font-weight:700; color:var(--accent-rose);">03</div>
-          <h3 style="font-size:var(--fs-h4); margin-bottom:12px;">맞춤 시술</h3>
-          <p style="color:var(--text-secondary); font-size:var(--fs-small); line-height:1.8;">
-            최신 장비와 검증된 프로토콜로 안전하게 시술합니다. 시술 중에도 편안하실 수 있도록 세심하게 케어합니다.
-          </p>
-        </div>
-        <div class="reveal reveal-delay-3" style="text-align:center; padding:36px 24px; background:var(--white); border-radius:24px; border:1px solid var(--border-light);">
-          <div style="width:64px; height:64px; border-radius:50%; background:var(--bg-pink); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:1.5rem; font-family:var(--font-heading); font-weight:700; color:var(--accent-rose);">04</div>
-          <h3 style="font-size:var(--fs-h4); margin-bottom:12px;">사후 관리</h3>
-          <p style="color:var(--text-secondary); font-size:var(--fs-small); line-height:1.8;">
-            시술 후 주의사항과 홈케어 방법을 안내하고, 정기적인 경과 체크로 최적의 결과를 유지합니다.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Testimonials ===== -->
-  <section style="padding:var(--section-pad) 0;">
-    <div class="container">
-      <div class="text-center">
-        <p class="section-label reveal">Reviews</p>
-        <h2 class="section-title reveal">상담 후기</h2>
-        <p class="section-desc centered reveal">
-          실제 상담을 받으신 환자분들의 생생한 후기입니다.
-        </p>
-      </div>
-
-      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:48px;" class="testimonial-grid">
-        <div class="reveal" style="background:var(--white); border-radius:24px; padding:36px 28px; border:1px solid var(--border-light);">
-          <p style="color:#f59e0b; font-size:1.1rem; margin-bottom:12px;">★★★★★</p>
-          <p style="color:var(--text-secondary); line-height:1.8; margin-bottom:20px; font-size:var(--fs-small);">
-            "처음이라 긴장했는데 선생님이 너무 친절하게 설명해 주셔서 편안하게 상담받았어요. 
-            불필요한 시술을 권하지 않아서 신뢰가 갔습니다."
-          </p>
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div style="width:40px; height:40px; border-radius:50%; background:var(--bg-pink); display:flex; align-items:center; justify-content:center; font-size:var(--fs-small); font-weight:600;">김</div>
-            <div>
-              <p style="font-weight:600; font-size:var(--fs-small);">김*연님</p>
-              <p style="font-size:0.75rem; color:var(--text-muted);">레이저토닝 상담</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="reveal reveal-delay-1" style="background:var(--white); border-radius:24px; padding:36px 28px; border:1px solid var(--border-light);">
-          <p style="color:#f59e0b; font-size:1.1rem; margin-bottom:12px;">★★★★★</p>
-          <p style="color:var(--text-secondary); line-height:1.8; margin-bottom:20px; font-size:var(--fs-small);">
-            "카카오톡으로 먼저 사진 보내고 상담받았는데 정말 편했어요. 
-            병원 방문했을 때 이미 제 피부 상태를 파악하고 계셔서 빠르게 진행되었습니다."
-          </p>
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div style="width:40px; height:40px; border-radius:50%; background:var(--bg-lavender); display:flex; align-items:center; justify-content:center; font-size:var(--fs-small); font-weight:600;">이</div>
-            <div>
-              <p style="font-weight:600; font-size:var(--fs-small);">이*수님</p>
-              <p style="font-size:0.75rem; color:var(--text-muted);">보톡스 상담</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="reveal reveal-delay-2" style="background:var(--white); border-radius:24px; padding:36px 28px; border:1px solid var(--border-light);">
-          <p style="color:#f59e0b; font-size:1.1rem; margin-bottom:12px;">★★★★★</p>
-          <p style="color:var(--text-secondary); line-height:1.8; margin-bottom:20px; font-size:var(--fs-small);">
-            "다른 피부과에서는 한 번에 여러 시술을 권유받았는데, 여기서는 
-            제 피부에 정말 필요한 것만 솔직하게 말해주셔서 감동받았습니다."
-          </p>
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div style="width:40px; height:40px; border-radius:50%; background:var(--bg-mint); display:flex; align-items:center; justify-content:center; font-size:var(--fs-small); font-weight:600;">박</div>
-            <div>
-              <p style="font-weight:600; font-size:var(--fs-small);">박*진님</p>
-              <p style="font-size:0.75rem; color:var(--text-muted);">스킨부스터 상담</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Wave Divider ===== -->
-  <div class="wave-divider">
-    <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
-      <path fill="#FDE8E8" d="M0,60 C240,20 480,80 720,40 C960,0 1200,60 1440,30 L1440,100 L0,100 Z"/>
-    </svg>
-  </div>
-
-  <!-- ===== FAQ ===== -->
-  <section class="contact-faq">
-    <div class="container">
-      <div class="text-center">
-        <p class="section-label reveal">FAQ</p>
-        <h2 class="section-title reveal">자주 묻는 질문</h2>
-      </div>
-
-      <div class="faq-grid">
-        <div class="faq-card reveal">
-          <p class="faq-card-q">상담 비용이 있나요?</p>
-          <p class="faq-card-a">
-            초진 상담은 무료입니다. 전문의가 직접 피부 상태를 분석하고
-            최적의 시술을 추천해 드립니다. 부담 없이 방문해 주세요.
-          </p>
-        </div>
-        <div class="faq-card reveal reveal-delay-1">
-          <p class="faq-card-q">예약 없이도 방문 가능한가요?</p>
-          <p class="faq-card-a">
-            가능하지만, 예약 고객 우선으로 진료됩니다.
-            대기 시간을 줄이시려면 사전 예약을 권장합니다.
-            전화, 카카오톡, 온라인 모두 예약 가능합니다.
-          </p>
-        </div>
-        <div class="faq-card reveal reveal-delay-2">
-          <p class="faq-card-q">시술 후 바로 일상생활이 가능한가요?</p>
-          <p class="faq-card-a">
-            대부분의 시술은 시술 직후 일상생활이 가능합니다.
-            일부 시술은 1~2일 정도의 회복 기간이 필요하며,
-            상담 시 자세히 안내해 드립니다.
-          </p>
-        </div>
-      </div>
-
-      <!-- Extended FAQ Accordion -->
-      <div style="max-width:800px; margin:60px auto 0;">
-        <h3 class="reveal" style="font-size:var(--fs-h3); text-align:center; margin-bottom:32px;">더 많은 질문</h3>
-
-        <div class="accordion-item reveal">
-          <div class="accordion-header" onclick="this.parentElement.classList.toggle('active'); const b=this.nextElementSibling; b.style.maxHeight=b.style.maxHeight?null:b.scrollHeight+'px'">
-            <span>시술 가격은 어떻게 되나요?</span>
-            <span class="accordion-icon"></span>
-          </div>
-          <div class="accordion-body">
-            <div class="accordion-body-inner">
-              시술 가격은 피부 상태, 시술 부위, 횟수에 따라 달라집니다. 
-              정확한 비용은 전문의 상담 후 안내해 드리며, 상담 시 예상 비용을 투명하게 
-              안내해 드립니다. 카드 할부 및 현금 결제 모두 가능합니다.
-            </div>
-          </div>
-        </div>
-
-        <div class="accordion-item reveal">
-          <div class="accordion-header" onclick="this.parentElement.classList.toggle('active'); const b=this.nextElementSibling; b.style.maxHeight=b.style.maxHeight?null:b.scrollHeight+'px'">
-            <span>주차가 가능한가요?</span>
-            <span class="accordion-icon"></span>
-          </div>
-          <div class="accordion-body">
-            <div class="accordion-body-inner">
-              네, 건물 지하 주차장을 이용하실 수 있습니다. 
-              시술 고객에게는 2시간 무료 주차를 제공합니다. 
-              주차 공간이 제한적이므로 대중교통 이용을 권장드립니다. 
-              (역삼역 3번 출구 도보 3분)
-            </div>
-          </div>
-        </div>
-
-        <div class="accordion-item reveal">
-          <div class="accordion-header" onclick="this.parentElement.classList.toggle('active'); const b=this.nextElementSibling; b.style.maxHeight=b.style.maxHeight?null:b.scrollHeight+'px'">
-            <span>예약 변경이나 취소는 어떻게 하나요?</span>
-            <span class="accordion-icon"></span>
-          </div>
-          <div class="accordion-body">
-            <div class="accordion-body-inner">
-              예약일 하루 전까지 전화(02-555-0123) 또는 카카오톡으로 
-              변경/취소가 가능합니다. 당일 취소 시에는 다른 환자분들을 위해 
-              가급적 빨리 연락해 주시면 감사하겠습니다.
-            </div>
-          </div>
-        </div>
-
-        <div class="accordion-item reveal">
-          <div class="accordion-header" onclick="this.parentElement.classList.toggle('active'); const b=this.nextElementSibling; b.style.maxHeight=b.style.maxHeight?null:b.scrollHeight+'px'">
-            <span>민감한 피부인데 시술이 가능한가요?</span>
-            <span class="accordion-icon"></span>
-          </div>
-          <div class="accordion-body">
-            <div class="accordion-body-inner">
-              물론입니다. 민감 피부 전문 상담을 통해 피부 상태를 정확히 파악한 후, 
-              자극을 최소화한 맞춤 시술을 진행합니다. 피부 장벽 강화를 위한 
-              스킨케어 프로그램도 함께 제공합니다.
-            </div>
-          </div>
-        </div>
-
-        <div class="accordion-item reveal">
-          <div class="accordion-header" onclick="this.parentElement.classList.toggle('active'); const b=this.nextElementSibling; b.style.maxHeight=b.style.maxHeight?null:b.scrollHeight+'px'">
-            <span>시술 후 부작용은 없나요?</span>
-            <span class="accordion-icon"></span>
-          </div>
-          <div class="accordion-body">
-            <div class="accordion-body-inner">
-              모든 시술은 FDA/KFDA 승인된 장비와 약품만을 사용하여 안전성이 검증되어 있습니다. 
-              시술 후 일시적인 붉어짐이나 부기가 있을 수 있으나, 대부분 1~3일 내 자연스럽게 
-              사라집니다. 만약 이상 반응이 있으시면 즉시 연락해 주세요.
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Trust Section ===== -->
-  <section style="padding:var(--section-pad) 0;">
-    <div class="container">
-      <div class="text-center">
-        <p class="section-label reveal">Trust</p>
-        <h2 class="section-title reveal">글로우스킨을 선택하는 이유</h2>
-      </div>
-
-      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-top:48px; text-align:center;" class="trust-grid">
-        <div class="reveal" style="padding:36px 20px; background:var(--white); border-radius:20px; border:1px solid var(--border-light); transition:transform 0.3s var(--ease-out);"
-             onmouseenter="this.style.transform='translateY(-4px)'" onmouseleave="this.style.transform=''">
-          <div style="font-size:2.5rem; margin-bottom:16px;">👨‍⚕️</div>
-          <h4 style="font-size:var(--fs-h4); margin-bottom:8px;">전문의 직접 시술</h4>
-          <p style="color:var(--text-secondary); font-size:var(--fs-small); line-height:1.8;">
-            모든 시술은 피부과 전문의가 직접 진행합니다. 
-            인턴, 간호사 대리 시술을 하지 않습니다.
-          </p>
-        </div>
-        <div class="reveal reveal-delay-1" style="padding:36px 20px; background:var(--white); border-radius:20px; border:1px solid var(--border-light); transition:transform 0.3s var(--ease-out);"
-             onmouseenter="this.style.transform='translateY(-4px)'" onmouseleave="this.style.transform=''">
-          <div style="font-size:2.5rem; margin-bottom:16px;">🏆</div>
-          <h4 style="font-size:var(--fs-h4); margin-bottom:8px;">35,000+ 시술</h4>
-          <p style="color:var(--text-secondary); font-size:var(--fs-small); line-height:1.8;">
-            풍부한 임상 경험을 바탕으로 안전하고 
-            효과적인 시술을 약속합니다.
-          </p>
-        </div>
-        <div class="reveal reveal-delay-2" style="padding:36px 20px; background:var(--white); border-radius:20px; border:1px solid var(--border-light); transition:transform 0.3s var(--ease-out);"
-             onmouseenter="this.style.transform='translateY(-4px)'" onmouseleave="this.style.transform=''">
-          <div style="font-size:2.5rem; margin-bottom:16px;">💎</div>
-          <h4 style="font-size:var(--fs-h4); margin-bottom:8px;">정품 장비만 사용</h4>
-          <p style="color:var(--text-secondary); font-size:var(--fs-small); line-height:1.8;">
-            FDA/KFDA 승인된 정품 장비와 약품만 사용합니다. 
-            시술 전 환자에게 확인해 드립니다.
-          </p>
-        </div>
-        <div class="reveal reveal-delay-3" style="padding:36px 20px; background:var(--white); border-radius:20px; border:1px solid var(--border-light); transition:transform 0.3s var(--ease-out);"
-             onmouseenter="this.style.transform='translateY(-4px)'" onmouseleave="this.style.transform=''">
-          <div style="font-size:2.5rem; margin-bottom:16px;">🔄</div>
-          <h4 style="font-size:var(--fs-h4); margin-bottom:8px;">89% 재방문율</h4>
-          <p style="color:var(--text-secondary); font-size:var(--fs-small); line-height:1.8;">
-            한 번 방문한 환자분의 89%가 다시 찾아주십니다. 
-            결과로 증명하는 클리닉입니다.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Map Section with Kakao ===== -->
-  <section style="padding:var(--section-pad) 0;">
-    <div class="container">
-      <div class="text-center">
-        <p class="section-label reveal">Location</p>
-        <h2 class="section-title reveal">오시는 길</h2>
-        <p class="section-desc centered reveal">
-          서울특별시 강남구 테헤란로 152 글로우타워 3층
-        </p>
-      </div>
-
-      <div style="margin-top:48px; border-radius:24px; overflow:hidden; box-shadow:var(--shadow-md);" class="reveal">
-        <iframe 
-          src="https://map.kakao.com/link/map/글로우스킨클리닉,37.5012,127.0396" 
-          width="100%" 
-          height="450" 
-          style="border:0; display:block;" 
-          allowfullscreen="" 
-          loading="lazy" 
-          referrerpolicy="no-referrer-when-downgrade"
-          title="글로우스킨클리닉 위치">
-        </iframe>
-      </div>
-
-      <!-- 교통 안내 -->
-      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-top:48px;" class="transport-guide-grid">
-        <div class="reveal" style="background:var(--white); border-radius:20px; padding:28px 24px; border:1px solid var(--border-light); text-align:center; transition:transform 0.3s var(--ease-out);"
-             onmouseenter="this.style.transform='translateY(-4px)'" onmouseleave="this.style.transform=''">
-          <div style="width:56px; height:56px; border-radius:50%; background:#22c55e; color:var(--white); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:1.3rem; font-weight:700;">2</div>
-          <h4 style="font-size:var(--fs-body); margin-bottom:8px;">2호선 역삼역</h4>
-          <p style="color:var(--text-secondary); font-size:var(--fs-small); line-height:1.8;">3번 출구 도보 3분<br>출구 직진 후 첫 번째 사거리에서 우회전</p>
-        </div>
-
-        <div class="reveal reveal-delay-1" style="background:var(--white); border-radius:20px; padding:28px 24px; border:1px solid var(--border-light); text-align:center; transition:transform 0.3s var(--ease-out);"
-             onmouseenter="this.style.transform='translateY(-4px)'" onmouseleave="this.style.transform=''">
-          <div style="width:56px; height:56px; border-radius:50%; background:#f59e0b; color:var(--white); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:0.9rem; font-weight:700;">분당</div>
-          <h4 style="font-size:var(--fs-body); margin-bottom:8px;">분당선 선릉역</h4>
-          <p style="color:var(--text-secondary); font-size:var(--fs-small); line-height:1.8;">1번 출구 도보 7분<br>테헤란로 방면 직진</p>
-        </div>
-
-        <div class="reveal reveal-delay-2" style="background:var(--white); border-radius:20px; padding:28px 24px; border:1px solid var(--border-light); text-align:center; transition:transform 0.3s var(--ease-out);"
-             onmouseenter="this.style.transform='translateY(-4px)'" onmouseleave="this.style.transform=''">
-          <div style="width:56px; height:56px; border-radius:50%; background:#3b82f6; color:var(--white); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:1.3rem;">🚌</div>
-          <h4 style="font-size:var(--fs-body); margin-bottom:8px;">버스</h4>
-          <p style="color:var(--text-secondary); font-size:var(--fs-small); line-height:1.8;">역삼역 정류장 하차<br>146, 341, 360, 740번</p>
-        </div>
-
-        <div class="reveal reveal-delay-3" style="background:var(--white); border-radius:20px; padding:28px 24px; border:1px solid var(--border-light); text-align:center; transition:transform 0.3s var(--ease-out);"
-             onmouseenter="this.style.transform='translateY(-4px)'" onmouseleave="this.style.transform=''">
-          <div style="width:56px; height:56px; border-radius:50%; background:var(--accent-rose); color:var(--white); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:1.3rem;">🅿️</div>
-          <h4 style="font-size:var(--fs-body); margin-bottom:8px;">주차</h4>
-          <p style="color:var(--text-secondary); font-size:var(--fs-small); line-height:1.8;">건물 지하 주차장<br>시술 고객 2시간 무료</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Detailed Hours Table ===== -->
-  <section style="padding:var(--section-pad) 0; background:var(--bg-mint);">
-    <div class="container">
-      <div class="text-center">
-        <p class="section-label reveal">Hours</p>
-        <h2 class="section-title reveal">진료 시간 안내</h2>
-        <p class="section-desc centered reveal">
-          환자분의 편의를 위해 화·목 야간진료를 운영합니다.
-        </p>
-      </div>
-
-      <div style="max-width:700px; margin:48px auto 0;">
-        <div class="reveal" style="background:var(--white); border-radius:24px; padding:40px; box-shadow:var(--shadow-md); border:1px solid var(--border-light);">
-          <table style="width:100%; border-collapse:collapse;">
-            <thead>
-              <tr>
-                <th style="text-align:left; padding:16px 20px; border-bottom:2px solid var(--accent-rose); font-size:var(--fs-body); font-weight:600;">요일</th>
-                <th style="text-align:center; padding:16px 20px; border-bottom:2px solid var(--accent-rose); font-size:var(--fs-body); font-weight:600;">진료 시간</th>
-                <th style="text-align:center; padding:16px 20px; border-bottom:2px solid var(--accent-rose); font-size:var(--fs-body); font-weight:600;">비고</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="padding:14px 20px; border-bottom:1px solid var(--border-light); font-weight:500;">월요일</td>
-                <td style="padding:14px 20px; border-bottom:1px solid var(--border-light); text-align:center; color:var(--text-secondary);">10:00 – 19:00</td>
-                <td style="padding:14px 20px; border-bottom:1px solid var(--border-light); text-align:center; color:var(--text-muted); font-size:var(--fs-small);">점심 13:00–14:00</td>
-              </tr>
-              <tr style="background:var(--bg-pink);">
-                <td style="padding:14px 20px; border-bottom:1px solid var(--border-light); font-weight:500; color:var(--accent-rose);">화요일 ★</td>
-                <td style="padding:14px 20px; border-bottom:1px solid var(--border-light); text-align:center; color:var(--accent-rose); font-weight:600;">10:00 – 21:00</td>
-                <td style="padding:14px 20px; border-bottom:1px solid var(--border-light); text-align:center; color:var(--accent-rose); font-size:var(--fs-small); font-weight:500;">야간진료 (예약제)</td>
-              </tr>
-              <tr>
-                <td style="padding:14px 20px; border-bottom:1px solid var(--border-light); font-weight:500;">수요일</td>
-                <td style="padding:14px 20px; border-bottom:1px solid var(--border-light); text-align:center; color:var(--text-secondary);">10:00 – 19:00</td>
-                <td style="padding:14px 20px; border-bottom:1px solid var(--border-light); text-align:center; color:var(--text-muted); font-size:var(--fs-small);">점심 13:00–14:00</td>
-              </tr>
-              <tr style="background:var(--bg-pink);">
-                <td style="padding:14px 20px; border-bottom:1px solid var(--border-light); font-weight:500; color:var(--accent-rose);">목요일 ★</td>
-                <td style="padding:14px 20px; border-bottom:1px solid var(--border-light); text-align:center; color:var(--accent-rose); font-weight:600;">10:00 – 21:00</td>
-                <td style="padding:14px 20px; border-bottom:1px solid var(--border-light); text-align:center; color:var(--accent-rose); font-size:var(--fs-small); font-weight:500;">야간진료 (예약제)</td>
-              </tr>
-              <tr>
-                <td style="padding:14px 20px; border-bottom:1px solid var(--border-light); font-weight:500;">금요일</td>
-                <td style="padding:14px 20px; border-bottom:1px solid var(--border-light); text-align:center; color:var(--text-secondary);">10:00 – 19:00</td>
-                <td style="padding:14px 20px; border-bottom:1px solid var(--border-light); text-align:center; color:var(--text-muted); font-size:var(--fs-small);">점심 13:00–14:00</td>
-              </tr>
-              <tr>
-                <td style="padding:14px 20px; border-bottom:1px solid var(--border-light); font-weight:500;">토요일</td>
-                <td style="padding:14px 20px; border-bottom:1px solid var(--border-light); text-align:center; color:var(--text-secondary);">10:00 – 16:00</td>
-                <td style="padding:14px 20px; border-bottom:1px solid var(--border-light); text-align:center; color:var(--text-muted); font-size:var(--fs-small);">점심시간 없음</td>
-              </tr>
-              <tr>
-                <td style="padding:14px 20px; font-weight:500; color:var(--text-muted);">일요일·공휴일</td>
-                <td style="padding:14px 20px; text-align:center; color:var(--accent-rose); font-weight:600;">휴진</td>
-                <td style="padding:14px 20px; text-align:center; color:var(--text-muted); font-size:var(--fs-small);">—</td>
-              </tr>
-            </tbody>
-          </table>
-          <p style="margin-top:20px; padding:16px 20px; background:var(--bg-lavender); border-radius:12px; font-size:var(--fs-small); color:var(--text-secondary); line-height:1.8; text-align:center;">
-            ⚠️ 야간진료는 사전 예약이 필수입니다. 공휴일 전날은 16:00에 마감됩니다.<br>
-            응급 상황 시 02-555-0123으로 연락 주시면 안내해 드리겠습니다.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Extended Reservation Form ===== -->
-  <section style="padding:var(--section-pad) 0; background:var(--bg-pink);">
-    <div class="container">
-      <div class="text-center">
-        <p class="section-label reveal">Quick Reservation</p>
-        <h2 class="section-title reveal">빠른 온라인 예약</h2>
-        <p class="section-desc centered reveal">
-          간편하게 온라인으로 예약하시면 확인 전화를 드리겠습니다.
-        </p>
-      </div>
-
-      <div style="max-width:800px; margin:48px auto 0;">
-        <div class="reveal" style="background:var(--white); border-radius:24px; padding:48px; box-shadow:var(--shadow-md); border:1px solid var(--border-light);">
-          <form onsubmit="return false;">
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
-              <div style="position:relative;">
-                <input type="text" placeholder="성함" style="width:100%; padding:16px 20px; border:1px solid var(--border-light); border-radius:12px; font-size:var(--fs-body); font-family:var(--font-body); background:var(--bg-main); transition:border-color 0.3s;">
-              </div>
-              <div style="position:relative;">
-                <input type="tel" placeholder="연락처 (010-0000-0000)" style="width:100%; padding:16px 20px; border:1px solid var(--border-light); border-radius:12px; font-size:var(--fs-body); font-family:var(--font-body); background:var(--bg-main); transition:border-color 0.3s;">
-              </div>
-            </div>
-
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
-              <div style="position:relative;">
-                <select style="width:100%; padding:16px 20px; border:1px solid var(--border-light); border-radius:12px; font-size:var(--fs-body); font-family:var(--font-body); background:var(--bg-main); color:var(--text-primary); appearance:none; cursor:pointer;">
-                  <option value="" disabled selected>희망 의료진 선택</option>
-                  <option value="kim">김서연 원장 (레이저/안티에이징)</option>
-                  <option value="lee">이준호 전문의 (레이저/피부재생)</option>
-                  <option value="park">박지민 전문의 (보톡스/필러/리프팅)</option>
-                  <option value="choi">최은서 전문의 (여드름/스킨케어)</option>
-                  <option value="any">상관없음 (추천 매칭)</option>
-                </select>
-              </div>
-              <div style="position:relative;">
-                <select style="width:100%; padding:16px 20px; border:1px solid var(--border-light); border-radius:12px; font-size:var(--fs-body); font-family:var(--font-body); background:var(--bg-main); color:var(--text-primary); appearance:none; cursor:pointer;">
-                  <option value="" disabled selected>희망 시술 선택</option>
-                  <option value="laser">레이저토닝</option>
-                  <option value="pico">피코레이저</option>
-                  <option value="ipl">IPL 광선치료</option>
-                  <option value="botox">보톡스</option>
-                  <option value="filler">필러</option>
-                  <option value="ulthera">울쎄라 리프팅</option>
-                  <option value="thermage">써마지</option>
-                  <option value="skinbooster">스킨부스터</option>
-                  <option value="acne">여드름 치료</option>
-                  <option value="skincare">스킨케어 프로그램</option>
-                  <option value="consult">상담 후 결정</option>
-                </select>
-              </div>
-            </div>
-
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
-              <div style="position:relative;">
-                <input type="date" style="width:100%; padding:16px 20px; border:1px solid var(--border-light); border-radius:12px; font-size:var(--fs-body); font-family:var(--font-body); background:var(--bg-main); color:var(--text-primary);">
-              </div>
-              <div style="position:relative;">
-                <select style="width:100%; padding:16px 20px; border:1px solid var(--border-light); border-radius:12px; font-size:var(--fs-body); font-family:var(--font-body); background:var(--bg-main); color:var(--text-primary); appearance:none; cursor:pointer;">
-                  <option value="" disabled selected>시간 선택</option>
-                  <option value="10:00">오전 10:00</option>
-                  <option value="10:30">오전 10:30</option>
-                  <option value="11:00">오전 11:00</option>
-                  <option value="11:30">오전 11:30</option>
-                  <option value="14:00">오후 2:00</option>
-                  <option value="14:30">오후 2:30</option>
-                  <option value="15:00">오후 3:00</option>
-                  <option value="15:30">오후 3:30</option>
-                  <option value="16:00">오후 4:00</option>
-                  <option value="16:30">오후 4:30</option>
-                  <option value="17:00">오후 5:00</option>
-                  <option value="17:30">오후 5:30</option>
-                  <option value="18:00">오후 6:00</option>
-                  <option value="19:00">야간 7:00 (화·목)</option>
-                  <option value="19:30">야간 7:30 (화·목)</option>
-                  <option value="20:00">야간 8:00 (화·목)</option>
-                </select>
-              </div>
-            </div>
-
-            <div style="margin-bottom:20px;">
-              <select style="width:100%; padding:16px 20px; border:1px solid var(--border-light); border-radius:12px; font-size:var(--fs-body); font-family:var(--font-body); background:var(--bg-main); color:var(--text-primary); appearance:none; cursor:pointer;">
-                <option value="" disabled selected>방문 경험</option>
-                <option value="first">처음 방문합니다</option>
-                <option value="revisit">재방문입니다</option>
-                <option value="transfer">다른 병원에서 전원</option>
-              </select>
-            </div>
-
-            <div style="margin-bottom:20px;">
-              <textarea rows="3" placeholder="피부 고민이나 추가 요청사항을 적어주세요 (선택)" style="width:100%; padding:16px 20px; border:1px solid var(--border-light); border-radius:12px; font-size:var(--fs-body); font-family:var(--font-body); background:var(--bg-main); resize:vertical; line-height:1.8;"></textarea>
-            </div>
-
-            <div style="margin-bottom:24px;">
-              <label style="display:flex; align-items:flex-start; gap:12px; cursor:pointer; font-size:var(--fs-small); color:var(--text-secondary); line-height:1.8;">
-                <input type="checkbox" style="margin-top:4px; accent-color:var(--accent-rose);">
-                <span>개인정보 수집 및 이용에 동의합니다. 입력하신 개인정보는 상담 예약 및 진료 안내 목적으로만 사용되며, 개인정보처리방침에 따라 안전하게 관리됩니다.</span>
-              </label>
-            </div>
-
-            <button type="submit" style="width:100%; padding:18px; background:var(--accent-rose); color:var(--white); border:none; border-radius:100px; font-size:var(--fs-body); font-weight:600; cursor:pointer; font-family:var(--font-body); transition:background 0.3s, transform 0.3s;"
-                    onmouseenter="this.style.background='#c2185b'; this.style.transform='translateY(-2px)'"
-                    onmouseleave="this.style.background='var(--accent-rose)'; this.style.transform=''">
-              온라인 예약 신청하기
+            <!-- 제출 버튼 -->
+            <button type="submit" class="btn-submit">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 2L11 13"></path>
+                <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
+              </svg>
+              예약 상담 신청하기
             </button>
           </form>
         </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- ===== Extended FAQ ===== -->
-  <section style="padding:var(--section-pad) 0;">
-    <div class="container">
-      <div class="text-center">
-        <p class="section-label reveal">More Questions</p>
-        <h2 class="section-title reveal">예약 관련 자주 묻는 질문</h2>
-      </div>
+        <!-- Right: Clinic Image Side -->
+        <div class="reservation-image-side">
+          <div class="deco-float-1" aria-hidden="true"></div>
+          <div class="deco-float-2" aria-hidden="true"></div>
+          <div class="deco-float-3" aria-hidden="true"></div>
 
-      <div style="max-width:800px; margin:48px auto 0;">
-        <div class="accordion-item reveal">
-          <div class="accordion-header" onclick="this.parentElement.classList.toggle('active'); const b=this.nextElementSibling; b.style.maxHeight=b.style.maxHeight?null:b.scrollHeight+'px'">
-            <span>온라인 예약 후 확인은 어떻게 되나요?</span>
-            <span class="accordion-icon"></span>
-          </div>
-          <div class="accordion-body">
-            <div class="accordion-body-inner">
-              온라인 예약 신청 후 24시간 이내에 확인 전화 또는 문자를 보내드립니다. 예약이 확정되면 카카오톡 알림톡으로 예약 일시, 담당 의료진, 준비사항 등을 안내해 드립니다. 예약 전날에도 리마인드 알림을 발송합니다.
+          <div class="clinic-visual">
+            <div class="clinic-visual-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"></path>
+                <path d="M1 21h22"></path>
+                <path d="M9 7h6"></path>
+                <path d="M9 11h6"></path>
+                <path d="M9 15h4"></path>
+                <path d="M12 21v-4h-2v4"></path>
+              </svg>
             </div>
-          </div>
-        </div>
+            <h3>LUMIERE DERMATOLOGY</h3>
+            <p>
+              아름다움을 위한 첫걸음,<br>
+              전문 의료진이 함께합니다.
+            </p>
 
-        <div class="accordion-item reveal">
-          <div class="accordion-header" onclick="this.parentElement.classList.toggle('active'); const b=this.nextElementSibling; b.style.maxHeight=b.style.maxHeight?null:b.scrollHeight+'px'">
-            <span>당일 예약도 가능한가요?</span>
-            <span class="accordion-icon"></span>
-          </div>
-          <div class="accordion-body">
-            <div class="accordion-body-inner">
-              네, 가능합니다. 다만 당일 예약은 빈 시간이 있는 경우에 한해 가능하므로, 전화(02-555-0123)로 직접 문의해 주시면 가장 빠르게 확인해 드릴 수 있습니다. 카카오톡 상담도 실시간으로 운영되고 있으니 편한 방법을 이용해 주세요.
-            </div>
-          </div>
-        </div>
-
-        <div class="accordion-item reveal">
-          <div class="accordion-header" onclick="this.parentElement.classList.toggle('active'); const b=this.nextElementSibling; b.style.maxHeight=b.style.maxHeight?null:b.scrollHeight+'px'">
-            <span>예약 변경이나 취소는 어떻게 하나요?</span>
-            <span class="accordion-icon"></span>
-          </div>
-          <div class="accordion-body">
-            <div class="accordion-body-inner">
-              예약일 하루 전까지 전화(02-555-0123) 또는 카카오톡으로 변경/취소가 가능합니다. 당일 취소는 다른 환자분들의 예약 기회를 위해 가급적 일찍 연락해 주시면 감사하겠습니다. 노쇼(No-show)가 3회 이상 누적되면 예약에 제한이 있을 수 있습니다.
-            </div>
-          </div>
-        </div>
-
-        <div class="accordion-item reveal">
-          <div class="accordion-header" onclick="this.parentElement.classList.toggle('active'); const b=this.nextElementSibling; b.style.maxHeight=b.style.maxHeight?null:b.scrollHeight+'px'">
-            <span>초진 상담 비용이 있나요?</span>
-            <span class="accordion-icon"></span>
-          </div>
-          <div class="accordion-body">
-            <div class="accordion-body-inner">
-              초진 상담은 무료입니다. 전문의가 직접 피부 분석 장비를 활용하여 피부 상태를 정밀 진단하고, 최적의 시술 계획을 안내해 드립니다. 상담 후 시술 여부는 환자분이 자유롭게 결정하실 수 있으며, 어떠한 강요도 하지 않습니다.
-            </div>
-          </div>
-        </div>
-
-        <div class="accordion-item reveal">
-          <div class="accordion-header" onclick="this.parentElement.classList.toggle('active'); const b=this.nextElementSibling; b.style.maxHeight=b.style.maxHeight?null:b.scrollHeight+'px'">
-            <span>카카오톡으로 사진 상담이 가능한가요?</span>
-            <span class="accordion-icon"></span>
-          </div>
-          <div class="accordion-body">
-            <div class="accordion-body-inner">
-              네, 가능합니다. 카카오톡 채널에서 피부 고민 부위의 사진을 보내주시면 상담 코디네이터가 1차 확인 후, 필요 시 전문의 의견을 전달해 드립니다. 다만 정확한 진단을 위해서는 내원 상담을 권장드립니다. 사진 상담은 간단한 시술 안내와 예상 비용 범위를 확인하는 용도로 활용해 주세요.
-            </div>
-          </div>
-        </div>
-
-        <div class="accordion-item reveal">
-          <div class="accordion-header" onclick="this.parentElement.classList.toggle('active'); const b=this.nextElementSibling; b.style.maxHeight=b.style.maxHeight?null:b.scrollHeight+'px'">
-            <span>결제 방법은 어떻게 되나요?</span>
-            <span class="accordion-icon"></span>
-          </div>
-          <div class="accordion-body">
-            <div class="accordion-body-inner">
-              현금, 신용카드, 체크카드 모두 결제 가능합니다. 신용카드의 경우 무이자 할부(2~6개월)를 지원하며, 일부 카드사에서는 최대 12개월 할부도 가능합니다. 현금영수증 발급과 의료비 소득공제 서류도 제공해 드립니다. 시술 패키지의 경우 분할 결제도 상담 가능합니다.
-            </div>
-          </div>
-        </div>
-
-        <div class="accordion-item reveal">
-          <div class="accordion-header" onclick="this.parentElement.classList.toggle('active'); const b=this.nextElementSibling; b.style.maxHeight=b.style.maxHeight?null:b.scrollHeight+'px'">
-            <span>첫 방문 시 소요 시간은 얼마나 되나요?</span>
-            <span class="accordion-icon"></span>
-          </div>
-          <div class="accordion-body">
-            <div class="accordion-body-inner">
-              첫 방문 시 접수, 문진표 작성, 피부 분석, 전문의 상담까지 약 40~60분 정도 소요됩니다. 당일 시술을 진행하시는 경우 시술 종류에 따라 추가 30분~1시간이 소요될 수 있습니다. 예약 시간 10분 전에 도착하시면 여유있게 진행하실 수 있습니다.
-            </div>
-          </div>
-        </div>
-
-        <div class="accordion-item reveal">
-          <div class="accordion-header" onclick="this.parentElement.classList.toggle('active'); const b=this.nextElementSibling; b.style.maxHeight=b.style.maxHeight?null:b.scrollHeight+'px'">
-            <span>외국인도 진료가 가능한가요?</span>
-            <span class="accordion-icon"></span>
-          </div>
-          <div class="accordion-body">
-            <div class="accordion-body-inner">
-              네, 외국인 환자분도 진료 가능합니다. 영어 상담이 가능한 코디네이터가 상주하고 있으며, 예약 시 영어 상담을 요청해 주시면 통역 지원을 해 드립니다. 여권을 지참해 주시면 됩니다. 의료관광 비자 관련 서류 발급도 지원합니다.
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Emergency Contact ===== -->
-  <section style="padding:var(--section-pad) 0; background:var(--bg-lavender);">
-    <div class="container">
-      <div class="text-center">
-        <p class="section-label reveal">Emergency</p>
-        <h2 class="section-title reveal">시술 후 응급 연락</h2>
-        <p class="section-desc centered reveal">
-          시술 후 이상 반응이 있으시면 즉시 연락해 주세요.
-        </p>
-      </div>
-
-      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:48px; max-width:900px; margin-left:auto; margin-right:auto;" class="emergency-grid">
-        <div class="reveal" style="background:var(--white); border-radius:20px; padding:32px 24px; text-align:center; border:1px solid var(--border-light);">
-          <div style="font-size:2.5rem; margin-bottom:16px;">📞</div>
-          <h4 style="font-size:var(--fs-h4); margin-bottom:8px;">대표 전화</h4>
-          <p style="color:var(--accent-rose); font-weight:700; font-size:var(--fs-h4); margin-bottom:8px;">02-555-0123</p>
-          <p style="color:var(--text-muted); font-size:var(--fs-small);">진료시간 내 연결</p>
-        </div>
-        <div class="reveal reveal-delay-1" style="background:var(--white); border-radius:20px; padding:32px 24px; text-align:center; border:1px solid var(--border-light);">
-          <div style="font-size:2.5rem; margin-bottom:16px;">🆘</div>
-          <h4 style="font-size:var(--fs-h4); margin-bottom:8px;">응급 연락처</h4>
-          <p style="color:var(--accent-rose); font-weight:700; font-size:var(--fs-h4); margin-bottom:8px;">010-1234-5678</p>
-          <p style="color:var(--text-muted); font-size:var(--fs-small);">진료시간 외 긴급상황</p>
-        </div>
-        <div class="reveal reveal-delay-2" style="background:var(--white); border-radius:20px; padding:32px 24px; text-align:center; border:1px solid var(--border-light);">
-          <div style="font-size:2.5rem; margin-bottom:16px;">💬</div>
-          <h4 style="font-size:var(--fs-h4); margin-bottom:8px;">카카오톡</h4>
-          <p style="color:var(--accent-lavender); font-weight:700; font-size:var(--fs-h4); margin-bottom:8px;">@글로우스킨</p>
-          <p style="color:var(--text-muted); font-size:var(--fs-small);">사진 첨부 상담 가능</p>
-        </div>
-      </div>
-
-      <div class="reveal" style="max-width:700px; margin:48px auto 0; background:var(--white); border-radius:20px; padding:32px; border:1px solid var(--border-light);">
-        <h4 style="font-size:var(--fs-body); font-weight:600; margin-bottom:16px; color:var(--accent-rose);">⚠️ 다음과 같은 증상이 있다면 즉시 연락해 주세요</h4>
-        <ul style="color:var(--text-secondary); font-size:var(--fs-small); line-height:2.2; list-style:none; padding:0;">
-          <li style="padding-left:24px; position:relative;"><span style="position:absolute; left:0;">•</span>시술 부위의 심한 통증이나 부종이 48시간 이상 지속되는 경우</li>
-          <li style="padding-left:24px; position:relative;"><span style="position:absolute; left:0;">•</span>시술 부위에서 출혈이나 고름이 발생한 경우</li>
-          <li style="padding-left:24px; position:relative;"><span style="position:absolute; left:0;">•</span>피부색이 비정상적으로 변한 경우 (자주색, 하얀색 등)</li>
-          <li style="padding-left:24px; position:relative;"><span style="position:absolute; left:0;">•</span>발열, 오한 등 전신 증상이 동반된 경우</li>
-          <li style="padding-left:24px; position:relative;"><span style="position:absolute; left:0;">•</span>필러 시술 후 시야 장애나 심한 두통이 발생한 경우</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Nearby Landmarks ===== -->
-  <section style="padding:var(--section-pad) 0;">
-    <div class="container">
-      <div class="text-center">
-        <p class="section-label reveal">Nearby</p>
-        <h2 class="section-title reveal">주변 랜드마크</h2>
-        <p class="section-desc centered reveal">
-          근처 주요 건물과 거리를 참고하세요.
-        </p>
-      </div>
-
-      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-top:48px;" class="landmark-grid">
-        <div class="reveal" style="background:var(--white); border-radius:20px; padding:28px 20px; text-align:center; border:1px solid var(--border-light);">
-          <div style="font-size:2rem; margin-bottom:12px;">🏢</div>
-          <h4 style="font-size:var(--fs-small); font-weight:600; margin-bottom:4px;">강남파이낸스센터</h4>
-          <p style="color:var(--text-muted); font-size:0.75rem;">도보 5분</p>
-        </div>
-        <div class="reveal reveal-delay-1" style="background:var(--white); border-radius:20px; padding:28px 20px; text-align:center; border:1px solid var(--border-light);">
-          <div style="font-size:2rem; margin-bottom:12px;">🏬</div>
-          <h4 style="font-size:var(--fs-small); font-weight:600; margin-bottom:4px;">삼성동 코엑스</h4>
-          <p style="color:var(--text-muted); font-size:0.75rem;">도보 15분</p>
-        </div>
-        <div class="reveal reveal-delay-2" style="background:var(--white); border-radius:20px; padding:28px 20px; text-align:center; border:1px solid var(--border-light);">
-          <div style="font-size:2rem; margin-bottom:12px;">☕</div>
-          <h4 style="font-size:var(--fs-small); font-weight:600; margin-bottom:4px;">스타벅스 역삼점</h4>
-          <p style="color:var(--text-muted); font-size:0.75rem;">도보 1분</p>
-        </div>
-        <div class="reveal reveal-delay-3" style="background:var(--white); border-radius:20px; padding:28px 20px; text-align:center; border:1px solid var(--border-light);">
-          <div style="font-size:2rem; margin-bottom:12px;">🏥</div>
-          <h4 style="font-size:var(--fs-small); font-weight:600; margin-bottom:4px;">강남세브란스</h4>
-          <p style="color:var(--text-muted); font-size:0.75rem;">차량 10분</p>
-        </div>
-      </div>
-
-      <div class="reveal" style="margin-top:48px; background:var(--bg-pink); border-radius:24px; padding:40px;">
-        <h3 style="font-size:var(--fs-h4); margin-bottom:20px; text-align:center;">📍 자세한 길 안내</h3>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:40px;" class="directions-grid">
-          <div>
-            <h4 style="font-size:var(--fs-body); font-weight:600; margin-bottom:12px; color:var(--accent-rose);">🚇 역삼역 3번 출구에서</h4>
-            <ol style="color:var(--text-secondary); font-size:var(--fs-small); line-height:2.2; padding-left:20px;">
-              <li>3번 출구로 나오세요</li>
-              <li>테헤란로 방면으로 직진 (약 200m)</li>
-              <li>첫 번째 사거리에서 우회전</li>
-              <li>50m 직진 후 좌측 글로우타워 빌딩</li>
-              <li>3층으로 올라오시면 됩니다</li>
-            </ol>
-          </div>
-          <div>
-            <h4 style="font-size:var(--fs-body); font-weight:600; margin-bottom:12px; color:var(--accent-lavender);">🚗 자가용 이용 시</h4>
-            <ol style="color:var(--text-secondary); font-size:var(--fs-small); line-height:2.2; padding-left:20px;">
-              <li>네비게이션에 "글로우타워" 또는 "테헤란로 152" 검색</li>
-              <li>건물 정면 입구로 진입</li>
-              <li>지하 주차장 B1~B3 이용</li>
-              <li>주차 후 엘리베이터로 3층 이동</li>
-              <li>시술 고객 2시간 무료 주차</li>
-            </ol>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Quick Contact Cards ===== -->
-  <section style="padding:var(--section-pad) 0; background:var(--bg-mint);">
-    <div class="container">
-      <div class="text-center">
-        <p class="section-label reveal">Quick Contact</p>
-        <h2 class="section-title reveal">빠른 연락 방법</h2>
-      </div>
-
-      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:48px; max-width:900px; margin-left:auto; margin-right:auto;" class="quick-contact-grid">
-        <div class="reveal" style="background:var(--white); border-radius:24px; padding:40px 28px; text-align:center; border:1px solid var(--border-light); transition:transform 0.3s var(--ease-out);"
-             onmouseenter="this.style.transform='translateY(-6px)'" onmouseleave="this.style.transform=''">
-          <div style="width:72px; height:72px; border-radius:50%; background:var(--bg-pink); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:2rem;">📞</div>
-          <h4 style="font-size:var(--fs-h4); margin-bottom:8px;">전화 상담</h4>
-          <p style="color:var(--accent-rose); font-size:var(--fs-h4); font-weight:700; margin-bottom:8px;">02-555-0123</p>
-          <p style="color:var(--text-secondary); font-size:var(--fs-small); line-height:1.8;">
-            진료시간 내 연결 가능<br>
-            평일 10:00~19:00<br>
-            토요일 10:00~16:00
-          </p>
-        </div>
-
-        <div class="reveal reveal-delay-1" style="background:var(--white); border-radius:24px; padding:40px 28px; text-align:center; border:1px solid var(--border-light); transition:transform 0.3s var(--ease-out);"
-             onmouseenter="this.style.transform='translateY(-6px)'" onmouseleave="this.style.transform=''">
-          <div style="width:72px; height:72px; border-radius:50%; background:#FEE500; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:2rem;">💬</div>
-          <h4 style="font-size:var(--fs-h4); margin-bottom:8px;">카카오톡 상담</h4>
-          <p style="color:#3C1E1E; font-size:var(--fs-h4); font-weight:700; margin-bottom:8px;">@글로우스킨</p>
-          <p style="color:var(--text-secondary); font-size:var(--fs-small); line-height:1.8;">
-            사진 첨부 상담 가능<br>
-            실시간 응답<br>
-            예약/변경/취소 가능
-          </p>
-        </div>
-
-        <div class="reveal reveal-delay-2" style="background:var(--white); border-radius:24px; padding:40px 28px; text-align:center; border:1px solid var(--border-light); transition:transform 0.3s var(--ease-out);"
-             onmouseenter="this.style.transform='translateY(-6px)'" onmouseleave="this.style.transform=''">
-          <div style="width:72px; height:72px; border-radius:50%; background:var(--bg-lavender); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:2rem;">📧</div>
-          <h4 style="font-size:var(--fs-h4); margin-bottom:8px;">이메일 문의</h4>
-          <p style="color:var(--accent-lavender); font-size:var(--fs-h4); font-weight:700; margin-bottom:8px;">hello@glowskin.kr</p>
-          <p style="color:var(--text-secondary); font-size:var(--fs-small); line-height:1.8;">
-            상세 문의 및 제안<br>
-            24시간 이내 회신<br>
-            협력 제안 환영
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Social Links ===== -->
-  <section style="padding:var(--section-pad) 0;">
-    <div class="container">
-      <div class="text-center">
-        <p class="section-label reveal">Follow Us</p>
-        <h2 class="section-title reveal">소셜 미디어에서 만나요</h2>
-        <p class="section-desc centered reveal">
-          최신 시술 정보, 이벤트, 피부 관리 팁을 확인하세요.
-        </p>
-      </div>
-
-      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-top:48px; max-width:900px; margin-left:auto; margin-right:auto;" class="social-grid">
-        <a href="#" style="text-decoration:none; display:block; background:linear-gradient(135deg, #833AB4, #E1306C, #F77737); border-radius:20px; padding:36px 24px; text-align:center; color:var(--white); transition:transform 0.3s var(--ease-out);"
-           class="reveal" onmouseenter="this.style.transform='translateY(-4px)'" onmouseleave="this.style.transform=''">
-          <div style="font-size:2.5rem; margin-bottom:12px;">📸</div>
-          <h4 style="font-size:var(--fs-body); margin-bottom:4px;">인스타그램</h4>
-          <p style="font-size:var(--fs-small); opacity:0.8;">@glowskin_clinic</p>
-        </a>
-
-        <a href="#" style="text-decoration:none; display:block; background:linear-gradient(135deg, #FF0000, #cc0000); border-radius:20px; padding:36px 24px; text-align:center; color:var(--white); transition:transform 0.3s var(--ease-out);"
-           class="reveal reveal-delay-1" onmouseenter="this.style.transform='translateY(-4px)'" onmouseleave="this.style.transform=''">
-          <div style="font-size:2.5rem; margin-bottom:12px;">▶️</div>
-          <h4 style="font-size:var(--fs-body); margin-bottom:4px;">유튜브</h4>
-          <p style="font-size:var(--fs-small); opacity:0.8;">글로우스킨TV</p>
-        </a>
-
-        <a href="#" style="text-decoration:none; display:block; background:linear-gradient(135deg, #FEE500, #E5C700); border-radius:20px; padding:36px 24px; text-align:center; color:#3C1E1E; transition:transform 0.3s var(--ease-out);"
-           class="reveal reveal-delay-2" onmouseenter="this.style.transform='translateY(-4px)'" onmouseleave="this.style.transform=''">
-          <div style="font-size:2.5rem; margin-bottom:12px;">💬</div>
-          <h4 style="font-size:var(--fs-body); margin-bottom:4px;">카카오톡</h4>
-          <p style="font-size:var(--fs-small); opacity:0.8;">@글로우스킨</p>
-        </a>
-
-        <a href="#" style="text-decoration:none; display:block; background:linear-gradient(135deg, #03C75A, #02A84E); border-radius:20px; padding:36px 24px; text-align:center; color:var(--white); transition:transform 0.3s var(--ease-out);"
-           class="reveal reveal-delay-3" onmouseenter="this.style.transform='translateY(-4px)'" onmouseleave="this.style.transform=''">
-          <div style="font-size:2.5rem; margin-bottom:12px;">📝</div>
-          <h4 style="font-size:var(--fs-body); margin-bottom:4px;">네이버 블로그</h4>
-          <p style="font-size:var(--fs-small); opacity:0.8;">글로우스킨클리닉</p>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Holiday Calendar ===== -->
-  <section style="padding:var(--section-pad) 0;">
-    <div class="container">
-      <div class="text-center">
-        <p class="section-label reveal">Holiday</p>
-        <h2 class="section-title reveal">2024년 휴진 일정</h2>
-      </div>
-
-      <div style="max-width:700px; margin:48px auto 0;">
-        <div class="reveal" style="background:var(--white); border-radius:20px; padding:32px; border:1px solid var(--border-light);">
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;" class="holiday-grid">
-            <div>
-              <h4 style="font-size:var(--fs-small); font-weight:600; margin-bottom:12px; color:var(--accent-rose);">상반기</h4>
-              <ul style="list-style:none; padding:0; color:var(--text-secondary); font-size:var(--fs-small); line-height:2.2;">
-                <li>1/1 (월) 신정</li>
-                <li>2/9~12 설 연휴</li>
-                <li>3/1 (금) 삼일절</li>
-                <li>5/5~6 어린이날·대체공휴일</li>
-                <li>5/15 (수) 부처님오신날</li>
-                <li>6/6 (목) 현충일</li>
-              </ul>
-            </div>
-            <div>
-              <h4 style="font-size:var(--fs-small); font-weight:600; margin-bottom:12px; color:var(--accent-lavender);">하반기</h4>
-              <ul style="list-style:none; padding:0; color:var(--text-secondary); font-size:var(--fs-small); line-height:2.2;">
-                <li>8/15 (목) 광복절</li>
-                <li>9/16~18 추석 연휴</li>
-                <li>10/3 (목) 개천절</li>
-                <li>10/9 (수) 한글날</li>
-                <li>12/25 (수) 성탄절</li>
-                <li>12/30~31 연말 휴진</li>
+            <div class="clinic-hours-mini">
+              <h4>진료시간 안내</h4>
+              <ul>
+                <li>
+                  <span>월 - 금</span>
+                  <span>10:00 - 19:00</span>
+                </li>
+                <li>
+                  <span>토요일</span>
+                  <span>10:00 - 15:00</span>
+                </li>
+                <li>
+                  <span>일/공휴일</span>
+                  <span>휴진</span>
+                </li>
+                <li>
+                  <span>점심시간</span>
+                  <span>13:00 - 14:00</span>
+                </li>
               </ul>
             </div>
           </div>
-          <p style="margin-top:16px; color:var(--text-muted); font-size:0.75rem; text-align:center;">
-            ※ 공휴일 전날은 16:00 조기 마감됩니다. 변동 사항은 홈페이지/카카오톡으로 공지합니다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== Map Section ==================== -->
+  <section class="map-section" id="map">
+    <div class="container">
+      <!-- Section Header -->
+      <div class="section-header reveal">
+        <span class="caption">LOCATION</span>
+        <h2 class="display-md">오시는길</h2>
+        <div class="divider divider-center"></div>
+        <p>강남역 2번 출구에서 도보 5분, 편리한 위치에 있습니다.</p>
+      </div>
+
+      <!-- Map -->
+      <div class="map-wrapper reveal-scale">
+        <div class="map-placeholder">
+          <!-- Decorative roads -->
+          <div class="map-roads" aria-hidden="true">
+            <div class="map-road map-road-h1"></div>
+            <div class="map-road map-road-h2"></div>
+            <div class="map-road map-road-v1"></div>
+            <div class="map-road map-road-v2"></div>
+            <span class="map-road-label map-road-label-1">테헤란로</span>
+            <span class="map-road-label map-road-label-2">강남대로</span>
+          </div>
+
+          <!-- Pin -->
+          <div class="map-pin">
+            <div class="map-pin-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+            </div>
+            <p class="map-pin-label">루미에르 피부과</p>
+            <div class="map-pin-pulse" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <!-- Address Overlay Card -->
+        <div class="map-address-card">
+          <h3>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            루미에르 피부과
+          </h3>
+          <p>서울특별시 강남구 테헤란로 152<br>루미에르빌딩 3층</p>
+          <a href="https://map.naver.com" target="_blank" rel="noopener noreferrer" class="map-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            네이버 지도에서 보기
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wave decorations -->
+    <div class="wave-top">
+      <svg viewBox="0 0 1440 60" preserveAspectRatio="none">
+        <path d="M0,0 C480,60 960,60 1440,0 L1440,0 L0,0 Z" fill="#ffffff"/>
+      </svg>
+    </div>
+    <div class="wave-bottom">
+      <svg viewBox="0 0 1440 60" preserveAspectRatio="none">
+        <path d="M0,0 C480,60 960,60 1440,0 L1440,0 L0,0 Z" fill="#ffffff"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ==================== Clinic Hours Section ==================== -->
+  <section class="hours-section" id="hours">
+    <div class="container">
+      <!-- Section Header -->
+      <div class="section-header reveal">
+        <span class="caption">CLINIC HOURS</span>
+        <h2 class="display-md">진료시간 안내</h2>
+        <div class="divider divider-center"></div>
+        <p>환자분들의 편의를 위해 정확한 진료시간을 안내드립니다.</p>
+      </div>
+
+      <!-- Hours Grid -->
+      <div class="hours-grid stagger-children">
+        <!-- 월-금 -->
+        <div class="hours-card">
+          <div class="hours-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </div>
+          <h3>월요일 - 금요일</h3>
+          <p class="hours-time">10:00 - 19:00</p>
+          <p class="hours-note">평일 정상 진료</p>
+        </div>
+
+        <!-- 토요일 -->
+        <div class="hours-card">
+          <div class="hours-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <h3>토요일</h3>
+          <p class="hours-time">10:00 - 15:00</p>
+          <p class="hours-note">오전/오후 단축 진료</p>
+        </div>
+
+        <!-- 일요일/공휴일 -->
+        <div class="hours-card closed">
+          <div class="hours-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+            </svg>
+          </div>
+          <h3>일요일 / 공휴일</h3>
+          <p class="hours-time">휴진</p>
+          <p class="hours-note">응급 시 전화 문의</p>
+        </div>
+
+        <!-- 점심시간 -->
+        <div class="hours-card">
+          <div class="hours-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+              <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+              <line x1="6" y1="1" x2="6" y2="4"></line>
+              <line x1="10" y1="1" x2="10" y2="4"></line>
+              <line x1="14" y1="1" x2="14" y2="4"></line>
+            </svg>
+          </div>
+          <h3>점심시간</h3>
+          <p class="hours-time">13:00 - 14:00</p>
+          <p class="hours-note">점심시간 진료 불가</p>
+        </div>
+      </div>
+
+      <!-- Additional info -->
+      <div class="text-center mt-lg reveal" style="max-width: 640px; margin-left: auto; margin-right: auto;">
+        <div style="padding: 24px 32px; background: var(--pastel-cream); border-radius: var(--radius-md); border-left: 4px solid var(--rose);">
+          <p style="font-size: 0.9rem; color: var(--gray-700); line-height: 1.8;">
+            <strong style="color: var(--rose);">안내사항</strong><br>
+            진료 마감 30분 전까지 접수 가능합니다. 초진 환자분은 진료 시작 10분 전까지
+            내원해주시면 원활한 진료가 가능합니다. 공휴일 및 임시 휴진은 공지사항을 확인해주세요.
           </p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== Clinic Info Summary ===== -->
-  <section style="padding:var(--section-pad) 0; background:var(--bg-pink);">
+  <!-- ==================== Contact Info Cards Section ==================== -->
+  <section class="contact-info-section" id="contact-info">
     <div class="container">
-      <div class="text-center">
-        <p class="section-label reveal">Clinic Info</p>
-        <h2 class="section-title reveal">클리닉 정보 요약</h2>
+      <!-- Section Header -->
+      <div class="section-header reveal">
+        <span class="caption">CONTACT US</span>
+        <h2 class="display-md">연락처 안내</h2>
+        <div class="divider divider-center"></div>
+        <p>다양한 채널로 루미에르 피부과에 연락하실 수 있습니다.</p>
       </div>
 
-      <div style="max-width:800px; margin:48px auto 0;">
-        <div class="reveal" style="background:var(--white); border-radius:24px; padding:40px; border:1px solid var(--border-light);">
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:32px;" class="clinic-summary-grid">
-            <div>
-              <h4 style="font-size:var(--fs-body); font-weight:600; margin-bottom:16px; color:var(--accent-rose);">기본 정보</h4>
-              <table style="width:100%; font-size:var(--fs-small); color:var(--text-secondary);">
-                <tr><td style="padding:8px 0; font-weight:500;">상호명</td><td style="padding:8px 0;">글로우스킨클리닉</td></tr>
-                <tr><td style="padding:8px 0; font-weight:500;">대표자</td><td style="padding:8px 0;">김서연</td></tr>
-                <tr><td style="padding:8px 0; font-weight:500;">사업자등록번호</td><td style="padding:8px 0;">123-45-67890</td></tr>
-                <tr><td style="padding:8px 0; font-weight:500;">의료기관 번호</td><td style="padding:8px 0;">제 2010-강남-0123호</td></tr>
-                <tr><td style="padding:8px 0; font-weight:500;">개원일</td><td style="padding:8px 0;">2010년 3월 15일</td></tr>
-              </table>
-            </div>
-            <div>
-              <h4 style="font-size:var(--fs-body); font-weight:600; margin-bottom:16px; color:var(--accent-lavender);">연락처</h4>
-              <table style="width:100%; font-size:var(--fs-small); color:var(--text-secondary);">
-                <tr><td style="padding:8px 0; font-weight:500;">대표 전화</td><td style="padding:8px 0;">02-555-0123</td></tr>
-                <tr><td style="padding:8px 0; font-weight:500;">팩스</td><td style="padding:8px 0;">02-555-0124</td></tr>
-                <tr><td style="padding:8px 0; font-weight:500;">이메일</td><td style="padding:8px 0;">hello@glowskin.kr</td></tr>
-                <tr><td style="padding:8px 0; font-weight:500;">카카오톡</td><td style="padding:8px 0;">@글로우스킨</td></tr>
-                <tr><td style="padding:8px 0; font-weight:500;">인스타그램</td><td style="padding:8px 0;">@glowskin_clinic</td></tr>
-              </table>
-            </div>
+      <!-- Cards Grid -->
+      <div class="contact-cards-grid stagger-children">
+        <!-- 전화 -->
+        <div class="contact-card">
+          <div class="contact-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
           </div>
+          <h3>전화 예약</h3>
+          <p class="contact-value">
+            <a href="tel:02-1234-5678">02-1234-5678</a>
+          </p>
+          <p style="font-size: 0.8rem; color: var(--gray-500); margin-top: 8px;">
+            진료시간 내 전화 상담 가능
+          </p>
+        </div>
 
-          <div style="margin-top:28px; padding-top:28px; border-top:1px solid var(--border-light);">
-            <h4 style="font-size:var(--fs-body); font-weight:600; margin-bottom:12px; color:#10b981;">주소</h4>
-            <p style="color:var(--text-secondary); font-size:var(--fs-small); line-height:1.8;">
-              (06236) 서울특별시 강남구 테헤란로 152 글로우타워 3층<br>
-              3F, Glow Tower, 152 Teheran-ro, Gangnam-gu, Seoul, Korea
+        <!-- 카카오톡 -->
+        <div class="contact-card">
+          <div class="contact-card-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+              <path d="M12 3C6.5 3 2 6.58 2 11c0 2.83 1.82 5.32 4.59 6.74-.15.56-.55 2.03-.63 2.34-.1.38.14.38.3.28.12-.08 1.93-1.31 2.72-1.84.67.1 1.35.15 2.02.15 5.5 0 10-3.58 10-8s-4.5-8-10-8z"/>
+            </svg>
+          </div>
+          <h3>카카오톡</h3>
+          <p class="contact-value">
+            <a href="#">@lumiere_derm</a>
+          </p>
+          <p style="font-size: 0.8rem; color: var(--gray-500); margin-top: 8px;">
+            24시간 카카오톡 상담
+          </p>
+        </div>
+
+        <!-- 이메일 -->
+        <div class="contact-card">
+          <div class="contact-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+          </div>
+          <h3>이메일</h3>
+          <p class="contact-value">
+            <a href="mailto:hello@lumiere-derm.co.kr">hello@lumiere-derm.co.kr</a>
+          </p>
+          <p style="font-size: 0.8rem; color: var(--gray-500); margin-top: 8px;">
+            영업일 기준 24시간 내 회신
+          </p>
+        </div>
+
+        <!-- 주소 -->
+        <div class="contact-card">
+          <div class="contact-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+          </div>
+          <h3>주소</h3>
+          <p class="contact-value">
+            서울특별시 강남구<br>테헤란로 152
+          </p>
+          <p style="font-size: 0.8rem; color: var(--gray-500); margin-top: 8px;">
+            루미에르빌딩 3층
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wave decorations -->
+    <div class="wave-top">
+      <svg viewBox="0 0 1440 60" preserveAspectRatio="none">
+        <path d="M0,0 C480,60 960,60 1440,0 L1440,0 L0,0 Z" fill="#ffffff"/>
+      </svg>
+    </div>
+    <div class="wave-bottom">
+      <svg viewBox="0 0 1440 60" preserveAspectRatio="none">
+        <path d="M0,0 C480,60 960,60 1440,0 L1440,0 L0,0 Z" fill="#ffffff"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ==================== Transportation Guide Section ==================== -->
+  <section class="transport-section" id="transport">
+    <div class="container">
+      <!-- Section Header -->
+      <div class="section-header reveal">
+        <span class="caption">TRANSPORTATION</span>
+        <h2 class="display-md">교통편 안내</h2>
+        <div class="divider divider-center"></div>
+        <p>다양한 교통수단으로 편리하게 방문하실 수 있습니다.</p>
+      </div>
+
+      <!-- Transport Grid -->
+      <div class="transport-grid stagger-children">
+        <!-- 지하철 -->
+        <div class="transport-card">
+          <div class="transport-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="3" width="16" height="16" rx="2"></rect>
+              <path d="M4 11h16"></path>
+              <path d="M12 3v8"></path>
+              <line x1="8" y1="19" x2="6" y2="22"></line>
+              <line x1="16" y1="19" x2="18" y2="22"></line>
+              <circle cx="9" cy="15" r="1" fill="currentColor"></circle>
+              <circle cx="15" cy="15" r="1" fill="currentColor"></circle>
+            </svg>
+          </div>
+          <h3>지하철</h3>
+          <p>강남역 2번 출구 도보 5분</p>
+          <div class="transport-detail">
+            <p style="margin-bottom: 8px;">
+              <strong>2호선</strong> 강남역 하차<br>
+              2번 출구로 나와 테헤란로 방향으로<br>
+              직진 후 첫 번째 사거리에서 좌회전
+            </p>
+            <p>
+              <strong>신분당선</strong> 강남역 하차<br>
+              5번 출구 이용 시 도보 7분
+            </p>
+          </div>
+        </div>
+
+        <!-- 버스 -->
+        <div class="transport-card">
+          <div class="transport-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="14" rx="2"></rect>
+              <path d="M3 10h18"></path>
+              <path d="M7 17v2"></path>
+              <path d="M17 17v2"></path>
+              <circle cx="7" cy="14" r="1" fill="currentColor"></circle>
+              <circle cx="17" cy="14" r="1" fill="currentColor"></circle>
+              <path d="M3 7h18"></path>
+            </svg>
+          </div>
+          <h3>버스</h3>
+          <p>강남역 정류장 하차</p>
+          <div class="transport-detail">
+            <p style="margin-bottom: 8px;">
+              <strong>간선버스 (파랑)</strong><br>
+              <span class="transport-badge badge-blue">140</span>
+              <span class="transport-badge badge-blue">144</span>
+              <span class="transport-badge badge-blue">145</span>
+            </p>
+            <p>
+              <strong>지선버스 (초록)</strong><br>
+              <span class="transport-badge badge-green">3412</span>
+              <span class="transport-badge badge-green">4412</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- 주차 -->
+        <div class="transport-card">
+          <div class="transport-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1" y="6" width="22" height="12" rx="2"></rect>
+              <path d="M12 6V2"></path>
+              <path d="M7 18v2"></path>
+              <path d="M17 18v2"></path>
+              <circle cx="7" cy="12" r="2"></circle>
+              <circle cx="17" cy="12" r="2"></circle>
+              <path d="M9 12h6"></path>
+            </svg>
+          </div>
+          <h3>자가용 / 주차</h3>
+          <p>건물 지하 주차장 이용</p>
+          <div class="transport-detail">
+            <p>
+              <strong>주차 안내</strong><br>
+              루미에르빌딩 지하 주차장<br>
+              <span style="color: var(--rose); font-weight: 700;">2시간 무료 주차</span> 제공<br>
+              (진료 확인 시)
+            </p>
+            <p style="margin-top: 8px; font-size: 0.82rem; color: var(--gray-500);">
+              * 주차 공간이 한정되어 있으니<br>
+              대중교통 이용을 권장드립니다.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Walking guide -->
+      <div class="reveal mt-lg" style="max-width: 800px; margin-left: auto; margin-right: auto;">
+        <div style="padding: 32px; background: var(--pastel-lavender); border-radius: var(--radius-xl); display: flex; align-items: flex-start; gap: 20px;">
+          <div style="width: 48px; height: 48px; min-width: 48px; background: var(--gradient-rose-lavender); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="5" r="2"></circle>
+              <path d="M10 22V18L7.5 14.5 9 8l3-1 3 1 1.5 6.5L14 18v4"></path>
+            </svg>
+          </div>
+          <div>
+            <h4 style="font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; color: var(--gray-900); margin-bottom: 8px;">
+              도보 안내 (강남역 2번 출구 기준)
+            </h4>
+            <p style="font-size: 0.92rem; color: var(--gray-600); line-height: 1.8;">
+              1. 강남역 2번 출구로 나오세요.<br>
+              2. 테헤란로 방향(동쪽)으로 약 300m 직진하세요.<br>
+              3. 첫 번째 사거리에서 좌회전 후 50m 직진하세요.<br>
+              4. 왼편 루미에르빌딩 3층에 위치해 있습니다.<br>
+              <span style="color: var(--rose); font-weight: 600;">소요시간: 약 5분</span>
             </p>
           </div>
         </div>
@@ -1299,208 +1916,391 @@
     </div>
   </section>
 
-  <!-- ===== Before Visit Checklist ===== -->
-  <section style="padding:var(--section-pad) 0;">
+  <!-- ==================== FAQ Section ==================== -->
+  <section class="faq-section" id="faq">
     <div class="container">
-      <div class="text-center">
-        <p class="section-label reveal">Before Your Visit</p>
-        <h2 class="section-title reveal">방문 전 체크리스트</h2>
-        <p class="section-desc centered reveal">
-          원활한 상담과 시술을 위해 아래 사항을 확인해 주세요.
+      <!-- Section Header -->
+      <div class="section-header reveal">
+        <span class="caption">FAQ</span>
+        <h2 class="display-md">자주 묻는 질문</h2>
+        <div class="divider divider-center"></div>
+        <p>방문 전 궁금한 사항들을 미리 확인해보세요.</p>
+      </div>
+
+      <!-- FAQ List -->
+      <div class="faq-container">
+        <div class="faq-list reveal">
+          <!-- FAQ 1 -->
+          <div class="faq-item">
+            <div class="faq-question">
+              <span class="faq-q-label">Q</span>
+              <span class="faq-q-text">예약 없이 방문 가능한가요?</span>
+              <span class="faq-toggle-icon"></span>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                네, 예약 없이 방문하셔도 진료가 가능합니다. 다만, 예약 환자분을 우선으로
+                진료하기 때문에 대기 시간이 발생할 수 있습니다. 원활한 진료를 위해
+                사전 예약을 권장드리며, 전화(02-1234-5678) 또는 카카오톡(@lumiere_derm),
+                홈페이지 예약 양식을 통해 편리하게 예약하실 수 있습니다.
+                특히 토요일은 예약이 빨리 마감되오니 평일 예약을 추천드립니다.
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 2 -->
+          <div class="faq-item">
+            <div class="faq-question">
+              <span class="faq-q-label">Q</span>
+              <span class="faq-q-text">시술 비용은 어떻게 되나요?</span>
+              <span class="faq-toggle-icon"></span>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                시술 비용은 시술 종류, 부위, 횟수에 따라 달라질 수 있습니다.
+                정확한 비용은 전문 의료진의 상담 후 안내드리고 있으며,
+                초진 상담은 무료로 진행됩니다. 카카오톡이나 전화로 대략적인
+                비용 문의도 가능합니다. 또한 시술 패키지 및 멤버십 할인
+                프로그램도 운영하고 있으니 방문 시 안내받으실 수 있습니다.
+                모든 비용은 사전에 투명하게 안내드리며, 추가 비용이 발생하지 않습니다.
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 3 -->
+          <div class="faq-item">
+            <div class="faq-question">
+              <span class="faq-q-label">Q</span>
+              <span class="faq-q-text">시술 후 주의사항은?</span>
+              <span class="faq-toggle-icon"></span>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                시술 후 주의사항은 시술 종류에 따라 다릅니다. 공통적으로는
+                시술 당일 음주 및 사우나, 찜질방 이용을 삼가해주시고,
+                자외선 차단제를 꼼꼼히 발라주시길 권장합니다.
+                레이저 시술 후에는 일시적으로 붉어짐이나 열감이 있을 수 있으며,
+                보톡스/필러 시술 후에는 시술 부위를 강하게 만지거나 눕지 않는 것이
+                좋습니다. 시술 시 상세한 주의사항을 안내해드리며,
+                시술 후 관리 키트도 함께 제공해드립니다.
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 4 -->
+          <div class="faq-item">
+            <div class="faq-question">
+              <span class="faq-q-label">Q</span>
+              <span class="faq-q-text">의료보험 적용이 되나요?</span>
+              <span class="faq-toggle-icon"></span>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                피부과 진료 중 질환 치료 목적의 진료(여드름, 아토피, 습진, 두드러기 등)는
+                의료보험이 적용됩니다. 다만, 미용 목적의 시술(보톡스, 필러, 레이저 토닝 등)은
+                비급여 항목으로 보험 적용이 되지 않습니다. 정확한 보험 적용 여부는
+                진료 내용에 따라 다를 수 있으므로, 내원 시 상담을 통해
+                안내받으실 수 있습니다. 실비보험의 경우 일부 시술에 대해
+                보험금 청구가 가능한 경우가 있으니 확인해보시기 바랍니다.
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 5 -->
+          <div class="faq-item">
+            <div class="faq-question">
+              <span class="faq-q-label">Q</span>
+              <span class="faq-q-text">시술 시간은 얼마나 걸리나요?</span>
+              <span class="faq-toggle-icon"></span>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                시술 시간은 종류에 따라 차이가 있습니다. 일반적인 기준을 안내드립니다.<br><br>
+                <strong>보톡스:</strong> 약 10~15분<br>
+                <strong>필러:</strong> 약 20~30분<br>
+                <strong>레이저 토닝:</strong> 약 20~30분<br>
+                <strong>리프팅:</strong> 약 30분~1시간<br>
+                <strong>스킨케어:</strong> 약 40분~1시간<br><br>
+                상담 시간을 포함하면 첫 방문 시 약 1시간~1시간 30분 정도
+                소요됩니다. 재방문 시에는 상담 시간이 단축되어 보다 빠르게
+                시술을 받으실 수 있습니다.
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 6 -->
+          <div class="faq-item">
+            <div class="faq-question">
+              <span class="faq-q-label">Q</span>
+              <span class="faq-q-text">주차는 가능한가요?</span>
+              <span class="faq-toggle-icon"></span>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                네, 루미에르빌딩 지하에 주차장이 있습니다. 진료 확인 시
+                <strong style="color: var(--rose);">2시간 무료 주차</strong>가 가능합니다.
+                추가 주차 시간은 10분당 500원이 부과됩니다.
+                다만, 건물 주차 공간이 한정되어 있어 만차 시 인근 공영주차장을
+                이용하셔야 할 수 있습니다. 강남역 인근 공영주차장은
+                건물에서 도보 3분 거리에 위치해 있습니다.
+                가능하시면 대중교통 이용을 권장드립니다.
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 7 -->
+          <div class="faq-item">
+            <div class="faq-question">
+              <span class="faq-q-label">Q</span>
+              <span class="faq-q-text">상담만 받을 수도 있나요?</span>
+              <span class="faq-toggle-icon"></span>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                물론입니다. 시술 전 상담만 받으시는 것도 가능합니다.
+                전문 의료진이 피부 상태를 정밀 진단하고, 적합한 시술 방법과
+                예상 효과, 비용 등을 상세하게 안내해드립니다.
+                초진 상담은 무료로 진행되며, 상담 후 시술 여부는
+                충분히 고민하신 후 결정하시면 됩니다.
+                강압적인 시술 권유는 절대 하지 않으니 편하게 방문해주세요.
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 8 -->
+          <div class="faq-item">
+            <div class="faq-question">
+              <span class="faq-q-label">Q</span>
+              <span class="faq-q-text">예약 변경이나 취소는 어떻게 하나요?</span>
+              <span class="faq-toggle-icon"></span>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                예약 변경 및 취소는 예약일 하루 전까지 전화(02-1234-5678) 또는
+                카카오톡(@lumiere_derm)으로 연락주시면 됩니다.
+                당일 취소의 경우 다른 환자분들에게 불편을 드릴 수 있으므로,
+                가능한 한 사전에 알려주시기 바랍니다.
+                노쇼(No-show)가 3회 이상 누적될 경우 예약이 제한될 수 있습니다.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- More Questions CTA -->
+        <div class="text-center mt-lg reveal">
+          <p style="font-size: 0.95rem; color: var(--gray-600); margin-bottom: 20px;">
+            찾으시는 답변이 없으신가요? 언제든지 문의해주세요.
+          </p>
+          <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <a href="tel:02-1234-5678" class="btn btn-primary btn-md">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+              </svg>
+              전화 문의
+            </a>
+            <a href="#" class="btn btn-secondary btn-md">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+              카카오톡 문의
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wave decorations -->
+    <div class="wave-top">
+      <svg viewBox="0 0 1440 60" preserveAspectRatio="none">
+        <path d="M0,0 C480,60 960,60 1440,0 L1440,0 L0,0 Z" fill="#ffffff"/>
+      </svg>
+    </div>
+    <div class="wave-bottom">
+      <svg viewBox="0 0 1440 60" preserveAspectRatio="none">
+        <path d="M0,0 C480,60 960,60 1440,0 L1440,0 L0,0 Z" fill="#ffffff"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ==================== CTA Section ==================== -->
+  <section class="cta-section" id="cta">
+    <div class="container">
+      <div class="cta-content reveal">
+        <span class="cta-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          QUICK CONTACT
+        </span>
+        <h2>지금 바로 예약하세요</h2>
+        <p>
+          전문 의료진의 1:1 맞춤 상담으로<br>
+          당신만의 아름다운 변화를 시작하세요.
         </p>
-      </div>
-
-      <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:24px; margin-top:48px; max-width:900px; margin-left:auto; margin-right:auto;" class="checklist-grid">
-        <div class="reveal" style="background:var(--bg-pink); border-radius:20px; padding:32px;">
-          <h4 style="font-size:var(--fs-h4); margin-bottom:16px;">✅ 준비물</h4>
-          <ul style="list-style:none; padding:0; color:var(--text-secondary); font-size:var(--fs-small); line-height:2.4;">
-            <li style="padding-left:24px; position:relative;"><span style="position:absolute; left:0;">☐</span> 신분증 (주민등록증, 운전면허증, 여권)</li>
-            <li style="padding-left:24px; position:relative;"><span style="position:absolute; left:0;">☐</span> 현재 복용 중인 약 정보</li>
-            <li style="padding-left:24px; position:relative;"><span style="position:absolute; left:0;">☐</span> 과거 시술 이력 메모</li>
-            <li style="padding-left:24px; position:relative;"><span style="position:absolute; left:0;">☐</span> 알레르기 이력 확인</li>
-            <li style="padding-left:24px; position:relative;"><span style="position:absolute; left:0;">☐</span> 피부 고민 부위 사진 (선택)</li>
-          </ul>
+        <div class="cta-buttons">
+          <a href="tel:02-1234-5678" class="btn btn-primary btn-lg">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+            전화로 예약하기
+          </a>
+          <a href="#reservation" class="btn btn-ghost btn-lg">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            온라인 예약하기
+            <span class="arrow">&#8594;</span>
+          </a>
         </div>
 
-        <div class="reveal reveal-delay-1" style="background:var(--bg-lavender); border-radius:20px; padding:32px;">
-          <h4 style="font-size:var(--fs-h4); margin-bottom:16px;">⚠️ 주의사항</h4>
-          <ul style="list-style:none; padding:0; color:var(--text-secondary); font-size:var(--fs-small); line-height:2.4;">
-            <li style="padding-left:24px; position:relative;"><span style="position:absolute; left:0;">•</span> 예약 시간 10분 전 도착을 권장합니다</li>
-            <li style="padding-left:24px; position:relative;"><span style="position:absolute; left:0;">•</span> 메이크업은 가볍게 해주세요 (클렌징 제공)</li>
-            <li style="padding-left:24px; position:relative;"><span style="position:absolute; left:0;">•</span> 시술 당일 음주는 삼가해 주세요</li>
-            <li style="padding-left:24px; position:relative;"><span style="position:absolute; left:0;">•</span> 임신 중이거나 수유 중이면 미리 알려주세요</li>
-            <li style="padding-left:24px; position:relative;"><span style="position:absolute; left:0;">•</span> 켈로이드 체질이면 반드시 고지해 주세요</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Notice Board ===== -->
-  <section style="padding:var(--section-pad) 0;">
-    <div class="container">
-      <div class="text-center">
-        <p class="section-label reveal">Notice</p>
-        <h2 class="section-title reveal">공지사항</h2>
-      </div>
-
-      <div style="max-width:800px; margin:48px auto 0;">
-        <div class="reveal" style="background:var(--white); border-radius:20px; padding:8px 0; border:1px solid var(--border-light);">
-          <div style="padding:16px 28px; border-bottom:1px solid var(--border-light); display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <span style="padding:2px 8px; background:var(--accent-rose); color:var(--white); border-radius:4px; font-size:0.7rem; margin-right:8px;">공지</span>
-              <span style="font-size:var(--fs-small); font-weight:500;">2024년 추석 연휴 진료 안내</span>
-            </div>
-            <span style="color:var(--text-muted); font-size:0.75rem;">2024.09.10</span>
+        <div class="cta-phone-number">
+          <div class="phone-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
           </div>
-          <div style="padding:16px 28px; border-bottom:1px solid var(--border-light); display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <span style="padding:2px 8px; background:var(--accent-lavender); color:var(--white); border-radius:4px; font-size:0.7rem; margin-right:8px;">이벤트</span>
-              <span style="font-size:var(--fs-small); font-weight:500;">가을맞이 스킨케어 패키지 20% 할인</span>
-            </div>
-            <span style="color:var(--text-muted); font-size:0.75rem;">2024.09.01</span>
-          </div>
-          <div style="padding:16px 28px; border-bottom:1px solid var(--border-light); display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <span style="padding:2px 8px; background:var(--accent-rose); color:var(--white); border-radius:4px; font-size:0.7rem; margin-right:8px;">공지</span>
-              <span style="font-size:var(--fs-small); font-weight:500;">최신 피코슈어 프로 도입 안내</span>
-            </div>
-            <span style="color:var(--text-muted); font-size:0.75rem;">2024.08.15</span>
-          </div>
-          <div style="padding:16px 28px; border-bottom:1px solid var(--border-light); display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <span style="padding:2px 8px; background:var(--accent-lavender); color:var(--white); border-radius:4px; font-size:0.7rem; margin-right:8px;">이벤트</span>
-              <span style="font-size:var(--fs-small); font-weight:500;">여름 자외선 케어 프로그램 오픈</span>
-            </div>
-            <span style="color:var(--text-muted); font-size:0.75rem;">2024.07.01</span>
-          </div>
-          <div style="padding:16px 28px; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <span style="padding:2px 8px; background:var(--accent-rose); color:var(--white); border-radius:4px; font-size:0.7rem; margin-right:8px;">공지</span>
-              <span style="font-size:var(--fs-small); font-weight:500;">화·목 야간진료 시간 변경 안내 (21시까지)</span>
-            </div>
-            <span style="color:var(--text-muted); font-size:0.75rem;">2024.06.15</span>
+          <div class="phone-text">
+            <span class="phone-label">전화 예약</span>
+            <a href="tel:02-1234-5678" class="phone-num">02-1234-5678</a>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Decorative elements -->
+    <div style="position: absolute; top: 40px; left: 10%; width: 8px; height: 8px; background: var(--rose-light); border-radius: 50%; opacity: 0.3; animation: float 4s ease-in-out infinite;" aria-hidden="true"></div>
+    <div style="position: absolute; top: 60%; right: 8%; width: 12px; height: 12px; background: var(--lavender-light); border-radius: 50%; opacity: 0.3; animation: float 5s ease-in-out infinite 1s;" aria-hidden="true"></div>
+    <div style="position: absolute; bottom: 30px; left: 15%; width: 6px; height: 6px; background: var(--rose-light); border-radius: 2px; opacity: 0.2; transform: rotate(45deg); animation: float 6s ease-in-out infinite 0.5s;" aria-hidden="true"></div>
+    <div style="position: absolute; top: 30%; right: 15%; width: 16px; height: 16px; border: 2px solid rgba(183, 148, 246, 0.2); border-radius: 50%; animation: float 7s ease-in-out infinite 2s;" aria-hidden="true"></div>
+    <div style="position: absolute; bottom: 20%; left: 5%; width: 20px; height: 20px; border: 2px solid rgba(233, 30, 99, 0.15); border-radius: 4px; transform: rotate(30deg); animation: float 5s ease-in-out infinite 1.5s;" aria-hidden="true"></div>
   </section>
 
-  <!-- ===== Banner ===== -->
-  <section class="contact-banner">
-    <div class="container">
-      <h2 class="reveal">아직 고민 중이신가요?</h2>
-      <p class="reveal">부담 없이 전화 한 통으로 시작하세요.</p>
-      <a href="tel:02-555-0123" class="btn-pill reveal" style="background:var(--accent-rose); color:var(--white);">📞 02-555-0123</a>
-    </div>
-  </section>
-
-  <!-- ===== Footer ===== -->
-  <footer class="site-footer">
-    <div class="container">
-      <div class="footer-grid">
-        <div class="footer-col">
-          <h4>글로우스킨클리닉</h4>
-          <p>서울특별시 강남구 테헤란로 152<br>글로우타워 3층</p>
-          <p style="margin-top:12px;">Tel. 02-555-0123</p>
-          <p>Email. hello@glowskin.kr</p>
-        </div>
-        <div class="footer-col">
-          <h4>시술 안내</h4>
-          <a href="treatments.html">레이저토닝</a>
-          <a href="treatments.html">보톡스/필러</a>
-          <a href="treatments.html">울쎄라/써마지</a>
-          <a href="treatments.html">스킨부스터</a>
-          <a href="treatments.html">여드름 치료</a>
-        </div>
-        <div class="footer-col">
-          <h4>소셜 미디어</h4>
-          <a href="#">인스타그램</a>
-          <a href="#">유튜브</a>
-          <a href="#">카카오톡 채널</a>
-          <a href="#">네이버 블로그</a>
-        </div>
-        <div class="footer-col">
-          <h4>진료 시간</h4>
-          <p>평일 10:00 – 19:00</p>
-          <p>토요일 10:00 – 16:00</p>
-          <p>일요일·공휴일 휴진</p>
-          <p style="margin-top:12px; font-size:0.75rem;">점심시간 13:00 – 14:00</p>
+  <!-- ==================== Footer ==================== -->
+  <footer class="footer">
+    <div class="footer-top">
+      <!-- Brand -->
+      <div class="footer-brand">
+        <a href="index.html" class="logo" style="align-items: flex-start; padding: 0; margin-bottom: 16px;">
+          <span class="logo-text">LUMIERE</span>
+          <span class="logo-sub">DERMATOLOGY</span>
+        </a>
+        <p>
+          아름다움의 빛을 찾아드리는 루미에르 피부과.<br>
+          전문 의료진의 섬세한 진료와 최신 장비로<br>
+          당신만의 자연스러운 아름다움을 완성합니다.
+        </p>
+        <div class="footer-social" style="margin-top: 24px;">
+          <a href="#" aria-label="인스타그램">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+            </svg>
+          </a>
+          <a href="#" aria-label="유튜브">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.13C5.12 19.56 12 19.56 12 19.56s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"></path>
+              <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+            </svg>
+          </a>
+          <a href="#" aria-label="블로그">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+            </svg>
+          </a>
+          <a href="#" aria-label="카카오톡">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+              <path d="M12 3C6.5 3 2 6.58 2 11c0 2.83 1.82 5.32 4.59 6.74-.15.56-.55 2.03-.63 2.34-.1.38.14.38.3.28.12-.08 1.93-1.31 2.72-1.84.67.1 1.35.15 2.02.15 5.5 0 10-3.58 10-8s-4.5-8-10-8z"/>
+            </svg>
+          </a>
         </div>
       </div>
-      <div class="footer-bottom">
-        <span>© 2024 글로우스킨클리닉. All rights reserved.</span>
-        <span>사업자등록번호: 123-45-67890 | 대표자: 김서연</span>
+
+      <!-- Quick Links -->
+      <div class="footer-col">
+        <h4>바로가기</h4>
+        <ul>
+          <li><a href="index.html">홈</a></li>
+          <li><a href="about.html">의료진 소개</a></li>
+          <li><a href="treatments.html">시술 안내</a></li>
+          <li><a href="before-after.html">전후 사진</a></li>
+          <li><a href="contact.html">오시는길</a></li>
+        </ul>
+      </div>
+
+      <!-- Treatments -->
+      <div class="footer-col">
+        <h4>시술 안내</h4>
+        <ul>
+          <li><a href="treatments.html">레이저 시술</a></li>
+          <li><a href="treatments.html">보톡스 / 필러</a></li>
+          <li><a href="treatments.html">리프팅</a></li>
+          <li><a href="treatments.html">스킨케어</a></li>
+          <li><a href="treatments.html">모발 클리닉</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="footer-col">
+        <h4>연락처</h4>
+        <ul>
+          <li>
+            <a href="tel:02-1234-5678" style="display: flex; align-items: center; gap: 8px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+              </svg>
+              02-1234-5678
+            </a>
+          </li>
+          <li>
+            <a href="mailto:hello@lumiere-derm.co.kr" style="display: flex; align-items: center; gap: 8px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+              hello@lumiere-derm.co.kr
+            </a>
+          </li>
+          <li style="display: flex; align-items: flex-start; gap: 8px; color: var(--gray-500);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-top: 4px; min-width: 14px;">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            서울특별시 강남구 테헤란로 152 루미에르빌딩 3층
+          </li>
+          <li style="display: flex; align-items: center; gap: 8px; color: var(--gray-500);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            평일 10:00 - 19:00 / 토 10:00 - 15:00
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 LUMIERE DERMATOLOGY. All rights reserved.</p>
+      <div style="display: flex; gap: 24px; font-size: 0.8rem;">
+        <a href="#" style="color: var(--gray-500);">개인정보처리방침</a>
+        <a href="#" style="color: var(--gray-500);">이용약관</a>
+        <a href="#" style="color: var(--gray-500);">비급여 안내</a>
       </div>
     </div>
   </footer>
 
-  <!-- ===== Scripts ===== -->
-  <script>
-    // Nav scroll
-    const nav = document.getElementById('mainNav');
-    window.addEventListener('scroll', () => {
-      nav.classList.toggle('scrolled', window.scrollY > 60);
-    }, { passive: true });
+  <!-- ==================== Back to Top Button ==================== -->
+  <button class="back-to-top" aria-label="맨 위로 이동">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
 
-    // Mobile nav
-    const navToggle = document.getElementById('navToggle');
-    const navLinks = document.getElementById('navLinks');
-    navToggle.addEventListener('click', () => {
-      navToggle.classList.toggle('active');
-      navLinks.classList.toggle('open');
-    });
-
-    // Scroll reveal
-    const revealEls = document.querySelectorAll('.reveal');
-    const revealObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          revealObserver.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
-    revealEls.forEach(el => revealObserver.observe(el));
-
-    // Form submit handler
-    function handleSubmit(e) {
-      e.preventDefault();
-      const form = e.target;
-      const btn = form.querySelector('button[type="submit"]');
-      const originalText = btn.textContent;
-
-      btn.textContent = '신청 완료! ✓';
-      btn.style.background = '#10b981';
-      btn.disabled = true;
-
-      setTimeout(() => {
-        btn.textContent = originalText;
-        btn.style.background = '';
-        btn.disabled = false;
-        form.reset();
-      }, 3000);
-
-      return false;
-    }
-
-    // Floating label fix for date/select
-    document.querySelectorAll('.form-group select, .form-group input[type="date"]').forEach(el => {
-      el.addEventListener('change', () => {
-        el.classList.add('has-value');
-      });
-    });
-
-    // Mouse ripple
-    document.addEventListener('click', (e) => {
-      const ripple = document.createElement('div');
-      ripple.className = 'ripple-circle';
-      ripple.style.left = e.clientX + 'px';
-      ripple.style.top = e.clientY + 'px';
-      document.body.appendChild(ripple);
-      setTimeout(() => ripple.remove(), 600);
-    });
-  </script>
-
+  <!-- ==================== Scripts ==================== -->
+  <script src="script.js"></script>
 </body>
 </html>

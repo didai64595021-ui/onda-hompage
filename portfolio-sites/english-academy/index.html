@@ -1,2460 +1,1507 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Bright English Academy - AI 기반 맞춤 영어 학습. 회화, 비즈니스, TOEIC, IELTS 전문 영어 학원">
-  <meta name="theme-color" content="#0066FF">
-  <title>Bright English Academy | Your English, Our Mission</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-  <style>
-    /* ============================================
-       CSS RESET (MANDATORY)
-       ============================================ */
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    html {
-      scroll-behavior: smooth;
-    }
-    body {
-      font-family: 'Noto Sans KR', sans-serif;
-      color: #212121;
-      overflow-x: hidden;
-      word-break: keep-all;
-      overflow-wrap: break-word;
-      line-height: 1.6;
-    }
-    img {
-      max-width: 100%;
-      height: auto;
-      object-fit: cover;
-      display: block;
-    }
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
-    button {
-      font-family: inherit;
-      cursor: pointer;
-      border: none;
-      background: none;
-    }
-    ul, ol {
-      list-style: none;
-    }
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
-    }
-
-    /* ============================================
-       CONTAINER
-       ============================================ */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-    @media (max-width: 768px) {
-      .container {
-        padding: 0 16px;
-      }
-    }
-
-    /* ============================================
-       TYPOGRAPHY
-       ============================================ */
-    .font-en {
-      font-family: 'Outfit', sans-serif;
-    }
-    .font-kr {
-      font-family: 'Noto Sans KR', sans-serif;
-    }
-
-    /* ============================================
-       TOP BAR
-       ============================================ */
-    .topbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 64px;
-      background: #ffffff;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-      z-index: 999;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
-      transition: box-shadow 0.3s ease;
-    }
-    .topbar.scrolled {
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-    }
-    .topbar__left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .topbar__hamburger {
-      width: 48px;
-      height: 48px;
-      min-height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 12px;
-      transition: background 0.2s ease;
-    }
-    .topbar__hamburger:hover {
-      background: #F5F5F5;
-    }
-    .topbar__hamburger span {
-      display: block;
-      width: 22px;
-      height: 2px;
-      background: #212121;
-      border-radius: 2px;
-      position: relative;
-      transition: all 0.3s ease;
-    }
-    .topbar__hamburger span::before,
-    .topbar__hamburger span::after {
-      content: '';
-      display: block;
-      width: 22px;
-      height: 2px;
-      background: #212121;
-      border-radius: 2px;
-      position: absolute;
-      left: 0;
-      transition: all 0.3s ease;
-    }
-    .topbar__hamburger span::before {
-      top: -7px;
-    }
-    .topbar__hamburger span::after {
-      top: 7px;
-    }
-    .topbar__logo {
-      font-family: 'Outfit', sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: #0066FF;
-      letter-spacing: -0.5px;
-      white-space: nowrap;
-    }
-    .topbar__logo-accent {
-      color: #FF8F00;
-    }
-    .topbar__right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .topbar__phone {
-      font-family: 'Outfit', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      color: #555555;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .topbar__phone svg {
-      width: 16px;
-      height: 16px;
-      fill: #0066FF;
-    }
-    .topbar__cta {
-      background: #0066FF;
-      color: #ffffff;
-      font-size: 14px;
-      font-weight: 600;
-      padding: 10px 20px;
-      border-radius: 8px;
-      min-height: 48px;
-      display: flex;
-      align-items: center;
-      transition: background 0.2s ease, transform 0.2s ease;
-    }
-    .topbar__cta:hover {
-      background: #0052CC;
-      transform: translateY(-1px);
-    }
-    @media (max-width: 768px) {
-      .topbar {
-        padding: 0 16px;
-      }
-      .topbar__phone {
-        display: none;
-      }
-      .topbar__logo {
-        font-size: 16px;
-      }
-      .topbar__cta {
-        padding: 8px 14px;
-        font-size: 13px;
-        min-height: 44px;
-      }
-    }
-
-    /* ============================================
-       SIDEBAR NAVIGATION
-       ============================================ */
-    .sidebar-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
-    }
-    .sidebar-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 300px;
-      height: 100vh;
-      height: 100dvh;
-      background: #ffffff;
-      z-index: 1001;
-      transform: translateX(-100%);
-      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex;
-      flex-direction: column;
-      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
-    }
-    .sidebar.active {
-      transform: translateX(0);
-    }
-    .sidebar__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 20px;
-      border-bottom: 1px solid #E0E0E0;
-    }
-    .sidebar__title {
-      font-family: 'Outfit', sans-serif;
-      font-size: 18px;
-      font-weight: 700;
-      color: #0066FF;
-    }
-    .sidebar__close {
-      width: 48px;
-      height: 48px;
-      min-height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 12px;
-      font-size: 24px;
-      color: #555555;
-      transition: background 0.2s ease, color 0.2s ease;
-    }
-    .sidebar__close:hover {
-      background: #F5F5F5;
-      color: #212121;
-    }
-    .sidebar__nav {
-      flex: 1;
-      padding: 24px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .sidebar__link {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px 16px;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 500;
-      color: #333333;
-      min-height: 48px;
-      transition: background 0.2s ease, color 0.2s ease;
-    }
-    .sidebar__link:hover {
-      background: #E6F0FF;
-      color: #0066FF;
-    }
-    .sidebar__link.active {
-      background: #0066FF;
-      color: #ffffff;
-    }
-    .sidebar__link.active svg {
-      fill: #ffffff;
-    }
-    .sidebar__link svg {
-      width: 22px;
-      height: 22px;
-      fill: #757575;
-      flex-shrink: 0;
-      transition: fill 0.2s ease;
-    }
-    .sidebar__link:hover svg {
-      fill: #0066FF;
-    }
-    .sidebar__footer {
-      padding: 20px;
-      border-top: 1px solid #E0E0E0;
-    }
-    .sidebar__level-test {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      padding: 14px 20px;
-      background: #FF8F00;
-      color: #ffffff;
-      font-size: 16px;
-      font-weight: 700;
-      border-radius: 12px;
-      min-height: 48px;
-      transition: background 0.2s ease, transform 0.2s ease;
-    }
-    .sidebar__level-test:hover {
-      background: #E67E00;
-      transform: translateY(-1px);
-    }
-
-    /* Desktop sidebar (fixed) */
-    @media (min-width: 1024px) {
-      .sidebar {
-        transform: translateX(0);
-        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
-        width: 280px;
-      }
-      .sidebar-overlay {
-        display: none;
-      }
-      .topbar__hamburger {
-        display: none;
-      }
-      .topbar {
-        left: 280px;
-        width: calc(100% - 280px);
-      }
-      .main-content {
-        margin-left: 280px;
-      }
-    }
-
-    /* ============================================
-       HERO SECTION
-       ============================================ */
-    .hero {
-      position: relative;
-      min-height: calc(100vh - 64px);
-      margin-top: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-    .hero__bg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -2;
-    }
-    .hero__bg img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .hero__overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(
-        135deg,
-        rgba(26, 26, 46, 0.85) 0%,
-        rgba(0, 102, 255, 0.6) 50%,
-        rgba(26, 26, 46, 0.75) 100%
-      );
-      z-index: -1;
-    }
-    .hero__content {
-      text-align: center;
-      color: #ffffff;
-      padding: 40px 24px;
-      max-width: 800px;
-    }
-    .hero__title-line {
-      font-family: 'Outfit', sans-serif;
-      font-size: clamp(42px, 8vw, 80px);
-      font-weight: 900;
-      line-height: 1.1;
-      letter-spacing: -2px;
-      margin-bottom: 8px;
-      overflow: hidden;
-    }
-    .hero__title-line span {
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(40px);
-    }
-    .hero__title-accent {
-      color: #FF8F00;
-    }
-    .hero__subtitle {
-      font-family: 'Noto Sans KR', sans-serif;
-      font-size: clamp(16px, 2.5vw, 22px);
-      font-weight: 400;
-      color: rgba(255, 255, 255, 0.9);
-      margin-top: 24px;
-      margin-bottom: 40px;
-      opacity: 0;
-      transform: translateY(20px);
-      line-height: 1.7;
-    }
-    .hero__buttons {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    .hero__btn-outline {
-      font-family: 'Noto Sans KR', sans-serif;
-      font-size: 16px;
-      font-weight: 600;
-      color: #ffffff;
-      padding: 14px 28px;
-      border-bottom: 2px solid #ffffff;
-      min-height: 48px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: color 0.2s ease, border-color 0.2s ease;
-    }
-    .hero__btn-outline:hover {
-      color: #FF8F00;
-      border-color: #FF8F00;
-    }
-    .hero__btn-solid {
-      font-family: 'Noto Sans KR', sans-serif;
-      font-size: 16px;
-      font-weight: 700;
-      color: #212121;
-      background: #FF8F00;
-      padding: 14px 32px;
-      border-radius: 12px;
-      min-height: 48px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: background 0.2s ease, transform 0.2s ease;
-      box-shadow: 0 4px 16px rgba(255, 143, 0, 0.35);
-    }
-    .hero__btn-solid:hover {
-      background: #E67E00;
-      transform: translateY(-2px);
-    }
-    .hero__scroll-indicator {
-      position: absolute;
-      bottom: 32px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 12px;
-      font-weight: 400;
-      animation: bounceDown 2s infinite;
-    }
-    .hero__scroll-indicator svg {
-      width: 24px;
-      height: 24px;
-      fill: rgba(255, 255, 255, 0.7);
-    }
-    @keyframes bounceDown {
-      0%, 100% { transform: translateX(-50%) translateY(0); }
-      50% { transform: translateX(-50%) translateY(10px); }
-    }
-    @media (max-width: 768px) {
-      .hero {
-        min-height: calc(100vh - 64px);
-      }
-      .hero__content {
-        padding: 32px 16px;
-      }
-      .hero__buttons {
-        flex-direction: column;
-      }
-    }
-
-    /* ============================================
-       STATS SECTION
-       ============================================ */
-    .stats {
-      padding: 80px 0;
-      background: #ffffff;
-    }
-    .stats__grid {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr 1fr 0.8fr;
-      gap: 32px;
-      align-items: center;
-    }
-    .stats__item {
-      text-align: center;
-      padding: 32px 16px;
-      border-radius: 16px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .stats__item:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 32px rgba(0, 102, 255, 0.1);
-    }
-    .stats__icon {
-      width: 56px;
-      height: 56px;
-      margin: 0 auto 16px;
-      background: #E6F0FF;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-    }
-    .stats__item:nth-child(2) .stats__icon {
-      background: #FFF3E0;
-    }
-    .stats__item:nth-child(3) .stats__icon {
-      background: #E0F7FA;
-    }
-    .stats__item:nth-child(4) .stats__icon {
-      background: #EDE7F6;
-    }
-    .stats__number {
-      font-family: 'Outfit', sans-serif;
-      font-size: clamp(32px, 4vw, 48px);
-      font-weight: 900;
-      color: #0066FF;
-      line-height: 1.2;
-      margin-bottom: 8px;
-    }
-    .stats__number .stats__suffix {
-      font-size: 0.6em;
-      color: #FF8F00;
-    }
-    .stats__label {
-      font-size: 15px;
-      font-weight: 500;
-      color: #555555;
-    }
-    @media (max-width: 1024px) {
-      .stats__grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 24px;
-      }
-    }
-    @media (max-width: 480px) {
-      .stats__grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-      }
-      .stats {
-        padding: 60px 0;
-      }
-    }
-
-    /* ============================================
-       SECTION COMMON
-       ============================================ */
-    .section-title {
-      text-align: center;
-      margin-bottom: 48px;
-    }
-    .section-title h2 {
-      font-family: 'Noto Sans KR', sans-serif;
-      font-size: clamp(28px, 4vw, 40px);
-      font-weight: 900;
-      color: #212121;
-      margin-bottom: 12px;
-      position: relative;
-      display: inline-block;
-    }
-    .section-title h2::after {
-      content: '';
-      display: block;
-      width: 60px;
-      height: 4px;
-      background: #FF8F00;
-      border-radius: 4px;
-      margin: 12px auto 0;
-    }
-    .section-title p {
-      font-size: 16px;
-      color: #757575;
-      margin-top: 12px;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .underline-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 15px;
-      font-weight: 600;
-      color: #0066FF;
-      border-bottom: 2px solid #0066FF;
-      padding-bottom: 4px;
-      min-height: 48px;
-      transition: color 0.2s ease, border-color 0.2s ease, gap 0.2s ease;
-    }
-    .underline-btn:hover {
-      color: #0052CC;
-      border-color: #0052CC;
-      gap: 10px;
-    }
-
-    /* Fade-in animation */
-    .fade-in {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: opacity 0.7s ease, transform 0.7s ease;
-    }
-    .fade-in.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .fade-in-left {
-      opacity: 0;
-      transform: translateX(-40px);
-      transition: opacity 0.7s ease, transform 0.7s ease;
-    }
-    .fade-in-left.visible {
-      opacity: 1;
-      transform: translateX(0);
-    }
-    .fade-in-right {
-      opacity: 0;
-      transform: translateX(40px);
-      transition: opacity 0.7s ease, transform 0.7s ease;
-    }
-    .fade-in-right.visible {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    /* ============================================
-       PROGRAMS SECTION
-       ============================================ */
-    .programs {
-      background: #E0F7FA;
-      padding: 100px 0;
-      clip-path: polygon(0 5%, 100% 0, 100% 95%, 0 100%);
-      margin-top: -40px;
-      margin-bottom: -40px;
-      position: relative;
-    }
-    .programs__grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-    }
-    .programs__card {
-      background: #ffffff;
-      border-radius: 16px;
-      padding: 28px;
-      border-left: 5px solid #0066FF;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .programs__card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-    }
-    .programs__card:nth-child(2) {
-      border-left-color: #FF8F00;
-    }
-    .programs__card:nth-child(3) {
-      border-left-color: #4CAF50;
-    }
-    .programs__card:nth-child(4) {
-      border-left-color: #9C27B0;
-    }
-    .programs__card:nth-child(5) {
-      border-left-color: #E91E63;
-    }
-    .programs__card:nth-child(6) {
-      border-left-color: #00BCD4;
-    }
-    .programs__card-badge {
-      font-family: 'Outfit', sans-serif;
-      font-size: 12px;
-      font-weight: 700;
-      color: #0066FF;
-      background: #E6F0FF;
-      padding: 4px 12px;
-      border-radius: 20px;
-      display: inline-block;
-      width: fit-content;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .programs__card:nth-child(2) .programs__card-badge {
-      color: #FF8F00;
-      background: #FFF3E0;
-    }
-    .programs__card:nth-child(3) .programs__card-badge {
-      color: #4CAF50;
-      background: #E8F5E9;
-    }
-    .programs__card:nth-child(4) .programs__card-badge {
-      color: #9C27B0;
-      background: #F3E5F5;
-    }
-    .programs__card:nth-child(5) .programs__card-badge {
-      color: #E91E63;
-      background: #FCE4EC;
-    }
-    .programs__card:nth-child(6) .programs__card-badge {
-      color: #00BCD4;
-      background: #E0F7FA;
-    }
-    .programs__card h3 {
-      font-size: 20px;
-      font-weight: 700;
-      color: #212121;
-    }
-    .programs__card-en {
-      font-family: 'Outfit', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      color: #757575;
-    }
-    .programs__card p {
-      font-size: 14px;
-      color: #555555;
-      line-height: 1.7;
-    }
-    .programs__card-meta {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-top: auto;
-      padding-top: 12px;
-      border-top: 1px solid #EEEEEE;
-    }
-    .programs__card-meta span {
-      font-size: 13px;
-      color: #757575;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .programs__card-price {
-      font-family: 'Outfit', sans-serif;
-      font-size: 20px;
-      font-weight: 800;
-      color: #0066FF;
-    }
-    .programs__more {
-      text-align: center;
-      margin-top: 40px;
-    }
-    @media (max-width: 1024px) {
-      .programs__grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-    @media (max-width: 768px) {
-      .programs {
-        clip-path: polygon(0 3%, 100% 0, 100% 97%, 0 100%);
-        padding: 80px 0;
-      }
-    }
-    @media (max-width: 480px) {
-      .programs__grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* ============================================
-       TEACHERS SECTION
-       ============================================ */
-    .teachers {
-      background: #EDE7F6;
-      padding: 100px 0;
-      clip-path: polygon(0 0, 100% 5%, 100% 100%, 0 95%);
-      position: relative;
-    }
-    .teachers__grid {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr 1fr;
-      gap: 32px;
-      align-items: start;
-    }
-    .teachers__card {
-      background: #ffffff;
-      border-radius: 20px;
-      padding: 32px 24px;
-      text-align: center;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .teachers__card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-    }
-    .teachers__card:nth-child(2) {
-      margin-top: 48px;
-    }
-    .teachers__img-wrap {
-      width: 140px;
-      height: 140px;
-      margin: 0 auto 20px;
-      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-      overflow: hidden;
-      background: #E6F0FF;
-    }
-    .teachers__img-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .teachers__card h3 {
-      font-size: 20px;
-      font-weight: 700;
-      color: #212121;
-      margin-bottom: 4px;
-    }
-    .teachers__card-origin {
-      font-family: 'Outfit', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      color: #757575;
-      margin-bottom: 12px;
-    }
-    .teachers__tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      margin-bottom: 16px;
-    }
-    .teachers__tag {
-      font-size: 12px;
-      font-weight: 600;
-      padding: 5px 12px;
-      border-radius: 20px;
-      background: #E6F0FF;
-      color: #0066FF;
-    }
-    .teachers__card:nth-child(2) .teachers__tag {
-      background: #FFF3E0;
-      color: #FF8F00;
-    }
-    .teachers__card:nth-child(3) .teachers__tag {
-      background: #E0F7FA;
-      color: #00838F;
-    }
-    .teachers__card-desc {
-      font-size: 14px;
-      color: #555555;
-      line-height: 1.7;
-    }
-    .teachers__more {
-      text-align: center;
-      margin-top: 40px;
-    }
-    @media (max-width: 1024px) {
-      .teachers__grid {
-        grid-template-columns: 1fr 1fr;
-      }
-      .teachers__card:nth-child(2) {
-        margin-top: 0;
-      }
-    }
-    @media (max-width: 768px) {
-      .teachers {
-        clip-path: polygon(0 0, 100% 3%, 100% 100%, 0 97%);
-        padding: 80px 0;
-      }
-      .teachers__grid {
-        grid-template-columns: 1fr;
-        max-width: 400px;
-        margin-left: auto;
-        margin-right: auto;
-      }
-    }
-
-    /* ============================================
-       REVIEWS SECTION
-       ============================================ */
-    .reviews {
-      background: #FFF3E0;
-      padding: 100px 0;
-      clip-path: polygon(0 5%, 100% 0, 100% 95%, 0 100%);
-      position: relative;
-    }
-    .reviews__carousel {
-      position: relative;
-      overflow: hidden;
-      border-radius: 20px;
-    }
-    .reviews__track {
-      display: flex;
-      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .reviews__slide {
-      min-width: 100%;
-      padding: 0 8px;
-    }
-    .reviews__card {
-      background: #ffffff;
-      border-radius: 20px;
-      padding: 40px 32px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-      max-width: 700px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .reviews__stars {
-      margin-bottom: 20px;
-      font-size: 22px;
-      color: #FF8F00;
-      letter-spacing: 4px;
-    }
-    .reviews__quote {
-      font-size: 18px;
-      font-weight: 500;
-      color: #212121;
-      line-height: 1.8;
-      margin-bottom: 24px;
-      position: relative;
-    }
-    .reviews__quote::before {
-      content: '\201C';
-      font-family: 'Outfit', sans-serif;
-      font-size: 60px;
-      font-weight: 900;
-      color: #0066FF;
-      opacity: 0.15;
-      position: absolute;
-      top: -20px;
-      left: -10px;
-      line-height: 1;
-    }
-    .reviews__author {
-      font-size: 15px;
-      font-weight: 700;
-      color: #333333;
-    }
-    .reviews__author-info {
-      font-size: 13px;
-      font-weight: 400;
-      color: #757575;
-      margin-top: 4px;
-    }
-    .reviews__controls {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      margin-top: 32px;
-    }
-    .reviews__arrow {
-      width: 48px;
-      height: 48px;
-      min-height: 48px;
-      border-radius: 50%;
-      background: #ffffff;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s ease, box-shadow 0.2s ease;
-    }
-    .reviews__arrow:hover {
-      background: #0066FF;
-      box-shadow: 0 4px 16px rgba(0, 102, 255, 0.3);
-    }
-    .reviews__arrow:hover svg {
-      fill: #ffffff;
-    }
-    .reviews__arrow svg {
-      width: 20px;
-      height: 20px;
-      fill: #333333;
-      transition: fill 0.2s ease;
-    }
-    .reviews__dots {
-      display: flex;
-      gap: 8px;
-    }
-    .reviews__dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #BDBDBD;
-      min-height: 10px;
-      transition: background 0.3s ease, width 0.3s ease;
-    }
-    .reviews__dot.active {
-      background: #0066FF;
-      width: 28px;
-      border-radius: 5px;
-    }
-    .reviews__more {
-      text-align: center;
-      margin-top: 32px;
-    }
-    @media (max-width: 768px) {
-      .reviews {
-        clip-path: polygon(0 3%, 100% 0, 100% 97%, 0 100%);
-        padding: 80px 0;
-      }
-      .reviews__card {
-        padding: 28px 20px;
-      }
-      .reviews__quote {
-        font-size: 16px;
-      }
-    }
-
-    /* ============================================
-       CTA SECTION (Level Test)
-       ============================================ */
-    .cta-section {
-      background: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);
-      padding: 80px 0;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .cta-section::before {
-      content: '';
-      position: absolute;
-      width: 500px;
-      height: 500px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.05);
-      top: -200px;
-      right: -100px;
-    }
-    .cta-section::after {
-      content: '';
-      position: absolute;
-      width: 300px;
-      height: 300px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.04);
-      bottom: -100px;
-      left: -50px;
-    }
-    .cta-section h2 {
-      font-size: clamp(24px, 4vw, 36px);
-      font-weight: 900;
-      color: #ffffff;
-      margin-bottom: 16px;
-      position: relative;
-      z-index: 1;
-    }
-    .cta-section p {
-      font-size: clamp(14px, 2vw, 18px);
-      color: rgba(255, 255, 255, 0.9);
-      margin-bottom: 36px;
-      position: relative;
-      z-index: 1;
-    }
-    .cta-section__btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 16px 40px;
-      background: #ffffff;
-      color: #0066FF;
-      font-size: 18px;
-      font-weight: 800;
-      border-radius: 14px;
-      min-height: 48px;
-      position: relative;
-      z-index: 1;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    }
-    .cta-section__btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-    }
-
-    /* ============================================
-       CAMPUS SECTION
-       ============================================ */
-    .campus {
-      background: #F1F8E9;
-      padding: 100px 0;
-      clip-path: polygon(0 5%, 100% 0, 100% 100%, 0 95%);
-      position: relative;
-    }
-    .campus__grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 32px;
-    }
-    .campus__card {
-      background: #ffffff;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .campus__card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-    }
-    .campus__img-wrap {
-      position: relative;
-      height: 240px;
-      overflow: hidden;
-    }
-    .campus__img-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
-    }
-    .campus__card-body {
-      padding: 24px;
-    }
-    .campus__card h3 {
-      font-size: 22px;
-      font-weight: 800;
-      color: #212121;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .campus__card h3 .campus__badge {
-      font-family: 'Outfit', sans-serif;
-      font-size: 11px;
-      font-weight: 700;
-      color: #ffffff;
-      background: #0066FF;
-      padding: 3px 10px;
-      border-radius: 20px;
-      text-transform: uppercase;
-    }
-    .campus__info {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .campus__info-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 14px;
-      color: #555555;
-    }
-    .campus__info-item svg {
-      width: 18px;
-      height: 18px;
-      fill: #0066FF;
-      flex-shrink: 0;
-      margin-top: 3px;
-    }
-    @media (max-width: 768px) {
-      .campus {
-        clip-path: polygon(0 3%, 100% 0, 100% 100%, 0 97%);
-        padding: 80px 0;
-      }
-      .campus__grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* ============================================
-       FOOTER
-       ============================================ */
-    .footer {
-      background: #1A1A2E;
-      color: #ffffff;
-      padding: 64px 0 0;
-    }
-    .footer__grid {
-      display: grid;
-      grid-template-columns: 1.5fr 1fr 1fr 1fr;
-      gap: 40px;
-    }
-    .footer__brand h3 {
-      font-family: 'Outfit', sans-serif;
-      font-size: 22px;
-      font-weight: 800;
-      color: #ffffff;
-      margin-bottom: 8px;
-    }
-    .footer__brand-slogan {
-      font-family: 'Outfit', sans-serif;
-      font-size: 14px;
-      color: #FF8F00;
-      font-weight: 500;
-      margin-bottom: 16px;
-    }
-    .footer__brand p {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.6);
-      line-height: 1.7;
-    }
-    .footer__col h4 {
-      font-size: 16px;
-      font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 20px;
-      position: relative;
-    }
-    .footer__col h4::after {
-      content: '';
-      display: block;
-      width: 24px;
-      height: 3px;
-      background: #0066FF;
-      border-radius: 3px;
-      margin-top: 8px;
-    }
-    .footer__col ul {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .footer__col ul li a {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.6);
-      transition: color 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      min-height: 44px;
-    }
-    .footer__col ul li a:hover {
-      color: #ffffff;
-    }
-    .footer__col p {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.6);
-      line-height: 1.7;
-    }
-    .footer__contact-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.6);
-      margin-bottom: 12px;
-    }
-    .footer__contact-item svg {
-      width: 18px;
-      height: 18px;
-      fill: #0066FF;
-      flex-shrink: 0;
-    }
-    .footer__bottom {
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      margin-top: 48px;
-      padding: 24px 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-    .footer__copyright {
-      font-size: 13px;
-      color: rgba(255, 255, 255, 0.4);
-    }
-    .footer__socials {
-      display: flex;
-      gap: 12px;
-    }
-    .footer__social-link {
-      width: 44px;
-      height: 44px;
-      min-height: 44px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s ease;
-    }
-    .footer__social-link:hover {
-      background: #0066FF;
-    }
-    .footer__social-link svg {
-      width: 20px;
-      height: 20px;
-      fill: #ffffff;
-    }
-    @media (max-width: 1024px) {
-      .footer__grid {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-    @media (max-width: 768px) {
-      .footer {
-        padding: 48px 0 0;
-      }
-      .footer__grid {
-        grid-template-columns: 1fr;
-        gap: 32px;
-      }
-      .footer__bottom {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-      }
-    }
-
-    /* ============================================
-       MOUSE TRAIL (desktop only)
-       ============================================ */
-    .mouse-trail-dot {
-      position: fixed;
-      width: 8px;
-      height: 8px;
-      background: #0066FF;
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 9999;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    /* ============================================
-       GLOBAL RESPONSIVE FINE-TUNING
-       ============================================ */
-    @media (max-width: 375px) {
-      .hero__title-line {
-        font-size: 36px;
-      }
-      .section-title h2 {
-        font-size: 24px;
-      }
-      .programs__card {
-        padding: 20px;
-      }
-    }
-
-    @media (min-width: 1440px) {
-      .container {
-        max-width: 1280px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bright English Academy - 브라이트 영어학원</title>
+    <meta name="description" content="브라이트 영어학원 - 체계적인 영어 교육, 토익/토플/회화/비즈니스 영어 전문">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-  <!-- ============================================
-       TOP BAR
-       ============================================ -->
-  <header class="topbar" id="topbar">
-    <div class="topbar__left">
-      <button class="topbar__hamburger" id="hamburgerBtn" aria-label="메뉴 열기">
-        <span></span>
-      </button>
-      <a href="index.html" class="topbar__logo">
-        Bright<span class="topbar__logo-accent">.</span> English Academy
-      </a>
+    <!-- Scroll Progress -->
+    <div class="scroll-progress">
+        <div class="scroll-progress-bar" id="scrollProgress"></div>
     </div>
-    <div class="topbar__right">
-      <a href="tel:02-1234-5678" class="topbar__phone">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.24 1.01l-2.21 2.2z"/></svg>
-        02-1234-5678
-      </a>
-      <a href="contact.html" class="topbar__cta">무료 상담</a>
-    </div>
-  </header>
 
-  <!-- ============================================
-       SIDEBAR OVERLAY
-       ============================================ -->
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <!-- Particles -->
+    <canvas id="particles"></canvas>
 
-  <!-- ============================================
-       SIDEBAR NAVIGATION
-       ============================================ -->
-  <nav class="sidebar" id="sidebar" aria-label="주요 메뉴">
-    <div class="sidebar__header">
-      <span class="sidebar__title">Bright English</span>
-      <button class="sidebar__close" id="sidebarClose" aria-label="메뉴 닫기">&times;</button>
-    </div>
-    <div class="sidebar__nav">
-      <a href="index.html" class="sidebar__link active">
-        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-        홈
-      </a>
-      <a href="programs.html" class="sidebar__link">
-        <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg>
-        프로그램
-      </a>
-      <a href="teachers.html" class="sidebar__link">
-        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-        강사진
-      </a>
-      <a href="community.html" class="sidebar__link">
-        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>
-        커뮤니티
-      </a>
-      <a href="contact.html" class="sidebar__link">
-        <svg viewBox="0 0 24 24"><path d="M11.5 2C6.81 2 3 5.81 3 10.5S6.81 19 11.5 19h.5v3c4.86-2.34 8-7 8-11.5C20 5.81 16.19 2 11.5 2zm1 14.5h-2v-2h2v2zm0-3.5h-2c0-3.25 3-3 3-5 0-1.1-.9-2-2-2s-2 .9-2 2h-2c0-2.21 1.79-4 4-4s4 1.79 4 4c0 2.5-3 2.75-3 5z"/></svg>
-        상담신청
-      </a>
-    </div>
-    <div class="sidebar__footer">
-      <a href="contact.html" class="sidebar__level-test">무료 레벨테스트</a>
-    </div>
-  </nav>
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="header-inner">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">🎓</span>
+                <span class="logo-text">BRIGHT <span class="logo-accent">English</span></span>
+            </a>
+            <nav class="nav" id="nav">
+                <ul class="nav-list">
+                    <li><a href="index.html" class="nav-link active">Home</a></li>
+                    <li><a href="about.html" class="nav-link">About</a></li>
+                    <li><a href="programs.html" class="nav-link">Programs</a></li>
+                    <li><a href="gallery.html" class="nav-link">Gallery</a></li>
+                    <li><a href="contact.html" class="nav-link">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <a href="contact.html" class="btn btn-primary btn-sm">레벨테스트 예약</a>
+                <button class="nav-toggle" id="navToggle" aria-label="메뉴">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
 
-  <!-- ============================================
-       MAIN CONTENT
-       ============================================ -->
-  <main class="main-content">
-
-    <!-- ============================================
-         HERO SECTION
-         ============================================ -->
+    <!-- ========================= -->
+    <!-- HERO SECTION              -->
+    <!-- ========================= -->
     <section class="hero" id="hero">
-      <div class="hero__bg">
-        <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1400&h=900&fit=crop" alt="밝은 교실에서 영어를 배우는 학생들" width="1400" height="900" loading="eager">
-      </div>
-      <div class="hero__overlay"></div>
-      <div class="hero__content">
-        <div class="hero__title-line">
-          <span class="font-en" id="heroLine1">Your English,</span>
-        </div>
-        <div class="hero__title-line">
-          <span class="font-en hero__title-accent" id="heroLine2">Our Mission</span>
-        </div>
-        <p class="hero__subtitle" id="heroSubtitle">
-          AI 기반 맞춤 학습으로 당신의 영어 실력을<br>한 단계 끌어올립니다
-        </p>
-        <div class="hero__buttons" id="heroButtons">
-          <a href="programs.html" class="hero__btn-outline">
-            프로그램 보기
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
-          </a>
-          <a href="contact.html" class="hero__btn-solid">
-            무료 레벨테스트
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-          </a>
-        </div>
-      </div>
-      <div class="hero__scroll-indicator">
-        <span class="font-en">Scroll</span>
-        <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
-      </div>
-    </section>
+        <div class="hero-bg"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-badge" data-animate="fade-up" data-delay="1">
+                <span class="hero-badge-icon">🏅</span>
+                <span class="hero-badge-text">No.1 영어 전문 학원</span>
+            </div>
 
-    <!-- ============================================
-         STATS SECTION
-         ============================================ -->
-    <section class="stats" id="stats">
-      <div class="container">
-        <div class="stats__grid">
-          <div class="stats__item fade-in">
-            <div class="stats__icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="#0066FF"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-            </div>
-            <div class="stats__number font-en">
-              <span class="count-up" data-target="15000">0</span><span class="stats__suffix">+</span>
-            </div>
-            <div class="stats__label">누적 수강생</div>
-          </div>
-          <div class="stats__item fade-in" style="transition-delay: 0.1s">
-            <div class="stats__icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="#FF8F00"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-            </div>
-            <div class="stats__number font-en">
-              <span class="count-up" data-target="4.8" data-decimal="true">0</span>
-            </div>
-            <div class="stats__label">평균 만족도</div>
-          </div>
-          <div class="stats__item fade-in" style="transition-delay: 0.2s">
-            <div class="stats__icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="#00838F"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-            </div>
-            <div class="stats__number font-en">
-              <span class="count-up" data-target="250">0</span><span class="stats__suffix">점</span>
-            </div>
-            <div class="stats__label">TOEIC 평균 향상</div>
-          </div>
-          <div class="stats__item fade-in" style="transition-delay: 0.3s">
-            <div class="stats__icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="#7B1FA2"><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/></svg>
-            </div>
-            <div class="stats__number font-en">
-              <span class="count-up" data-target="20">0</span><span class="stats__suffix">+</span>
-            </div>
-            <div class="stats__label">전문 강사 수</div>
-          </div>
-        </div>
-      </div>
-    </section>
+            <h1 class="hero-title" data-animate="fade-up" data-delay="2">
+                영어의 밝은 미래를<br>함께 열어갑니다
+            </h1>
 
-    <!-- ============================================
-         PROGRAMS SECTION
-         ============================================ -->
-    <section class="programs" id="programs">
-      <div class="container">
-        <div class="section-title fade-in">
-          <h2>프로그램</h2>
-          <p>다양한 목적에 맞는 체계적인 영어 교육 프로그램을 제공합니다</p>
-        </div>
-        <div class="programs__grid">
-          <!-- Program 1 -->
-          <div class="programs__card fade-in">
-            <span class="programs__card-badge">Daily English</span>
-            <h3>성인회화</h3>
-            <span class="programs__card-en font-en">Daily Conversation Program</span>
-            <p>실생활에서 바로 사용할 수 있는 일상 영어 회화를 원어민 강사와 함께 집중적으로 훈련합니다. 소규모 그룹 수업으로 충분한 스피킹 기회를 제공합니다.</p>
-            <div class="programs__card-meta">
-              <span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#757575"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                주 3회
-              </span>
-              <span class="programs__card-price">280,000원<small>/월</small></span>
-            </div>
-          </div>
-          <!-- Program 2 -->
-          <div class="programs__card fade-in" style="transition-delay: 0.1s">
-            <span class="programs__card-badge">Business Pro</span>
-            <h3>비즈니스영어</h3>
-            <span class="programs__card-en font-en">Business Communication</span>
-            <p>프레젠테이션, 이메일 작성, 회의 영어 등 직장에서 필요한 실전 비즈니스 커뮤니케이션 역량을 집중적으로 키웁니다.</p>
-            <div class="programs__card-meta">
-              <span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#757575"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                주 2회
-              </span>
-              <span class="programs__card-price">350,000원<small>/월</small></span>
-            </div>
-          </div>
-          <!-- Program 3 -->
-          <div class="programs__card fade-in" style="transition-delay: 0.2s">
-            <span class="programs__card-badge">TOEIC Master</span>
-            <h3>TOEIC 집중반</h3>
-            <span class="programs__card-en font-en">TOEIC Intensive Course</span>
-            <p>목표 점수 달성을 위한 전략적 학습 커리큘럼. 파트별 문제풀이 전략과 실전 모의고사로 단기간 점수 향상을 실현합니다.</p>
-            <div class="programs__card-meta">
-              <span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#757575"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                주 5회
-              </span>
-              <span class="programs__card-price">450,000원<small>/월</small></span>
-            </div>
-          </div>
-          <!-- Program 4 -->
-          <div class="programs__card fade-in" style="transition-delay: 0.3s">
-            <span class="programs__card-badge">IELTS Prep</span>
-            <h3>IELTS 준비반</h3>
-            <span class="programs__card-en font-en">IELTS Preparation</span>
-            <p>유학 및 이민 준비를 위한 IELTS 전문 프로그램. Speaking, Writing, Listening, Reading 모든 영역을 체계적으로 대비합니다.</p>
-            <div class="programs__card-meta">
-              <span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#757575"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                주 3회
-              </span>
-              <span class="programs__card-price">500,000원<small>/월</small></span>
-            </div>
-          </div>
-          <!-- Program 5 -->
-          <div class="programs__card fade-in" style="transition-delay: 0.4s">
-            <span class="programs__card-badge">Kids Fun</span>
-            <h3>키즈영어</h3>
-            <span class="programs__card-en font-en">Kids English Program</span>
-            <p>초등학생을 위한 재미있는 영어 수업. 노래, 게임, 스토리텔링으로 자연스럽게 영어를 습득하며 기초 실력을 탄탄하게 만듭니다.</p>
-            <div class="programs__card-meta">
-              <span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#757575"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                주 3회
-              </span>
-              <span class="programs__card-price">220,000원<small>/월</small></span>
-            </div>
-          </div>
-          <!-- Program 6 -->
-          <div class="programs__card fade-in" style="transition-delay: 0.5s">
-            <span class="programs__card-badge">Private</span>
-            <h3>1:1 맞춤수업</h3>
-            <span class="programs__card-en font-en">Private Tutoring</span>
-            <p>개인의 목표와 수준에 맞춘 완전 맞춤형 1:1 수업. 원하는 시간, 원하는 주제로 가장 효율적인 학습 경험을 제공합니다.</p>
-            <div class="programs__card-meta">
-              <span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#757575"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                주 1-5회
-              </span>
-              <span class="programs__card-price">80,000원<small>/회</small></span>
-            </div>
-          </div>
-        </div>
-        <div class="programs__more fade-in">
-          <a href="programs.html" class="underline-btn">
-            자세히 보기
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================
-         TEACHERS SECTION
-         ============================================ -->
-    <section class="teachers" id="teachers">
-      <div class="container">
-        <div class="section-title fade-in">
-          <h2>강사진</h2>
-          <p>풍부한 경험과 전문성을 갖춘 최고의 강사진을 소개합니다</p>
-        </div>
-        <div class="teachers__grid">
-          <!-- Teacher 1 -->
-          <div class="teachers__card fade-in-left">
-            <div class="teachers__img-wrap">
-              <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop" alt="Sarah Mitchell 강사" width="400" height="400" loading="lazy">
-            </div>
-            <h3>Sarah Mitchell</h3>
-            <p class="teachers__card-origin font-en">United States</p>
-            <div class="teachers__tags">
-              <span class="teachers__tag">회화</span>
-              <span class="teachers__tag">비즈니스</span>
-            </div>
-            <p class="teachers__card-desc">미국 뉴욕 출신, TESOL 석사. 10년간 한국에서 영어 교육 경험. 유쾌한 수업 스타일로 학생들의 스피킹 자신감을 키워드립니다.</p>
-          </div>
-          <!-- Teacher 2 -->
-          <div class="teachers__card fade-in" style="transition-delay: 0.15s">
-            <div class="teachers__img-wrap">
-              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" alt="James Park 강사" width="400" height="400" loading="lazy">
-            </div>
-            <h3>James Park</h3>
-            <p class="teachers__card-origin font-en">United Kingdom</p>
-            <div class="teachers__tags">
-              <span class="teachers__tag">IELTS</span>
-              <span class="teachers__tag">아카데믹</span>
-            </div>
-            <p class="teachers__card-desc">영국 옥스퍼드대 영문학 졸업. IELTS 공인 시험관 출신으로 정확한 피드백과 전략적 학습법을 제시합니다.</p>
-          </div>
-          <!-- Teacher 3 -->
-          <div class="teachers__card fade-in-right">
-            <div class="teachers__img-wrap">
-              <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop" alt="김지현 강사" width="400" height="400" loading="lazy">
-            </div>
-            <h3>김지현</h3>
-            <p class="teachers__card-origin font-en">South Korea</p>
-            <div class="teachers__tags">
-              <span class="teachers__tag">TOEIC</span>
-              <span class="teachers__tag">TOEFL</span>
-            </div>
-            <p class="teachers__card-desc">연세대 영어영문학과 졸업, TOEIC 990점. 15년간 토익 강의 경력. 체계적 문제풀이 전략으로 단기 고득점을 보장합니다.</p>
-          </div>
-        </div>
-        <div class="teachers__more fade-in">
-          <a href="teachers.html" class="underline-btn">
-            전체 강사진 보기
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================
-         REVIEWS SECTION
-         ============================================ -->
-    <section class="reviews" id="reviews">
-      <div class="container">
-        <div class="section-title fade-in">
-          <h2>수강 후기</h2>
-          <p>수강생들의 생생한 후기를 확인하세요</p>
-        </div>
-        <div class="reviews__carousel" id="reviewCarousel">
-          <div class="reviews__track" id="reviewTrack">
-            <!-- Review 1 -->
-            <div class="reviews__slide">
-              <div class="reviews__card">
-                <div class="reviews__stars" aria-label="별점 5점 만점에 5점">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                <p class="reviews__quote">6개월 만에 영어 회의에서 자신 있게 발표할 수 있게 되었어요! Sarah 선생님의 비즈니스 영어 수업 덕분에 해외 파트너사와의 소통이 한결 수월해졌습니다.</p>
-                <p class="reviews__author">김민지</p>
-                <p class="reviews__author-info">30대, 직장인 / 비즈니스영어 수강</p>
-              </div>
-            </div>
-            <!-- Review 2 -->
-            <div class="reviews__slide">
-              <div class="reviews__card">
-                <div class="reviews__stars" aria-label="별점 5점 만점에 5점">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                <p class="reviews__quote">TOEIC 점수가 580에서 890으로! 김지현 선생님의 파트별 전략 수업이 정말 효과적이었습니다. 3개월 만에 목표 점수를 초과 달성했어요.</p>
-                <p class="reviews__author">이현우</p>
-                <p class="reviews__author-info">20대, 대학생 / TOEIC 집중반 수강</p>
-              </div>
-            </div>
-            <!-- Review 3 -->
-            <div class="reviews__slide">
-              <div class="reviews__card">
-                <div class="reviews__stars" aria-label="별점 5점 만점에 4점">&#9733;&#9733;&#9733;&#9733;&#9734;</div>
-                <p class="reviews__quote">아이와 함께 수강 중인데, 원어민 선생님들이 정말 친절해요. 아이는 키즈 프로그램에서 노래와 게임으로 자연스럽게 영어를 배우고, 저는 성인회화 수업으로 함께 성장하고 있습니다.</p>
-                <p class="reviews__author">박소연</p>
-                <p class="reviews__author-info">40대, 주부 / 성인회화 + 키즈영어 수강</p>
-              </div>
-            </div>
-            <!-- Review 4 -->
-            <div class="reviews__slide">
-              <div class="reviews__card">
-                <div class="reviews__stars" aria-label="별점 5점 만점에 5점">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                <p class="reviews__quote">해외 컨퍼런스 발표 준비를 성공적으로 마쳤습니다. 1:1 맞춤수업으로 발표 스크립트부터 Q&A 대응까지 완벽하게 연습할 수 있었어요. 자신감이 완전히 달라졌습니다.</p>
-                <p class="reviews__author">최동호</p>
-                <p class="reviews__author-info">30대, IT개발자 / 1:1 맞춤수업 수강</p>
-              </div>
-            </div>
-            <!-- Review 5 -->
-            <div class="reviews__slide">
-              <div class="reviews__card">
-                <div class="reviews__stars" aria-label="별점 5점 만점에 5점">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                <p class="reviews__quote">IELTS 6.5를 3개월 만에 달성! James 선생님이 전 IELTS 시험관이셔서 채점 기준을 정확히 알고 계시더라고요. 실전 팁들이 정말 도움이 많이 됐습니다.</p>
-                <p class="reviews__author">정유나</p>
-                <p class="reviews__author-info">20대, 취준생 / IELTS 준비반 수강</p>
-              </div>
-            </div>
-            <!-- Review 6 -->
-            <div class="reviews__slide">
-              <div class="reviews__card">
-                <div class="reviews__stars" aria-label="별점 5점 만점에 5점">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                <p class="reviews__quote">해외 바이어와의 협상에서 자신감이 생겼습니다. 비즈니스 영어 프로그램에서 실제 비즈니스 시나리오로 연습한 것이 실전에서 큰 도움이 되었습니다.</p>
-                <p class="reviews__author">한승우</p>
-                <p class="reviews__author-info">40대, 사업가 / 비즈니스영어 수강</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="reviews__controls">
-          <button class="reviews__arrow" id="reviewPrev" aria-label="이전 후기">
-            <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>
-          </button>
-          <div class="reviews__dots" id="reviewDots">
-            <button class="reviews__dot active" data-index="0" aria-label="후기 1"></button>
-            <button class="reviews__dot" data-index="1" aria-label="후기 2"></button>
-            <button class="reviews__dot" data-index="2" aria-label="후기 3"></button>
-            <button class="reviews__dot" data-index="3" aria-label="후기 4"></button>
-            <button class="reviews__dot" data-index="4" aria-label="후기 5"></button>
-            <button class="reviews__dot" data-index="5" aria-label="후기 6"></button>
-          </div>
-          <button class="reviews__arrow" id="reviewNext" aria-label="다음 후기">
-            <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
-          </button>
-        </div>
-        <div class="reviews__more fade-in">
-          <a href="community.html" class="underline-btn">
-            더 많은 후기
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================
-         CTA SECTION (Level Test)
-         ============================================ -->
-    <section class="cta-section" id="ctaSection">
-      <div class="container">
-        <h2 class="fade-in">지금 무료 레벨테스트를 받아보세요</h2>
-        <p class="fade-in" style="transition-delay: 0.1s">AI 분석으로 현재 영어 실력을 정확하게 진단합니다</p>
-        <a href="contact.html" class="cta-section__btn fade-in" style="transition-delay: 0.2s">
-          무료 레벨테스트 신청
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#0066FF"><path d="M5 12h14m-7-7l7 7-7 7" stroke="#0066FF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-      </div>
-    </section>
-
-    <!-- ============================================
-         CAMPUS SECTION
-         ============================================ -->
-    <section class="campus" id="campus">
-      <div class="container">
-        <div class="section-title fade-in">
-          <h2>캠퍼스</h2>
-          <p>쾌적한 학습 환경에서 영어 실력을 키워보세요</p>
-        </div>
-        <div class="campus__grid">
-          <!-- Campus 1: 강남점 -->
-          <div class="campus__card fade-in-left">
-            <div class="campus__img-wrap">
-              <img src="https://images.unsplash.com/photo-1562774053-701939374585?w=800&h=500&fit=crop" alt="Bright English Academy 강남점 캠퍼스 외관" width="800" height="500" loading="lazy">
-            </div>
-            <div class="campus__card-body">
-              <h3>
-                강남점
-                <span class="campus__badge">Main</span>
-              </h3>
-              <div class="campus__info">
-                <div class="campus__info-item">
-                  <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                  <span>서울시 강남구 테헤란로 123</span>
-                </div>
-                <div class="campus__info-item">
-                  <svg viewBox="0 0 24 24"><path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.24 1.01l-2.21 2.2z"/></svg>
-                  <span>02-1234-5678</span>
-                </div>
-                <div class="campus__info-item">
-                  <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                  <span>평일 07:00 - 22:00 / 토요일 09:00 - 18:00</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- Campus 2: 홍대점 -->
-          <div class="campus__card fade-in-right">
-            <div class="campus__img-wrap">
-              <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=500&fit=crop" alt="Bright English Academy 홍대점 캠퍼스 내부" width="800" height="500" loading="lazy">
-            </div>
-            <div class="campus__card-body">
-              <h3>
-                홍대점
-                <span class="campus__badge">New</span>
-              </h3>
-              <div class="campus__info">
-                <div class="campus__info-item">
-                  <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                  <span>서울시 마포구 와우산로 45</span>
-                </div>
-                <div class="campus__info-item">
-                  <svg viewBox="0 0 24 24"><path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.24 1.01l-2.21 2.2z"/></svg>
-                  <span>02-9876-5432</span>
-                </div>
-                <div class="campus__info-item">
-                  <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                  <span>평일 08:00 - 22:00 / 토요일 10:00 - 17:00</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================
-         FOOTER
-         ============================================ -->
-    <footer class="footer" id="footer">
-      <div class="container">
-        <div class="footer__grid">
-          <!-- Column 1: Brand -->
-          <div class="footer__brand">
-            <h3 class="font-en">Bright English Academy</h3>
-            <p class="footer__brand-slogan font-en">Your English, Our Mission</p>
-            <p>AI 기반 맞춤 학습 시스템과 최고의 강사진으로 당신의 영어 실력 향상을 돕겠습니다. 15년간 15,000명 이상의 수강생과 함께해 온 신뢰할 수 있는 영어 교육 기관입니다.</p>
-          </div>
-          <!-- Column 2: Quick Links -->
-          <div class="footer__col">
-            <h4>빠른 링크</h4>
-            <ul>
-              <li><a href="programs.html">프로그램</a></li>
-              <li><a href="teachers.html">강사진</a></li>
-              <li><a href="community.html">수강후기</a></li>
-              <li><a href="contact.html">상담신청</a></li>
-            </ul>
-          </div>
-          <!-- Column 3: Campus -->
-          <div class="footer__col">
-            <h4>캠퍼스</h4>
-            <p>
-              <strong style="color: #ffffff;">강남점</strong><br>
-              서울시 강남구 테헤란로 123
+            <p class="hero-subtitle" data-animate="fade-up" data-delay="3">
+                Bright English Academy
             </p>
-            <p style="margin-top: 16px;">
-              <strong style="color: #ffffff;">홍대점</strong><br>
-              서울시 마포구 와우산로 45
+
+            <p class="hero-desc" data-animate="fade-up" data-delay="3">
+                15년 전통의 브라이트 영어학원은 체계적인 커리큘럼과 검증된 강사진으로<br>
+                토익, 토플, 영어회화, 비즈니스 영어까지 모든 영어 학습의 길을 안내합니다.<br>
+                당신의 영어 실력, 브라이트가 책임집니다.
             </p>
-          </div>
-          <!-- Column 4: Contact -->
-          <div class="footer__col">
-            <h4>문의</h4>
-            <div class="footer__contact-item">
-              <svg viewBox="0 0 24 24"><path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.24 1.01l-2.21 2.2z"/></svg>
-              <a href="tel:02-1234-5678" style="color: rgba(255,255,255,0.6);">02-1234-5678</a>
+
+            <div class="hero-buttons" data-animate="fade-up" data-delay="4">
+                <a href="programs.html" class="btn btn-primary btn-lg">
+                    <span class="btn-icon">📚</span>
+                    프로그램 보기
+                </a>
+                <a href="contact.html" class="btn btn-outline btn-lg">
+                    <span class="btn-icon">✏️</span>
+                    무료 레벨테스트
+                </a>
             </div>
-            <div class="footer__contact-item">
-              <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-              <a href="mailto:info@brightenglish.kr" style="color: rgba(255,255,255,0.6);">info@brightenglish.kr</a>
+
+            <div class="hero-stats" data-animate="fade-up" data-delay="5">
+                <div class="hero-stat">
+                    <span class="hero-stat-value">15년+</span>
+                    <span class="hero-stat-label">교육 경력</span>
+                </div>
+                <div class="hero-stat-divider"></div>
+                <div class="hero-stat">
+                    <span class="hero-stat-value">5,000+</span>
+                    <span class="hero-stat-label">누적 수강생</span>
+                </div>
+                <div class="hero-stat-divider"></div>
+                <div class="hero-stat">
+                    <span class="hero-stat-value">150+</span>
+                    <span class="hero-stat-label">TOEIC 평균 상승</span>
+                </div>
+                <div class="hero-stat-divider"></div>
+                <div class="hero-stat">
+                    <span class="hero-stat-value">98%</span>
+                    <span class="hero-stat-label">수강생 만족도</span>
+                </div>
             </div>
-            <div class="footer__contact-item" style="margin-top: 8px;">
-              <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-              <span>평일 07:00 - 22:00</span>
-            </div>
-          </div>
         </div>
-        <!-- Footer Bottom -->
-        <div class="footer__bottom">
-          <p class="footer__copyright font-en">&copy; 2024 Bright English Academy. All rights reserved.</p>
-          <div class="footer__socials">
-            <a href="#" class="footer__social-link" aria-label="인스타그램">
-              <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-            </a>
-            <a href="#" class="footer__social-link" aria-label="유튜브">
-              <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-            </a>
-            <a href="#" class="footer__social-link" aria-label="블로그">
-              <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-            </a>
-          </div>
+
+        <div class="hero-scroll-indicator" data-animate="fade-up" data-delay="5">
+            <span class="hero-scroll-text">Scroll Down</span>
+            <span class="hero-scroll-arrow">↓</span>
         </div>
-      </div>
+    </section>
+
+    <!-- ========================= -->
+    <!-- PROGRAMS BENTO GRID       -->
+    <!-- ========================= -->
+    <section class="section section-blue" id="programs">
+        <div class="container">
+            <div class="section-header" data-animate="fade-up">
+                <span class="section-label">PROGRAMS</span>
+                <h2 class="section-title">맞춤형 영어 프로그램</h2>
+                <p class="section-subtitle">
+                    수강생의 목표와 수준에 맞춘 체계적인 프로그램으로<br>
+                    확실한 영어 실력 향상을 보장합니다.
+                </p>
+            </div>
+
+            <div class="bento-grid">
+                <!-- Program 1: TOEIC/TOEFL (Large) -->
+                <div class="bento-item bento-item-lg" data-animate="fade-up" data-delay="1">
+                    <div class="card">
+                        <div class="card-img">
+                            <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800"
+                                 alt="토익/토플 수업 모습"
+                                 class="img-round"
+                                 loading="lazy">
+                            <div class="card-img-overlay">
+                                <span class="card-badge">인기 프로그램</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <span class="card-badge card-badge-primary">TOEIC / TOEFL</span>
+                            <h3 class="card-title">토익 · 토플 마스터 과정</h3>
+                            <p class="card-text">
+                                목표 점수 달성을 위한 체계적인 커리큘럼. 파트별 전략 수업과
+                                실전 모의고사로 최단기간 목표 점수를 달성하세요.
+                                평균 150점 이상 점수 상승을 보장하는 검증된 프로그램입니다.
+                                매월 정기 모의고사와 1:1 취약점 분석 리포트를 제공합니다.
+                            </p>
+                            <a href="programs.html" class="card-link">
+                                자세히 보기 <span class="card-link-arrow">→</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Program 2: 영어회화 -->
+                <div class="bento-item" data-animate="fade-up" data-delay="2">
+                    <div class="card">
+                        <div class="card-img">
+                            <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?w=600"
+                                 alt="영어회화 수업 모습"
+                                 class="img-round"
+                                 loading="lazy">
+                        </div>
+                        <div class="card-body">
+                            <span class="card-badge card-badge-accent">CONVERSATION</span>
+                            <h3 class="card-title">영어회화</h3>
+                            <p class="card-text">
+                                원어민 강사와 함께하는 실전 영어회화. 일상 대화부터
+                                심화 토론까지 단계별로 실력을 키워보세요.
+                                매주 다양한 주제와 상황별 롤플레이로 자연스러운 영어를 구사할 수 있습니다.
+                            </p>
+                            <a href="programs.html" class="card-link">
+                                자세히 보기 <span class="card-link-arrow">→</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Program 3: 비즈니스 영어 -->
+                <div class="bento-item" data-animate="fade-up" data-delay="3">
+                    <div class="card">
+                        <div class="card-img">
+                            <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600"
+                                 alt="비즈니스 영어 수업"
+                                 class="img-round"
+                                 loading="lazy">
+                        </div>
+                        <div class="card-body">
+                            <span class="card-badge card-badge-dark">BUSINESS</span>
+                            <h3 class="card-title">비즈니스 영어</h3>
+                            <p class="card-text">
+                                글로벌 비즈니스 환경에서 필요한 이메일, 프레젠테이션,
+                                미팅 영어를 집중적으로 학습합니다.
+                                실제 비즈니스 케이스 스터디를 통해 실무 영어를 마스터하세요.
+                            </p>
+                            <a href="programs.html" class="card-link">
+                                자세히 보기 <span class="card-link-arrow">→</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Program 4: 주니어 영어 -->
+                <div class="bento-item" data-animate="fade-up" data-delay="1">
+                    <div class="card">
+                        <div class="card-img">
+                            <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600"
+                                 alt="주니어 영어 수업"
+                                 class="img-round"
+                                 loading="lazy">
+                        </div>
+                        <div class="card-body">
+                            <span class="card-badge card-badge-success">JUNIOR</span>
+                            <h3 class="card-title">주니어 영어</h3>
+                            <p class="card-text">
+                                초등학생부터 중학생까지, 연령과 수준에 맞춘 재미있는
+                                영어 수업. 게이미피케이션 기반의 학습법으로
+                                아이들이 즐기며 영어를 배울 수 있습니다.
+                            </p>
+                            <a href="programs.html" class="card-link">
+                                자세히 보기 <span class="card-link-arrow">→</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Program 5: 시험 대비반 (Large) -->
+                <div class="bento-item bento-item-lg" data-animate="fade-up" data-delay="2">
+                    <div class="card">
+                        <div class="card-img">
+                            <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800"
+                                 alt="시험 대비 수업"
+                                 class="img-round"
+                                 loading="lazy">
+                            <div class="card-img-overlay">
+                                <span class="card-badge">수능/내신 특강</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <span class="card-badge card-badge-warning">EXAM PREP</span>
+                            <h3 class="card-title">시험 대비반</h3>
+                            <p class="card-text">
+                                수능, 내신, 편입, 공무원 영어 등 각종 시험에 특화된 대비 과정.
+                                시험 유형별 맞춤 전략과 기출문제 집중 분석으로
+                                확실한 성적 향상을 이끌어냅니다.
+                                매주 실전 모의고사와 개별 첨삭 지도를 통해 취약점을 보완합니다.
+                            </p>
+                            <a href="programs.html" class="card-link">
+                                자세히 보기 <span class="card-link-arrow">→</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Program 6: 원어민 회화 -->
+                <div class="bento-item" data-animate="fade-up" data-delay="3">
+                    <div class="card">
+                        <div class="card-img">
+                            <img src="https://images.unsplash.com/photo-1529390079861-591de354faf5?w=600"
+                                 alt="원어민 회화 수업"
+                                 class="img-round"
+                                 loading="lazy">
+                        </div>
+                        <div class="card-body">
+                            <span class="card-badge card-badge-info">NATIVE</span>
+                            <h3 class="card-title">원어민 회화</h3>
+                            <p class="card-text">
+                                원어민 강사와 1:1 또는 소그룹으로 진행되는 프리토킹 수업.
+                                실제 영어권 문화와 표현을 자연스럽게 익히며
+                                리스닝과 스피킹 실력을 동시에 향상시킵니다.
+                            </p>
+                            <a href="programs.html" class="card-link">
+                                자세히 보기 <span class="card-link-arrow">→</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-cta" data-animate="fade-up">
+                <a href="programs.html" class="btn btn-primary btn-lg">
+                    전체 프로그램 보기 →
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================= -->
+    <!-- ACHIEVEMENT COUNTERS      -->
+    <!-- ========================= -->
+    <section class="section section-white" id="achievements">
+        <div class="container">
+            <div class="section-header" data-animate="fade-up">
+                <span class="section-label">ACHIEVEMENTS</span>
+                <h2 class="section-title">브라이트의 자랑스러운 성과</h2>
+                <p class="section-subtitle">
+                    숫자로 증명하는 브라이트 영어학원의 교육 품질.<br>
+                    15년간 쌓아온 신뢰와 실력을 확인하세요.
+                </p>
+            </div>
+
+            <div class="counters">
+                <div class="counter-item" data-animate="fade-up" data-delay="1">
+                    <div class="counter-icon-wrapper">
+                        <span class="counter-icon">👨‍🎓</span>
+                    </div>
+                    <div class="counter-value" data-target="5247">0</div>
+                    <div class="counter-suffix">명</div>
+                    <div class="counter-label">누적 수강생 수</div>
+                    <p class="counter-desc">15년간 브라이트와 함께한<br>수강생의 숫자입니다</p>
+                </div>
+
+                <div class="counter-item" data-animate="fade-up" data-delay="2">
+                    <div class="counter-icon-wrapper">
+                        <span class="counter-icon">📈</span>
+                    </div>
+                    <div class="counter-value" data-target="97">0</div>
+                    <div class="counter-suffix">%</div>
+                    <div class="counter-label">목표 달성률</div>
+                    <p class="counter-desc">수강생이 설정한 목표를<br>달성한 비율입니다</p>
+                </div>
+
+                <div class="counter-item" data-animate="fade-up" data-delay="3">
+                    <div class="counter-icon-wrapper">
+                        <span class="counter-icon">⭐</span>
+                    </div>
+                    <div class="counter-value" data-target="98">0</div>
+                    <div class="counter-suffix">%</div>
+                    <div class="counter-label">수강생 만족도</div>
+                    <p class="counter-desc">수강 후 만족도 조사<br>결과입니다</p>
+                </div>
+
+                <div class="counter-item" data-animate="fade-up" data-delay="4">
+                    <div class="counter-icon-wrapper">
+                        <span class="counter-icon">🏆</span>
+                    </div>
+                    <div class="counter-value" data-target="15">0</div>
+                    <div class="counter-suffix">년</div>
+                    <div class="counter-label">교육 경력</div>
+                    <p class="counter-desc">영어 교육 전문<br>노하우의 세월입니다</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================= -->
+    <!-- INSTRUCTORS SECTION       -->
+    <!-- ========================= -->
+    <section class="section section-gray" id="instructors">
+        <div class="container">
+            <div class="section-header" data-animate="fade-up">
+                <span class="section-label">INSTRUCTORS</span>
+                <h2 class="section-title">최고의 강사진</h2>
+                <p class="section-subtitle">
+                    풍부한 경력과 전문 자격을 갖춘 강사진이<br>
+                    수강생 한 분 한 분의 영어 실력 향상을 책임집니다.
+                </p>
+            </div>
+
+            <div class="grid-4">
+                <!-- Instructor 1: Sarah Kim -->
+                <div class="instructor-card" data-animate="fade-up" data-delay="1">
+                    <div class="instructor-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400"
+                             alt="Sarah Kim 강사"
+                             class="img-circle"
+                             loading="lazy">
+                        <div class="instructor-badge">TESOL 자격</div>
+                    </div>
+                    <div class="instructor-info">
+                        <h3 class="instructor-name">Sarah Kim</h3>
+                        <p class="instructor-title">영어회화 전문 강사</p>
+                        <div class="instructor-meta">
+                            <span class="instructor-meta-item">
+                                <span class="meta-icon">📜</span> TESOL 국제 자격증
+                            </span>
+                            <span class="instructor-meta-item">
+                                <span class="meta-icon">🎯</span> 영어회화 전문
+                            </span>
+                            <span class="instructor-meta-item">
+                                <span class="meta-icon">⏱️</span> 10년 경력
+                            </span>
+                        </div>
+                        <p class="instructor-bio">
+                            미국 UCLA 영문학과 졸업 후, TESOL 자격을 취득하고
+                            10년간 영어회화를 전문으로 가르치고 있습니다.
+                            학생 한 명 한 명의 수준에 맞춘 맞춤형 수업으로
+                            자연스러운 영어 구사를 이끌어냅니다.
+                        </p>
+                        <div class="instructor-social">
+                            <a href="#" class="instructor-social-link" aria-label="Instagram">📷</a>
+                            <a href="#" class="instructor-social-link" aria-label="LinkedIn">💼</a>
+                            <a href="#" class="instructor-social-link" aria-label="Email">📧</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructor 2: James Park -->
+                <div class="instructor-card" data-animate="fade-up" data-delay="2">
+                    <div class="instructor-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400"
+                             alt="James Park 강사"
+                             class="img-circle"
+                             loading="lazy">
+                        <div class="instructor-badge">TOEIC 990</div>
+                    </div>
+                    <div class="instructor-info">
+                        <h3 class="instructor-name">James Park</h3>
+                        <p class="instructor-title">토익/토플 전문 강사</p>
+                        <div class="instructor-meta">
+                            <span class="instructor-meta-item">
+                                <span class="meta-icon">📜</span> TOEIC 990 만점
+                            </span>
+                            <span class="instructor-meta-item">
+                                <span class="meta-icon">🎯</span> 토익/토플 전문
+                            </span>
+                            <span class="instructor-meta-item">
+                                <span class="meta-icon">⏱️</span> 12년 경력
+                            </span>
+                        </div>
+                        <p class="instructor-bio">
+                            TOEIC 990점 만점 보유, 12년간 토익/토플 전문 강사로 활동.
+                            수많은 수강생의 목표 점수 달성을 도왔으며,
+                            파트별 핵심 전략과 실전 감각을 길러주는 수업으로
+                            정평이 나 있습니다.
+                        </p>
+                        <div class="instructor-social">
+                            <a href="#" class="instructor-social-link" aria-label="Instagram">📷</a>
+                            <a href="#" class="instructor-social-link" aria-label="LinkedIn">💼</a>
+                            <a href="#" class="instructor-social-link" aria-label="Email">📧</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructor 3: Emily Lee -->
+                <div class="instructor-card" data-animate="fade-up" data-delay="3">
+                    <div class="instructor-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400"
+                             alt="Emily Lee 강사"
+                             class="img-circle"
+                             loading="lazy">
+                        <div class="instructor-badge">Cambridge CELTA</div>
+                    </div>
+                    <div class="instructor-info">
+                        <h3 class="instructor-name">Emily Lee</h3>
+                        <p class="instructor-title">비즈니스 영어 전문 강사</p>
+                        <div class="instructor-meta">
+                            <span class="instructor-meta-item">
+                                <span class="meta-icon">📜</span> Cambridge CELTA
+                            </span>
+                            <span class="instructor-meta-item">
+                                <span class="meta-icon">🎯</span> 비즈니스 영어
+                            </span>
+                            <span class="instructor-meta-item">
+                                <span class="meta-icon">⏱️</span> 8년 경력
+                            </span>
+                        </div>
+                        <p class="instructor-bio">
+                            영국 Cambridge 대학교에서 CELTA 자격을 취득하고,
+                            8년간 글로벌 기업 임직원 대상 비즈니스 영어를 전문으로
+                            가르쳐왔습니다. 이메일, 프레젠테이션, 협상 영어까지
+                            실무에 바로 적용 가능한 수업을 제공합니다.
+                        </p>
+                        <div class="instructor-social">
+                            <a href="#" class="instructor-social-link" aria-label="Instagram">📷</a>
+                            <a href="#" class="instructor-social-link" aria-label="LinkedIn">💼</a>
+                            <a href="#" class="instructor-social-link" aria-label="Email">📧</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructor 4: David Choi -->
+                <div class="instructor-card" data-animate="fade-up" data-delay="4">
+                    <div class="instructor-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400"
+                             alt="David Choi 강사"
+                             class="img-circle"
+                             loading="lazy">
+                        <div class="instructor-badge">원어민 강사</div>
+                    </div>
+                    <div class="instructor-info">
+                        <h3 class="instructor-name">David Choi</h3>
+                        <p class="instructor-title">주니어 영어 전문 강사</p>
+                        <div class="instructor-meta">
+                            <span class="instructor-meta-item">
+                                <span class="meta-icon">📜</span> 원어민 강사
+                            </span>
+                            <span class="instructor-meta-item">
+                                <span class="meta-icon">🎯</span> 주니어 영어 전문
+                            </span>
+                            <span class="instructor-meta-item">
+                                <span class="meta-icon">⏱️</span> 7년 경력
+                            </span>
+                        </div>
+                        <p class="instructor-bio">
+                            캐나다 출신 원어민 강사로, 7년간 한국에서 주니어 영어를
+                            전문으로 가르치고 있습니다. 아이들 눈높이에 맞춘
+                            재미있고 창의적인 수업으로 영어에 대한 흥미와
+                            자신감을 심어줍니다.
+                        </p>
+                        <div class="instructor-social">
+                            <a href="#" class="instructor-social-link" aria-label="Instagram">📷</a>
+                            <a href="#" class="instructor-social-link" aria-label="LinkedIn">💼</a>
+                            <a href="#" class="instructor-social-link" aria-label="Email">📧</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================= -->
+    <!-- TESTIMONIAL SLIDER        -->
+    <!-- ========================= -->
+    <section class="section section-white" id="testimonials">
+        <div class="container">
+            <div class="section-header" data-animate="fade-up">
+                <span class="section-label">TESTIMONIALS</span>
+                <h2 class="section-title">수강생 후기</h2>
+                <p class="section-subtitle">
+                    브라이트 영어학원에서 목표를 달성한 수강생들의<br>
+                    생생한 후기를 확인하세요.
+                </p>
+            </div>
+
+            <div class="slider" data-animate="fade-up" data-delay="1">
+                <div class="slider-track" id="sliderTrack">
+                    <!-- Testimonial 1 -->
+                    <div class="testimonial-card">
+                        <div class="testimonial-rating">
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                        </div>
+                        <blockquote class="testimonial-quote">
+                            "브라이트 영어학원 덕분에 토익 점수가 170점이나 올랐습니다.
+                            James 선생님의 파트별 전략 수업이 정말 효과적이었고,
+                            매주 모의고사를 통해 실전 감각을 키울 수 있었습니다.
+                            목표 점수 900점을 넘길 수 있어서 정말 감사합니다.
+                            취업 준비생분들께 강력 추천드립니다!"
+                        </blockquote>
+                        <div class="testimonial-author">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100"
+                                 alt="김지수"
+                                 class="testimonial-avatar"
+                                 loading="lazy">
+                            <div class="testimonial-author-info">
+                                <span class="testimonial-name">김지수</span>
+                                <span class="testimonial-role">직장인</span>
+                                <span class="testimonial-achievement">TOEIC 750 → 920</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Testimonial 2 -->
+                    <div class="testimonial-card">
+                        <div class="testimonial-rating">
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                        </div>
+                        <blockquote class="testimonial-quote">
+                            "체계적인 커리큘럼과 열정적인 강사님들 덕분에
+                            TOEFL 95점이라는 목표를 달성할 수 있었습니다.
+                            특히 스피킹과 라이팅 섹션에서 취약했는데,
+                            집중 피드백을 받으며 큰 폭으로 성장했습니다.
+                            유학을 준비하는 분들께 강력히 추천합니다!"
+                        </blockquote>
+                        <div class="testimonial-author">
+                            <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100"
+                                 alt="이하늘"
+                                 class="testimonial-avatar"
+                                 loading="lazy">
+                            <div class="testimonial-author-info">
+                                <span class="testimonial-name">이하늘</span>
+                                <span class="testimonial-role">대학생</span>
+                                <span class="testimonial-achievement">TOEFL 95점 달성</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Testimonial 3 -->
+                    <div class="testimonial-card">
+                        <div class="testimonial-rating">
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                        </div>
+                        <blockquote class="testimonial-quote">
+                            "아이와 함께 주니어반에 등록했는데, 아이가 영어를
+                            정말 좋아하게 되었어요! David 선생님의 재미있는 수업
+                            덕분에 매일 학원 가고 싶어해요. 저도 회화반을 수강하면서
+                            아이와 영어로 대화하는 즐거움을 느끼고 있습니다.
+                            가족 모두의 영어 실력이 함께 성장하고 있어요."
+                        </blockquote>
+                        <div class="testimonial-author">
+                            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100"
+                                 alt="박서연"
+                                 class="testimonial-avatar"
+                                 loading="lazy">
+                            <div class="testimonial-author-info">
+                                <span class="testimonial-name">박서연</span>
+                                <span class="testimonial-role">주부</span>
+                                <span class="testimonial-achievement">영어회화 수강</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Testimonial 4 -->
+                    <div class="testimonial-card">
+                        <div class="testimonial-rating">
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star">★</span>
+                        </div>
+                        <blockquote class="testimonial-quote">
+                            "해외 바이어와의 미팅에서 항상 통역에 의존했는데,
+                            Emily 선생님의 비즈니스 영어 수업을 듣고 나서
+                            직접 영어로 협상할 수 있게 되었습니다.
+                            실무에 바로 적용할 수 있는 실전 중심의 수업이라
+                            바쁜 사업가에게도 효율적이었습니다."
+                        </blockquote>
+                        <div class="testimonial-author">
+                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100"
+                                 alt="최민준"
+                                 class="testimonial-avatar"
+                                 loading="lazy">
+                            <div class="testimonial-author-info">
+                                <span class="testimonial-name">최민준</span>
+                                <span class="testimonial-role">사업가</span>
+                                <span class="testimonial-achievement">비즈니스 영어</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Testimonial 5 -->
+                    <div class="testimonial-card">
+                        <div class="testimonial-rating">
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                        </div>
+                        <blockquote class="testimonial-quote">
+                            "수능 영어를 위해 등록했는데, 1등급을 받을 수 있었습니다!
+                            기출 문제 분석과 유형별 풀이 전략이 정말 도움이 되었어요.
+                            모의고사 때마다 점수가 올라가는 게 눈에 보여서
+                            자신감이 붙었습니다. 수능 영어로 고민하는
+                            학생들에게 꼭 추천합니다!"
+                        </blockquote>
+                        <div class="testimonial-author">
+                            <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100"
+                                 alt="정유진"
+                                 class="testimonial-avatar"
+                                 loading="lazy">
+                            <div class="testimonial-author-info">
+                                <span class="testimonial-name">정유진</span>
+                                <span class="testimonial-role">고등학생</span>
+                                <span class="testimonial-achievement">수능 영어 1등급</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Testimonial 6 -->
+                    <div class="testimonial-card">
+                        <div class="testimonial-rating">
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                        </div>
+                        <blockquote class="testimonial-quote">
+                            "개발 문서를 읽을 때 항상 번역기에 의존했는데,
+                            Sarah 선생님의 회화 수업을 듣고 나서 영어 문서를
+                            자연스럽게 읽을 수 있게 되었습니다.
+                            IT 용어와 일상 회화를 동시에 배울 수 있어서 좋았고,
+                            해외 컨퍼런스에서도 자신 있게 대화할 수 있게 되었습니다."
+                        </blockquote>
+                        <div class="testimonial-author">
+                            <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100"
+                                 alt="한승우"
+                                 class="testimonial-avatar"
+                                 loading="lazy">
+                            <div class="testimonial-author-info">
+                                <span class="testimonial-name">한승우</span>
+                                <span class="testimonial-role">IT 개발자</span>
+                                <span class="testimonial-achievement">영어회화</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slider-arrows">
+                    <button class="slider-arrow slider-arrow-prev" id="sliderPrev" aria-label="이전 후기">
+                        <span>←</span>
+                    </button>
+                    <button class="slider-arrow slider-arrow-next" id="sliderNext" aria-label="다음 후기">
+                        <span>→</span>
+                    </button>
+                </div>
+
+                <div class="slider-dots" id="sliderDots">
+                    <button class="slider-dot active" data-slide="0" aria-label="후기 1"></button>
+                    <button class="slider-dot" data-slide="1" aria-label="후기 2"></button>
+                    <button class="slider-dot" data-slide="2" aria-label="후기 3"></button>
+                    <button class="slider-dot" data-slide="3" aria-label="후기 4"></button>
+                    <button class="slider-dot" data-slide="4" aria-label="후기 5"></button>
+                    <button class="slider-dot" data-slide="5" aria-label="후기 6"></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================= -->
+    <!-- WHY CHOOSE US SECTION     -->
+    <!-- ========================= -->
+    <section class="section section-light" id="whyUs">
+        <div class="container">
+            <div class="section-header" data-animate="fade-up">
+                <span class="section-label">WHY BRIGHT</span>
+                <h2 class="section-title">브라이트를 선택하는 이유</h2>
+                <p class="section-subtitle">
+                    다른 학원과는 다른 브라이트만의 차별화된 교육 시스템을 경험하세요.
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card" data-animate="fade-up" data-delay="1">
+                    <div class="feature-icon-wrapper">
+                        <span class="feature-icon">🎯</span>
+                    </div>
+                    <h3 class="feature-title">1:1 맞춤 커리큘럼</h3>
+                    <p class="feature-desc">
+                        수강생의 현재 수준과 목표에 맞춘 개인별 학습 계획을 수립합니다.
+                        정기적인 레벨 테스트와 상담을 통해 최적의 학습 경로를 제시합니다.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-animate="fade-up" data-delay="2">
+                    <div class="feature-icon-wrapper">
+                        <span class="feature-icon">📊</span>
+                    </div>
+                    <h3 class="feature-title">데이터 기반 분석</h3>
+                    <p class="feature-desc">
+                        매월 학습 성취도 리포트를 제공하여 수강생의 성장 과정을
+                        수치로 확인할 수 있습니다. 취약 영역을 정확히 파악하고 집중 보완합니다.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-animate="fade-up" data-delay="3">
+                    <div class="feature-icon-wrapper">
+                        <span class="feature-icon">👥</span>
+                    </div>
+                    <h3 class="feature-title">소수정예 클래스</h3>
+                    <p class="feature-desc">
+                        한 반 최대 8명의 소수정예 수업으로 개인별 피드백과
+                        충분한 연습 시간을 보장합니다. 모든 수강생이 주인공인 수업입니다.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-animate="fade-up" data-delay="4">
+                    <div class="feature-icon-wrapper">
+                        <span class="feature-icon">🔄</span>
+                    </div>
+                    <h3 class="feature-title">무제한 보충 수업</h3>
+                    <p class="feature-desc">
+                        정규 수업 외에도 무제한 보충 수업과 질문 시간을 운영합니다.
+                        이해가 될 때까지 반복 학습할 수 있는 환경을 제공합니다.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-animate="fade-up" data-delay="5">
+                    <div class="feature-icon-wrapper">
+                        <span class="feature-icon">📱</span>
+                    </div>
+                    <h3 class="feature-title">온라인 학습 플랫폼</h3>
+                    <p class="feature-desc">
+                        자체 개발 온라인 플랫폼을 통해 수업 복습, 추가 학습,
+                        단어 암기, 모의고사 등을 언제 어디서나 이용할 수 있습니다.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-animate="fade-up" data-delay="5">
+                    <div class="feature-icon-wrapper">
+                        <span class="feature-icon">🏅</span>
+                    </div>
+                    <h3 class="feature-title">성적 향상 보장제</h3>
+                    <p class="feature-desc">
+                        목표 점수에 도달하지 못할 경우, 추가 수강료 없이
+                        목표 달성 시까지 수업을 연장해드리는 성적 보장 프로그램을 운영합니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================= -->
+    <!-- SCHEDULE SECTION          -->
+    <!-- ========================= -->
+    <section class="section section-white" id="schedule">
+        <div class="container">
+            <div class="section-header" data-animate="fade-up">
+                <span class="section-label">SCHEDULE</span>
+                <h2 class="section-title">수업 시간표</h2>
+                <p class="section-subtitle">
+                    직장인, 학생, 주부 등 다양한 수강생의 일정에 맞춘<br>
+                    유연한 시간표를 운영하고 있습니다.
+                </p>
+            </div>
+
+            <div class="schedule-table-wrapper" data-animate="fade-up" data-delay="1">
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>시간대</th>
+                            <th>월</th>
+                            <th>화</th>
+                            <th>수</th>
+                            <th>목</th>
+                            <th>금</th>
+                            <th>토</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="time-cell">07:00 - 08:30</td>
+                            <td class="class-cell class-toeic">
+                                <span class="class-name">얼리버드 토익</span>
+                                <span class="class-instructor">James Park</span>
+                            </td>
+                            <td class="class-cell class-conversation">
+                                <span class="class-name">모닝 회화</span>
+                                <span class="class-instructor">Sarah Kim</span>
+                            </td>
+                            <td class="class-cell class-toeic">
+                                <span class="class-name">얼리버드 토익</span>
+                                <span class="class-instructor">James Park</span>
+                            </td>
+                            <td class="class-cell class-conversation">
+                                <span class="class-name">모닝 회화</span>
+                                <span class="class-instructor">Sarah Kim</span>
+                            </td>
+                            <td class="class-cell class-toeic">
+                                <span class="class-name">얼리버드 토익</span>
+                                <span class="class-instructor">James Park</span>
+                            </td>
+                            <td class="class-cell class-empty">-</td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">10:00 - 12:00</td>
+                            <td class="class-cell class-business">
+                                <span class="class-name">비즈니스 영어</span>
+                                <span class="class-instructor">Emily Lee</span>
+                            </td>
+                            <td class="class-cell class-junior">
+                                <span class="class-name">주니어 기초</span>
+                                <span class="class-instructor">David Choi</span>
+                            </td>
+                            <td class="class-cell class-business">
+                                <span class="class-name">비즈니스 영어</span>
+                                <span class="class-instructor">Emily Lee</span>
+                            </td>
+                            <td class="class-cell class-junior">
+                                <span class="class-name">주니어 기초</span>
+                                <span class="class-instructor">David Choi</span>
+                            </td>
+                            <td class="class-cell class-business">
+                                <span class="class-name">비즈니스 영어</span>
+                                <span class="class-instructor">Emily Lee</span>
+                            </td>
+                            <td class="class-cell class-toeic">
+                                <span class="class-name">주말 토익</span>
+                                <span class="class-instructor">James Park</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">14:00 - 16:00</td>
+                            <td class="class-cell class-junior">
+                                <span class="class-name">주니어 심화</span>
+                                <span class="class-instructor">David Choi</span>
+                            </td>
+                            <td class="class-cell class-toefl">
+                                <span class="class-name">토플 집중</span>
+                                <span class="class-instructor">James Park</span>
+                            </td>
+                            <td class="class-cell class-junior">
+                                <span class="class-name">주니어 심화</span>
+                                <span class="class-instructor">David Choi</span>
+                            </td>
+                            <td class="class-cell class-toefl">
+                                <span class="class-name">토플 집중</span>
+                                <span class="class-instructor">James Park</span>
+                            </td>
+                            <td class="class-cell class-junior">
+                                <span class="class-name">주니어 심화</span>
+                                <span class="class-instructor">David Choi</span>
+                            </td>
+                            <td class="class-cell class-conversation">
+                                <span class="class-name">주말 회화</span>
+                                <span class="class-instructor">Sarah Kim</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">16:00 - 18:00</td>
+                            <td class="class-cell class-exam">
+                                <span class="class-name">수능 영어</span>
+                                <span class="class-instructor">James Park</span>
+                            </td>
+                            <td class="class-cell class-conversation">
+                                <span class="class-name">프리토킹</span>
+                                <span class="class-instructor">Sarah Kim</span>
+                            </td>
+                            <td class="class-cell class-exam">
+                                <span class="class-name">수능 영어</span>
+                                <span class="class-instructor">James Park</span>
+                            </td>
+                            <td class="class-cell class-conversation">
+                                <span class="class-name">프리토킹</span>
+                                <span class="class-instructor">Sarah Kim</span>
+                            </td>
+                            <td class="class-cell class-exam">
+                                <span class="class-name">수능 영어</span>
+                                <span class="class-instructor">James Park</span>
+                            </td>
+                            <td class="class-cell class-junior">
+                                <span class="class-name">주말 주니어</span>
+                                <span class="class-instructor">David Choi</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">19:00 - 21:00</td>
+                            <td class="class-cell class-toeic">
+                                <span class="class-name">토익 정규</span>
+                                <span class="class-instructor">James Park</span>
+                            </td>
+                            <td class="class-cell class-business">
+                                <span class="class-name">비즈니스 심화</span>
+                                <span class="class-instructor">Emily Lee</span>
+                            </td>
+                            <td class="class-cell class-toeic">
+                                <span class="class-name">토익 정규</span>
+                                <span class="class-instructor">James Park</span>
+                            </td>
+                            <td class="class-cell class-business">
+                                <span class="class-name">비즈니스 심화</span>
+                                <span class="class-instructor">Emily Lee</span>
+                            </td>
+                            <td class="class-cell class-conversation">
+                                <span class="class-name">야간 회화</span>
+                                <span class="class-instructor">Sarah Kim</span>
+                            </td>
+                            <td class="class-cell class-empty">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="schedule-legend" data-animate="fade-up" data-delay="2">
+                <div class="legend-item">
+                    <span class="legend-color legend-toeic"></span>
+                    <span class="legend-label">토익</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color legend-toefl"></span>
+                    <span class="legend-label">토플</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color legend-conversation"></span>
+                    <span class="legend-label">회화</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color legend-business"></span>
+                    <span class="legend-label">비즈니스</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color legend-junior"></span>
+                    <span class="legend-label">주니어</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color legend-exam"></span>
+                    <span class="legend-label">시험대비</span>
+                </div>
+            </div>
+
+            <div class="schedule-notice" data-animate="fade-up" data-delay="3">
+                <p>※ 시간표는 학기별로 변경될 수 있으며, 자세한 사항은 전화 문의 바랍니다.</p>
+                <p>※ 개인 레슨 및 소그룹 수업은 별도 상담을 통해 시간 조율이 가능합니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================= -->
+    <!-- LEARNING PROCESS SECTION  -->
+    <!-- ========================= -->
+    <section class="section section-blue" id="process">
+        <div class="container">
+            <div class="section-header" data-animate="fade-up">
+                <span class="section-label">PROCESS</span>
+                <h2 class="section-title">브라이트 학습 프로세스</h2>
+                <p class="section-subtitle">
+                    체계적인 4단계 프로세스로 확실한 실력 향상을 이끌어냅니다.
+                </p>
+            </div>
+
+            <div class="process-steps">
+                <div class="process-step" data-animate="fade-up" data-delay="1">
+                    <div class="process-step-number">01</div>
+                    <div class="process-step-icon">📝</div>
+                    <h3 class="process-step-title">레벨 테스트 & 상담</h3>
+                    <p class="process-step-desc">
+                        무료 레벨 테스트를 통해 현재 영어 실력을 정확히 진단합니다.
+                        전문 상담사와의 1:1 상담으로 학습 목표를 설정하고
+                        최적의 수강 프로그램을 추천받으세요.
+                    </p>
+                    <ul class="process-step-list">
+                        <li>영역별 실력 진단 (Reading, Listening, Speaking, Writing)</li>
+                        <li>목표 설정 및 학습 기간 산정</li>
+                        <li>맞춤형 프로그램 추천</li>
+                    </ul>
+                </div>
+
+                <div class="process-step-connector" data-animate="fade-up">
+                    <div class="connector-line"></div>
+                    <div class="connector-arrow">→</div>
+                </div>
+
+                <div class="process-step" data-animate="fade-up" data-delay="2">
+                    <div class="process-step-number">02</div>
+                    <div class="process-step-icon">📚</div>
+                    <h3 class="process-step-title">맞춤형 수업 진행</h3>
+                    <p class="process-step-desc">
+                        소수정예 클래스에서 전문 강사의 체계적인 수업을 받습니다.
+                        개인별 학습 계획에 따라 맞춤형으로 진행되며,
+                        매 수업마다 피드백이 제공됩니다.
+                    </p>
+                    <ul class="process-step-list">
+                        <li>소수정예 (최대 8명) 수업 운영</li>
+                        <li>개인별 취약점 집중 보완</li>
+                        <li>매 수업 피드백 및 과제 제공</li>
+                    </ul>
+                </div>
+
+                <div class="process-step-connector" data-animate="fade-up">
+                    <div class="connector-line"></div>
+                    <div class="connector-arrow">→</div>
+                </div>
+
+                <div class="process-step" data-animate="fade-up" data-delay="3">
+                    <div class="process-step-number">03</div>
+                    <div class="process-step-icon">📊</div>
+                    <h3 class="process-step-title">정기 평가 & 분석</h3>
+                    <p class="process-step-desc">
+                        매월 정기 모의고사와 레벨 테스트로 학습 성과를 점검합니다.
+                        데이터 기반의 성취도 리포트로 성장 과정을 확인하고
+                        학습 계획을 최적화합니다.
+                    </p>
+                    <ul class="process-step-list">
+                        <li>월별 모의고사 및 레벨 테스트</li>
+                        <li>개인별 성취도 리포트 제공</li>
+                        <li>학습 계획 조정 및 최적화</li>
+                    </ul>
+                </div>
+
+                <div class="process-step-connector" data-animate="fade-up">
+                    <div class="connector-line"></div>
+                    <div class="connector-arrow">→</div>
+                </div>
+
+                <div class="process-step" data-animate="fade-up" data-delay="4">
+                    <div class="process-step-number">04</div>
+                    <div class="process-step-icon">🏆</div>
+                    <h3 class="process-step-title">목표 달성</h3>
+                    <p class="process-step-desc">
+                        설정한 목표를 달성하고 수료증을 발급받습니다.
+                        졸업 후에도 온라인 커뮤니티를 통해 지속적인 학습을
+                        이어갈 수 있으며, 재수강 시 할인 혜택을 제공합니다.
+                    </p>
+                    <ul class="process-step-list">
+                        <li>목표 점수/수준 달성 확인</li>
+                        <li>수료증 발급 및 후속 상담</li>
+                        <li>졸업생 커뮤니티 및 재수강 혜택</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================= -->
+    <!-- FAQ SECTION               -->
+    <!-- ========================= -->
+    <section class="section section-white" id="faq">
+        <div class="container">
+            <div class="section-header" data-animate="fade-up">
+                <span class="section-label">FAQ</span>
+                <h2 class="section-title">자주 묻는 질문</h2>
+                <p class="section-subtitle">
+                    수강 전 궁금한 점을 미리 확인하세요.
+                </p>
+            </div>
+
+            <div class="faq-list" data-animate="fade-up" data-delay="1">
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        <span class="faq-question-text">레벨 테스트는 어떻게 진행되나요?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>
+                            레벨 테스트는 약 40분간 진행되며, Reading, Listening, Speaking, Writing
+                            4개 영역을 평가합니다. 온라인 또는 방문 테스트가 가능하며,
+                            테스트 결과를 바탕으로 전문 상담사가 1:1 상담을 진행하여
+                            맞춤형 학습 계획을 수립합니다. 레벨 테스트는 무료입니다.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        <span class="faq-question-text">수강료는 얼마인가요?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>
+                            수강료는 프로그램과 수강 기간에 따라 다릅니다.
+                            그룹 수업은 월 20만원~35만원, 1:1 개인 레슨은 시간당 5만원~8만원입니다.
+                            장기 등록 시 최대 20% 할인 혜택이 있으며,
+                            자세한 수강료는 전화 또는 방문 상담을 통해 안내받으실 수 있습니다.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        <span class="faq-question-text">중도 환불이 가능한가요?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>
+                            네, 가능합니다. 학원법에 따라 수업 시작 전 전액 환불,
+                            수업 진행 후에는 잔여 수업에 대해 환불이 가능합니다.
+                            자세한 환불 규정은 수강 계약서를 참고하시거나
+                            학원으로 문의해 주시기 바랍니다.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        <span class="faq-question-text">주차 시설이 있나요?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>
+                            건물 지하 1~2층에 주차장이 마련되어 있으며,
+                            수강생은 2시간 무료 주차가 가능합니다.
+                            또한 학원은 강남역 3번 출구에서 도보 3분 거리에 위치하여
+                            대중교통 이용도 매우 편리합니다.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        <span class="faq-question-text">온라인 수업도 가능한가요?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>
+                            네, 모든 프로그램은 온라인 실시간 수업으로도 수강 가능합니다.
+                            Zoom을 활용한 실시간 화상 수업으로 오프라인과 동일한
+                            수업 품질을 제공하며, 수업 녹화본도 제공됩니다.
+                            온라인 전용 할인 혜택도 있으니 상담 시 문의해 주세요.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        <span class="faq-question-text">성적 향상 보장제는 어떤 조건인가요?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>
+                            출석률 90% 이상, 과제 수행률 80% 이상을 충족하신 수강생 중
+                            목표 점수에 도달하지 못한 경우, 추가 수강료 없이
+                            다음 학기 동일 과정을 재수강할 수 있습니다.
+                            보장 조건에 대한 자세한 내용은 수강 등록 시 안내드립니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================= -->
+    <!-- GALLERY PREVIEW SECTION   -->
+    <!-- ========================= -->
+    <section class="section section-gray" id="galleryPreview">
+        <div class="container">
+            <div class="section-header" data-animate="fade-up">
+                <span class="section-label">GALLERY</span>
+                <h2 class="section-title">학원 풍경</h2>
+                <p class="section-subtitle">
+                    쾌적하고 현대적인 시설에서 최고의 학습 환경을 경험하세요.
+                </p>
+            </div>
+
+            <div class="gallery-grid" data-animate="fade-up" data-delay="1">
+                <div class="gallery-item gallery-item-lg">
+                    <img src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=800"
+                         alt="브라이트 영어학원 강의실"
+                         loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="gallery-caption">넓고 쾌적한 강의실</span>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600"
+                         alt="수업 모습"
+                         loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="gallery-caption">소수정예 수업</span>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600"
+                         alt="그룹 스터디"
+                         loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="gallery-caption">그룹 스터디 공간</span>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1571260899304-425eee4c7efc?w=600"
+                         alt="자습실"
+                         loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="gallery-caption">개인 자습실</span>
+                    </div>
+                </div>
+                <div class="gallery-item gallery-item-lg">
+                    <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?w=800"
+                         alt="상담 공간"
+                         loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="gallery-caption">1:1 상담 공간</span>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600"
+                         alt="라이브러리"
+                         loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="gallery-caption">영어 도서관</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-cta" data-animate="fade-up" data-delay="2">
+                <a href="gallery.html" class="btn btn-outline btn-lg">
+                    더 많은 사진 보기 →
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================= -->
+    <!-- LOCATION / MAP SECTION    -->
+    <!-- ========================= -->
+    <section class="section section-white" id="location">
+        <div class="container">
+            <div class="section-header" data-animate="fade-up">
+                <span class="section-label">LOCATION</span>
+                <h2 class="section-title">오시는 길</h2>
+                <p class="section-subtitle">
+                    강남역 3번 출구에서 도보 3분, 편리한 위치에서 만나보세요.
+                </p>
+            </div>
+
+            <div class="location-grid" data-animate="fade-up" data-delay="1">
+                <div class="location-map">
+                    <div class="map-placeholder">
+                        <div class="map-placeholder-inner">
+                            <span class="map-icon">📍</span>
+                            <p class="map-address">서울시 강남구 테헤란로 123</p>
+                            <p class="map-detail">브라이트빌딩 5층</p>
+                            <a href="https://map.naver.com" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
+                                네이버 지도에서 보기
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="location-info">
+                    <div class="location-info-card">
+                        <h3 class="location-info-title">📍 주소</h3>
+                        <p>서울시 강남구 테헤란로 123 브라이트빌딩 5층</p>
+                    </div>
+
+                    <div class="location-info-card">
+                        <h3 class="location-info-title">🚇 대중교통</h3>
+                        <ul class="location-transport">
+                            <li><strong>지하철:</strong> 2호선 강남역 3번 출구 도보 3분</li>
+                            <li><strong>버스:</strong> 강남역 정류장 하차 (146, 341, 360)</li>
+                        </ul>
+                    </div>
+
+                    <div class="location-info-card">
+                        <h3 class="location-info-title">🅿️ 주차</h3>
+                        <p>건물 지하 1~2층 주차장 (수강생 2시간 무료)</p>
+                    </div>
+
+                    <div class="location-info-card">
+                        <h3 class="location-info-title">⏰ 운영 시간</h3>
+                        <ul class="location-hours">
+                            <li><span>평일 (월~금)</span><strong>07:00 - 22:00</strong></li>
+                            <li><span>토요일</span><strong>09:00 - 18:00</strong></li>
+                            <li><span>일요일 / 공휴일</span><strong>휴원</strong></li>
+                        </ul>
+                    </div>
+
+                    <div class="location-info-card">
+                        <h3 class="location-info-title">📞 연락처</h3>
+                        <ul class="location-contact-list">
+                            <li><strong>전화:</strong> <a href="tel:02-1234-5678">02-1234-5678</a></li>
+                            <li><strong>이메일:</strong> <a href="mailto:info@brightenglish.kr">info@brightenglish.kr</a></li>
+                            <li><strong>카카오톡:</strong> @brightenglish</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================= -->
+    <!-- CTA SECTION               -->
+    <!-- ========================= -->
+    <section class="cta-section" id="cta">
+        <div class="cta-bg"></div>
+        <div class="container">
+            <div class="cta-content" data-animate="fade-up">
+                <h2 class="cta-title">지금 바로 시작하세요</h2>
+                <p class="cta-desc">
+                    무료 레벨테스트로 나의 영어 실력을 확인하고,<br>
+                    맞춤형 학습 계획을 받아보세요.<br>
+                    브라이트 영어학원이 당신의 영어 목표 달성을 함께합니다.
+                </p>
+                <div class="cta-buttons" data-animate="fade-up" data-delay="1">
+                    <a href="contact.html" class="btn btn-white btn-lg">
+                        <span class="btn-icon">✏️</span>
+                        무료 레벨테스트 신청
+                    </a>
+                    <a href="programs.html" class="btn btn-outline-white btn-lg">
+                        <span class="btn-icon">📚</span>
+                        프로그램 둘러보기
+                    </a>
+                </div>
+                <div class="cta-contact" data-animate="fade-up" data-delay="2">
+                    <p class="cta-contact-text">
+                        지금 바로 전화 상담도 가능합니다
+                    </p>
+                    <a href="tel:02-1234-5678" class="cta-phone">
+                        📞 02-1234-5678
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================= -->
+    <!-- PARTNERS & CERTIFICATIONS -->
+    <!-- ========================= -->
+    <section class="section section-white" id="partners">
+        <div class="container">
+            <div class="section-header" data-animate="fade-up">
+                <span class="section-label">PARTNERS</span>
+                <h2 class="section-title">파트너 & 인증</h2>
+                <p class="section-subtitle">
+                    공신력 있는 기관과의 파트너십으로 교육 품질을 보증합니다.
+                </p>
+            </div>
+
+            <div class="partners-grid" data-animate="fade-up" data-delay="1">
+                <div class="partner-item">
+                    <div class="partner-icon">🏛️</div>
+                    <span class="partner-name">ETS 공인<br>시험센터</span>
+                </div>
+                <div class="partner-item">
+                    <div class="partner-icon">🎓</div>
+                    <span class="partner-name">Cambridge<br>Assessment</span>
+                </div>
+                <div class="partner-item">
+                    <div class="partner-icon">📚</div>
+                    <span class="partner-name">British<br>Council</span>
+                </div>
+                <div class="partner-item">
+                    <div class="partner-icon">🌐</div>
+                    <span class="partner-name">TESOL<br>International</span>
+                </div>
+                <div class="partner-item">
+                    <div class="partner-icon">📖</div>
+                    <span class="partner-name">Oxford<br>University Press</span>
+                </div>
+                <div class="partner-item">
+                    <div class="partner-icon">🏢</div>
+                    <span class="partner-name">강남구청<br>우수학원</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================= -->
+    <!-- NEWSLETTER SECTION        -->
+    <!-- ========================= -->
+    <section class="section section-gray" id="newsletter">
+        <div class="container">
+            <div class="newsletter-wrapper" data-animate="fade-up">
+                <div class="newsletter-content">
+                    <span class="section-label">NEWSLETTER</span>
+                    <h2 class="newsletter-title">영어 학습 팁을 받아보세요</h2>
+                    <p class="newsletter-desc">
+                        매주 유용한 영어 학습 팁, 영어 표현, 할인 이벤트 소식을
+                        이메일로 받아보세요. 구독자 전용 학습 자료도 무료 제공!
+                    </p>
+                </div>
+                <form class="newsletter-form" onsubmit="return false;">
+                    <div class="newsletter-input-group">
+                        <input type="email"
+                               class="newsletter-input"
+                               placeholder="이메일 주소를 입력하세요"
+                               aria-label="이메일 주소"
+                               required>
+                        <button type="submit" class="btn btn-primary newsletter-btn">
+                            구독하기
+                        </button>
+                    </div>
+                    <p class="newsletter-privacy">
+                        구독은 언제든 해지 가능하며, 개인정보는 안전하게 보호됩니다.
+                    </p>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <a href="index.html" class="footer-logo">
+                        <span class="logo-icon">🎓</span>
+                        <span class="logo-text">BRIGHT <span class="logo-accent">English</span></span>
+                    </a>
+                    <p class="footer-desc">영어의 밝은 미래를 열어가는 브라이트 영어학원. 체계적인 커리큘럼과 검증된 강사진이 여러분의 영어 실력 향상을 책임집니다.</p>
+                    <div class="footer-social">
+                        <a href="#" aria-label="Instagram">📷</a>
+                        <a href="#" aria-label="YouTube">🎬</a>
+                        <a href="#" aria-label="Blog">📝</a>
+                        <a href="#" aria-label="KakaoTalk">💬</a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>바로가기</h4>
+                    <ul>
+                        <li><a href="about.html">학원 소개</a></li>
+                        <li><a href="programs.html">프로그램</a></li>
+                        <li><a href="gallery.html">갤러리</a></li>
+                        <li><a href="contact.html">상담 예약</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>프로그램</h4>
+                    <ul>
+                        <li><a href="programs.html">토익/토플</a></li>
+                        <li><a href="programs.html">영어회화</a></li>
+                        <li><a href="programs.html">비즈니스 영어</a></li>
+                        <li><a href="programs.html">주니어 영어</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>연락처</h4>
+                    <div class="footer-contact-item">📍 서울시 강남구 테헤란로 123</div>
+                    <div class="footer-contact-item">📞 02-1234-5678</div>
+                    <div class="footer-contact-item">📧 info@brightenglish.kr</div>
+                    <div class="footer-contact-item">⏰ 평일 07:00-22:00 / 토 09:00-18:00</div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Bright English Academy. All rights reserved.</p>
+            </div>
+        </div>
     </footer>
 
-  </main>
-
-  <!-- Mouse Trail Dots Container -->
-  <div id="mouseTrailContainer" aria-hidden="true"></div>
-
-  <!-- ============================================
-       JAVASCRIPT
-       ============================================ -->
-  <script>
-    (function() {
-      'use strict';
-
-      /* ============================================
-         DOM ELEMENTS
-         ============================================ */
-      var hamburgerBtn = document.getElementById('hamburgerBtn');
-      var sidebar = document.getElementById('sidebar');
-      var sidebarOverlay = document.getElementById('sidebarOverlay');
-      var sidebarClose = document.getElementById('sidebarClose');
-      var topbar = document.getElementById('topbar');
-
-      /* ============================================
-         1. SIDEBAR TOGGLE
-         ============================================ */
-      function openSidebar() {
-        sidebar.classList.add('active');
-        sidebarOverlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-      }
-
-      function closeSidebar() {
-        sidebar.classList.remove('active');
-        sidebarOverlay.classList.remove('active');
-        document.body.style.overflow = '';
-      }
-
-      if (hamburgerBtn) {
-        hamburgerBtn.addEventListener('click', function() {
-          if (sidebar.classList.contains('active')) {
-            closeSidebar();
-          } else {
-            openSidebar();
-          }
-        });
-      }
-
-      if (sidebarClose) {
-        sidebarClose.addEventListener('click', closeSidebar);
-      }
-
-      if (sidebarOverlay) {
-        sidebarOverlay.addEventListener('click', closeSidebar);
-      }
-
-      /* Close sidebar on escape key */
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && sidebar.classList.contains('active')) {
-          closeSidebar();
-        }
-      });
-
-      /* Close sidebar drawer on desktop resize */
-      var desktopMQ = window.matchMedia('(min-width: 1024px)');
-      function handleDesktopChange(e) {
-        if (e.matches) {
-          closeSidebar();
-        }
-      }
-      desktopMQ.addEventListener('change', handleDesktopChange);
-
-      /* ============================================
-         2. TOPBAR SCROLL SHADOW
-         ============================================ */
-      var lastScrollY = 0;
-      var ticking = false;
-
-      function updateTopbar() {
-        if (window.scrollY > 50) {
-          topbar.classList.add('scrolled');
-        } else {
-          topbar.classList.remove('scrolled');
-        }
-        ticking = false;
-      }
-
-      window.addEventListener('scroll', function() {
-        lastScrollY = window.scrollY;
-        if (!ticking) {
-          window.requestAnimationFrame(updateTopbar);
-          ticking = true;
-        }
-      }, { passive: true });
-
-      /* ============================================
-         3. SCROLL ANIMATIONS (IntersectionObserver)
-         ============================================ */
-      var fadeElements = document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right');
-
-      if ('IntersectionObserver' in window) {
-        var fadeObserver = new IntersectionObserver(function(entries) {
-          entries.forEach(function(entry) {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('visible');
-              fadeObserver.unobserve(entry.target);
-            }
-          });
-        }, {
-          threshold: 0.15,
-          rootMargin: '0px 0px -50px 0px'
-        });
-
-        fadeElements.forEach(function(el) {
-          fadeObserver.observe(el);
-        });
-      } else {
-        /* Fallback: show everything */
-        fadeElements.forEach(function(el) {
-          el.classList.add('visible');
-        });
-      }
-
-      /* ============================================
-         4. COUNT-UP ANIMATION
-         ============================================ */
-      var countElements = document.querySelectorAll('.count-up');
-      var counted = false;
-
-      function animateCount(el) {
-        var target = parseFloat(el.getAttribute('data-target'));
-        var isDecimal = el.getAttribute('data-decimal') === 'true';
-        var duration = 2000;
-        var startTime = null;
-        var startValue = 0;
-
-        function easeOutCubic(t) {
-          return 1 - Math.pow(1 - t, 3);
-        }
-
-        function updateCount(timestamp) {
-          if (!startTime) startTime = timestamp;
-          var progress = Math.min((timestamp - startTime) / duration, 1);
-          var easedProgress = easeOutCubic(progress);
-          var currentValue = startValue + (target - startValue) * easedProgress;
-
-          if (isDecimal) {
-            el.textContent = currentValue.toFixed(1);
-          } else {
-            el.textContent = Math.floor(currentValue).toLocaleString();
-          }
-
-          if (progress < 1) {
-            requestAnimationFrame(updateCount);
-          } else {
-            if (isDecimal) {
-              el.textContent = target.toFixed(1);
-            } else {
-              el.textContent = target.toLocaleString();
-            }
-          }
-        }
-
-        requestAnimationFrame(updateCount);
-      }
-
-      if ('IntersectionObserver' in window) {
-        var statsSection = document.getElementById('stats');
-        if (statsSection) {
-          var countObserver = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-              if (entry.isIntersecting && !counted) {
-                counted = true;
-                countElements.forEach(function(el) {
-                  animateCount(el);
-                });
-                countObserver.unobserve(entry.target);
-              }
-            });
-          }, {
-            threshold: 0.3
-          });
-
-          countObserver.observe(statsSection);
-        }
-      } else {
-        /* Fallback */
-        countElements.forEach(function(el) {
-          var target = parseFloat(el.getAttribute('data-target'));
-          var isDecimal = el.getAttribute('data-decimal') === 'true';
-          el.textContent = isDecimal ? target.toFixed(1) : target.toLocaleString();
-        });
-      }
-
-      /* ============================================
-         5. HERO TYPEWRITER / FADE-IN ANIMATION
-         ============================================ */
-      var heroLine1 = document.getElementById('heroLine1');
-      var heroLine2 = document.getElementById('heroLine2');
-      var heroSubtitle = document.getElementById('heroSubtitle');
-      var heroButtons = document.getElementById('heroButtons');
-
-      function animateHero() {
-        /* Line 1 */
-        setTimeout(function() {
-          if (heroLine1) {
-            heroLine1.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-            heroLine1.style.opacity = '1';
-            heroLine1.style.transform = 'translateY(0)';
-          }
-        }, 300);
-
-        /* Line 2 */
-        setTimeout(function() {
-          if (heroLine2) {
-            heroLine2.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-            heroLine2.style.opacity = '1';
-            heroLine2.style.transform = 'translateY(0)';
-          }
-        }, 800);
-
-        /* Subtitle */
-        setTimeout(function() {
-          if (heroSubtitle) {
-            heroSubtitle.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-            heroSubtitle.style.opacity = '1';
-            heroSubtitle.style.transform = 'translateY(0)';
-          }
-        }, 1400);
-
-        /* Buttons */
-        setTimeout(function() {
-          if (heroButtons) {
-            heroButtons.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-            heroButtons.style.opacity = '1';
-            heroButtons.style.transform = 'translateY(0)';
-          }
-        }, 1800);
-      }
-
-      /* Run on page load */
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', animateHero);
-      } else {
-        animateHero();
-      }
-
-      /* ============================================
-         6. REVIEW CAROUSEL
-         ============================================ */
-      var reviewTrack = document.getElementById('reviewTrack');
-      var reviewPrev = document.getElementById('reviewPrev');
-      var reviewNext = document.getElementById('reviewNext');
-      var reviewDots = document.querySelectorAll('.reviews__dot');
-      var currentSlide = 0;
-      var totalSlides = 6;
-      var autoPlayInterval = null;
-      var isAutoPlaying = true;
-
-      function goToSlide(index) {
-        if (index < 0) index = totalSlides - 1;
-        if (index >= totalSlides) index = 0;
-        currentSlide = index;
-
-        if (reviewTrack) {
-          reviewTrack.style.transform = 'translateX(-' + (currentSlide * 100) + '%)';
-        }
-
-        /* Update dots */
-        reviewDots.forEach(function(dot, i) {
-          dot.classList.toggle('active', i === currentSlide);
-        });
-      }
-
-      function nextSlide() {
-        goToSlide(currentSlide + 1);
-      }
-
-      function prevSlide() {
-        goToSlide(currentSlide - 1);
-      }
-
-      if (reviewNext) {
-        reviewNext.addEventListener('click', function() {
-          nextSlide();
-          resetAutoPlay();
-        });
-      }
-
-      if (reviewPrev) {
-        reviewPrev.addEventListener('click', function() {
-          prevSlide();
-          resetAutoPlay();
-        });
-      }
-
-      reviewDots.forEach(function(dot) {
-        dot.addEventListener('click', function() {
-          var index = parseInt(this.getAttribute('data-index'), 10);
-          goToSlide(index);
-          resetAutoPlay();
-        });
-      });
-
-      function startAutoPlay() {
-        autoPlayInterval = setInterval(function() {
-          if (isAutoPlaying) {
-            nextSlide();
-          }
-        }, 5000);
-      }
-
-      function resetAutoPlay() {
-        clearInterval(autoPlayInterval);
-        startAutoPlay();
-      }
-
-      startAutoPlay();
-
-      /* Pause on hover */
-      var reviewCarousel = document.getElementById('reviewCarousel');
-      if (reviewCarousel) {
-        reviewCarousel.addEventListener('mouseenter', function() {
-          isAutoPlaying = false;
-        });
-        reviewCarousel.addEventListener('mouseleave', function() {
-          isAutoPlaying = true;
-        });
-      }
-
-      /* Touch/swipe support for carousel */
-      var touchStartX = 0;
-      var touchEndX = 0;
-
-      if (reviewCarousel) {
-        reviewCarousel.addEventListener('touchstart', function(e) {
-          touchStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-
-        reviewCarousel.addEventListener('touchend', function(e) {
-          touchEndX = e.changedTouches[0].screenX;
-          var diff = touchStartX - touchEndX;
-          if (Math.abs(diff) > 50) {
-            if (diff > 0) {
-              nextSlide();
-            } else {
-              prevSlide();
-            }
-            resetAutoPlay();
-          }
-        }, { passive: true });
-      }
-
-      /* ============================================
-         7. MOUSE TRAIL (desktop only)
-         ============================================ */
-      var isDesktop = window.matchMedia('(min-width: 1024px) and (hover: hover)');
-
-      function initMouseTrail() {
-        if (!isDesktop.matches) return;
-
-        var container = document.getElementById('mouseTrailContainer');
-        if (!container) return;
-
-        var dotCount = 12;
-        var dots = [];
-        var mouseX = 0;
-        var mouseY = 0;
-
-        for (var i = 0; i < dotCount; i++) {
-          var dot = document.createElement('div');
-          dot.className = 'mouse-trail-dot';
-          dot.style.width = Math.max(3, 8 - i * 0.5) + 'px';
-          dot.style.height = Math.max(3, 8 - i * 0.5) + 'px';
-          dot.style.opacity = '0';
-          container.appendChild(dot);
-          dots.push({
-            el: dot,
-            x: 0,
-            y: 0
-          });
-        }
-
-        var isMoving = false;
-        var moveTimeout;
-
-        document.addEventListener('mousemove', function(e) {
-          mouseX = e.clientX;
-          mouseY = e.clientY;
-          isMoving = true;
-
-          dots.forEach(function(d) {
-            d.el.style.opacity = '0.4';
-          });
-
-          clearTimeout(moveTimeout);
-          moveTimeout = setTimeout(function() {
-            isMoving = false;
-            dots.forEach(function(d) {
-              d.el.style.opacity = '0';
-            });
-          }, 300);
-        }, { passive: true });
-
-        function animateTrail() {
-          var prevX = mouseX;
-          var prevY = mouseY;
-
-          dots.forEach(function(dot, index) {
-            var speed = 0.3 - index * 0.02;
-            dot.x += (prevX - dot.x) * speed;
-            dot.y += (prevY - dot.y) * speed;
-            dot.el.style.left = dot.x + 'px';
-            dot.el.style.top = dot.y + 'px';
-            prevX = dot.x;
-            prevY = dot.y;
-          });
-
-          requestAnimationFrame(animateTrail);
-        }
-
-        animateTrail();
-      }
-
-      if (isDesktop.matches) {
-        initMouseTrail();
-      }
-
-      /* ============================================
-         8. SMOOTH SCROLL FOR ANCHOR LINKS
-         ============================================ */
-      document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
-        anchor.addEventListener('click', function(e) {
-          var href = this.getAttribute('href');
-          if (href === '#') return;
-
-          var target = document.querySelector(href);
-          if (target) {
-            e.preventDefault();
-            var topOffset = 64; /* topbar height */
-            var elementPosition = target.getBoundingClientRect().top;
-            var offsetPosition = elementPosition + window.pageYOffset - topOffset;
-
-            window.scrollTo({
-              top: offsetPosition,
-              behavior: 'smooth'
-            });
-
-            /* Close sidebar on mobile after clicking a link */
-            if (!desktopMQ.matches) {
-              closeSidebar();
-            }
-          }
-        });
-      });
-
-      /* ============================================
-         9. ACTIVE NAV HIGHLIGHTING
-         ============================================ */
-      var currentPage = window.location.pathname.split('/').pop() || 'index.html';
-      var navLinks = document.querySelectorAll('.sidebar__link');
-
-      navLinks.forEach(function(link) {
-        var linkPage = link.getAttribute('href');
-        link.classList.remove('active');
-        if (linkPage === currentPage) {
-          link.classList.add('active');
-        }
-      });
-
-      /* ============================================
-         10. PRELOAD CRITICAL IMAGES
-         ============================================ */
-      var heroImg = document.querySelector('.hero__bg img');
-      if (heroImg && heroImg.complete) {
-        heroImg.style.opacity = '1';
-      }
-
-      /* ============================================
-         11. KEYBOARD ACCESSIBILITY
-         ============================================ */
-      /* Trap focus in sidebar when open */
-      sidebar.addEventListener('keydown', function(e) {
-        if (e.key === 'Tab' && sidebar.classList.contains('active')) {
-          var focusableEls = sidebar.querySelectorAll('a, button, [tabindex]:not([tabindex="-1"])');
-          var firstEl = focusableEls[0];
-          var lastEl = focusableEls[focusableEls.length - 1];
-
-          if (e.shiftKey) {
-            if (document.activeElement === firstEl) {
-              e.preventDefault();
-              lastEl.focus();
-            }
-          } else {
-            if (document.activeElement === lastEl) {
-              e.preventDefault();
-              firstEl.focus();
-            }
-          }
-        }
-      });
-
-      /* ============================================
-         12. PERFORMANCE: Lazy reveal sections
-         ============================================ */
-      /* All handled by IntersectionObserver above */
-
-      /* ============================================
-         13. REVIEW CAROUSEL KEYBOARD SUPPORT
-         ============================================ */
-      if (reviewCarousel) {
-        reviewCarousel.addEventListener('keydown', function(e) {
-          if (e.key === 'ArrowLeft') {
-            prevSlide();
-            resetAutoPlay();
-          } else if (e.key === 'ArrowRight') {
-            nextSlide();
-            resetAutoPlay();
-          }
-        });
-      }
-
-    })();
-  </script>
-
+    <script src="script.js"></script>
 </body>
 </html>
