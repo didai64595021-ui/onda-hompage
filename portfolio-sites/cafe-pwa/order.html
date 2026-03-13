@@ -1299,6 +1299,318 @@ document.addEventListener('DOMContentLoaded', () => {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./service-worker.js').catch(() => {});
 }
+
+/* ============================================
+   PULL TO REFRESH SIMULATION
+   ============================================ */
+(function() {
+  let startY = 0;
+  let isPulling = false;
+  const threshold = 80;
+
+  document.addEventListener('touchstart', (e) => {
+    if (window.scrollY === 0) {
+      startY = e.touches[0].clientY;
+      isPulling = true;
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!isPulling) return;
+    const diff = e.touches[0].clientY - startY;
+    if (diff > 0 && diff < 150) {
+      document.body.style.transform = `translateY(${diff * 0.4}px)`;
+      document.body.style.transition = 'none';
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', () => {
+    if (!isPulling) return;
+    isPulling = false;
+    document.body.style.transition = 'transform 0.3s ease';
+    document.body.style.transform = '';
+    
+    setTimeout(() => {
+      document.body.style.transition = '';
+    }, 300);
+  });
+})();
+
+/* ============================================
+   ORDER TRACKING WEBSOCKET SIMULATION
+   ============================================ */
+class OrderTracker {
+  constructor(orderId) {
+    this.orderId = orderId;
+    this.status = 'preparing';
+    this.estimatedTime = 8;
+    this.startTime = Date.now();
+    this.listeners = [];
+  }
+
+  onUpdate(callback) {
+    this.listeners.push(callback);
+  }
+
+  notify(data) {
+    this.listeners.forEach(cb => cb(data));
+  }
+
+  simulateUpdates() {
+    const stages = [
+      { time: 15000, status: 'grinding', msg: '원두를 분쇄하고 있어요 🫘', progress: 20 },
+      { time: 30000, status: 'extracting', msg: '에스프레소를 추출 중이에요 ☕', progress: 35 },
+      { time: 45000, status: 'steaming', msg: '우유를 스팀하고 있어요 🥛', progress: 50 },
+      { time: 60000, status: 'pouring', msg: '음료를 완성하고 있어요 🎨', progress: 70 },
+      { time: 80000, status: 'finishing', msg: '마지막 마무리 중이에요 ✨', progress: 85 },
+      { time: 100000, status: 'ready', msg: '음료가 준비되었어요! 🎉', progress: 100 },
+    ];
+
+    stages.forEach(stage => {
+      setTimeout(() => {
+        this.status = stage.status;
+        this.notify({
+          status: stage.status,
+          message: stage.msg,
+          progress: stage.progress
+        });
+      }, stage.time);
+    });
+  }
+}
+
+const tracker = new OrderTracker('B-127');
+tracker.onUpdate((data) => {
+  const statusEl = document.getElementById('statusText');
+  const barEl = document.getElementById('progressBar');
+  
+  if (statusEl) statusEl.textContent = data.message;
+  if (barEl) barEl.style.width = data.progress + '%';
+  
+  if (data.status === 'ready') {
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    showToast('🎉 음료가 준비되었어요! 카운터에서 수령해주세요.');
+  }
+});
+
+/* ============================================
+   RECEIPT DOWNLOAD
+   ============================================ */
+function downloadReceipt() {
+  const receiptData = {
+    orderNumber: document.getElementById('orderNum').textContent,
+    date: document.getElementById('orderTime').textContent,
+    items: [
+      { name: '카페라떼 (ICE)', options: 'Regular · 샷추가1 · 바닐라시럽', qty: 2, price: 13000 },
+      { name: '아메리카노 (HOT)', options: 'Large · 샷추가2', qty: 1, price: 6500 },
+      { name: '크루아상', options: '플레인', qty: 1, price: 4500 },
+    ],
+    subtotal: 24000,
+    discount: 2000,
+    total: 22000,
+    points: 220,
+    store: '블루밍 커피 강남점'
+  };
+
+  const receiptText = `
+═══════════════════════════
+    🌸 블루밍 커피
+    Blooming Coffee
+═══════════════════════════
+
+주문번호: ${receiptData.orderNumber}
+일시: ${receiptData.date}
+매장: ${receiptData.store}
+
+───────────────────────────
+${receiptData.items.map(item => 
+  `${item.name}
+  ${item.options}
+  ${item.qty}개  ${item.price.toLocaleString()}원`
+).join('\n\n')}
+───────────────────────────
+
+주문금액: ${receiptData.subtotal.toLocaleString()}원
+쿠폰할인: -${receiptData.discount.toLocaleString()}원
+───────────────────────────
+결제금액: ${receiptData.total.toLocaleString()}원
+적립포인트: +${receiptData.points}P
+
+═══════════════════════════
+  감사합니다. 좋은 하루 되세요! ☕
+═══════════════════════════
+  `.trim();
+
+  console.log(receiptText);
+  showToast('영수증이 저장되었어요 📄');
+}
+
+/* ============================================
+   NOTIFICATION PERMISSION
+   ============================================ */
+async function requestNotification() {
+  if ('Notification' in window) {
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      showToast('알림이 설정되었어요! 🔔');
+      
+      setTimeout(() => {
+        new Notification('블루밍 커피', {
+          body: '음료가 준비되면 알려드릴게요 ☕',
+          icon: '🌸',
+          badge: '🌸'
+        });
+      }, 1000);
+    }
+  }
+}
+
+/* ============================================
+   RATING PROMPT (after order)
+   ============================================ */
+function showRatingPrompt() {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 300; display: flex; align-items: center; justify-content: center;
+    padding: 40px; opacity: 0; transition: opacity 0.3s ease;
+  `;
+  
+  const dialog = document.createElement('div');
+  dialog.style.cssText = `
+    background: white; border-radius: 20px; padding: 32px; text-align: center;
+    max-width: 320px; width: 100%; transform: scale(0.9); transition: transform 0.3s ease;
+  `;
+  dialog.innerHTML = `
+    <div style="font-size: 48px; margin-bottom: 16px;">⭐</div>
+    <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 8px;">커피는 어떠셨나요?</h3>
+    <p style="font-size: 14px; color: #6B7280; margin-bottom: 20px;">별점으로 평가해주세요</p>
+    <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 24px;">
+      ${[1,2,3,4,5].map(n => `
+        <button onclick="rateOrder(${n})" style="
+          width: 44px; height: 44px; border-radius: 50%; border: 2px solid #E5E7EB;
+          background: white; font-size: 20px; cursor: pointer; transition: 0.2s;
+        " onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"
+        >⭐</button>
+      `).join('')}
+    </div>
+    <button onclick="this.closest('[style*=fixed]').remove()" style="
+      padding: 12px 32px; background: #F3F4F6; border: none; border-radius: 999px;
+      font-size: 14px; font-weight: 600; cursor: pointer; font-family: Pretendard, sans-serif;
+    ">다음에 할게요</button>
+  `;
+  
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+  
+  requestAnimationFrame(() => {
+    overlay.style.opacity = '1';
+    dialog.style.transform = 'scale(1)';
+  });
+}
+
+function rateOrder(stars) {
+  const overlay = document.querySelector('[style*="fixed"][style*="z-index: 300"]');
+  if (overlay) overlay.remove();
+  showToast(`⭐ ${stars}점 평가 감사합니다!`);
+}
+
+/* ============================================
+   NEARBY STORE FINDER
+   ============================================ */
+function findNearbyStores() {
+  if ('geolocation' in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        showToast(`📍 현재 위치 기반 매장을 찾고 있어요...`);
+      },
+      () => {
+        showToast('📍 위치 권한이 필요해요');
+      }
+    );
+  }
+}
+
+/* ============================================
+   HAPTIC FEEDBACK HELPER
+   ============================================ */
+function haptic(pattern) {
+  if (navigator.vibrate) {
+    switch(pattern) {
+      case 'light': navigator.vibrate(10); break;
+      case 'medium': navigator.vibrate(25); break;
+      case 'heavy': navigator.vibrate([50, 30, 50]); break;
+      case 'success': navigator.vibrate([100, 50, 100, 50, 200]); break;
+      default: navigator.vibrate(10);
+    }
+  }
+}
+
+/* ============================================
+   SCROLL ANIMATIONS
+   ============================================ */
+(function() {
+  const fadeEls = document.querySelectorAll('[style*="fadeUp"]');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  
+  fadeEls.forEach(el => observer.observe(el));
+})();
+
+/* ============================================
+   COPY ORDER NUMBER
+   ============================================ */
+document.getElementById('orderNum').addEventListener('click', function() {
+  const num = this.textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(num).then(() => {
+      showToast(`주문번호 ${num} 복사됨! 📋`);
+      haptic('light');
+    });
+  }
+});
+
+/* ============================================
+   KEYBOARD SHORTCUTS
+   ============================================ */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    window.location.href = 'index.html';
+  }
+  if (e.key === 'r' || e.key === 'R') {
+    downloadReceipt();
+  }
+});
+
+/* ============================================
+   PAGE VISIBILITY — PAUSE/RESUME TRACKING
+   ============================================ */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    console.log('[OrderTracker] App backgrounded — tracking paused');
+  } else {
+    console.log('[OrderTracker] App foregrounded — refreshing status');
+    // Refresh order status when app comes back
+  }
+});
+
+/* ============================================
+   NETWORK STATUS MONITORING
+   ============================================ */
+window.addEventListener('online', () => {
+  showToast('🌐 네트워크 연결됨');
+});
+
+window.addEventListener('offline', () => {
+  showToast('📡 오프라인 모드 — 일부 기능이 제한됩니다');
+});
 </script>
 
 </body>
