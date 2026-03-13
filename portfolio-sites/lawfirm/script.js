@@ -560,6 +560,18 @@
       }, 250);
     });
 
+    /* ========== Scroll Hint hide on scroll ========== */
+    var scrollHint = document.getElementById('scrollHint');
+    if (scrollHint) {
+      window.addEventListener('scroll', function () {
+        if (window.scrollY > 100) {
+          scrollHint.classList.add('hidden');
+        } else {
+          scrollHint.classList.remove('hidden');
+        }
+      });
+    }
+
   }); // DOMContentLoaded end
 
 })();
