@@ -798,6 +798,10 @@
       50% { opacity: 0.4; transform: scale(0.7); }
     }
 
+    .hero-firm-name {
+      display: none;
+    }
+
     .hero-title {
       font-family: var(--font-kr);
       font-size: clamp(36px, 5vw, 68px);
@@ -1823,24 +1827,151 @@
       }
 
       #hero {
-        grid-template-columns: 1fr;
-        min-height: auto;
-      }
-
-      .hero-left {
-        padding: 120px 40px 60px;
-        order: 2;
+        display: block;
+        position: relative;
+        height: 100vh;
+        max-height: 100vh;
+        overflow: hidden;
       }
 
       .hero-right {
-        order: 1;
-        height: 50vh;
-        min-height: 300px;
+        position: absolute;
+        inset: 0;
+        height: 100%;
+        min-height: 100vh;
+        z-index: 1;
+      }
+
+      /* 이미지 위 어두운 그라데이션 오버레이 (가독성 확보) */
+      .hero-right::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(0,0,0,0.55) 0%,
+          rgba(0,0,0,0.35) 40%,
+          rgba(0,0,0,0.5) 100%
+        );
+        z-index: 4;
+      }
+
+      .hero-left {
+        position: relative;
+        z-index: 5;
+        padding: 130px 40px 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        color: var(--white);
+      }
+
+      .hero-firm-name {
+        display: block;
+        font-family: var(--font-en);
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 4px;
+        color: rgba(255,255,255,0.85);
+        text-transform: uppercase;
+        margin-bottom: 16px;
+      }
+
+      .hero-badge {
+        background: rgba(255,255,255,0.1);
+        border-color: rgba(255,255,255,0.25);
+        color: rgba(255,255,255,0.9);
+      }
+
+      .hero-badge::before {
+        background: rgba(255,255,255,0.9);
+      }
+
+      .hero-title {
+        color: var(--white);
+        text-shadow: 0 2px 16px rgba(0,0,0,0.3);
+      }
+
+      .hero-title .typing-cursor {
+        background: rgba(255,255,255,0.8);
+      }
+
+      .hero-subtitle {
+        color: rgba(255,255,255,0.75);
+      }
+
+      .hero-firm-info span {
+        color: rgba(255,255,255,0.8);
+      }
+
+      .hero-firm-info .sep {
+        background: rgba(255,255,255,0.35);
+      }
+
+      .hero-firm-info .year {
+        color: rgba(255,255,255,0.6);
+      }
+
+      /* 통계카드: 히어로 하단 가로 배치 */
+      .hero-image-overlay {
+        flex-direction: row;
+        align-items: flex-end;
+        justify-content: flex-start;
+        gap: 12px;
+        padding: 0 40px 32px;
+        z-index: 5;
+      }
+
+      .hero-stat-card {
+        min-width: auto;
+        flex: 1;
+        padding: 14px 18px;
+        margin-bottom: 0;
+      }
+
+      .hero-stat-num {
+        font-size: 24px;
+      }
+
+      .hero-stat-label {
+        font-size: 11px;
       }
 
       .hero-scroll-hint {
         left: 40px;
         bottom: 24px;
+        z-index: 6;
+      }
+
+      .hero-scroll-hint span {
+        color: rgba(255,255,255,0.5);
+      }
+
+      .hero-scroll-line {
+        background: rgba(255,255,255,0.25);
+      }
+
+      #hero .btn-ghost-indigo {
+        color: var(--white);
+        border-color: rgba(255,255,255,0.5);
+      }
+
+      #hero .btn-ghost-indigo:hover {
+        background: var(--white);
+        color: var(--black);
+        border-color: var(--white);
+      }
+
+      #hero .btn-ghost-burgundy {
+        color: rgba(255,255,255,0.8);
+        border-color: rgba(255,255,255,0.3);
+      }
+
+      #hero .btn-ghost-burgundy:hover {
+        background: rgba(255,255,255,0.15);
+        color: var(--white);
+        border-color: rgba(255,255,255,0.5);
       }
 
       .section { padding: 80px 40px; }
@@ -1879,7 +2010,33 @@
     /* 375px (mobile) */
     @media (max-width: 480px) {
       .hero-left {
-        padding: 100px 24px 48px;
+        padding: 110px 24px 0;
+      }
+
+      .hero-firm-name {
+        font-size: 11px;
+        letter-spacing: 3px;
+        margin-bottom: 12px;
+      }
+
+      .hero-image-overlay {
+        padding: 0 24px 24px;
+      }
+
+      .hero-stat-card {
+        padding: 12px 14px;
+      }
+
+      .hero-stat-num {
+        font-size: 20px;
+      }
+
+      .hero-stat-label {
+        font-size: 10px;
+      }
+
+      .hero-scroll-hint {
+        display: none;
       }
 
       .hero-buttons {
@@ -2103,6 +2260,8 @@
         <div class="hero-badge reveal reveal-delay-1">
           Est. 2005 · JUNGUI LAW
         </div>
+
+        <div class="hero-firm-name reveal reveal-delay-1">법무법인 정의</div>
 
         <h1 class="hero-title reveal reveal-delay-2">
           <span
