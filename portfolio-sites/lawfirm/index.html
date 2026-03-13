@@ -1942,6 +1942,11 @@
         bottom: 20px;
       }
     }
+
+    @media (max-width: 768px) {
+      .cursor-dot, .cursor-circle { display: none !important; }
+      * { cursor: auto !important; }
+    }
   </style>
 </head>
 <body>
@@ -2734,6 +2739,14 @@
        CUSTOM CURSOR (I6)
     ============================================================ */
     function initCursor() {
+      if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+        var ce = document.getElementById('cursor-circle');
+        var de = document.getElementById('cursor-dot');
+        if (ce) ce.style.display = 'none';
+        if (de) de.style.display = 'none';
+        document.body.style.cursor = 'auto';
+        return;
+      }
       const circle = document.getElementById('cursor-circle');
       const dot = document.getElementById('cursor-dot');
       if (!circle || !dot) return;

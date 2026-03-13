@@ -101,6 +101,14 @@
     });
 
     /* ========== Custom Cursor (I6) ========== */
+    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+      var _c = document.querySelector('.custom-cursor');
+      var _d = document.querySelector('.custom-cursor-dot');
+      if (_c) _c.style.display = 'none';
+      if (_d) _d.style.display = 'none';
+      document.body.style.cursor = 'auto';
+    }
+
     var cursor = document.querySelector('.custom-cursor');
     var cursorDot = document.querySelector('.custom-cursor-dot');
     var mouseX = 0, mouseY = 0;
