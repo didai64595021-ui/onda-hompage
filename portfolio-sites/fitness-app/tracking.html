@@ -9,132 +9,1054 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--dark:#0D0D0D;--dark-surface:#1A1A1A;--dark-card:#1E1E1E;--dark-border:#2A2A2A;--lime:#CCFF00;--lime-dim:rgba(204,255,0,0.15);--lime-glow:rgba(204,255,0,0.3);--white:#F5F5F5;--gray:#8A8A8A;--gray-light:#B0B0B0;--red:#FF4757;--blue:#3B82F6;--orange:#FF6B35;--safe-top:44px;--safe-bottom:34px;--nav-height:72px;--radius:16px;--font-body:'Pretendard',-apple-system,sans-serif;--font-display:'Sora',sans-serif;--transition:cubic-bezier(0.4,0,0.2,1)}
-html{font-size:16px}
-body{font-family:var(--font-body);background:var(--dark);color:var(--white);min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
-a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
-::-webkit-scrollbar{width:0;height:0}
+:root{
+  --dark:#0D0D0D;
+  --dark-surface:#1A1A1A;
+  --dark-card:#1E1E1E;
+  --dark-border:#2A2A2A;
+  --lime:#CCFF00;
+  --lime-dim:rgba(204,255,0,0.15);
+  --lime-glow:rgba(204,255,0,0.3);
+  --white:#F5F5F5;
+  --gray:#8A8A8A;
+  --gray-light:#B0B0B0;
+  --red:#FF4757;
+  --blue:#3B82F6;
+  --orange:#FF6B35;
+  --green:#22C55E;
+  --purple:#8B5CF6;
+  --safe-top:44px;
+  --safe-bottom:34px;
+  --nav-height:72px;
+  --radius:16px;
+  --font-body:'Pretendard',-apple-system,sans-serif;
+  --font-display:'Sora',sans-serif;
+  --transition:cubic-bezier(0.4,0,0.2,1);
+  --glass-border:rgba(255,255,255,0.1);
+  --glass-bg:rgba(30,30,30,0.8);
+}
+html{font-size:16px;word-break:keep-all}
+body{
+  font-family:var(--font-body);
+  background:var(--dark);
+  color:var(--white);
+  min-height:100dvh;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--dark-border)}
+::-webkit-scrollbar-thumb{background:var(--gray);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--gray-light)}
 
+/* ANIMATIONS */
 @keyframes fadeInUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInDown{from{opacity:0;transform:translateY(-24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInLeft{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fadeInRight{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 20px var(--lime-glow)}50%{box-shadow:0 0 40px var(--lime-glow)}}
 @keyframes heartbeat{0%,100%{transform:scale(1)}15%{transform:scale(1.15)}30%{transform:scale(1)}45%{transform:scale(1.1)}}
 @keyframes ripple{0%{transform:scale(1);opacity:0.4}100%{transform:scale(2.5);opacity:0}}
 @keyframes countIn{from{opacity:0;transform:scale(0.5)}to{opacity:1;transform:scale(1)}}
 @keyframes slideUp{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-100%)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(0.8)}to{opacity:1;transform:scale(1)}}
+@keyframes bounce{0%,20%,53%,80%,100%{animation-timing-function:cubic-bezier(0.215,0.610,0.355,1.000);transform:translate3d(0,0,0)}40%,43%{animation-timing-function:cubic-bezier(0.755,0.050,0.855,0.060);transform:translate3d(0,-6px,0)}70%{animation-timing-function:cubic-bezier(0.755,0.050,0.855,0.060);transform:translate3d(0,-3px,0)}90%{transform:translate3d(0,-1px,0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}10%,30%,50%,70%,90%{transform:translateX(-2px)}20%,40%,60%,80%{transform:translateX(2px)}}
+@keyframes glow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.2)}}
+@keyframes float{0%,100%{transform:translateY(0px)}50%{transform:translateY(-4px)}}
+@keyframes rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes timerPulse{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.02);filter:brightness(1.1)}}
+@keyframes zoneGlow{0%,100%{opacity:0.8}50%{opacity:1}}
+
+/* GLASSMORPHISM EFFECTS */
+.glass{
+  background:var(--glass-bg);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);
+}
 
 /* TRACKING HEADER */
-.track-header{padding:var(--safe-top) 20px 0;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:10}
-.track-header__back{width:40px;height:40px;border-radius:50%;background:var(--dark-card);border:1px solid var(--dark-border);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+.track-header{
+  padding:var(--safe-top) 20px 0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:relative;
+  z-index:10;
+  animation:fadeInDown 0.6s var(--transition);
+}
+.track-header__back{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:var(--dark-card);
+  border:1px solid var(--dark-border);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+  transition:all 0.2s var(--transition);
+}
 .track-header__back:active{transform:scale(0.9)}
-.track-header__back svg{width:20px;height:20px;stroke:var(--white);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.track-header__title{font-size:16px;font-weight:600}
-.track-header__type{font-size:12px;color:var(--lime);font-family:var(--font-display);font-weight:600;text-transform:uppercase;letter-spacing:1px;background:var(--lime-dim);padding:4px 12px;border-radius:20px}
+.track-header__back:hover{background:var(--dark-border)}
+.track-header__back svg{
+  width:20px;
+  height:20px;
+  stroke:var(--white);
+  fill:none;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.track-header__title{
+  font-size:16px;
+  font-weight:600;
+  font-family:var(--font-display);
+}
+.track-header__type{
+  font-size:12px;
+  color:var(--lime);
+  font-family:var(--font-display);
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  background:var(--lime-dim);
+  padding:4px 12px;
+  border-radius:20px;
+  animation:glow 2s infinite;
+}
 
 /* MAIN TRACKING AREA */
-.track-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;position:relative}
+.track-main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  padding:20px;
+  position:relative;
+  overflow-y:auto;
+  max-height:calc(100vh - 120px);
+}
 
-/* BIG TIMER */
-.timer-display{text-align:center;margin-bottom:32px;animation:fadeInUp 0.6s var(--transition)}
-.timer-display__time{font-family:var(--font-display);font-size:72px;font-weight:800;letter-spacing:-2px;line-height:1;color:var(--white);transition:color 0.3s}
-.timer-display__time.paused{color:var(--gray)}
-.timer-display__label{font-size:13px;color:var(--gray);margin-top:8px;text-transform:uppercase;letter-spacing:2px;font-family:var(--font-display)}
+/* LIVE INDICATOR */
+.live-indicator{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  color:var(--red);
+  font-weight:600;
+  margin-bottom:12px;
+  justify-content:center;
+  animation:fadeInUp 0.6s var(--transition);
+}
+.live-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--red);
+  animation:pulse 1.5s infinite;
+}
 
-/* STATS GRID */
-.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;width:100%;max-width:360px;margin-bottom:40px;animation:fadeInUp 0.6s 0.1s var(--transition) both}
-.stat-box{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:var(--radius);padding:18px 16px;text-align:center;position:relative;overflow:hidden}
-.stat-box__icon{font-size:20px;margin-bottom:6px}
-.stat-box__value{font-family:var(--font-display);font-size:28px;font-weight:700;line-height:1;margin-bottom:4px;transition:all 0.3s}
-.stat-box__value span{font-size:14px;font-weight:400;color:var(--gray-light)}
-.stat-box__label{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:1px}
-.stat-box--cal .stat-box__value{color:var(--lime)}
-.stat-box--hr .stat-box__value{color:var(--red)}
-.stat-box--dist .stat-box__value{color:var(--blue)}
-.stat-box--pace .stat-box__value{color:var(--orange)}
+/* BIG TIMER DISPLAY - ENHANCED */
+.timer-display{
+  text-align:center;
+  margin-bottom:32px;
+  animation:fadeInUp 0.6s var(--transition);
+  position:relative;
+}
+.timer-display__time{
+  font-family:var(--font-display);
+  font-size:96px;
+  font-weight:800;
+  letter-spacing:-3px;
+  line-height:1;
+  color:var(--white);
+  transition:all 0.3s var(--transition);
+  text-shadow:0 0 20px rgba(255,255,255,0.1);
+  position:relative;
+}
+.timer-display__time.running{
+  animation:timerPulse 2s infinite;
+  color:var(--lime);
+  text-shadow:0 0 30px var(--lime-glow);
+}
+.timer-display__time.paused{
+  color:var(--gray);
+  animation:none;
+}
+.timer-display__label{
+  font-size:14px;
+  color:var(--gray);
+  margin-top:12px;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  font-family:var(--font-display);
+  font-weight:500;
+}
+.timer-display__bg{
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at center,var(--lime-dim) 0%,transparent 70%);
+  border-radius:50%;
+  opacity:0;
+  transition:opacity 0.3s;
+}
+.timer-display.running .timer-display__bg{
+  opacity:1;
+  animation:pulseGlow 3s infinite;
+}
 
-/* HEART ANIMATION */
-.heart-icon{display:inline-block}
+/* ENHANCED STATS GRID */
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:16px;
+  width:100%;
+  max-width:420px;
+  margin:0 auto 32px;
+  animation:fadeInUp 0.6s 0.1s var(--transition) both;
+}
+.stat-box{
+  background:var(--glass-bg);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);
+  padding:24px 20px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  transition:all 0.3s var(--transition);
+  min-height:120px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.stat-box:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 32px rgba(0,0,0,0.3);
+}
+.stat-box__icon{
+  font-size:28px;
+  margin-bottom:12px;
+  transition:transform 0.3s var(--transition);
+}
+.stat-box:hover .stat-box__icon{
+  transform:scale(1.1);
+}
+.stat-box__value{
+  font-family:var(--font-display);
+  font-size:32px;
+  font-weight:700;
+  line-height:1;
+  margin-bottom:6px;
+  transition:all 0.3s var(--transition);
+}
+.stat-box__value span{
+  font-size:16px;
+  font-weight:400;
+  color:var(--gray-light);
+}
+.stat-box__label{
+  font-size:12px;
+  color:var(--gray);
+  text-transform:uppercase;
+  letter-spacing:1px;
+  font-family:var(--font-display);
+  font-weight:500;
+}
+.stat-box--cal{
+  background:linear-gradient(135deg,var(--glass-bg),rgba(255,107,53,0.05));
+  border-color:rgba(255,107,53,0.2);
+}
+.stat-box--cal .stat-box__value{color:var(--lime);text-shadow:0 0 10px var(--lime-glow)}
+.stat-box--hr{
+  background:linear-gradient(135deg,var(--glass-bg),rgba(255,71,87,0.05));
+  border-color:rgba(255,71,87,0.2);
+}
+.stat-box--hr .stat-box__value{color:var(--red);text-shadow:0 0 10px rgba(255,71,87,0.3)}
+.stat-box--dist{
+  background:linear-gradient(135deg,var(--glass-bg),rgba(59,130,246,0.05));
+  border-color:rgba(59,130,246,0.2);
+}
+.stat-box--dist .stat-box__value{color:var(--blue);text-shadow:0 0 10px rgba(59,130,246,0.3)}
+.stat-box--pace{
+  background:linear-gradient(135deg,var(--glass-bg),rgba(255,107,53,0.05));
+  border-color:rgba(255,107,53,0.2);
+}
+.stat-box--pace .stat-box__value{color:var(--orange);text-shadow:0 0 10px rgba(255,107,53,0.3)}
+
+/* HEART ANIMATION ENHANCED */
+.heart-icon{display:inline-block;transition:transform 0.2s}
 .heart-icon.beating{animation:heartbeat 0.8s ease-in-out infinite}
 
-/* PROGRESS RING */
-.progress-ring-container{position:relative;width:200px;height:200px;margin-bottom:32px;animation:fadeInUp 0.6s var(--transition);display:none}
-.progress-ring-container.visible{display:block}
-.progress-ring{transform:rotate(-90deg)}
-.progress-ring__bg{fill:none;stroke:var(--dark-border);stroke-width:8}
-.progress-ring__fill{fill:none;stroke:var(--lime);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1s var(--transition)}
-.progress-ring__center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
-.progress-ring__percent{font-family:var(--font-display);font-size:36px;font-weight:800;color:var(--lime)}
-.progress-ring__sub{font-size:12px;color:var(--gray)}
+/* LAP TIME LIST SECTION - NEW */
+.lap-section{
+  width:100%;
+  max-width:420px;
+  margin:0 auto 32px;
+  animation:fadeInUp 0.6s 0.2s var(--transition) both;
+}
+.lap-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:16px;
+  padding:0 4px;
+}
+.lap-header__title{
+  font-size:16px;
+  font-weight:600;
+  color:var(--white);
+  font-family:var(--font-display);
+}
+.lap-header__count{
+  font-size:12px;
+  color:var(--gray);
+  background:var(--dark-border);
+  padding:4px 8px;
+  border-radius:12px;
+}
+.lap-list{
+  background:var(--glass-bg);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);
+  max-height:200px;
+  overflow-y:auto;
+}
+.lap-list.empty{
+  padding:32px 20px;
+  text-align:center;
+  color:var(--gray);
+  font-size:14px;
+}
+.lap-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 16px;
+  border-bottom:1px solid var(--dark-border);
+  transition:background 0.2s;
+}
+.lap-item:last-child{border-bottom:none}
+.lap-item:hover{background:rgba(255,255,255,0.05)}
+.lap-item__number{
+  font-family:var(--font-display);
+  font-weight:600;
+  color:var(--lime);
+  font-size:14px;
+  min-width:60px;
+}
+.lap-item__time{
+  font-family:var(--font-display);
+  font-weight:600;
+  color:var(--white);
+  font-size:14px;
+  flex:1;
+  text-align:center;
+}
+.lap-item__calories{
+  font-size:12px;
+  color:var(--gray-light);
+  min-width:60px;
+  text-align:right;
+}
+.lap-item.new{
+  animation:fadeInDown 0.5s var(--transition);
+  background:var(--lime-dim);
+}
 
-/* CONTROL BUTTONS */
-.controls{display:flex;gap:16px;align-items:center;justify-content:center;animation:fadeInUp 0.6s 0.2s var(--transition) both;padding-bottom:calc(var(--safe-bottom) + 20px)}
+/* HEART RATE ZONE VISUALIZATION - ENHANCED */
+.hr-zone-section{
+  width:100%;
+  max-width:420px;
+  margin:0 auto 32px;
+  animation:fadeInUp 0.6s 0.25s var(--transition) both;
+}
+.hr-zone-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:16px;
+  padding:0 4px;
+}
+.hr-zone-header__title{
+  font-size:16px;
+  font-weight:600;
+  color:var(--white);
+  font-family:var(--font-display);
+}
+.hr-zone-header__current{
+  font-size:12px;
+  font-weight:600;
+  padding:4px 8px;
+  border-radius:12px;
+  transition:all 0.3s;
+}
+.hr-zones{
+  background:var(--glass-bg);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);
+  padding:20px;
+}
+.zone-bar{
+  display:flex;
+  align-items:center;
+  margin-bottom:12px;
+  position:relative;
+}
+.zone-bar:last-child{margin-bottom:0}
+.zone-label{
+  font-size:11px;
+  font-weight:600;
+  min-width:60px;
+  color:var(--gray-light);
+}
+.zone-track{
+  flex:1;
+  height:8px;
+  background:var(--dark-border);
+  border-radius:4px;
+  margin:0 12px;
+  overflow:hidden;
+  position:relative;
+}
+.zone-fill{
+  height:100%;
+  border-radius:4px;
+  transition:width 1s var(--transition);
+  position:relative;
+}
+.zone-fill.active{animation:zoneGlow 2s infinite}
+.zone-percent{
+  font-size:10px;
+  font-weight:600;
+  min-width:40px;
+  text-align:right;
+  color:var(--gray);
+}
+.zone-1{color:#3B82F6}
+.zone-1 .zone-fill{background:linear-gradient(90deg,#3B82F6,rgba(59,130,246,0.6))}
+.zone-2{color:#22C55E}
+.zone-2 .zone-fill{background:linear-gradient(90deg,#22C55E,rgba(34,197,94,0.6))}
+.zone-3{color:#F59E0B}
+.zone-3 .zone-fill{background:linear-gradient(90deg,#F59E0B,rgba(245,158,11,0.6))}
+.zone-4{color:var(--orange)}
+.zone-4 .zone-fill{background:linear-gradient(90deg,var(--orange),rgba(255,107,53,0.6))}
+.zone-5{color:var(--red)}
+.zone-5 .zone-fill{background:linear-gradient(90deg,var(--red),rgba(255,71,87,0.6))}
 
-.ctrl-btn{border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all 0.2s var(--transition);-webkit-tap-highlight-color:transparent;position:relative;overflow:hidden}
+/* MUSIC CONTROLLER - NEW */
+.music-widget{
+  position:fixed;
+  top:calc(var(--safe-top) + 80px);
+  right:20px;
+  width:240px;
+  background:var(--glass-bg);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);
+  padding:16px;
+  z-index:20;
+  animation:fadeInRight 0.6s 0.3s var(--transition) both;
+  transition:all 0.3s var(--transition);
+  transform:translateX(100%);
+}
+.music-widget.visible{transform:translateX(0)}
+.music-widget__song{
+  display:flex;
+  align-items:center;
+  margin-bottom:12px;
+}
+.music-widget__cover{
+  width:40px;
+  height:40px;
+  background:linear-gradient(135deg,var(--lime),var(--blue));
+  border-radius:8px;
+  margin-right:12px;
+  position:relative;
+  overflow:hidden;
+}
+.music-widget__cover::after{
+  content:'🎵';
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+}
+.music-widget__info{
+  flex:1;
+  overflow:hidden;
+}
+.music-widget__title{
+  font-size:13px;
+  font-weight:600;
+  color:var(--white);
+  margin-bottom:2px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.music-widget__artist{
+  font-size:11px;
+  color:var(--gray);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.music-widget__progress{
+  height:3px;
+  background:var(--dark-border);
+  border-radius:2px;
+  margin-bottom:12px;
+  overflow:hidden;
+}
+.music-widget__progress-fill{
+  height:100%;
+  background:var(--lime);
+  border-radius:2px;
+  width:0%;
+  transition:width 1s linear;
+}
+.music-widget__controls{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+}
+.music-btn{
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  background:var(--dark-border);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all 0.2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.music-btn:active{transform:scale(0.9)}
+.music-btn:hover{background:var(--dark-card)}
+.music-btn svg{
+  width:14px;
+  height:14px;
+  stroke:var(--white);
+  fill:none;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.music-btn--play{
+  width:40px;
+  height:40px;
+  background:var(--lime);
+}
+.music-btn--play svg{
+  stroke:var(--dark);
+  fill:var(--dark);
+}
+.music-btn--play.playing{
+  background:var(--orange);
+}
+.music-btn--play.playing svg{
+  stroke:var(--white);
+  fill:var(--white);
+}
+
+/* MAP SIMULATION AREA - NEW */
+.map-section{
+  width:100%;
+  max-width:420px;
+  margin:0 auto 32px;
+  animation:fadeInUp 0.6s 0.35s var(--transition) both;
+}
+.map-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:16px;
+  padding:0 4px;
+}
+.map-header__title{
+  font-size:16px;
+  font-weight:600;
+  color:var(--white);
+  font-family:var(--font-display);
+}
+.map-header__distance{
+  font-size:12px;
+  color:var(--lime);
+  font-weight:600;
+  background:var(--lime-dim);
+  padding:4px 8px;
+  border-radius:12px;
+}
+.map-container{
+  background:var(--dark-surface);
+  border:1px solid var(--dark-border);
+  border-radius:var(--radius);
+  height:180px;
+  position:relative;
+  overflow:hidden;
+}
+.map-route{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,var(--dark-card) 0%,var(--dark-surface) 100%);
+}
+.route-dot{
+  position:absolute;
+  width:4px;
+  height:4px;
+  background:var(--lime);
+  border-radius:50%;
+  opacity:0;
+  transition:opacity 0.5s;
+}
+.route-dot.active{
+  opacity:1;
+  animation:float 2s infinite;
+}
+.route-line{
+  position:absolute;
+  height:2px;
+  background:linear-gradient(90deg,var(--lime),rgba(204,255,0,0.5));
+  border-radius:1px;
+  transform-origin:left center;
+  opacity:0;
+  transition:opacity 0.5s;
+}
+.route-line.active{
+  opacity:0.7;
+}
+.map-overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to bottom,transparent 0%,rgba(13,13,13,0.3) 100%);
+  display:flex;
+  align-items:flex-end;
+  padding:16px;
+}
+.map-stats{
+  display:flex;
+  gap:20px;
+}
+.map-stat{
+  text-align:center;
+}
+.map-stat__value{
+  font-family:var(--font-display);
+  font-size:14px;
+  font-weight:700;
+  color:var(--lime);
+  margin-bottom:2px;
+}
+.map-stat__label{
+  font-size:10px;
+  color:var(--gray);
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+
+/* CONTROL BUTTONS - ENHANCED */
+.controls{
+  display:flex;
+  gap:20px;
+  align-items:center;
+  justify-content:center;
+  animation:fadeInUp 0.6s 0.4s var(--transition) both;
+  padding:20px 0 calc(var(--safe-bottom) + 20px);
+  margin-top:auto;
+}
+
+.ctrl-btn{
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all 0.2s var(--transition);
+  -webkit-tap-highlight-color:transparent;
+  position:relative;
+  overflow:hidden;
+}
 .ctrl-btn:active{transform:scale(0.9)}
 
-.ctrl-btn--main{width:80px;height:80px;background:var(--lime);box-shadow:0 0 30px var(--lime-glow)}
-.ctrl-btn--main svg{width:32px;height:32px;fill:var(--dark)}
-.ctrl-btn--main.running{background:var(--orange)}
-.ctrl-btn--main.running svg{fill:var(--white)}
+.ctrl-btn--main{
+  width:88px;
+  height:88px;
+  background:var(--lime);
+  box-shadow:0 0 40px var(--lime-glow);
+  position:relative;
+}
+.ctrl-btn--main svg{
+  width:36px;
+  height:36px;
+  fill:var(--dark);
+  stroke:var(--dark);
+  transition:all 0.2s;
+}
+.ctrl-btn--main.running{
+  background:var(--orange);
+  box-shadow:0 0 40px rgba(255,107,53,0.4);
+  animation:pulseGlow 3s infinite;
+}
+.ctrl-btn--main.running svg{
+  fill:var(--white);
+  stroke:var(--white);
+}
 
-.ctrl-btn--secondary{width:56px;height:56px;background:var(--dark-card);border:1px solid var(--dark-border)}
-.ctrl-btn--secondary svg{width:22px;height:22px;stroke:var(--white);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ctrl-btn--secondary{
+  width:64px;
+  height:64px;
+  background:var(--glass-bg);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--glass-border);
+}
+.ctrl-btn--secondary svg{
+  width:24px;
+  height:24px;
+  stroke:var(--white);
+  fill:none;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.ctrl-btn--secondary:hover{
+  background:rgba(255,255,255,0.1);
+  transform:translateY(-2px);
+}
 
-.ctrl-btn--stop{width:56px;height:56px;background:rgba(255,71,87,0.15);border:1px solid rgba(255,71,87,0.3)}
-.ctrl-btn--stop svg{width:22px;height:22px;fill:var(--red)}
+.ctrl-btn--stop{
+  width:64px;
+  height:64px;
+  background:rgba(255,71,87,0.15);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,71,87,0.3);
+}
+.ctrl-btn--stop svg{
+  width:24px;
+  height:24px;
+  fill:var(--red);
+}
+.ctrl-btn--stop:hover{
+  background:rgba(255,71,87,0.25);
+  transform:translateY(-2px);
+}
 
-.ctrl-ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,0.2);animation:ripple 0.6s ease-out forwards;pointer-events:none}
+.ctrl-ripple{
+  position:absolute;
+  border-radius:50%;
+  background:rgba(255,255,255,0.2);
+  animation:ripple 0.6s ease-out forwards;
+  pointer-events:none;
+}
 
-/* INTENSITY BAR */
-.intensity-bar{width:100%;max-width:360px;margin-bottom:32px;animation:fadeInUp 0.6s 0.15s var(--transition) both}
-.intensity-bar__header{display:flex;justify-content:space-between;margin-bottom:8px}
-.intensity-bar__label{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;font-family:var(--font-display)}
-.intensity-bar__zone{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px}
-.intensity-bar__zone.zone-1{color:#3B82F6;background:rgba(59,130,246,0.12)}
-.intensity-bar__zone.zone-2{color:#22C55E;background:rgba(34,197,94,0.12)}
-.intensity-bar__zone.zone-3{color:var(--orange);background:rgba(255,107,53,0.12)}
-.intensity-bar__zone.zone-4{color:var(--red);background:rgba(255,71,87,0.12)}
-.intensity-bar__track{height:6px;background:var(--dark-border);border-radius:3px;overflow:hidden;display:flex}
-.intensity-bar__segment{height:100%;transition:width 0.5s}
-.intensity-bar__segment--1{background:#3B82F6}
-.intensity-bar__segment--2{background:#22C55E}
-.intensity-bar__segment--3{background:var(--orange)}
-.intensity-bar__segment--4{background:var(--red)}
+/* COUNTDOWN OVERLAY - ENHANCED */
+.countdown-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(13,13,13,0.98);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:200;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.3s;
+}
+.countdown-overlay.active{
+  opacity:1;
+  pointer-events:all;
+}
+.countdown-number{
+  font-family:var(--font-display);
+  font-size:140px;
+  font-weight:800;
+  color:var(--lime);
+  text-shadow:0 0 50px var(--lime-glow);
+  animation:countIn 0.5s var(--transition);
+}
+.countdown-go{
+  font-family:var(--font-display);
+  font-size:72px;
+  font-weight:800;
+  color:var(--lime);
+  text-transform:uppercase;
+  letter-spacing:12px;
+  text-shadow:0 0 50px var(--lime-glow);
+}
 
-/* COUNTDOWN OVERLAY */
-.countdown-overlay{position:fixed;inset:0;background:rgba(13,13,13,0.95);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity 0.3s}
-.countdown-overlay.active{opacity:1;pointer-events:all}
-.countdown-number{font-family:var(--font-display);font-size:120px;font-weight:800;color:var(--lime);animation:countIn 0.5s var(--transition)}
-.countdown-go{font-family:var(--font-display);font-size:64px;font-weight:800;color:var(--lime);text-transform:uppercase;letter-spacing:8px}
+/* RESULT MODAL - ENHANCED */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.8);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  z-index:300;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.3s;
+}
+.modal-overlay.active{
+  opacity:1;
+  pointer-events:all;
+}
+.modal{
+  background:var(--dark-card);
+  border:1px solid var(--dark-border);
+  border-radius:24px 24px 0 0;
+  padding:32px 24px calc(var(--safe-bottom) + 24px);
+  width:100%;
+  max-width:480px;
+  transform:translateY(100%);
+  transition:transform 0.4s var(--transition);
+  max-height:80vh;
+  overflow-y:auto;
+}
+.modal-overlay.active .modal{
+  transform:translateY(0);
+}
+.modal__handle{
+  width:40px;
+  height:4px;
+  background:var(--dark-border);
+  border-radius:2px;
+  margin:0 auto 24px;
+}
+.modal__emoji{
+  font-size:64px;
+  text-align:center;
+  margin-bottom:16px;
+  animation:bounce 1s;
+}
+.modal__title{
+  font-size:28px;
+  font-weight:700;
+  text-align:center;
+  margin-bottom:6px;
+  font-family:var(--font-display);
+  color:var(--lime);
+}
+.modal__subtitle{
+  font-size:16px;
+  color:var(--gray-light);
+  text-align:center;
+  margin-bottom:32px;
+}
 
-/* RESULT MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s}
-.modal-overlay.active{opacity:1;pointer-events:all}
-.modal{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:24px 24px 0 0;padding:32px 24px calc(var(--safe-bottom) + 24px);width:100%;max-width:480px;transform:translateY(100%);transition:transform 0.4s var(--transition)}
-.modal-overlay.active .modal{transform:translateY(0)}
-.modal__handle{width:40px;height:4px;background:var(--dark-border);border-radius:2px;margin:0 auto 24px}
-.modal__emoji{font-size:56px;text-align:center;margin-bottom:16px}
-.modal__title{font-size:24px;font-weight:700;text-align:center;margin-bottom:4px}
-.modal__subtitle{font-size:14px;color:var(--gray-light);text-align:center;margin-bottom:28px}
-.modal-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:28px}
-.modal-stat{background:var(--dark-surface);border-radius:var(--radius);padding:16px;text-align:center}
-.modal-stat__value{font-family:var(--font-display);font-size:24px;font-weight:700;margin-bottom:4px}
+/* Enhanced Modal Stats Grid */
+.modal-stats{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:16px;
+  margin-bottom:24px;
+}
+.modal-stat{
+  background:var(--dark-surface);
+  border-radius:var(--radius);
+  padding:20px 16px;
+  text-align:center;
+  border:1px solid var(--dark-border);
+  transition:transform 0.2s;
+}
+.modal-stat:hover{
+  transform:translateY(-2px);
+}
+.modal-stat__value{
+  font-family:var(--font-display);
+  font-size:24px;
+  font-weight:700;
+  margin-bottom:6px;
+  line-height:1;
+}
 .modal-stat__value--lime{color:var(--lime)}
 .modal-stat__value--blue{color:var(--blue)}
 .modal-stat__value--red{color:var(--red)}
 .modal-stat__value--orange{color:var(--orange)}
-.modal-stat__label{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:1px}
-.modal__actions{display:flex;flex-direction:column;gap:10px}
-.modal__btn{padding:16px;border-radius:var(--radius);font-size:16px;font-weight:600;text-align:center;transition:all 0.2s;-webkit-tap-highlight-color:transparent}
+.modal-stat__value--green{color:var(--green)}
+.modal-stat__value--purple{color:var(--purple)}
+.modal-stat__label{
+  font-size:11px;
+  color:var(--gray);
+  text-transform:uppercase;
+  letter-spacing:1px;
+  font-family:var(--font-display);
+}
+
+/* Additional detailed stats section */
+.modal-details{
+  background:var(--dark-surface);
+  border-radius:var(--radius);
+  padding:20px;
+  margin-bottom:24px;
+  border:1px solid var(--dark-border);
+}
+.modal-details__title{
+  font-size:14px;
+  font-weight:600;
+  color:var(--white);
+  margin-bottom:16px;
+  font-family:var(--font-display);
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+.detail-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+  padding-bottom:8px;
+  border-bottom:1px solid var(--dark-border);
+}
+.detail-row:last-child{
+  margin-bottom:0;
+  padding-bottom:0;
+  border-bottom:none;
+}
+.detail-row__label{
+  font-size:13px;
+  color:var(--gray);
+}
+.detail-row__value{
+  font-size:13px;
+  font-weight:600;
+  color:var(--white);
+}
+
+/* Zone breakdown in modal */
+.zone-breakdown{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:8px;
+  margin-top:12px;
+}
+.zone-mini{
+  text-align:center;
+  padding:8px 4px;
+  border-radius:8px;
+  background:var(--dark-card);
+  border:1px solid var(--dark-border);
+}
+.zone-mini__label{
+  font-size:9px;
+  color:var(--gray);
+  margin-bottom:4px;
+  text-transform:uppercase;
+}
+.zone-mini__time{
+  font-size:11px;
+  font-weight:600;
+}
+
+.modal__actions{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.modal__btn{
+  padding:18px;
+  border-radius:var(--radius);
+  font-size:16px;
+  font-weight:600;
+  text-align:center;
+  transition:all 0.2s;
+  -webkit-tap-highlight-color:transparent;
+  font-family:var(--font-display);
+}
 .modal__btn:active{transform:scale(0.97)}
-.modal__btn--primary{background:var(--lime);color:var(--dark)}
-.modal__btn--secondary{background:var(--dark-surface);color:var(--white);border:1px solid var(--dark-border)}
+.modal__btn--primary{
+  background:var(--lime);
+  color:var(--dark);
+  box-shadow:0 4px 20px var(--lime-glow);
+}
+.modal__btn--primary:hover{
+  background:rgba(204,255,0,0.9);
+  transform:translateY(-2px);
+}
+.modal__btn--secondary{
+  background:var(--dark-surface);
+  color:var(--white);
+  border:1px solid var(--dark-border);
+}
+.modal__btn--secondary:hover{
+  background:var(--dark-border);
+  transform:translateY(-2px);
+}
 
-/* LIVE INDICATOR */
-.live-indicator{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--red);font-weight:600;margin-bottom:8px;justify-content:center}
-.live-dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 1.5s infinite}
+/* RESPONSIVE DESIGN */
+@media(max-width:390px){
+  .timer-display__time{font-size:72px}
+  .stats-grid{grid-template-columns:1fr;max-width:300px}
+  .stat-box{min-height:100px}
+  .music-widget{width:200px;right:10px}
+  .controls{gap:16px}
+  .ctrl-btn--main{width:72px;height:72px}
+  .ctrl-btn--secondary,.ctrl-btn--stop{width:56px;height:56px}
+  .modal{padding:24px 16px calc(var(--safe-bottom) + 16px)}
+}
 
-/* RESPONSIVE */
-@media(min-width:768px){.timer-display__time{font-size:96px}.stats-grid{max-width:420px}.controls{gap:24px}}
+@media(min-width:768px){
+  .timer-display__time{font-size:120px}
+  .stats-grid{max-width:500px;gap:20px}
+  .stat-box{padding:28px 24px;min-height:140px}
+  .controls{gap:32px}
+  .ctrl-btn--main{width:100px;height:100px}
+  .ctrl-btn--secondary,.ctrl-btn--stop{width:72px;height:72px}
+  .track-main{padding:32px}
+  .music-widget{width:280px;right:32px}
+  .modal-stats{grid-template-columns:repeat(3,1fr)}
+}
+
+@media(min-width:1024px){
+  .track-main{
+    flex-direction:row;
+    flex-wrap:wrap;
+    align-items:flex-start;
+    justify-content:space-between;
+  }
+  .timer-display{
+    width:100%;
+    margin-bottom:40px;
+  }
+  .stats-grid{
+    width:48%;
+    margin-bottom:0;
+  }
+  .map-section,
+  .lap-section,
+  .hr-zone-section{
+    width:48%;
+  }
+  .controls{
+    width:100%;
+    justify-content:center;
+    margin-top:40px;
+  }
+}
 </style>
 </head>
 <body>
@@ -146,6 +1068,31 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
   </button>
   <span class="track-header__title" id="workoutName">러닝</span>
   <span class="track-header__type" id="workoutType">RUNNING</span>
+</div>
+
+<!-- Music Widget -->
+<div class="music-widget" id="musicWidget">
+  <div class="music-widget__song">
+    <div class="music-widget__cover"></div>
+    <div class="music-widget__info">
+      <div class="music-widget__title" id="songTitle">운동 음악 플레이리스트</div>
+      <div class="music-widget__artist" id="songArtist">VITALITY Radio</div>
+    </div>
+  </div>
+  <div class="music-widget__progress">
+    <div class="music-widget__progress-fill" id="musicProgress"></div>
+  </div>
+  <div class="music-widget__controls">
+    <button class="music-btn" onclick="previousTrack()">
+      <svg viewBox="0 0 24 24"><polygon points="19 20 9 12 19 4"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+    </button>
+    <button class="music-btn music-btn--play" id="playBtn" onclick="toggleMusic()">
+      <svg viewBox="0 0 24 24" id="playIcon"><polygon points="5 3 19 12 5 21"/></svg>
+    </button>
+    <button class="music-btn" onclick="nextTrack()">
+      <svg viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+    </button>
+  </div>
 </div>
 
 <!-- Countdown -->
@@ -161,13 +1108,14 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
     운동 중
   </div>
 
-  <!-- Timer -->
-  <div class="timer-display">
+  <!-- Enhanced Timer -->
+  <div class="timer-display" id="timerSection">
+    <div class="timer-display__bg"></div>
     <div class="timer-display__time" id="timerDisplay">00:00:00</div>
     <div class="timer-display__label" id="timerLabel">준비</div>
   </div>
 
-  <!-- Stats -->
+  <!-- Enhanced Stats Grid -->
   <div class="stats-grid">
     <div class="stat-box stat-box--cal">
       <div class="stat-box__icon">🔥</div>
@@ -191,21 +1139,90 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
     </div>
   </div>
 
-  <!-- Intensity Bar -->
-  <div class="intensity-bar">
-    <div class="intensity-bar__header">
-      <span class="intensity-bar__label">Heart Rate Zone</span>
-      <span class="intensity-bar__zone zone-1" id="zoneLabel">Zone 1</span>
+  <!-- Lap Times Section -->
+  <div class="lap-section">
+    <div class="lap-header">
+      <span class="lap-header__title">랩 타임</span>
+      <span class="lap-header__count" id="lapCount">0개</span>
     </div>
-    <div class="intensity-bar__track">
-      <div class="intensity-bar__segment intensity-bar__segment--1" id="zone1" style="width:100%"></div>
-      <div class="intensity-bar__segment intensity-bar__segment--2" id="zone2" style="width:0"></div>
-      <div class="intensity-bar__segment intensity-bar__segment--3" id="zone3" style="width:0"></div>
-      <div class="intensity-bar__segment intensity-bar__segment--4" id="zone4" style="width:0"></div>
+    <div class="lap-list empty" id="lapList">
+      아직 기록된 랩이 없습니다
     </div>
   </div>
 
-  <!-- Controls -->
+  <!-- Heart Rate Zones -->
+  <div class="hr-zone-section">
+    <div class="hr-zone-header">
+      <span class="hr-zone-header__title">심박 구간</span>
+      <span class="hr-zone-header__current zone-1" id="currentZone">Zone 1</span>
+    </div>
+    <div class="hr-zones">
+      <div class="zone-bar zone-1">
+        <span class="zone-label">Zone 1</span>
+        <div class="zone-track">
+          <div class="zone-fill" id="zone1Fill" style="width:100%"></div>
+        </div>
+        <span class="zone-percent" id="zone1Percent">100%</span>
+      </div>
+      <div class="zone-bar zone-2">
+        <span class="zone-label">Zone 2</span>
+        <div class="zone-track">
+          <div class="zone-fill" id="zone2Fill" style="width:0%"></div>
+        </div>
+        <span class="zone-percent" id="zone2Percent">0%</span>
+      </div>
+      <div class="zone-bar zone-3">
+        <span class="zone-label">Zone 3</span>
+        <div class="zone-track">
+          <div class="zone-fill" id="zone3Fill" style="width:0%"></div>
+        </div>
+        <span class="zone-percent" id="zone3Percent">0%</span>
+      </div>
+      <div class="zone-bar zone-4">
+        <span class="zone-label">Zone 4</span>
+        <div class="zone-track">
+          <div class="zone-fill" id="zone4Fill" style="width:0%"></div>
+        </div>
+        <span class="zone-percent" id="zone4Percent">0%</span>
+      </div>
+      <div class="zone-bar zone-5">
+        <span class="zone-label">Zone 5</span>
+        <div class="zone-track">
+          <div class="zone-fill" id="zone5Fill" style="width:0%"></div>
+        </div>
+        <span class="zone-percent" id="zone5Percent">0%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map Simulation -->
+  <div class="map-section">
+    <div class="map-header">
+      <span class="map-header__title">경로</span>
+      <span class="map-header__distance" id="mapDistance">0.00km</span>
+    </div>
+    <div class="map-container">
+      <div class="map-route" id="mapRoute"></div>
+      <div class="map-overlay">
+        <div class="map-stats">
+          <div class="map-stat">
+            <div class="map-stat__value" id="mapAvgPace">0:00</div>
+            <div class="map-stat__label">평균 페이스</div>
+          </div>
+          <div class="map-stat">
+            <div class="map-stat__value" id="mapElevation">+0m</div>
+            <div class="map-stat__label">고도 상승</div>
+          </div>
+          <div class="map-stat">
+            <div class="map-stat__value" id="mapSpeed">0.0</div>
+            <div class="map-stat__label">현재 속도</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Control Buttons -->
   <div class="controls">
     <button class="ctrl-btn ctrl-btn--stop" id="stopBtn" onclick="stopWorkout()" style="display:none">
       <svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
@@ -219,33 +1236,92 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
   </div>
 </div>
 
-<!-- Result Modal -->
+<!-- Enhanced Result Modal -->
 <div class="modal-overlay" id="resultModal">
   <div class="modal">
     <div class="modal__handle"></div>
     <div class="modal__emoji">🏆</div>
     <div class="modal__title">운동 완료!</div>
     <div class="modal__subtitle" id="resultSubtitle">수고하셨습니다</div>
+    
     <div class="modal-stats">
       <div class="modal-stat">
         <div class="modal-stat__value modal-stat__value--lime" id="resultTime">00:00:00</div>
-        <div class="modal-stat__label">시간</div>
+        <div class="modal-stat__label">총 시간</div>
       </div>
       <div class="modal-stat">
-        <div class="modal-stat__value modal-stat__value--blue" id="resultCal">0 kcal</div>
+        <div class="modal-stat__value modal-stat__value--orange" id="resultCal">0 kcal</div>
         <div class="modal-stat__label">칼로리</div>
       </div>
       <div class="modal-stat">
-        <div class="modal-stat__value modal-stat__value--red" id="resultHr">0 bpm</div>
+        <div class="modal-stat__value modal-stat__value--red" id="resultAvgHr">0 bpm</div>
         <div class="modal-stat__label">평균 심박</div>
       </div>
       <div class="modal-stat">
-        <div class="modal-stat__value modal-stat__value--orange" id="resultDist">0.00 km</div>
+        <div class="modal-stat__value modal-stat__value--blue" id="resultDist">0.00 km</div>
         <div class="modal-stat__label">거리</div>
       </div>
+      <div class="modal-stat">
+        <div class="modal-stat__value modal-stat__value--green" id="resultMaxHr">0 bpm</div>
+        <div class="modal-stat__label">최고 심박</div>
+      </div>
+      <div class="modal-stat">
+        <div class="modal-stat__value modal-stat__value--purple" id="resultCalMin">0.0</div>
+        <div class="modal-stat__label">칼로리/분</div>
+      </div>
     </div>
+
+    <div class="modal-details">
+      <div class="modal-details__title">상세 정보</div>
+      <div class="detail-row">
+        <span class="detail-row__label">평균 페이스</span>
+        <span class="detail-row__value" id="resultAvgPace">0:00/km</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-row__label">최고 페이스</span>
+        <span class="detail-row__value" id="resultBestPace">0:00/km</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-row__label">랩 수</span>
+        <span class="detail-row__value" id="resultLaps">0개</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-row__label">평균 스피드</span>
+        <span class="detail-row__value" id="resultAvgSpeed">0.0 km/h</span>
+      </div>
+      
+      <div style="margin-top:20px">
+        <div class="detail-row">
+          <span class="detail-row__label">심박 구간 분포</span>
+        </div>
+        <div class="zone-breakdown">
+          <div class="zone-mini">
+            <div class="zone-mini__label">Z1</div>
+            <div class="zone-mini__time zone-1" id="zoneTime1">0%</div>
+          </div>
+          <div class="zone-mini">
+            <div class="zone-mini__label">Z2</div>
+            <div class="zone-mini__time zone-2" id="zoneTime2">0%</div>
+          </div>
+          <div class="zone-mini">
+            <div class="zone-mini__label">Z3</div>
+            <div class="zone-mini__time zone-3" id="zoneTime3">0%</div>
+          </div>
+          <div class="zone-mini">
+            <div class="zone-mini__label">Z4</div>
+            <div class="zone-mini__time zone-4" id="zoneTime4">0%</div>
+          </div>
+          <div class="zone-mini">
+            <div class="zone-mini__label">Z5</div>
+            <div class="zone-mini__time zone-5" id="zoneTime5">0%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <div class="modal__actions">
-      <button class="modal__btn modal__btn--primary" onclick="saveAndGoHome()">저장하고 홈으로</button>
+      <button class="modal__btn modal__btn--primary" onclick="shareWorkout()">결과 공유하기</button>
+      <button class="modal__btn modal__btn--secondary" onclick="saveAndGoHome()">저장하고 홈으로</button>
       <button class="modal__btn modal__btn--secondary" onclick="location.href='history.html'">기록 보기</button>
     </div>
   </div>
@@ -253,7 +1329,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;back
 
 <script>
 /* ============================================
-   VITALITY — Workout Tracking (Full Interactivity)
+   VITALITY — Enhanced Workout Tracking
    ============================================ */
 
 // Parse URL params
@@ -265,7 +1341,7 @@ document.getElementById('workoutName').textContent = decodeURIComponent(workoutN
 const typeLabels = {running:'RUNNING',strength:'STRENGTH',hiit:'HIIT',yoga:'YOGA'};
 document.getElementById('workoutType').textContent = typeLabels[workoutType] || 'WORKOUT';
 
-// Hide distance/pace for non-running
+// Hide distance/pace for non-running workouts
 if (workoutType !== 'running') {
   document.getElementById('distBox').querySelector('.stat-box__icon').textContent = '🔁';
   document.getElementById('distBox').querySelector('.stat-box__label').textContent = '세트';
@@ -273,24 +1349,49 @@ if (workoutType !== 'running') {
   document.getElementById('paceBox').querySelector('.stat-box__label').textContent = '강도';
 }
 
-// State
+// Enhanced State Management
 let isRunning = false;
 let isPaused = false;
 let seconds = 0;
 let timerInterval = null;
 let simInterval = null;
+let mapInterval = null;
+let musicInterval = null;
+
+// Stats
 let calories = 0;
 let heartRate = 72;
 let distance = 0;
 let hrSum = 0;
 let hrCount = 0;
+let maxHeartRate = 0;
+let minHeartRate = 300;
 let laps = [];
-let zoneTime = [0,0,0,0];
+let zoneTime = [0,0,0,0,0]; // 5 zones
+let elevation = 0;
+let currentSpeed = 0;
+let bestPaceTime = Infinity;
+let paceHistory = [];
 
-// Cal burn rate per second by type
-const calRates = {running:0.18, strength:0.12, hiit:0.22, yoga:0.06};
-const distRate = 0.0028; // km per second for running
+// Music simulation
+let isPlaying = false;
+let currentTrack = 0;
+let musicProgress = 0;
+const musicTracks = [
+  {title: "운동 음악 플레이리스트", artist: "VITALITY Radio"},
+  {title: "Energy Boost", artist: "Workout Mix"},
+  {title: "High Tempo Run", artist: "Cardio Beats"},
+  {title: "Power Training", artist: "Fitness Radio"},
+  {title: "Endurance Flow", artist: "Athletic Mix"}
+];
 
+// Map simulation data
+let routeDots = [];
+let routeLines = [];
+let currentMapX = 20;
+let currentMapY = 90;
+
+// Utility Functions
 function formatTime(s) {
   const h = Math.floor(s/3600);
   const m = Math.floor((s%3600)/60);
@@ -298,22 +1399,37 @@ function formatTime(s) {
   return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
 }
 
+function formatPace(timeInSec, distInKm) {
+  if (distInKm <= 0) return "0:00";
+  const paceMinutes = (timeInSec / 60) / distInKm;
+  const minutes = Math.floor(paceMinutes);
+  const seconds = Math.round((paceMinutes - minutes) * 60);
+  return `${minutes}:${String(seconds).padStart(2,'0')}`;
+}
+
+// Enhanced Countdown
 function startCountdown(cb) {
   const overlay = document.getElementById('countdownOverlay');
   const numEl = document.getElementById('countdownNum');
   overlay.classList.add('active');
   let count = 3;
   numEl.textContent = count;
-  numEl.style.animation = 'none'; numEl.offsetHeight; numEl.style.animation = 'countIn 0.5s var(--transition)';
+  numEl.style.animation = 'none'; 
+  numEl.offsetHeight; 
+  numEl.style.animation = 'countIn 0.5s var(--transition)';
   
   const interval = setInterval(() => {
     count--;
     if (count > 0) {
       numEl.textContent = count;
-      numEl.style.animation = 'none'; numEl.offsetHeight; numEl.style.animation = 'countIn 0.5s var(--transition)';
+      numEl.style.animation = 'none'; 
+      numEl.offsetHeight; 
+      numEl.style.animation = 'countIn 0.5s var(--transition)';
     } else if (count === 0) {
       numEl.innerHTML = '<span class="countdown-go">GO!</span>';
-      numEl.style.animation = 'none'; numEl.offsetHeight; numEl.style.animation = 'countIn 0.5s var(--transition)';
+      numEl.style.animation = 'none'; 
+      numEl.offsetHeight; 
+      numEl.style.animation = 'countIn 0.5s var(--transition)';
     } else {
       clearInterval(interval);
       overlay.classList.remove('active');
@@ -322,6 +1438,7 @@ function startCountdown(cb) {
   }, 800);
 }
 
+// Main Workout Controls
 function toggleWorkout() {
   if (!isRunning && !isPaused) {
     // First start
@@ -338,33 +1455,47 @@ function toggleWorkout() {
 function startWorkout() {
   isRunning = true;
   isPaused = false;
+  
+  // UI Updates
   document.getElementById('timerLabel').textContent = '운동 중';
   document.getElementById('liveIndicator').style.display = 'flex';
   document.getElementById('timerDisplay').classList.remove('paused');
+  document.getElementById('timerDisplay').classList.add('running');
+  document.getElementById('timerSection').classList.add('running');
   document.getElementById('heartIcon').classList.add('beating');
   document.getElementById('stopBtn').style.display = 'flex';
   document.getElementById('lapBtn').style.display = 'flex';
+  document.getElementById('musicWidget').classList.add('visible');
   
   // Update main button to pause
   const mainBtn = document.getElementById('mainBtn');
   mainBtn.classList.add('running');
   document.getElementById('mainIcon').innerHTML = '<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>';
   
+  // Start intervals
   timerInterval = setInterval(() => {
     seconds++;
     document.getElementById('timerDisplay').textContent = formatTime(seconds);
   }, 1000);
   
   simInterval = setInterval(simulateData, 1000);
+  mapInterval = setInterval(updateMap, 2000);
+  startMusicSimulation();
 }
 
 function pauseWorkout() {
   isRunning = false;
   isPaused = true;
+  
   clearInterval(timerInterval);
   clearInterval(simInterval);
+  clearInterval(mapInterval);
+  clearInterval(musicInterval);
+  
   document.getElementById('timerLabel').textContent = '일시정지';
   document.getElementById('timerDisplay').classList.add('paused');
+  document.getElementById('timerDisplay').classList.remove('running');
+  document.getElementById('timerSection').classList.remove('running');
   document.getElementById('heartIcon').classList.remove('beating');
   document.getElementById('liveIndicator').style.display = 'none';
   
@@ -376,8 +1507,11 @@ function pauseWorkout() {
 function resumeWorkout() {
   isRunning = true;
   isPaused = false;
+  
   document.getElementById('timerLabel').textContent = '운동 중';
   document.getElementById('timerDisplay').classList.remove('paused');
+  document.getElementById('timerDisplay').classList.add('running');
+  document.getElementById('timerSection').classList.add('running');
   document.getElementById('heartIcon').classList.add('beating');
   document.getElementById('liveIndicator').style.display = 'flex';
   
@@ -391,129 +1525,436 @@ function resumeWorkout() {
   }, 1000);
   
   simInterval = setInterval(simulateData, 1000);
+  mapInterval = setInterval(updateMap, 2000);
+  startMusicSimulation();
 }
 
+// Enhanced Data Simulation
 function simulateData() {
-  // Calories
-  const rate = calRates[workoutType] || 0.15;
-  calories += rate * (0.8 + Math.random() * 0.4);
+  // Calories calculation
+  const rate = {running:0.18, strength:0.12, hiit:0.22, yoga:0.06}[workoutType] || 0.15;
+  const calIncrement = rate * (0.8 + Math.random() * 0.4);
+  calories += calIncrement;
   document.getElementById('calDisplay').innerHTML = Math.round(calories) + ' <span>kcal</span>';
   
-  // Heart rate (120-165 range with noise)
+  // Enhanced heart rate simulation
   const baseHr = {running:145, strength:135, hiit:155, yoga:100}[workoutType] || 140;
-  const range = {running:20, strength:15, hiit:25, yoga:15}[workoutType] || 20;
-  heartRate += (Math.random() - 0.5) * 8;
-  heartRate = Math.max(baseHr - range, Math.min(baseHr + range, heartRate));
+  const range = {running:25, strength:20, hiit:30, yoga:15}[workoutType] || 25;
+  
+  // Add natural variation and workout intensity curve
+  const intensityFactor = Math.sin((seconds / 60) * 0.5) * 0.3 + 1;
+  heartRate += (Math.random() - 0.5) * 10;
+  heartRate = Math.max(baseHr - range, Math.min(baseHr + range * intensityFactor, heartRate));
+  
   const hr = Math.round(heartRate);
   document.getElementById('hrDisplay').innerHTML = hr + ' <span>bpm</span>';
+  
   hrSum += hr;
   hrCount++;
+  maxHeartRate = Math.max(maxHeartRate, hr);
+  minHeartRate = Math.min(minHeartRate, hr);
   
-  // Zone tracking
+  // Enhanced zone tracking (5 zones)
   let zone = 0;
-  if (hr < 120) zone = 0;
-  else if (hr < 140) zone = 1;
-  else if (hr < 155) zone = 2;
-  else zone = 3;
+  if (hr < 110) zone = 0;
+  else if (hr < 130) zone = 1;
+  else if (hr < 150) zone = 2;
+  else if (hr < 170) zone = 3;
+  else zone = 4;
+  
   zoneTime[zone]++;
+  updateZoneVisualization();
   
-  const totalZ = zoneTime.reduce((a,b) => a+b, 0);
-  document.getElementById('zone1').style.width = (zoneTime[0]/totalZ*100)+'%';
-  document.getElementById('zone2').style.width = (zoneTime[1]/totalZ*100)+'%';
-  document.getElementById('zone3').style.width = (zoneTime[2]/totalZ*100)+'%';
-  document.getElementById('zone4').style.width = (zoneTime[3]/totalZ*100)+'%';
-  
-  const zoneLabel = document.getElementById('zoneLabel');
-  const zoneNames = ['Zone 1','Zone 2','Zone 3','Zone 4'];
-  const zoneClasses = ['zone-1','zone-2','zone-3','zone-4'];
-  zoneLabel.textContent = zoneNames[zone];
-  zoneLabel.className = 'intensity-bar__zone ' + zoneClasses[zone];
-  
-  // Distance (running)
+  // Distance and pace (running only)
   if (workoutType === 'running') {
-    distance += distRate * (0.8 + Math.random() * 0.4);
+    const distRate = 0.0028; // km per second base rate
+    const speedVariation = 0.8 + Math.random() * 0.4;
+    const distIncrement = distRate * speedVariation;
+    distance += distIncrement;
+    currentSpeed = distIncrement * 3600; // km/h
+    
     document.getElementById('distDisplay').innerHTML = distance.toFixed(2) + ' <span>km</span>';
-    // Pace
+    document.getElementById('mapDistance').textContent = distance.toFixed(2) + 'km';
+    
+    // Calculate pace
     if (distance > 0.01) {
-      const paceMin = (seconds / 60) / distance;
-      const pm = Math.floor(paceMin);
-      const ps = Math.round((paceMin - pm) * 60);
-      document.getElementById('paceDisplay').innerHTML = pm + ':' + String(ps).padStart(2,'0') + ' <span>/km</span>';
+      const currentPaceTime = (seconds / 60) / distance;
+      paceHistory.push(currentPaceTime);
+      bestPaceTime = Math.min(bestPaceTime, currentPaceTime);
+      
+      const paceMin = Math.floor(currentPaceTime);
+      const paceSec = Math.round((currentPaceTime - paceMin) * 60);
+      document.getElementById('paceDisplay').innerHTML = paceMin + ':' + String(paceSec).padStart(2,'0') + ' <span>/km</span>';
+      
+      // Update map stats
+      document.getElementById('mapAvgPace').textContent = formatPace(seconds, distance);
+      document.getElementById('mapSpeed').textContent = currentSpeed.toFixed(1);
+    }
+    
+    // Simulate elevation gain
+    if (Math.random() > 0.7) {
+      elevation += Math.floor(Math.random() * 3);
+      document.getElementById('mapElevation').textContent = '+' + elevation + 'm';
     }
   } else {
-    // Sets/reps simulation
+    // Non-running workout stats
     const sets = Math.floor(seconds / 45) + 1;
     document.getElementById('distDisplay').innerHTML = sets + ' <span>세트</span>';
-    const intensityNames = ['낮음','보통','높음','최고'];
+    const intensityNames = ['낮음','보통','높음','매우높음','최고'];
     document.getElementById('paceDisplay').innerHTML = intensityNames[zone] + ' <span></span>';
   }
 }
 
+// Enhanced Zone Visualization
+function updateZoneVisualization() {
+  const totalTime = zoneTime.reduce((a,b) => a+b, 0);
+  const currentZone = getCurrentHeartRateZone(Math.round(heartRate));
+  
+  for (let i = 0; i < 5; i++) {
+    const percent = totalTime > 0 ? (zoneTime[i] / totalTime * 100) : 0;
+    document.getElementById(`zone${i+1}Fill`).style.width = percent + '%';
+    document.getElementById(`zone${i+1}Percent`).textContent = Math.round(percent) + '%';
+    
+    // Highlight current zone
+    const zoneFill = document.getElementById(`zone${i+1}Fill`);
+    zoneFill.classList.toggle('active', i === currentZone);
+  }
+  
+  // Update current zone indicator
+  const zoneNames = ['Zone 1','Zone 2','Zone 3','Zone 4','Zone 5'];
+  const zoneClasses = ['zone-1','zone-2','zone-3','zone-4','zone-5'];
+  const currentZoneEl = document.getElementById('currentZone');
+  currentZoneEl.textContent = zoneNames[currentZone];
+  currentZoneEl.className = 'hr-zone-header__current ' + zoneClasses[currentZone];
+}
+
+function getCurrentHeartRateZone(hr) {
+  if (hr < 110) return 0;
+  else if (hr < 130) return 1;
+  else if (hr < 150) return 2;
+  else if (hr < 170) return 3;
+  else return 4;
+}
+
+// Lap Functionality Enhanced
 function markLap() {
-  laps.push({time: seconds, cal: Math.round(calories)});
+  const lapTime = seconds;
+  const lapCal = Math.round(calories);
+  const lapDistance = distance;
+  const lapHR = Math.round(heartRate);
+  
+  laps.push({
+    number: laps.length + 1,
+    time: lapTime,
+    calories: lapCal,
+    distance: lapDistance,
+    heartRate: lapHR
+  });
+  
+  updateLapList();
+  
   // Visual feedback
   const btn = document.getElementById('lapBtn');
   btn.style.background = 'var(--lime-dim)';
   btn.style.borderColor = 'var(--lime)';
   setTimeout(() => {
-    btn.style.background = 'var(--dark-card)';
-    btn.style.borderColor = 'var(--dark-border)';
-  }, 300);
+    btn.style.background = 'var(--glass-bg)';
+    btn.style.borderColor = 'var(--glass-border)';
+  }, 500);
 }
 
+function updateLapList() {
+  const lapList = document.getElementById('lapList');
+  const lapCount = document.getElementById('lapCount');
+  
+  lapCount.textContent = laps.length + '개';
+  
+  if (laps.length === 0) {
+    lapList.className = 'lap-list empty';
+    lapList.innerHTML = '아직 기록된 랩이 없습니다';
+    return;
+  }
+  
+  lapList.className = 'lap-list';
+  lapList.innerHTML = '';
+  
+  // Show latest laps first
+  const recentLaps = [...laps].reverse().slice(0, 8);
+  
+  recentLaps.forEach((lap, index) => {
+    const lapItem = document.createElement('div');
+    lapItem.className = 'lap-item' + (index === 0 ? ' new' : '');
+    
+    const lapDuration = lap.number > 1 ? lap.time - laps[lap.number - 2].time : lap.time;
+    
+    lapItem.innerHTML = `
+      <div class="lap-item__number">랩 ${lap.number}</div>
+      <div class="lap-item__time">${formatTime(lapDuration)}</div>
+      <div class="lap-item__calories">${lap.calories} kcal</div>
+    `;
+    
+    lapList.appendChild(lapItem);
+  });
+}
+
+// Map Visualization
+function initializeMap() {
+  const mapRoute = document.getElementById('mapRoute');
+  mapRoute.innerHTML = '';
+  routeDots = [];
+  routeLines = [];
+  currentMapX = 20;
+  currentMapY = 90;
+}
+
+function updateMap() {
+  if (!isRunning || workoutType !== 'running') return;
+  
+  const mapRoute = document.getElementById('mapRoute');
+  const mapWidth = 420;
+  const mapHeight = 180;
+  
+  // Calculate new position with some randomness for realistic route
+  const progress = Math.min(distance / 5, 1); // Assume 5km route
+  const baseX = 20 + (mapWidth - 40) * progress;
+  const randomY = 60 + Math.sin(progress * Math.PI * 3) * 20 + (Math.random() - 0.5) * 20;
+  
+  // Add route dot
+  const dot = document.createElement('div');
+  dot.className = 'route-dot active';
+  dot.style.left = baseX + 'px';
+  dot.style.top = randomY + 'px';
+  mapRoute.appendChild(dot);
+  
+  routeDots.push({x: baseX, y: randomY});
+  
+  // Connect with line if not first dot
+  if (routeDots.length > 1) {
+    const prevDot = routeDots[routeDots.length - 2];
+    const line = document.createElement('div');
+    line.className = 'route-line active';
+    
+    const length = Math.sqrt(Math.pow(baseX - prevDot.x, 2) + Math.pow(randomY - prevDot.y, 2));
+    const angle = Math.atan2(randomY - prevDot.y, baseX - prevDot.x) * 180 / Math.PI;
+    
+    line.style.left = prevDot.x + 'px';
+    line.style.top = prevDot.y + 'px';
+    line.style.width = length + 'px';
+    line.style.transform = `rotate(${angle}deg)`;
+    
+    mapRoute.insertBefore(line, dot);
+  }
+  
+  // Limit number of dots/lines for performance
+  if (routeDots.length > 20) {
+    routeDots.shift();
+    const oldElements = mapRoute.querySelectorAll('.route-dot, .route-line');
+    if (oldElements.length > 40) {
+      oldElements[0].remove();
+      if (oldElements[1]) oldElements[1].remove();
+    }
+  }
+}
+
+// Music Widget Functionality
+function startMusicSimulation() {
+  if (isPlaying) {
+    musicInterval = setInterval(() => {
+      musicProgress += 1;
+      if (musicProgress >= 100) {
+        musicProgress = 0;
+        nextTrack();
+      }
+      document.getElementById('musicProgress').style.width = musicProgress + '%';
+    }, 300); // Update every 300ms for smooth animation
+  }
+}
+
+function toggleMusic() {
+  isPlaying = !isPlaying;
+  const playBtn = document.getElementById('playBtn');
+  const playIcon = document.getElementById('playIcon');
+  
+  if (isPlaying) {
+    playBtn.classList.add('playing');
+    playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>';
+    if (isRunning) startMusicSimulation();
+  } else {
+    playBtn.classList.remove('playing');
+    playIcon.innerHTML = '<polygon points="5 3 19 12 5 21"/>';
+    clearInterval(musicInterval);
+  }
+}
+
+function nextTrack() {
+  currentTrack = (currentTrack + 1) % musicTracks.length;
+  updateMusicInfo();
+  musicProgress = 0;
+}
+
+function previousTrack() {
+  currentTrack = currentTrack === 0 ? musicTracks.length - 1 : currentTrack - 1;
+  updateMusicInfo();
+  musicProgress = 0;
+}
+
+function updateMusicInfo() {
+  const track = musicTracks[currentTrack];
+  document.getElementById('songTitle').textContent = track.title;
+  document.getElementById('songArtist').textContent = track.artist;
+}
+
+// Stop Workout
 function stopWorkout() {
   if (seconds < 3) return; // prevent accidental stop
+  
   clearInterval(timerInterval);
   clearInterval(simInterval);
+  clearInterval(mapInterval);
+  clearInterval(musicInterval);
+  
   isRunning = false;
   isPaused = false;
   
-  // Show result modal
+  showResultModal();
+}
+
+// Enhanced Result Modal
+function showResultModal() {
   const avgHr = hrCount > 0 ? Math.round(hrSum / hrCount) : 0;
+  const calPerMin = seconds > 0 ? (calories / (seconds / 60)).toFixed(1) : 0;
+  const avgSpeed = workoutType === 'running' && seconds > 0 ? (distance / (seconds / 3600)).toFixed(1) : 0;
+  
+  // Basic stats
   document.getElementById('resultTime').textContent = formatTime(seconds);
   document.getElementById('resultCal').textContent = Math.round(calories) + ' kcal';
-  document.getElementById('resultHr').textContent = avgHr + ' bpm';
-  document.getElementById('resultDist').textContent = workoutType === 'running' ? distance.toFixed(2) + ' km' : Math.floor(seconds/45+1) + ' 세트';
+  document.getElementById('resultAvgHr').textContent = avgHr + ' bpm';
+  document.getElementById('resultMaxHr').textContent = maxHeartRate + ' bpm';
+  document.getElementById('resultCalMin').textContent = calPerMin;
   
-  // Subtitle
-  if (calories > 300) {
-    document.getElementById('resultSubtitle').textContent = '🔥 대단해요! 목표를 초과 달성했습니다!';
-  } else if (calories > 150) {
-    document.getElementById('resultSubtitle').textContent = '💪 좋은 운동이었어요!';
+  if (workoutType === 'running') {
+    document.getElementById('resultDist').textContent = distance.toFixed(2) + ' km';
   } else {
-    document.getElementById('resultSubtitle').textContent = '👏 꾸준함이 중요합니다!';
+    document.getElementById('resultDist').textContent = Math.floor(seconds/45+1) + ' 세트';
   }
+  
+  // Detailed stats
+  document.getElementById('resultAvgPace').textContent = workoutType === 'running' ? formatPace(seconds, distance) + '/km' : '-';
+  document.getElementById('resultBestPace').textContent = workoutType === 'running' && bestPaceTime < Infinity ? formatPace(bestPaceTime * 60, 1) + '/km' : '-';
+  document.getElementById('resultLaps').textContent = laps.length + '개';
+  document.getElementById('resultAvgSpeed').textContent = workoutType === 'running' ? avgSpeed + ' km/h' : '-';
+  
+  // Zone breakdown
+  const totalZoneTime = zoneTime.reduce((a,b) => a+b, 0);
+  for (let i = 0; i < 5; i++) {
+    const percent = totalZoneTime > 0 ? Math.round((zoneTime[i] / totalZoneTime) * 100) : 0;
+    document.getElementById(`zoneTime${i+1}`).textContent = percent + '%';
+  }
+  
+  // Dynamic subtitle based on performance
+  let subtitle = '';
+  if (calories > 500) {
+    subtitle = '🔥 놀라워요! 엄청난 칼로리를 소모했네요!';
+  } else if (calories > 300) {
+    subtitle = '💪 훌륭해요! 목표를 초과 달성했습니다!';
+  } else if (calories > 150) {
+    subtitle = '👍 좋은 운동이었어요!';
+  } else if (seconds > 300) {
+    subtitle = '⏱️ 꾸준한 운동, 대단합니다!';
+  } else {
+    subtitle = '👏 시작이 중요해요. 잘 하셨습니다!';
+  }
+  document.getElementById('resultSubtitle').textContent = subtitle;
   
   document.getElementById('resultModal').classList.add('active');
 }
 
+// Share Workout
+function shareWorkout() {
+  const workoutData = {
+    type: workoutType,
+    name: decodeURIComponent(workoutName),
+    duration: formatTime(seconds),
+    calories: Math.round(calories),
+    distance: workoutType === 'running' ? distance.toFixed(2) + 'km' : Math.floor(seconds/45+1) + '세트',
+    avgHR: hrCount > 0 ? Math.round(hrSum / hrCount) : 0
+  };
+  
+  const shareText = `🏃‍♂️ VITALITY 운동 완료!\n\n` +
+    `📝 ${workoutData.name}\n` +
+    `⏱️ 시간: ${workoutData.duration}\n` +
+    `🔥 칼로리: ${workoutData.calories} kcal\n` +
+    `❤️ 평균 심박: ${workoutData.avgHR} bpm\n` +
+    `📍 ${workoutType === 'running' ? '거리' : '세트'}: ${workoutData.distance}\n\n` +
+    `#VITALITY #운동완료 #피트니스`;
+  
+  if (navigator.share) {
+    navigator.share({
+      title: 'VITALITY 운동 기록',
+      text: shareText
+    });
+  } else {
+    navigator.clipboard.writeText(shareText).then(() => {
+      alert('운동 기록이 클립보드에 복사되었습니다!');
+    });
+  }
+}
+
+// Save and Go Home
 function saveAndGoHome() {
-  // Save to localStorage
+  // Save comprehensive workout record
   const record = {
     type: workoutType,
     name: decodeURIComponent(workoutName),
     duration: seconds,
     calories: Math.round(calories),
     heartRate: hrCount > 0 ? Math.round(hrSum / hrCount) : 0,
+    maxHeartRate: maxHeartRate,
+    minHeartRate: minHeartRate < 300 ? minHeartRate : 0,
     distance: workoutType === 'running' ? parseFloat(distance.toFixed(2)) : 0,
+    elevation: elevation,
+    avgSpeed: workoutType === 'running' && seconds > 0 ? parseFloat((distance / (seconds / 3600)).toFixed(1)) : 0,
+    bestPace: workoutType === 'running' && bestPaceTime < Infinity ? bestPaceTime : 0,
     date: new Date().toISOString(),
-    laps: laps
+    laps: laps,
+    zoneTime: zoneTime,
+    calPerMin: seconds > 0 ? parseFloat((calories / (seconds / 60)).toFixed(1)) : 0
   };
   
   const history = JSON.parse(localStorage.getItem('vitality_history') || '[]');
   history.unshift(record);
   localStorage.setItem('vitality_history', JSON.stringify(history));
   
-  // Update today stats
+  // Update today's cumulative stats
   const todayKey = new Date().toISOString().slice(0,10);
-  const todayStats = JSON.parse(localStorage.getItem('vitality_today_' + todayKey) || '{"cal":0,"time":0,"hr":[]}');
+  const todayStats = JSON.parse(localStorage.getItem('vitality_today_' + todayKey) || '{"cal":0,"time":0,"hr":[],"workouts":0}');
   todayStats.cal += record.calories;
   todayStats.time += Math.round(seconds / 60);
+  todayStats.workouts += 1;
   if (record.heartRate) todayStats.hr.push(record.heartRate);
   localStorage.setItem('vitality_today_' + todayKey, JSON.stringify(todayStats));
   
   location.href = 'index.html';
 }
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+  initializeMap();
+  updateMusicInfo();
+  
+  // Auto-show music widget after 2 seconds
+  setTimeout(() => {
+    document.getElementById('musicWidget').classList.add('visible');
+  }, 2000);
+  
+  // Initialize empty lap list
+  updateLapList();
+  
+  // Show music widget only for running/hiit workouts
+  if (workoutType === 'yoga' || workoutType === 'strength') {
+    document.getElementById('musicWidget').style.display = 'none';
+  }
+});
 </script>
 </body>
 </html>
