@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" data-theme="light">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1670,6 +1670,31 @@
 
   <!-- Scripts -->
   <script src="script.js"></script>
+
+  <!-- Theme toggle -->
+  <script>
+  (function() {
+    var saved = localStorage.getItem('jungui-theme');
+    if (saved === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+    var toggle = document.getElementById('theme-toggle');
+    if (toggle) {
+      toggle.checked = saved === 'dark';
+      toggle.addEventListener('change', function() {
+        if (this.checked) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          localStorage.setItem('jungui-theme', 'dark');
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+          localStorage.setItem('jungui-theme', 'light');
+        }
+      });
+    }
+  })();
+  </script>
 
   <!-- Sub-accordion script -->
   <script>
