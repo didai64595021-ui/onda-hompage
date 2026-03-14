@@ -441,49 +441,35 @@
     }
 
     .timeline-item {
-      display: grid;
-      grid-template-columns: 1fr 24px 1fr;
-      column-gap: 2.5rem;
-      margin-bottom: 3rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 3rem;
+      margin-bottom: 3.5rem;
       position: relative;
-      align-items: start;
     }
 
-    /* Force all children to row 1 so grid-column works regardless of DOM order */
-    .timeline-item > * {
-      grid-row: 1;
+    .timeline-item:nth-child(odd) {
+      flex-direction: row;
     }
 
-    .timeline-item:nth-child(odd) .timeline-item__content {
-      grid-column: 1;
-      text-align: right;
-    }
-    .timeline-item:nth-child(odd) .timeline-item__dot {
-      grid-column: 2;
-    }
-    .timeline-item:nth-child(odd) .timeline-item__spacer {
-      grid-column: 3;
-    }
-
-    .timeline-item:nth-child(even) .timeline-item__spacer {
-      grid-column: 1;
-    }
-    .timeline-item:nth-child(even) .timeline-item__dot {
-      grid-column: 2;
-    }
-    .timeline-item:nth-child(even) .timeline-item__content {
-      grid-column: 3;
-      text-align: left;
+    .timeline-item:nth-child(even) {
+      flex-direction: row-reverse;
     }
 
     .timeline-item__content {
+      flex: 1;
       display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
+      align-items: flex-start;
+      gap: 1.5rem;
       background: var(--color-bg);
       border: 1px solid var(--color-border);
       border-radius: 12px;
-      padding: 2rem 2.5rem;
+      padding: 1.75rem 2rem;
+      width: 426px;
+      max-width: 426px;
+      min-height: 211px;
+      max-height: 211px;
+      overflow: hidden;
       transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
@@ -493,13 +479,25 @@
       box-shadow: 0 8px 30px rgba(63, 81, 181, 0.12);
     }
 
+    .timeline-item:nth-child(odd) .timeline-item__content {
+      flex-direction: row-reverse;
+      text-align: right;
+    }
+
+    .timeline-item:nth-child(even) .timeline-item__content {
+      flex-direction: row;
+      text-align: left;
+    }
+
     .timeline-item__year {
       font-family: 'Montserrat', sans-serif;
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      color: var(--color-burgundy);
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      color: var(--color-indigo);
       white-space: nowrap;
+      flex-shrink: 0;
+      padding-top: 0.15rem;
     }
 
     .timeline-item__body {
@@ -523,28 +521,29 @@
     }
 
     .timeline-item__dot {
-      position: relative;
-      width: 16px;
-      height: 16px;
+      position: absolute;
+      left: 50%;
+      top: 1.75rem;
+      transform: translateX(-50%);
+      width: 1rem;
+      height: 1rem;
       border-radius: 50%;
       background: var(--color-indigo);
       border: 3px solid var(--color-bg-alt);
       box-shadow: 0 0 0 3px var(--color-indigo);
       z-index: 2;
-      margin-top: 2rem;
-      justify-self: center;
-      align-self: start;
       transition: background 0.3s ease, transform 0.3s ease;
     }
 
     .timeline-item:hover .timeline-item__dot {
       background: var(--color-burgundy);
       box-shadow: 0 0 0 3px var(--color-burgundy);
-      transform: scale(1.3);
+      transform: translateX(-50%) scale(1.3);
     }
 
     .timeline-item__spacer {
-      /* empty spacer for grid balance */
+      flex: 1;
+      max-width: 426px;
     }
 
     /* ===== LAWYERS SECTION ===== */
@@ -1080,7 +1079,8 @@
         flex-direction: column !important;
         text-align: left !important;
         width: 100%;
-        min-width: unset;
+        max-width: 100%;
+        min-height: auto;
         max-height: none;
       }
       .timeline-item__spacer {
