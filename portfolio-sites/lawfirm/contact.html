@@ -980,7 +980,7 @@
     .cta-parallax-bg {
       position: absolute;
       inset: 0;
-      background-image: url('https://images.unsplash.com/photo-1507679799987-c73b1676c542?w=1200&q=80');
+      background-image: url('https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1200&q=80');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
@@ -1369,14 +1369,9 @@
       </div>
     </div>
 
-    <!-- Dark/Light Toggle (I14) -->
-    <div class="theme-toggle">
-      <span class="toggle-label">Dark / Light</span>
-      <label class="toggle-switch" aria-label="다크모드 / 라이트모드 전환">
-        <input type="checkbox" id="theme-toggle" />
-        <div class="toggle-track"></div>
-        <div class="toggle-thumb"></div>
-      </label>
+    <!-- EN/KR Language Toggle -->
+    <div class="lang-toggle">
+      <button class="lang-btn" id="lang-toggle" aria-label="영문/한국어 전환"><span class="lang-current">KR</span> / <span class="lang-other">EN</span></button>
     </div>
   </aside>
 
@@ -2072,313 +2067,34 @@
   <!-- Global Script -->
   <script src="script.js"></script>
 
-  <!-- Page-specific Script -->
-  <script>
-    /* ============================================================
-       contact.html — Page-specific JavaScript
-       Features: Typing Effect, Custom Cursor, Parallax,
-                 FAQ Accordion, Form Validation, Scroll Reveal,
-                 Back to Top, Date Min
-       ============================================================ */
-    (function () {
-      'use strict';
-
-      /* ---------- Page Loader ---------- */
-      window.addEventListener('load', function () {
-        var loader = document.getElementById('pageLoader');
-        if (loader) {
-          setTimeout(function () {
-            loader.classList.add('loaded');
-          }, 700);
-        }
+<script>
+  (function() {
+    var btn = document.getElementById("lang-toggle");
+    if (!btn) return;
+    var lang = localStorage.getItem("jungui-lang") || "kr";
+    var cur = btn.querySelector(".lang-current");
+    var oth = btn.querySelector(".lang-other");
+    function update(l) {
+      if (l === "kr") { cur.textContent = "KR"; oth.textContent = "EN"; }
+      else { cur.textContent = "EN"; oth.textContent = "KR"; }
+    }
+    function switchLang(l) {
+      document.querySelectorAll("[data-kr]").forEach(function(el) {
+        el.textContent = l === "kr" ? el.getAttribute("data-kr") : el.getAttribute("data-en");
       });
-
-      document.addEventListener('DOMContentLoaded', function () {
-
-        /* ---------- Custom Cursor (I6) ---------- */
-        var dot  = document.getElementById('cursorDot');
-        var ring = document.getElementById('cursorRing');
-        var mouseX = 0, mouseY = 0;
-        var ringX = 0, ringY = 0;
-
-        document.addEventListener('mousemove', function (e) {
-          mouseX = e.clientX;
-          mouseY = e.clientY;
-          if (dot) {
-            dot.style.left = mouseX + 'px';
-            dot.style.top  = mouseY + 'px';
-          }
-        });
-
-        function animateRing() {
-          ringX += (mouseX - ringX) * 0.15;
-          ringY += (mouseY - ringY) * 0.15;
-          if (ring) {
-            ring.style.left = ringX + 'px';
-            ring.style.top  = ringY + 'px';
-          }
-          requestAnimationFrame(animateRing);
-        }
-        animateRing();
-
-        var hoverTargets = document.querySelectorAll('a, button, [role="button"], label, select, input, textarea');
-        hoverTargets.forEach(function (el) {
-          el.addEventListener('mouseenter', function () {
-            if (ring) ring.classList.add('hovered');
-          });
-          el.addEventListener('mouseleave', function () {
-            if (ring) ring.classList.remove('hovered');
-          });
-        });
-
-        /* ---------- Dark / Light Toggle (I14) ---------- */
-        (function() {
-          var saved = localStorage.getItem('jungui-theme');
-          if (saved === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-          } else {
-            document.documentElement.removeAttribute('data-theme');
-          }
-          var toggle = document.getElementById('theme-toggle');
-          if (toggle) {
-            toggle.checked = saved === 'dark';
-            toggle.addEventListener('change', function() {
-              if (this.checked) {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                localStorage.setItem('jungui-theme', 'dark');
-              } else {
-                document.documentElement.removeAttribute('data-theme');
-                localStorage.setItem('jungui-theme', 'light');
-              }
-            });
-          }
-        })();
-
-        /* ---------- Typing Effect (Hero) ---------- */
-        var typingTarget = document.getElementById('typingTarget');
-        var typingText   = '법률 상담을 예약하세요';
-        var typingIndex  = 0;
-        var typingDone   = false;
-
-        function typeNextChar() {
-          if (!typingTarget || typingDone) return;
-          if (typingIndex < typingText.length) {
-            typingTarget.textContent += typingText[typingIndex];
-            typingIndex++;
-            setTimeout(typeNextChar, 90);
-          } else {
-            typingDone = true;
-          }
-        }
-
-        setTimeout(typeNextChar, 900);
-
-        /* ---------- Parallax (I2) — CTA section ---------- */
-        var parallaxBg = document.getElementById('parallaxBg');
-
-        function handleParallax() {
-          if (!parallaxBg) return;
-          var rect   = parallaxBg.parentElement.getBoundingClientRect();
-          var center = rect.top + rect.height / 2 - window.innerHeight / 2;
-          var shift  = center * 0.25;
-          parallaxBg.style.transform = 'scale(1.12) translateY(' + shift + 'px)';
-        }
-
-        window.addEventListener('scroll', handleParallax, { passive: true });
-        handleParallax();
-
-        /* ---------- Scroll Reveal ---------- */
-        var revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
-
-        function checkReveal() {
-          revealEls.forEach(function (el) {
-            var rect = el.getBoundingClientRect();
-            if (rect.top < window.innerHeight - 80) {
-              el.classList.add('visible');
-            }
-          });
-        }
-
-        window.addEventListener('scroll', checkReveal, { passive: true });
-        checkReveal();
-
-        /* ---------- Back to Top ---------- */
-        var backToTop = document.getElementById('backToTop');
-
-        window.addEventListener('scroll', function () {
-          if (!backToTop) return;
-          if (window.scrollY > 400) {
-            backToTop.classList.add('visible');
-          } else {
-            backToTop.classList.remove('visible');
-          }
-        }, { passive: true });
-
-        if (backToTop) {
-          backToTop.addEventListener('click', function () {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          });
-        }
-
-        /* ---------- Smooth Scroll for anchor links ---------- */
-        document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
-          anchor.addEventListener('click', function (e) {
-            var targetId = this.getAttribute('href');
-            if (targetId === '#') return;
-            var target = document.querySelector(targetId);
-            if (target) {
-              e.preventDefault();
-              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          });
-        });
-
-        /* ---------- FAQ Accordion ---------- */
-        var faqItems = document.querySelectorAll('.faq-item');
-
-        faqItems.forEach(function (item) {
-          var question = item.querySelector('.faq-question');
-          var answer   = item.querySelector('.faq-answer');
-
-          if (question && answer) {
-            question.addEventListener('click', function () {
-              var isOpen = item.classList.contains('open');
-
-              // Close all
-              faqItems.forEach(function (other) {
-                other.classList.remove('open');
-                var otherQ = other.querySelector('.faq-question');
-                if (otherQ) otherQ.setAttribute('aria-expanded', 'false');
-              });
-
-              // Toggle clicked
-              if (!isOpen) {
-                item.classList.add('open');
-                question.setAttribute('aria-expanded', 'true');
-              }
-            });
-
-            // Keyboard: Enter / Space
-            question.addEventListener('keydown', function (e) {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                question.click();
-              }
-            });
-          }
-        });
-
-        /* ---------- Set Date Min (today) ---------- */
-        var dateInput = document.getElementById('dateInput');
-        if (dateInput) {
-          var today = new Date();
-          var yyyy  = today.getFullYear();
-          var mm    = String(today.getMonth() + 1).padStart(2, '0');
-          var dd    = String(today.getDate()).padStart(2, '0');
-          dateInput.setAttribute('min', yyyy + '-' + mm + '-' + dd);
-        }
-
-        /* ---------- Form Validation & Submission ---------- */
-        var consultForm = document.getElementById('consultForm');
-        var formSuccess = document.getElementById('formSuccess');
-
-        function setInvalid(inputId, errorId) {
-          var el  = document.getElementById(inputId);
-          var err = document.getElementById(errorId);
-          if (el)  el.classList.add('invalid');
-          if (err) err.style.display = 'block';
-        }
-
-        function clearInvalid(inputId, errorId) {
-          var el  = document.getElementById(inputId);
-          var err = document.getElementById(errorId);
-          if (el)  el.classList.remove('invalid');
-          if (err) err.style.display = 'none';
-        }
-
-        function validateEmail(email) {
-          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        }
-
-        if (consultForm) {
-          /* Live validation: clear errors on input */
-          ['nameInput', 'phoneInput', 'emailInput', 'descInput'].forEach(function (id) {
-            var el = document.getElementById(id);
-            if (el) {
-              el.addEventListener('input', function () {
-                el.classList.remove('invalid');
-                var errId = id.replace('Input', 'Error');
-                var err = document.getElementById(errId);
-                if (err) err.style.display = 'none';
-              });
-            }
-          });
-
-          consultForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            var valid = true;
-
-            /* Name */
-            var nameVal = document.getElementById('nameInput').value.trim();
-            if (!nameVal) { setInvalid('nameInput', 'nameError'); valid = false; }
-            else { clearInvalid('nameInput', 'nameError'); }
-
-            /* Phone */
-            var phoneVal = document.getElementById('phoneInput').value.trim();
-            if (!phoneVal) { setInvalid('phoneInput', 'phoneError'); valid = false; }
-            else { clearInvalid('phoneInput', 'phoneError'); }
-
-            /* Email */
-            var emailVal = document.getElementById('emailInput').value.trim();
-            if (!emailVal || !validateEmail(emailVal)) { setInvalid('emailInput', 'emailError'); valid = false; }
-            else { clearInvalid('emailInput', 'emailError'); }
-
-            /* Description */
-            var descVal = document.getElementById('descInput').value.trim();
-            if (!descVal) { setInvalid('descInput', 'descError'); valid = false; }
-            else { clearInvalid('descInput', 'descError'); }
-
-            /* Privacy */
-            var privacyEl = document.getElementById('privacyAgree');
-            var privacyErr = document.getElementById('privacyError');
-            if (!privacyEl.checked) {
-              if (privacyErr) privacyErr.style.display = 'block';
-              valid = false;
-            } else {
-              if (privacyErr) privacyErr.style.display = 'none';
-            }
-
-            if (!valid) {
-              /* Scroll to first error */
-              var firstInvalid = consultForm.querySelector('.invalid');
-              if (firstInvalid) {
-                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                firstInvalid.focus();
-              }
-              return;
-            }
-
-            /* Simulate submission */
-            var submitBtn = consultForm.querySelector('.btn-submit');
-            if (submitBtn) {
-              submitBtn.textContent = '신청 중...';
-              submitBtn.disabled = true;
-            }
-
-            setTimeout(function () {
-              consultForm.style.display = 'none';
-              if (formSuccess) {
-                formSuccess.classList.add('visible');
-                formSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }
-            }, 1200);
-          });
-        }
-
-      }); /* end DOMContentLoaded */
-
-    })(); /* end IIFE */
+    }
+    update(lang);
+    if (lang === "en") switchLang("en");
+    btn.addEventListener("click", function() {
+      lang = lang === "kr" ? "en" : "kr";
+      localStorage.setItem("jungui-lang", lang);
+      update(lang);
+      switchLang(lang);
+    });
+  })();
   </script>
+
+  <!-- Page-specific Script -->
 
 </body>
 </html>

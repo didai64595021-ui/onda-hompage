@@ -1883,14 +1883,9 @@
       </div>
     </div>
 
-    <!-- Dark/Light Toggle (I14) -->
-    <div class="theme-toggle">
-      <span class="toggle-label">Dark / Light</span>
-      <label class="toggle-switch" aria-label="다크모드 / 라이트모드 전환">
-        <input type="checkbox" id="theme-toggle" />
-        <div class="toggle-track"></div>
-        <div class="toggle-thumb"></div>
-      </label>
+    <!-- EN/KR Language Toggle -->
+    <div class="lang-toggle">
+      <button class="lang-btn" id="lang-toggle" aria-label="영문/한국어 전환"><span class="lang-current">KR</span> / <span class="lang-other">EN</span></button>
     </div>
   </aside>
 
@@ -2149,7 +2144,7 @@
       <!-- Parallax Background (I2) -->
       <div class="stats-parallax-bg" id="stats-parallax-bg" aria-hidden="true">
         <img
-          src="https://images.unsplash.com/photo-1507679799987-c73b1676c542?w=1200&q=80"
+          src="https://images.unsplash.com/photo-1505664194779-8beaceb93744?w=1200&q=80"
           alt=""
           loading="lazy"
         />
@@ -2673,27 +2668,30 @@
     }
 
     /* ============================================================
-       DARK / LIGHT TOGGLE (I14)
+       EN / KR LANGUAGE TOGGLE
     ============================================================ */
     function initThemeToggle() {
-      var toggle = document.getElementById('theme-toggle');
-      if (!toggle) return;
-
-      // Check saved preference
-      var saved = localStorage.getItem('jungui-theme');
-      if (saved === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        toggle.checked = true;
-      }
-
-      toggle.addEventListener('change', function () {
-        if (toggle.checked) {
-          document.documentElement.setAttribute('data-theme', 'dark');
-          localStorage.setItem('jungui-theme', 'dark');
-        } else {
-          document.documentElement.removeAttribute('data-theme');
-          localStorage.setItem('jungui-theme', 'light');
-        }
+      var btn = document.getElementById('lang-toggle');
+      if (!btn) return;
+      var currentLang = localStorage.getItem('jungui-lang') || 'kr';
+      updateLangBtn(btn, currentLang);
+      btn.addEventListener('click', function () {
+        var lang = localStorage.getItem('jungui-lang') || 'kr';
+        var newLang = lang === 'kr' ? 'en' : 'kr';
+        localStorage.setItem('jungui-lang', newLang);
+        updateLangBtn(btn, newLang);
+        switchLanguage(newLang);
+      });
+    }
+    function updateLangBtn(btn, lang) {
+      var cur = btn.querySelector('.lang-current');
+      var oth = btn.querySelector('.lang-other');
+      if (lang === 'kr') { cur.textContent = 'KR'; oth.textContent = 'EN'; }
+      else { cur.textContent = 'EN'; oth.textContent = 'KR'; }
+    }
+    function switchLanguage(lang) {
+      document.querySelectorAll('[data-kr]').forEach(function(el) {
+        el.textContent = lang === 'kr' ? el.getAttribute('data-kr') : el.getAttribute('data-en');
       });
     }
 

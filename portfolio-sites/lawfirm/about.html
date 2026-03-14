@@ -1228,14 +1228,9 @@
       </div>
     </div>
 
-    <!-- Dark/Light Toggle (I14) -->
-    <div class="theme-toggle">
-      <span class="toggle-label">Dark / Light</span>
-      <label class="toggle-switch" aria-label="다크모드 / 라이트모드 전환">
-        <input type="checkbox" id="theme-toggle" />
-        <div class="toggle-track"></div>
-        <div class="toggle-thumb"></div>
-      </label>
+    <!-- EN/KR Language Toggle -->
+    <div class="lang-toggle">
+      <button class="lang-btn" id="lang-toggle" aria-label="영문/한국어 전환"><span class="lang-current">KR</span> / <span class="lang-other">EN</span></button>
     </div>
   </aside>
 
@@ -2060,29 +2055,33 @@
   <!-- ===== SCRIPTS ===== -->
   <script src="script.js"></script>
 
-  <script>
+<script>
   (function() {
-    var saved = localStorage.getItem('jungui-theme');
-    if (saved === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-      document.documentElement.removeAttribute('data-theme');
+    var btn = document.getElementById("lang-toggle");
+    if (!btn) return;
+    var lang = localStorage.getItem("jungui-lang") || "kr";
+    var cur = btn.querySelector(".lang-current");
+    var oth = btn.querySelector(".lang-other");
+    function update(l) {
+      if (l === "kr") { cur.textContent = "KR"; oth.textContent = "EN"; }
+      else { cur.textContent = "EN"; oth.textContent = "KR"; }
     }
-    var toggle = document.getElementById('theme-toggle');
-    if (toggle) {
-      toggle.checked = saved === 'dark';
-      toggle.addEventListener('change', function() {
-        if (this.checked) {
-          document.documentElement.setAttribute('data-theme', 'dark');
-          localStorage.setItem('jungui-theme', 'dark');
-        } else {
-          document.documentElement.removeAttribute('data-theme');
-          localStorage.setItem('jungui-theme', 'light');
-        }
+    function switchLang(l) {
+      document.querySelectorAll("[data-kr]").forEach(function(el) {
+        el.textContent = l === "kr" ? el.getAttribute("data-kr") : el.getAttribute("data-en");
       });
     }
+    update(lang);
+    if (lang === "en") switchLang("en");
+    btn.addEventListener("click", function() {
+      lang = lang === "kr" ? "en" : "kr";
+      localStorage.setItem("jungui-lang", lang);
+      update(lang);
+      switchLang(lang);
+    });
   })();
   </script>
+
 
   <script>
     /* ============================================================
