@@ -78,17 +78,21 @@
 5. **공통 styles.css 분리** — 헤더/푸터/변수/리셋은 공통 파일, 페이지별 스타일은 인라인 or 별도
 - 요청자: 000 (@gumibear012)
 
-## 배포 규칙 (2026-03-10 변경, 영구)
-- **테스트 시안 = GitHub Pages로 배포 + 링크 제공** (자동)
-  - URL: `https://didai64595021-ui.github.io/레포이름/`
-- **Vercel 배포 = 관리자가 따로 지시할 때만** (최종 샘플용)
-  - 자동 Vercel 배포 절대 금지
-- **동적 서비스 = Vercel** (DB/API 필요한 것)
-  - onda-logic-monitor = 개발/테스트 (모든 수정사항 여기에 먼저 배포)
-  - place-rank = 실제 제공 페이지 (관리자가 "place-rank 배포해" 할 때만 배포)
+## 배포 규칙 (2026-03-15 변경, 영구)
+- **정적 사이트/포트폴리오 = GitHub Pages** (무료, 무제한)
+  - URL: `https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/<name>/`
+  - 포트폴리오 40개 GitHub Pages 이전 완료 (2026-03-15)
+- **동적 서비스 = Cloudflare Pages + Workers** (무료, DB/API 필요한 것)
+  - onda-logic-monitor = 개발/테스트 (이전 예정)
+  - place-rank = 실제 제공 페이지 (이전 예정)
   - place-rank 자동 배포 절대 금지 — 검수 완료 후 수동 지시만
-- **Vercel 프로젝트 정리 완료 (2026-03-10)**: 70개 → 41개, 불필요 29개 삭제 (코드는 GitHub에 유지)
-- Vercel 배포 명령: `npx vercel link --yes --token $VERCEL_TOKEN --project place-rank` → `npx vercel --yes --token $VERCEL_TOKEN --prod` → 후 `npx vercel link --yes --token $VERCEL_TOKEN --project onda-logic-monitor`로 원복
+- **Vercel → Cloudflare 이전 진행 중** (2026-03-15)
+  - Cloudflare 계정: Didai64595021@gmail.com
+  - CF Account ID: 41c6067465ad6492470bb2fb1eecad6e
+  - CF API Token: 환경변수 $CLOUDFLARE_API_TOKEN
+  - Cloudflare 무료 한도: 프로젝트 20개, 요청 10만/일, 빌드 500/월
+- **Vercel 사용 금지** — 모든 신규 배포는 GitHub Pages 또는 Cloudflare
+- Vercel Cron → PM2로 전환 (진행 중)
 
 ## 프로젝트 현황 (2026-02-28)
 
