@@ -2645,9 +2645,11 @@
     ============================================================ */
     function initThemeToggle() {
       var btn = document.getElementById('lang-toggle');
-      if (!btn) return;
+      if (!btn || btn._langInited) return;
+      btn._langInited = true;
       var currentLang = localStorage.getItem('jungui-lang') || 'kr';
       updateLangBtn(btn, currentLang);
+      switchLanguage(currentLang);
       btn.addEventListener('click', function () {
         var lang = localStorage.getItem('jungui-lang') || 'kr';
         var newLang = lang === 'kr' ? 'en' : 'kr';
