@@ -92,7 +92,13 @@
   - CF API Token: 환경변수 $CLOUDFLARE_API_TOKEN
   - Cloudflare 무료 한도: 프로젝트 20개, 요청 10만/일, 빌드 500/월
 - **Vercel 사용 금지** — 모든 신규 배포는 GitHub Pages 또는 Cloudflare
-- Vercel Cron → PM2로 전환 (진행 중)
+- **Vercel 예외: onda-logic-monitor + place-rank만 유지** — Next.js 14.2.35 → Cloudflare 14.3.0+ 업그레이드 위험
+- **Vercel Cron 18개 → PM2 전환 완료** (2026-03-15)
+  - PM2 config: `/home/onda/projects/onda-logic-monitor/cron-ecosystem.config.js`
+  - Cron wrapper: `/home/onda/scripts/vercel-cron-pm2.sh`
+  - CRON_SECRET: `onda-cron-0b05548ac71240affe26fe39ce973948`
+  - 15/18 성공, 3개 기존 버그 (market-crawl 502, data-verify JSON parse, auto-learn 504)
+- **onda-self-marketing 에이전트** (2026-03-15): workspace `/home/onda/projects/onda-self-marketing`, Telegram `-5055799097`
 
 ## 프로젝트 현황 (2026-02-28)
 
