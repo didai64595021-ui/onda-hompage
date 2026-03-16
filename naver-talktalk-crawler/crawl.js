@@ -3,7 +3,7 @@ const { generateKeywords } = require('./config');
 const { createBrowser, searchPlaces, checkTalktalk, delay } = require('./scraper');
 const { checkHomepage } = require('./homepage-checker');
 const db = require('./db');
-const { exportCsv, exportJson } = require('./exporter');
+const { exportBatch, exportCsv, exportJson, BATCH_SIZE } = require('./exporter');
 
 // CLI 인자 파싱
 function parseArgs() {
@@ -21,22 +21,24 @@ function parseArgs() {
     } else if (args[i] === '--stats') {
       options.stats = true;
     } else if (args[i] === '--help') {
-      console.log(`네이버 톡톡 업체 크롤러
+      console.log(`네이버 톡톡 업체 크롤러 + 콜드메시지 타겟 분류
 
 사용법:
   node crawl.js                       전체 크롤링 (우선순위 순)
   node crawl.js --region 강남          특정 지역만
   node crawl.js --category 피부과      특정 업종만
-  node crawl.js --export csv           CSV 내보내기만 (크롤링 없이)
-  node crawl.js --export json          JSON 내보내기만
+  node crawl.js --export csv           전체 CSV 내보내기 (크롤링 없이)
+  node crawl.js --export json          전체 JSON 내보내기
+  node crawl.js --export all           전체 CSV 하나로 내보내기
   node crawl.js --max-pages 5          키워드당 최대 페이지 수
   node crawl.js --stats                현재 수집 통계 출력
 
-수집 필드 (8개):
-  1. 업체명          2. 플레이스 링크
-  3. 톡톡 활성여부    4. 방문자리뷰 수
-  5. 블로그리뷰 수    6. 홈페이지 유무 + URL
-  7. 반응형 여부      8. 카톡버튼 유무`);
+전환등급:
+  S급: 톡톡O + 홈페이지O + 반응형X → 반응형전환 (7만)
+  A급: 톡톡O + 홈페이지X + 리뷰적음 → 랜딩제작 (12만)
+  B급: 톡톡O + 홈페이지X + 리뷰많음 → 랜딩제작
+  C급: 톡톡O + 홈페이지O + 반응형O + 카톡X → 부가서비스
+  D급: 톡톡O + 홈페이지O + 반응형O + 카톡O → 타겟아님`);
       process.exit(0);
     }
   }
@@ -47,7 +49,7 @@ function parseArgs() {
 function printStats() {
   const stats = db.getStats();
   console.log('\n=== 수집 통계 ===');
-  console.log(`전체: ${stats.total}건\n`);
+  console.log(`전체 스캔: ${stats.totalAll}건 | 타겟 대상: ${stats.total}건\n`);
 
   if (stats.total === 0) {
     console.log('수집된 데이터가 없습니다.');
@@ -55,9 +57,22 @@ function printStats() {
   }
 
   console.log('등급별:');
-  const desc = { S: '톡톡O+홈페이지X+리뷰부족', A: '톡톡O+홈페이지X', B: '홈페이지O+반응형X', C: '홈페이지O+카톡X', D: '리뷰<30' };
+  const desc = {
+    S: '반응형전환 타겟 (홈페이지O+반응형X)',
+    A: '랜딩제작 타겟 (홈페이지X+리뷰적음)',
+    B: '랜딩제작 타겟 (홈페이지X+리뷰많음)',
+    C: '부가서비스 (반응형O+카톡X)',
+    D: '현재 타겟아님 (반응형O+카톡O)',
+  };
   for (const g of stats.byGrade) {
-    console.log(`  ${g.grade}급: ${g.cnt}건 (${desc[g.grade] || ''})`);
+    console.log(`  ${g.grade}급: ${g.cnt}건 — ${desc[g.grade] || ''}`);
+  }
+
+  if (stats.byMenu && stats.byMenu.length > 0) {
+    console.log('\n타겟 메뉴별:');
+    for (const m of stats.byMenu) {
+      console.log(`  ${m.target_menu}: ${m.cnt}건`);
+    }
   }
 
   if (stats.byRegion.length > 0) {
@@ -84,29 +99,27 @@ async function crawl(options = {}) {
   let totalCollected = 0;
   let totalSkipped = 0;
   let processedCount = 0;
+  let batchNum = 0;
+  let batchBuffer = []; // 배치 출력용 버퍼
+  let currentKeyword = '';
 
   const { browser, context, page } = await createBrowser();
-
-  // 톡톡 확인용 별도 페이지
   const detailPage = await context.newPage();
-  // 홈페이지 체크용 별도 페이지
   const homepagePage = await context.newPage();
 
   try {
     for (let ki = 0; ki < keywords.length; ki++) {
       const kw = keywords[ki];
+      currentKeyword = kw.keyword;
       console.log(`\n[${ki + 1}/${keywords.length}] 키워드: "${kw.keyword}" (우선순위: ${kw.priority})`);
 
-      // 검색 결과 수집 (API 인터셉트 방식, 키워드당 최대 20개)
       const places = await searchPlaces(page, kw.keyword);
-      console.log(`  총 ${places.length}개 업체 발견`);
 
       let keywordCollected = 0;
 
       for (let pi = 0; pi < places.length; pi++) {
         const place = places[pi];
 
-        // 중복 체크
         if (db.exists(place.id)) {
           totalSkipped++;
           continue;
@@ -114,17 +127,16 @@ async function crawl(options = {}) {
 
         console.log(`  [${pi + 1}/${places.length}] ${place.name} 수집 중...`);
 
-        // 톡톡 확인 (상세 페이지 방문)
+        // 톡톡 확인
         const talktalkResult = await checkTalktalk(detailPage, place.id);
 
-        // 홈페이지 체크 (톡톡 활성 + 홈페이지 URL 있을 때만)
+        // 홈페이지 체크 (홈페이지 URL 있을 때만)
         let homepageResult = { responsive: false, kakaoButton: false };
-        if (talktalkResult.talktalk_active && place.homepage_url) {
+        if (place.homepage_url) {
           console.log(`    → 홈페이지 체크: ${place.homepage_url}`);
           homepageResult = await checkHomepage(homepagePage, place.homepage_url);
         }
 
-        // DB 저장 데이터 구성 (톡톡 없는 업체도 저장하여 중복 크롤링 방지)
         const biz = {
           place_id: place.id,
           name: place.name,
@@ -149,15 +161,21 @@ async function crawl(options = {}) {
         if (grade) {
           keywordCollected++;
           totalCollected++;
+          batchBuffer.push({ ...biz, grade, target_menu: getTargetMenu(grade, biz) });
+
           console.log(`    → [${grade}급] 저장 (톡톡:${biz.talktalk_active} 홈페이지:${biz.homepage_exists} 반응형:${biz.responsive} 카톡:${biz.kakao_button} 리뷰:방문${place.visitor_review_count}/블로그${place.blog_review_count})`);
-        } else if (!talktalkResult.talktalk_active) {
-          console.log(`    → 톡톡 없음, 스킵`);
+
+          // 100개 배치 출력
+          if (batchBuffer.length >= BATCH_SIZE) {
+            batchNum++;
+            exportBatch(batchBuffer, batchNum, currentKeyword);
+            batchBuffer = [];
+          }
         } else {
-          console.log(`    → 타겟 대상 아님 (조건 충족 업체)`);
+          console.log(`    → 톡톡 없음 또는 타겟 아님, 스킵`);
         }
 
         processedCount++;
-        // 차단 방지: 50개마다 30초 휴식
         if (processedCount > 0 && processedCount % 50 === 0) {
           console.log(`\n  --- ${processedCount}개 처리, 30초 휴식 ---`);
           await delay(25000, 30000);
@@ -169,6 +187,13 @@ async function crawl(options = {}) {
       console.log(`  키워드 "${kw.keyword}" 완료: ${keywordCollected}건 수집`);
       await delay(3000, 6000);
     }
+
+    // 남은 배치 출력
+    if (batchBuffer.length > 0) {
+      batchNum++;
+      exportBatch(batchBuffer, batchNum, currentKeyword);
+      batchBuffer = [];
+    }
   } finally {
     await detailPage.close().catch(() => {});
     await homepagePage.close().catch(() => {});
@@ -178,7 +203,7 @@ async function crawl(options = {}) {
   // 결과 통계
   const stats = db.getStats();
   console.log(`\n=== 크롤링 완료 ===`);
-  console.log(`이번 수집: ${totalCollected}건 | 중복 스킵: ${totalSkipped}건`);
+  console.log(`이번 수집: ${totalCollected}건 | 중복 스킵: ${totalSkipped}건 | 배치 파일: ${batchNum}개`);
   console.log(`DB 타겟: ${stats.total}건 (전체 스캔: ${stats.totalAll}건)`);
   for (const g of stats.byGrade) {
     console.log(`  ${g.grade}급: ${g.cnt}건`);
@@ -187,36 +212,38 @@ async function crawl(options = {}) {
   return stats;
 }
 
+// 등급 → 타겟 메뉴 매핑 헬퍼
+function getTargetMenu(grade, biz) {
+  if (grade === 'S') return '반응형전환';
+  if (grade === 'A' || grade === 'B') return '랜딩제작';
+  return '해당없음';
+}
+
 // 메인 실행
 async function main() {
   const options = parseArgs();
 
-  // 통계만 출력
   if (options.stats) {
     printStats();
     db.close();
     return;
   }
 
-  // 내보내기만
   if (options.exportFormat && !options.region && !options.category) {
-    if (options.exportFormat === 'csv') {
+    if (options.exportFormat === 'csv' || options.exportFormat === 'all') {
       exportCsv();
     } else if (options.exportFormat === 'json') {
       exportJson();
     } else {
-      console.log('지원하지 않는 형식입니다. csv 또는 json을 사용하세요.');
+      console.log('지원하지 않는 형식입니다. csv, json, all 중 선택하세요.');
     }
     db.close();
     return;
   }
 
-  // 크롤링 실행
   try {
     await crawl(options);
-
-    // 크롤링 후 자동 CSV 내보내기
-    console.log('\n자동 CSV 내보내기...');
+    console.log('\n전체 CSV 내보내기...');
     exportCsv();
   } catch (err) {
     console.error('크롤링 오류:', err.message);

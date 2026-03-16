@@ -1,5 +1,6 @@
 const Database = require('better-sqlite3');
 const path = require('path');
+const { classify } = require('./classifier');
 
 const DB_PATH = path.join(__dirname, 'targets.db');
 
@@ -35,18 +36,15 @@ function initSchema() {
       blog_review_count INTEGER DEFAULT 0,
       phone TEXT,
       grade TEXT,
+      target_menu TEXT DEFAULT '해당없음',
       search_keyword TEXT,
       created_at TEXT DEFAULT (datetime('now', 'localtime')),
       updated_at TEXT DEFAULT (datetime('now', 'localtime'))
     );
 
-    CREATE INDEX IF NOT EXISTS idx_grade ON businesses(grade);
-    CREATE INDEX IF NOT EXISTS idx_region ON businesses(region);
-    CREATE INDEX IF NOT EXISTS idx_category ON businesses(category);
-    CREATE INDEX IF NOT EXISTS idx_talktalk ON businesses(talktalk_active);
   `);
 
-  // 기존 테이블에 새 컬럼 추가 (마이그레이션)
+  // 마이그레이션 (인덱스 전에 실행)
   const cols = d.prepare("PRAGMA table_info(businesses)").all().map(c => c.name);
   const migrations = [
     ['place_url', 'TEXT'],
@@ -54,60 +52,33 @@ function initSchema() {
     ['homepage_exists', "TEXT DEFAULT 'X'"],
     ['responsive', "TEXT DEFAULT 'X'"],
     ['kakao_button', "TEXT DEFAULT 'X'"],
+    ['target_menu', "TEXT DEFAULT '해당없음'"],
   ];
   for (const [col, type] of migrations) {
     if (!cols.includes(col)) {
       d.exec(`ALTER TABLE businesses ADD COLUMN ${col} ${type}`);
     }
   }
-  // 불필요한 컬럼(rating, talktalk_id)은 SQLite에서 DROP 불가 → 무시
+
+  // 인덱스 생성 (마이그레이션 후)
+  d.exec(`
+    CREATE INDEX IF NOT EXISTS idx_grade ON businesses(grade);
+    CREATE INDEX IF NOT EXISTS idx_region ON businesses(region);
+    CREATE INDEX IF NOT EXISTS idx_category ON businesses(category);
+    CREATE INDEX IF NOT EXISTS idx_talktalk ON businesses(talktalk_active);
+    CREATE INDEX IF NOT EXISTS idx_target_menu ON businesses(target_menu);
+  `);
 }
 
-// 등급 분류 (스펙 기준)
-// S급: 톡톡 O + 홈페이지 X + 방문자리뷰 <10 + 블로그리뷰 <5
-// A급: 톡톡 O + 홈페이지 X
-// B급: 톡톡 O + 홈페이지 O + 반응형 X
-// C급: 톡톡 O + 홈페이지 O + 카톡버튼 X
-// D급: 톡톡 O + 방문자리뷰 <30
-function classifyGrade(biz) {
-  const hasTalktalk = biz.talktalk_active === 'O';
-  const hasHomepage = biz.homepage_exists === 'O';
-  const isResponsive = biz.responsive === 'O';
-  const hasKakao = biz.kakao_button === 'O';
-  const visitorReviews = biz.visitor_review_count || 0;
-  const blogReviews = biz.blog_review_count || 0;
-
-  if (!hasTalktalk) return null; // 톡톡 없으면 대상 아님
-
-  // S급: 톡톡 O + 홈페이지 X + 리뷰 매우 적음
-  if (!hasHomepage && visitorReviews < 10 && blogReviews < 5) return 'S';
-
-  // A급: 톡톡 O + 홈페이지 X
-  if (!hasHomepage) return 'A';
-
-  // B급: 톡톡 O + 홈페이지 O + 반응형 X
-  if (hasHomepage && !isResponsive) return 'B';
-
-  // C급: 톡톡 O + 홈페이지 O + 카톡버튼 X
-  if (hasHomepage && !hasKakao) return 'C';
-
-  // D급: 톡톡 O + 방문자리뷰 < 30
-  if (visitorReviews < 30) return 'D';
-
-  return null; // 해당 없음
-}
-
-// 업체 존재 여부
 function exists(placeId) {
   const d = getDb();
   const row = d.prepare('SELECT 1 FROM businesses WHERE place_id = ?').get(placeId);
   return !!row;
 }
 
-// 업체 저장/업데이트 (톡톡 없는 업체도 저장하여 중복 크롤링 방지)
 function upsert(biz) {
   const d = getDb();
-  const grade = classifyGrade(biz);
+  const { grade, target_menu } = classify(biz);
 
   const stmt = d.prepare(`
     INSERT INTO businesses (
@@ -115,13 +86,13 @@ function upsert(biz) {
       category, category_group, region, address,
       homepage_url, homepage_exists, responsive, kakao_button,
       visitor_review_count, blog_review_count,
-      phone, grade, search_keyword
+      phone, grade, target_menu, search_keyword
     ) VALUES (
       @place_id, @name, @place_url, @talktalk_active, @talktalk_url,
       @category, @category_group, @region, @address,
       @homepage_url, @homepage_exists, @responsive, @kakao_button,
       @visitor_review_count, @blog_review_count,
-      @phone, @grade, @search_keyword
+      @phone, @grade, @target_menu, @search_keyword
     )
     ON CONFLICT(place_id) DO UPDATE SET
       name = @name,
@@ -140,15 +111,15 @@ function upsert(biz) {
       blog_review_count = @blog_review_count,
       phone = @phone,
       grade = @grade,
+      target_menu = @target_menu,
       search_keyword = @search_keyword,
       updated_at = datetime('now', 'localtime')
   `);
 
-  stmt.run({ ...biz, grade });
+  stmt.run({ ...biz, grade, target_menu });
   return grade;
 }
 
-// 전체 조회 (등급이 있는 업체만, 등급순 정렬)
 function getAll(options = {}) {
   const d = getDb();
   let where = ['grade IS NOT NULL'];
@@ -176,7 +147,12 @@ function getAll(options = {}) {
   `).all(params);
 }
 
-// 통계
+// 배치 출력용: 아직 내보내지 않은 레코드 수
+function getUnexportedCount() {
+  const d = getDb();
+  return d.prepare("SELECT COUNT(*) as cnt FROM businesses WHERE grade IS NOT NULL").get().cnt;
+}
+
 function getStats() {
   const d = getDb();
   const totalAll = d.prepare('SELECT COUNT(*) as cnt FROM businesses').get().cnt;
@@ -191,7 +167,10 @@ function getStats() {
   const byCategory = d.prepare(`
     SELECT category_group, COUNT(*) as cnt FROM businesses WHERE grade IS NOT NULL GROUP BY category_group ORDER BY cnt DESC LIMIT 10
   `).all();
-  return { total, totalAll, byGrade, byRegion, byCategory };
+  const byMenu = d.prepare(`
+    SELECT target_menu, COUNT(*) as cnt FROM businesses WHERE grade IS NOT NULL GROUP BY target_menu ORDER BY cnt DESC
+  `).all();
+  return { total, totalAll, byGrade, byRegion, byCategory, byMenu };
 }
 
 function close() {
@@ -201,4 +180,4 @@ function close() {
   }
 }
 
-module.exports = { getDb, exists, upsert, getAll, getStats, classifyGrade, close };
+module.exports = { getDb, exists, upsert, getAll, getUnexportedCount, getStats, close };
