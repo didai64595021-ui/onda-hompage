@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>엠앤와이즈 CMS 체험형 데모</title>
+<style>
+/* ============================================================
+   cms-sample.html — 엠앤와이즈 CMS 체험형 데모
+   관리자 모드 토글 → 인라인 편집 → localStorage 저장
+   ============================================================ */
+
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --primary: #1B65A6;
+  --primary-light: #2A7BC8;
+  --primary-dark: #134A7A;
+  --accent: #FEE500;
+  --dark: #0F1724;
+  --bg: #F8FAFC;
+  --text: #1E293B;
+  --text-light: #64748B;
+  --border: #E2E8F0;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --edit-highlight: rgba(254, 229, 0, 0.25);
+  --edit-border: #FEE500;
+  --radius: 12px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 48px rgba(0,0,0,0.12);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ---------- Admin Toolbar ---------- */
+.admin-toolbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  background: var(--dark);
+  color: #fff; padding: 0 24px;
+  height: 56px; display: flex;
+  align-items: center; justify-content: space-between;
+  z-index: 10000; font-size: 14px;
+  transform: translateY(-100%);
+  transition: transform 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.admin-toolbar.active { transform: translateY(0); }
+
+body.admin-mode { padding-top: 56px; }
+
+.toolbar-left { display: flex; align-items: center; gap: 16px; }
+.toolbar-right { display: flex; align-items: center; gap: 12px; }
+
+.toolbar-badge {
+  background: var(--accent); color: var(--dark);
+  padding: 4px 12px; border-radius: 20px;
+  font-weight: 700; font-size: 12px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.toolbar-btn {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff; padding: 8px 16px;
+  border-radius: 8px; cursor: pointer;
+  font-size: 13px; font-weight: 600;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.toolbar-btn:hover { background: rgba(255,255,255,0.2); }
+.toolbar-btn.danger { border-color: var(--danger); color: var(--danger); }
+.toolbar-btn.danger:hover { background: var(--danger); color: #fff; }
+.toolbar-btn.success { border-color: var(--success); color: var(--success); }
+.toolbar-btn.success:hover { background: var(--success); color: #fff; }
+
+.save-indicator {
+  font-size: 12px; opacity: 0;
+  transition: opacity 0.3s;
+  color: var(--success);
+}
+
+.save-indicator.show { opacity: 1; }
+
+/* ---------- Admin Toggle FAB ---------- */
+.admin-fab {
+  position: fixed; bottom: 24px; right: 24px;
+  width: 56px; height: 56px;
+  background: var(--dark); color: #fff;
+  border: none; border-radius: 50%;
+  cursor: pointer; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-lg);
+  transition: all 0.3s;
+  font-size: 24px;
+}
+
+.admin-fab:hover { transform: scale(1.1); }
+.admin-fab.active { background: var(--accent); color: var(--dark); }
+
+/* ---------- Editable Highlights ---------- */
+body.admin-mode [data-editable] {
+  outline: 2px dashed var(--edit-border);
+  outline-offset: 4px;
+  background: var(--edit-highlight);
+  cursor: text;
+  transition: all 0.2s;
+  position: relative;
+  min-height: 1em;
+}
+
+body.admin-mode [data-editable]:hover {
+  outline-style: solid;
+  outline-color: var(--primary);
+  background: rgba(27, 101, 166, 0.1);
+}
+
+body.admin-mode [data-editable]:focus {
+  outline: 3px solid var(--primary);
+  background: rgba(27, 101, 166, 0.08);
+  box-shadow: 0 0 0 6px rgba(27, 101, 166, 0.15);
+}
+
+body.admin-mode [data-editable]::before {
+  content: attr(data-label);
+  position: absolute; top: -22px; left: 0;
+  background: var(--accent); color: var(--dark);
+  padding: 2px 8px; border-radius: 4px;
+  font-size: 10px; font-weight: 700;
+  opacity: 0; transition: opacity 0.2s;
+  pointer-events: none; white-space: nowrap;
+}
+
+body.admin-mode [data-editable]:hover::before,
+body.admin-mode [data-editable]:focus::before {
+  opacity: 1;
+}
+
+/* ---------- Change Counter ---------- */
+.change-counter {
+  background: var(--danger); color: #fff;
+  width: 20px; height: 20px; border-radius: 50%;
+  display: inline-flex; align-items: center;
+  justify-content: center; font-size: 11px;
+  font-weight: 700; margin-left: 4px;
+}
+
+/* ---------- Navigation ---------- */
+.nav {
+  background: #fff;
+  padding: 0 48px;
+  height: 72px;
+  display: flex; align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 0 var(--border);
+  transition: top 0.3s;
+}
+
+body.admin-mode .nav { top: 56px; }
+
+.nav-logo {
+  font-size: 22px; font-weight: 800;
+  color: var(--primary);
+  display: flex; align-items: center; gap: 10px;
+}
+
+.nav-logo-icon {
+  width: 36px; height: 36px;
+  background: var(--primary);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.nav-logo-icon svg { width: 22px; height: 22px; fill: #fff; }
+
+.nav-links { display: flex; gap: 32px; list-style: none; }
+
+.nav-links a {
+  text-decoration: none; color: var(--text);
+  font-weight: 600; font-size: 15px;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--primary); }
+
+.nav-cta {
+  background: var(--primary); color: #fff;
+  padding: 10px 24px; border-radius: 8px;
+  text-decoration: none; font-weight: 700;
+  font-size: 14px; transition: all 0.2s;
+}
+
+.nav-cta:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+/* ---------- Hero Section ---------- */
+.hero {
+  background: linear-gradient(135deg, var(--dark) 0%, var(--primary-dark) 50%, var(--primary) 100%);
+  color: #fff;
+  padding: 100px 48px 120px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute; top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(circle at 30% 70%, rgba(254,229,0,0.08) 0%, transparent 50%),
+              radial-gradient(circle at 70% 30%, rgba(27,101,166,0.15) 0%, transparent 50%);
+  animation: heroFloat 20s ease-in-out infinite;
+}
+
+@keyframes heroFloat {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(30px, -30px) rotate(1deg); }
+  66% { transform: translate(-20px, 20px) rotate(-1deg); }
+}
+
+.hero-content { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(254,229,0,0.15);
+  border: 1px solid rgba(254,229,0,0.3);
+  padding: 8px 20px; border-radius: 24px;
+  margin-bottom: 24px; font-size: 14px;
+  color: var(--accent); font-weight: 600;
+}
+
+.hero h1 {
+  font-size: 48px; font-weight: 800;
+  line-height: 1.3; margin-bottom: 20px;
+  letter-spacing: -1px;
+}
+
+.hero p {
+  font-size: 18px; opacity: 0.85;
+  max-width: 600px; margin: 0 auto 36px;
+  line-height: 1.8;
+}
+
+.hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+.btn-primary {
+  background: var(--accent); color: var(--dark);
+  padding: 14px 32px; border-radius: 10px;
+  font-weight: 700; font-size: 16px;
+  text-decoration: none; display: inline-flex;
+  align-items: center; gap: 8px;
+  transition: all 0.2s; border: none; cursor: pointer;
+  font-family: inherit;
+}
+
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(254,229,0,0.3); }
+
+.btn-secondary {
+  background: rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.3);
+  color: #fff; padding: 14px 32px;
+  border-radius: 10px; font-weight: 700;
+  font-size: 16px; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: all 0.2s; cursor: pointer;
+  font-family: inherit;
+}
+
+.btn-secondary:hover { background: rgba(255,255,255,0.2); border-color: #fff; }
+
+/* ---------- Sections Common ---------- */
+.section { padding: 80px 48px; max-width: 1200px; margin: 0 auto; }
+.section-alt { background: #fff; }
+
+.section-header {
+  text-align: center; margin-bottom: 48px;
+}
+
+.section-header h2 {
+  font-size: 36px; font-weight: 800;
+  color: var(--dark); margin-bottom: 12px;
+}
+
+.section-header p {
+  font-size: 18px; color: var(--text-light);
+  max-width: 600px; margin: 0 auto;
+}
+
+/* ---------- Services Cards ---------- */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.service-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.service-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--primary-light));
+  transform: scaleX(0);
+  transition: transform 0.3s;
+}
+
+.service-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
+}
+
+.service-card:hover::before { transform: scaleX(1); }
+
+.service-icon {
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px; font-size: 28px;
+}
+
+.service-card h3 {
+  font-size: 20px; font-weight: 700;
+  color: var(--dark); margin-bottom: 10px;
+}
+
+.service-card p {
+  font-size: 14px; color: var(--text-light);
+  line-height: 1.7;
+}
+
+.service-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #EFF6FF;
+  color: var(--primary);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 12px;
+}
+
+/* ---------- Stats Section ---------- */
+.stats-section {
+  background: linear-gradient(135deg, var(--dark), var(--primary-dark));
+  padding: 80px 48px;
+  color: #fff;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.stat-item { padding: 24px; }
+
+.stat-number {
+  font-size: 56px; font-weight: 800;
+  background: linear-gradient(135deg, #fff, var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+
+.stat-unit {
+  font-size: 24px; font-weight: 700;
+  opacity: 0.9;
+}
+
+.stat-label {
+  font-size: 15px; opacity: 0.7;
+  margin-top: 8px;
+}
+
+/* ---------- Clients ---------- */
+.clients-section { padding: 60px 48px; background: #fff; }
+
+.clients-header {
+  text-align: center; margin-bottom: 40px;
+}
+
+.clients-header h2 { font-size: 28px; font-weight: 800; color: var(--dark); }
+
+.clients-grid {
+  display: flex; justify-content: center;
+  gap: 48px; flex-wrap: wrap;
+  align-items: center;
+  max-width: 1000px; margin: 0 auto;
+}
+
+.client-logo {
+  padding: 16px 32px;
+  background: var(--bg);
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-light);
+  transition: all 0.2s;
+  border: 1px solid var(--border);
+}
+
+.client-logo:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+/* ---------- CTA Section ---------- */
+.cta-section {
+  background: var(--primary);
+  padding: 80px 48px;
+  text-align: center;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-section::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(254,229,0,0.1) 0%, transparent 70%);
+}
+
+.cta-content { position: relative; z-index: 1; }
+
+.cta-section h2 {
+  font-size: 36px; font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.cta-section p {
+  font-size: 18px; opacity: 0.85;
+  margin-bottom: 32px; max-width: 600px;
+  margin-left: auto; margin-right: auto;
+}
+
+.cta-btn {
+  background: var(--accent); color: var(--dark);
+  padding: 16px 40px; border-radius: 10px;
+  font-weight: 800; font-size: 18px;
+  text-decoration: none; display: inline-flex;
+  align-items: center; gap: 10px;
+  transition: all 0.2s; border: none; cursor: pointer;
+  font-family: inherit;
+}
+
+.cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(254,229,0,0.4); }
+
+/* ---------- Footer ---------- */
+.footer {
+  background: var(--dark);
+  color: rgba(255,255,255,0.7);
+  padding: 60px 48px 40px;
+}
+
+.footer-content {
+  max-width: 1200px; margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
+}
+
+.footer-brand h3 {
+  color: #fff; font-size: 20px;
+  font-weight: 800; margin-bottom: 12px;
+}
+
+.footer-brand p { font-size: 14px; line-height: 1.8; }
+
+.footer-col h4 {
+  color: #fff; font-size: 14px;
+  font-weight: 700; margin-bottom: 16px;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+
+.footer-col ul { list-style: none; }
+
+.footer-col li {
+  padding: 4px 0; font-size: 14px;
+}
+
+.footer-col a {
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-col a:hover { color: var(--accent); }
+
+.footer-bottom {
+  max-width: 1200px; margin: 40px auto 0;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex; justify-content: space-between;
+  font-size: 13px;
+}
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed; bottom: 100px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--dark); color: #fff;
+  padding: 14px 28px; border-radius: 10px;
+  font-size: 14px; font-weight: 600;
+  box-shadow: var(--shadow-lg);
+  opacity: 0; transition: all 0.3s;
+  z-index: 10001;
+}
+
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.success { background: var(--success); }
+.toast.warning { background: var(--warning); color: var(--dark); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1024px) {
+  .services-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .footer-content { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  .nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .hero { padding: 60px 20px 80px; }
+  .hero h1 { font-size: 32px; }
+  .section { padding: 60px 20px; }
+  .services-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .stat-number { font-size: 40px; }
+  .clients-grid { gap: 20px; }
+  .footer-content { grid-template-columns: 1fr; }
+  .footer-bottom { flex-direction: column; gap: 8px; }
+  .hero-buttons { flex-direction: column; align-items: center; }
+  .admin-toolbar { padding: 0 12px; font-size: 12px; }
+  .toolbar-btn { padding: 6px 10px; font-size: 11px; }
+}
+
+@media (max-width: 480px) {
+  .hero h1 { font-size: 26px; }
+  .hero p { font-size: 15px; }
+  .section-header h2 { font-size: 26px; }
+  .cta-section h2 { font-size: 26px; }
+  .stat-number { font-size: 32px; }
+}
+
+/* ---------- Instruction Panel ---------- */
+.instruction-panel {
+  position: fixed; top: 72px; right: 24px;
+  background: #fff; border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 20px 24px; max-width: 320px;
+  box-shadow: var(--shadow-lg);
+  z-index: 9998;
+  transform: translateX(400px);
+  transition: transform 0.4s ease;
+}
+
+.instruction-panel.show { transform: translateX(0); }
+
+body.admin-mode .instruction-panel { top: 128px; }
+
+.instruction-panel h3 {
+  font-size: 16px; font-weight: 800;
+  color: var(--dark); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.instruction-panel ol {
+  padding-left: 20px; font-size: 13px;
+  color: var(--text-light);
+}
+
+.instruction-panel li { padding: 4px 0; }
+
+.instruction-panel .close-btn {
+  position: absolute; top: 12px; right: 12px;
+  background: none; border: none;
+  cursor: pointer; font-size: 18px;
+  color: var(--text-light);
+}
+
+/* ---------- Edit History Panel ---------- */
+.history-panel {
+  position: fixed; top: 56px; right: 0;
+  width: 320px; height: calc(100vh - 56px);
+  background: #fff; border-left: 1px solid var(--border);
+  z-index: 9997; transform: translateX(100%);
+  transition: transform 0.3s;
+  overflow-y: auto; padding: 24px;
+}
+
+.history-panel.show { transform: translateX(0); }
+
+.history-panel h3 {
+  font-size: 16px; font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.history-item {
+  padding: 12px; margin-bottom: 8px;
+  background: var(--bg); border-radius: 8px;
+  font-size: 12px;
+}
+
+.history-item .field { font-weight: 700; color: var(--primary); }
+.history-item .time { color: var(--text-light); font-size: 11px; }
+.history-item .old { color: var(--danger); text-decoration: line-through; }
+.history-item .new { color: var(--success); }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     Admin Toolbar (hidden by default)
+     ============================================================ -->
+<div class="admin-toolbar" id="adminToolbar">
+  <div class="toolbar-left">
+    <span class="toolbar-badge">✏️ CMS 편집 모드</span>
+    <span>편집할 영역을 클릭하세요</span>
+    <span class="save-indicator" id="saveIndicator">✓ 자동 저장됨</span>
+    <span class="change-counter" id="changeCounter" style="display:none">0</span>
+  </div>
+  <div class="toolbar-right">
+    <button class="toolbar-btn" onclick="toggleHistory()">📋 변경내역</button>
+    <button class="toolbar-btn success" onclick="exportChanges()">💾 내보내기</button>
+    <button class="toolbar-btn danger" onclick="resetAll()">🔄 초기화</button>
+  </div>
+</div>
+
+<!-- Admin FAB Toggle -->
+<button class="admin-fab" id="adminFab" onclick="toggleAdmin()" title="관리자 모드 토글">
+  ⚙️
+</button>
+
+<!-- Instruction Panel -->
+<div class="instruction-panel" id="instructionPanel">
+  <button class="close-btn" onclick="closeInstruction()">✕</button>
+  <h3>🎓 CMS 체험 가이드</h3>
+  <ol>
+    <li>우측 하단 <strong>⚙️ 버튼</strong>을 클릭하여 관리자 모드를 활성화합니다</li>
+    <li>노란 점선으로 표시된 <strong>편집 가능 영역</strong>을 클릭합니다</li>
+    <li>텍스트를 <strong>직접 수정</strong>합니다</li>
+    <li>변경사항은 <strong>자동 저장</strong>됩니다</li>
+    <li><strong>초기화</strong> 버튼으로 원본 복원 가능</li>
+  </ol>
+</div>
+
+<!-- History Panel -->
+<div class="history-panel" id="historyPanel">
+  <h3>📋 변경 내역</h3>
+  <div id="historyList"><p style="color:var(--text-light);font-size:13px">아직 변경 내역이 없습니다.</p></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ============================================================
+     Navigation
+     ============================================================ -->
+<nav class="nav">
+  <div class="nav-logo">
+    <div class="nav-logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <span data-editable data-label="로고 텍스트" data-key="logo">M&Wise</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#services">서비스</a></li>
+    <li><a href="#stats">도입효과</a></li>
+    <li><a href="#clients">고객사</a></li>
+    <li><a href="#contact">문의</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">무료 상담</a>
+</nav>
+
+<!-- ============================================================
+     Hero Section
+     ============================================================ -->
+<section class="hero" id="hero">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span>🟡</span>
+      <span data-editable data-label="히어로 배지" data-key="hero-badge">카카오 공식 전략 파트너</span>
+    </div>
+    <h1 data-editable data-label="메인 헤드라인" data-key="hero-title">기업 커뮤니케이션의<br>새로운 기준</h1>
+    <p data-editable data-label="히어로 설명" data-key="hero-desc">알림톡, 친구톡, RCS, SMS부터 통합 메시징 플랫폼까지.<br>엠앤와이즈가 기업의 고객 소통을 혁신합니다.</p>
+    <div class="hero-buttons">
+      <button class="btn-primary">
+        <span data-editable data-label="CTA 버튼 1" data-key="hero-cta1">무료 상담 받기</span> →
+      </button>
+      <button class="btn-secondary">
+        <span data-editable data-label="CTA 버튼 2" data-key="hero-cta2">서비스 둘러보기</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Services Section
+     ============================================================ -->
+<section class="section" id="services">
+  <div class="section-header">
+    <h2 data-editable data-label="서비스 섹션 제목" data-key="services-title">통합 메시징 솔루션</h2>
+    <p data-editable data-label="서비스 섹션 설명" data-key="services-desc">하나의 플랫폼에서 모든 메시징 채널을 통합 관리하세요</p>
+  </div>
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-icon">💬</div>
+      <h3 data-editable data-label="서비스1 이름" data-key="svc1-title">카카오 알림톡</h3>
+      <p data-editable data-label="서비스1 설명" data-key="svc1-desc">카카오톡을 통한 정보성 메시지 발송. 99.9% 도달률과 건당 8원의 합리적 비용으로 고객에게 확실한 전달을 보장합니다.</p>
+      <span class="service-tag">인기</span>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">📢</div>
+      <h3 data-editable data-label="서비스2 이름" data-key="svc2-title">카카오 친구톡</h3>
+      <p data-editable data-label="서비스2 설명" data-key="svc2-desc">이미지, 와이드 메시지로 마케팅 효과 극대화. 타겟팅 발송과 A/B 테스트로 캠페인 ROI를 3배 이상 향상시킵니다.</p>
+      <span class="service-tag">마케팅</span>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🔗</div>
+      <h3 data-editable data-label="서비스3 이름" data-key="svc3-title">WiseU 통합 플랫폼</h3>
+      <p data-editable data-label="서비스3 설명" data-key="svc3-desc">UMS + Cloud 기반 차세대 메시징 인프라. 카카오, RCS, SMS를 하나의 API로 통합하여 운영 비용을 40% 절감합니다.</p>
+      <span class="service-tag">올인원</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Stats Section
+     ============================================================ -->
+<section class="stats-section" id="stats">
+  <div class="section-header" style="color:#fff;margin-bottom:48px">
+    <h2 style="color:#fff" data-editable data-label="도입효과 제목" data-key="stats-title">검증된 성과</h2>
+    <p style="color:rgba(255,255,255,0.7)" data-editable data-label="도입효과 설명" data-key="stats-desc">국내 500+ 기업이 선택한 엠앤와이즈의 성과를 확인하세요</p>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-item">
+      <div class="stat-number">
+        <span data-editable data-label="수치1" data-key="stat1-num">10</span><span class="stat-unit">억+</span>
+      </div>
+      <div class="stat-label" data-editable data-label="수치1 라벨" data-key="stat1-label">월간 메시지 발송량</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">
+        <span data-editable data-label="수치2" data-key="stat2-num">500</span><span class="stat-unit">+</span>
+      </div>
+      <div class="stat-label" data-editable data-label="수치2 라벨" data-key="stat2-label">기업 고객사</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">
+        <span data-editable data-label="수치3" data-key="stat3-num">99.9</span><span class="stat-unit">%</span>
+      </div>
+      <div class="stat-label" data-editable data-label="수치3 라벨" data-key="stat3-label">서비스 가동률</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">
+        <span data-editable data-label="수치4" data-key="stat4-num">15</span><span class="stat-unit">년+</span>
+      </div>
+      <div class="stat-label" data-editable data-label="수치4 라벨" data-key="stat4-label">업력 및 노하우</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Clients Section
+     ============================================================ -->
+<section class="clients-section" id="clients">
+  <div class="clients-header">
+    <h2 data-editable data-label="고객사 제목" data-key="clients-title">신뢰하는 기업들</h2>
+  </div>
+  <div class="clients-grid">
+    <div class="client-logo" data-editable data-label="고객사1" data-key="client1">케이뱅크</div>
+    <div class="client-logo" data-editable data-label="고객사2" data-key="client2">폭스바겐</div>
+    <div class="client-logo" data-editable data-label="고객사3" data-key="client3">DB손해보험</div>
+    <div class="client-logo" data-editable data-label="고객사4" data-key="client4">AIA생명</div>
+    <div class="client-logo" data-editable data-label="고객사5" data-key="client5">현대카드</div>
+    <div class="client-logo" data-editable data-label="고객사6" data-key="client6">SK텔레콤</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     CTA Section
+     ============================================================ -->
+<section class="cta-section" id="contact">
+  <div class="cta-content">
+    <h2 data-editable data-label="CTA 제목" data-key="cta-title">지금 바로 시작하세요</h2>
+    <p data-editable data-label="CTA 설명" data-key="cta-desc">전문 컨설턴트가 귀사에 최적화된 메시징 솔루션을 제안해 드립니다. 무료 상담을 신청하세요.</p>
+    <button class="cta-btn">
+      <span data-editable data-label="CTA 버튼" data-key="cta-btn">무료 상담 신청하기</span> →
+    </button>
+  </div>
+</section>
+
+<!-- ============================================================
+     Footer
+     ============================================================ -->
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-brand">
+      <h3>(주)엠앤와이즈</h3>
+      <p data-editable data-label="회사 정보" data-key="footer-info">
+        서울특별시 강남구 테헤란로 123, 엠앤와이즈빌딩 10층<br>
+        대표이사: 홍길동 | 사업자등록번호: 123-45-67890<br>
+        Tel: 02-1234-5678 | Fax: 02-1234-5679<br>
+        Email: contact@mnwise.com
+      </p>
+    </div>
+    <div class="footer-col">
+      <h4>서비스</h4>
+      <ul>
+        <li><a href="#">알림톡</a></li>
+        <li><a href="#">친구톡</a></li>
+        <li><a href="#">WiseU UMS</a></li>
+        <li><a href="#">WiseU Cloud</a></li>
+        <li><a href="#">RCS</a></li>
+        <li><a href="#">SMS/MMS</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>회사</h4>
+      <ul>
+        <li><a href="#">회사소개</a></li>
+        <li><a href="#">도입사례</a></li>
+        <li><a href="#">뉴스/공지</a></li>
+        <li><a href="#">채용정보</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>지원</h4>
+      <ul>
+        <li><a href="#">문의하기</a></li>
+        <li><a href="#">FAQ</a></li>
+        <li><a href="#">개인정보처리방침</a></li>
+        <li><a href="#">이용약관</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span data-editable data-label="저작권" data-key="footer-copy">© 2026 M&Wise Co., Ltd. All rights reserved.</span>
+    <span>카카오 공식 전략 파트너</span>
+  </div>
+</footer>
+
+<!-- ============================================================
+     JavaScript — CMS Logic
+     ============================================================ -->
+<script>
+(function() {
+  'use strict';
+
+  // ---------- State ----------
+  const STORAGE_KEY = 'mnwise-cms-data';
+  const HISTORY_KEY = 'mnwise-cms-history';
+  let isAdminMode = false;
+  let changeCount = 0;
+  let editHistory = [];
+  let originalData = {};
+  let instructionShown = false;
+
+  // ---------- Init ----------
+  function init() {
+    captureOriginals();
+    loadSavedData();
+    loadHistory();
+    updateChangeCounter();
+
+    // Show instruction on first visit
+    if (!localStorage.getItem('mnwise-cms-instructed')) {
+      setTimeout(() => {
+        document.getElementById('instructionPanel').classList.add('show');
+        instructionShown = true;
+      }, 1000);
+    }
+  }
+
+  // ---------- Capture original content ----------
+  function captureOriginals() {
+    document.querySelectorAll('[data-editable]').forEach(el => {
+      const key = el.dataset.key;
+      if (key) {
+        originalData[key] = el.innerHTML;
+      }
+    });
+  }
+
+  // ---------- Load saved data ----------
+  function loadSavedData() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (!saved) return;
+      Object.entries(saved).forEach(([key, value]) => {
+        const el = document.querySelector(`[data-key="${key}"]`);
+        if (el) {
+          el.innerHTML = value;
+          changeCount++;
+        }
+      });
+    } catch (e) { /* ignore */ }
+  }
+
+  // ---------- Load history ----------
+  function loadHistory() {
+    try {
+      editHistory = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+      renderHistory();
+    } catch (e) {
+      editHistory = [];
+    }
+  }
+
+  // ---------- Save to localStorage ----------
+  function saveData() {
+    const data = {};
+    document.querySelectorAll('[data-editable]').forEach(el => {
+      const key = el.dataset.key;
+      if (key && el.innerHTML !== originalData[key]) {
+        data[key] = el.innerHTML;
+      }
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    changeCount = Object.keys(data).length;
+    updateChangeCounter();
+    showSaveIndicator();
+  }
+
+  // ---------- Toggle admin mode ----------
+  window.toggleAdmin = function() {
+    isAdminMode = !isAdminMode;
+    const fab = document.getElementById('adminFab');
+    const toolbar = document.getElementById('adminToolbar');
+
+    document.body.classList.toggle('admin-mode', isAdminMode);
+    fab.classList.toggle('active', isAdminMode);
+    toolbar.classList.toggle('active', isAdminMode);
+
+    if (isAdminMode) {
+      enableEditing();
+      showToast('✏️ 관리자 모드 활성화 — 노란 영역을 클릭하여 편집하세요', 'success');
+    } else {
+      disableEditing();
+      document.getElementById('historyPanel').classList.remove('show');
+      showToast('🔒 관리자 모드 비활성화', '');
+    }
+  };
+
+  // ---------- Enable editing ----------
+  function enableEditing() {
+    document.querySelectorAll('[data-editable]').forEach(el => {
+      el.setAttribute('contenteditable', 'true');
+      el.addEventListener('input', handleEdit);
+      el.addEventListener('focus', handleFocus);
+      el.addEventListener('blur', handleBlur);
+    });
+  }
+
+  // ---------- Disable editing ----------
+  function disableEditing() {
+    document.querySelectorAll('[data-editable]').forEach(el => {
+      el.removeAttribute('contenteditable');
+      el.removeEventListener('input', handleEdit);
+      el.removeEventListener('focus', handleFocus);
+      el.removeEventListener('blur', handleBlur);
+    });
+  }
+
+  // ---------- Editing handlers ----------
+  let beforeEditValue = '';
+
+  function handleFocus(e) {
+    beforeEditValue = e.target.innerHTML;
+  }
+
+  function handleEdit(e) {
+    saveData();
+  }
+
+  function handleBlur(e) {
+    const el = e.target;
+    const key = el.dataset.key;
+    const label = el.dataset.label || key;
+
+    if (beforeEditValue !== el.innerHTML) {
+      const entry = {
+        key, label,
+        old: beforeEditValue.substring(0, 50),
+        new: el.innerHTML.substring(0, 50),
+        time: new Date().toLocaleTimeString('ko-KR')
+      };
+      editHistory.unshift(entry);
+      if (editHistory.length > 50) editHistory.pop();
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(editHistory));
+      renderHistory();
+    }
+  }
+
+  // ---------- Render history ----------
+  function renderHistory() {
+    const list = document.getElementById('historyList');
+    if (editHistory.length === 0) {
+      list.innerHTML = '<p style="color:var(--text-light);font-size:13px">아직 변경 내역이 없습니다.</p>';
+      return;
+    }
+    list.innerHTML = editHistory.map(h => `
+      <div class="history-item">
+        <div class="field">${h.label}</div>
+        <div class="time">${h.time}</div>
+        <div class="old">${h.old}</div>
+        <div class="new">${h.new}</div>
+      </div>
+    `).join('');
+  }
+
+  // ---------- Toggle history panel ----------
+  window.toggleHistory = function() {
+    document.getElementById('historyPanel').classList.toggle('show');
+  };
+
+  // ---------- Export changes ----------
+  window.exportChanges = function() {
+    const data = {};
+    document.querySelectorAll('[data-editable]').forEach(el => {
+      const key = el.dataset.key;
+      if (key) data[key] = el.innerHTML;
+    });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'mnwise-cms-export.json';
+    a.click(); URL.revokeObjectURL(url);
+    showToast('💾 변경사항이 JSON으로 내보내기되었습니다', 'success');
+  };
+
+  // ---------- Reset all ----------
+  window.resetAll = function() {
+    if (!confirm('⚠️ 모든 변경사항을 초기화하시겠습니까?\n원본 콘텐츠로 복원됩니다.')) return;
+    Object.entries(originalData).forEach(([key, value]) => {
+      const el = document.querySelector(`[data-key="${key}"]`);
+      if (el) el.innerHTML = value;
+    });
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(HISTORY_KEY);
+    editHistory = [];
+    changeCount = 0;
+    updateChangeCounter();
+    renderHistory();
+    showToast('🔄 모든 변경사항이 초기화되었습니다', 'warning');
+  };
+
+  // ---------- Update change counter ----------
+  function updateChangeCounter() {
+    const counter = document.getElementById('changeCounter');
+    if (changeCount > 0) {
+      counter.style.display = 'inline-flex';
+      counter.textContent = changeCount;
+    } else {
+      counter.style.display = 'none';
+    }
+  }
+
+  // ---------- Show save indicator ----------
+  function showSaveIndicator() {
+    const indicator = document.getElementById('saveIndicator');
+    indicator.classList.add('show');
+    setTimeout(() => indicator.classList.remove('show'), 2000);
+  }
+
+  // ---------- Show toast ----------
+  function showToast(message, type) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast ' + (type || '');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+  window.showToast = showToast;
+
+  // ---------- Close instruction ----------
+  window.closeInstruction = function() {
+    document.getElementById('instructionPanel').classList.remove('show');
+    localStorage.setItem('mnwise-cms-instructed', '1');
+  };
+
+  // ---------- Run ----------
+  init();
+})();
+</script>
+
+</body>
+</html>

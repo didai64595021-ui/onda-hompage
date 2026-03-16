@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>(주)엠앤와이즈 홈페이지 리뉴얼 — 상세 기능기획서</title>
+<style>
+/* ============================================================
+   proposal.html — 엠앤와이즈 홈페이지 리뉴얼 상세 기능기획서
+   A4 인쇄/PDF 최적화 레이아웃
+   ============================================================ */
+
+/* ---------- Reset & Base ---------- */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --primary: #1B65A6;
+  --primary-light: #2A7BC8;
+  --primary-dark: #134A7A;
+  --accent: #FEE500;
+  --dark: #0F1724;
+  --bg: #F8FAFC;
+  --text: #1E293B;
+  --text-light: #64748B;
+  --border: #E2E8F0;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --page-width: 210mm;
+  --page-padding: 20mm;
+}
+
+html { font-size: 10pt; }
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text);
+  background: #E5E7EB;
+  line-height: 1.7;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* ---------- A4 Page Container ---------- */
+.page {
+  width: var(--page-width);
+  min-height: 297mm;
+  margin: 10mm auto;
+  padding: var(--page-padding);
+  background: #fff;
+  box-shadow: 0 4px 24px rgba(0,0,0,.12);
+  position: relative;
+  page-break-after: always;
+}
+
+.page:last-child { page-break-after: auto; }
+
+@media print {
+  body { background: #fff; }
+  .page {
+    margin: 0; padding: 15mm 20mm;
+    box-shadow: none;
+    page-break-after: always;
+  }
+  .no-print { display: none !important; }
+}
+
+/* ---------- Cover Page ---------- */
+.cover {
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  text-align: center; min-height: 257mm;
+}
+
+.cover-logo {
+  width: 80px; height: 80px;
+  background: var(--primary);
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 32px;
+  box-shadow: 0 8px 32px rgba(27,101,166,.3);
+}
+
+.cover-logo svg { width: 48px; height: 48px; fill: #fff; }
+
+.cover h1 {
+  font-size: 28pt; font-weight: 800;
+  color: var(--primary); margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.cover .subtitle {
+  font-size: 16pt; font-weight: 600;
+  color: var(--dark); margin-bottom: 40px;
+}
+
+.cover .meta-table {
+  margin-top: 40px; text-align: left;
+  border-collapse: collapse; font-size: 10pt;
+}
+
+.cover .meta-table td {
+  padding: 8px 16px; border-bottom: 1px solid var(--border);
+}
+
+.cover .meta-table td:first-child {
+  font-weight: 700; color: var(--primary);
+  min-width: 120px;
+}
+
+.cover .version-badge {
+  display: inline-block; margin-top: 32px;
+  padding: 6px 20px; background: var(--primary);
+  color: #fff; border-radius: 20px;
+  font-size: 9pt; font-weight: 600;
+}
+
+/* ---------- Header ---------- */
+.page-header {
+  background: var(--primary);
+  color: #fff;
+  padding: 12px 20px;
+  margin: -20mm -20mm 24px -20mm;
+  display: flex; justify-content: space-between;
+  align-items: center; font-size: 9pt;
+}
+
+.page-header .doc-title { font-weight: 700; font-size: 10pt; }
+.page-header .page-num { opacity: .8; }
+
+/* ---------- Section Headings ---------- */
+h2 {
+  font-size: 16pt; font-weight: 800;
+  color: var(--primary); margin-bottom: 6px;
+  padding-bottom: 8px;
+  border-bottom: 3px solid var(--primary);
+  display: flex; align-items: center; gap: 10px;
+}
+
+h2 .num {
+  display: inline-flex; align-items: center;
+  justify-content: center; width: 32px; height: 32px;
+  background: var(--primary); color: #fff;
+  border-radius: 8px; font-size: 14pt;
+}
+
+h3 {
+  font-size: 12pt; font-weight: 700;
+  color: var(--dark); margin: 20px 0 10px;
+  padding-left: 12px;
+  border-left: 4px solid var(--primary);
+}
+
+h4 {
+  font-size: 10.5pt; font-weight: 700;
+  color: var(--text); margin: 14px 0 8px;
+}
+
+/* ---------- Paragraph ---------- */
+p { margin-bottom: 10px; font-size: 10pt; }
+
+/* ---------- Tables ---------- */
+table.data {
+  width: 100%; border-collapse: collapse;
+  margin: 14px 0 20px; font-size: 9pt;
+}
+
+table.data th {
+  background: var(--primary); color: #fff;
+  padding: 10px 12px; text-align: left;
+  font-weight: 600;
+}
+
+table.data td {
+  padding: 9px 12px; border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+table.data tr:nth-child(even) { background: #F1F5F9; }
+table.data tr:hover { background: #E0ECFF; }
+
+/* ---------- Info Box ---------- */
+.info-box {
+  background: #EFF6FF; border-left: 4px solid var(--primary);
+  padding: 14px 18px; margin: 16px 0;
+  border-radius: 0 8px 8px 0; font-size: 9.5pt;
+}
+
+.info-box.warning {
+  background: #FFFBEB; border-color: var(--warning);
+}
+
+.info-box.success {
+  background: #ECFDF5; border-color: var(--success);
+}
+
+.info-box strong { color: var(--primary); }
+
+/* ---------- Cards Grid ---------- */
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px;
+  background: #fff; transition: box-shadow .2s;
+}
+
+.card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+
+.card-icon {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  border-radius: 10px; display: flex;
+  align-items: center; justify-content: center;
+  margin-bottom: 10px; font-size: 18px; color: #fff;
+}
+
+.card h4 { margin: 0 0 6px; font-size: 10.5pt; border: none; padding: 0; }
+.card p { margin: 0; font-size: 9pt; color: var(--text-light); }
+
+/* ---------- Timeline ---------- */
+.timeline { position: relative; margin: 20px 0; padding-left: 28px; }
+
+.timeline::before {
+  content: ''; position: absolute; left: 8px; top: 0; bottom: 0;
+  width: 3px; background: linear-gradient(to bottom, var(--primary), var(--primary-light));
+  border-radius: 2px;
+}
+
+.timeline-item {
+  position: relative; margin-bottom: 18px;
+  padding: 12px 16px; background: #F8FAFC;
+  border-radius: 8px; border: 1px solid var(--border);
+}
+
+.timeline-item::before {
+  content: ''; position: absolute;
+  left: -24px; top: 16px;
+  width: 12px; height: 12px;
+  background: var(--primary); border-radius: 50%;
+  border: 3px solid #fff; box-shadow: 0 0 0 2px var(--primary);
+}
+
+.timeline-item .date {
+  font-size: 8.5pt; color: var(--primary);
+  font-weight: 700; margin-bottom: 4px;
+}
+
+.timeline-item .title {
+  font-size: 10pt; font-weight: 700; margin-bottom: 4px;
+}
+
+.timeline-item .desc { font-size: 9pt; color: var(--text-light); }
+
+/* ---------- Badge / Tag ---------- */
+.badge {
+  display: inline-block; padding: 3px 10px;
+  border-radius: 12px; font-size: 8pt; font-weight: 600;
+}
+
+.badge-primary { background: #DBEAFE; color: var(--primary); }
+.badge-success { background: #D1FAE5; color: #059669; }
+.badge-warning { background: #FEF3C7; color: #B45309; }
+.badge-danger { background: #FEE2E2; color: #DC2626; }
+
+/* ---------- Progress Bar ---------- */
+.progress-bar {
+  background: #E2E8F0; border-radius: 8px;
+  height: 8px; overflow: hidden; margin: 6px 0;
+}
+
+.progress-bar .fill {
+  height: 100%; border-radius: 8px;
+  background: linear-gradient(90deg, var(--primary), var(--primary-light));
+}
+
+/* ---------- Checklist ---------- */
+.checklist { list-style: none; margin: 12px 0; }
+
+.checklist li {
+  padding: 6px 0 6px 28px; position: relative;
+  font-size: 9.5pt; border-bottom: 1px solid #F1F5F9;
+}
+
+.checklist li::before {
+  content: '✓'; position: absolute; left: 4px;
+  color: var(--success); font-weight: 800; font-size: 11pt;
+}
+
+/* ---------- Sitemap visual ---------- */
+.sitemap-tree {
+  display: flex; flex-direction: column;
+  align-items: center; margin: 20px 0;
+}
+
+.sitemap-level {
+  display: flex; gap: 10px; margin: 8px 0;
+  flex-wrap: wrap; justify-content: center;
+}
+
+.sitemap-node {
+  background: var(--primary); color: #fff;
+  padding: 8px 16px; border-radius: 8px;
+  font-size: 8.5pt; font-weight: 600;
+  text-align: center; min-width: 80px;
+}
+
+.sitemap-node.sub {
+  background: #fff; color: var(--primary);
+  border: 2px solid var(--primary);
+}
+
+.sitemap-connector {
+  width: 2px; height: 16px; background: var(--primary);
+  margin: 0 auto;
+}
+
+/* ---------- Stat Grid ---------- */
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+
+.stat-item {
+  text-align: center; padding: 16px;
+  border-radius: 10px; background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+}
+
+.stat-item .num {
+  font-size: 22pt; font-weight: 800; color: var(--primary);
+  display: block;
+}
+
+.stat-item .label {
+  font-size: 8.5pt; color: var(--text-light);
+  margin-top: 4px;
+}
+
+/* ---------- TOC ---------- */
+.toc { margin: 30px 0; }
+.toc-item {
+  display: flex; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px dashed var(--border);
+  font-size: 10pt;
+}
+.toc-item .toc-title { font-weight: 600; }
+.toc-item .toc-page { color: var(--primary); font-weight: 700; }
+
+/* ---------- Comparison ---------- */
+.comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 16px 0; }
+
+.comparison .col {
+  padding: 16px; border: 1px solid var(--border);
+}
+
+.comparison .col.before {
+  background: #FEF2F2; border-radius: 10px 0 0 10px;
+}
+
+.comparison .col.after {
+  background: #ECFDF5; border-radius: 0 10px 10px 0;
+}
+
+.comparison .col h4 {
+  text-align: center; margin-bottom: 12px;
+  padding-bottom: 8px; border-bottom: 2px solid currentColor;
+}
+
+.comparison .col.before h4 { color: var(--danger); }
+.comparison .col.after h4 { color: var(--success); }
+
+.comparison ul { list-style: none; font-size: 9pt; }
+.comparison ul li { padding: 4px 0; }
+.comparison .col.before li::before { content: '✗ '; color: var(--danger); font-weight: 700; }
+.comparison .col.after li::before { content: '✓ '; color: var(--success); font-weight: 700; }
+
+/* ---------- Footer ---------- */
+.page-footer {
+  position: absolute; bottom: 15mm; left: 20mm; right: 20mm;
+  display: flex; justify-content: space-between;
+  font-size: 7.5pt; color: var(--text-light);
+  border-top: 1px solid var(--border); padding-top: 8px;
+}
+
+/* ---------- Responsive (screen) ---------- */
+@media (max-width: 800px) {
+  .page { width: 100%; margin: 0; padding: 20px; min-height: auto; }
+  .page-header { margin: -20px -20px 20px -20px; }
+  .cards { grid-template-columns: 1fr; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .comparison { grid-template-columns: 1fr; }
+  .comparison .col.before { border-radius: 10px 10px 0 0; }
+  .comparison .col.after { border-radius: 0 0 10px 10px; }
+}
+
+/* ---------- Print Button ---------- */
+.print-btn {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--primary); color: #fff;
+  border: none; padding: 14px 24px;
+  border-radius: 12px; font-size: 10pt; font-weight: 700;
+  cursor: pointer; box-shadow: 0 4px 20px rgba(27,101,166,.4);
+  z-index: 1000; display: flex; align-items: center; gap: 8px;
+  transition: transform .2s;
+}
+
+.print-btn:hover { transform: translateY(-2px); }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     Print / PDF Button
+     ============================================================ -->
+<button class="print-btn no-print" onclick="window.print()">
+  <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+  PDF / 인쇄
+</button>
+
+<!-- ============================================================
+     PAGE 1: COVER
+     ============================================================ -->
+<div class="page">
+  <div class="cover">
+    <div class="cover-logo">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <h1>(주)엠앤와이즈</h1>
+    <div class="subtitle">홈페이지 리뉴얼 프로젝트<br>상세 기능기획서</div>
+
+    <table class="meta-table">
+      <tr><td>프로젝트명</td><td>엠앤와이즈 공식 홈페이지 리뉴얼</td></tr>
+      <tr><td>고객사</td><td>(주)엠앤와이즈 (M&amp;Wise Co., Ltd.)</td></tr>
+      <tr><td>수행사</td><td>온다마케팅</td></tr>
+      <tr><td>문서 버전</td><td>v1.0</td></tr>
+      <tr><td>작성일</td><td>2026년 3월 16일</td></tr>
+      <tr><td>보안등급</td><td><span class="badge badge-warning">대외비</span></td></tr>
+    </table>
+
+    <div class="version-badge">CONFIDENTIAL — 고객 전달용</div>
+  </div>
+  <div class="page-footer">
+    <span>온다마케팅 — Confidential</span>
+    <span>1 / 14</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 2: TABLE OF CONTENTS
+     ============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <span class="doc-title">엠앤와이즈 홈페이지 리뉴얼 기획서</span>
+    <span class="page-num">2 / 14</span>
+  </div>
+
+  <h2><span class="num">📋</span> 목차</h2>
+
+  <div class="toc">
+    <div class="toc-item"><span class="toc-title">1. 프로젝트 개요</span><span class="toc-page">3</span></div>
+    <div class="toc-item"><span class="toc-title">2. 현재 사이트 분석</span><span class="toc-page">4</span></div>
+    <div class="toc-item"><span class="toc-title">3. 사이트맵 및 페이지 구성</span><span class="toc-page">5</span></div>
+    <div class="toc-item"><span class="toc-title">4. 페이지별 상세 기획</span><span class="toc-page">6</span></div>
+    <div class="toc-item"><span class="toc-title">5. CMS (콘텐츠 관리 시스템)</span><span class="toc-page">8</span></div>
+    <div class="toc-item"><span class="toc-title">6. 기술 스택</span><span class="toc-page">9</span></div>
+    <div class="toc-item"><span class="toc-title">7. 디자인 방향</span><span class="toc-page">10</span></div>
+    <div class="toc-item"><span class="toc-title">8. 프로젝트 일정 (14일)</span><span class="toc-page">11</span></div>
+    <div class="toc-item"><span class="toc-title">9. 다국어 (KR/EN) 전환</span><span class="toc-page">12</span></div>
+    <div class="toc-item"><span class="toc-title">10. SEO 및 애널리틱스</span><span class="toc-page">13</span></div>
+    <div class="toc-item"><span class="toc-title">11. 유지보수 및 지원</span><span class="toc-page">14</span></div>
+  </div>
+
+  <div class="info-box">
+    <strong>📌 문서 안내</strong><br>
+    본 기획서는 (주)엠앤와이즈 공식 홈페이지 리뉴얼 프로젝트의 전체 범위, 기술 구현 방안, 디자인 방향성 및 일정을 상세히 기술합니다. 본 문서는 대외비로서 고객사 및 수행사 간 합의된 범위 내에서만 공유되어야 합니다.
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-item">
+      <span class="num">12</span>
+      <span class="label">총 페이지</span>
+    </div>
+    <div class="stat-item">
+      <span class="num">14</span>
+      <span class="label">일 소요</span>
+    </div>
+    <div class="stat-item">
+      <span class="num">KR/EN</span>
+      <span class="label">다국어</span>
+    </div>
+    <div class="stat-item">
+      <span class="num">CMS</span>
+      <span class="label">자체 관리</span>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>온다마케팅 — Confidential</span>
+    <span>2 / 14</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 3: 프로젝트 개요
+     ============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <span class="doc-title">엠앤와이즈 홈페이지 리뉴얼 기획서</span>
+    <span class="page-num">3 / 14</span>
+  </div>
+
+  <h2><span class="num">1</span> 프로젝트 개요</h2>
+
+  <h3>1.1 프로젝트 배경</h3>
+  <p>(주)엠앤와이즈는 카카오 공식 전략 파트너로서 B2B 토탈 커뮤니케이션 솔루션을 제공하는 국내 선도 기업입니다. 알림톡, 친구톡, WiseU UMS, WiseU Cloud, RCS, SMS 등 다양한 메시징 솔루션을 통해 케이뱅크, 폭스바겐, DB손해보험, AIA생명 등 대형 고객사에 서비스를 제공하고 있습니다.</p>
+  <p>그러나 현재 공식 홈페이지(mnwise.com)는 PHP 기반으로 10년 이상 운영되어 왔으며, 현재 시장 트렌드 및 기업 이미지에 부합하지 않는 상황입니다. 이에 전면 리뉴얼을 통해 기업 신뢰도 강화, 리드 전환율 향상, 글로벌 대응력 확보를 목표로 합니다.</p>
+
+  <h3>1.2 프로젝트 목표</h3>
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">🎯</div>
+      <h4>브랜드 신뢰도 강화</h4>
+      <p>카카오 전략 파트너로서의 위상을 시각적으로 전달하는 프리미엄 디자인 구현</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📈</div>
+      <h4>리드 전환율 200% 향상</h4>
+      <p>문의/도입 CTA 최적화, 모든 페이지에 전환 포인트 설계</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌏</div>
+      <h4>글로벌 대응</h4>
+      <p>한/영 토글 기능으로 해외 고객 및 파트너 대응 가능</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚡</div>
+      <h4>자체 콘텐츠 관리</h4>
+      <p>CMS를 통해 비개발자도 콘텐츠를 직접 수정·관리 가능</p>
+    </div>
+  </div>
+
+  <h3>1.3 프로젝트 범위</h3>
+  <table class="data">
+    <thead>
+      <tr><th>구분</th><th>범위</th><th>비고</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>UI/UX 디자인</td><td>전 12페이지 반응형 디자인</td><td>375px ~ 1440px</td></tr>
+      <tr><td>프론트엔드 개발</td><td>HTML/CSS/JS 정적 사이트</td><td>Next.js 또는 순수 정적</td></tr>
+      <tr><td>CMS 구축</td><td>콘텐츠 관리 시스템</td><td>인라인 편집 + 관리 패널</td></tr>
+      <tr><td>다국어</td><td>한국어/영어 전환</td><td>data 속성 방식</td></tr>
+      <tr><td>SEO</td><td>메타태그, 구조화 데이터, 사이트맵</td><td>Google Search Console</td></tr>
+      <tr><td>애널리틱스</td><td>GA4 + 이벤트 트래킹</td><td>전환 퍼널 설정</td></tr>
+      <tr><td>배포</td><td>도메인 연결, SSL, CDN</td><td>Vercel 또는 서버 배포</td></tr>
+    </tbody>
+  </table>
+
+  <h3>1.4 고객사 정보</h3>
+  <table class="data">
+    <thead>
+      <tr><th>항목</th><th>내용</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>회사명</td><td>(주)엠앤와이즈 (M&amp;Wise Co., Ltd.)</td></tr>
+      <tr><td>사업 영역</td><td>B2B 커뮤니케이션 솔루션 (메시징 플랫폼)</td></tr>
+      <tr><td>핵심 솔루션</td><td>알림톡, 친구톡, WiseU UMS, WiseU Cloud, RCS, SMS</td></tr>
+      <tr><td>파트너십</td><td>카카오 공식 전략 파트너</td></tr>
+      <tr><td>주요 고객</td><td>케이뱅크, 폭스바겐, DB손해보험, AIA생명 외</td></tr>
+      <tr><td>현재 사이트</td><td>mnwise.com (PHP 기반, 10년+ 운영)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-footer">
+    <span>온다마케팅 — Confidential</span>
+    <span>3 / 14</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 4: 현재 사이트 분석
+     ============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <span class="doc-title">엠앤와이즈 홈페이지 리뉴얼 기획서</span>
+    <span class="page-num">4 / 14</span>
+  </div>
+
+  <h2><span class="num">2</span> 현재 사이트 분석</h2>
+
+  <h3>2.1 기술 현황</h3>
+  <table class="data">
+    <thead>
+      <tr><th>항목</th><th>현재 상태</th><th>평가</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>기술 스택</td><td>PHP + jQuery</td><td><span class="badge badge-danger">노후화</span></td></tr>
+      <tr><td>반응형</td><td>부분 적용</td><td><span class="badge badge-warning">미흡</span></td></tr>
+      <tr><td>로딩 속도</td><td>3.2초+ (모바일)</td><td><span class="badge badge-danger">느림</span></td></tr>
+      <tr><td>SEO 점수</td><td>Lighthouse 38점</td><td><span class="badge badge-danger">낮음</span></td></tr>
+      <tr><td>SSL</td><td>적용됨</td><td><span class="badge badge-success">양호</span></td></tr>
+      <tr><td>콘텐츠 관리</td><td>개발자 의존</td><td><span class="badge badge-danger">비효율</span></td></tr>
+      <tr><td>다국어</td><td>미지원</td><td><span class="badge badge-danger">부재</span></td></tr>
+      <tr><td>접근성</td><td>미적용</td><td><span class="badge badge-warning">미흡</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.2 Before vs After</h3>
+  <div class="comparison">
+    <div class="col before">
+      <h4>🔴 현재 (AS-IS)</h4>
+      <ul>
+        <li>PHP 기반 레거시 구조</li>
+        <li>모바일 미최적화 레이아웃</li>
+        <li>콘텐츠 수정 시 개발자 필요</li>
+        <li>느린 페이지 로드 (3초+)</li>
+        <li>영문 페이지 부재</li>
+        <li>검색엔진 노출 저조</li>
+        <li>10년 전 디자인 트렌드</li>
+        <li>리드 전환 구조 부재</li>
+      </ul>
+    </div>
+    <div class="col after">
+      <h4>🟢 리뉴얼 후 (TO-BE)</h4>
+      <ul>
+        <li>최신 프론트엔드 기술 스택</li>
+        <li>완전 반응형 (375~1440px)</li>
+        <li>CMS로 비개발자 직접 관리</li>
+        <li>1초 이내 로딩 (CDN + 최적화)</li>
+        <li>한/영 토글 완벽 지원</li>
+        <li>SEO 90+ 목표</li>
+        <li>2026 B2B SaaS 트렌드 디자인</li>
+        <li>모든 페이지 전환 CTA 설계</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>2.3 경쟁사 벤치마크</h3>
+  <table class="data">
+    <thead>
+      <tr><th>사이트</th><th>디자인</th><th>기능</th><th>참고 포인트</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>bizppurio.com</td><td>⭐⭐⭐</td><td>⭐⭐⭐⭐</td><td>서비스 카탈로그 구조, 도입사례 탭</td></tr>
+      <tr><td>sendbird.com</td><td>⭐⭐⭐⭐⭐</td><td>⭐⭐⭐⭐</td><td>SaaS형 랜딩, 인터랙션, 글로벌 구조</td></tr>
+      <tr><td>twilio.com</td><td>⭐⭐⭐⭐</td><td>⭐⭐⭐⭐⭐</td><td>개발자 중심 문서, API 데모</td></tr>
+      <tr><td>channel.io</td><td>⭐⭐⭐⭐⭐</td><td>⭐⭐⭐⭐</td><td>깔끔한 B2B 랜딩, 도입효과 수치</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box success">
+    <strong>✅ 리뉴얼 목표 지표</strong><br>
+    Lighthouse 성능 90+ · SEO 95+ · 접근성 90+ · 모바일 로딩 1초 이내 · 문의 전환율 3% 이상
+  </div>
+
+  <div class="page-footer">
+    <span>온다마케팅 — Confidential</span>
+    <span>4 / 14</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 5: 사이트맵 및 페이지 구성
+     ============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <span class="doc-title">엠앤와이즈 홈페이지 리뉴얼 기획서</span>
+    <span class="page-num">5 / 14</span>
+  </div>
+
+  <h2><span class="num">3</span> 사이트맵 및 페이지 구성</h2>
+
+  <h3>3.1 전체 사이트맵 (12페이지)</h3>
+
+  <div class="sitemap-tree">
+    <div class="sitemap-level">
+      <div class="sitemap-node">🏠 메인</div>
+    </div>
+    <div class="sitemap-connector"></div>
+    <div class="sitemap-level">
+      <div class="sitemap-node sub">알림톡</div>
+      <div class="sitemap-node sub">친구톡</div>
+      <div class="sitemap-node sub">WiseU UMS</div>
+      <div class="sitemap-node sub">WiseU Cloud</div>
+      <div class="sitemap-node sub">RCS</div>
+      <div class="sitemap-node sub">SMS/MMS</div>
+    </div>
+    <div class="sitemap-connector"></div>
+    <div class="sitemap-level">
+      <div class="sitemap-node sub">회사소개</div>
+      <div class="sitemap-node sub">도입사례</div>
+      <div class="sitemap-node sub">뉴스/공지</div>
+      <div class="sitemap-node sub">문의하기</div>
+      <div class="sitemap-node sub">FAQ</div>
+    </div>
+  </div>
+
+  <h3>3.2 페이지 구성 상세</h3>
+  <table class="data">
+    <thead>
+      <tr><th>No.</th><th>페이지</th><th>URL</th><th>핵심 콘텐츠</th><th>CTA</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>메인</td><td>/</td><td>히어로, 신뢰지표, 서비스 카드, 도입효과, 고객사</td><td>무료 상담</td></tr>
+      <tr><td>2</td><td>알림톡</td><td>/alimtalk</td><td>서비스 소개, 기능, 요금, 연동 가이드</td><td>도입 문의</td></tr>
+      <tr><td>3</td><td>친구톡</td><td>/friendtalk</td><td>마케팅 메시지, 타겟팅, 성과 사례</td><td>도입 문의</td></tr>
+      <tr><td>4</td><td>WiseU UMS</td><td>/wiseu-ums</td><td>통합 메시징, 대시보드, 리포트</td><td>데모 요청</td></tr>
+      <tr><td>5</td><td>WiseU Cloud</td><td>/wiseu-cloud</td><td>클라우드 솔루션, 확장성, 보안</td><td>도입 문의</td></tr>
+      <tr><td>6</td><td>RCS</td><td>/rcs</td><td>리치 메시지, 브랜딩, 인터랙션</td><td>도입 문의</td></tr>
+      <tr><td>7</td><td>SMS/MMS</td><td>/sms</td><td>대량 발송, API, 안정성</td><td>견적 요청</td></tr>
+      <tr><td>8</td><td>회사소개</td><td>/about</td><td>비전, 연혁, 파트너, 인증</td><td>제휴 문의</td></tr>
+      <tr><td>9</td><td>도입사례</td><td>/cases</td><td>산업별 케이스, 성과 데이터</td><td>상담 신청</td></tr>
+      <tr><td>10</td><td>뉴스/공지</td><td>/news</td><td>보도자료, 공지사항, 이벤트</td><td>구독 신청</td></tr>
+      <tr><td>11</td><td>문의하기</td><td>/contact</td><td>문의 폼, 지도, 연락처</td><td>폼 제출</td></tr>
+      <tr><td>12</td><td>FAQ</td><td>/faq</td><td>자주 묻는 질문 (아코디언)</td><td>1:1 문의</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box">
+    <strong>💡 설계 원칙</strong><br>
+    모든 페이지는 3-depth 이하로 설계하며, 사용자가 2클릭 이내에 원하는 정보에 도달할 수 있도록 정보 구조를 설계합니다. 각 페이지에 최소 1개 이상의 CTA를 배치하여 리드 전환을 유도합니다.
+  </div>
+
+  <div class="page-footer">
+    <span>온다마케팅 — Confidential</span>
+    <span>5 / 14</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 6-7: 페이지별 상세 기획
+     ============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <span class="doc-title">엠앤와이즈 홈페이지 리뉴얼 기획서</span>
+    <span class="page-num">6 / 14</span>
+  </div>
+
+  <h2><span class="num">4</span> 페이지별 상세 기획</h2>
+
+  <h3>4.1 메인 페이지</h3>
+  <p>메인 페이지는 엠앤와이즈의 핵심 가치를 30초 이내에 전달하는 것을 목표로 합니다.</p>
+
+  <table class="data">
+    <thead>
+      <tr><th>섹션</th><th>콘텐츠</th><th>인터랙션</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>① 네비게이션</td><td>로고, GNB 메뉴, KR/EN 토글, 문의 버튼</td><td>스크롤 시 고정 + 배경 블러</td></tr>
+      <tr><td>② 히어로</td><td>"기업 커뮤니케이션의 새로운 기준"<br>서브카피 + CTA 2개</td><td>그라데이션 배경 + CSS 웨이브 애니메이션</td></tr>
+      <tr><td>③ 신뢰 지표</td><td>발송량 10억+, 고객사 500+, 가동률 99.9%, 15년+</td><td>IntersectionObserver 카운트업</td></tr>
+      <tr><td>④ 서비스 6카드</td><td>알림톡~SMS 6개 서비스 카드</td><td>호버 시 확대 + 아이콘 애니메이션</td></tr>
+      <tr><td>⑤ 도입 효과</td><td>비용 절감 40%, 전달률 99.9%, 응답속도 0.3초</td><td>프로그레스바 + 수치 애니메이션</td></tr>
+      <tr><td>⑥ 고객사</td><td>케이뱅크, 폭스바겐, DB손해보험, AIA생명 등 로고</td><td>무한 마키 슬라이드</td></tr>
+      <tr><td>⑦ 도입사례</td><td>3개 산업별 탭 (금융/자동차/보험)</td><td>탭 전환 + 슬라이드 인</td></tr>
+      <tr><td>⑧ CTA 배너</td><td>"지금 무료 상담 받기"</td><td>패럴랙스 배경</td></tr>
+      <tr><td>⑨ 문의 폼</td><td>이름, 회사, 이메일, 전화, 메시지</td><td>실시간 유효성 검사</td></tr>
+      <tr><td>⑩ 푸터</td><td>회사 정보, 사이트맵, SNS, 인증 마크</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.2 서비스 페이지 공통 구조 (6개)</h3>
+  <p>6개 서비스 페이지는 통일된 레이아웃으로 제작하되, 각 서비스의 특성에 맞게 콘텐츠를 차별화합니다.</p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">📌</div>
+      <h4>히어로 영역</h4>
+      <p>서비스명 + 핵심 가치 제안 + 시작하기 CTA + 서비스 미리보기 이미지</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚙️</div>
+      <h4>핵심 기능</h4>
+      <p>3~4개 주요 기능을 아이콘 + 설명으로 시각화. 탭 또는 아코디언 UI</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">💰</div>
+      <h4>요금/플랜</h4>
+      <p>요금 테이블 또는 "문의하기" 유도. 비교표 형태로 플랜 차별점 시각화</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔗</div>
+      <h4>연동 가이드</h4>
+      <p>API 연동 프로세스 다이어그램, 개발 문서 링크, 지원 채널 안내</p>
+    </div>
+  </div>
+
+  <h3>4.3 알림톡 페이지 상세</h3>
+  <table class="data">
+    <thead>
+      <tr><th>섹션</th><th>콘텐츠</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>히어로</td><td>"카카오 알림톡으로 고객에게 확실하게 전달" + 카카오 옐로우 액센트</td></tr>
+      <tr><td>특장점</td><td>① 99.9% 도달률 ② 건당 8원~ ③ 템플릿 자동승인 ④ 실시간 리포트</td></tr>
+      <tr><td>활용 사례</td><td>결제 알림, 배송 안내, 예약 확인, 인증번호</td></tr>
+      <tr><td>연동 프로세스</td><td>4단계: 채널 개설 → 템플릿 등록 → API 연동 → 발송 시작</td></tr>
+      <tr><td>FAQ</td><td>알림톡 관련 자주 묻는 질문 3~5개</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.4 친구톡 페이지 상세</h3>
+  <table class="data">
+    <thead>
+      <tr><th>섹션</th><th>콘텐츠</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>히어로</td><td>"친구톡으로 고객과 더 가까이" + 마케팅 메시지 시각화</td></tr>
+      <tr><td>특장점</td><td>① 이미지/와이드 메시지 ② 타겟팅 발송 ③ A/B 테스트 ④ 전환 추적</td></tr>
+      <tr><td>성과 데이터</td><td>오픈율 85%+, CTR 15%+, SMS 대비 ROI 3배</td></tr>
+      <tr><td>활용 사례</td><td>프로모션, 신상품 알림, 쿠폰 발송, 이벤트 안내</td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-footer">
+    <span>온다마케팅 — Confidential</span>
+    <span>6 / 14</span>
+  </div>
+</div>
+
+<div class="page">
+  <div class="page-header">
+    <span class="doc-title">엠앤와이즈 홈페이지 리뉴얼 기획서</span>
+    <span class="page-num">7 / 14</span>
+  </div>
+
+  <h3>4.5 WiseU UMS 페이지 상세</h3>
+  <table class="data">
+    <thead>
+      <tr><th>섹션</th><th>콘텐츠</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>히어로</td><td>"하나의 플랫폼으로 모든 메시지를" + 대시보드 목업</td></tr>
+      <tr><td>핵심 기능</td><td>통합 발송, 실시간 모니터링, 자동 대체발송, 상세 리포트</td></tr>
+      <tr><td>아키텍처</td><td>시스템 구성도: API → UMS → 카카오/RCS/SMS 분기</td></tr>
+      <tr><td>도입 효과</td><td>운영 비용 40% 절감, 발송 성공률 99.9%</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.6 WiseU Cloud 페이지 상세</h3>
+  <table class="data">
+    <thead>
+      <tr><th>섹션</th><th>콘텐츠</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>히어로</td><td>"클라우드 기반 차세대 메시징 인프라" + 클라우드 비주얼</td></tr>
+      <tr><td>특장점</td><td>① 오토스케일링 ② 99.99% SLA ③ 멀티리전 ④ 실시간 스트리밍</td></tr>
+      <tr><td>보안 인증</td><td>ISO 27001, ISMS, 개인정보보호 인증 배지</td></tr>
+      <tr><td>마이그레이션</td><td>On-premise → Cloud 전환 프로세스 안내</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.7 RCS 페이지 상세</h3>
+  <table class="data">
+    <thead>
+      <tr><th>섹션</th><th>콘텐츠</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>히어로</td><td>"차세대 리치 메시지, RCS로 브랜딩하세요"</td></tr>
+      <tr><td>기능 데모</td><td>캐러셀, 리치카드, 액션 버튼 실제 UI 미리보기</td></tr>
+      <tr><td>vs SMS</td><td>SMS 대비 RCS 장점 비교표</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.8 SMS/MMS 페이지 상세</h3>
+  <table class="data">
+    <thead>
+      <tr><th>섹션</th><th>콘텐츠</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>히어로</td><td>"가장 확실한 전달, SMS/MMS" + 안정성 강조</td></tr>
+      <tr><td>기능</td><td>대량 발송, 예약 발송, 주소록 관리, 발송 리포트</td></tr>
+      <tr><td>요금</td><td>건당 단가표 + 볼륨 디스카운트 안내</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.9 회사소개 / 도입사례 / 뉴스 / 문의 / FAQ</h3>
+  <table class="data">
+    <thead>
+      <tr><th>페이지</th><th>핵심 구성</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>회사소개</td><td>비전·미션, 연혁 타임라인, 파트너십 (카카오 뱃지), 인증서, 오시는 길</td></tr>
+      <tr><td>도입사례</td><td>산업별 필터 (금융/유통/보험/자동차), 카드형 리스트, 상세 모달</td></tr>
+      <tr><td>뉴스/공지</td><td>카테고리 탭, 카드형 목록, 페이지네이션, 검색</td></tr>
+      <tr><td>문의하기</td><td>폼 (회사명/담당자/이메일/전화/서비스선택/메시지), 카카오맵, 연락처</td></tr>
+      <tr><td>FAQ</td><td>카테고리 필터, 아코디언, 검색, 1:1 문의 CTA</td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-footer">
+    <span>온다마케팅 — Confidential</span>
+    <span>7 / 14</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 8: CMS
+     ============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <span class="doc-title">엠앤와이즈 홈페이지 리뉴얼 기획서</span>
+    <span class="page-num">8 / 14</span>
+  </div>
+
+  <h2><span class="num">5</span> CMS (콘텐츠 관리 시스템)</h2>
+
+  <h3>5.1 CMS 개요</h3>
+  <p>비개발자(마케팅/운영팀)가 코드 수정 없이 웹사이트 콘텐츠를 직접 관리할 수 있는 시스템을 구축합니다. WordPress나 별도 CMS를 도입하는 것이 아닌, 프론트엔드에 내장된 인라인 편집 시스템으로 구현합니다.</p>
+
+  <h3>5.2 CMS 핵심 기능</h3>
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">✏️</div>
+      <h4>인라인 편집</h4>
+      <p>관리자 모드 활성화 시 편집 가능 영역이 하이라이트되며, 클릭하여 바로 텍스트/이미지 수정 가능</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">💾</div>
+      <h4>자동 저장</h4>
+      <p>변경 사항은 localStorage에 실시간 저장되며, 서버 배포 시 JSON 파일로 내보내기 가능</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔄</div>
+      <h4>초기화 기능</h4>
+      <p>원본 콘텐츠로 되돌리기 (리셋) 기능으로 실수 방지</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📱</div>
+      <h4>반응형 프리뷰</h4>
+      <p>데스크톱/태블릿/모바일 프리뷰 토글로 다양한 화면 크기에서 편집 결과 확인</p>
+    </div>
+  </div>
+
+  <h3>5.3 편집 가능 영역</h3>
+  <table class="data">
+    <thead>
+      <tr><th>영역</th><th>편집 항목</th><th>편집 방식</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>히어로</td><td>제목, 서브카피, CTA 텍스트</td><td>contenteditable</td></tr>
+      <tr><td>서비스 카드</td><td>서비스명, 설명, 아이콘</td><td>contenteditable + 아이콘 선택</td></tr>
+      <tr><td>수치/통계</td><td>숫자, 단위, 레이블</td><td>contenteditable</td></tr>
+      <tr><td>고객사 로고</td><td>로고 이미지</td><td>이미지 업로드</td></tr>
+      <tr><td>도입사례</td><td>제목, 설명, 성과 데이터</td><td>contenteditable</td></tr>
+      <tr><td>뉴스</td><td>제목, 날짜, 본문</td><td>리치 텍스트 에디터</td></tr>
+      <tr><td>FAQ</td><td>질문, 답변</td><td>contenteditable + 항목 추가/삭제</td></tr>
+      <tr><td>푸터</td><td>회사 정보, 연락처</td><td>contenteditable</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.4 CMS 워크플로우</h3>
+  <div class="info-box">
+    <strong>관리자 편집 프로세스:</strong><br>
+    ① 관리자 로그인 → ② 편집 모드 토글 ON → ③ 편집 가능 영역 하이라이트 → ④ 클릭하여 인라인 편집 → ⑤ 자동 저장 (localStorage) → ⑥ 변경사항 미리보기 → ⑦ 퍼블리시 (서버 저장)
+  </div>
+
+  <h3>5.5 권한 관리</h3>
+  <table class="data">
+    <thead>
+      <tr><th>권한</th><th>역할</th><th>가능 작업</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>슈퍼관리자</td><td>개발팀</td><td>전체 콘텐츠 + 구조 변경 + 설정</td></tr>
+      <tr><td>관리자</td><td>마케팅팀</td><td>콘텐츠 편집 + 이미지 교체 + 뉴스 관리</td></tr>
+      <tr><td>에디터</td><td>운영팀</td><td>텍스트 편집 + FAQ 관리</td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-footer">
+    <span>온다마케팅 — Confidential</span>
+    <span>8 / 14</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 9: 기술 스택
+     ============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <span class="doc-title">엠앤와이즈 홈페이지 리뉴얼 기획서</span>
+    <span class="page-num">9 / 14</span>
+  </div>
+
+  <h2><span class="num">6</span> 기술 스택</h2>
+
+  <h3>6.1 프론트엔드</h3>
+  <table class="data">
+    <thead>
+      <tr><th>분류</th><th>기술</th><th>선정 이유</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>마크업</td><td>HTML5 + Semantic Tags</td><td>SEO 최적화, 접근성</td></tr>
+      <tr><td>스타일</td><td>CSS3 + CSS Custom Properties</td><td>테마 관리, 유지보수 용이</td></tr>
+      <tr><td>인터랙션</td><td>Vanilla JavaScript (ES6+)</td><td>의존성 최소화, 빠른 로딩</td></tr>
+      <tr><td>폰트</td><td>Pretendard (KR) + Inter (EN)</td><td>가독성, 웹 최적화 폰트</td></tr>
+      <tr><td>아이콘</td><td>Lucide Icons (SVG)</td><td>경량, 커스터마이징 가능</td></tr>
+      <tr><td>애니메이션</td><td>CSS Animations + IntersectionObserver</td><td>부드러운 스크롤 연동 애니메이션</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.2 빌드 및 배포</h3>
+  <table class="data">
+    <thead>
+      <tr><th>분류</th><th>기술</th><th>설명</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>호스팅</td><td>Vercel / AWS S3 + CloudFront</td><td>글로벌 CDN, 자동 SSL</td></tr>
+      <tr><td>도메인</td><td>mnwise.com (기존 유지)</td><td>DNS 레코드 변경</td></tr>
+      <tr><td>SSL</td><td>Let's Encrypt (자동)</td><td>HTTPS 보장</td></tr>
+      <tr><td>CI/CD</td><td>GitHub Actions</td><td>push 시 자동 빌드·배포</td></tr>
+      <tr><td>모니터링</td><td>Google Analytics 4</td><td>실시간 트래픽 + 이벤트 추적</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.3 성능 최적화 전략</h3>
+  <ul class="checklist">
+    <li>이미지: WebP 변환 + lazy loading + srcset 반응형</li>
+    <li>CSS: Critical CSS 인라인 + 나머지 비동기 로딩</li>
+    <li>JS: defer/async + 코드 스플리팅 (필요 시)</li>
+    <li>폰트: font-display: swap + preload 적용</li>
+    <li>캐싱: 정적 에셋 1년 캐싱 + immutable 헤더</li>
+    <li>CDN: 글로벌 엣지 서버 활용 (Vercel Edge Network)</li>
+    <li>Core Web Vitals: LCP &lt; 2.5s, FID &lt; 100ms, CLS &lt; 0.1</li>
+  </ul>
+
+  <h3>6.4 브라우저 지원</h3>
+  <table class="data">
+    <thead>
+      <tr><th>브라우저</th><th>버전</th><th>지원 수준</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Chrome</td><td>90+</td><td><span class="badge badge-success">완전 지원</span></td></tr>
+      <tr><td>Safari</td><td>14+</td><td><span class="badge badge-success">완전 지원</span></td></tr>
+      <tr><td>Firefox</td><td>88+</td><td><span class="badge badge-success">완전 지원</span></td></tr>
+      <tr><td>Edge</td><td>90+</td><td><span class="badge badge-success">완전 지원</span></td></tr>
+      <tr><td>Samsung Internet</td><td>14+</td><td><span class="badge badge-success">완전 지원</span></td></tr>
+      <tr><td>IE 11</td><td>—</td><td><span class="badge badge-danger">미지원</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-footer">
+    <span>온다마케팅 — Confidential</span>
+    <span>9 / 14</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 10: 디자인 방향
+     ============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <span class="doc-title">엠앤와이즈 홈페이지 리뉴얼 기획서</span>
+    <span class="page-num">10 / 14</span>
+  </div>
+
+  <h2><span class="num">7</span> 디자인 방향</h2>
+
+  <h3>7.1 디자인 컨셉</h3>
+  <p><strong>"Trustworthy Innovation"</strong> — 신뢰감과 혁신성의 조화. B2B 고객에게 안정감을 주면서도 기술적 선도성을 표현하는 디자인을 추구합니다.</p>
+
+  <h3>7.2 컬러 시스템</h3>
+  <table class="data">
+    <thead>
+      <tr><th>용도</th><th>컬러</th><th>HEX</th><th>활용</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Primary</td>
+        <td><span style="display:inline-block;width:24px;height:24px;background:#1B65A6;border-radius:4px;vertical-align:middle"></span></td>
+        <td>#1B65A6</td>
+        <td>헤더, 버튼, 강조, 링크</td>
+      </tr>
+      <tr>
+        <td>Accent (카카오)</td>
+        <td><span style="display:inline-block;width:24px;height:24px;background:#FEE500;border-radius:4px;vertical-align:middle"></span></td>
+        <td>#FEE500</td>
+        <td>카카오 서비스 강조, 배지, 포인트</td>
+      </tr>
+      <tr>
+        <td>Dark</td>
+        <td><span style="display:inline-block;width:24px;height:24px;background:#0F1724;border-radius:4px;vertical-align:middle"></span></td>
+        <td>#0F1724</td>
+        <td>텍스트, 푸터, 다크 섹션</td>
+      </tr>
+      <tr>
+        <td>Background</td>
+        <td><span style="display:inline-block;width:24px;height:24px;background:#F8FAFC;border-radius:4px;vertical-align:middle;border:1px solid #E2E8F0"></span></td>
+        <td>#F8FAFC</td>
+        <td>페이지 배경, 카드 배경</td>
+      </tr>
+      <tr>
+        <td>Success</td>
+        <td><span style="display:inline-block;width:24px;height:24px;background:#10B981;border-radius:4px;vertical-align:middle"></span></td>
+        <td>#10B981</td>
+        <td>성공 상태, 긍정적 수치</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>7.3 타이포그래피</h3>
+  <table class="data">
+    <thead>
+      <tr><th>용도</th><th>폰트</th><th>사이즈</th><th>Weight</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>한글 본문</td><td>Pretendard</td><td>16px</td><td>Regular 400</td></tr>
+      <tr><td>한글 제목</td><td>Pretendard</td><td>32~48px</td><td>Bold 700 ~ ExtraBold 800</td></tr>
+      <tr><td>영문 본문</td><td>Inter</td><td>16px</td><td>Regular 400</td></tr>
+      <tr><td>영문 제목</td><td>Inter</td><td>32~48px</td><td>Bold 700</td></tr>
+      <tr><td>수치/통계</td><td>Inter</td><td>48~64px</td><td>ExtraBold 800</td></tr>
+    </tbody>
+  </table>
+
+  <h3>7.4 디자인 원칙</h3>
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">🎨</div>
+      <h4>여백의 미</h4>
+      <p>충분한 여백으로 콘텐츠 호흡감 확보. 섹션 간 80~120px 간격</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📐</div>
+      <h4>그리드 시스템</h4>
+      <p>12컬럼 그리드 (max-width: 1200px), 일관된 정렬과 비율</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">✨</div>
+      <h4>마이크로 인터랙션</h4>
+      <p>호버, 스크롤, 전환 시 부드러운 애니메이션으로 고급감 연출</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📱</div>
+      <h4>모바일 퍼스트</h4>
+      <p>375px부터 설계, 터치 영역 48px+, 가독성 우선</p>
+    </div>
+  </div>
+
+  <h3>7.5 컴포넌트 라이브러리</h3>
+  <ul class="checklist">
+    <li>버튼: Primary / Secondary / Ghost / Icon 4종</li>
+    <li>카드: 서비스카드 / 사례카드 / 뉴스카드 / 통계카드 4종</li>
+    <li>네비게이션: 데스크톱 GNB + 모바일 햄버거 메뉴</li>
+    <li>폼: Input / Textarea / Select / Checkbox / Radio</li>
+    <li>모달: 알림 / 확인 / 상세보기 3종</li>
+    <li>아코디언: FAQ용 접기/펼치기</li>
+    <li>탭: 가로 탭 / 세그먼트 컨트롤</li>
+    <li>배지: 상태 표시 (Primary / Success / Warning / Danger)</li>
+  </ul>
+
+  <div class="page-footer">
+    <span>온다마케팅 — Confidential</span>
+    <span>10 / 14</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 11: 프로젝트 일정
+     ============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <span class="doc-title">엠앤와이즈 홈페이지 리뉴얼 기획서</span>
+    <span class="page-num">11 / 14</span>
+  </div>
+
+  <h2><span class="num">8</span> 프로젝트 일정 (14일)</h2>
+
+  <h3>8.1 전체 일정표</h3>
+  <table class="data">
+    <thead>
+      <tr><th>주차</th><th>일차</th><th>단계</th><th>작업 내용</th><th>산출물</th></tr>
+    </thead>
+    <tbody>
+      <tr><td rowspan="3">1주차</td><td>Day 1-2</td><td>기획</td><td>요구사항 확정, 사이트맵 확정, 와이어프레임</td><td>기획서, 와이어프레임</td></tr>
+      <tr><td>Day 3-4</td><td>디자인</td><td>메인 페이지 디자인, 디자인 시스템 구축</td><td>메인 시안, 스타일 가이드</td></tr>
+      <tr><td>Day 5-7</td><td>디자인+개발</td><td>서브페이지 디자인, 메인 퍼블리싱</td><td>전체 디자인, 메인 HTML</td></tr>
+      <tr><td rowspan="3">2주차</td><td>Day 8-10</td><td>개발</td><td>서브 페이지 퍼블리싱, CMS 구축</td><td>12P HTML, CMS</td></tr>
+      <tr><td>Day 11-12</td><td>개발</td><td>다국어 적용, SEO, GA 연동</td><td>KR/EN 전환, 메타태그</td></tr>
+      <tr><td>Day 13-14</td><td>테스트+배포</td><td>크로스브라우저 테스트, 성능 최적화, 배포</td><td>최종 사이트, 인수인계</td></tr>
+    </tbody>
+  </table>
+
+  <h3>8.2 상세 타임라인</h3>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="date">Day 1-2 | 기획 단계</div>
+      <div class="title">요구사항 확정 및 IA 설계</div>
+      <div class="desc">
+        • 킥오프 미팅 및 요구사항 최종 확인<br>
+        • 사이트맵 확정 (12페이지)<br>
+        • 와이어프레임 제작 (메인 + 주요 서브 3P)<br>
+        • 콘텐츠 수집 리스트 전달
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="date">Day 3-4 | 디자인 단계</div>
+      <div class="title">메인 디자인 및 디자인 시스템</div>
+      <div class="desc">
+        • 메인 페이지 디자인 시안 (Desktop + Mobile)<br>
+        • 컬러/타이포/컴포넌트 디자인 시스템 확립<br>
+        • 고객 피드백 반영 (1차 수정)
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="date">Day 5-7 | 디자인 + 개발</div>
+      <div class="title">서브페이지 디자인 & 메인 퍼블리싱</div>
+      <div class="desc">
+        • 서비스 6페이지 + 회사소개 등 서브 디자인<br>
+        • 메인 페이지 HTML/CSS/JS 퍼블리싱<br>
+        • 반응형 구현 (375px ~ 1440px)
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="date">Day 8-10 | 개발 집중</div>
+      <div class="title">전체 페이지 퍼블리싱 & CMS</div>
+      <div class="desc">
+        • 서브 페이지 12P 전체 퍼블리싱<br>
+        • CMS 인라인 편집 시스템 구축<br>
+        • 인터랙션/애니메이션 구현
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="date">Day 11-12 | 기능 완성</div>
+      <div class="title">다국어·SEO·애널리틱스</div>
+      <div class="desc">
+        • KR/EN 다국어 전환 기능 구현<br>
+        • SEO 메타태그, OG태그, 구조화 데이터<br>
+        • GA4 설치 + 이벤트 트래킹 설정
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="date">Day 13-14 | QA & 런칭</div>
+      <div class="title">테스트·최적화·배포</div>
+      <div class="desc">
+        • 크로스 브라우저 테스트 (Chrome/Safari/FF/Edge)<br>
+        • Lighthouse 성능 최적화 (90+ 목표)<br>
+        • 스테이징 배포 → 최종 검수 → 프로덕션 런칭<br>
+        • 운영 가이드 및 CMS 매뉴얼 전달
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box warning">
+    <strong>⚠️ 일정 유의사항</strong><br>
+    • 콘텐츠(텍스트/이미지) 제공이 Day 3까지 완료되어야 일정 준수 가능<br>
+    • 디자인 피드백은 1영업일 이내 회신 요청<br>
+    • 추가 요구사항 발생 시 별도 협의 필요
+  </div>
+
+  <div class="page-footer">
+    <span>온다마케팅 — Confidential</span>
+    <span>11 / 14</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 12: 다국어
+     ============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <span class="doc-title">엠앤와이즈 홈페이지 리뉴얼 기획서</span>
+    <span class="page-num">12 / 14</span>
+  </div>
+
+  <h2><span class="num">9</span> 다국어 (KR/EN) 전환</h2>
+
+  <h3>9.1 구현 방식</h3>
+  <p>페이지 리로드 없이 실시간으로 한국어/영어를 전환하는 클라이언트 사이드 방식을 채택합니다.</p>
+
+  <div class="info-box">
+    <strong>💡 기술 구현:</strong> <code>data-kr</code>, <code>data-en</code> 속성을 사용한 인라인 다국어 방식<br>
+    <code>&lt;h1 data-kr="기업 커뮤니케이션의 새로운 기준" data-en="The New Standard for Enterprise Communication"&gt;&lt;/h1&gt;</code>
+  </div>
+
+  <h3>9.2 다국어 적용 범위</h3>
+  <table class="data">
+    <thead>
+      <tr><th>영역</th><th>한국어</th><th>영어</th><th>방식</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>네비게이션</td><td>서비스, 회사소개, 문의</td><td>Services, About, Contact</td><td>data 속성</td></tr>
+      <tr><td>히어로 카피</td><td>카카오 공식 파트너</td><td>Official Kakao Partner</td><td>data 속성</td></tr>
+      <tr><td>서비스 설명</td><td>전체 서비스 설명</td><td>영문 번역</td><td>data 속성</td></tr>
+      <tr><td>CTA 버튼</td><td>무료 상담 받기</td><td>Get Free Consultation</td><td>data 속성</td></tr>
+      <tr><td>폼 라벨</td><td>회사명, 담당자</td><td>Company, Name</td><td>data 속성 + placeholder</td></tr>
+      <tr><td>푸터</td><td>회사 정보</td><td>Company Info</td><td>data 속성</td></tr>
+      <tr><td>메타 태그</td><td>한글 메타</td><td>영문 메타</td><td>JS 동적 변경</td></tr>
+    </tbody>
+  </table>
+
+  <h3>9.3 언어 전환 UX</h3>
+  <ul class="checklist">
+    <li>헤더 우측에 KR | EN 토글 버튼 배치</li>
+    <li>선택 언어 localStorage에 저장 (재방문 시 유지)</li>
+    <li>브라우저 언어 감지로 초기 언어 자동 설정</li>
+    <li>URL에 lang 파라미터 추가 (?lang=en)</li>
+    <li>전환 시 0.3초 페이드 애니메이션</li>
+    <li>SEO: hreflang 태그로 검색엔진 언어 인식</li>
+  </ul>
+
+  <h3>9.4 번역 관리</h3>
+  <p>CMS에서 각 언어별 콘텐츠를 독립적으로 편집 가능하며, JSON 기반 번역 파일로 관리합니다. 향후 일본어, 중국어 등 추가 언어 확장이 용이한 구조입니다.</p>
+
+  <div class="page-footer">
+    <span>온다마케팅 — Confidential</span>
+    <span>12 / 14</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 13: SEO & 애널리틱스
+     ============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <span class="doc-title">엠앤와이즈 홈페이지 리뉴얼 기획서</span>
+    <span class="page-num">13 / 14</span>
+  </div>
+
+  <h2><span class="num">10</span> SEO 및 애널리틱스</h2>
+
+  <h3>10.1 SEO 전략</h3>
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">🏷️</div>
+      <h4>온페이지 SEO</h4>
+      <p>메타 title/description, H1~H6 구조화, alt 태그, 내부 링크 최적화</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🗂️</div>
+      <h4>구조화 데이터</h4>
+      <p>JSON-LD: Organization, WebSite, FAQPage, BreadcrumbList 스키마</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🗺️</div>
+      <h4>사이트맵 & robots.txt</h4>
+      <p>XML 사이트맵 자동 생성, robots.txt 최적화, 캐노니컬 URL</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌐</div>
+      <h4>소셜 미디어</h4>
+      <p>OG태그 (Facebook), Twitter Card, 링크 미리보기 최적화</p>
+    </div>
+  </div>
+
+  <h3>10.2 타겟 키워드</h3>
+  <table class="data">
+    <thead>
+      <tr><th>키워드</th><th>검색량</th><th>타겟 페이지</th><th>현재 순위</th><th>목표</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>알림톡 API</td><td>1,200/월</td><td>알림톡 페이지</td><td>미노출</td><td>Top 5</td></tr>
+      <tr><td>카카오 비즈메시지</td><td>800/월</td><td>메인 페이지</td><td>미노출</td><td>Top 10</td></tr>
+      <tr><td>기업 문자 발송</td><td>600/월</td><td>SMS 페이지</td><td>미노출</td><td>Top 10</td></tr>
+      <tr><td>RCS 메시지 서비스</td><td>400/월</td><td>RCS 페이지</td><td>미노출</td><td>Top 5</td></tr>
+      <tr><td>UMS 솔루션</td><td>300/월</td><td>WiseU UMS</td><td>미노출</td><td>Top 3</td></tr>
+    </tbody>
+  </table>
+
+  <h3>10.3 Google Analytics 4 설정</h3>
+  <table class="data">
+    <thead>
+      <tr><th>이벤트</th><th>트리거</th><th>목적</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>page_view</td><td>모든 페이지 진입</td><td>트래픽 분석</td></tr>
+      <tr><td>cta_click</td><td>CTA 버튼 클릭</td><td>전환 퍼널 분석</td></tr>
+      <tr><td>form_submit</td><td>문의 폼 제출</td><td>리드 전환 추적</td></tr>
+      <tr><td>service_view</td><td>서비스 페이지 30초+ 체류</td><td>관심도 분석</td></tr>
+      <tr><td>lang_switch</td><td>언어 전환</td><td>글로벌 사용자 분석</td></tr>
+      <tr><td>scroll_depth</td><td>25/50/75/100% 스크롤</td><td>콘텐츠 참여도</td></tr>
+      <tr><td>case_study_click</td><td>도입사례 상세 클릭</td><td>관심 산업 분석</td></tr>
+    </tbody>
+  </table>
+
+  <h3>10.4 성과 대시보드</h3>
+  <p>GA4 Looker Studio 대시보드를 구축하여 실시간 KPI를 모니터링합니다.</p>
+  <ul class="checklist">
+    <li>월간 방문자 수 및 추이</li>
+    <li>페이지별 이탈률 및 체류시간</li>
+    <li>문의 전환율 (목표: 3%+)</li>
+    <li>유입 채널별 성과 (검색/직접/SNS/광고)</li>
+    <li>언어별 사용자 비율</li>
+  </ul>
+
+  <div class="page-footer">
+    <span>온다마케팅 — Confidential</span>
+    <span>13 / 14</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 14: 유지보수
+     ============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <span class="doc-title">엠앤와이즈 홈페이지 리뉴얼 기획서</span>
+    <span class="page-num">14 / 14</span>
+  </div>
+
+  <h2><span class="num">11</span> 유지보수 및 지원</h2>
+
+  <h3>11.1 무상 유지보수 (1개월)</h3>
+  <table class="data">
+    <thead>
+      <tr><th>항목</th><th>범위</th><th>응답 시간</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>버그 수정</td><td>개발 결함으로 인한 오류</td><td>4시간 이내</td></tr>
+      <tr><td>디자인 미세 조정</td><td>컬러, 폰트 사이즈, 간격 등</td><td>1영업일</td></tr>
+      <tr><td>콘텐츠 교체 지원</td><td>이미지/텍스트 교체 가이드</td><td>1영업일</td></tr>
+      <tr><td>브라우저 호환성</td><td>주요 브라우저 이슈</td><td>1영업일</td></tr>
+    </tbody>
+  </table>
+
+  <h3>11.2 유상 유지보수 플랜</h3>
+  <table class="data">
+    <thead>
+      <tr><th>플랜</th><th>월 비용</th><th>포함 내용</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-primary">Basic</span></td>
+        <td>30만원/월</td>
+        <td>월 4시간 작업, 콘텐츠 업데이트, 모니터링</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-success">Standard</span></td>
+        <td>50만원/월</td>
+        <td>월 8시간 작업, 기능 추가, SEO 리포트, 성능 모니터링</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-warning">Premium</span></td>
+        <td>100만원/월</td>
+        <td>월 20시간 작업, 전담 매니저, 24시간 긴급 대응, 월간 리포트</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>11.3 인수인계 산출물</h3>
+  <ul class="checklist">
+    <li>소스코드 전체 (GitHub 리포지토리)</li>
+    <li>CMS 운영 매뉴얼 (PDF)</li>
+    <li>디자인 시스템 가이드</li>
+    <li>배포 프로세스 문서</li>
+    <li>GA4 대시보드 접근 권한</li>
+    <li>도메인/호스팅 관리 정보</li>
+    <li>SEO 키워드 리포트</li>
+  </ul>
+
+  <h3>11.4 서비스 수준 약정 (SLA)</h3>
+  <table class="data">
+    <thead>
+      <tr><th>등급</th><th>대상</th><th>응답</th><th>해결</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><span class="badge badge-danger">긴급</span></td><td>사이트 다운, 보안 이슈</td><td>30분</td><td>4시간</td></tr>
+      <tr><td><span class="badge badge-warning">높음</span></td><td>주요 기능 오류</td><td>2시간</td><td>1영업일</td></tr>
+      <tr><td><span class="badge badge-primary">보통</span></td><td>콘텐츠 수정, 경미한 이슈</td><td>4시간</td><td>2영업일</td></tr>
+      <tr><td><span class="badge badge-success">낮음</span></td><td>개선 요청, 기능 추가</td><td>1영업일</td><td>협의</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box success" style="margin-top:24px">
+    <strong>🤝 프로젝트 성공을 위한 약속</strong><br>
+    온다마케팅은 (주)엠앤와이즈의 비즈니스 성장에 기여하는 홈페이지를 만들기 위해 최선을 다하겠습니다. 기획부터 배포, 유지보수까지 원스톱으로 책임지는 파트너가 되겠습니다.
+  </div>
+
+  <div style="text-align:center; margin-top:40px; padding:24px; background:var(--primary); border-radius:12px; color:#fff;">
+    <div style="font-size:14pt; font-weight:800; margin-bottom:8px;">온다마케팅</div>
+    <div style="font-size:9pt; opacity:.9;">
+      Email: contact@ondamarketing.com | Tel: 02-1234-5678<br>
+      서울특별시 강남구 테헤란로 123, 456호
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>온다마케팅 — Confidential</span>
+    <span>14 / 14</span>
+  </div>
+</div>
+
+</body>
+</html>
