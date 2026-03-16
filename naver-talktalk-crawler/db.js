@@ -35,8 +35,10 @@ function initSchema() {
       visitor_review_count INTEGER DEFAULT 0,
       blog_review_count INTEGER DEFAULT 0,
       phone TEXT,
+      seo_visible TEXT DEFAULT 'X',
       grade TEXT,
       target_menu TEXT DEFAULT '해당없음',
+      target_menus TEXT DEFAULT '',
       search_keyword TEXT,
       created_at TEXT DEFAULT (datetime('now', 'localtime')),
       updated_at TEXT DEFAULT (datetime('now', 'localtime'))
@@ -53,6 +55,8 @@ function initSchema() {
     ['responsive', "TEXT DEFAULT 'X'"],
     ['kakao_button', "TEXT DEFAULT 'X'"],
     ['target_menu', "TEXT DEFAULT '해당없음'"],
+    ['target_menus', "TEXT DEFAULT ''"],
+    ['seo_visible', "TEXT DEFAULT 'X'"],
   ];
   for (const [col, type] of migrations) {
     if (!cols.includes(col)) {
@@ -78,7 +82,8 @@ function exists(placeId) {
 
 function upsert(biz) {
   const d = getDb();
-  const { grade, target_menu } = classify(biz);
+  const { grade, target_menu, target_menus } = classify(biz);
+  biz.target_menus = (target_menus || []).join(',');
 
   const stmt = d.prepare(`
     INSERT INTO businesses (
@@ -86,13 +91,13 @@ function upsert(biz) {
       category, category_group, region, address,
       homepage_url, homepage_exists, responsive, kakao_button,
       visitor_review_count, blog_review_count,
-      phone, grade, target_menu, search_keyword
+      phone, seo_visible, grade, target_menu, target_menus, search_keyword
     ) VALUES (
       @place_id, @name, @place_url, @talktalk_active, @talktalk_url,
       @category, @category_group, @region, @address,
       @homepage_url, @homepage_exists, @responsive, @kakao_button,
       @visitor_review_count, @blog_review_count,
-      @phone, @grade, @target_menu, @search_keyword
+      @phone, @seo_visible, @grade, @target_menu, @target_menus, @search_keyword
     )
     ON CONFLICT(place_id) DO UPDATE SET
       name = @name,
@@ -110,8 +115,10 @@ function upsert(biz) {
       visitor_review_count = @visitor_review_count,
       blog_review_count = @blog_review_count,
       phone = @phone,
+      seo_visible = @seo_visible,
       grade = @grade,
       target_menu = @target_menu,
+      target_menus = @target_menus,
       search_keyword = @search_keyword,
       updated_at = datetime('now', 'localtime')
   `);

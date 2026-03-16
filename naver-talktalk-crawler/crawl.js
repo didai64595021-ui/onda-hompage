@@ -2,6 +2,7 @@
 const { generateKeywords } = require('./config');
 const { createBrowser, searchPlaces, checkTalktalk, delay } = require('./scraper');
 const { checkHomepage } = require('./homepage-checker');
+const { checkSeoVisibility } = require('./seo-checker');
 const db = require('./db');
 const { exportBatch, exportCsv, exportJson, BATCH_SIZE } = require('./exporter');
 
@@ -36,9 +37,10 @@ function parseArgs() {
 전환등급:
   S급: 톡톡O + 홈페이지O + 반응형X → 반응형전환 (7만)
   A급: 톡톡O + 홈페이지X + 리뷰적음 → 랜딩제작 (12만)
-  B급: 톡톡O + 홈페이지X + 리뷰많음 → 랜딩제작
-  C급: 톡톡O + 홈페이지O + 반응형O + 카톡X → 부가서비스
-  D급: 톡톡O + 홈페이지O + 반응형O + 카톡O → 타겟아님`);
+  B급: 톡톡O + 홈페이지O + SEO노출X → SEO최적화 (10만)
+  C급: 리뷰적음 (방문자<30 or 블로그<10) → 리뷰관리
+  D급: 다 있음 → 현재 타겟아님
+  ※ 한 업체가 여러 메뉴 해당 가능 (복합타겟)`);
       process.exit(0);
     }
   }
@@ -106,6 +108,7 @@ async function crawl(options = {}) {
   const { browser, context, page } = await createBrowser();
   const detailPage = await context.newPage();
   const homepagePage = await context.newPage();
+  // seoPage는 checkSeoVisibility 내부에서 매번 생성/닫기
 
   try {
     for (let ki = 0; ki < keywords.length; ki++) {
@@ -113,7 +116,7 @@ async function crawl(options = {}) {
       currentKeyword = kw.keyword;
       console.log(`\n[${ki + 1}/${keywords.length}] 키워드: "${kw.keyword}" (우선순위: ${kw.priority})`);
 
-      const places = await searchPlaces(page, kw.keyword);
+      const places = await searchPlaces(page, context, kw.keyword);
 
       let keywordCollected = 0;
 
@@ -125,24 +128,24 @@ async function crawl(options = {}) {
           continue;
         }
 
-        console.log(`  [${pi + 1}/${places.length}] ${place.name} 수집 중...`);
-
-        // 톡톡 확인
-        const talktalkResult = await checkTalktalk(detailPage, place.id);
+        console.log(`  [${pi + 1}/${places.length}] ${place.name} 추가 체크 중...`);
 
         // 홈페이지 체크 (홈페이지 URL 있을 때만)
         let homepageResult = { responsive: false, kakaoButton: false };
+        let seoVisible = 'X';
         if (place.homepage_url) {
           console.log(`    → 홈페이지 체크: ${place.homepage_url}`);
           homepageResult = await checkHomepage(homepagePage, place.homepage_url);
+          seoVisible = await checkSeoVisibility(context, place.homepage_url, place.name);
+          console.log(`    → SEO 노출: ${seoVisible}`);
         }
 
         const biz = {
           place_id: place.id,
           name: place.name,
           place_url: place.placeUrl,
-          talktalk_active: talktalkResult.talktalk_active ? 'O' : 'X',
-          talktalk_url: talktalkResult.talktalk_url,
+          talktalk_active: place.talktalk_active ? 'O' : 'X',
+          talktalk_url: place.talktalk_url,
           category: place.category || kw.category,
           category_group: kw.categoryGroup,
           region: kw.region,
@@ -151,6 +154,7 @@ async function crawl(options = {}) {
           homepage_exists: place.homepage_url ? 'O' : 'X',
           responsive: homepageResult.responsive ? 'O' : 'X',
           kakao_button: homepageResult.kakaoButton ? 'O' : 'X',
+          seo_visible: seoVisible,
           visitor_review_count: place.visitor_review_count,
           blog_review_count: place.blog_review_count,
           phone: place.phone,
@@ -163,7 +167,7 @@ async function crawl(options = {}) {
           totalCollected++;
           batchBuffer.push({ ...biz, grade, target_menu: getTargetMenu(grade, biz) });
 
-          console.log(`    → [${grade}급] 저장 (톡톡:${biz.talktalk_active} 홈페이지:${biz.homepage_exists} 반응형:${biz.responsive} 카톡:${biz.kakao_button} 리뷰:방문${place.visitor_review_count}/블로그${place.blog_review_count})`);
+          console.log(`    → [${grade}급] 저장 (톡톡:${biz.talktalk_active} 홈페이지:${biz.homepage_exists} 반응형:${biz.responsive} SEO:${biz.seo_visible} 카톡:${biz.kakao_button} 리뷰:방문${place.visitor_review_count}/블로그${place.blog_review_count})`);
 
           // 100개 배치 출력
           if (batchBuffer.length >= BATCH_SIZE) {
@@ -197,6 +201,7 @@ async function crawl(options = {}) {
   } finally {
     await detailPage.close().catch(() => {});
     await homepagePage.close().catch(() => {});
+    // seoPage는 내부에서 자동 관리
     await browser.close();
   }
 
