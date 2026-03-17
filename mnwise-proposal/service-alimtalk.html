@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>카카오 알림톡 — M&Wise</title>
+<meta name="description" content="엠앤와이즈 카카오 알림톡 서비스. 스팸 없는 정보성 비즈메시지로 고객 소통을 혁신하세요.">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & VARIABLES ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#1B65A6;
+  --primary-dark:#134B7E;
+  --accent:#FEE500;
+  --accent-dark:#E6CF00;
+  --dark:#0A0E1A;
+  --dark-surface:#131829;
+  --bg:#F8FAFC;
+  --bg-alt:#EEF2F7;
+  --text:#1A1A2E;
+  --text-light:#64748B;
+  --text-inv:#F1F5F9;
+  --glass:rgba(255,255,255,.08);
+  --glass-border:rgba(255,255,255,.12);
+  --radius:16px;
+  --radius-sm:10px;
+  --radius-xs:6px;
+  --font-main:'Pretendard',system-ui,sans-serif;
+  --font-en:'Inter',sans-serif;
+  --nav-h:72px;
+  --section-py:clamp(80px,10vw,140px);
+  --max-w:1240px;
+}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:var(--font-main);color:var(--text);background:var(--bg);line-height:1.7;word-break:keep-all;overflow-x:hidden}
+img{max-width:100%;display:block}
+a{text-decoration:none;color:inherit}
+button{font:inherit;cursor:pointer;border:none;background:none}
+ul,ol{list-style:none}
+.container{width:min(var(--max-w),100% - 48px);margin:0 auto}
+@media(max-width:480px){.container{width:min(var(--max-w),100% - 32px)}}
+
+/* ===== UTILITY ===== */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
+.reveal-delay-4{transition-delay:.4s}
+
+/* ===== NAV ===== */
+.nav{position:fixed;top:0;left:0;width:100%;height:var(--nav-h);z-index:1000;transition:background .3s,box-shadow .3s}
+.nav.scrolled{background:rgba(10,14,26,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 1px 0 rgba(255,255,255,.06)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:100%}
+.nav-logo{font-family:var(--font-en);font-weight:800;font-size:1.5rem;color:#fff;letter-spacing:-.5px}
+.nav-logo span{color:var(--accent)}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{color:rgba(255,255,255,.75);font-size:.9rem;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:#fff}
+.nav-right{display:flex;align-items:center;gap:16px}
+.lang-toggle{display:flex;border:1px solid rgba(255,255,255,.2);border-radius:20px;overflow:hidden}
+.lang-toggle button{padding:5px 12px;font-size:.75rem;font-weight:600;color:rgba(255,255,255,.5);transition:all .2s}
+.lang-toggle button.active{background:rgba(255,255,255,.15);color:#fff}
+.nav-cta{padding:10px 24px;background:var(--accent);color:var(--dark);font-weight:700;font-size:.85rem;border-radius:50px;transition:transform .2s,box-shadow .2s}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(254,229,0,.3)}
+.hamburger{display:none;flex-direction:column;gap:5px;width:28px;cursor:pointer}
+.hamburger span{height:2px;background:#fff;border-radius:2px;transition:all .3s}
+.mobile-menu{position:fixed;top:0;left:0;width:100%;height:100dvh;background:rgba(10,14,26,.97);backdrop-filter:blur(20px);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;opacity:0;pointer-events:none;transition:opacity .3s}
+.mobile-menu.open{opacity:1;pointer-events:all}
+.mobile-menu a{color:#fff;font-size:1.5rem;font-weight:600}
+.mobile-close{position:absolute;top:24px;right:24px;color:#fff;font-size:2rem;cursor:pointer}
+
+@media(max-width:768px){
+  .nav-links,.nav-cta,.lang-toggle{display:none}
+  .hamburger{display:flex}
+}
+
+/* ===== HERO ===== */
+.hero{min-height:100vh;background:var(--dark);position:relative;display:flex;align-items:center;overflow:hidden;padding-top:var(--nav-h)}
+.hero::before{content:'';position:absolute;top:-30%;right:-10%;width:600px;height:600px;background:radial-gradient(circle,rgba(27,101,166,.15),transparent 70%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-20%;left:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(254,229,0,.06),transparent 70%);pointer-events:none}
+.hero-inner{display:flex;align-items:center;gap:clamp(40px,5vw,80px);padding:clamp(40px,6vw,80px) 0}
+.hero-left{flex:0 0 55%;max-width:55%}
+.hero-right{flex:1;display:flex;justify-content:center;align-items:center;position:relative}
+
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(254,229,0,.1);border:1px solid rgba(254,229,0,.25);padding:8px 20px;border-radius:50px;font-size:.8rem;font-weight:600;color:var(--accent);margin-bottom:24px}
+.hero-badge::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse-dot 2s infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.5)}}
+
+.hero-title{font-size:clamp(2rem,4.5vw,3.6rem);font-weight:800;color:#fff;line-height:1.2;margin-bottom:20px;letter-spacing:-.02em}
+.hero-title .highlight{position:relative;display:inline-block}
+.hero-title .highlight svg{position:absolute;top:-8px;left:-12px;width:calc(100% + 24px);height:calc(100% + 16px);pointer-events:none}
+.hero-title .highlight svg ellipse{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-dasharray:300;stroke-dashoffset:300;animation:draw-circle 1.5s ease-out .5s forwards}
+@keyframes draw-circle{to{stroke-dashoffset:0}}
+
+.hero-desc{font-size:clamp(.95rem,1.2vw,1.15rem);color:rgba(255,255,255,.65);line-height:1.8;margin-bottom:36px;max-width:520px}
+.hero-ctas{display:flex;gap:16px;flex-wrap:wrap}
+.btn-primary{padding:16px 36px;background:var(--accent);color:var(--dark);font-weight:700;font-size:.95rem;border-radius:50px;transition:all .25s}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(254,229,0,.25)}
+.btn-ghost{padding:16px 36px;border:1.5px solid rgba(255,255,255,.25);color:#fff;font-weight:600;font-size:.95rem;border-radius:50px;transition:all .25s}
+.btn-ghost:hover{border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.05)}
+
+/* Kakao Mockup */
+.kakao-mockup{width:320px;border-radius:24px;overflow:hidden;background:#B2C7D9;padding:16px 12px;box-shadow:0 30px 80px rgba(0,0,0,.4);animation:bob 3s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.kakao-header{display:flex;align-items:center;gap:10px;padding:0 4px 12px}
+.kakao-avatar{width:40px;height:40px;border-radius:14px;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:#fff;font-family:var(--font-en)}
+.kakao-channel-name{font-size:.85rem;font-weight:700;color:var(--dark)}
+.kakao-verified{display:inline-flex;align-items:center;gap:3px;font-size:.65rem;color:var(--primary);font-weight:600;margin-top:2px}
+.kakao-verified::before{content:'✓';background:var(--primary);color:#fff;width:14px;height:14px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.55rem}
+.kakao-bubble{background:#fff;border-radius:4px 20px 20px 20px;padding:20px 18px;margin-bottom:10px;font-size:.82rem;line-height:1.7;color:var(--dark)}
+.kakao-bubble strong{display:block;font-size:.9rem;margin-bottom:8px}
+.kakao-bubble .divider{height:1px;background:#E5E8EB;margin:12px 0}
+.kakao-bubble .detail{color:var(--text-light);font-size:.78rem}
+.kakao-btn-area{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.kakao-btn{padding:10px;text-align:center;border-radius:8px;font-size:.8rem;font-weight:600;border:1px solid #E5E8EB}
+.kakao-btn.yellow{background:var(--accent);border-color:var(--accent);color:var(--dark)}
+
+/* Scroll indicator */
+.scroll-indicator{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(255,255,255,.4);font-size:.7rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase}
+.scroll-indicator::after{content:'';width:1px;height:40px;background:linear-gradient(rgba(255,255,255,.4),transparent);animation:scroll-line 2s ease-in-out infinite}
+@keyframes scroll-line{0%{opacity:0;transform:scaleY(0);transform-origin:top}50%{opacity:1;transform:scaleY(1)}100%{opacity:0;transform:scaleY(0);transform-origin:bottom}}
+
+@media(max-width:1024px){
+  .hero-inner{flex-direction:column;text-align:center}
+  .hero-left{flex:none;max-width:100%}
+  .hero-desc{margin-left:auto;margin-right:auto}
+  .hero-ctas{justify-content:center}
+}
+@media(max-width:480px){
+  .kakao-mockup{width:280px}
+  .btn-primary,.btn-ghost{padding:14px 28px;font-size:.9rem}
+}
+
+/* ===== STATS STRIP ===== */
+.stats-strip{position:relative;z-index:2;margin-top:-50px;padding-bottom:var(--section-py)}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.stat-card{background:rgba(255,255,255,.7);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.8);border-radius:var(--radius);padding:clamp(28px,3vw,40px);text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.06);transition:transform .3s}
+.stat-card:hover{transform:translateY(-4px)}
+.stat-number{font-family:var(--font-en);font-size:clamp(2rem,4vw,3.2rem);font-weight:900;color:var(--primary);line-height:1}
+.stat-number .accent{color:var(--accent)}
+.stat-label{font-size:.9rem;color:var(--text-light);margin-top:8px;font-weight:500}
+
+@media(max-width:768px){
+  .stats-grid{grid-template-columns:1fr}
+  .stats-strip{margin-top:-30px}
+}
+
+/* ===== SECTION COMMON ===== */
+.section{padding:var(--section-py) 0}
+.section-dark{background:var(--dark);color:var(--text-inv)}
+.section-alt{background:var(--bg-alt)}
+.section-label{font-size:.8rem;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px;font-family:var(--font-en)}
+.section-dark .section-label{color:var(--accent)}
+.section-title{font-size:clamp(1.6rem,3vw,2.6rem);font-weight:800;line-height:1.3;margin-bottom:20px;letter-spacing:-.02em}
+.section-desc{font-size:clamp(.9rem,1.1vw,1.05rem);color:var(--text-light);max-width:600px;line-height:1.8}
+.section-dark .section-desc{color:rgba(255,255,255,.55)}
+.section-header{margin-bottom:clamp(40px,5vw,64px)}
+.section-header.center{text-align:center}
+.section-header.center .section-desc{margin:0 auto}
+
+/* ===== BENTO GRID (FEATURES) ===== */
+.bento-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(220px,auto);gap:20px}
+.bento-card{background:#fff;border-radius:var(--radius);padding:clamp(24px,2.5vw,36px);border:1px solid #E8ECF1;transition:all .35s cubic-bezier(.22,1,.36,1);overflow:hidden;position:relative}
+.bento-card:hover{transform:translateY(-4px) scale(1.01);box-shadow:0 20px 60px rgba(0,0,0,.08)}
+.bento-card.span-2{grid-column:span 2}
+.bento-card-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:16px}
+.bento-card-title{font-size:1.1rem;font-weight:700;margin-bottom:8px}
+.bento-card-desc{font-size:.85rem;color:var(--text-light);line-height:1.7}
+
+/* Template mockup inside bento */
+.template-mockup{margin-top:20px;background:var(--bg);border-radius:var(--radius-sm);padding:16px;border:1px solid #E8ECF1;font-size:.75rem;color:var(--text-light)}
+.template-mockup .tmpl-line{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #EEF2F7}
+.template-mockup .tmpl-line:last-child{border-bottom:none}
+.template-mockup .tmpl-tag{padding:3px 8px;border-radius:4px;background:rgba(27,101,166,.08);color:var(--primary);font-size:.65rem;font-weight:600;white-space:nowrap}
+.template-mockup .tmpl-var{color:var(--primary);font-weight:600}
+
+/* Button types inside bento */
+.btn-types{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.btn-type-tag{padding:8px 14px;border-radius:8px;font-size:.75rem;font-weight:600;border:1px solid #E8ECF1;background:var(--bg);transition:all .2s}
+.btn-type-tag:hover{border-color:var(--primary);color:var(--primary);background:rgba(27,101,166,.04)}
+
+@media(max-width:768px){
+  .bento-grid{grid-template-columns:1fr}
+  .bento-card.span-2{grid-column:span 1}
+}
+
+/* ===== VS SECTION ===== */
+.vs-wrapper{display:grid;grid-template-columns:1fr auto 1fr;gap:40px;align-items:start}
+.vs-col{background:#fff;border-radius:var(--radius);padding:clamp(28px,3vw,40px);border:1px solid #E8ECF1}
+.vs-col.sms{opacity:.7}
+.vs-col.alimtalk{border-color:var(--accent);box-shadow:0 8px 40px rgba(254,229,0,.1)}
+.vs-divider{display:flex;align-items:center;justify-content:center;font-family:var(--font-en);font-weight:900;font-size:1.5rem;color:var(--text-light);padding-top:40px}
+.vs-col-title{font-size:1.3rem;font-weight:700;margin-bottom:24px;display:flex;align-items:center;gap:10px}
+.vs-col-title .dot{width:10px;height:10px;border-radius:50%}
+.vs-col.sms .dot{background:#94A3B8}
+.vs-col.alimtalk .dot{background:var(--accent)}
+.vs-feature{padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:.9rem;display:flex;align-items:center;gap:10px}
+.vs-feature:last-child{border-bottom:none}
+.vs-check{color:#22C55E;font-weight:700}
+.vs-cross{color:#EF4444;font-weight:700}
+
+/* Bar chart */
+.vs-chart{margin-top:40px}
+.vs-chart-title{font-size:.85rem;font-weight:600;margin-bottom:16px}
+.vs-bar-group{margin-bottom:16px}
+.vs-bar-label{font-size:.8rem;margin-bottom:6px;color:var(--text-light)}
+.vs-bar-track{height:32px;background:var(--bg);border-radius:8px;overflow:hidden;position:relative}
+.vs-bar-fill{height:100%;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:.75rem;font-weight:700;color:#fff;transition:width 1.2s cubic-bezier(.22,1,.36,1)}
+.vs-bar-fill.sms-bar{background:#94A3B8}
+.vs-bar-fill.alimtalk-bar{background:var(--primary)}
+
+@media(max-width:768px){
+  .vs-wrapper{grid-template-columns:1fr;gap:16px}
+  .vs-divider{padding:0;font-size:1.2rem}
+}
+
+/* ===== PROCESS ===== */
+.process-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+.process-step{text-align:center;padding:0 20px;position:relative}
+.process-step:not(:last-child)::after{content:'';position:absolute;top:28px;left:calc(50% + 32px);width:calc(100% - 64px);height:2px;border-top:2px dashed rgba(27,101,166,.2)}
+.step-number{width:56px;height:56px;border-radius:50%;background:rgba(27,101,166,.08);color:var(--primary);font-family:var(--font-en);font-weight:800;font-size:1.2rem;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;position:relative;z-index:1;transition:all .3s}
+.process-step:hover .step-number{background:var(--primary);color:#fff;transform:scale(1.1)}
+.step-icon{font-size:1.5rem;margin-bottom:8px}
+.step-title{font-size:1rem;font-weight:700;margin-bottom:6px}
+.step-desc{font-size:.82rem;color:var(--text-light);line-height:1.6}
+
+@media(max-width:768px){
+  .process-steps{grid-template-columns:1fr 1fr;gap:32px}
+  .process-step:not(:last-child)::after{display:none}
+}
+@media(max-width:480px){
+  .process-steps{grid-template-columns:1fr}
+}
+
+/* ===== CASE STUDIES (horizontal scroll) ===== */
+.cases-scroll{display:flex;gap:24px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:8px 0 24px;cursor:grab}
+.cases-scroll:active{cursor:grabbing}
+.cases-scroll::-webkit-scrollbar{height:6px}
+.cases-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,.05)}
+.cases-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:3px}
+.case-card{min-width:clamp(300px,35vw,400px);flex-shrink:0;border-radius:var(--radius);padding:clamp(28px,3vw,40px);scroll-snap-align:start;position:relative;overflow:hidden}
+.case-card:nth-child(1){background:linear-gradient(135deg,#1B3A5C,#2A5F8F)}
+.case-card:nth-child(2){background:linear-gradient(135deg,#1B4332,#2D6A4F)}
+.case-card:nth-child(3){background:linear-gradient(135deg,#4A1B6B,#7C3AED)}
+.case-industry{font-size:.7rem;font-weight:600;padding:4px 12px;border-radius:20px;background:rgba(255,255,255,.15);color:rgba(255,255,255,.8);display:inline-block;margin-bottom:16px}
+.case-company{font-size:1.5rem;font-weight:800;color:#fff;margin-bottom:16px}
+.case-quote{font-size:.9rem;color:rgba(255,255,255,.75);line-height:1.8;font-style:italic;margin-bottom:20px}
+.case-effect{font-size:.82rem;color:rgba(255,255,255,.55);padding-top:16px;border-top:1px solid rgba(255,255,255,.1)}
+.case-effect strong{color:#fff;font-weight:700}
+
+/* ===== MARQUEE (clients) ===== */
+.marquee-section{padding:clamp(60px,8vw,100px) 0;overflow:hidden}
+.marquee-track{display:flex;gap:16px;width:max-content}
+.marquee-row{display:flex;gap:16px;animation:marquee-scroll 40s linear infinite}
+.marquee-row.reverse{animation-direction:reverse}
+@keyframes marquee-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.marquee-section:hover .marquee-row{animation-play-state:paused}
+.client-badge{padding:12px 24px;background:#fff;border:1px solid #E8ECF1;border-radius:50px;white-space:nowrap;font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:8px;transition:all .2s}
+.client-badge:hover{border-color:var(--primary);background:rgba(27,101,166,.03)}
+.client-badge .industry{font-size:.65rem;color:var(--text-light);font-weight:500;padding:2px 8px;background:var(--bg-alt);border-radius:10px}
+
+/* ===== CTA BANNER ===== */
+.cta-banner{padding:clamp(60px,8vw,100px) 0;background:linear-gradient(135deg,var(--primary),var(--primary-dark))}
+.cta-banner-inner{text-align:center;color:#fff}
+.cta-banner-title{font-size:clamp(1.5rem,3vw,2.4rem);font-weight:800;margin-bottom:12px}
+.cta-banner-desc{font-size:1rem;color:rgba(255,255,255,.7);margin-bottom:32px}
+.cta-form{display:flex;gap:12px;max-width:480px;margin:0 auto}
+.cta-form input{flex:1;padding:16px 24px;border-radius:50px;border:none;font-size:.95rem;outline:none}
+.cta-form input::placeholder{color:#94A3B8}
+.cta-form button{padding:16px 32px;background:var(--accent);color:var(--dark);font-weight:700;border-radius:50px;white-space:nowrap;transition:transform .2s}
+.cta-form button:hover{transform:translateY(-2px)}
+@media(max-width:480px){
+  .cta-form{flex-direction:column}
+  .cta-form input,.cta-form button{width:100%}
+}
+
+/* ===== FOOTER ===== */
+.footer{background:var(--dark);color:rgba(255,255,255,.5);padding:60px 0 40px}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;padding-bottom:40px;border-bottom:1px solid rgba(255,255,255,.06)}
+.footer-brand{font-family:var(--font-en);font-weight:800;font-size:1.3rem;color:#fff;margin-bottom:12px}
+.footer-brand span{color:var(--accent)}
+.footer-info{font-size:.8rem;line-height:2}
+.footer-col-title{font-size:.8rem;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:16px;text-transform:uppercase;letter-spacing:.05em}
+.footer-col a{display:block;font-size:.82rem;padding:4px 0;transition:color .2s}
+.footer-col a:hover{color:var(--accent)}
+.footer-bottom{padding-top:24px;display:flex;justify-content:space-between;align-items:center;font-size:.75rem}
+@media(max-width:768px){
+  .footer-top{grid-template-columns:1fr 1fr}
+  .footer-bottom{flex-direction:column;gap:12px;text-align:center}
+}
+@media(max-width:480px){.footer-top{grid-template-columns:1fr}}
+
+/* ===== BILINGUAL ===== */
+[data-en]{display:none}
+body.en [data-kr]{display:none}
+body.en [data-en]{display:revert}
+body.en [data-en-block]{display:block}
+body.en [data-en-flex]{display:flex}
+body.en [data-en-inline]{display:inline}
+body.en [data-en-grid]{display:grid}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+<div class="container nav-inner">
+  <a href="index.html" class="nav-logo">M&<span>W</span>ise</a>
+  <div class="nav-links">
+    <a href="index.html#services" data-kr>서비스</a><a href="index.html#services" data-en>Services</a>
+    <a href="index.html#about" data-kr>회사소개</a><a href="index.html#about" data-en>About</a>
+    <a href="index.html#cases" data-kr>도입사례</a><a href="index.html#cases" data-en>Cases</a>
+    <a href="index.html#news" data-kr>뉴스</a><a href="index.html#news" data-en>News</a>
+    <a href="index.html#contact" data-kr>문의</a><a href="index.html#contact" data-en>Contact</a>
+  </div>
+  <div class="nav-right">
+    <div class="lang-toggle">
+      <button class="active" id="btnKr" onclick="setLang('kr')">KR</button>
+      <button id="btnEn" onclick="setLang('en')">EN</button>
+    </div>
+    <a href="#cta" class="nav-cta" data-kr>3초 만에 상담 신청</a>
+    <a href="#cta" class="nav-cta" data-en>Get Started</a>
+  </div>
+  <div class="hamburger" onclick="toggleMobile()">
+    <span></span><span></span><span></span>
+  </div>
+</div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+<div class="mobile-close" onclick="toggleMobile()">✕</div>
+<a href="index.html#services" onclick="toggleMobile()" data-kr>서비스</a>
+<a href="index.html#services" onclick="toggleMobile()" data-en>Services</a>
+<a href="index.html#about" onclick="toggleMobile()" data-kr>회사소개</a>
+<a href="index.html#about" onclick="toggleMobile()" data-en>About</a>
+<a href="index.html#cases" onclick="toggleMobile()" data-kr>도입사례</a>
+<a href="index.html#cases" onclick="toggleMobile()" data-en>Cases</a>
+<a href="#cta" onclick="toggleMobile()" data-kr>문의하기</a>
+<a href="#cta" onclick="toggleMobile()" data-en>Contact</a>
+<div class="lang-toggle" style="display:flex">
+  <button class="active" onclick="setLang('kr')">KR</button>
+  <button onclick="setLang('en')">EN</button>
+</div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+<div class="container hero-inner">
+  <div class="hero-left">
+    <div class="hero-badge reveal">
+      <span data-kr>카카오 비즈메시지</span>
+      <span data-en>Kakao Biz Message</span>
+    </div>
+    <h1 class="hero-title reveal reveal-delay-1">
+      <span data-kr>스팸 없는 정보성 메시지<br><span class="highlight">알림톡<svg viewBox="0 0 140 60"><ellipse cx="70" cy="30" rx="65" ry="25"/></svg></span>으로 소통하세요</span>
+      <span data-en>Communicate with<br>Spam-free <span class="highlight">Alimtalk<svg viewBox="0 0 160 60"><ellipse cx="80" cy="30" rx="75" ry="25"/></svg></span></span>
+    </h1>
+    <p class="hero-desc reveal reveal-delay-2">
+      <span data-kr>카카오톡 채널을 추가하지 않은 이용자에게도 발송 가능한 정보성 비즈메시지 서비스. 주문·예약·결제·배송 등 고객 행동에 즉각 반응하세요.</span>
+      <span data-en>Send informational biz-messages even to users who haven't added your KakaoTalk channel. React instantly to orders, bookings, payments & deliveries.</span>
+    </p>
+    <div class="hero-ctas reveal reveal-delay-3">
+      <a href="#cta" class="btn-primary" data-kr>도입 문의하기</a>
+      <a href="#cta" class="btn-primary" data-en>Get Started</a>
+      <a href="#features" class="btn-ghost" data-kr>데모 체험</a>
+      <a href="#features" class="btn-ghost" data-en>Live Demo</a>
+    </div>
+  </div>
+  <div class="hero-right reveal reveal-delay-2">
+    <div class="kakao-mockup">
+      <div class="kakao-header">
+        <div class="kakao-avatar">M&W</div>
+        <div>
+          <div class="kakao-channel-name">엠앤와이즈</div>
+          <div class="kakao-verified">인증된 채널</div>
+        </div>
+      </div>
+      <div class="kakao-bubble">
+        <strong>[엠앤와이즈] 알림톡</strong>
+        <span data-kr>OOO님, 9월 사용료 명세서입니다.<br><br></span>
+        <span data-en>Dear Customer, here is your September statement.<br><br></span>
+        <div class="detail">
+          <span data-kr>당월결제금액: <strong>100,000원</strong><br>결제일: 2025.09.25<br>결제수단: 자동이체</span>
+          <span data-en>Amount Due: <strong>₩100,000</strong><br>Due Date: 2025.09.25<br>Payment: Auto-debit</span>
+        </div>
+        <div class="kakao-btn-area">
+          <div class="kakao-btn" data-kr>상세 내역 확인</div>
+          <div class="kakao-btn" data-en>View Details</div>
+          <div class="kakao-btn yellow">Ch+ 채널 추가</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="scroll-indicator">
+  <span>Scroll</span>
+</div>
+</section>
+
+<!-- STATS STRIP -->
+<section class="stats-strip">
+<div class="container">
+  <div class="stats-grid">
+    <div class="stat-card reveal">
+      <div class="stat-number" data-kr><span class="accent" data-count="70">0</span>%</div>
+      <div class="stat-number" data-en>Up to <span class="accent" data-count="70">0</span>%</div>
+      <div class="stat-label" data-kr>최대 비용 절감</div>
+      <div class="stat-label" data-en>Cost Reduction</div>
+    </div>
+    <div class="stat-card reveal reveal-delay-1">
+      <div class="stat-number"><span data-count="90">0</span>%</div>
+      <div class="stat-label" data-kr>수신 성공률</div>
+      <div class="stat-label" data-en>Delivery Success Rate</div>
+    </div>
+    <div class="stat-card reveal reveal-delay-2">
+      <div class="stat-number"><span data-count="1000">0</span><span style="font-size:.6em" data-kr>자</span><span style="font-size:.6em" data-en>chars</span></div>
+      <div class="stat-label" data-kr>최대 발송 가능 글자수</div>
+      <div class="stat-label" data-en>Max Characters per Message</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- FEATURES BENTO GRID -->
+<section class="section section-alt" id="features">
+<div class="container">
+  <div class="section-header center reveal">
+    <div class="section-label">Features</div>
+    <h2 class="section-title" data-kr>알림톡의 주요 기능</h2>
+    <h2 class="section-title" data-en>Key Features of Alimtalk</h2>
+    <p class="section-desc" data-kr>사전 승인된 템플릿 기반으로 안전하고 효과적인 비즈메시지를 발송하세요.</p>
+    <p class="section-desc" data-en>Send safe, effective biz-messages based on pre-approved templates.</p>
+  </div>
+  <div class="bento-grid">
+    <!-- Template -->
+    <div class="bento-card span-2 reveal">
+      <div class="bento-card-icon" style="background:rgba(27,101,166,.08);color:var(--primary)">📋</div>
+      <div class="bento-card-title" data-kr>템플릿 기반 발송</div>
+      <div class="bento-card-title" data-en>Template-based Messaging</div>
+      <div class="bento-card-desc" data-kr>사전 승인 받은 템플릿으로 정보성 비즈메시지를 안전하게 발송합니다.</div>
+      <div class="bento-card-desc" data-en>Send biz-messages safely using pre-approved templates.</div>
+      <div class="template-mockup">
+        <div class="tmpl-line"><span class="tmpl-tag">변수</span> <span class="tmpl-var">#{고객명}</span>님, 주문이 접수되었습니다.</div>
+        <div class="tmpl-line"><span class="tmpl-tag">고정</span> 주문번호: <span class="tmpl-var">#{주문번호}</span></div>
+        <div class="tmpl-line"><span class="tmpl-tag">고정</span> 결제금액: <span class="tmpl-var">#{금액}</span>원</div>
+        <div class="tmpl-line"><span class="tmpl-tag">버튼</span> [배송조회] [주문상세]</div>
+      </div>
+    </div>
+    <!-- Phone-based -->
+    <div class="bento-card reveal reveal-delay-1">
+      <div class="bento-card-icon" style="background:rgba(34,197,94,.08);color:#22C55E">📱</div>
+      <div class="bento-card-title" data-kr>번호 기반 발송</div>
+      <div class="bento-card-title" data-en>Phone Number Based</div>
+      <div class="bento-card-desc" data-kr>카카오톡 채널 친구 추가 없이 휴대전화번호만으로 발송할 수 있습니다.</div>
+      <div class="bento-card-desc" data-en>Send messages using phone numbers — no channel friend required.</div>
+    </div>
+    <!-- 1000 chars -->
+    <div class="bento-card reveal reveal-delay-2">
+      <div class="bento-card-icon" style="background:rgba(168,85,247,.08);color:#A855F7">✉️</div>
+      <div class="bento-card-title" data-kr>1,000자 + 이미지</div>
+      <div class="bento-card-title" data-en>1,000 Chars + Images</div>
+      <div class="bento-card-desc" data-kr>한/영 구분 없이 띄어쓰기 포함 1,000자 발송. 이미지도 포함 가능합니다.</div>
+      <div class="bento-card-desc" data-en>Send up to 1,000 characters with spaces and attach images.</div>
+    </div>
+    <!-- Buttons -->
+    <div class="bento-card span-2 reveal reveal-delay-1">
+      <div class="bento-card-icon" style="background:rgba(254,229,0,.12);color:#D4A800">🔘</div>
+      <div class="bento-card-title" data-kr>다양한 버튼 기능</div>
+      <div class="bento-card-title" data-en>Rich Button Options</div>
+      <div class="bento-card-desc" data-kr>웹링크, 앱링크, 배송조회, 채널추가 등 다양한 버튼으로 전환율을 높이세요.</div>
+      <div class="bento-card-desc" data-en>Boost conversions with web links, app links, delivery tracking buttons & more.</div>
+      <div class="btn-types">
+        <span class="btn-type-tag" data-kr>배송조회</span><span class="btn-type-tag" data-en>Delivery</span>
+        <span class="btn-type-tag" data-kr>웹링크</span><span class="btn-type-tag" data-en>Web Link</span>
+        <span class="btn-type-tag" data-kr>앱링크</span><span class="btn-type-tag" data-en>App Link</span>
+        <span class="btn-type-tag" data-kr>채널추가</span><span class="btn-type-tag" data-en>Add Channel</span>
+        <span class="btn-type-tag" data-kr>봇키워드</span><span class="btn-type-tag" data-en>Bot Keyword</span>
+        <span class="btn-type-tag" data-kr>메시지전달</span><span class="btn-type-tag" data-en>Forward</span>
+        <span class="btn-type-tag" data-kr>상담톡전환</span><span class="btn-type-tag" data-en>Consult</span>
+        <span class="btn-type-tag" data-kr>봇전환</span><span class="btn-type-tag" data-en>Bot Switch</span>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- VS COMPARISON -->
+<section class="section" id="compare">
+<div class="container">
+  <div class="section-header center reveal">
+    <div class="section-label">Comparison</div>
+    <h2 class="section-title" data-kr>문자 vs 알림톡</h2>
+    <h2 class="section-title" data-en>SMS vs Alimtalk</h2>
+    <p class="section-desc" data-kr>기존 문자 대비 알림톡의 압도적인 우위를 확인하세요.</p>
+    <p class="section-desc" data-en>See why Alimtalk outperforms traditional SMS in every way.</p>
+  </div>
+  <div class="vs-wrapper reveal">
+    <div class="vs-col sms">
+      <div class="vs-col-title"><span class="dot"></span> SMS / LMS</div>
+      <div class="vs-feature"><span class="vs-cross">✕</span> <span data-kr>텍스트만 전송</span><span data-en>Text only</span></div>
+      <div class="vs-feature"><span class="vs-cross">✕</span> <span data-kr>최대 2,000바이트</span><span data-en>Max 2,000 bytes</span></div>
+      <div class="vs-feature"><span class="vs-cross">✕</span> <span data-kr>버튼 불가</span><span data-en>No buttons</span></div>
+      <div class="vs-feature"><span class="vs-cross">✕</span> <span data-kr>인증마크 없음</span><span data-en>No verification badge</span></div>
+      <div class="vs-feature"><span class="vs-cross">✕</span> <span data-kr>높은 비용</span><span data-en>High cost</span></div>
+      <div class="vs-feature"><span class="vs-cross">✕</span> <span data-kr>스팸 혼동</span><span data-en>Spam confusion</span></div>
+    </div>
+    <div class="vs-divider">VS</div>
+    <div class="vs-col alimtalk">
+      <div class="vs-col-title"><span class="dot"></span> <span data-kr>카카오 알림톡</span><span data-en>Kakao Alimtalk</span></div>
+      <div class="vs-feature"><span class="vs-check">✓</span> <span data-kr>이미지 + 텍스트</span><span data-en>Images + Text</span></div>
+      <div class="vs-feature"><span class="vs-check">✓</span> <span data-kr>1,000자 발송</span><span data-en>1,000 characters</span></div>
+      <div class="vs-feature"><span class="vs-check">✓</span> <span data-kr>8종 버튼 지원</span><span data-en>8 button types</span></div>
+      <div class="vs-feature"><span class="vs-check">✓</span> <span data-kr>카카오 인증마크</span><span data-en>Kakao verified badge</span></div>
+      <div class="vs-feature"><span class="vs-check">✓</span> <span data-kr>최대 70% 절감</span><span data-en>Up to 70% savings</span></div>
+      <div class="vs-feature"><span class="vs-check">✓</span> <span data-kr>스팸 스트레스 제로</span><span data-en>Zero spam stress</span></div>
+    </div>
+  </div>
+  <!-- Bar charts -->
+  <div class="vs-chart reveal" style="max-width:700px;margin:48px auto 0">
+    <div class="vs-chart-title" data-kr>비용 & 수신률 비교</div>
+    <div class="vs-chart-title" data-en>Cost & Delivery Rate Comparison</div>
+    <div class="vs-bar-group">
+      <div class="vs-bar-label">SMS/LMS <span data-kr>비용</span><span data-en>Cost</span></div>
+      <div class="vs-bar-track"><div class="vs-bar-fill sms-bar" data-bar="100">100%</div></div>
+    </div>
+    <div class="vs-bar-group">
+      <div class="vs-bar-label" data-kr>알림톡 비용</div><div class="vs-bar-label" data-en>Alimtalk Cost</div>
+      <div class="vs-bar-track"><div class="vs-bar-fill alimtalk-bar" data-bar="30">30%</div></div>
+    </div>
+    <div class="vs-bar-group" style="margin-top:24px">
+      <div class="vs-bar-label">SMS <span data-kr>수신률</span><span data-en>Delivery</span></div>
+      <div class="vs-bar-track"><div class="vs-bar-fill sms-bar" data-bar="65">~65%</div></div>
+    </div>
+    <div class="vs-bar-group">
+      <div class="vs-bar-label" data-kr>알림톡 수신률</div><div class="vs-bar-label" data-en>Alimtalk Delivery</div>
+      <div class="vs-bar-track"><div class="vs-bar-fill alimtalk-bar" data-bar="90">~90%</div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- PROCESS -->
+<section class="section section-alt" id="process">
+<div class="container">
+  <div class="section-header center reveal">
+    <div class="section-label">Process</div>
+    <h2 class="section-title" data-kr>도입 프로세스</h2>
+    <h2 class="section-title" data-en>Implementation Process</h2>
+    <p class="section-desc" data-kr>4단계로 간편하게 알림톡을 시작하세요.</p>
+    <p class="section-desc" data-en>Get started with Alimtalk in just 4 simple steps.</p>
+  </div>
+  <div class="process-steps">
+    <div class="process-step reveal">
+      <div class="step-number">1</div>
+      <div class="step-icon">📞</div>
+      <div class="step-title" data-kr>상담 신청</div>
+      <div class="step-title" data-en>Consultation</div>
+      <div class="step-desc" data-kr>전문 컨설턴트가 맞춤 솔루션을 제안합니다.</div>
+      <div class="step-desc" data-en>Expert consultants propose tailored solutions.</div>
+    </div>
+    <div class="process-step reveal reveal-delay-1">
+      <div class="step-number">2</div>
+      <div class="step-icon">💬</div>
+      <div class="step-title" data-kr>카카오 채널 개설</div>
+      <div class="step-title" data-en>Channel Setup</div>
+      <div class="step-desc" data-kr>카카오톡 채널을 개설하고 비즈니스 인증을 진행합니다.</div>
+      <div class="step-desc" data-en>Open a KakaoTalk channel and complete business verification.</div>
+    </div>
+    <div class="process-step reveal reveal-delay-2">
+      <div class="step-number">3</div>
+      <div class="step-icon">📝</div>
+      <div class="step-title" data-kr>템플릿 등록</div>
+      <div class="step-title" data-en>Template Registration</div>
+      <div class="step-desc" data-kr>발송할 메시지 템플릿을 등록하고 승인받습니다.</div>
+      <div class="step-desc" data-en>Register and get approval for your message templates.</div>
+    </div>
+    <div class="process-step reveal reveal-delay-3">
+      <div class="step-number">4</div>
+      <div class="step-icon">🚀</div>
+      <div class="step-title" data-kr>발송 시작</div>
+      <div class="step-title" data-en>Go Live</div>
+      <div class="step-desc" data-kr>API 연동 후 알림톡 발송을 시작합니다.</div>
+      <div class="step-desc" data-en>Start sending Alimtalk messages via API integration.</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- CASE STUDIES -->
+<section class="section section-dark" id="cases">
+<div class="container">
+  <div class="section-header reveal">
+    <div class="section-label">Case Studies</div>
+    <h2 class="section-title" data-kr>구축사례</h2>
+    <h2 class="section-title" data-en>Success Stories</h2>
+    <p class="section-desc" data-kr>다양한 산업에서 검증된 알림톡 도입 효과를 확인하세요.</p>
+    <p class="section-desc" data-en>Proven results across diverse industries.</p>
+  </div>
+  <div class="cases-scroll" id="casesScroll">
+    <div class="case-card reveal">
+      <div class="case-industry" data-kr>금융</div><div class="case-industry" data-en>Finance</div>
+      <div class="case-company">케이뱅크<br><span style="font-size:.5em;font-weight:500;opacity:.6">Kbank</span></div>
+      <div class="case-quote" data-kr>"계좌개설, 자동이체, 모바일고지서 등 비대면 업무에 알림톡을 도입하여 업무 효율을 대폭 강화했습니다."</div>
+      <div class="case-quote" data-en>"We significantly improved non-face-to-face operations including account opening, auto-transfers, and mobile statements."</div>
+      <div class="case-effect"><strong data-kr>도입 효과:</strong><strong data-en>Impact:</strong> <span data-kr>비대면 업무 효율 강화, 고객 만족도 향상</span><span data-en>Enhanced remote operations, improved customer satisfaction</span></div>
+    </div>
+    <div class="case-card reveal reveal-delay-1">
+      <div class="case-industry" data-kr>자동차</div><div class="case-industry" data-en>Automotive</div>
+      <div class="case-company">폭스바겐그룹코리아<br><span style="font-size:.5em;font-weight:500;opacity:.6">Volkswagen Group Korea</span></div>
+      <div class="case-quote" data-kr>"서비스 내역을 알림톡으로 안내하고, 마케팅 문자로 이벤트와 프로모션을 효과적으로 전달합니다."</div>
+      <div class="case-quote" data-en>"We deliver service updates via Alimtalk and effectively promote events through marketing messages."</div>
+      <div class="case-effect"><strong data-kr>도입 효과:</strong><strong data-en>Impact:</strong> <span data-kr>서비스 알림 + 마케팅 통합 운영</span><span data-en>Unified service notifications + marketing operations</span></div>
+    </div>
+    <div class="case-card reveal reveal-delay-2">
+      <div class="case-industry" data-kr>보험</div><div class="case-industry" data-en>Insurance</div>
+      <div class="case-company">DB손해보험<br><span style="font-size:.5em;font-weight:500;opacity:.6">DB Insurance</span></div>
+      <div class="case-quote" data-kr>"보험 접수·진행·보상 전 과정을 알림톡으로 안내하여 비용을 절감하고 신뢰성을 강화했습니다."</div>
+      <div class="case-quote" data-en>"We guide the entire insurance process via Alimtalk, reducing costs while strengthening trust."</div>
+      <div class="case-effect"><strong data-kr>도입 효과:</strong><strong data-en>Impact:</strong> <span data-kr>비용 절감 + 고객 신뢰 강화</span><span data-en>Cost reduction + enhanced customer trust</span></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- CLIENTS MARQUEE -->
+<section class="marquee-section section-alt">
+<div class="container" style="margin-bottom:32px">
+  <div class="section-header center reveal">
+    <div class="section-label">Clients</div>
+    <h2 class="section-title" data-kr>신뢰할 수 있는 고객사</h2>
+    <h2 class="section-title" data-en>Trusted by Industry Leaders</h2>
+  </div>
+</div>
+<div style="overflow:hidden">
+  <div class="marquee-track">
+    <div class="marquee-row" id="marqueeRow1"></div>
+  </div>
+</div>
+<div style="overflow:hidden;margin-top:12px">
+  <div class="marquee-track">
+    <div class="marquee-row reverse" id="marqueeRow2"></div>
+  </div>
+</div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="cta-banner" id="cta">
+<div class="container cta-banner-inner">
+  <h2 class="cta-banner-title reveal" data-kr>알림톡 도입, 지금 시작하세요</h2>
+  <h2 class="cta-banner-title reveal" data-en>Start Your Alimtalk Journey Today</h2>
+  <p class="cta-banner-desc reveal reveal-delay-1" data-kr>전문 컨설턴트가 최적의 솔루션을 제안해 드립니다.</p>
+  <p class="cta-banner-desc reveal reveal-delay-1" data-en>Our expert consultants will propose the optimal solution for you.</p>
+  <div class="cta-form reveal reveal-delay-2">
+    <input type="email" placeholder="your@email.com" aria-label="Email">
+    <button type="button" data-kr>상담 신청</button>
+    <button type="button" data-en>Get Started</button>
+  </div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+<div class="container">
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand">M&<span>W</span>ise</div>
+      <div class="footer-info" data-kr>
+        (주)엠앤와이즈 | 대표이사 김경민<br>
+        서울특별시 강남구 테헤란로 131, 한국지식재산센터 15층<br>
+        사업자등록번호 120-87-46858<br>
+        Tel 02-2082-2100 | Fax 02-2082-2109
+      </div>
+      <div class="footer-info" data-en>
+        M&Wise Inc. | CEO Kim Kyung-min<br>
+        15F, Korea IP Center, 131 Teheran-ro, Gangnam-gu, Seoul<br>
+        Business Reg. 120-87-46858<br>
+        Tel +82-2-2082-2100 | Fax +82-2-2082-2109
+      </div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title" data-kr>서비스</div>
+      <div class="footer-col-title" data-en>Services</div>
+      <a href="#" data-kr>카카오 알림톡</a><a href="#" data-en>Kakao Alimtalk</a>
+      <a href="#" data-kr>카카오 친구톡</a><a href="#" data-en>Kakao Friendtalk</a>
+      <a href="#" data-kr>RCS 메시지</a><a href="#" data-en>RCS Message</a>
+      <a href="#" data-kr>문자 메시지</a><a href="#" data-en>SMS/LMS</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title" data-kr>회사</div>
+      <div class="footer-col-title" data-en>Company</div>
+      <a href="#" data-kr>회사소개</a><a href="#" data-en>About Us</a>
+      <a href="#" data-kr>뉴스</a><a href="#" data-en>News</a>
+      <a href="#" data-kr>채용</a><a href="#" data-en>Careers</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title" data-kr>지원</div>
+      <div class="footer-col-title" data-en>Support</div>
+      <a href="#" data-kr>문의하기</a><a href="#" data-en>Contact</a>
+      <a href="#" data-kr>개인정보처리방침</a><a href="#" data-en>Privacy Policy</a>
+      <a href="#" data-kr>이용약관</a><a href="#" data-en>Terms of Use</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 M&Wise Inc. All rights reserved.</span>
+    <span data-kr>본 페이지는 포트폴리오 제안용입니다.</span>
+    <span data-en>This page is a portfolio proposal.</span>
+  </div>
+</div>
+</footer>
+
+<script>
+/* ===== LANGUAGE TOGGLE ===== */
+function setLang(lang){
+  document.body.classList.toggle('en',lang==='en');
+  document.getElementById('btnKr').classList.toggle('active',lang==='kr');
+  document.getElementById('btnEn').classList.toggle('active',lang==='en');
+  localStorage.setItem('mnwise-lang',lang);
+}
+(function(){const l=localStorage.getItem('mnwise-lang');if(l)setLang(l)})();
+
+/* ===== MOBILE MENU ===== */
+function toggleMobile(){document.getElementById('mobileMenu').classList.toggle('open')}
+
+/* ===== NAV SCROLL ===== */
+window.addEventListener('scroll',function(){
+  document.getElementById('nav').classList.toggle('scrolled',window.scrollY>40);
+},{passive:true});
+
+/* ===== INTERSECTION OBSERVER ===== */
+const obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}});
+},{threshold:.15,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el)});
+
+/* ===== COUNT UP ===== */
+const countObs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(!e.isIntersecting)return;
+    const el=e.target;
+    const target=parseInt(el.dataset.count,10);
+    const duration=1500;
+    const start=performance.now();
+    function tick(now){
+      const p=Math.min((now-start)/duration,1);
+      const ease=1-Math.pow(1-p,3);
+      el.textContent=Math.round(ease*target).toLocaleString();
+      if(p<1)requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    countObs.unobserve(el);
+  });
+},{threshold:.5});
+document.querySelectorAll('[data-count]').forEach(function(el){countObs.observe(el)});
+
+/* ===== BAR CHART ANIMATION ===== */
+const barObs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(!e.isIntersecting)return;
+    e.target.querySelectorAll('.vs-bar-fill').forEach(function(bar){
+      bar.style.width=bar.dataset.bar+'%';
+    });
+    barObs.unobserve(e.target);
+  });
+},{threshold:.3});
+document.querySelectorAll('.vs-chart').forEach(function(el){
+  el.querySelectorAll('.vs-bar-fill').forEach(function(bar){bar.style.width='0'});
+  barObs.observe(el);
+});
+
+/* ===== DRAG SCROLL (cases) ===== */
+(function(){
+  const el=document.getElementById('casesScroll');
+  if(!el)return;
+  let isDown=false,startX,scrollLeft;
+  el.addEventListener('mousedown',function(e){isDown=true;startX=e.pageX-el.offsetLeft;scrollLeft=el.scrollLeft;el.style.cursor='grabbing'});
+  el.addEventListener('mouseleave',function(){isDown=false;el.style.cursor='grab'});
+  el.addEventListener('mouseup',function(){isDown=false;el.style.cursor='grab'});
+  el.addEventListener('mousemove',function(e){if(!isDown)return;e.preventDefault();el.scrollLeft=scrollLeft-(e.pageX-el.offsetLeft-startX)*1.5});
+})();
+
+/* ===== MARQUEE CLIENTS ===== */
+(function(){
+  var clients1=[
+    {name:'KB국민은행',tag:'금융'},{name:'Kbank',tag:'금융'},{name:'KDB생명',tag:'보험'},
+    {name:'NH농협생명',tag:'보험'},{name:'KB라이프',tag:'보험'},{name:'삼성증권',tag:'증권'},
+    {name:'전북은행',tag:'금융'},{name:'MetLife',tag:'보험'},{name:'BNK부산은행',tag:'금융'},
+    {name:'EASTAR JET',tag:'항공'},{name:'HD현대오일뱅크',tag:'에너지'},{name:'폭스바겐',tag:'자동차'}
+  ];
+  var clients2=[
+    {name:'중소기업중앙회',tag:'공공'},{name:'청호나이스',tag:'가전'},{name:'Pizza Hut',tag:'F&B'},
+    {name:'캐롯보험',tag:'보험'},{name:'병무청',tag:'공공'},{name:'DB생명',tag:'보험'},
+    {name:'한화손해보험',tag:'보험'},{name:'DB손해보험',tag:'보험'},{name:'KB국민은행',tag:'금융'},
+    {name:'Kbank',tag:'금융'},{name:'삼성증권',tag:'증권'},{name:'MetLife',tag:'보험'}
+  ];
+  function render(arr){return arr.map(function(c){return '<div class="client-badge">'+c.name+' <span class="industry">'+c.tag+'</span></div>'}).join('')}
+  var h1=render(clients1);
+  var h2=render(clients2);
+  document.getElementById('marqueeRow1').innerHTML=h1+h1;
+  document.getElementById('marqueeRow2').innerHTML=h2+h2;
+})();
+</script>
+</body>
+</html>
