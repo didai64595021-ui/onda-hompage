@@ -1,9 +1,23 @@
+require('dotenv').config();
 const { chromium } = require('playwright');
+const https = require('https');
+
+// 네이버 API 키 로테이션
+const API_KEYS = [
+  { id: process.env.NAVER_CLIENT_ID, secret: process.env.NAVER_CLIENT_SECRET },
+  { id: process.env.NAVER_CLIENT_ID_2, secret: process.env.NAVER_CLIENT_SECRET_2 },
+].filter(k => k.id && k.secret);
+
+let apiKeyIndex = 0;
+function getApiKey() {
+  const key = API_KEYS[apiKeyIndex % API_KEYS.length];
+  apiKeyIndex++;
+  return key;
+}
 
 const USER_AGENTS = [
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
 ];
 
 function randomUA() {
@@ -29,214 +43,328 @@ async function createBrowser() {
   return { browser, context, page };
 }
 
-// 네이버 통합검색에서 플레이스 영역 파싱 → 각 업체 상세 페이지 접근
+// 네이버 공식 지역검색 API (모든 키 순회, 재귀 없음)
+async function naverLocalSearch(query, display = 5, start = 1) {
+  for (let i = 0; i < API_KEYS.length; i++) {
+    try {
+      const result = await _callNaverApi(query, display, start, API_KEYS[i]);
+      if (!result.error) return result;
+    } catch (e) {}
+  }
+  return { items: [], error: true };
+}
+
+function _callNaverApi(query, display, start, key) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'openapi.naver.com',
+      path: `/v1/search/local.json?query=${encodeURIComponent(query)}&display=${display}&start=${start}&sort=random`,
+      method: 'GET',
+      headers: { 'X-Naver-Client-Id': key.id, 'X-Naver-Client-Secret': key.secret },
+    };
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(data);
+          if (json.errorCode) {
+            resolve({ items: [], error: true, errorMsg: json.errorMessage });
+          } else {
+            resolve(json);
+          }
+        } catch (e) { reject(e); }
+      });
+    });
+    req.on('error', reject);
+    req.end();
+  });
+}
+
+// 네이버 API로 업체 검색 (API 실패 시 HTML 파싱 폴백)
 async function searchPlaces(page, context, keyword) {
+  const places = [];
+  const seenIds = new Set();
+
+  // API 시도 → 실패 시 HTML 폴백
+  console.log(`  네이버 검색 API 시도 (키 ${API_KEYS.length}개)...`);
+  
+  const testResult = await naverLocalSearch(keyword, 5, 1);
+  if (testResult.error || !testResult.items || testResult.items.length === 0) {
+    console.log(`  API 실패 → HTML 파싱으로 전환`);
+    return await searchPlacesHtml(page, context, keyword);
+  }
+
+  // API 성공 — 나머지 페이지도 수집
+  let allItems = [...testResult.items];
+  for (let start = 6; start <= 25; start += 5) {
+    const result = await naverLocalSearch(keyword, 5, start);
+    if (result.error || !result.items || result.items.length === 0) break;
+    allItems.push(...result.items);
+    await delay(500, 1000);
+  }
+
+  for (const item of allItems) {
+      // place_id 추출: link에서 place/{id} 또는 맵링크에서 추출
+      let placeId = null;
+      if (item.link) {
+        const match = item.link.match(/(?:place\/|id=)(\d+)/);
+        if (match) placeId = match[1];
+      }
+
+      // place_id 없으면 m.place에서 검색
+      if (!placeId) {
+        placeId = await findPlaceId(page, item.title.replace(/<[^>]*>/g, ''));
+      }
+
+      if (!placeId || seenIds.has(placeId)) continue;
+      seenIds.add(placeId);
+
+      const name = item.title.replace(/<[^>]*>/g, '').trim();
+      
+      places.push({
+        id: placeId,
+        name,
+        category: item.category || '',
+        address: item.roadAddress || item.address || '',
+        phone: item.telephone || '',
+        placeUrl: `https://m.place.naver.com/place/${placeId}`,
+        homepage_url: null, // 상세 페이지에서 수집
+        visitor_review_count: 0,
+        blog_review_count: 0,
+        talktalk_active: false,
+        talktalk_url: null,
+      });
+    }
+
+  console.log(`  API에서 ${places.length}개 업체 발견`);
+
+  // 각 업체 상세 페이지에서 톡톡/홈페이지/리뷰 수집
+  const detailPage = await context.newPage();
+  
+  for (let i = 0; i < places.length; i++) {
+    const place = places[i];
+    console.log(`    [${i+1}/${places.length}] ${place.name} 상세 수집...`);
+    
+    try {
+      await detailPage.goto(`https://m.place.naver.com/place/${place.id}/home`, {
+        waitUntil: 'domcontentloaded', timeout: 15000
+      });
+      await delay(1500, 2500);
+
+      const detail = await detailPage.evaluate(() => {
+        const r = {
+          homepage_url: null,
+          talktalk_active: false,
+          talktalk_url: null,
+          visitor_review_count: 0,
+          blog_review_count: 0,
+        };
+
+        // 톡톡
+        const talkLinks = document.querySelectorAll('a[href*="talk.naver.com"]');
+        if (talkLinks.length > 0) {
+          r.talktalk_active = true;
+          r.talktalk_url = talkLinks[0].href;
+        } else {
+          for (const el of document.querySelectorAll('a, button')) {
+            if (el.textContent.includes('톡톡')) {
+              r.talktalk_active = true;
+              r.talktalk_url = el.href || null;
+              break;
+            }
+          }
+        }
+
+        // 홈페이지
+        for (const a of document.querySelectorAll('a')) {
+          const href = a.href || '';
+          const text = a.textContent.trim();
+          if ((text === '홈페이지' || text === '홈' || a.className.includes('homepage')) 
+              && href && !href.includes('naver.com') && !href.includes('kakao') 
+              && !href.includes('instagram') && !href.includes('facebook')) {
+            r.homepage_url = href;
+            break;
+          }
+        }
+        // 외부 링크 중 홈페이지 후보
+        if (!r.homepage_url) {
+          for (const a of document.querySelectorAll('a[target="_blank"]')) {
+            const href = a.href || '';
+            if (href && !href.includes('naver.com') && !href.includes('kakao') 
+                && !href.includes('instagram') && !href.includes('facebook')
+                && !href.includes('youtube') && !href.includes('blog')) {
+              r.homepage_url = href;
+              break;
+            }
+          }
+        }
+
+        // 리뷰 수
+        const allText = document.body?.innerText || '';
+        const visitorMatch = allText.match(/방문자\s*리뷰\s*([\d,]+)/);
+        const blogMatch = allText.match(/블로그\s*리뷰\s*([\d,]+)/);
+        if (visitorMatch) r.visitor_review_count = parseInt(visitorMatch[1].replace(/,/g, ''), 10);
+        if (blogMatch) r.blog_review_count = parseInt(blogMatch[1].replace(/,/g, ''), 10);
+
+        return r;
+      });
+
+      place.homepage_url = detail.homepage_url;
+      place.talktalk_active = detail.talktalk_active;
+      place.talktalk_url = detail.talktalk_url;
+      place.visitor_review_count = detail.visitor_review_count;
+      place.blog_review_count = detail.blog_review_count;
+
+      console.log(`      톡톡:${place.talktalk_active?'O':'X'} 홈페이지:${place.homepage_url?'O':'X'} 방문자:${place.visitor_review_count} 블로그:${place.blog_review_count}`);
+
+    } catch (e) {
+      console.log(`      ⚠️ 상세 수집 실패: ${e.message}`);
+    }
+
+    if (i > 0 && i % 10 === 0) {
+      console.log(`    --- ${i}개 처리, 15초 휴식 ---`);
+      await delay(12000, 18000);
+    }
+  }
+
+  await detailPage.close().catch(() => {});
+  return places;
+}
+
+// HTML 파싱 폴백 (API 실패 시)
+async function searchPlacesHtml(page, context, keyword) {
   const places = [];
 
   try {
-    // 1단계: 네이버 통합검색
+    // 네이버 통합검색
     await page.goto(`https://search.naver.com/search.naver?where=nexearch&query=${encodeURIComponent(keyword)}`, {
       waitUntil: 'load', timeout: 20000
     });
     await delay(2000, 3000);
 
-    // 2단계: 플레이스 영역에서 업체명+링크 추출
-    // 클래스 "uD1F4"가 업체명 링크, 링크에 place_id 포함됨
+    // 업체명 추출 (uD1F4 클래스)
     const rawPlaces = await page.evaluate(() => {
       const results = [];
-      
-      // 업체명 링크 (uD1F4 gADnZ 클래스)
       const nameLinks = document.querySelectorAll('a.uD1F4');
       for (const link of nameLinks) {
         const name = link.textContent.replace(/예약|톡톡|영수증|쿠폰/g, '').trim();
-        const hasTalktalk = link.textContent.includes('톡톡');
-        if (name) {
-          results.push({ name, hasTalktalk, href: link.href });
-        }
+        if (name) results.push({ name });
       }
-
-      // 리뷰 정보 (KJzzB 클래스)  
+      // 리뷰 수
       const reviewEls = document.querySelectorAll('a.KJzzB');
-      let reviewIdx = 0;
+      let idx = 0;
       for (const el of reviewEls) {
         const text = el.textContent;
-        const visitorMatch = text.match(/방문자\s*리뷰\s*([\d,]+)/);
-        const blogMatch = text.match(/블로그\s*리뷰\s*([\d,]+)/);
-        if (visitorMatch || blogMatch) {
-          if (reviewIdx < results.length) {
-            results[reviewIdx].visitor_review_count = visitorMatch ? parseInt(visitorMatch[1].replace(/,/g, ''), 10) : 0;
-            results[reviewIdx].blog_review_count = blogMatch ? parseInt(blogMatch[1].replace(/,/g, ''), 10) : 0;
-          }
-          reviewIdx++;
+        const vm = text.match(/방문자\s*리뷰\s*([\d,]+)/);
+        const bm = text.match(/블로그\s*리뷰\s*([\d,]+)/);
+        if ((vm || bm) && idx < results.length) {
+          results[idx].visitor_review_count = vm ? parseInt(vm[1].replace(/,/g, ''), 10) : 0;
+          results[idx].blog_review_count = bm ? parseInt(bm[1].replace(/,/g, ''), 10) : 0;
+          idx++;
         }
       }
-
       return results;
     });
 
-    console.log(`  통합검색에서 ${rawPlaces.length}개 업체명 발견`);
+    console.log(`  HTML에서 ${rawPlaces.length}개 업체명 발견`);
 
-    // 3단계: 각 업체를 m.place.naver.com에서 검색하여 place_id + 상세 정보 수집
     const detailPage = await context.newPage();
-    
+
     for (const raw of rawPlaces) {
+      const placeId = await findPlaceId(detailPage, raw.name);
+      if (!placeId) {
+        console.log(`    ⚠️ ${raw.name} - place_id 못 찾음, 스킵`);
+        continue;
+      }
+
+      // 상세 페이지 수집
       try {
-        // 네이버 플레이스 검색으로 place_id 찾기
-        const searchUrl = `https://m.place.naver.com/place/list?query=${encodeURIComponent(raw.name)}`;
-        await detailPage.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await delay(1500, 2500);
-
-        // place_id 추출 (URL에서 또는 페이지에서)
-        const placeInfo = await detailPage.evaluate((targetName) => {
-          // 리스트에서 첫 번째 업체 링크 찾기
-          const links = document.querySelectorAll('a[href*="/place/"]');
-          for (const a of links) {
-            const match = a.href.match(/\/place\/(\d+)/);
-            if (match) {
-              return { placeId: match[1], url: a.href };
-            }
-          }
-          return null;
-        }, raw.name);
-
-        if (!placeInfo) {
-          // 대안: 직접 상세 페이지 접근 시도
-          const directUrl = `https://m.place.naver.com/place/list?query=${encodeURIComponent(keyword + ' ' + raw.name)}`;
-          await detailPage.goto(directUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
-          await delay(1000, 2000);
-          
-          const retryInfo = await detailPage.evaluate(() => {
-            const links = document.querySelectorAll('a[href*="/place/"]');
-            for (const a of links) {
-              const match = a.href.match(/\/place\/(\d+)/);
-              if (match) return { placeId: match[1], url: a.href };
-            }
-            return null;
-          });
-          
-          if (!retryInfo) {
-            console.log(`    ⚠️ ${raw.name} - place_id 못 찾음, 스킵`);
-            continue;
-          }
-          
-          Object.assign(placeInfo || {}, retryInfo);
-        }
-
-        // 4단계: 업체 상세 페이지에서 정보 수집
-        const placeDetailUrl = `https://m.place.naver.com/place/${placeInfo.placeId}/home`;
-        await detailPage.goto(placeDetailUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await detailPage.goto(`https://m.place.naver.com/place/${placeId}/home`, {
+          waitUntil: 'domcontentloaded', timeout: 15000
+        });
         await delay(1500, 2500);
 
         const detail = await detailPage.evaluate(() => {
-          const result = {
-            category: '',
-            address: '',
-            phone: '',
-            homepage_url: null,
-            talktalk_active: false,
-            talktalk_url: null,
-          };
-
-          // 카테고리
-          const categoryEl = document.querySelector('.lnJFt, [class*="category"]');
-          if (categoryEl) result.category = categoryEl.textContent.trim();
-
-          // 주소
-          const addrEl = document.querySelector('.LDgIH, [class*="addr"], .Y31Sf');
-          if (addrEl) result.address = addrEl.textContent.trim();
-
-          // 전화번호
-          const phoneEl = document.querySelector('.xlx7Q, a[href^="tel:"]');
-          if (phoneEl) result.phone = phoneEl.textContent.trim().replace(/^전화\s*/, '');
-
-          // 홈페이지
-          const homepageLinks = document.querySelectorAll('a[class*="homepage"], a.jO09N, a[target="_blank"]');
-          for (const a of homepageLinks) {
-            const href = a.href;
-            if (href && !href.includes('naver.com') && !href.includes('kakao') && !href.includes('instagram') && !href.includes('facebook') && !href.includes('youtube')) {
-              result.homepage_url = href;
-              break;
-            }
-          }
-          // 홈페이지 별도 영역
-          if (!result.homepage_url) {
-            const allLinks = document.querySelectorAll('a');
-            for (const a of allLinks) {
-              const text = a.textContent.trim();
-              if ((text === '홈페이지' || text.includes('홈페이지')) && a.href && !a.href.includes('naver.com')) {
-                result.homepage_url = a.href;
-                break;
-              }
-            }
-          }
-
+          const r = { homepage_url: null, talktalk_active: false, talktalk_url: null, category: '', address: '', phone: '' };
+          
           // 톡톡
           const talkLinks = document.querySelectorAll('a[href*="talk.naver.com"]');
-          if (talkLinks.length > 0) {
-            result.talktalk_active = true;
-            result.talktalk_url = talkLinks[0].href;
-          } else {
-            const allEls = document.querySelectorAll('a, button');
-            for (const el of allEls) {
-              if (el.textContent.includes('톡톡')) {
-                result.talktalk_active = true;
-                result.talktalk_url = el.href || null;
-                break;
-              }
-            }
+          if (talkLinks.length > 0) { r.talktalk_active = true; r.talktalk_url = talkLinks[0].href; }
+          else { for (const el of document.querySelectorAll('a, button')) { if (el.textContent.includes('톡톡')) { r.talktalk_active = true; r.talktalk_url = el.href || null; break; } } }
+          
+          // 홈페이지
+          for (const a of document.querySelectorAll('a')) {
+            const text = a.textContent.trim();
+            if ((text === '홈페이지' || text === '홈') && a.href && !a.href.includes('naver.com')) { r.homepage_url = a.href; break; }
           }
-
-          return result;
+          
+          // 카테고리/주소/전화
+          const catEl = document.querySelector('.lnJFt, [class*="category"]');
+          if (catEl) r.category = catEl.textContent.trim();
+          const addrEl = document.querySelector('.LDgIH, [class*="addr"], .Y31Sf');
+          if (addrEl) r.address = addrEl.textContent.trim();
+          const phoneEl = document.querySelector('.xlx7Q, a[href^="tel:"]');
+          if (phoneEl) r.phone = phoneEl.textContent.trim();
+          
+          return r;
         });
 
         places.push({
-          id: placeInfo.placeId,
-          name: raw.name,
-          category: detail.category,
-          address: detail.address,
-          phone: detail.phone,
-          placeUrl: `https://m.place.naver.com/place/${placeInfo.placeId}`,
+          id: placeId, name: raw.name, category: detail.category, address: detail.address,
+          phone: detail.phone, placeUrl: `https://m.place.naver.com/place/${placeId}`,
           homepage_url: detail.homepage_url,
           visitor_review_count: raw.visitor_review_count || 0,
           blog_review_count: raw.blog_review_count || 0,
-          talktalk_active: detail.talktalk_active,
-          talktalk_url: detail.talktalk_url,
+          talktalk_active: detail.talktalk_active, talktalk_url: detail.talktalk_url,
         });
-
-        console.log(`    ✅ ${raw.name} (place:${placeInfo.placeId}) 수집 완료`);
-
+        console.log(`    ✅ ${raw.name} (place:${placeId})`);
       } catch (e) {
-        console.log(`    ⚠️ ${raw.name} 수집 실패: ${e.message}`);
+        console.log(`    ⚠️ ${raw.name} 상세 실패: ${e.message}`);
       }
     }
 
     await detailPage.close().catch(() => {});
-
   } catch (e) {
-    console.log(`  검색 실패: ${e.message}`);
+    console.log(`  HTML 파싱 실패: ${e.message}`);
   }
 
-  console.log(`  총 ${places.length}개 업체 상세 수집 완료`);
+  console.log(`  총 ${places.length}개 업체 수집 완료`);
   return places;
 }
 
-// 톡톡 확인 (이미 searchPlaces에서 수집하므로 단순 래퍼)
+// place_id 검색 (폴백)
+async function findPlaceId(page, name) {
+  try {
+    const searchUrl = `https://m.place.naver.com/place/list?query=${encodeURIComponent(name)}`;
+    await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 10000 });
+    await delay(1000, 1500);
+
+    const id = await page.evaluate(() => {
+      const links = document.querySelectorAll('a[href*="/place/"]');
+      for (const a of links) {
+        const match = a.href.match(/\/place\/(\d+)/);
+        if (match) return match[1];
+      }
+      return null;
+    });
+    return id;
+  } catch {
+    return null;
+  }
+}
+
+// 톡톡 확인 (폴백용)
 async function checkTalktalk(page, placeId) {
-  // searchPlaces에서 이미 수집됨 — 여기선 폴백용
   const result = { talktalk_active: false, talktalk_url: null };
   try {
     await page.goto(`https://m.place.naver.com/place/${placeId}/home`, {
       waitUntil: 'domcontentloaded', timeout: 15000
     });
     await delay(1000, 2000);
-
     const data = await page.evaluate(() => {
       const links = document.querySelectorAll('a[href*="talk.naver.com"]');
       if (links.length > 0) return { active: true, url: links[0].href };
-      const btns = document.querySelectorAll('a, button');
-      for (const b of btns) {
-        if (b.textContent.includes('톡톡')) return { active: true, url: b.href || null };
-      }
       return { active: false, url: null };
     });
     result.talktalk_active = data.active;
