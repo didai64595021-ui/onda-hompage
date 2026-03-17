@@ -2177,40 +2177,31 @@
 
     /* ---- Typing effect on hero title ---- */
     (function () {
-      const targetEl = document.querySelector('.typing-text');
-      const fullTextKr = '법무법인 정의를\n소개합니다';
-      const fullTextEn = 'Introducing\nJUNGUI LAW';
-      const lang = localStorage.getItem('jungui-lang') || 'kr';
-      const fullText = lang === 'en' ? fullTextEn : fullTextKr;
-      let charIndex = 0;
-      let started = false;
-
-      function typeChar () {
-        if (charIndex < fullText.length) {
-          const ch = fullText[charIndex];
-          if (ch === '\n') {
-            targetEl.innerHTML += '<br />';
-          } else {
-            targetEl.innerHTML += ch;
+      var targetEl = document.querySelector('.typing-text');
+      var typingTimer = null;
+      window.__runTyping = function(lang) {
+        if (typingTimer) clearTimeout(typingTimer);
+        targetEl.innerHTML = '';
+        var txt = lang === 'en' ? 'Introducing\nJUNGUI LAW' : '법무법인 정의를\n소개합니다';
+        var ci = 0;
+        (function tp() {
+          if (ci < txt.length) {
+            var ch = txt[ci];
+            targetEl.innerHTML += ch === '\n' ? '<br />' : ch;
+            ci++;
+            typingTimer = setTimeout(tp, ci < 8 ? 90 : 70);
           }
-          charIndex++;
-          setTimeout(typeChar, charIndex < 8 ? 90 : 70);
-        }
+        })();
+      };
+      var lang = localStorage.getItem('jungui-lang') || 'kr';
+      var started = false;
+      function startTyping() {
+        if (!started) { started = true; setTimeout(function(){ window.__runTyping(lang); }, 800); }
       }
-
-      /* Start after page loader finishes */
-      function startTyping () {
-        if (!started) {
-          started = true;
-          setTimeout(typeChar, 800);
-        }
-      }
-
-      /* Trigger via IntersectionObserver or after 2s */
-      const heroLeft = document.querySelector('.about-hero__left');
+      var heroLeft = document.querySelector('.about-hero__left');
       if ('IntersectionObserver' in window) {
-        const io = new IntersectionObserver(entries => {
-          entries.forEach(e => { if (e.isIntersecting) { startTyping(); io.disconnect(); } });
+        var io = new IntersectionObserver(function(entries) {
+          entries.forEach(function(e) { if (e.isIntersecting) { startTyping(); io.disconnect(); } });
         }, { threshold: 0.3 });
         if (heroLeft) io.observe(heroLeft);
       }
@@ -2336,13 +2327,7 @@
       else el.textContent=v;
     });
     /* Re-run typing effect for hero title */
-    var typingEl=document.querySelector('.typing-text');
-    if(typingEl){
-      typingEl.innerHTML='';
-      var txt=l==='en'?'Introducing\nJUNGUI LAW':'법무법인 정의를\n소개합니다';
-      var ci=0;
-      (function tp(){if(ci<txt.length){var ch=txt[ci];typingEl.innerHTML+=ch==='\n'?'<br />':ch;ci++;setTimeout(tp,ci<8?90:70);}})();
-    }
+    if(window.__runTyping) window.__runTyping(l);
   }
 })();
 </script>
