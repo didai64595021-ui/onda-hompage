@@ -50,7 +50,7 @@
 1-1a. **더 좋은 방식 있으면 항상 제안** — 기존 방식보다 나은 대안 발견 시 반드시 제안. 비교(기존 vs 제안) + 장단점 + 대체제 함께 제시.
 3. **정말 관리자만 가능한 것만 요청** — SSH 키 등록, 결제, 외부 서비스 인증 등.
 2. **요청 전부 기록** — 한 번 말한 건 다시 안 물어보게 md + git + 메모리 저장.
-3. **백그라운드 → 서버로** — 개발/대화 외 백그라운드 작업은 Vercel Cron 등 서버에서 구동. 토큰 절약.
+3. **백그라운드 → 서버로** — 개발/대화 외 백그라운드 작업은 Cloudflare 등 서버에서 구동. 토큰 절약.
 4. **코딩은 Claude Opus 4.6에 위임** — 직접 코딩 X, coding-agent 스킬로 위임.
 5. **작업완료 = 테스트+디버깅 완전 완료** — 코드 작성만으로 끝이 아님. 반드시 테스트→디버깅→재테스트 무한 반복 후 완전히 동작 확인된 것만 작업완료. 사용자에게 테스트 떠넘기지 말 것.
 
@@ -86,13 +86,14 @@
   - onda-logic-monitor = 개발/테스트 (이전 예정)
   - place-rank = 실제 제공 페이지 (이전 예정)
   - place-rank 자동 배포 절대 금지 — 검수 완료 후 수동 지시만
-- **Vercel → Cloudflare 이전 진행 중** (2026-03-15)
+- **Vercel → Cloudflare 이전 완료** (2026-03-18 전 프로젝트 통일)
   - Cloudflare 계정: Didai64595021@gmail.com
   - CF Account ID: 41c6067465ad6492470bb2fb1eecad6e
   - CF API Token: 환경변수 $CLOUDFLARE_API_TOKEN
   - Cloudflare 무료 한도: 프로젝트 20개, 요청 10만/일, 빌드 500/월
-- **Vercel 사용 금지** — 모든 신규 배포는 GitHub Pages 또는 Cloudflare
-- **Vercel 예외: onda-logic-monitor + place-rank만 유지** — Next.js 14.2.35 → Cloudflare 14.3.0+ 업그레이드 위험
+- **Vercel 완전 미사용** — 전 프로젝트 Cloudflare Pages 통일 (관리자 지시 2026-03-18)
+- **예외 없음** — onda-logic-monitor, place-rank, onda-youtube-investment 포함 모두 Cloudflare
+- **onda-youtube-investment 대시보드**: Vercel → Cloudflare Pages 이전 필요 (기존: web-orpin-three-93.vercel.app)
 - **Vercel Cron 18개 → PM2 전환 완료** (2026-03-15)
   - PM2 config: `/home/onda/projects/onda-logic-monitor/cron-ecosystem.config.js`
   - Cron wrapper: `/home/onda/scripts/vercel-cron-pm2.sh`
@@ -104,7 +105,7 @@
 
 ### onda-logic-monitor
 - GitHub: didai64595021-ui/onda-logic-monitor
-- Vercel: https://onda-logic-monitor.vercel.app
+- Cloudflare Pages: https://onda-logic-monitor.pages.dev
 - Supabase: byaipfmwicukyzruqtsj
 - PM2: onda-crawler-scheduler (크롤링 16시/20시, AI분석 08시)
 - Vercel Cron: crawl-next (매2분 7-11시), daily-analysis, community-crawl (06시)
@@ -276,7 +277,7 @@
   2. 파생오류 전수 테스트 (수정한 코드가 다른 기능에 영향 없는지)
   3. 디버깅 루프 완료 판단 (에러 0 + 파생오류 0)
   4. OCR 검증 (스크린샷 → 실제 출력물 텍스트/수치 확인)
-  5. 위 4단계 모두 통과 후에만 Vercel 배포
+  5. 위 4단계 모두 통과 후에만 Cloudflare 배포
 - **순서 생략/스킵 절대 금지**
 - 관리자 지시 (2026-03-10)
 
