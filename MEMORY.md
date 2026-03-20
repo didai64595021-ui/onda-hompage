@@ -93,7 +93,7 @@
   - Cloudflare 무료 한도: 프로젝트 20개, 요청 10만/일, 빌드 500/월
 - **Vercel 완전 미사용** — 전 프로젝트 Cloudflare Pages 통일 (관리자 지시 2026-03-18)
 - **예외 없음** — onda-logic-monitor, place-rank, onda-youtube-investment 포함 모두 Cloudflare
-- **onda-youtube-investment 대시보드**: Vercel → Cloudflare Pages 이전 필요 (기존: web-orpin-three-93.vercel.app)
+- **onda-youtube-investment 대시보드**: Cloudflare Pages 이전 완료 (https://onda-youtube-dashboard.pages.dev)
 - **Vercel Cron 18개 → PM2 전환 완료** (2026-03-15)
   - PM2 config: `/home/onda/projects/onda-logic-monitor/cron-ecosystem.config.js`
   - Cron wrapper: `/home/onda/scripts/vercel-cron-pm2.sh`
@@ -108,7 +108,7 @@
 - Cloudflare Pages: https://onda-logic-monitor.pages.dev
 - Supabase: byaipfmwicukyzruqtsj
 - PM2: onda-crawler-scheduler (크롤링 16시/20시, AI분석 08시)
-- Vercel Cron: crawl-next (매2분 7-11시), daily-analysis, community-crawl (06시)
+- PM2 Cron으로 전환 완료 (Vercel Cron 미사용): crawl-next, daily-analysis, community-crawl
 - 커뮤니티 크롤러: 아이보스 + 셀클럽 → community_signals 테이블 → 기존 데이터에 통합
 - 클라이언트 포털 버그: 경쟁사 쿼리 snapshot_date=today → 최근 날짜로 수정 필요
 
@@ -129,10 +129,9 @@
 - ❌ 삭제됨 (2026-03-04, 관리자 지시) — 미사용 프로젝트
 
 ## 서버 환경
-- 호스트: ubuntu-4gb-hel1-3 (핀란드 Hetzner)
-- IP: 핀란드 — 한국 커뮤니티 크롤링 시 차단 가능성 있음
-- 유저: onda (sudo 권한 없음, no-new-privileges 컨테이너 제한)
-- 관리자가 권한 열어주기로 함
+- 호스트: didai21-302200 (한국 SMILESERV/iwinv, 인천)
+- IP: 49.247.137.28 — 한국 서버이므로 네이버/AdLog 프록시 없이 직접 접근 가능
+- 유저: onda
 
 ## 관리자 정보
 - 텔레그램 ID: 7383805736
@@ -267,9 +266,10 @@
 - 절대 300초/900초로 줄이지 마라 — 작업 중단 원인
 
 ## UIUX 프로젝트 자동배포 규칙 (2026-03-09, 영구)
-- onda-hompage UIUX 작업 완료 시 항상 git + Vercel 배포까지 자동 진행
+- onda-hompage UIUX 작업 완료 시 항상 git + Cloudflare Pages 배포까지 자동 진행
 - 컨펌 없이 배포 완료 후 URL과 함께 보고
 - "배포할까요?" 금지
+- Vercel 사용 금지 — Cloudflare Pages만 사용
 
 ## 배포 전 필수 루틴 (2026-03-10, 영구, 최우선)
 - **모든 배포 전 반드시 아래 순서 완료 후 배포:**

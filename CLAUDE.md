@@ -24,8 +24,9 @@
 - `git push` 전에 반드시 커밋 먼저. push 실패 시 재시도 1회만, 그래도 실패 시 텔레그램 보고.
 
 ## 배포 규칙 (필수 준수)
-- **테스트 시안/미리보기** → GitHub Pages 배포 + 링크 자동 제공. 별도 지시 없어도 테스트 결과물은 GitHub Pages로 배포하고 확인 링크를 텔레그램에 보고.
-- **Vercel 배포** → 관리자가 명시적으로 "Vercel 배포해"라고 지시할 때만 실행. 자의적 Vercel 배포 금지.
+- **모든 배포는 Cloudflare(Pages/Workers)만 사용. Vercel 사용 절대 금지.**
+- **테스트 시안/미리보기** → Cloudflare Pages 배포 + 링크 자동 제공.
+- 정적 사이트이므로 `wrangler pages deploy` 직접 사용 가능.
 - 배포 후 반드시 접속 확인하고 링크와 함께 결과 보고.
 
 ## 작업 규칙
