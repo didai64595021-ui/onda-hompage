@@ -8,12 +8,37 @@
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-html{font-size:16px;-webkit-text-size-adjust:100%}
-body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:#37352f;line-height:1.5;-webkit-font-smoothing:antialiased}
-.notion-cover{width:100%;height:30vh;min-height:180px;overflow:hidden}
+html{font-size:16px;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:#37352f;line-height:1.5;-webkit-font-smoothing:antialiased;word-break:keep-all}
+.notion-cover{width:100%;height:20vh;min-height:120px;overflow:hidden}
 .notion-cover img{width:100%;height:100%;object-fit:cover}
+@media(max-width:768px){.notion-cover{height:15vh;min-height:90px}}
+.sticky-nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid #e9e9e7;transition:box-shadow .2s}
+.sticky-nav.scrolled{box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.sticky-nav-inner{max-width:900px;margin:0 auto;padding:0 96px;display:flex;align-items:center;justify-content:space-between;height:52px}
+.sticky-nav-title{font-weight:700;font-size:1em;color:#37352f;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;text-decoration:none;transition:color .15s}
+.sticky-nav-title:hover{color:#2eaadc}
+.sticky-nav-tabs{display:flex;gap:4px}
+.sticky-nav-tab{padding:6px 14px;border-radius:6px;font-size:.85em;font-weight:500;cursor:pointer;color:rgba(55,53,47,.65);transition:all .15s;border:none;background:none;white-space:nowrap;min-height:36px}
+.sticky-nav-tab:hover{background:#f1f1ef;color:#37352f}
+.sticky-nav-tab.active{background:#37352f;color:#fff}
+@media(max-width:768px){.sticky-nav-inner{padding:0 16px;height:46px}.sticky-nav-tab{padding:5px 10px;font-size:.78em}.sticky-nav-title{font-size:.9em}}
+.sub-nav{position:sticky;top:52px;z-index:90;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid #f0f0ee;display:none}
+.sub-nav.visible{display:block}
+.sub-nav-inner{max-width:900px;margin:0 auto;padding:8px 96px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sub-nav-breadcrumb{display:flex;align-items:center;gap:4px;font-size:.875em;min-width:0;flex:1;overflow:hidden}
+.sub-nav-breadcrumb a{color:rgba(55,53,47,.65);text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:4px;transition:all .12s;white-space:nowrap;min-height:36px;flex-shrink:0}
+.sub-nav-breadcrumb a:hover{background:#f1f1ef;color:#37352f}
+.sub-nav-breadcrumb .sep{color:rgba(55,53,47,.3);flex-shrink:0}
+.sub-nav-breadcrumb .current{color:#37352f;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sub-nav-arrows{display:flex;gap:4px;flex-shrink:0}
+.sub-nav-arrows button{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid #e9e9e7;border-radius:6px;background:#fff;cursor:pointer;color:#37352f;font-size:1em;transition:all .12s}
+.sub-nav-arrows button:hover:not(:disabled){background:#f1f1ef;border-color:#d6d6d4}
+.sub-nav-arrows button:disabled{opacity:.3;cursor:default}
+@media(max-width:768px){.sub-nav-inner{padding:6px 16px}.sub-nav-breadcrumb{font-size:.8em}.sub-nav-arrows button{width:32px;height:32px;font-size:.85em}}
 .notion-page{max-width:900px;margin:0 auto;padding:0 96px 120px}
-@media(max-width:768px){.notion-page{padding:0 24px 80px}}
+@media(max-width:1200px){.notion-page{padding:0 60px 100px}}
+@media(max-width:768px){.notion-page{padding:0 20px 80px}}
 .notion-page-title{font-size:2.5em;font-weight:700;margin-top:40px;margin-bottom:4px;line-height:1.2}
 h1{font-size:1.875em;font-weight:700;margin-top:2em;margin-bottom:4px;line-height:1.3}
 h2{font-size:1.5em;font-weight:600;margin-top:1.4em;margin-bottom:4px;line-height:1.3}
@@ -23,60 +48,128 @@ p{margin-top:2px;margin-bottom:2px;white-space:pre-wrap}
 .notion-callout{background:#f1f1ef;border-radius:3px;padding:16px 16px 16px 12px;margin:6px 0;display:flex;gap:8px;align-items:flex-start}
 .notion-callout-icon{font-size:1.2em;flex-shrink:0;line-height:1.5}
 .notion-callout-content{flex:1;min-width:0}
-.notion-callout-content h1,.notion-callout-content h2,.notion-callout-content h3{margin-top:0.3em}
+.notion-callout-content h1,.notion-callout-content h2,.notion-callout-content h3{margin-top:.3em}
 .notion-callout-content h1:first-child,.notion-callout-content h2:first-child,.notion-callout-content h3:first-child,.notion-callout-content p:first-child{margin-top:0}
 .notion-table-wrap{overflow-x:auto;margin:8px 0;-webkit-overflow-scrolling:touch}
-.notion-table{width:100%;border-collapse:collapse;font-size:0.875em}
+.notion-table{width:100%;border-collapse:collapse;font-size:.875em}
 .notion-table th,.notion-table td{border:1px solid #e9e9e7;padding:8px 10px;text-align:left;vertical-align:top;line-height:1.5}
 .notion-table thead th{background:#f7f6f3;font-weight:600}
 .notion-quote{border-left:3px solid currentColor;padding-left:14px;margin:6px 0}
-.notion-bookmark{display:block;border:1px solid #e9e9e7;border-radius:3px;padding:12px 14px;margin:6px 0;color:#37352f;text-decoration:none;font-size:0.875em;transition:background 120ms}
+.notion-bookmark{display:block;border:1px solid #e9e9e7;border-radius:3px;padding:12px 14px;margin:6px 0;color:#37352f;text-decoration:none;font-size:.875em;transition:background 120ms}
 .notion-bookmark:hover{background:#f7f6f3}
-.notion-page-link{display:flex;align-items:center;gap:6px;padding:4px;margin:2px 0;border-radius:3px;cursor:pointer;text-decoration:none;color:#37352f;transition:background 120ms}
-.notion-page-link:hover{background:#f7f6f3}
+.notion-page-link{display:flex;align-items:center;gap:6px;padding:8px 10px;margin:2px 0;border-radius:6px;cursor:pointer;text-decoration:none;color:#37352f;transition:all 120ms;min-height:48px;font-size:.95em}
+.notion-page-link:hover{background:#f1f1ef;transform:translateX(4px)}
+.notion-page-link:active{background:#e8e8e5}
 ul.notion-list{list-style:disc;padding-left:1.5em;margin:2px 0}
-ul.notion-list li{margin:2px 0;padding-left:0.2em}
+ul.notion-list li{margin:2px 0;padding-left:.2em}
 ul.notion-list ul{list-style:circle;padding-left:1.5em}
 ol.notion-list-numbered{list-style:decimal;padding-left:1.5em;margin:2px 0}
 ol.notion-list-numbered li{margin:2px 0}
 .notion-image{margin:8px 0;text-align:center}
 .notion-image img{max-width:100%;height:auto;border-radius:2px}
-.notion-video-placeholder{background:#f7f6f3;border:1px solid #e9e9e7;border-radius:3px;padding:40px 20px;text-align:center;color:#9b9a97;margin:8px 0;font-size:0.9em}
+.notion-video-placeholder{background:#f7f6f3;border:1px solid #e9e9e7;border-radius:3px;padding:40px 20px;text-align:center;color:#9b9a97;margin:8px 0;font-size:.9em}
 .notion-columns{display:flex;gap:16px;margin:8px 0}
 .notion-column{flex:1;min-width:0}
 @media(max-width:768px){.notion-columns{flex-direction:column;gap:8px}}
 .notion-toggle{margin:4px 0}
 .notion-toggle summary{cursor:pointer;padding:4px 0;user-select:none}
 .notion-toggle summary:hover{background:#f7f6f3;border-radius:3px}
-.notion-breadcrumb{margin-top:16px;margin-bottom:8px}
-.notion-breadcrumb a{color:rgba(55,53,47,0.65);text-decoration:none;font-size:0.875em;display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border-radius:3px;transition:background 120ms}
-.notion-breadcrumb a:hover{background:#f7f6f3}
 .notion-section{display:none}
-.notion-section.active{display:block}
-.text-gray{color:rgba(55,53,47,0.65)}
-.notion-notice{color:rgba(55,53,47,0.65);font-size:0.875em;margin:4px 0}
-a.notion-link{color:#37352f;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(55,53,47,0.4)}
+.notion-section.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.text-gray{color:rgba(55,53,47,.65)}
+.notion-notice{color:rgba(55,53,47,.65);font-size:.875em;margin:4px 0}
+a.notion-link{color:#37352f;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(55,53,47,.4)}
 a.notion-link:hover{text-decoration-color:#37352f}
 .notion-callout .notion-table-wrap{margin-top:8px}
+.notion-breadcrumb{margin-top:16px;margin-bottom:8px}
+.notion-breadcrumb a{color:rgba(55,53,47,.65);text-decoration:none;font-size:.875em;display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border-radius:3px;transition:background 120ms}
+.notion-breadcrumb a:hover{background:#f7f6f3}
+.category-toggle{margin:10px 0;border:none}
+.category-toggle summary{display:flex;align-items:center;gap:8px;padding:14px 16px;font-size:1.1em;font-weight:700;cursor:pointer;list-style:none;background:#f7f6f3;border-radius:8px;transition:all .15s;user-select:none;min-height:52px}
+.category-toggle summary::-webkit-details-marker{display:none}
+.category-toggle summary::before{content:'▶';font-size:.65em;transition:transform .2s;flex-shrink:0;color:rgba(55,53,47,.45);width:16px;text-align:center}
+.category-toggle[open] summary::before{transform:rotate(90deg)}
+.category-toggle summary:hover{background:#ededeb}
+.category-toggle-content{padding:4px 0 8px 20px;border-left:2px solid #e9e9e7;margin-left:20px;margin-top:4px}
+.category-toggle-content .notion-page-link{padding-left:14px}
+.category-toggle-content .cat-subtitle{color:rgba(55,53,47,.5);font-size:.82em;padding:6px 14px 2px;margin:0}
+.toc-sidebar{position:fixed;left:calc(50% + 470px);top:120px;width:220px;max-height:calc(100vh - 160px);overflow-y:auto;font-size:.8em;padding:12px 0;z-index:80;display:none}
+.toc-sidebar.visible{display:block}
+.toc-sidebar-title{font-weight:700;font-size:.85em;color:rgba(55,53,47,.5);text-transform:uppercase;letter-spacing:.05em;padding:0 12px 8px;border-bottom:1px solid #f0f0ee;margin-bottom:6px}
+.toc-sidebar a{display:block;padding:4px 12px;color:rgba(55,53,47,.6);text-decoration:none;border-radius:4px;line-height:1.4;transition:all .12s;border-left:2px solid transparent;margin:1px 0}
+.toc-sidebar a:hover{color:#37352f;background:#f7f6f3}
+.toc-sidebar a.active{color:#37352f;font-weight:600;border-left-color:#37352f}
+.toc-sidebar a.toc-h2{padding-left:24px;font-size:.92em}
+@media(max-width:1340px){.toc-sidebar{display:none!important}}
+.toc-mobile{display:none;margin:12px 0}
+.toc-mobile summary{display:flex;align-items:center;gap:6px;padding:10px 14px;background:#f7f6f3;border-radius:6px;font-size:.85em;font-weight:600;cursor:pointer;list-style:none;min-height:44px}
+.toc-mobile summary::-webkit-details-marker{display:none}
+.toc-mobile summary::before{content:'📑';margin-right:2px}
+.toc-mobile-content{padding:8px 0;max-height:50vh;overflow-y:auto}
+.toc-mobile-content a{display:flex;align-items:center;padding:8px 14px;color:rgba(55,53,47,.7);text-decoration:none;font-size:.85em;border-radius:4px;min-height:40px}
+.toc-mobile-content a:hover{background:#f1f1ef;color:#37352f}
+.toc-mobile-content a.toc-h2{padding-left:28px}
+@media(max-width:1340px){.toc-mobile.has-items{display:block}}
+@media(min-width:1341px){.toc-mobile{display:none!important}}
 </style>
 </head>
 <body>
-<div class="notion-cover"><img src="images/logo.png" alt="커버"></div>
+<div class="notion-cover"><img src="images/logo.png" alt="커버" loading="lazy"></div>
+
+<nav class="sticky-nav" id="stickyNav">
+<div class="sticky-nav-inner">
+  <a class="sticky-nav-title" href="#" onclick="showSection('main-content');return false;">📋 서비스 안내</a>
+  <div class="sticky-nav-tabs" id="navTabs">
+    <button class="sticky-nav-tab active" data-cat="all" onclick="filterCategory('all')">전체</button>
+    <button class="sticky-nav-tab" data-cat="naver" onclick="filterCategory('naver')">Naver</button>
+    <button class="sticky-nav-tab" data-cat="instagram" onclick="filterCategory('instagram')">Instagram</button>
+    <button class="sticky-nav-tab" data-cat="etc" onclick="filterCategory('etc')">기타</button>
+  </div>
+</div>
+</nav>
+
+<div class="sub-nav" id="subNav">
+<div class="sub-nav-inner">
+  <div class="sub-nav-breadcrumb">
+    <a href="#" onclick="showSection('main-content');return false;">🏠 서비스 안내</a>
+    <span class="sep">›</span>
+    <span class="current" id="subNavTitle"></span>
+  </div>
+  <div class="sub-nav-arrows">
+    <button id="prevBtn" title="이전 페이지" onclick="goPrev()">←</button>
+    <button id="nextBtn" title="다음 페이지" onclick="goNext()">→</button>
+  </div>
+</div>
+</div>
+
+<div class="toc-sidebar" id="tocSidebar">
+<div class="toc-sidebar-title">목차</div>
+</div>
+
 <div class="notion-page">
 
-<!-- ===== MAIN ===== -->
 <div id="main-content" class="notion-section active">
 <div class="notion-page-title">서비스 안내 페이지</div>
 <p class="notion-notice">※ PC보기를 권장드립니다.</p>
+
 <div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p>상담 및 견적문의 : <a class="notion-link" href="#">카카오톡 채널 바로가기</a></p><ul class="notion-list"><li>평일 10:00~19:00</li><li>주말 · 공휴일 휴무</li></ul></div></div>
-<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><h1>‣ Naver</h1><hr class="notion-divider"></div></div>
-<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><h1>‣ Instagram</h1><h3>상위 노출 서비스</h3><h3>릴스 알고리즘 확산</h3><h3>프로모션 패키지</h3></div></div>
+
 <hr class="notion-divider">
-<div class="notion-sub-nav">
+
+<details class="category-toggle cat-naver" open>
+<summary>📘 Naver</summary>
+<div class="category-toggle-content">
 <a class="notion-page-link" href="#" onclick="showSection('nplace-seo-guide');return false;">📄 N플레이스 최적화 SEO 가이드북</a>
 <a class="notion-page-link" href="#" onclick="showSection('nplace-delegation');return false;">📄 네이버 플레이스 권한 위임</a>
 <a class="notion-page-link" href="#" onclick="showSection('ad-center-delegation');return false;">📄 네이버 광고주센터 권한 위임</a>
-<hr class="notion-divider">
+</div>
+</details>
+
+<details class="category-toggle cat-instagram" open>
+<summary>📸 Instagram</summary>
+<div class="category-toggle-content">
+<p class="cat-subtitle">상위 노출 서비스 · 릴스 알고리즘 확산 · 프로모션 패키지</p>
 <a class="notion-page-link" href="#" onclick="showSection('pricing');return false;">📄 상품 가격표</a>
 <a class="notion-page-link" href="#" onclick="showSection('instagram-guide');return false;">📄 인스타그램 가이드북</a>
 <a class="notion-page-link" href="#" onclick="showSection('repost');return false;">📄 리그램 배포 작업</a>
@@ -86,16 +179,271 @@ a.notion-link:hover{text-decoration-color:#37352f}
 <a class="notion-page-link" href="#" onclick="showSection('optimized-account');return false;">📄 최적화 계정 구매</a>
 <a class="notion-page-link" href="#" onclick="showSection('boosting');return false;">📄 릴스 알고리즘 부스팅</a>
 <a class="notion-page-link" href="#" onclick="showSection('step-package');return false;">📄 스탭 패키지</a>
+</div>
+</details>
+
+<details class="category-toggle cat-etc" open>
+<summary>📋 기타</summary>
+<div class="category-toggle-content">
 <a class="notion-page-link" href="#" onclick="showSection('capture');return false;">📄 노출 캡쳐 사이트</a>
 <a class="notion-page-link" href="#" onclick="showSection('banned');return false;">📄 금지 업종</a>
 </div>
+</details>
+
 <hr class="notion-divider">
 </div>
 
+<div id="nplace-seo-guide" class="notion-section" data-cat="naver" data-title="N플레이스 최적화 SEO 가이드북">
+<div class="notion-page-title">N플레이스 최적화 SEO 가이드북</div>
+<hr class="notion-divider">
+<div class="notion-quote"><p>기초가 부실하다면 모래성처럼 금방 무너지기 마련입니다.</p></div>
+<hr class="notion-divider">
 
-<!-- ===== 상품 가격표 ===== -->
-<div id="pricing" class="notion-section">
-<div class="notion-breadcrumb"><a href="#" onclick="showSection('main-content');return false;">← 서비스 안내 페이지</a></div>
+<h2>네이버 알고리즘이 점수를 매기는 9가지 핵심 지표</h2>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>그룹</th><th>기대 효과</th><th>항목 및 핵심 포인트</th></tr></thead>
+<tbody>
+<tr><td>STEP 1. 기초 탄탄</td><td>정확도 점수<br>(검색 신뢰도 상승)</td><td>• 주소 풀 세팅: 도로명+지번 모두 기재<br>• 영업시간 디테일: 휴무/브레이크 타임 상세화<br>• 찾아오시는 길: 지명 키워드 기반 텍스트 최적화</td></tr>
+<tr><td>STEP 2. 점수 가점</td><td>활동성 점수<br>(지수 최적화)</td><td>• 스마트콜(0507): 통화 데이터 기록 및 지수화<br>• 네이버 톡톡: 1:1 상담을 통한 체류 시간 증대<br>• 소개글 SEO: 2,000자 내 타겟 키워드 전략 배치</td></tr>
+<tr><td>STEP 3. 매출 직결</td><td>전환 점수<br>(순위 상승 지름길)</td><td>• 예약/주문(N페이): 네이버가 선호하는 결제 데이터 확보<br>• 소식/쿠폰: 알림받기 유도로 '저장' 및 '재방문' 트리거<br>• 최신성 유지: 월 1~2회 소식 발행으로 활성화 증명</td></tr>
+</tbody></table></div>
+<hr class="notion-divider">
+
+<h2>📋 우리 매장 N플레이스 건강검진 시트</h2>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>자가 진단</th><th>분류</th><th>최적화 체크리스트</th></tr></thead>
+<tbody>
+<tr><td>□</td><td>기초</td><td>구주소(지번)와 신주소(도로명)를 모두 정확히 입력했는가?</td></tr>
+<tr><td>□</td><td>기초</td><td>휴무일과 브레이크 타임을 분 단위까지 상세히 기재했는가?</td></tr>
+<tr><td>□</td><td>기초</td><td>'찾아오시는 길'에 주변 지명과 역 이름 등 키워드가 포함되었는가?</td></tr>
+<tr><td>□</td><td>정보</td><td>소개글(상세설명)이 타겟 키워드를 포함해 1,000자 이상인가?</td></tr>
+<tr><td>□</td><td>연결</td><td>스마트콜(0507) 번호를 발급받아 연결해두었는가?</td></tr>
+<tr><td>□</td><td>연결</td><td>네이버 톡톡이 활성화되어 있으며 응대율이 높은가?</td></tr>
+<tr><td>□</td><td>확산</td><td>네이버 예약 또는 주문(N페이) 기능을 실제 사용 중인가?</td></tr>
+<tr><td>□</td><td>확산</td><td>최근 2주 이내에 새로운 '소식'을 업로드했는가?</td></tr>
+<tr><td>□</td><td>유인</td><td>'알림받기' 등 고객의 '저장'을 유도하는 쿠폰이 발행되어 있는가?</td></tr>
+</tbody></table></div>
+<hr class="notion-divider">
+
+<h1>💡 전문가가 알려주는 상위 노출 '치트키' 3가지</h1>
+<h3>1. 소개글 : 네이버 AI가 좋아하는 '텍스트 마이닝'</h3>
+<p>네이버 AI는 이미지보다 텍스트로 업체 정보를 파악합니다. 단순한 "맛집"이 아니라 고객이 검색할 법한 구체적인 상황을 녹여내야 합니다.</p>
+<ul class="notion-list">
+<li>전략 : "신내동 회식 장소", "봉화산역 데이트 코스", "주차 편한 고기집" 등 지역명과 상황 키워드 배치.</li>
+<li>효과 : 체류 시간이 늘어나며 네이버로부터 "매력적인 매장"으로 인식되어 가산점을 받습니다.</li>
+</ul>
+
+<h3>2. 찾아오시는 길 : 로컬 타겟팅의 핵심</h3>
+<p>"OO빌딩 1층"처럼 간단히 작성하는 것 보단 주변 랜드마크를 활용해보세요.</p>
+<ul class="notion-list">
+<li>전략 : "봉화산역 3번 출구 도보 1분", "중랑구청 인근","신내동 우체국 맞은편" 등 주변 지명 명시.</li>
+<li>효과 : '길찾기/네비게이션' 클릭을 유도합니다. 네이버는 이 클릭을 강력한 방문 의사로 판단하여 순위를 올립니다.</li>
+</ul>
+
+<h3>3. 스마트 블록 &amp; 테마 검색 대비</h3>
+<p>네이버 AI는 소개글과 찾아오시는 길의 내용을 분석해 업체를 #분위기좋은, #가성비 같은 테마로 자동 분류합니다. 작성한 글에 전략 키워드가 포함되어 있는지 꼭 확인해보세요!</p>
+<hr class="notion-divider">
+
+<h1>⚠️ [필독] 사장님만 모르는 '대표 키워드'의 낭비</h1>
+<p>네이버 플레이스 설정의 '대표 키워드 5자리'는 상위 노출의 운명을 결정합니다. 하지만 대부분의 사장님은 이곳에 [강남 미용실], [강남 준오헤어] 같은 단어를 넣습니다.</p>
+<ul class="notion-list">
+<li><strong>1️⃣ 네이버 AI는 이미 다 알고 있습니다</strong><br>우리 매장 주소지가 '강남역'이고 업종이 '미용실'로 등록되어 있다면, 네이버 알고리즘은 이미 우리를 [강남 미용실] 후보군에 자동 분류합니다. 굳이 키워드 칸에 다시 쓸 필요가 없습니다. 이미 확보한 점수를 또 따려고 애쓰는 꼴입니다.</li>
+<li><strong>2️⃣ '레드오션'보다는 '수익 키워드'를 노리세요</strong><br>예시로 [강남 미용실]은 경쟁이 너무 치열해 노출이 어렵습니다. 하지만 고객은 [강남 레이어드컷], [강남 복구펌], [강남 히피펌 성지]처럼 구체적인 목적을 가지고 검색합니다. 이 세부 키워드가 바로 실제 예약과 매출로 직결되는 알짜배기 키워드입니다.</li>
+</ul>
+<hr class="notion-divider">
+
+<h3>✅ 전문가의 추천: 이렇게 수정해보세요!</h3>
+<p>귀중한 5자리의 슬롯에는 '지역명 + 주력 메뉴(시술명)'를 조합해 넣는 것이 상위 노출의 핵심 전략입니다.</p>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>구분</th><th>잘못된 예시 (중복 낭비)</th><th>올바른 예시 (노출 극대화)</th></tr></thead>
+<tbody>
+<tr><td>키워드 1</td><td>강남 미용실</td><td>강남 레이어드컷</td></tr>
+<tr><td>키워드 2</td><td>역삼역 미용실</td><td>강남 복구펌</td></tr>
+<tr><td>키워드 3</td><td>준오헤어 강남</td><td>강남 가일컷</td></tr>
+<tr><td>키워드 4</td><td>강남역 헤어샵</td><td>강남 톤다운염색</td></tr>
+</tbody></table></div>
+
+<h3>💡 핵심 요약</h3>
+<div class="notion-quote"><p>"당연히 노출될 키워드에 자리를 낭비하지 마세요. 네이버가 자동으로 잡아주는 기본 키워드 대신, 고객의 지갑이 열리는 '구체적인 시술명과 메뉴명'으로 5자리를 꽉 채우는 것이 상위 노출과 매출 상승의 지름길입니다."</p></div>
+<hr class="notion-divider">
+
+<h1>🛠️ [실전] SEO 최적화 설정</h1>
+<a class="notion-bookmark" href="https://new.smartplace.naver.com/" target="_blank">네이버 스마트플레이스 → new.smartplace.naver.com</a>
+
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content">
+<p><strong>⚠️ 기본정보 수정 횟수 제한</strong></p>
+<p>업체 기본정보는 일주일 기준 최대 5회까지만 수정 가능합니다.</p>
+<p>빠진 정보가 없는지 한번 더 살펴보신 후 '저장' 버튼을 눌러주세요.</p>
+</div></div>
+
+<h3>💡 한 줄 팁</h3>
+<ul class="notion-list">
+<li>소개글에 들어간 핵심 키워드(지역명+메뉴명)는 네이버 AI가 우리 매장을 어떤 '스마트 블록'에 넣을지 결정하는 재료가 됩니다.</li>
+<li>찾아오시는 길에 '스타벅스', '영동시장', '먹자골목' 같은 랜드마크를 넣었기 때문에, 해당 장소 근처를 검색하는 유저에게도 노출될 확률이 높아졌습니다.</li>
+<li>네이버 예약과 톡톡을 활성화해 두셨다면, 소개글 중간에 "톡톡으로 문의주시면 빠른 상담이 가능합니다"라는 문구를 한 줄 더 추가하시는 것도 체류 시간을 늘리는 좋은 방법입니다.</li>
+</ul>
+<hr class="notion-divider">
+
+<h2>플레이스 로그인 후 ➜ 업체정보 ➜ 기본정보</h2>
+
+<h3>1️⃣ *상세설명 (매장 소개글)</h3>
+<div class="notion-image" style="max-width:314px"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_162411.png" alt="상세설명" loading="lazy"></div>
+<p>예시) (OO헤어 논현점 / 미용실 기준)</p>
+<p>안녕하세요, 당신의 인생 스타일을 찾아드리는 프리미엄 헤어살롱 [OO헤어 논현점]입니다.</p>
+<p>논현역과 영동시장 인근에서 가장 트렌디하고 감각적인 디자인을 제안하는 저희 매장은, 단순한 시술을 넘어 고객님의 라이프스타일까지 고려한 맞춤형 뷰티 솔루션을 제공합니다.</p>
+<p>[전문 디자이너의 1:1 퍼스널 컨설팅]</p>
+<p>논현동 미용실 중에서도 저희 [OO헤어]는 디테일의 차이를 지향합니다. 얼굴형을 보완하는 논현역 레이어드 펌, 손상된 모발에 생명력을 불어넣는 논현동 복구 염색, 그리고 남성분들의 두상과 모질에 딱 맞춘 논현역 맨즈 컨설팅 커트까지 각 분야의 전문가들이 상주하고 있습니다. 고객님의 모발 상태를 정밀 진단하여 손상을 최소화하는 프리미엄 약제만을 사용합니다.</p>
+<p>[고객님을 위한 특별한 혜택]</p>
+<p>처음 방문하시는 고객님들께는 감사의 마음을 담아 전 시술 20% 할인 이벤트를 진행 중입니다. 또한, 스마트한 소비를 위해 네이버 페이(N Pay) 결제 시 최대 포인트 적립 혜택을 드리고 있어 합리적인 가격으로 하이엔드 서비스를 경험하실 수 있습니다.</p>
+<p>[머무는 시간이 즐거운 공간]</p>
+<p>논현동 먹자골목 인근에 위치하여 접근성이 뛰어나며, 바쁜 일상 속에서도 편안하게 쉴 수 있는 프라이빗하고 세련된 인테리어를 갖추었습니다. 논현동 주차 가능 미용실을 찾으시는 분들을 위해 무료 주차 공간을 완비하고 있어 자차 이용 시에도 불편함 없이 방문하실 수 있습니다.</p>
+<p>[이런 고민을 하시는 분들께 추천합니다]</p>
+<ul class="notion-list">
+<li>나에게 어울리는 스타일을 찾지 못한 '유목민' 고객님</li>
+<li>잦은 시술로 머릿결이 상해 염색이나 펌이 망설여지는 분</li>
+<li>아침마다 손질이 편한 디자인 커트를 원하시는 분</li>
+</ul>
+<p>스타일의 변화는 작은 차이에서 시작됩니다. 지금 바로 네이버 예약을 통해 논현동에서 가장 사랑받는 [OO헤어]의 감각을 만나보세요.</p>
+<p>#논현동미용실 #논현역미용실 #논현역레이어드펌 #논현동복구염색 #논현역맨즈컷 #논현동주차미용실</p>
+<hr class="notion-divider">
+
+<h3>2️⃣ 대표키워드</h3>
+<div class="notion-image" style="max-width:314px"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_162454.png" alt="대표키워드" loading="lazy"></div>
+<hr class="notion-divider">
+
+<h3>3️⃣ 주소</h3>
+<div class="notion-image" style="max-width:314px"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_162621.png" alt="주소" loading="lazy"></div>
+<hr class="notion-divider">
+
+<h3>4️⃣ *찾아오는 길</h3>
+<div class="notion-image" style="max-width:314px"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_162724.png" alt="찾아오는 길" loading="lazy"></div>
+<p>예시) (OO헤어 논현점 / 미용실 기준)</p>
+<p>[지하철 및 도보 이용 시]</p>
+<p>지하철 7호선/신분당선 논현역 3번 출구에서 나오셔서 약 100m 정도 직진하시면 됩니다. 스타벅스 논현역점을 지나 바로 보이는 OO빌딩 2층에 위치하고 있습니다. 논현역에서 도보 2분 거리로 매우 가깝습니다.</p>
+<p>[버스 이용 시]</p>
+<p>'논현역' 혹은 '영동시장' 버스 정류장에서 하차하시면 편리합니다. 강남대로를 지나는 대부분의 간선/지선 버스가 정차하는 교통의 요지에 위치해 있어 대중교통 이용이 매우 용이합니다.</p>
+<p>[자차 이용 및 주차 안내]</p>
+<p>네비게이션에 '논현동 OO빌딩' 혹은 <strong>'OO헤어 논현점'</strong>을 검색해 주세요.</p>
+<p>건물 1층 및 지하에 전용 주차 공간이 마련되어 있어 주차 걱정 없이 방문하실 수 있습니다. (논현동 먹자골목 초입 부근이며, 강남 영동시장과도 인접해 있어 찾기 쉽습니다.)</p>
+<p>[길찾기 팁]</p>
+<p>찾기 어려우시다면 네이버 지도에서 [길찾기] 버튼을 눌러주세요! 현재 위치에서 매장까지 가장 빠른 경로를 안내해 드립니다. 매장 방문이 설렘으로 가득 차도록 친절히 모시겠습니다.</p>
+<hr class="notion-divider">
+
+<h3>5️⃣ 부가정보</h3>
+<div class="notion-image"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_162948.png" alt="부가정보" style="max-width:710px" loading="lazy"></div>
+<hr class="notion-divider">
+
+<h3>6️⃣ 영업시간 상세 등록</h3>
+<div class="notion-image" style="max-width:407px"><img src="images/nplace-seo-guide/03829d01-0208-47d9-aa04-b4491757a422.png" alt="영업시간" loading="lazy"></div>
+<p>영업시간은 단순히 "평일 10:00~20:00"만 기재하는 것이 아니라, 요일별 세부 시간, 브레이크 타임, 정기 휴무일까지 모두 입력해야 합니다.</p>
+<p>네이버 알고리즘은 이 정보의 완성도를 체크하여 정확도 점수에 반영하며, 특히 "지금 영업 중" 배지가 노출되려면 필수입니다.</p>
+<hr class="notion-divider">
+
+<h3>7️⃣ 전화번호 (스마트콜 0507 권장)</h3>
+<div class="notion-image"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_161918.png" alt="전화번호" style="max-width:710px" loading="lazy"></div>
+<p>일반 전화번호도 등록할 수 있지만, 네이버 스마트콜(0507)을 사용하면 통화 데이터가 네이버에 기록되어 활동성 지표로 반영됩니다. 통화량이 많을수록 "실제로 운영 중인 매장"으로 판단되어 상위 노출에 유리합니다.</p>
+<hr class="notion-divider">
+
+<h3>8️⃣ 홈페이지 / SNS 링크</h3>
+<div class="notion-image" style="max-width:314px"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_163437.png" alt="SNS 링크" loading="lazy"></div>
+<p>공식 홈페이지, 인스타그램, 블로그 등을 모두 연결하면 신뢰도가 올라갑니다.</p>
+<p>특히 인스타그램은 시각 자료와 함께 최신 트렌드를 보여줄 수 있어 고객 유입에 효과적입니다.</p>
+<hr class="notion-divider">
+
+<h3>9️⃣ 예약 / 주문 (N페이 연동)</h3>
+<div class="notion-image" style="max-width:583px"><img src="images/nplace-seo-guide/34f51e8f-878c-49c0-8139-3c01fd204990.png" alt="예약 주문" loading="lazy"></div>
+<p>네이버 예약 또는 주문하기 기능을 활성화하면 네이버가 가장 선호하는 전환 데이터를 확보할 수 있습니다.</p>
+<p>예약/주문 건수가 쌓일수록 알고리즘이 "고객이 선택하는 매장"으로 인식하여 순위 상승에 직접적인 영향을 미칩니다.</p>
+<hr class="notion-divider">
+
+<h3>🔟 네이버 톡톡 활성화</h3>
+<div class="notion-image"><img src="images/nplace-seo-guide/495594a4-a49e-4483-95b2-22885f2808bc.png" alt="네이버 톡톡" style="max-width:710px" loading="lazy"></div>
+<p>네이버 톡톡은 1:1 상담 채널로, 고객이 매장 페이지에 머무는 시간을 늘려주고 체류 시간 지표를 높입니다.</p>
+<p>빠른 응대는 곧 고객 만족도로 이어지며, 톡톡을 통한 문의 → 예약 전환율이 높을수록 네이버는 해당 매장을 더 자주 노출시킵니다.</p>
+<hr class="notion-divider">
+
+<h3>1️⃣1️⃣ 쿠폰 / 소식</h3>
+<div class="notion-image" style="max-width:428px"><img src="images/nplace-seo-guide/9b37dd26-c1c3-4926-92e8-f958a8ec4ca8.png" alt="쿠폰 소식" loading="lazy"></div>
+</div>
+
+<div id="nplace-delegation" class="notion-section" data-cat="naver" data-title="네이버 플레이스 권한 위임">
+<div class="notion-page-title">네이버 플레이스 권한 위임</div>
+<hr class="notion-divider">
+<div class="notion-quote"><p>담당 직원 혹은 관리 대행사에게 권한 위임하는 방법</p></div>
+
+<h3>주인</h3>
+<p>플레이스의 모든 설정 및 수정을 할 수 있습니다. 한 명만 위임이 가능합니다.</p>
+
+<h3>운영자</h3>
+<p>리뷰 및 통계, 예약 및 주문, 관리가 가능하며 업체 정보 또한 수정이 가능한 권한을 가지게 됩니다.</p>
+<p>단, 스마트콜 쿠폰 소식 마케팅 메시지 플레이스 광고 소사공인 광고 등은 설정 및 수정할 수 없습니다.</p>
+<p>스마트 플레이스의 운영자 권한을 위임하는 방법은 다음과 같습니다.</p>
+
+<h2>1. '네이버 스마트 플레이스' 검색 후 선택</h2>
+<div class="notion-image" style="max-width:355px"><img src="images/nplace-delegation/872d1a60-dd5b-4420-9d0a-040cc7408817.png" alt="스마트플레이스 검색" loading="lazy"></div>
+<ul class="notion-list"><li>사업장 플레이스 아이디로 로그인 되어있어야 합니다.</li></ul>
+
+<h2>2. 해당 사업장을 선택합니다.</h2>
+<div class="notion-image"><img src="images/nplace-delegation/f57bd27a-5a30-4bc3-8579-41134cc11a4e.png" alt="사업장 선택" style="max-width:710px" loading="lazy"></div>
+<ul class="notion-list"><li>운영자 권한을 원하는 사업장을 클릭합니다.</li></ul>
+
+<h2>3. 전체 설정을 선택합니다.</h2>
+<div class="notion-image" style="max-width:376px"><img src="images/nplace-delegation/cf3b6c9d-e783-418f-9001-4ef0da981695.png" alt="전체 설정" loading="lazy"></div>
+<ul class="notion-list"><li>업체 정보 왼쪽 하단의 '전체 설정'을 클릭 합니다.</li></ul>
+
+<h2>4. 전체 설정을 클릭 후 권한 관리를 선택합니다.</h2>
+<div class="notion-image" style="max-width:451px"><img src="images/nplace-delegation/be455a95-55ed-4703-b628-bc09168e9ed5.png" alt="권한 관리" loading="lazy"></div>
+
+<h2>5. 권한 관리 하단에 운영자 추가를 선택합니다.</h2>
+<div class="notion-image" style="max-width:317px"><img src="images/nplace-delegation/e58cd883-1467-4426-ba24-f7a0b27c25f1.png" alt="운영자 추가" loading="lazy"></div>
+<ul class="notion-list"><li>운영자 추가 클릭</li></ul>
+
+<h2>6. 운영자로 추가할 네이버 ID를 입력합니다.</h2>
+<div class="notion-image" style="max-width:331px"><img src="images/nplace-delegation/ecb43e25-29c5-4eff-9799-c5f66678309d.png" alt="네이버 ID 입력" loading="lazy"></div>
+<ul class="notion-list">
+<li>아이디 입력 → 동의 및 추가 → 동의하기</li>
+<li>유의사항 : 추가할 네이버 아이디는 스마트 플레이스에 가입이 되어있어야 합니다.</li>
+</ul>
+
+<h2>7. 해당 위임자의 최종 동의 확인</h2>
+<div class="notion-image"><img src="images/nplace-delegation/ed8889d9-66e9-4f12-ba11-ca6c80e25ad8.png" alt="최종 동의" style="max-width:710px" loading="lazy"></div>
+<div class="notion-image" style="max-width:429px"><img src="images/nplace-delegation/0281a7b1-e396-46ab-b20a-633a120d85ed.png" alt="동의하기" loading="lazy"></div>
+<ul class="notion-list"><li>해당 권한을 받을 네이버 로그인 후 '알림' 클릭→ '동의하기' 클릭</li></ul>
+<hr class="notion-divider">
+</div>
+
+<div id="ad-center-delegation" class="notion-section" data-cat="naver" data-title="네이버 광고주센터 권한 위임">
+<div class="notion-page-title">네이버 광고주센터 권한 위임</div>
+<div class="notion-quote"><p>담당 직원 혹은 관리 대행사에게 권한 위임하는 방법</p></div>
+
+<h1>1. 네이버 광고주센터 접속</h1>
+<p>바로가기 URL : <a class="notion-link" href="https://ads.naver.com/" target="_blank">https://ads.naver.com/</a></p>
+<div class="notion-image" style="max-width:489px"><img src="images/ad-center-delegation/dfc33ab3-3376-4434-a9bc-d7ff13a10a26.png" alt="광고주센터 접속" loading="lazy"></div>
+
+<h1>2. 로그인 후 우측상단 ID 클릭</h1>
+<div class="notion-image"><img src="images/ad-center-delegation/c1585e69-c3d0-41c1-a43f-c4d1c0208b32.png" alt="ID 클릭" style="max-width:710px" loading="lazy"></div>
+
+<h1>3. 계정 책임자 선택</h1>
+<div class="notion-image" style="max-width:427px"><img src="images/ad-center-delegation/46f47502-0020-45e3-b424-c943c46b95e7.png" alt="계정 책임자" loading="lazy"></div>
+
+<h1>4. 좌측하단 설정 → 권한 관리 → 맴버초대</h1>
+<div class="notion-image"><img src="images/ad-center-delegation/3ed275be-7747-4e77-81b0-973bafd4c99e.png" alt="권한 관리" style="max-width:710px" loading="lazy"></div>
+
+<h1>5. 동의 → ID입력 → 가입 여부 조회 → 확인</h1>
+<div class="notion-image" style="max-width:600px"><img src="images/ad-center-delegation/5937dc0e-5ded-4294-9bfd-ea326b409d6b.png" alt="ID 입력" loading="lazy"></div>
+<p>✔️ 운영 관리 : 광고 계정 수정, 소재 등록 및 집행가능</p>
+<p>✔️ 운영 조회 : 결과 분석만 가능, 수정 불가</p>
+
+<h1>6. 초대한 계정의 수락</h1>
+<div class="notion-image" style="max-width:584px"><img src="images/ad-center-delegation/0c723be2-e7d5-4544-b367-d334b8c17ae8.png" alt="수락" loading="lazy"></div>
+<ul class="notion-list">
+<li>정상적으로 초대가 되었다면 하단에 초대한 계정이 보여집니다.</li>
+<li>초대한 계정의 수락 후 최종 완료됩니다.</li>
+</ul>
+<hr class="notion-divider">
+</div>
+
+<div id="pricing" class="notion-section" data-cat="instagram" data-title="상품 가격표">
 <div class="notion-page-title">상품 가격표</div>
 <hr class="notion-divider">
 <div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content">
@@ -214,335 +562,7 @@ a.notion-link:hover{text-decoration-color:#37352f}
 <hr class="notion-divider">
 </div>
 
-<!-- ===== 노출 캡쳐 사이트 ===== -->
-<div id="capture" class="notion-section">
-<div class="notion-breadcrumb"><a href="#" onclick="showSection('main-content');return false;">← 서비스 안내 페이지</a></div>
-<div class="notion-page-title">노출 캡쳐 사이트</div>
-<hr class="notion-divider">
-<h1>서비스 개요</h1>
-<p>현재 인스타그램 검색 결과는 계정 상태, 사용자의 접속 기기, 접속 시점에 따라 모두 다르게 표시됩니다. 이로 인해 사람이 직접 상위 노출 여부를 확인하고 캡쳐하는 것은 매우 어렵고 비효율적입니다.</p>
-<p>이러한 불편함을 해소하기 위해, 지정한 키워드에 대해 상위에 노출되었을 때 자동으로 화면을 캡쳐해주는 "상위 노출 캡쳐 슬롯"을 도입하였습니다.</p>
-<p>노출 캡쳐 슬롯은 광고주 계정 또는 리그램 계정에서 업로드된 콘텐츠가 추천탭 상단 노출된 경우, 해당 노출 화면을 자동으로 캡쳐하여 저장하는 서비스 입니다.</p>
-<p>매번 수동으로 캡쳐하던 작업을 자동화함으로써 리소스를 절감하고, 광고주는 별도의 요청 없이도 노출 내역을 실시간으로 확인하실 수 있습니다.</p>
-
-<h1>주요 기능</h1>
-<h3>자동 캡쳐</h3>
-<p>인스타그램 내 키워드 검색 시 상위 노출된 광고주 및 리그램 계정을 시스템이 자동 인식하여 노출 화면을 캡쳐합니다.</p>
-<h3>다수의 계정 확인 가능</h3>
-<p>광고주가 다수의 계정을 진행중이신 경우, 최대 5개 계정까지 순위 체크할 수 있습니다.</p>
-<h3>최대 20개 키워드 확인 가능</h3>
-<p>주요 타겟 키워드 외에도 메인 키워드 + 서브 키워드 조합으로 노출 영역을 다양하게 모니터링할 수 있습니다.</p>
-<h3>전용 확인 페이지 제공</h3>
-<p>광고주는 별도의 리포트를 기다리지 않아도, 제공되는 전용 페이지를 통해 비밀번호를 입력 후 캡쳐된 노출 내역을 실시간 확인할 수 있습니다.</p>
-
-<h1>광고주님만을 위한 노출 캡쳐 사이트</h1>
-<ul class="notion-list">
-<li>페이지 샘플
-  <ul>
-    <li>링크：<a class="notion-link" href="https://officialmarketing.co.kr/marketing-report/71dei" target="_blank">https://officialmarketing.co.kr/marketing-report/71dei</a></li>
-    <li>비밀번호：3590</li>
-  </ul>
-</li>
-<li>파란색 동그라미 = 광고주님의 계정으로 업로드 되어 노출된 게시물</li>
-<li>빨간색 동그라미 = 리그램 계정으로 업로드 되어 노출된 게시물</li>
-</ul>
-<div class="notion-image"><img src="images/capture1.png" alt="노출 캡쳐 예시 1"></div>
-<div class="notion-image"><img src="images/capture2.png" alt="노출 캡쳐 예시 2"></div>
-<div class="notion-image"><img src="images/capture3.png" alt="노출 캡쳐 예시 3"></div>
-<hr class="notion-divider">
-</div>
-
-<!-- ===== 금지 업종 ===== -->
-<div id="banned" class="notion-section">
-<div class="notion-breadcrumb"><a href="#" onclick="showSection('main-content');return false;">← 서비스 안내 페이지</a></div>
-<div class="notion-page-title">금지 업종</div>
-<hr class="notion-divider">
-<div class="notion-quote"><p>인스타그램에서는 특정 업종 및 콘텐츠의 배포를 제한하거나 금지하고 있습니다. 주로 불법적이거나 유해한 콘텐츠, 오해를 일으킬 수 있는 정보, 미성년자 보호와 관련된 업종이 포함됩니다.</p></div>
-
-<h1>광고 및 게시물 모두 금지</h1>
-<h2>1. 불법 상품 및 서비스</h2>
-<ul class="notion-list"><li>마약, 대마초 및 관련 제품</li><li>위조품 및 불법 복제품</li><li>불법 무기 및 폭발물</li></ul>
-<h2>2. 도박 및 사행성 관련 업종</h2>
-<ul class="notion-list"><li>온라인 도박(토토, 바카라, 슬롯머신 등)</li><li>카지노 및 복권 (일부 국가에서 제한적 허용)</li></ul>
-<h2>3. 19금 및 성인 콘텐츠</h2>
-<ul class="notion-list"><li>성인용 제품 및 서비스 (성인 웹사이트, 성인용품, 유흥업소 등)</li><li>성적 암시가 강한 콘텐츠</li></ul>
-<h2>4. 불법 금융 및 사기성 서비스</h2>
-<ul class="notion-list"><li>다단계 및 피라미드 금융사기</li><li>고위험 투자 유도 (불법 주식 리딩방, 선물 옵션 거래 유도)</li><li>가상자산 사기 (펌프앤덤프, 불법 코인 투자 유도)</li></ul>
-<h2>5. 정치 및 사회적 논란이 있는 콘텐츠</h2>
-<ul class="notion-list"><li>선거 관련 조작된 정보</li><li>정치적 극단주의 콘텐츠</li></ul>
-
-<h1>광고에 제한되는 업종</h1>
-<h2>1. 담배 및 전자담배 관련 제품</h2>
-<ul class="notion-list"><li>일반 게시물은 가능하지만, 광고는 금지됨</li></ul>
-<h2>2. 알코올 관련 제품</h2>
-<ul class="notion-list"><li>일부 국가에서는 광고 제한 또는 금지</li><li>연령 제한 적용 필요</li></ul>
-<h2>3. 의료 및 건강 관련 제품</h2>
-<ul class="notion-list"><li>허위 과장 광고 금지 (다이어트 약, 미승인 건강기능식품 등)</li><li>의료 시술 광고 (일부 국가에서 성형수술은 제한됨)</li></ul>
-<h2>4. 파괴적이거나 폭력적인 콘텐츠</h2>
-<ul class="notion-list"><li>폭력 미화, 혐오 발언, 극단주의 콘텐츠</li></ul>
-<hr class="notion-divider">
-<p>※ 위 사항을 포함한 규정에 위반되는 행위일 경우 일체 진행이 불가합니다.</p>
-</div>
-
-<!-- ===== N플레이스 최적화 SEO 가이드북 ===== -->
-<div id="nplace-seo-guide" class="notion-section">
-<div class="notion-breadcrumb"><a href="#" onclick="showSection('main-content');return false;">← 서비스 안내 페이지</a></div>
-<div class="notion-page-title">N플레이스 최적화 SEO 가이드북</div>
-<hr class="notion-divider">
-<div class="notion-quote"><p>기초가 부실하다면 모래성처럼 금방 무너지기 마련입니다.</p></div>
-<hr class="notion-divider">
-
-<h2>네이버 알고리즘이 점수를 매기는 9가지 핵심 지표</h2>
-<div class="notion-table-wrap"><table class="notion-table">
-<thead><tr><th>그룹</th><th>기대 효과</th><th>항목 및 핵심 포인트</th></tr></thead>
-<tbody>
-<tr><td>STEP 1. 기초 탄탄</td><td>정확도 점수<br>(검색 신뢰도 상승)</td><td>• 주소 풀 세팅: 도로명+지번 모두 기재<br>• 영업시간 디테일: 휴무/브레이크 타임 상세화<br>• 찾아오시는 길: 지명 키워드 기반 텍스트 최적화</td></tr>
-<tr><td>STEP 2. 점수 가점</td><td>활동성 점수<br>(지수 최적화)</td><td>• 스마트콜(0507): 통화 데이터 기록 및 지수화<br>• 네이버 톡톡: 1:1 상담을 통한 체류 시간 증대<br>• 소개글 SEO: 2,000자 내 타겟 키워드 전략 배치</td></tr>
-<tr><td>STEP 3. 매출 직결</td><td>전환 점수<br>(순위 상승 지름길)</td><td>• 예약/주문(N페이): 네이버가 선호하는 결제 데이터 확보<br>• 소식/쿠폰: 알림받기 유도로 '저장' 및 '재방문' 트리거<br>• 최신성 유지: 월 1~2회 소식 발행으로 활성화 증명</td></tr>
-</tbody></table></div>
-<hr class="notion-divider">
-
-<h2>📋 우리 매장 N플레이스 건강검진 시트</h2>
-<div class="notion-table-wrap"><table class="notion-table">
-<thead><tr><th>자가 진단</th><th>분류</th><th>최적화 체크리스트</th></tr></thead>
-<tbody>
-<tr><td>□</td><td>기초</td><td>구주소(지번)와 신주소(도로명)를 모두 정확히 입력했는가?</td></tr>
-<tr><td>□</td><td>기초</td><td>휴무일과 브레이크 타임을 분 단위까지 상세히 기재했는가?</td></tr>
-<tr><td>□</td><td>기초</td><td>'찾아오시는 길'에 주변 지명과 역 이름 등 키워드가 포함되었는가?</td></tr>
-<tr><td>□</td><td>정보</td><td>소개글(상세설명)이 타겟 키워드를 포함해 1,000자 이상인가?</td></tr>
-<tr><td>□</td><td>연결</td><td>스마트콜(0507) 번호를 발급받아 연결해두었는가?</td></tr>
-<tr><td>□</td><td>연결</td><td>네이버 톡톡이 활성화되어 있으며 응대율이 높은가?</td></tr>
-<tr><td>□</td><td>확산</td><td>네이버 예약 또는 주문(N페이) 기능을 실제 사용 중인가?</td></tr>
-<tr><td>□</td><td>확산</td><td>최근 2주 이내에 새로운 '소식'을 업로드했는가?</td></tr>
-<tr><td>□</td><td>유인</td><td>'알림받기' 등 고객의 '저장'을 유도하는 쿠폰이 발행되어 있는가?</td></tr>
-</tbody></table></div>
-<hr class="notion-divider">
-
-<h1>💡 전문가가 알려주는 상위 노출 '치트키' 3가지</h1>
-<h3>1. 소개글 : 네이버 AI가 좋아하는 '텍스트 마이닝'</h3>
-<p>네이버 AI는 이미지보다 텍스트로 업체 정보를 파악합니다. 단순한 "맛집"이 아니라 고객이 검색할 법한 구체적인 상황을 녹여내야 합니다.</p>
-<ul class="notion-list">
-<li>전략 : "신내동 회식 장소", "봉화산역 데이트 코스", "주차 편한 고기집" 등 지역명과 상황 키워드 배치.</li>
-<li>효과 : 체류 시간이 늘어나며 네이버로부터 "매력적인 매장"으로 인식되어 가산점을 받습니다.</li>
-</ul>
-
-<h3>2. 찾아오시는 길 : 로컬 타겟팅의 핵심</h3>
-<p>"OO빌딩 1층"처럼 간단히 작성하는 것 보단 주변 랜드마크를 활용해보세요.</p>
-<ul class="notion-list">
-<li>전략 : "봉화산역 3번 출구 도보 1분", "중랑구청 인근","신내동 우체국 맞은편" 등 주변 지명 명시.</li>
-<li>효과 : '길찾기/네비게이션' 클릭을 유도합니다. 네이버는 이 클릭을 강력한 방문 의사로 판단하여 순위를 올립니다.</li>
-</ul>
-
-<h3>3. 스마트 블록 &amp; 테마 검색 대비</h3>
-<p>네이버 AI는 소개글과 찾아오시는 길의 내용을 분석해 업체를 #분위기좋은, #가성비 같은 테마로 자동 분류합니다. 작성한 글에 전략 키워드가 포함되어 있는지 꼭 확인해보세요!</p>
-<hr class="notion-divider">
-
-<h1>⚠️ [필독] 사장님만 모르는 '대표 키워드'의 낭비</h1>
-<p>네이버 플레이스 설정의 '대표 키워드 5자리'는 상위 노출의 운명을 결정합니다. 하지만 대부분의 사장님은 이곳에 [강남 미용실], [강남 준오헤어] 같은 단어를 넣습니다.</p>
-<ul class="notion-list">
-<li><strong>1️⃣ 네이버 AI는 이미 다 알고 있습니다</strong><br>우리 매장 주소지가 '강남역'이고 업종이 '미용실'로 등록되어 있다면, 네이버 알고리즘은 이미 우리를 [강남 미용실] 후보군에 자동 분류합니다. 굳이 키워드 칸에 다시 쓸 필요가 없습니다. 이미 확보한 점수를 또 따려고 애쓰는 꼴입니다.</li>
-<li><strong>2️⃣ '레드오션'보다는 '수익 키워드'를 노리세요</strong><br>예시로 [강남 미용실]은 경쟁이 너무 치열해 노출이 어렵습니다. 하지만 고객은 [강남 레이어드컷], [강남 복구펌], [강남 히피펌 성지]처럼 구체적인 목적을 가지고 검색합니다. 이 세부 키워드가 바로 실제 예약과 매출로 직결되는 알짜배기 키워드입니다.</li>
-</ul>
-<hr class="notion-divider">
-
-<h3>✅ 전문가의 추천: 이렇게 수정해보세요!</h3>
-<p>귀중한 5자리의 슬롯에는 '지역명 + 주력 메뉴(시술명)'를 조합해 넣는 것이 상위 노출의 핵심 전략입니다.</p>
-<div class="notion-table-wrap"><table class="notion-table">
-<thead><tr><th>구분</th><th>잘못된 예시 (중복 낭비)</th><th>올바른 예시 (노출 극대화)</th></tr></thead>
-<tbody>
-<tr><td>키워드 1</td><td>강남 미용실</td><td>강남 레이어드컷</td></tr>
-<tr><td>키워드 2</td><td>역삼역 미용실</td><td>강남 복구펌</td></tr>
-<tr><td>키워드 3</td><td>준오헤어 강남</td><td>강남 가일컷</td></tr>
-<tr><td>키워드 4</td><td>강남역 헤어샵</td><td>강남 톤다운염색</td></tr>
-</tbody></table></div>
-
-<h3>💡 핵심 요약</h3>
-<div class="notion-quote"><p>"당연히 노출될 키워드에 자리를 낭비하지 마세요. 네이버가 자동으로 잡아주는 기본 키워드 대신, 고객의 지갑이 열리는 '구체적인 시술명과 메뉴명'으로 5자리를 꽉 채우는 것이 상위 노출과 매출 상승의 지름길입니다."</p></div>
-<hr class="notion-divider">
-
-<h1>🛠️ [실전] SEO 최적화 설정</h1>
-<a class="notion-bookmark" href="https://new.smartplace.naver.com/" target="_blank">네이버 스마트플레이스 → new.smartplace.naver.com</a>
-
-<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content">
-<p><strong>⚠️ 기본정보 수정 횟수 제한</strong></p>
-<p>업체 기본정보는 일주일 기준 최대 5회까지만 수정 가능합니다.</p>
-<p>빠진 정보가 없는지 한번 더 살펴보신 후 '저장' 버튼을 눌러주세요.</p>
-</div></div>
-
-<h3>💡 한 줄 팁</h3>
-<ul class="notion-list">
-<li>소개글에 들어간 핵심 키워드(지역명+메뉴명)는 네이버 AI가 우리 매장을 어떤 '스마트 블록'에 넣을지 결정하는 재료가 됩니다.</li>
-<li>찾아오시는 길에 '스타벅스', '영동시장', '먹자골목' 같은 랜드마크를 넣었기 때문에, 해당 장소 근처를 검색하는 유저에게도 노출될 확률이 높아졌습니다.</li>
-<li>네이버 예약과 톡톡을 활성화해 두셨다면, 소개글 중간에 "톡톡으로 문의주시면 빠른 상담이 가능합니다"라는 문구를 한 줄 더 추가하시는 것도 체류 시간을 늘리는 좋은 방법입니다.</li>
-</ul>
-<hr class="notion-divider">
-
-<h2>플레이스 로그인 후 ➜ 업체정보 ➜ 기본정보</h2>
-
-<h3>1️⃣ *상세설명 (매장 소개글)</h3>
-<div class="notion-image" style="max-width:314px"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_162411.png" alt="상세설명"></div>
-<p>예시) (OO헤어 논현점 / 미용실 기준)</p>
-<p>안녕하세요, 당신의 인생 스타일을 찾아드리는 프리미엄 헤어살롱 [OO헤어 논현점]입니다.</p>
-<p>논현역과 영동시장 인근에서 가장 트렌디하고 감각적인 디자인을 제안하는 저희 매장은, 단순한 시술을 넘어 고객님의 라이프스타일까지 고려한 맞춤형 뷰티 솔루션을 제공합니다.</p>
-<p>[전문 디자이너의 1:1 퍼스널 컨설팅]</p>
-<p>논현동 미용실 중에서도 저희 [OO헤어]는 디테일의 차이를 지향합니다. 얼굴형을 보완하는 논현역 레이어드 펌, 손상된 모발에 생명력을 불어넣는 논현동 복구 염색, 그리고 남성분들의 두상과 모질에 딱 맞춘 논현역 맨즈 컨설팅 커트까지 각 분야의 전문가들이 상주하고 있습니다. 고객님의 모발 상태를 정밀 진단하여 손상을 최소화하는 프리미엄 약제만을 사용합니다.</p>
-<p>[고객님을 위한 특별한 혜택]</p>
-<p>처음 방문하시는 고객님들께는 감사의 마음을 담아 전 시술 20% 할인 이벤트를 진행 중입니다. 또한, 스마트한 소비를 위해 네이버 페이(N Pay) 결제 시 최대 포인트 적립 혜택을 드리고 있어 합리적인 가격으로 하이엔드 서비스를 경험하실 수 있습니다.</p>
-<p>[머무는 시간이 즐거운 공간]</p>
-<p>논현동 먹자골목 인근에 위치하여 접근성이 뛰어나며, 바쁜 일상 속에서도 편안하게 쉴 수 있는 프라이빗하고 세련된 인테리어를 갖추었습니다. 논현동 주차 가능 미용실을 찾으시는 분들을 위해 무료 주차 공간을 완비하고 있어 자차 이용 시에도 불편함 없이 방문하실 수 있습니다.</p>
-<p>[이런 고민을 하시는 분들께 추천합니다]</p>
-<ul class="notion-list">
-<li>나에게 어울리는 스타일을 찾지 못한 '유목민' 고객님</li>
-<li>잦은 시술로 머릿결이 상해 염색이나 펌이 망설여지는 분</li>
-<li>아침마다 손질이 편한 디자인 커트를 원하시는 분</li>
-</ul>
-<p>스타일의 변화는 작은 차이에서 시작됩니다. 지금 바로 네이버 예약을 통해 논현동에서 가장 사랑받는 [OO헤어]의 감각을 만나보세요.</p>
-<p>#논현동미용실 #논현역미용실 #논현역레이어드펌 #논현동복구염색 #논현역맨즈컷 #논현동주차미용실</p>
-<hr class="notion-divider">
-
-<h3>2️⃣ 대표키워드</h3>
-<div class="notion-image" style="max-width:314px"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_162454.png" alt="대표키워드"></div>
-<hr class="notion-divider">
-
-<h3>3️⃣ 주소</h3>
-<div class="notion-image" style="max-width:314px"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_162621.png" alt="주소"></div>
-<hr class="notion-divider">
-
-<h3>4️⃣ *찾아오는 길</h3>
-<div class="notion-image" style="max-width:314px"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_162724.png" alt="찾아오는 길"></div>
-<p>예시) (OO헤어 논현점 / 미용실 기준)</p>
-<p>[지하철 및 도보 이용 시]</p>
-<p>지하철 7호선/신분당선 논현역 3번 출구에서 나오셔서 약 100m 정도 직진하시면 됩니다. 스타벅스 논현역점을 지나 바로 보이는 OO빌딩 2층에 위치하고 있습니다. 논현역에서 도보 2분 거리로 매우 가깝습니다.</p>
-<p>[버스 이용 시]</p>
-<p>'논현역' 혹은 '영동시장' 버스 정류장에서 하차하시면 편리합니다. 강남대로를 지나는 대부분의 간선/지선 버스가 정차하는 교통의 요지에 위치해 있어 대중교통 이용이 매우 용이합니다.</p>
-<p>[자차 이용 및 주차 안내]</p>
-<p>네비게이션에 '논현동 OO빌딩' 혹은 <strong>'OO헤어 논현점'</strong>을 검색해 주세요.</p>
-<p>건물 1층 및 지하에 전용 주차 공간이 마련되어 있어 주차 걱정 없이 방문하실 수 있습니다. (논현동 먹자골목 초입 부근이며, 강남 영동시장과도 인접해 있어 찾기 쉽습니다.)</p>
-<p>[길찾기 팁]</p>
-<p>찾기 어려우시다면 네이버 지도에서 [길찾기] 버튼을 눌러주세요! 현재 위치에서 매장까지 가장 빠른 경로를 안내해 드립니다. 매장 방문이 설렘으로 가득 차도록 친절히 모시겠습니다.</p>
-<hr class="notion-divider">
-
-<h3>5️⃣ 부가정보</h3>
-<div class="notion-image"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_162948.png" alt="부가정보" style="max-width:710px"></div>
-<hr class="notion-divider">
-
-<h3>6️⃣ 영업시간 상세 등록</h3>
-<div class="notion-image" style="max-width:407px"><img src="images/nplace-seo-guide/03829d01-0208-47d9-aa04-b4491757a422.png" alt="영업시간"></div>
-<p>영업시간은 단순히 "평일 10:00~20:00"만 기재하는 것이 아니라, 요일별 세부 시간, 브레이크 타임, 정기 휴무일까지 모두 입력해야 합니다.</p>
-<p>네이버 알고리즘은 이 정보의 완성도를 체크하여 정확도 점수에 반영하며, 특히 "지금 영업 중" 배지가 노출되려면 필수입니다.</p>
-<hr class="notion-divider">
-
-<h3>7️⃣ 전화번호 (스마트콜 0507 권장)</h3>
-<div class="notion-image"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_161918.png" alt="전화번호" style="max-width:710px"></div>
-<p>일반 전화번호도 등록할 수 있지만, 네이버 스마트콜(0507)을 사용하면 통화 데이터가 네이버에 기록되어 활동성 지표로 반영됩니다. 통화량이 많을수록 "실제로 운영 중인 매장"으로 판단되어 상위 노출에 유리합니다.</p>
-<hr class="notion-divider">
-
-<h3>8️⃣ 홈페이지 / SNS 링크</h3>
-<div class="notion-image" style="max-width:314px"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_163437.png" alt="SNS 링크"></div>
-<p>공식 홈페이지, 인스타그램, 블로그 등을 모두 연결하면 신뢰도가 올라갑니다.</p>
-<p>특히 인스타그램은 시각 자료와 함께 최신 트렌드를 보여줄 수 있어 고객 유입에 효과적입니다.</p>
-<hr class="notion-divider">
-
-<h3>9️⃣ 예약 / 주문 (N페이 연동)</h3>
-<div class="notion-image" style="max-width:583px"><img src="images/nplace-seo-guide/34f51e8f-878c-49c0-8139-3c01fd204990.png" alt="예약 주문"></div>
-<p>네이버 예약 또는 주문하기 기능을 활성화하면 네이버가 가장 선호하는 전환 데이터를 확보할 수 있습니다.</p>
-<p>예약/주문 건수가 쌓일수록 알고리즘이 "고객이 선택하는 매장"으로 인식하여 순위 상승에 직접적인 영향을 미칩니다.</p>
-<hr class="notion-divider">
-
-<h3>🔟 네이버 톡톡 활성화</h3>
-<div class="notion-image"><img src="images/nplace-seo-guide/495594a4-a49e-4483-95b2-22885f2808bc.png" alt="네이버 톡톡" style="max-width:710px"></div>
-<p>네이버 톡톡은 1:1 상담 채널로, 고객이 매장 페이지에 머무는 시간을 늘려주고 체류 시간 지표를 높입니다.</p>
-<p>빠른 응대는 곧 고객 만족도로 이어지며, 톡톡을 통한 문의 → 예약 전환율이 높을수록 네이버는 해당 매장을 더 자주 노출시킵니다.</p>
-<hr class="notion-divider">
-
-<h3>1️⃣1️⃣ 쿠폰 / 소식</h3>
-<div class="notion-image" style="max-width:428px"><img src="images/nplace-seo-guide/9b37dd26-c1c3-4926-92e8-f958a8ec4ca8.png" alt="쿠폰 소식"></div>
-</div>
-
-<!-- ===== 네이버 플레이스 권한 위임 ===== -->
-<div id="nplace-delegation" class="notion-section">
-<div class="notion-breadcrumb"><a href="#" onclick="showSection('main-content');return false;">← 서비스 안내 페이지</a></div>
-<div class="notion-page-title">네이버 플레이스 권한 위임</div>
-<hr class="notion-divider">
-<div class="notion-quote"><p>담당 직원 혹은 관리 대행사에게 권한 위임하는 방법</p></div>
-
-<h3>주인</h3>
-<p>플레이스의 모든 설정 및 수정을 할 수 있습니다. 한 명만 위임이 가능합니다.</p>
-
-<h3>운영자</h3>
-<p>리뷰 및 통계, 예약 및 주문, 관리가 가능하며 업체 정보 또한 수정이 가능한 권한을 가지게 됩니다.</p>
-<p>단, 스마트콜 쿠폰 소식 마케팅 메시지 플레이스 광고 소사공인 광고 등은 설정 및 수정할 수 없습니다.</p>
-<p>스마트 플레이스의 운영자 권한을 위임하는 방법은 다음과 같습니다.</p>
-
-<h2>1. '네이버 스마트 플레이스' 검색 후 선택</h2>
-<div class="notion-image" style="max-width:355px"><img src="images/nplace-delegation/872d1a60-dd5b-4420-9d0a-040cc7408817.png" alt="스마트플레이스 검색"></div>
-<ul class="notion-list"><li>사업장 플레이스 아이디로 로그인 되어있어야 합니다.</li></ul>
-
-<h2>2. 해당 사업장을 선택합니다.</h2>
-<div class="notion-image"><img src="images/nplace-delegation/f57bd27a-5a30-4bc3-8579-41134cc11a4e.png" alt="사업장 선택" style="max-width:710px"></div>
-<ul class="notion-list"><li>운영자 권한을 원하는 사업장을 클릭합니다.</li></ul>
-
-<h2>3. 전체 설정을 선택합니다.</h2>
-<div class="notion-image" style="max-width:376px"><img src="images/nplace-delegation/cf3b6c9d-e783-418f-9001-4ef0da981695.png" alt="전체 설정"></div>
-<ul class="notion-list"><li>업체 정보 왼쪽 하단의 '전체 설정'을 클릭 합니다.</li></ul>
-
-<h2>4. 전체 설정을 클릭 후 권한 관리를 선택합니다.</h2>
-<div class="notion-image" style="max-width:451px"><img src="images/nplace-delegation/be455a95-55ed-4703-b628-bc09168e9ed5.png" alt="권한 관리"></div>
-
-<h2>5. 권한 관리 하단에 운영자 추가를 선택합니다.</h2>
-<div class="notion-image" style="max-width:317px"><img src="images/nplace-delegation/e58cd883-1467-4426-ba24-f7a0b27c25f1.png" alt="운영자 추가"></div>
-<ul class="notion-list"><li>운영자 추가 클릭</li></ul>
-
-<h2>6. 운영자로 추가할 네이버 ID를 입력합니다.</h2>
-<div class="notion-image" style="max-width:331px"><img src="images/nplace-delegation/ecb43e25-29c5-4eff-9799-c5f66678309d.png" alt="네이버 ID 입력"></div>
-<ul class="notion-list">
-<li>아이디 입력 → 동의 및 추가 → 동의하기</li>
-<li>유의사항 : 추가할 네이버 아이디는 스마트 플레이스에 가입이 되어있어야 합니다.</li>
-</ul>
-
-<h2>7. 해당 위임자의 최종 동의 확인</h2>
-<div class="notion-image"><img src="images/nplace-delegation/ed8889d9-66e9-4f12-ba11-ca6c80e25ad8.png" alt="최종 동의" style="max-width:710px"></div>
-<div class="notion-image" style="max-width:429px"><img src="images/nplace-delegation/0281a7b1-e396-46ab-b20a-633a120d85ed.png" alt="동의하기"></div>
-<ul class="notion-list"><li>해당 권한을 받을 네이버 로그인 후 '알림' 클릭→ '동의하기' 클릭</li></ul>
-<hr class="notion-divider">
-</div>
-
-<!-- ===== 네이버 광고주센터 권한 위임 ===== -->
-<div id="ad-center-delegation" class="notion-section">
-<div class="notion-breadcrumb"><a href="#" onclick="showSection('main-content');return false;">← 서비스 안내 페이지</a></div>
-<div class="notion-page-title">네이버 광고주센터 권한 위임</div>
-<div class="notion-quote"><p>담당 직원 혹은 관리 대행사에게 권한 위임하는 방법</p></div>
-
-<h1>1. 네이버 광고주센터 접속</h1>
-<p>바로가기 URL : <a class="notion-link" href="https://ads.naver.com/" target="_blank">https://ads.naver.com/</a></p>
-<div class="notion-image" style="max-width:489px"><img src="images/ad-center-delegation/dfc33ab3-3376-4434-a9bc-d7ff13a10a26.png" alt="광고주센터 접속"></div>
-
-<h1>2. 로그인 후 우측상단 ID 클릭</h1>
-<div class="notion-image"><img src="images/ad-center-delegation/c1585e69-c3d0-41c1-a43f-c4d1c0208b32.png" alt="ID 클릭" style="max-width:710px"></div>
-
-<h1>3. 계정 책임자 선택</h1>
-<div class="notion-image" style="max-width:427px"><img src="images/ad-center-delegation/46f47502-0020-45e3-b424-c943c46b95e7.png" alt="계정 책임자"></div>
-
-<h1>4. 좌측하단 설정 → 권한 관리 → 맴버초대</h1>
-<div class="notion-image"><img src="images/ad-center-delegation/3ed275be-7747-4e77-81b0-973bafd4c99e.png" alt="권한 관리" style="max-width:710px"></div>
-
-<h1>5. 동의 → ID입력 → 가입 여부 조회 → 확인</h1>
-<div class="notion-image" style="max-width:600px"><img src="images/ad-center-delegation/5937dc0e-5ded-4294-9bfd-ea326b409d6b.png" alt="ID 입력"></div>
-<p>✔️ 운영 관리 : 광고 계정 수정, 소재 등록 및 집행가능</p>
-<p>✔️ 운영 조회 : 결과 분석만 가능, 수정 불가</p>
-
-<h1>6. 초대한 계정의 수락</h1>
-<div class="notion-image" style="max-width:584px"><img src="images/ad-center-delegation/0c723be2-e7d5-4544-b367-d334b8c17ae8.png" alt="수락"></div>
-<ul class="notion-list">
-<li>정상적으로 초대가 되었다면 하단에 초대한 계정이 보여집니다.</li>
-<li>초대한 계정의 수락 후 최종 완료됩니다.</li>
-</ul>
-<hr class="notion-divider">
-</div>
-
-<!-- ===== 인스타그램 가이드북 ===== -->
-<div id="instagram-guide" class="notion-section">
-<div class="notion-breadcrumb"><a href="#" onclick="showSection('main-content');return false;">← 서비스 안내 페이지</a></div>
+<div id="instagram-guide" class="notion-section" data-cat="instagram" data-title="인스타그램 가이드북">
 <div class="notion-page-title">인스타그램 가이드북</div>
 <p class="notion-notice">※ 해당 문서의 외부 공유 및 유출을 금지합니다.</p>
 <hr class="notion-divider">
@@ -693,9 +713,7 @@ a.notion-link:hover{text-decoration-color:#37352f}
 <hr class="notion-divider">
 </div>
 
-<!-- ===== 리그램 배포 작업 ===== -->
-<div id="repost" class="notion-section">
-<div class="notion-breadcrumb"><a href="#" onclick="showSection('main-content');return false;">← 서비스 안내 페이지</a></div>
+<div id="repost" class="notion-section" data-cat="instagram" data-title="리그램 배포 작업">
 <div class="notion-page-title">리그램 배포 작업</div>
 <hr class="notion-divider">
 
@@ -802,9 +820,7 @@ a.notion-link:hover{text-decoration-color:#37352f}
 <hr class="notion-divider">
 </div>
 
-<!-- ===== 내 게시물 노출 작업 ===== -->
-<div id="mypost" class="notion-section">
-<div class="notion-breadcrumb"><a href="#" onclick="showSection('main-content');return false;">← 서비스 안내 페이지</a></div>
+<div id="mypost" class="notion-section" data-cat="instagram" data-title="내 게시물 노출 작업">
 <div class="notion-page-title">내 게시물 노출 작업</div>
 
 <h1>01. Service Overview</h1>
@@ -913,9 +929,7 @@ a.notion-link:hover{text-decoration-color:#37352f}
 <hr class="notion-divider">
 </div>
 
-<!-- ===== 계정 상위 노출 ===== -->
-<div id="account" class="notion-section">
-<div class="notion-breadcrumb"><a href="#" onclick="showSection('main-content');return false;">← 서비스 안내 페이지</a></div>
+<div id="account" class="notion-section" data-cat="instagram" data-title="계정 상위 노출">
 <div class="notion-page-title">계정 상위 노출</div>
 <hr class="notion-divider">
 
@@ -928,7 +942,7 @@ a.notion-link:hover{text-decoration-color:#37352f}
 <h3>✅ 고객이 직접 검색하고 찾아오는 구조 (Inbound)</h3>
 <p>특정 키워드를 검색한 사용자는 이미 구매 의사가 있는 잠재 고객입니다. 이때 경쟁사보다 앞서 노출되는 계정은 더 많은 유입량 확보를 통해 문의량과 구매 전환으로 이어질 가능성이 크게 증가합니다.</p>
 <p>[자동완성어, N사와 비교 화면]</p>
-<div class="notion-image"><img src="images/account/내_계정_상위_노출_2.png" alt="계정 상위 노출" style="max-width:710px"></div>
+<div class="notion-image"><img src="images/account/내_계정_상위_노출_2.png" alt="계정 상위 노출" style="max-width:710px" loading="lazy"></div>
 <hr class="notion-divider">
 
 <h1>02. Why This Service?</h1>
@@ -936,11 +950,11 @@ a.notion-link:hover{text-decoration-color:#37352f}
 <div class="notion-columns">
 <div class="notion-column">
 <p>[과거]</p>
-<div class="notion-image"><img src="images/account/f4f16ffc-b725-4829-a476-a99c13004e04.png" alt="과거 UI" style="max-width:483px"></div>
+<div class="notion-image"><img src="images/account/f4f16ffc-b725-4829-a476-a99c13004e04.png" alt="과거 UI" style="max-width:483px" loading="lazy"></div>
 </div>
 <div class="notion-column">
 <p>[현재]</p>
-<div class="notion-image"><img src="images/account/709867bf-7edb-4cf2-b10c-6e525d52fa54.png" alt="현재 UI" style="max-width:489px"></div>
+<div class="notion-image"><img src="images/account/709867bf-7edb-4cf2-b10c-6e525d52fa54.png" alt="현재 UI" style="max-width:489px" loading="lazy"></div>
 </div>
 </div>
 <div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content">
@@ -1034,9 +1048,7 @@ a.notion-link:hover{text-decoration-color:#37352f}
 <hr class="notion-divider">
 </div>
 
-<!-- ===== 계정 최적화 자동활동 ===== -->
-<div id="optimization-auto" class="notion-section">
-<div class="notion-breadcrumb"><a href="#" onclick="showSection('main-content');return false;">← 서비스 안내 페이지</a></div>
+<div id="optimization-auto" class="notion-section" data-cat="instagram" data-title="계정 최적화 자동활동">
 <div class="notion-page-title">계정 최적화 자동활동</div>
 
 <h1>01. Service Overview</h1>
@@ -1064,8 +1076,8 @@ a.notion-link:hover{text-decoration-color:#37352f}
 <div class="notion-column"><p>[인사이트 유입량의 변화]</p></div>
 </div>
 <div class="notion-columns">
-<div class="notion-column"><div class="notion-image" style="max-width:373px"><img src="images/optimization-auto/ab9516b0-55ac-4f8f-a2ec-d0d921b529c0.png" alt="작업 레포트"></div></div>
-<div class="notion-column"><div class="notion-image"><img src="images/optimization-auto/3f316af1-7750-4ec9-80ce-8120130ba4e0.png" alt="인사이트 유입량" style="max-width:672px"></div></div>
+<div class="notion-column"><div class="notion-image" style="max-width:373px"><img src="images/optimization-auto/ab9516b0-55ac-4f8f-a2ec-d0d921b529c0.png" alt="작업 레포트" loading="lazy"></div></div>
+<div class="notion-column"><div class="notion-image"><img src="images/optimization-auto/3f316af1-7750-4ec9-80ce-8120130ba4e0.png" alt="인사이트 유입량" style="max-width:672px" loading="lazy"></div></div>
 </div>
 <hr class="notion-divider">
 
@@ -1135,9 +1147,7 @@ a.notion-link:hover{text-decoration-color:#37352f}
 </ul>
 </div>
 
-<!-- ===== 최적화 계정 구매 ===== -->
-<div id="optimized-account" class="notion-section">
-<div class="notion-breadcrumb"><a href="#" onclick="showSection('main-content');return false;">← 서비스 안내 페이지</a></div>
+<div id="optimized-account" class="notion-section" data-cat="instagram" data-title="최적화 계정 구매">
 <div class="notion-page-title">최적화 계정 구매</div>
 <hr class="notion-divider">
 <div class="notion-quote"><p>"육성 기간 0일, 노출에 최적화된 계정으로 인스타그램 마케팅을 바로 시작해보세요."</p></div>
@@ -1193,9 +1203,7 @@ a.notion-link:hover{text-decoration-color:#37352f}
 <hr class="notion-divider">
 </div>
 
-<!-- ===== 릴스 알고리즘 부스팅 ===== -->
-<div id="boosting" class="notion-section">
-<div class="notion-breadcrumb"><a href="#" onclick="showSection('main-content');return false;">← 서비스 안내 페이지</a></div>
+<div id="boosting" class="notion-section" data-cat="instagram" data-title="릴스 알고리즘 부스팅">
 <div class="notion-page-title">릴스 알고리즘 부스팅</div>
 <hr class="notion-divider">
 <div class="notion-quote"><p>"인스타그램이 우리의 영상을 선택하게 만드세요"</p></div>
@@ -1210,7 +1218,7 @@ a.notion-link:hover{text-decoration-color:#37352f}
 
 <h1>02. Why This Service?</h1>
 <div class="notion-quote"><p>아무리 잘 만든 영상이라도 초기에 반응이 없으면 알고리즘에 의해 묻히게 됩니다.<br>인위적인 노출이 아닌, 알고리즘이 선택할 수밖에 없는 환경을 만듭니다.</p></div>
-<div class="notion-image" style="max-width:524px"><img src="images/boosting/4bd3ebf2-5b60-48e8-9330-bffd8b21f627.png" alt="부스팅 원리"></div>
+<div class="notion-image" style="max-width:524px"><img src="images/boosting/4bd3ebf2-5b60-48e8-9330-bffd8b21f627.png" alt="부스팅 원리" loading="lazy"></div>
 
 <h3>🎯 월간 목표 퍼포먼스 (KPI)</h3>
 <div class="notion-table-wrap"><table class="notion-table">
@@ -1293,9 +1301,7 @@ a.notion-link:hover{text-decoration-color:#37352f}
 <hr class="notion-divider">
 </div>
 
-<!-- ===== 스탭 패키지 ===== -->
-<div id="step-package" class="notion-section">
-<div class="notion-breadcrumb"><a href="#" onclick="showSection('main-content');return false;">← 서비스 안내 페이지</a></div>
+<div id="step-package" class="notion-section" data-cat="instagram" data-title="스탭 패키지">
 <div class="notion-page-title">스탭 패키지</div>
 <p class="notion-notice">※ PC보기를 권장드립니다.</p>
 <hr class="notion-divider">
@@ -1397,7 +1403,7 @@ a.notion-link:hover{text-decoration-color:#37352f}
 
 <h1>작업 프로세스</h1>
 <h3>1️⃣ 계정의 전반적인 상태 진단</h3>
-<div class="notion-image" style="max-width:306px"><img src="images/step-package/76e42158-f04d-4a1d-a24c-b44e03bc601e.png" alt="계정 진단"></div>
+<div class="notion-image" style="max-width:306px"><img src="images/step-package/76e42158-f04d-4a1d-a24c-b44e03bc601e.png" alt="계정 진단" loading="lazy"></div>
 
 <h3>2️⃣ 키워드 수립</h3>
 <ul class="notion-list">
@@ -1438,23 +1444,184 @@ a.notion-link:hover{text-decoration-color:#37352f}
 <hr class="notion-divider">
 </div>
 
+<div id="capture" class="notion-section" data-cat="etc" data-title="노출 캡쳐 사이트">
+<div class="notion-page-title">노출 캡쳐 사이트</div>
+<hr class="notion-divider">
+<h1>서비스 개요</h1>
+<p>현재 인스타그램 검색 결과는 계정 상태, 사용자의 접속 기기, 접속 시점에 따라 모두 다르게 표시됩니다. 이로 인해 사람이 직접 상위 노출 여부를 확인하고 캡쳐하는 것은 매우 어렵고 비효율적입니다.</p>
+<p>이러한 불편함을 해소하기 위해, 지정한 키워드에 대해 상위에 노출되었을 때 자동으로 화면을 캡쳐해주는 "상위 노출 캡쳐 슬롯"을 도입하였습니다.</p>
+<p>노출 캡쳐 슬롯은 광고주 계정 또는 리그램 계정에서 업로드된 콘텐츠가 추천탭 상단 노출된 경우, 해당 노출 화면을 자동으로 캡쳐하여 저장하는 서비스 입니다.</p>
+<p>매번 수동으로 캡쳐하던 작업을 자동화함으로써 리소스를 절감하고, 광고주는 별도의 요청 없이도 노출 내역을 실시간으로 확인하실 수 있습니다.</p>
+
+<h1>주요 기능</h1>
+<h3>자동 캡쳐</h3>
+<p>인스타그램 내 키워드 검색 시 상위 노출된 광고주 및 리그램 계정을 시스템이 자동 인식하여 노출 화면을 캡쳐합니다.</p>
+<h3>다수의 계정 확인 가능</h3>
+<p>광고주가 다수의 계정을 진행중이신 경우, 최대 5개 계정까지 순위 체크할 수 있습니다.</p>
+<h3>최대 20개 키워드 확인 가능</h3>
+<p>주요 타겟 키워드 외에도 메인 키워드 + 서브 키워드 조합으로 노출 영역을 다양하게 모니터링할 수 있습니다.</p>
+<h3>전용 확인 페이지 제공</h3>
+<p>광고주는 별도의 리포트를 기다리지 않아도, 제공되는 전용 페이지를 통해 비밀번호를 입력 후 캡쳐된 노출 내역을 실시간 확인할 수 있습니다.</p>
+
+<h1>광고주님만을 위한 노출 캡쳐 사이트</h1>
+<ul class="notion-list">
+<li>페이지 샘플
+  <ul>
+    <li>링크：<a class="notion-link" href="https://officialmarketing.co.kr/marketing-report/71dei" target="_blank">https://officialmarketing.co.kr/marketing-report/71dei</a></li>
+    <li>비밀번호：3590</li>
+  </ul>
+</li>
+<li>파란색 동그라미 = 광고주님의 계정으로 업로드 되어 노출된 게시물</li>
+<li>빨간색 동그라미 = 리그램 계정으로 업로드 되어 노출된 게시물</li>
+</ul>
+<div class="notion-image"><img src="images/capture1.png" alt="노출 캡쳐 예시 1" loading="lazy"></div>
+<div class="notion-image"><img src="images/capture2.png" alt="노출 캡쳐 예시 2" loading="lazy"></div>
+<div class="notion-image"><img src="images/capture3.png" alt="노출 캡쳐 예시 3" loading="lazy"></div>
+<hr class="notion-divider">
 </div>
 
+<div id="banned" class="notion-section" data-cat="etc" data-title="금지 업종">
+<div class="notion-page-title">금지 업종</div>
+<hr class="notion-divider">
+<div class="notion-quote"><p>인스타그램에서는 특정 업종 및 콘텐츠의 배포를 제한하거나 금지하고 있습니다. 주로 불법적이거나 유해한 콘텐츠, 오해를 일으킬 수 있는 정보, 미성년자 보호와 관련된 업종이 포함됩니다.</p></div>
+
+<h1>광고 및 게시물 모두 금지</h1>
+<h2>1. 불법 상품 및 서비스</h2>
+<ul class="notion-list"><li>마약, 대마초 및 관련 제품</li><li>위조품 및 불법 복제품</li><li>불법 무기 및 폭발물</li></ul>
+<h2>2. 도박 및 사행성 관련 업종</h2>
+<ul class="notion-list"><li>온라인 도박(토토, 바카라, 슬롯머신 등)</li><li>카지노 및 복권 (일부 국가에서 제한적 허용)</li></ul>
+<h2>3. 19금 및 성인 콘텐츠</h2>
+<ul class="notion-list"><li>성인용 제품 및 서비스 (성인 웹사이트, 성인용품, 유흥업소 등)</li><li>성적 암시가 강한 콘텐츠</li></ul>
+<h2>4. 불법 금융 및 사기성 서비스</h2>
+<ul class="notion-list"><li>다단계 및 피라미드 금융사기</li><li>고위험 투자 유도 (불법 주식 리딩방, 선물 옵션 거래 유도)</li><li>가상자산 사기 (펌프앤덤프, 불법 코인 투자 유도)</li></ul>
+<h2>5. 정치 및 사회적 논란이 있는 콘텐츠</h2>
+<ul class="notion-list"><li>선거 관련 조작된 정보</li><li>정치적 극단주의 콘텐츠</li></ul>
+
+<h1>광고에 제한되는 업종</h1>
+<h2>1. 담배 및 전자담배 관련 제품</h2>
+<ul class="notion-list"><li>일반 게시물은 가능하지만, 광고는 금지됨</li></ul>
+<h2>2. 알코올 관련 제품</h2>
+<ul class="notion-list"><li>일부 국가에서는 광고 제한 또는 금지</li><li>연령 제한 적용 필요</li></ul>
+<h2>3. 의료 및 건강 관련 제품</h2>
+<ul class="notion-list"><li>허위 과장 광고 금지 (다이어트 약, 미승인 건강기능식품 등)</li><li>의료 시술 광고 (일부 국가에서 성형수술은 제한됨)</li></ul>
+<h2>4. 파괴적이거나 폭력적인 콘텐츠</h2>
+<ul class="notion-list"><li>폭력 미화, 혐오 발언, 극단주의 콘텐츠</li></ul>
+<hr class="notion-divider">
+<p>※ 위 사항을 포함한 규정에 위반되는 행위일 경우 일체 진행이 불가합니다.</p>
+</div>
+
+</div><!-- /.notion-page -->
+
 <script>
+var PAGE_ORDER=["nplace-seo-guide","nplace-delegation","ad-center-delegation","pricing","instagram-guide","repost","mypost","account","optimization-auto","optimized-account","boosting","step-package","capture","banned"];
+var PAGE_TITLES={"nplace-seo-guide":"N플레이스 최적화 SEO 가이드북","nplace-delegation":"네이버 플레이스 권한 위임","ad-center-delegation":"네이버 광고주센터 권한 위임","pricing":"상품 가격표","instagram-guide":"인스타그램 가이드북","repost":"리그램 배포 작업","mypost":"내 게시물 노출 작업","account":"계정 상위 노출","optimization-auto":"계정 최적화 자동활동","optimized-account":"최적화 계정 구매","boosting":"릴스 알고리즘 부스팅","step-package":"스탭 패키지","capture":"노출 캡쳐 사이트","banned":"금지 업종"};
+var currentSection='main-content';
+
 function showSection(id){
-  document.querySelectorAll('.notion-section').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.notion-section').forEach(function(s){s.classList.remove('active')});
+  var el=document.getElementById(id);
+  if(el)el.classList.add('active');
+  currentSection=id;
   window.scrollTo(0,0);
   history.pushState(null,null,'#'+id);
+  var subNav=document.getElementById('subNav');
+  var navTabs=document.getElementById('navTabs');
+  if(id==='main-content'){
+    subNav.classList.remove('visible');
+    navTabs.style.display='';
+  }else{
+    subNav.classList.add('visible');
+    navTabs.style.display='none';
+    document.getElementById('subNavTitle').textContent=PAGE_TITLES[id]||id;
+    updatePrevNext(id);
+  }
+  buildTOC(id);
 }
+
+function updatePrevNext(id){
+  var idx=PAGE_ORDER.indexOf(id);
+  document.getElementById('prevBtn').disabled=(idx<=0);
+  document.getElementById('nextBtn').disabled=(idx<0||idx>=PAGE_ORDER.length-1);
+}
+function goPrev(){var i=PAGE_ORDER.indexOf(currentSection);if(i>0)showSection(PAGE_ORDER[i-1])}
+function goNext(){var i=PAGE_ORDER.indexOf(currentSection);if(i>=0&&i<PAGE_ORDER.length-1)showSection(PAGE_ORDER[i+1])}
+
+function buildTOC(sectionId){
+  var sidebar=document.getElementById('tocSidebar');
+  var section=document.getElementById(sectionId);
+  var titleEl=sidebar.querySelector('.toc-sidebar-title');
+  sidebar.innerHTML='';sidebar.appendChild(titleEl);
+  var old=document.querySelector('.toc-mobile');if(old)old.remove();
+  if(sectionId==='main-content'||!section){sidebar.classList.remove('visible');return}
+  var headings=section.querySelectorAll('h1,h2');
+  if(headings.length<2){sidebar.classList.remove('visible');return}
+  headings.forEach(function(h,i){
+    var aid=sectionId+'-toc-'+i;h.id=aid;
+    var a=document.createElement('a');a.href='#'+aid;a.textContent=h.textContent;
+    if(h.tagName==='H2')a.className='toc-h2';
+    a.onclick=function(e){e.preventDefault();document.getElementById(aid).scrollIntoView({behavior:'smooth',block:'start'})};
+    sidebar.appendChild(a);
+  });
+  sidebar.classList.add('visible');
+  // Mobile TOC
+  var mt=document.createElement('details');mt.className='toc-mobile has-items';
+  var ms=document.createElement('summary');ms.textContent='목차 ('+headings.length+'개 항목)';mt.appendChild(ms);
+  var mc=document.createElement('div');mc.className='toc-mobile-content';
+  headings.forEach(function(h,i){
+    var aid=sectionId+'-toc-'+i;
+    var a=document.createElement('a');a.href='#'+aid;a.textContent=h.textContent;
+    if(h.tagName==='H2')a.className='toc-h2';
+    a.onclick=function(e){e.preventDefault();mt.open=false;document.getElementById(aid).scrollIntoView({behavior:'smooth',block:'start'})};
+    mc.appendChild(a);
+  });
+  mt.appendChild(mc);
+  var pt=section.querySelector('.notion-page-title');
+  if(pt&&pt.nextSibling)pt.parentNode.insertBefore(mt,pt.nextSibling);
+  else section.insertBefore(mt,section.firstChild);
+}
+
+function filterCategory(cat){
+  document.querySelectorAll('.sticky-nav-tab').forEach(function(t){t.classList.remove('active')});
+  document.querySelector('[data-cat="'+cat+'"]').classList.add('active');
+  if(currentSection!=='main-content')showSection('main-content');
+  document.querySelectorAll('.category-toggle').forEach(function(t){
+    if(cat==='all'){t.style.display='';t.open=true}
+    else{
+      var show=t.classList.contains('cat-'+cat);
+      t.style.display=show?'':'none';
+      if(show)t.open=true;
+    }
+  });
+}
+
+// Sticky nav shadow on scroll
+window.addEventListener('scroll',function(){
+  var nav=document.getElementById('stickyNav');
+  if(window.scrollY>10)nav.classList.add('scrolled');
+  else nav.classList.remove('scrolled');
+  // Highlight active TOC item
+  if(currentSection!=='main-content'){
+    var links=document.querySelectorAll('#tocSidebar a');
+    var scrollPos=window.scrollY+130;
+    var active=null;
+    links.forEach(function(a){
+      var target=document.getElementById(a.getAttribute('href').slice(1));
+      if(target&&target.offsetTop<=scrollPos)active=a;
+    });
+    links.forEach(function(a){a.classList.remove('active')});
+    if(active)active.classList.add('active');
+  }
+});
+
+// Hash routing
 window.addEventListener('hashchange',function(){
   var h=location.hash.replace('#','');
-  if(h&&document.getElementById(h)){showSection(h);}
-  else{showSection('main-content');}
+  if(h&&document.getElementById(h))showSection(h);
+  else showSection('main-content');
 });
 window.addEventListener('DOMContentLoaded',function(){
   var h=location.hash.replace('#','');
-  if(h&&document.getElementById(h)){showSection(h);}
+  if(h&&document.getElementById(h))showSection(h);
 });
 </script>
 </body>
