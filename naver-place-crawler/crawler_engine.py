@@ -1516,6 +1516,8 @@ class CrawlerEngine:
 
         results = []
         page = 1
+        import re as _re
+        pid_pattern = _re.compile(r'/place/(\d+)')
 
         try:
             driver.get(f"https://map.naver.com/p/search/{quote(keyword)}")
@@ -1528,6 +1530,9 @@ class CrawlerEngine:
                 return None
 
             while max_pages == 0 or page <= max_pages:
+                if not self.running:
+                    break
+
                 driver.switch_to.default_content()
                 try:
                     iframe = driver.find_element(By.CSS_SELECTOR, "iframe#searchIframe")
@@ -1536,48 +1541,61 @@ class CrawlerEngine:
                     self.callback("log", f"  ⚠️ iframe 전환 실패 (페이지 {page})")
                     break
 
-                time.sleep(2 + random.random())
+                time.sleep(1.5 + random.random())
 
-                # 스크롤해서 전체 로딩
+                # ── 스크롤 반복: 더 이상 새 place ID 안 나올 때까지 ──
                 body = driver.find_element(By.TAG_NAME, "body")
-                for _ in range(8):
-                    driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", body)
-                    time.sleep(0.3 + random.random() * 0.2)
-                time.sleep(1)
-
-                # HTML에서 place ID + 업체명 추출
-                html = driver.page_source
-                
-                # place ID가 있는 a 태그 찾기
-                import re as _re
-                # 패턴: /place/숫자 형태의 링크
-                pid_pattern = _re.compile(r'/place/(\d+)')
-                
-                # 업체 카드에서 이름+ID 매핑
-                links = driver.find_elements(By.CSS_SELECTOR, "a[href*='/place/']")
                 seen = {r["id"] for r in results}
+                prev_count = 0
+                no_change_rounds = 0
+
+                for scroll_round in range(50):  # 안전장치: 최대 50번 스크롤
+                    if not self.running:
+                        break
+                    driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", body)
+                    time.sleep(0.8 + random.random() * 0.5)
+
+                    # 현재까지 발견된 place ID 카운트
+                    links = driver.find_elements(By.CSS_SELECTOR, "a[href*='/place/']")
+                    current_pids = set()
+                    for link in links:
+                        href = link.get_attribute("href") or ""
+                        m = pid_pattern.search(href)
+                        if m:
+                            current_pids.add(m.group(1))
+                    
+                    new_count = len(current_pids - seen)
+                    if new_count == prev_count:
+                        no_change_rounds += 1
+                        if no_change_rounds >= 3:
+                            break  # 3번 연속 변화 없음 → 스크롤 끝
+                    else:
+                        no_change_rounds = 0
+                        prev_count = new_count
+
+                # ── 이 페이지의 place ID + 이름 전부 수집 ──
+                links = driver.find_elements(By.CSS_SELECTOR, "a[href*='/place/']")
                 page_items = []
-                
+                page_seen = set()
+
                 for link in links:
                     href = link.get_attribute("href") or ""
                     m = pid_pattern.search(href)
                     if not m:
                         continue
                     pid = m.group(1)
-                    if pid in seen:
+                    if pid in seen or pid in page_seen:
                         continue
-                    
-                    # 이름 추출: 링크 텍스트 또는 상위 요소
+
+                    # 이름 추출
                     name = link.text.strip().split("\n")[0] if link.text.strip() else ""
-                    
-                    # "이미지 수", 숫자만, 빈 문자열 필터
+
                     if not name or name.startswith("이미지") or _re.match(r'^\d+$', name):
-                        # 부모 요소에서 이름 찾기
                         try:
                             parent = link.find_element(By.XPATH, "./ancestor::li")
                             lines = [l.strip() for l in parent.text.split("\n") if l.strip()]
                             for line in lines:
-                                if (not line.startswith("이미지") and 
+                                if (not line.startswith("이미지") and
                                     not _re.match(r'^\d+$', line) and
                                     "광고" not in line and
                                     len(line) > 1 and len(line) < 50):
@@ -1585,31 +1603,37 @@ class CrawlerEngine:
                                     break
                         except Exception:
                             pass
-                    
+
                     if not name or "광고" in name:
                         continue
-                    
-                    seen.add(pid)
+
+                    page_seen.add(pid)
                     page_items.append({
                         "id": pid,
                         "name": name,
                         "rank": len(results) + len(page_items) + 1,
                         "page": page,
                     })
-                
+
                 results.extend(page_items)
-                self.callback("log", f"  📊 Selenium 페이지 {page}: +{len(page_items)}건 (누적 {len(results)}건)")
+                self.callback("log", f"  📊 페이지 {page}: +{len(page_items)}건 (누적 {len(results)}건)")
 
                 if not page_items:
+                    self.callback("log", f"  ℹ️ 페이지 {page}에서 신규 업체 없음 → 수집 종료")
                     break
 
-                # 다음 페이지
+                # ── 다음 페이지 버튼 찾기 ──
                 try:
-                    page_btns = driver.find_elements(By.CSS_SELECTOR, "a")
+                    driver.switch_to.default_content()
+                    iframe = driver.find_element(By.CSS_SELECTOR, "iframe#searchIframe")
+                    driver.switch_to.frame(iframe)
+
+                    all_btns = driver.find_elements(By.CSS_SELECTOR, "a, button")
                     next_found = False
-                    for btn in page_btns:
+                    for btn in all_btns:
+                        txt = btn.text.strip()
                         try:
-                            if btn.text.strip() == str(page + 1):
+                            if txt == str(page + 1):
                                 btn.click()
                                 page += 1
                                 next_found = True
@@ -1617,7 +1641,20 @@ class CrawlerEngine:
                                 break
                         except Exception:
                             continue
+
                     if not next_found:
+                        # "다음" 버튼 찾기
+                        for btn in all_btns:
+                            aria = btn.get_attribute("aria-label") or ""
+                            if "다음" in aria or "다음" in btn.text:
+                                btn.click()
+                                page += 1
+                                next_found = True
+                                time.sleep(2 + random.random() * 2)
+                                break
+
+                    if not next_found:
+                        self.callback("log", f"  ℹ️ 마지막 페이지 ({page}) → 수집 완료")
                         break
                 except Exception:
                     break
