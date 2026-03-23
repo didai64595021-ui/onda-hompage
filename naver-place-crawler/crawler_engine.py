@@ -2291,9 +2291,15 @@ class CrawlerEngine:
 
             self.callback("progress", len(rows))
 
-        if not self.running and not rows:
-            self.callback("log", "사용자 중지 (수집 데이터 없음)")
-            return
+        if not self.running:
+            # 사용자 중지 — progress_file 보존 (이어하기용)
+            if rows:
+                self.save_output(rows, output_file)
+                self.callback("log", f"⏸ 사용자 중지 — {len(rows)}건 저장됨 (이어하기 가능)")
+                self.callback("done", output_file)
+            else:
+                self.callback("log", "사용자 중지 (수집 데이터 없음)")
+            return  # progress_file 삭제하지 않고 리턴!
 
         # 이미 파이프라인에서 상세 크롤링 완료
 

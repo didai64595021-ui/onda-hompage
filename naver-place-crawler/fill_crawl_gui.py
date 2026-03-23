@@ -1450,20 +1450,26 @@ class CrawlerGUI:
 
             try:
                 self.engine.run_keyword_search(keyword, kw_temp, start_page, max_pages)
-                item["status"] = "done"
-                # 수집 건수 파악
-                count = self._count_xlsx_rows(kw_temp)
-                item["count"] = count
-                self._safe_callback("log", f"✅ '{keyword}' 완료 — {count}건 수집")
-            except Exception as e:
-                if self._queue_stop_requested:
-                    # 중지에 의한 중단은 pending으로 복원 (이어하기 가능)
+
+                # 엔진이 중지로 인해 정상 리턴한 경우 (예외 없이 리턴)
+                if self._queue_stop_requested or not self.engine.running:
                     item["status"] = "pending"
-                    # 중간 수집 건수 보존
                     count = self._count_xlsx_rows(kw_temp)
                     if count > 0:
                         item["count"] = count
-                    # 중지된 키워드도 중간 결과 보존 (선택 다운로드 + 이어하기용)
+                    self._keyword_results[keyword] = kw_temp
+                    self._safe_callback("log", f"⏸ '{keyword}' 일시중지됨 — {count}건 수집됨, 다음 시작 시 이어서 진행")
+                else:
+                    item["status"] = "done"
+                    count = self._count_xlsx_rows(kw_temp)
+                    item["count"] = count
+                    self._safe_callback("log", f"✅ '{keyword}' 완료 — {count}건 수집")
+            except Exception as e:
+                if self._queue_stop_requested:
+                    item["status"] = "pending"
+                    count = self._count_xlsx_rows(kw_temp)
+                    if count > 0:
+                        item["count"] = count
                     self._keyword_results[keyword] = kw_temp
                     self._safe_callback("log", f"⏸ '{keyword}' 일시중지됨 — {count}건 수집됨, 다음 시작 시 이어서 진행")
                 else:
