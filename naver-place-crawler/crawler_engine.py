@@ -1026,12 +1026,13 @@ class CrawlerEngine:
 
         wb.save(filepath)
 
-    def save_output(self, rows, filepath):
-        """확장자에 따라 CSV 또는 XLSX 저장"""
+    def save_output(self, rows, filepath, keyword=None):
+        """확장자에 따라 CSV 또는 XLSX 저장. keyword 지정 시 업종 우선 정렬 적용."""
+        save_rows = self._sort_by_category(rows, keyword) if keyword else rows
         if filepath.lower().endswith(".xlsx"):
-            self.save_xlsx(rows, filepath)
+            self.save_xlsx(save_rows, filepath)
         else:
-            self.save_csv(rows, filepath)
+            self.save_csv(save_rows, filepath)
 
     # ═══════════════════════════════════════════
     # 메인 크롤링 로직
@@ -2280,9 +2281,9 @@ class CrawlerEngine:
             # 상세 크롤링 (홈페이지/이메일/네이버ID) — 번호는 기존건 포함한 전체 기준
             self._detail_crawl_one(row, total_expected, resumed_count + idx + 1)
 
-            # 매건 실시간 저장
+            # 매건 실시간 저장 (업종 정렬 적용)
             try:
-                self.save_output(rows, output_file)
+                self.save_output(rows, output_file, keyword=keyword)
             except Exception as e:
                 logger.debug(f"save error: {e}")
 
@@ -2298,7 +2299,7 @@ class CrawlerEngine:
         if not self.running:
             # 사용자 중지 — progress_file 보존 (이어하기용)
             if rows:
-                self.save_output(rows, output_file)
+                self.save_output(rows, output_file, keyword=keyword)
                 self.callback("log", f"⏸ 사용자 중지 — {len(rows)}건 저장됨 (이어하기 가능)")
                 self.callback("done", output_file)
             else:
@@ -2307,11 +2308,8 @@ class CrawlerEngine:
 
         # 이미 파이프라인에서 상세 크롤링 완료
 
-        # 업종 우선 정렬: 검색 키워드 업종 → 상단, 나머지 → 업종별 그룹핑
-        rows = self._sort_by_category(rows, keyword)
-
-        # 최종 저장
-        self.save_output(rows, output_file)
+        # 최종 저장 (업종 우선 정렬 적용)
+        self.save_output(rows, output_file, keyword=keyword)
         try:
             os.remove(progress_file)
         except Exception:
