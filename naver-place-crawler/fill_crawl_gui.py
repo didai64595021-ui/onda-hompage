@@ -229,7 +229,7 @@ class CrawlerGUI:
         self._settings_visible = False
 
         # 키워드 큐 상태
-        self._queue_items = []  # [{"keyword": str, "status": "pending"|"running"|"done"|"failed", "count": 0}]
+        self._queue_items = []  # [{"keyword": str, "status": "pending"|"running"|"done"|"failed", "count": 0, "temp_file": None}]
         self._queue_running = False
         self._queue_current_idx = -1
         self._queue_stop_requested = False
@@ -849,7 +849,7 @@ class CrawlerGUI:
             self._queue_items = []
             for kw in cfg["keyword_queue"]:
                 if isinstance(kw, str) and kw.strip():
-                    self._queue_items.append({"keyword": kw.strip(), "status": "pending", "count": 0})
+                    self._queue_items.append({"keyword": kw.strip(), "status": "pending", "count": 0, "temp_file": None})
             self._queue_refresh_listbox()
 
     def _save_config(self):
@@ -922,12 +922,16 @@ class CrawlerGUI:
                 os.remove(self._temp_output)
             except Exception:
                 pass
-        # 키워드별 임시 결과 파일 삭제
+        # 키워드별 임시 결과 파일 + progress 파일 삭제
         if hasattr(self, "_keyword_results"):
             for kw_path in self._keyword_results.values():
                 try:
                     if kw_path and os.path.isfile(kw_path):
                         os.remove(kw_path)
+                    # progress 파일도 정리 (엔진이 kw_temp 기반으로 생성)
+                    progress = kw_path.rsplit(".", 1)[0] + "-progress.json" if kw_path else None
+                    if progress and os.path.isfile(progress):
+                        os.remove(progress)
                 except Exception:
                     pass
             self._keyword_results.clear()
@@ -1125,7 +1129,7 @@ class CrawlerGUI:
             # 중복 체크
             if any(item["keyword"] == kw for item in self._queue_items):
                 continue
-            self._queue_items.append({"keyword": kw, "status": "pending", "count": 0})
+            self._queue_items.append({"keyword": kw, "status": "pending", "count": 0, "temp_file": None})
         self.keyword_var.set("")
         self._queue_refresh_listbox()
 
@@ -1139,11 +1143,38 @@ class CrawlerGUI:
             if self._queue_items[idx]["status"] == "running":
                 messagebox.showwarning("경고", "진행중인 키워드는 삭제할 수 없습니다.")
                 return
-            self._queue_items.pop(idx)
+            removed = self._queue_items.pop(idx)
+            # 임시파일 + progress 파일 정리
+            tmp = removed.get("temp_file")
+            if tmp:
+                try:
+                    if os.path.isfile(tmp):
+                        os.remove(tmp)
+                    prog = tmp.rsplit(".", 1)[0] + "-progress.json"
+                    if os.path.isfile(prog):
+                        os.remove(prog)
+                except Exception:
+                    pass
+                self._keyword_results.pop(removed["keyword"], None)
             self._queue_refresh_listbox()
 
     def _queue_clear(self):
         """대기중인 키워드 전체 삭제 (진행중/완료 제외)"""
+        # 삭제 대상의 임시파일 + progress 정리
+        for item in self._queue_items:
+            if item["status"] == "running":
+                continue
+            tmp = item.get("temp_file")
+            if tmp:
+                try:
+                    if os.path.isfile(tmp):
+                        os.remove(tmp)
+                    prog = tmp.rsplit(".", 1)[0] + "-progress.json"
+                    if os.path.isfile(prog):
+                        os.remove(prog)
+                except Exception:
+                    pass
+                self._keyword_results.pop(item["keyword"], None)
         self._queue_items = [item for item in self._queue_items
                              if item["status"] == "running"]
         self._queue_refresh_listbox()
@@ -1184,8 +1215,12 @@ class CrawlerGUI:
             status = item["status"]
             count = item["count"]
             if status == "pending":
-                prefix = "⏳"
-                suffix = ""
+                if item.get("count", 0) > 0:
+                    prefix = "⏸"
+                    suffix = f" ({count}건 수집됨)"
+                else:
+                    prefix = "⏳"
+                    suffix = ""
             elif status == "running":
                 prefix = "🔄"
                 suffix = ""
@@ -1206,6 +1241,8 @@ class CrawlerGUI:
                 self.queue_listbox.itemconfig(idx, fg="#ff5252")
             elif status == "running":
                 self.queue_listbox.itemconfig(idx, fg="#ffb347")
+            elif status == "pending" and item.get("count", 0) > 0:
+                self.queue_listbox.itemconfig(idx, fg="#ffb347")  # 일시중지 (데이터 있음)
 
         total = len(self._queue_items)
         self.queue_progress_label.config(text=f"{done_count}/{total} 키워드 완료")
@@ -1306,14 +1343,21 @@ class CrawlerGUI:
             self.download_btn.config(state="disabled")
             self._clear_log()
             self._update_stats({})
-            # 새 크롤링 시작 시 이전 키워드별 결과 정리
+            # 새 크롤링 시작 시 이전 키워드별 결과 + progress 정리
             for kw_path in self._keyword_results.values():
                 try:
                     if kw_path and os.path.isfile(kw_path):
                         os.remove(kw_path)
+                    prog = kw_path.rsplit(".", 1)[0] + "-progress.json" if kw_path else None
+                    if prog and os.path.isfile(prog):
+                        os.remove(prog)
                 except Exception:
                     pass
             self._keyword_results.clear()
+            # 큐 아이템의 temp_file도 초기화
+            for item in self._queue_items:
+                item["temp_file"] = None
+                item["count"] = 0
 
         if has_queue:
             # 큐 모드
@@ -1381,9 +1425,13 @@ class CrawlerGUI:
             self._safe_callback("log", f"큐 [{queue_idx+1}/{len(self._queue_items)}] 키워드: {keyword}")
             self._safe_callback("log", f"{'='*50}")
 
-            # 각 키워드별 임시 파일
-            fd, kw_temp = tempfile.mkstemp(suffix=".xlsx", prefix=f"crawl_kw_")
-            os.close(fd)
+            # 각 키워드별 임시 파일 (기존 파일 재사용 → progress_file 경로 유지 → 이어하기 가능)
+            if item.get("temp_file") and os.path.isfile(item["temp_file"]):
+                kw_temp = item["temp_file"]
+            else:
+                fd, kw_temp = tempfile.mkstemp(suffix=".xlsx", prefix=f"crawl_kw_")
+                os.close(fd)
+                item["temp_file"] = kw_temp
 
             # 엔진 생성 (매 키워드마다 새로 생성)
             self.engine = CrawlerEngine(
@@ -1411,7 +1459,13 @@ class CrawlerGUI:
                 if self._queue_stop_requested:
                     # 중지에 의한 중단은 pending으로 복원 (이어하기 가능)
                     item["status"] = "pending"
-                    self._safe_callback("log", f"⏸ '{keyword}' 일시중지됨 — 다음 시작 시 이어서 진행")
+                    # 중간 수집 건수 보존
+                    count = self._count_xlsx_rows(kw_temp)
+                    if count > 0:
+                        item["count"] = count
+                    # 중지된 키워드도 중간 결과 보존 (선택 다운로드 + 이어하기용)
+                    self._keyword_results[keyword] = kw_temp
+                    self._safe_callback("log", f"⏸ '{keyword}' 일시중지됨 — {count}건 수집됨, 다음 시작 시 이어서 진행")
                 else:
                     item["status"] = "failed"
                     self._safe_callback("log", f"❌ '{keyword}' 실패: {e}")
