@@ -1316,8 +1316,12 @@ class CrawlerGUI:
         if cfg is None:
             return
 
-        # 이어하기 여부 판단 (큐에 done/failed가 이미 있으면 이어하기)
-        is_resume = has_queue and any(i["status"] in ("done", "failed") for i in self._queue_items)
+        # 이어하기 여부 판단 (큐에 done/failed가 있거나, pending이지만 중간 데이터가 있으면 이어하기)
+        is_resume = has_queue and (
+            any(i["status"] in ("done", "failed") for i in self._queue_items)
+            or any(i["status"] == "pending" and i.get("count", 0) > 0 for i in self._queue_items)
+            or any(i["status"] == "pending" and i.get("temp_file") for i in self._queue_items)
+        )
 
         # 임시 출력 파일: 이어하기면 기존 파일 재사용
         if is_resume and self._temp_output and os.path.isfile(self._temp_output):
