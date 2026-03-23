@@ -3,22 +3,25 @@
 > 자동 업데이트: 2026-03-23 KST
 
 ## 현재 작업
-car-type2 보험료 조회 + 할부 조회 기능 추가 — 완료
+마드모아젤헤어 플레이스 순위 회복 전략 제안서 고급 웹페이지 제작
 
 ## 진행 상황
 
-### car-type2 보험/할부 기능 추가: portfolio-sites/car-type2/
-- [x] insurance.html 신규 생성 (보험료 간편 조회 계산기)
-- [x] finance.html 할부 계산기 섹션 추가 (원리금균등상환 계산)
-- [x] 전체 14개 HTML 네비게이션 업데이트 (금융/할부 + 보험 조회 링크)
-- [x] 푸터 네비게이션 업데이트 (보험료 조회 링크 추가)
-- [x] 계산 로직 검증 완료
+### 마드모아젤헤어 제안서: portfolio-sites/mademoiselle-hair/
+- [ ] Step 1: index.html — head + CSS + nav + hero + ch1-3
+- [ ] Step 2: ch4-7 (테이블 + 이미지 섹션)
+- [ ] Step 3: ch8-12 + footer
+- [ ] Step 4: JavaScript (스크롤 애니메이션, 라이트박스, 네비게이션)
+- [ ] Step 5: 크로스 브라우저 테스트 + 커밋 + 푸시
 
-### car-type2 정상화 — 이전 완료
-### used-car 정상화 — 이전 완료
+### 이전 완료
+- car-type2 보험/할부 기능 추가 — 완료
+- car-type2 정상화 — 완료
+- used-car 정상화 — 완료
+- 노션 서비스 안내 페이지 — 완료
 
-### used-car 정상화 — 이전 완료
-### 노션 서비스 안내 페이지 — 이전 완료
+## 다음 단계
+Step 1: CSS + 초기 HTML 구조 작성
 
 ## Git 상태 (자동)
 - **브랜치**: main

@@ -2307,6 +2307,9 @@ class CrawlerEngine:
 
         # 이미 파이프라인에서 상세 크롤링 완료
 
+        # 업종 우선 정렬: 검색 키워드 업종 → 상단, 나머지 → 업종별 그룹핑
+        rows = self._sort_by_category(rows, keyword)
+
         # 최종 저장
         self.save_output(rows, output_file)
         try:
@@ -2354,6 +2357,60 @@ class CrawlerEngine:
         self.callback("log", summary)
         self.callback("done", output_file)
         self.running = False
+
+    @staticmethod
+    def _sort_by_category(rows, keyword):
+        """검색 키워드 업종 우선 정렬 + 나머지 업종별 그룹핑
+        
+        예: "해운대피부과" → 피부과 상단, 나머지(한의원, 의원, 병원...) 업종별 묶어서 하단
+        """
+        if not rows or not keyword:
+            return rows
+
+        # 키워드에서 업종명 추출 (지역명 제거)
+        # "해운대피부과" → "피부과", "수원 성형외과" → "성형외과"
+        kw_lower = keyword.replace(" ", "")
+        category_hint = ""
+        # 흔한 업종 키워드 목록
+        common_cats = [
+            "피부과", "성형외과", "정형외과", "치과", "한의원", "내과", "안과", "이비인후과",
+            "비뇨기과", "산부인과", "소아과", "소아청소년과", "신경외과", "외과", "통증의학과",
+            "재활의학과", "가정의학과", "정신건강의학과", "영상의학과", "마취통증의학과",
+            "요양병원", "병원", "의원", "약국", "동물병원", "네일", "미용실", "헬스",
+            "필라테스", "요가", "카페", "맛집", "음식점", "학원", "어린이집",
+        ]
+        for cat in common_cats:
+            if cat in kw_lower:
+                category_hint = cat
+                break
+
+        if not category_hint:
+            # 업종 키워드를 못 찾으면 정렬 없이 반환
+            return rows
+
+        # 분류: 키워드 업종 매칭 vs 나머지
+        primary = []  # 검색 업종과 일치
+        others = {}   # 업종별 그룹핑
+
+        for row in rows:
+            cat = row.get("업종(키워드)", "") or ""
+            name = row.get("상호명", "") or ""
+            # 업종 또는 상호명에 키워드 업종이 포함되면 primary
+            if category_hint in cat or category_hint in name:
+                primary.append(row)
+            else:
+                # 업종별 그룹핑
+                cat_key = cat.strip() if cat.strip() else "기타"
+                if cat_key not in others:
+                    others[cat_key] = []
+                others[cat_key].append(row)
+
+        # 나머지 업종은 알파벳/가나다 순 정렬
+        sorted_others = []
+        for cat_key in sorted(others.keys()):
+            sorted_others.extend(others[cat_key])
+
+        return primary + sorted_others
 
     def stop(self):
         """크롤링 중지"""
