@@ -1587,24 +1587,30 @@ class CrawlerEngine:
                     if pid in seen or pid in page_seen:
                         continue
 
+                    # 광고 업체 필터: 부모 li 전체 텍스트에서 "광고" 체크 (CPC 배제)
+                    card_text = ""
+                    try:
+                        parent = link.find_element(By.XPATH, "./ancestor::li")
+                        card_text = parent.text or ""
+                    except Exception:
+                        card_text = link.text or ""
+
+                    if "광고" in card_text:
+                        continue  # CPC 광고 업체 → 순위에서 제외
+
                     # 이름 추출
                     name = link.text.strip().split("\n")[0] if link.text.strip() else ""
 
                     if not name or name.startswith("이미지") or _re.match(r'^\d+$', name):
-                        try:
-                            parent = link.find_element(By.XPATH, "./ancestor::li")
-                            lines = [l.strip() for l in parent.text.split("\n") if l.strip()]
-                            for line in lines:
-                                if (not line.startswith("이미지") and
-                                    not _re.match(r'^\d+$', line) and
-                                    "광고" not in line and
-                                    len(line) > 1 and len(line) < 50):
-                                    name = line
-                                    break
-                        except Exception:
-                            pass
+                        lines = [l.strip() for l in card_text.split("\n") if l.strip()]
+                        for line in lines:
+                            if (not line.startswith("이미지") and
+                                not _re.match(r'^\d+$', line) and
+                                len(line) > 1 and len(line) < 50):
+                                name = line
+                                break
 
-                    if not name or "광고" in name:
+                    if not name:
                         continue
 
                     page_seen.add(pid)
