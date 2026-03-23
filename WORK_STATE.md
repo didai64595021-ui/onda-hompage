@@ -1,25 +1,24 @@
 # onda-hompage 작업 상태
 
-> 자동 업데이트: 2026-03-20 KST
+> 자동 업데이트: 2026-03-23 KST
 
 ## 현재 작업
-used-car 포트폴리오 전면 정상화 — 완료
+car-type2 포트폴리오 전면 정상화 — 완료
 
 ## 진행 상황
 
-### used-car 정상화: portfolio-sites/used-car/index.html
-- [x] viewport 메타태그 수정 (initial-scale, maximum-scale, viewport-fit)
-- [x] blur placeholder 로고(8x2px) → 텍스트 로고 "VROOM" 으로 교체
-- [x] blur placeholder car1(8x5px) → Unsplash 자동차 이미지로 교체 (5곳)
-- [x] 내부 앵커 링크 정상화 (index.html# → #)
-- [x] Stats 섹션에 id="stats" 앵커 추가
-- [x] body overflow-x: hidden 추가 (가로 스크롤 방지)
-- [x] NextUI Select → native select로 CSS 대체 (드롭다운 정상 작동)
-- [x] 모바일 햄버거 메뉴 순수 JS 토글 구현
-- [x] 모바일 반응형 CSS 추가 (639px 이하: 검색폼/배너/리스팅/통계/후기 세로 정렬)
+### car-type2 정상화: portfolio-sites/car-type2/
+- [x] CSS 커스텀 변수/클래스 확인 (--primary, --accent 등 모두 정상)
+- [x] 모바일 반응형 검증 (overflow-x-hidden, touch targets, 그리드 축소)
+- [x] 모바일 메뉴 토글 JS 추가 (전체 13개 HTML 파일)
+- [x] 카운터 애니메이션 JS 추가 (IntersectionObserver 기반)
+- [x] 검색 폼 → cars.html 이동 처리
+- [x] cars.html 로딩 스피너 → 정적 차량 카드 6개로 교체
+- [x] 서브페이지 헤더/푸터 통일 확인
+- [x] car detail pages (cars/*.html) 모바일 메뉴 JS 추가
 
-### 노션 서비스 안내 페이지: portfolio-sites/notion-service/index.html (1733줄) — 이전 완료
-- [x] Step 1~5 완료
+### used-car 정상화 — 이전 완료
+### 노션 서비스 안내 페이지 — 이전 완료
 
 ## Git 상태 (자동)
 - **브랜치**: main
