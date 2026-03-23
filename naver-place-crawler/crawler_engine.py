@@ -1,0 +1,2350 @@
+#!/usr/bin/env python3
+"""
+crawler_engine.py — 12개 항목 전체 크롤링 엔진
+
+입력 CSV에 "상호명"만 있으면 나머지 11개 항목 전부 자동 크롤링.
+
+STEP 0: 고유번호 + 플레이스URL (네이버 검색 → placeId 추출)
+STEP 1: 플레이스 HTML 파싱 (업종/상호명/주소/안심번호/방문자리뷰수/블로그리뷰수)
+STEP 2: 홈페이지 (API 우선 → 네이버 검색 폴백)
+STEP 3: 이메일 (홈페이지 HTML + 네이버 검색 폴백)
+STEP 4: 네이버아이디 → @naver.com
+STEP 5: 업데이트날짜 = 오늘
+
+  - Fingerprint 로테이션 (13개 UA, Referer 위장, 랜덤 딜레이)
+  - 차단 감지 (403/캡차/빈응답) → 자동 프록시 전환
+  - CSV/XLSX 입출력 (openpyxl)
+"""
+import re
+import os
+import csv
+import json
+import time
+import random
+import logging
+from io import StringIO
+from urllib.parse import urlencode, quote
+
+import requests
+from bs4 import BeautifulSoup
+
+logger = logging.getLogger(__name__)
+
+# ═══════════════════════════════════════════
+# Fingerprint 데이터베이스
+# ═══════════════════════════════════════════
+FINGERPRINTS = [
+    {
+        "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "headers": {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+            "Sec-Ch-Ua": '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+            "Sec-Ch-Ua-Mobile": "?0",
+            "Sec-Ch-Ua-Platform": '"Windows"',
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Upgrade-Insecure-Requests": "1",
+        },
+    },
+    {
+        "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "headers": {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8",
+            "Sec-Ch-Ua": '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+            "Sec-Ch-Ua-Mobile": "?0",
+            "Sec-Ch-Ua-Platform": '"macOS"',
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Upgrade-Insecure-Requests": "1",
+        },
+    },
+    {
+        "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+        "headers": {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8",
+            "Sec-Ch-Ua": '"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"',
+            "Sec-Ch-Ua-Mobile": "?0",
+            "Sec-Ch-Ua-Platform": '"Linux"',
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Upgrade-Insecure-Requests": "1",
+        },
+    },
+    {
+        "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
+        "headers": {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+            "Accept-Language": "ko-KR,ko;q=0.8,en-US;q=0.5,en;q=0.3",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Upgrade-Insecure-Requests": "1",
+            "DNT": "1",
+        },
+    },
+    {
+        "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:123.0) Gecko/20100101 Firefox/123.0",
+        "headers": {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+            "Accept-Language": "ko,en-US;q=0.7,en;q=0.3",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Upgrade-Insecure-Requests": "1",
+        },
+    },
+    {
+        "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0",
+        "headers": {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+            "Accept-Language": "ko-KR,ko;q=0.8,en;q=0.5",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Upgrade-Insecure-Requests": "1",
+        },
+    },
+    {
+        "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15",
+        "headers": {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "ko-KR,ko;q=0.9",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+        },
+    },
+    {
+        "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0",
+        "headers": {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "ko,en;q=0.9,en-US;q=0.8",
+            "Sec-Ch-Ua": '"Chromium";v="122", "Not(A:Brand";v="24", "Microsoft Edge";v="122"',
+            "Sec-Ch-Ua-Mobile": "?0",
+            "Sec-Ch-Ua-Platform": '"Windows"',
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Upgrade-Insecure-Requests": "1",
+        },
+    },
+    {
+        "ua": "Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.64 Mobile Safari/537.36",
+        "headers": {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "ko-KR,ko;q=0.9",
+            "Sec-Ch-Ua": '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+            "Sec-Ch-Ua-Mobile": "?1",
+            "Sec-Ch-Ua-Platform": '"Android"',
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Upgrade-Insecure-Requests": "1",
+        },
+    },
+    {
+        "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Mobile/15E148 Safari/604.1",
+        "headers": {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "ko-KR,ko;q=0.9",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+        },
+    },
+    {
+        "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "headers": {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+            "Sec-Ch-Ua": '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+            "Sec-Ch-Ua-Mobile": "?0",
+            "Sec-Ch-Ua-Platform": '"Windows"',
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Upgrade-Insecure-Requests": "1",
+        },
+    },
+    {
+        "ua": "Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/23.0 Chrome/115.0.0.0 Mobile Safari/537.36",
+        "headers": {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "ko-KR,ko;q=0.9",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Upgrade-Insecure-Requests": "1",
+        },
+    },
+    {
+        "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+        "headers": {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "ko,en-US;q=0.9,en;q=0.8",
+            "Sec-Ch-Ua": '"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"',
+            "Sec-Ch-Ua-Mobile": "?0",
+            "Sec-Ch-Ua-Platform": '"macOS"',
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Upgrade-Insecure-Requests": "1",
+        },
+    },
+]
+
+# ═══════════════════════════════════════════
+# 지역명 제거 패턴
+# ═══════════════════════════════════════════
+REGION_NAMES = sorted(
+    [
+        "부산서면역", "부산서면점", "부산서면", "부산해운대", "부산남포동", "부산광안리",
+        "부산동래", "부산사하", "부산연제", "부산수영", "부산진구", "부산사상", "부산북구",
+        "강남역", "강남점", "강남구", "강남", "서초구", "서초", "잠실", "홍대입구", "홍대",
+        "신촌", "이태원", "명동", "종로", "강동", "강서", "송파", "마포", "영등포",
+        "신림", "건대", "왕십리", "성수", "압구정", "청담", "삼성", "논현", "역삼",
+        "선릉", "대치", "도곡", "방배", "사당", "신사", "합정", "상수", "연남",
+        "성북", "동대문", "중구", "용산", "광화문", "여의도", "목동", "노원", "은평",
+        "수원", "성남", "분당", "일산", "고양", "용인", "부천", "안양", "평택",
+        "안산", "의정부", "파주", "김포", "광명", "하남", "남양주",
+        "대구", "대전", "광주", "인천", "울산", "세종",
+        "제주", "창원", "포항", "천안", "청주", "전주", "춘천", "원주", "강릉",
+        "여수", "순천", "목포", "군산", "익산", "경주", "거제", "진주", "통영",
+        "부산", "서면역", "서면점", "서면",
+    ],
+    key=len,
+    reverse=True,
+)
+
+REGION_PATTERN = re.compile(r"\s*(" + "|".join(re.escape(r) for r in REGION_NAMES) + r")\s*")
+
+# ═══════════════════════════════════════════
+# 블랙리스트
+# ═══════════════════════════════════════════
+EMAIL_BLACKLIST = [
+    "naver", "google", "kakao", "apple", "facebook", "instagram", "twitter", "youtube",
+    "microsoft", "w3.org", "schema", "cloudflare", "jsdelivr", "unpkg", "webpack", "babel",
+    "example", "noreply", "no-reply", "sentry", "wixpress", "placeholder", "fontawesome",
+    "bootstrap", "jquery", "react", "angular", "localhost", "gabia", "cafe24", "hosting",
+    "whois", "dothome", "iwinv", "vultr", "aws", "azure", "godo", "sixshop", "shopify",
+    "wix.com", "squarespace", "godaddy", "bluehost", "namecheap", "imweb", "modoo",
+    "adsense", "analytics", "mailchimp", "sendgrid", "hubspot", "intercom", "privacy",
+    "webmaster", "postmaster", "abuse@", "root@", "imaeil", "alisonbrodmc",
+]
+
+HP_BLACKLIST = [
+    "naver", "google", "gstatic", "pstatic", "facebook", "instagram", "youtube", "kakao",
+    "twitter", "tiktok", "modoodoc", "goodoc", "hidoc", "medinavi", "pervsi", "k-info",
+    "w3.org", "saramin", "jobkorea", "incruit", "daum", "wikipedia", "apple.com", "microsoft",
+    "cloudflare", "jsdelivr", "unpkg", "schema.org", "goodhosrank", "cdn.", "ssl.",
+    "polyfill", "fonts.", "jquery", "occupational", "line-culture",
+    "cultureexpo", "invitanku", "recruit.kpb", "intojob",
+    "tmailor", "himalayantouch", "ebs.co.kr", "psj.kr", "songpa.go", "cha.go",
+    "mid.ebs", "kbs.co.kr", "mbc.co.kr", "sbs.co.kr",
+]
+
+# go.kr/or.kr 도메인은 조건부 차단 (검색 제목에 업체명 포함 시만 허용)
+HP_GOV_DOMAINS = ["go.kr", "or.kr"]
+
+
+class CrawlerEngine:
+    """빈칸 채우기 크롤링 엔진"""
+
+    def __init__(
+        self,
+        proxy_file=None,
+        delay_min=0.5,
+        delay_max=1.5,
+        timeout=5,
+        callback=None,
+        api_keys=None,
+    ):
+        """
+        Args:
+            proxy_file: 프록시 IP:PORT 파일 경로 (없으면 직접 연결)
+            delay_min: 최소 딜레이 (초)
+            delay_max: 최대 딜레이 (초)
+            timeout: 요청 타임아웃 (초)
+            callback: 진행 상황 콜백 fn(event, data)
+            api_keys: 네이버 API 키 리스트 [{"client_id": "...", "client_secret": "..."}, ...]
+        """
+        self.delay_min = delay_min
+        self.delay_max = delay_max
+        self.timeout = timeout
+        self.callback = callback or (lambda e, d: None)
+        self.running = False
+        self.stats = {
+            "place_id": 0, "category": 0, "name": 0, "address": 0,
+            "phone": 0, "visitor_review": 0, "blog_review": 0,
+            "hp": 0, "email": 0, "naver_id": 0,
+            "blocked": 0, "success": 0,
+        }
+        self._consecutive_blocks = 0
+
+        # 네이버 API 키 (로테이션) — 기본 내장 키
+        _default_keys = [
+            {"client_id": "yoBUbNSW9MGSPH36zaHN", "client_secret": "wt0HPPOVKA"},
+        ]
+        self.api_keys = api_keys if api_keys else _default_keys
+        self._api_key_idx = 0
+
+        # 프록시 로드
+        self.proxies = []
+        self.proxy_idx = 0
+        self.fingerprint_map = {}
+        if proxy_file and os.path.isfile(proxy_file):
+            with open(proxy_file, "r") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#"):
+                        parts = line.split(":")
+                        ip = parts[0].strip()
+                        port = int(parts[1]) if len(parts) > 1 else 8080
+                        proxy = {"ip": ip, "port": port, "blocked": False, "block_until": 0}
+                        self._assign_fingerprint(proxy)
+                        self.proxies.append(proxy)
+            self.callback("log", f"프록시 {len(self.proxies)}개 로드됨")
+
+        # 직접연결용 fingerprint
+        self._direct_fp_idx = random.randint(0, len(FINGERPRINTS) - 1)
+
+        # requests 세션 (쿠키 없음, 연결 풀 강화)
+        self.session = requests.Session()
+        self.session.cookies.clear()
+        # 연결 풀 크기 확대 → 재연결 오버헤드 제거
+        adapter = requests.adapters.HTTPAdapter(
+            pool_connections=20, pool_maxsize=20, max_retries=1
+        )
+        self.session.mount("http://", adapter)
+        self.session.mount("https://", adapter)
+
+    def _assign_fingerprint(self, proxy):
+        key = f"{proxy['ip']}:{proxy['port']}"
+        if key not in self.fingerprint_map:
+            self.fingerprint_map[key] = random.randint(0, len(FINGERPRINTS) - 1)
+        proxy["fp_idx"] = self.fingerprint_map[key]
+
+    def _reassign_fingerprint(self, proxy):
+        key = f"{proxy['ip']}:{proxy['port']}"
+        old_idx = self.fingerprint_map.get(key, 0)
+        new_idx = old_idx
+        while new_idx == old_idx and len(FINGERPRINTS) > 1:
+            new_idx = random.randint(0, len(FINGERPRINTS) - 1)
+        self.fingerprint_map[key] = new_idx
+        proxy["fp_idx"] = new_idx
+
+    def _get_fingerprint(self, proxy=None):
+        if proxy:
+            idx = proxy.get("fp_idx", 0) % len(FINGERPRINTS)
+        else:
+            idx = self._direct_fp_idx
+        return FINGERPRINTS[idx]
+
+    def _get_headers(self, proxy=None, referer=None):
+        fp = self._get_fingerprint(proxy)
+        headers = {"User-Agent": fp["ua"], **fp["headers"]}
+        if referer:
+            headers["Referer"] = referer
+            headers["Sec-Fetch-Site"] = "cross-site"
+        # 쿠키 없음
+        headers.pop("Cookie", None)
+        return headers
+
+    def _get_proxy_dict(self, proxy):
+        if not proxy:
+            return None
+        url = f"http://{proxy['ip']}:{proxy['port']}"
+        return {"http": url, "https": url}
+
+    def _get_next_proxy(self):
+        if not self.proxies:
+            return None
+        now = time.time()
+        for i in range(len(self.proxies)):
+            idx = (self.proxy_idx + i) % len(self.proxies)
+            p = self.proxies[idx]
+            if p["blocked"] and now > p["block_until"]:
+                p["blocked"] = False
+            if not p["blocked"]:
+                self.proxy_idx = (idx + 1) % len(self.proxies)
+                return p
+        # 전부 차단 → 가장 오래된 복구
+        oldest = min(self.proxies, key=lambda p: p["block_until"])
+        oldest["blocked"] = False
+        return oldest
+
+    def _mark_blocked(self, proxy):
+        proxy["blocked"] = True
+        proxy["block_until"] = time.time() + 300  # 5분 쿨다운
+        self._reassign_fingerprint(proxy)
+        self.stats["blocked"] += 1
+        self._consecutive_blocks += 1
+
+    def _is_blocked(self, status_code, text):
+        if status_code in (403, 429):
+            return True
+        if not text or len(text) < 500:
+            return True
+        # 실제 차단 페이지 감지 (captchaApi 등 설정 URL은 정상이므로 제외)
+        block_signs = ["서비스 이용이 제한", "자동입력 방지", "이 페이지를 찾을 수 없습니다"]
+        if any(s in text for s in block_signs):
+            return True
+        # captcha 체크는 실제 캡차 입력 폼이 있는 경우만 (API URL은 제외)
+        if ("captcha" in text.lower() and "captcha-input" in text.lower()):
+            return True
+        return False
+
+    def _random_delay(self, min_s=None, max_s=None):
+        backoff = min(1.5 ** self._consecutive_blocks, 10)
+        lo = (min_s if min_s is not None else self.delay_min) * backoff
+        hi = (max_s if max_s is not None else self.delay_max) * backoff
+        time.sleep(random.uniform(lo, hi))
+
+    def _fetch(self, url, referer=None, timeout=None):
+        """HTTP GET with fingerprint, proxy rotation, retry"""
+        timeout = timeout or self.timeout
+        for attempt in range(3):
+            if not self.running:
+                return ""
+            try:
+                proxy = self._get_next_proxy()
+                headers = self._get_headers(proxy, referer)
+                proxy_dict = self._get_proxy_dict(proxy)
+
+                # 새 세션마다 쿠키 초기화
+                self.session.cookies.clear()
+
+                resp = self.session.get(
+                    url, headers=headers, proxies=proxy_dict, timeout=timeout, allow_redirects=True
+                )
+
+                if self._is_blocked(resp.status_code, resp.text):
+                    if proxy:
+                        self._mark_blocked(proxy)
+                        self.callback("log", f"차단 감지 → IP 로테이션 (시도 {attempt+1}/3)")
+                        continue
+                    else:
+                        self.stats["blocked"] += 1
+                        self._consecutive_blocks += 1
+                        time.sleep(3 * (attempt + 1))
+                        continue
+
+                self.stats["success"] += 1
+                self._consecutive_blocks = 0
+                resp.encoding = "utf-8"
+                return resp.text
+
+            except Exception as e:
+                logger.debug(f"fetch error: {e}")
+                if attempt < 2:
+                    time.sleep(1 * (attempt + 1))
+        return ""
+
+    # ═══════════════════════════════════════════
+    # 네이버 API
+    # ═══════════════════════════════════════════
+
+    def _search_naver_api(self, query):
+        """네이버 지역검색 API로 업체 정보 조회. 결과 dict 리스트 반환."""
+        if not self.api_keys:
+            return []
+        key = self.api_keys[self._api_key_idx % len(self.api_keys)]
+        self._api_key_idx += 1
+        try:
+            resp = self.session.get(
+                "https://openapi.naver.com/v1/search/local.json",
+                params={"query": query, "display": 5},
+                headers={
+                    "X-Naver-Client-Id": key["client_id"],
+                    "X-Naver-Client-Secret": key["client_secret"],
+                },
+                timeout=self.timeout,
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                return data.get("items", [])
+            else:
+                logger.debug(f"Naver API {resp.status_code}: {resp.text[:200]}")
+        except Exception as e:
+            logger.debug(f"Naver API error: {e}")
+        return []
+
+    # ═══════════════════════════════════════════
+    # 추출 함수들
+    # ═══════════════════════════════════════════
+
+    @staticmethod
+    def extract_emails(html):
+        """HTML에서 이메일 추출 (블랙리스트 필터링)"""
+        raw = set(re.findall(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", html))
+        result = []
+        for e in raw:
+            lo = e.lower()
+            if re.search(r"\.(png|jpg|jpeg|gif|svg|webp|ico|css|js|woff|ttf|eot|mp4|pdf|map|min)$", lo):
+                continue
+            if any(w in lo for w in EMAIL_BLACKLIST):
+                continue
+            local, domain = lo.split("@", 1) if "@" in lo else ("", "")
+            if not local or not domain or len(local) < 2 or len(domain) < 4:
+                continue
+            if re.match(r"^\d+$", local):
+                continue
+            if not re.search(r"\.(com|co\.kr|kr|net|org|gmail|nate|hanmail|daum)$", domain):
+                continue
+            result.append(e)
+        return result
+
+    @staticmethod
+    def extract_homepage(html):
+        """HTML에서 홈페이지 URL 추출 (블랙리스트 필터링)"""
+        urls = re.findall(
+            r"https?://(?:www\.)?[a-zA-Z0-9][a-zA-Z0-9.-]+\.(?:co\.kr|com|kr|net|clinic|hospital)[^\s\"'<>&;)}\]]{0,80}",
+            html,
+            re.IGNORECASE,
+        )
+        domain_map = {}
+        for u in urls:
+            lo = u.lower()
+            if any(b in lo for b in HP_BLACKLIST) or len(u) > 120:
+                continue
+            try:
+                from urllib.parse import urlparse
+                parsed = urlparse(u)
+                domain = parsed.hostname.replace("www.", "") if parsed.hostname else ""
+                if domain and domain not in domain_map:
+                    domain_map[domain] = f"{parsed.scheme}://{parsed.hostname}/"
+            except Exception:
+                pass
+        return list(domain_map.values())
+
+    @staticmethod
+    def clean_business_name(name):
+        """업체명에서 지역명 제거"""
+        return REGION_PATTERN.sub(" ", name).strip()
+
+    # ═══════════════════════════════════════════
+    # STEP 0: 고유번호(placeId) 추출
+    # ═══════════════════════════════════════════
+
+    def _find_place_id(self, name):
+        """네이버 검색으로 placeId 추출. 반환: str 또는 ""."""
+        clean = self.clean_business_name(name)
+
+        # API 모드 우선
+        if self.api_keys:
+            items = self._search_naver_api(clean)
+            for item in items:
+                link = item.get("link", "")
+                m = re.search(r"/place/(\d+)", link)
+                if m:
+                    return m.group(1)
+
+        # HTML 폴백: 네이버 검색 결과에서 placeId 추출
+        url = f"https://search.naver.com/search.naver?query={quote(clean)}"
+        html = self._fetch(url, referer="https://www.naver.com/")
+        if html:
+            # /place/12345 패턴 매칭
+            m = re.search(r"/place/(\d+)", html)
+            if m:
+                return m.group(1)
+        return ""
+
+    # ═══════════════════════════════════════════
+    # STEP 1: 플레이스 HTML에서 여러 항목 동시 추출
+    # ═══════════════════════════════════════════
+
+    def _fetch_place_html(self, pid, name=""):
+        """네이버 플레이스 HTML 가져오기 — localhost:3100 프록시 경유.
+        place HTML은 CSR이라 일반 fetch로는 빈 껍데기만 옴.
+        localhost:3100 프록시가 SSR 데이터를 포함한 전체 HTML을 반환.
+        hospital URL 사용 (place는 리다이렉트만 반환).
+        """
+        import json as _json
+        url = f"https://m.place.naver.com/hospital/{pid}/home"
+        fp = self._get_fingerprint()
+        try:
+            payload = _json.dumps({
+                "targetUrl": url,
+                "method": "GET",
+                "headers": {"User-Agent": fp["ua"]}
+            })
+            resp = self.session.post(
+                "http://localhost:3100",
+                data=payload,
+                headers={
+                    "Content-Type": "application/json",
+                    "x-api-key": "onda-proxy-2026-secret",
+                },
+                timeout=self.timeout + 5,
+            )
+            if resp.status_code == 200 and len(resp.content) > 10000:
+                self.stats["success"] += 1
+                # UTF-8 강제 디코딩 (프록시가 인코딩을 잘못 보고할 수 있음)
+                resp.encoding = "utf-8"
+                return resp.text
+        except Exception as e:
+            logger.debug(f"place proxy fetch error: {e}")
+
+        # 폴백: 직접 fetch (한국 IP면 작동할 수 있음)
+        referer = f"https://m.search.naver.com/search.naver?query={quote(name)}"
+        html = self._fetch(url, referer=referer)
+        if html and len(html) > 10000:
+            return html
+
+        # 3차 폴백: 모바일 검색 결과에서 해당 업체 JSON 블록 추출
+        mobile_data = self._fetch_place_from_mobile_search(pid, name)
+        if mobile_data:
+            return mobile_data  # dict 형태로 반환 (place HTML 대신)
+        return ""
+
+    def _fetch_place_from_mobile_search(self, pid, name=""):
+        """모바일 네이버 검색 결과에서 업체 상세 정보 추출.
+        place HTML 프록시 없는 Windows 환경용 폴백.
+        반환: place HTML과 호환되는 pseudo-HTML 문자열 또는 ""
+        """
+        if not name:
+            return ""
+        clean = self.clean_business_name(name)
+        url = f"https://m.search.naver.com/search.naver?where=m&query={quote(clean)}"
+        # 모바일 UA로 직접 요청 (일반 _fetch의 UA가 데스크톱이라 결과가 다를 수 있음)
+        try:
+            self.session.cookies.clear()
+            resp = self.session.get(url, headers={
+                "User-Agent": "Mozilla/5.0 (Linux; Android 13; SM-G991N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
+                "Referer": "https://m.naver.com/",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Language": "ko-KR,ko;q=0.9",
+            }, timeout=self.timeout)
+            if resp.status_code == 200:
+                resp.encoding = "utf-8"
+                html = resp.text
+            else:
+                html = ""
+        except Exception:
+            html = ""
+        if not html or len(html) < 1000:
+            return ""
+
+        # PlaceSummary:{pid} JSON 블록에서 데이터 추출
+        pid_str = str(pid)
+        marker = f"PlaceSummary:{pid_str}"
+        idx = html.find(marker)
+        if idx < 0:
+            # pid 자체로 검색
+            idx = html.find(pid_str)
+        if idx < 0:
+            return ""
+
+        # pid 주변 3000자 범위에서 데이터 추출
+        chunk = html[idx:min(len(html), idx + 3000)]
+
+        result = {}
+        # category
+        m = re.search(r'"category"\s*:\s*"([^"]+)"', chunk)
+        if m:
+            result["category"] = m.group(1)
+        # fullAddress 우선, roadAddress 폴백
+        m = re.search(r'"fullAddress"\s*:\s*"([^"]+)"', chunk)
+        if m:
+            result["address"] = m.group(1)
+        else:
+            m = re.search(r'"roadAddress"\s*:\s*"([^"]+)"', chunk)
+            if m:
+                result["address"] = m.group(1)
+        # virtualPhone
+        m = re.search(r'"virtualPhone"\s*:\s*"([0-9-]+)"', chunk)
+        if m:
+            result["phone"] = m.group(1)
+        # visitorReviewCount (모바일 검색에서는 축약값)
+        m = re.search(r'"visitorReviewCount"\s*:\s*"?(\d+)', chunk)
+        if m:
+            result["visitor_review"] = m.group(1)
+        # blogCafeReviewCount
+        m = re.search(r'"blogCafeReviewCount"\s*:\s*"?(\d+)', chunk)
+        if m:
+            result["blog_review"] = m.group(1)
+        # normalizedName 우선 (mark 태그 없음), name 폴백
+        m = re.search(r'"normalizedName"\s*:\s*"([^"]+)"', chunk)
+        if m:
+            result["name"] = m.group(1)
+        else:
+            m = re.search(r'"name"\s*:\s*"([^"]+)"', chunk)
+            if m:
+                name_val = m.group(1)
+                # <mark> 태그 제거
+                name_val = re.sub(r'\\u003C/?mark\\u003E|\\u003C\\u002Fmark\\u003E', '', name_val)
+                result["name"] = name_val
+
+        if not result:
+            return ""
+
+        # _parse_place_html과 호환되는 pseudo-HTML 문자열 생성
+        pseudo = " ".join(f'"{k}":"{v}"' for k, v in result.items())
+        return pseudo
+
+    def _parse_place_html(self, html):
+        """
+        플레이스 HTML에서 여러 항목 추출.
+        반환: dict with keys: category, name, address, phone, visitor_review, blog_review
+        """
+        result = {}
+
+        if not html or len(html) < 3000:
+            return result
+
+        # 업종(키워드)
+        m = re.search(r'"category"\s*:\s*"([^"]+)"', html)
+        if m:
+            result["category"] = m.group(1)
+
+        # 상호명
+        m = re.search(r'"name"\s*:\s*"([^"]+)"', html)
+        if m:
+            result["name"] = m.group(1)
+
+        # 업체주소 (roadAddress 우선)
+        m = re.search(r'"roadAddress"\s*:\s*"([^"]+)"', html)
+        if not m:
+            m = re.search(r'"address"\s*:\s*"([^"]+)"', html)
+        if m:
+            result["address"] = m.group(1)
+
+        # 안심번호 (virtualPhone 우선)
+        vp = re.search(r'"virtualPhone"\s*:\s*"([^"]+)"', html)
+        ph = re.search(r'"phone"\s*:\s*"([^"]+)"', html)
+        p = (vp.group(1) if vp else "") or (ph.group(1) if ph else "")
+        if p and re.search(r"\d", p):
+            result["phone"] = p
+
+        # 방문자리뷰수 (여러 필드명 대응)
+        for pat in [r'"visitorReviewCount"\s*:\s*(\d+)', r'"visitorReviewsTotal"\s*:\s*(\d+)']:
+            m = re.search(pat, html)
+            if m and int(m.group(1)) > 0:
+                result["visitor_review"] = m.group(1)
+                break
+
+        # 블로그리뷰수 (여러 필드명 대응)
+        for pat in [
+            r'FsasReviewsResult","total":(\d+)',           # __APOLLO_STATE__ 내 블로그/카페 리뷰
+            r'"blogCafeReviewCount"\s*:\s*(\d+)',           # GraphQL 응답
+            r'"blogCafeReviewsTotal"\s*:\s*(\d+)',          # 변형
+        ]:
+            m = re.search(pat, html)
+            if m and int(m.group(1)) > 0:
+                result["blog_review"] = m.group(1)
+                break
+
+        # 네이버 블로그 ID 추출 (3단계 폴백)
+        blog_id = ""
+        # 1단계: BaseNaverBlog
+        m = re.search(r'BaseNaverBlog:([a-zA-Z0-9_.-]+)', html)
+        if m:
+            blog_id = m.group(1)
+        # 2단계: blogId
+        if not blog_id:
+            m = re.search(r'"blogId"\s*:\s*"([a-zA-Z0-9_.-]+)"', html)
+            if m:
+                blog_id = m.group(1)
+        # 3단계: blog.naver.com URL
+        if not blog_id:
+            m = re.search(r'blog\.naver\.com/([a-zA-Z0-9_.-]+)', html)
+            if m and m.group(1) not in ("PostView", "PostList", "BlogTagLog", "NBlogTop", "profile", "intro"):
+                blog_id = m.group(1)
+        if blog_id:
+            result["naver_id"] = blog_id
+
+        # 이메일 (place HTML에서 추출, 추가 요청 0)
+        email_m = re.search(r'"email"\s*:\s*"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})"', html)
+        if email_m:
+            result["email"] = email_m.group(1)
+
+        # 홈페이지 URL (place HTML에서 추출)
+        # 방법1: place_blind span 뒤의 첫 <a href> (가장 안정적)
+        m = re.search(r'place_blind[^<]*</span></strong>[^<]*<[^>]*<[^>]*<a\s+href="(https?://[^"]+)"', html)
+        if not m:
+            # 방법2: homepages 블록에서 마지막 HomepageRepr의 url (홈페이지는 보통 마지막)
+            homepage_urls = re.findall(r'"HomepageRepr","url":"([^"]+)"', html)
+            if homepage_urls:
+                # 마지막 URL이 보통 홈페이지 (예약/인스타/유튜브/블로그 뒤)
+                last_url = homepage_urls[-1].replace("\\u002F", "/")
+                if not any(b in last_url.lower() for b in HP_BLACKLIST):
+                    result["homepage"] = last_url
+        else:
+            hp_url = m.group(1)
+            if hp_url and not any(b in hp_url.lower() for b in HP_BLACKLIST):
+                result["homepage"] = hp_url
+
+        return result
+
+    # ═══════════════════════════════════════════
+    # 홈페이지 검증
+    # ═══════════════════════════════════════════
+
+    def _extract_homepage_with_verify(self, search_html, name):
+        """검색 결과 HTML에서 홈페이지 URL 추출 + 경량 검증.
+        go.kr/or.kr 및 확장 블랙리스트 차단. 추가 HTTP 요청 없이 URL만으로 판단.
+        반환: URL 문자열 또는 ""
+        """
+        urls = self.extract_homepage(search_html)
+        for url in urls:
+            lo = url.lower()
+            # go.kr/or.kr 정부/비영리 스킵
+            if any(d in lo for d in HP_GOV_DOMAINS):
+                continue
+            # 확장 블랙리스트 (관공서/구인/무관 사이트)
+            if any(b in lo for b in ["cultureexpo", "invitanku", "recruit.kpb", 
+                                      "intojob", "songpa.go", "cha.go"]):
+                continue
+            return url
+        # 폴백: 블랙리스트 없이 첫 번째 URL (go.kr/or.kr만 제외)
+        for url in urls:
+            lo = url.lower()
+            if not any(d in lo for d in HP_GOV_DOMAINS):
+                return url
+        return ""
+
+    # ═══════════════════════════════════════════
+    # 네이버아이디 4단계 폴백
+    # ═══════════════════════════════════════════
+
+    def _fetch_place_graphql(self, pid):
+        """네이버 플레이스 GraphQL API로 상세 정보 가져오기.
+        반환: dict with phone, homepage, visitor_review, blog_review, category, address 등
+        """
+        import json as _json
+        url = "https://pcmap-api.place.naver.com/graphql"
+        fp = self._get_fingerprint()
+        headers = {
+            "User-Agent": fp["ua"],
+            "Referer": "https://map.naver.com/",
+            "Content-Type": "application/json",
+        }
+        payload = [{
+            "operationName": "getPlaceDetail",
+            "variables": {"input": {"deviceType": "pc", "id": str(pid), "isNx": False}},
+            "query": """query getPlaceDetail($input: PlaceDetailInput!) {
+              placeDetail(input: $input) {
+                base {
+                  name phone virtualPhone category
+                  address roadAddress
+                  visitorReviewsTotal
+                }
+                homepages {
+                  repr { url type }
+                  etc { url type }
+                }
+                fsasReviews { total }
+              }
+            }"""
+        }]
+        result = {}
+        try:
+            resp = self.session.post(url, json=payload, headers=headers, timeout=self.timeout)
+            if resp.status_code == 200:
+                data = resp.json()
+                if data and isinstance(data, list) and data[0].get("data"):
+                    detail = data[0]["data"].get("placeDetail", {})
+                    base = detail.get("base", {})
+                    hp = detail.get("homepages", {})
+                    fsas = detail.get("fsasReviews", {})
+
+                    # 전화번호
+                    result["phone"] = base.get("virtualPhone") or base.get("phone") or ""
+                    result["real_phone"] = base.get("phone") or ""
+
+                    # 홈페이지 (repr에서)
+                    repr_hp = hp.get("repr")
+                    if repr_hp and repr_hp.get("url"):
+                        result["homepage"] = repr_hp["url"]
+                        result["homepage_type"] = repr_hp.get("type", "")
+                    # etc 링크들 (인스타 등)
+                    etc_links = hp.get("etc", [])
+                    if etc_links:
+                        result["etc_links"] = [{"url": l.get("url", ""), "type": l.get("type", "")} for l in etc_links]
+
+                    # 리뷰
+                    result["visitor_review"] = str(base.get("visitorReviewsTotal", 0) or 0)
+                    result["blog_review"] = str(fsas.get("total", 0) if fsas else 0)
+
+                    # 카테고리/주소
+                    result["category"] = base.get("category", "")
+                    result["address"] = base.get("roadAddress") or base.get("address") or ""
+
+                    self.stats["success"] += 1
+            elif resp.status_code in (429, 403):
+                self.stats["blocked"] += 1
+        except Exception as e:
+            self.stats["fail"] += 1
+
+        return result
+
+    # summary API로 블로그/방문자 리뷰 수 보충
+    def _fetch_place_summary(self, pid):
+        """map.naver.com summary API — blogReviews, visitorReviews 가져오기"""
+        fp = self._get_fingerprint()
+        result = {}
+        try:
+            url = f"https://map.naver.com/p/api/place/summary/{pid}"
+            resp = self.session.get(url, headers={
+                "User-Agent": fp["ua"],
+                "Referer": "https://map.naver.com/"
+            }, timeout=self.timeout)
+            if resp.status_code == 200:
+                data = resp.json().get("data", {}).get("placeDetail", {})
+                blog = data.get("blogReviews", {})
+                result["blog_review"] = str(blog.get("total", 0)) if blog else "0"
+                # 방문자 리뷰 (displayText에서 숫자 추출)
+                vr = data.get("visitorReviews", {})
+                if vr:
+                    dt = vr.get("displayText", "")
+                    import re
+                    m = re.search(r'[\d,]+', dt)
+                    if m:
+                        result["visitor_review"] = m.group().replace(",", "")
+                # 카테고리
+                cat = data.get("category", {})
+                if cat:
+                    result["category"] = cat.get("category", "")
+        except Exception:
+            pass
+        return result
+
+    def _find_naver_id(self, name, parsed_place=None):
+        """네이버 블로그 ID 추출 (최적화: 1단계 성공률 90%+).
+        1단계: place HTML에서 BaseNaverBlog/blogId/blog.naver.com (이미 파싱됨, 추가 요청 0)
+        2단계: site:blog.naver.com 검색 (1단계 실패 시만)
+        3단계: 없으면 빈칸 (3단계 "블로그" 검색 제거 → 속도 우선)
+        반환: "blogid@naver.com" 또는 ""
+        """
+        _SKIP = ("PostView", "PostList", "BlogTagLog", "NBlogTop", "prologue", "MologPost", "profile", "intro")
+
+        # 1단계: place HTML 파싱 결과 (추가 HTTP 0회)
+        if parsed_place and parsed_place.get("naver_id"):
+            return parsed_place["naver_id"] + "@naver.com"
+
+        clean = self.clean_business_name(name)
+
+        # 2단계: site:blog.naver.com 검색 (1회 요청)
+        url = f"https://search.naver.com/search.naver?query={quote(clean + ' site:blog.naver.com')}"
+        html = self._fetch(url, referer="https://www.naver.com/", timeout=3)
+        if html:
+            for m in re.finditer(r'blog\.naver\.com/([a-zA-Z0-9_.-]+)', html):
+                bid = m.group(1)
+                if bid not in _SKIP and len(bid) >= 3:
+                    return bid + "@naver.com"
+
+        # 3단계: 없음
+        return ""
+
+    # ═══════════════════════════════════════════
+    # CSV/XLSX IO
+    # ═══════════════════════════════════════════
+
+    OUT_HEADERS = [
+        "업종(키워드)", "상호명", "업체이메일", "안심번호", "업체주소", "홈페이지URL",
+        "방문자리뷰수", "블로그리뷰수", "네이버아이디", "고유번호", "플레이스URL", "업데이트날짜",
+    ]
+
+    @staticmethod
+    def read_csv(filepath):
+        """CSV 파일 읽기 (UTF-8 BOM 지원)"""
+        with open(filepath, "r", encoding="utf-8-sig") as f:
+            reader = csv.DictReader(f)
+            return list(reader)
+
+    @staticmethod
+    def save_csv(rows, filepath):
+        """CSV 파일 저장 (UTF-8 BOM)"""
+        with open(filepath, "w", encoding="utf-8-sig", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=CrawlerEngine.OUT_HEADERS, extrasaction="ignore")
+            writer.writeheader()
+            for r in rows:
+                out = {}
+                for h in CrawlerEngine.OUT_HEADERS:
+                    val = r.get(h, "")
+                    if h == "홈페이지URL" and (not val or not val.strip()):
+                        val = "X"
+                    if h == "업데이트날짜" and not val:
+                        val = time.strftime("%Y-%m-%d")
+                    out[h] = val
+                writer.writerow(out)
+
+    @staticmethod
+    def save_xlsx(rows, filepath):
+        """엑셀 파일 저장"""
+        from openpyxl import Workbook
+        from openpyxl.styles import Font
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "크롤링결과"
+
+        # 헤더
+        for col, h in enumerate(CrawlerEngine.OUT_HEADERS, 1):
+            cell = ws.cell(row=1, column=col, value=h)
+            cell.font = Font(bold=True)
+
+        # 데이터
+        for row_idx, r in enumerate(rows, 2):
+            for col, h in enumerate(CrawlerEngine.OUT_HEADERS, 1):
+                val = r.get(h, "")
+                if h == "홈페이지URL" and (not val or not val.strip()):
+                    val = "X"
+                if h == "업데이트날짜" and not val:
+                    val = time.strftime("%Y-%m-%d")
+                if h in ("방문자리뷰수", "블로그리뷰수"):
+                    try:
+                        val = int(val) if val else 0
+                    except (ValueError, TypeError):
+                        val = 0
+                ws.cell(row=row_idx, column=col, value=val)
+
+        # 컬럼 너비 자동 조정
+        for col, h in enumerate(CrawlerEngine.OUT_HEADERS, 1):
+            max_len = len(h)
+            for row_idx in range(2, min(len(rows) + 2, 102)):  # 최대 100행 샘플
+                cell_val = str(ws.cell(row=row_idx, column=col).value or "")
+                max_len = max(max_len, len(cell_val))
+            ws.column_dimensions[ws.cell(row=1, column=col).column_letter].width = min(max(max_len + 2, 10), 50)
+
+        wb.save(filepath)
+
+    def save_output(self, rows, filepath):
+        """확장자에 따라 CSV 또는 XLSX 저장"""
+        if filepath.lower().endswith(".xlsx"):
+            self.save_xlsx(rows, filepath)
+        else:
+            self.save_csv(rows, filepath)
+
+    # ═══════════════════════════════════════════
+    # 메인 크롤링 로직
+    # ═══════════════════════════════════════════
+
+    def run(self, input_file, output_file, progress_file=None):
+        """
+        12개 항목 전체 크롤링 실행.
+        입력 CSV에 "상호명"만 있으면 나머지 전부 자동.
+
+        Args:
+            input_file: 입력 CSV 파일 경로
+            output_file: 출력 파일 경로 (.csv 또는 .xlsx)
+            progress_file: 진행 저장 파일 (None이면 자동 생성)
+        """
+        self.running = True
+        self.stats = {
+            "place_id": 0, "category": 0, "name": 0, "address": 0,
+            "phone": 0, "visitor_review": 0, "blog_review": 0,
+            "hp": 0, "email": 0, "naver_id": 0,
+            "blocked": 0, "success": 0,
+        }
+
+        if not progress_file:
+            progress_file = output_file.rsplit(".", 1)[0] + "-progress.json"
+
+        rows = self.read_csv(input_file)
+        self.callback("log", f"입력: {input_file} ({len(rows)}건)")
+        self.callback("log", f"출력: {output_file}")
+        self.callback("log", f"딜레이: {self.delay_min}~{self.delay_max}초 (랜덤)")
+        self.callback("log", f"모드: 12개 항목 전체 크롤링 (상호명 기반)")
+        if self.api_keys:
+            self.callback("log", f"네이버 API 키 {len(self.api_keys)}개 (로테이션)")
+        if self.proxies:
+            self.callback("log", f"프록시: {len(self.proxies)}개")
+        self.callback("total", len(rows))
+
+        # 이전 진행 복구
+        progress = {}
+        try:
+            with open(progress_file, "r") as f:
+                progress = json.load(f)
+        except Exception:
+            pass
+
+        for i, r in enumerate(rows):
+            if not self.running:
+                self.callback("log", "사용자 중지")
+                break
+
+            name = (r.get("상호명") or "").strip()
+            if not name:
+                self.callback("log", f"[{i+1}/{len(rows)}] (상호명 없음 - 스킵)")
+                self.callback("progress", i + 1)
+                continue
+
+            pid = (r.get("고유번호") or "").strip()
+            naver_id = (r.get("네이버아이디") or "").replace("@naver.com", "").strip()
+            log_items = []
+
+            # ── 이전 진행 복구 ──
+            prog_key = pid or name  # 고유번호 없으면 상호명을 키로
+            if prog_key in progress:
+                prev = progress[prog_key]
+                for csv_col, prog_col in [
+                    ("고유번호", "pid"), ("플레이스URL", "place_url"),
+                    ("업종(키워드)", "category"), ("상호명", "name"),
+                    ("업체주소", "address"), ("안심번호", "phone"),
+                    ("방문자리뷰수", "visitor_review"), ("블로그리뷰수", "blog_review"),
+                    ("홈페이지URL", "hp"), ("업체이메일", "email"),
+                ]:
+                    val = prev.get(prog_col, "")
+                    if val and not (r.get(csv_col) or "").strip():
+                        r[csv_col] = val
+                # hp 특수처리 (X도 빈값)
+                if prev.get("hp") and ((r.get("홈페이지URL") or "").strip() in ("", "X")):
+                    r["홈페이지URL"] = prev["hp"]
+
+            # ══ STEP 0: 고유번호 + 플레이스URL ══
+            pid = (r.get("고유번호") or "").strip()
+            if not pid:
+                pid = self._find_place_id(name)
+                if pid:
+                    r["고유번호"] = pid
+                    self.stats["place_id"] += 1
+                    log_items.append(f"pid:{pid}")
+                self._random_delay()
+
+            if pid and not (r.get("플레이스URL") or "").strip():
+                r["플레이스URL"] = f"https://m.place.naver.com/place/{pid}"
+
+            # ══ STEP 1: 플레이스 HTML 파싱 (한 번에 여러 항목) ══
+            parsed_place = {}
+            if pid:
+                need_any = (
+                    not (r.get("업종(키워드)") or "").strip()
+                    or not (r.get("업체주소") or "").strip()
+                    or not (r.get("안심번호") or "").strip()
+                    or not (r.get("방문자리뷰수") or "").strip()
+                    or not (r.get("블로그리뷰수") or "").strip()
+                    or not (r.get("네이버아이디") or "").strip()
+                )
+                if need_any:
+                    place_html = self._fetch_place_html(pid, name)
+                    parsed_place = self._parse_place_html(place_html)
+
+                    # 업종(키워드)
+                    if parsed_place.get("category") and not (r.get("업종(키워드)") or "").strip():
+                        r["업종(키워드)"] = parsed_place["category"]
+                        self.stats["category"] += 1
+                        log_items.append(f"cat:{parsed_place['category']}")
+
+                    # 상호명 보정 (CSV에 없으면)
+                    if parsed_place.get("name") and not name:
+                        r["상호명"] = parsed_place["name"]
+                        name = parsed_place["name"]
+                        self.stats["name"] += 1
+
+                    # 업체주소
+                    if parsed_place.get("address") and not (r.get("업체주소") or "").strip():
+                        r["업체주소"] = parsed_place["address"]
+                        self.stats["address"] += 1
+                        log_items.append(f"addr:{parsed_place['address'][:20]}")
+
+                    # 안심번호
+                    if parsed_place.get("phone") and not (r.get("안심번호") or "").strip():
+                        r["안심번호"] = parsed_place["phone"]
+                        self.stats["phone"] += 1
+                        log_items.append(f"tel:{parsed_place['phone']}")
+
+                    # 방문자리뷰수
+                    if parsed_place.get("visitor_review") and not (r.get("방문자리뷰수") or "").strip():
+                        r["방문자리뷰수"] = parsed_place["visitor_review"]
+                        self.stats["visitor_review"] += 1
+                        log_items.append(f"visit:{parsed_place['visitor_review']}")
+
+                    # 블로그리뷰수
+                    if parsed_place.get("blog_review") and not (r.get("블로그리뷰수") or "").strip():
+                        r["블로그리뷰수"] = parsed_place["blog_review"]
+                        self.stats["blog_review"] += 1
+                        log_items.append(f"blog:{parsed_place['blog_review']}")
+
+                    self._random_delay()
+
+            # ══ STEP 2: 홈페이지 (API 우선 → HTML 폴백) ══
+            need_hp = not (r.get("홈페이지URL") or "").strip() or (r.get("홈페이지URL") or "").strip() == "X"
+            if need_hp:
+                clean = self.clean_business_name(name)
+                found_hp = False
+
+                # API 모드
+                if self.api_keys:
+                    items = self._search_naver_api(clean)
+                    for item in items:
+                        link = item.get("link", "").strip()
+                        tel = item.get("telephone", "").strip()
+                        if link and not any(b in link.lower() for b in HP_BLACKLIST):
+                            r["홈페이지URL"] = link
+                            self.stats["hp"] += 1
+                            log_items.append(f"hp:{link}(API)")
+                            found_hp = True
+                            break
+                        if tel and not (r.get("안심번호") or "").strip():
+                            r["안심번호"] = tel
+                            self.stats["phone"] += 1
+                            log_items.append(f"tel:{tel}(API)")
+
+                # HTML 폴백 (검증 포함)
+                if not found_hp:
+                    url = f"https://search.naver.com/search.naver?query={quote(clean + ' 홈페이지')}"
+                    referer = "https://www.naver.com/"
+                    html = self._fetch(url, referer=referer)
+                    verified_hp = self._extract_homepage_with_verify(html, name)
+                    if verified_hp:
+                        r["홈페이지URL"] = verified_hp
+                        self.stats["hp"] += 1
+                        log_items.append(f"hp:{verified_hp}")
+                self._random_delay()
+
+            # ══ STEP 3: 이메일 (홈페이지 HTML + 네이버 검색 폴백) ══
+            need_email = not (r.get("업체이메일") or "").strip()
+            hp_url = (r.get("홈페이지URL") or "").strip()
+            if need_email and hp_url and hp_url != "X" and hp_url.startswith("http"):
+                referer = f"https://www.google.com/search?q={quote(name)}"
+                html = self._fetch(hp_url, referer=referer, timeout=6)
+                emails = self.extract_emails(html)
+                if emails:
+                    r["업체이메일"] = emails[0]
+                    self.stats["email"] += 1
+                    log_items.append(f"email:{emails[0]}")
+                self._random_delay()
+
+            # 이메일 폴백 (네이버 검색)
+            need_email = not (r.get("업체이메일") or "").strip()
+            if need_email:
+                clean = self.clean_business_name(name)
+                url = f"https://search.naver.com/search.naver?query={quote(clean + ' 이메일')}"
+                referer = "https://www.naver.com/"
+                html = self._fetch(url, referer=referer)
+                emails = self.extract_emails(html)
+                if emails:
+                    r["업체이메일"] = emails[0]
+                    self.stats["email"] += 1
+                    log_items.append(f"email:{emails[0]}(검색)")
+                self._random_delay()
+
+            # ══ STEP 4: 네이버아이디 (4단계 폴백) ══
+            need_nid = not (r.get("네이버아이디") or "").strip()
+            if need_nid:
+                nid = self._find_naver_id(name, parsed_place)
+                if nid:
+                    r["네이버아이디"] = nid
+                    self.stats["naver_id"] += 1
+                    log_items.append(f"nid:{nid}")
+            elif naver_id and "@" not in (r.get("네이버아이디") or ""):
+                r["네이버아이디"] = naver_id + "@naver.com"
+                self.stats["naver_id"] += 1
+
+            # ══ STEP 5: 업데이트날짜 ══
+            if not (r.get("업데이트날짜") or "").strip():
+                r["업데이트날짜"] = time.strftime("%Y-%m-%d")
+
+            # ── 진행 저장 (5건마다) ──
+            prog_key = pid or name
+            progress[prog_key] = {
+                "pid": r.get("고유번호", ""),
+                "place_url": r.get("플레이스URL", ""),
+                "category": r.get("업종(키워드)", ""),
+                "name": r.get("상호명", ""),
+                "address": r.get("업체주소", ""),
+                "phone": r.get("안심번호", ""),
+                "visitor_review": r.get("방문자리뷰수", ""),
+                "blog_review": r.get("블로그리뷰수", ""),
+                "hp": r.get("홈페이지URL", ""),
+                "email": r.get("업체이메일", ""),
+                "naver_id": r.get("네이버아이디", ""),
+                "update_date": r.get("업데이트날짜", ""),
+            }
+            if i % 5 == 0 or i == len(rows) - 1:
+                try:
+                    with open(progress_file, "w") as f:
+                        json.dump(progress, f, ensure_ascii=False)
+                    self.save_output(rows, output_file)
+                except Exception as e:
+                    logger.debug(f"save error: {e}")
+
+            log_msg = f"[{i+1}/{len(rows)}] {name}"
+            if log_items:
+                log_msg += " -> " + " ".join(log_items)
+            self.callback("log", log_msg)
+            self.callback("progress", i + 1)
+            self.callback("stats", dict(self.stats))
+
+        # 최종 저장
+        self.save_output(rows, output_file)
+        try:
+            os.remove(progress_file)
+        except Exception:
+            pass
+
+        # 최종 통계 — 12개 항목별 채움율
+        total = len(rows)
+
+        def _pct(field, empty_vals=("", "X")):
+            cnt = sum(1 for r in rows if (r.get(field) or "").strip() not in empty_vals)
+            return cnt, round(cnt / total * 100) if total else 0
+
+        c_cat, p_cat = _pct("업종(키워드)")
+        c_name, p_name = _pct("상호명")
+        c_email, p_email = _pct("업체이메일")
+        c_phone, p_phone = _pct("안심번호")
+        c_addr, p_addr = _pct("업체주소")
+        c_hp, p_hp = _pct("홈페이지URL")
+        c_visit, p_visit = _pct("방문자리뷰수")
+        c_blog, p_blog = _pct("블로그리뷰수")
+        c_nid, p_nid = _pct("네이버아이디")
+        c_pid, p_pid = _pct("고유번호")
+        c_purl, p_purl = _pct("플레이스URL")
+        c_date, p_date = _pct("업데이트날짜")
+
+        s = self.stats
+        summary = (
+            f"\n=== 최종 결과 ({total}건) ===\n"
+            f"  업종(키워드): {c_cat}/{total} ({p_cat}%)  +{s['category']}\n"
+            f"  상호명:       {c_name}/{total} ({p_name}%)  +{s['name']}\n"
+            f"  업체이메일:   {c_email}/{total} ({p_email}%)  +{s['email']}\n"
+            f"  안심번호:     {c_phone}/{total} ({p_phone}%)  +{s['phone']}\n"
+            f"  업체주소:     {c_addr}/{total} ({p_addr}%)  +{s['address']}\n"
+            f"  홈페이지URL:  {c_hp}/{total} ({p_hp}%)  +{s['hp']}\n"
+            f"  방문자리뷰수: {c_visit}/{total} ({p_visit}%)  +{s['visitor_review']}\n"
+            f"  블로그리뷰수: {c_blog}/{total} ({p_blog}%)  +{s['blog_review']}\n"
+            f"  네이버아이디: {c_nid}/{total} ({p_nid}%)  +{s['naver_id']}\n"
+            f"  고유번호:     {c_pid}/{total} ({p_pid}%)  +{s['place_id']}\n"
+            f"  플레이스URL:  {c_purl}/{total} ({p_purl}%)\n"
+            f"  업데이트날짜: {c_date}/{total} ({p_date}%)\n"
+            f"\n완료: {output_file}"
+        )
+        self.callback("log", summary)
+        self.callback("done", output_file)
+        self.running = False
+
+    # ═══════════════════════════════════════════
+    # 키워드 검색 모드 — 전체 페이지 크롤링
+    # ═══════════════════════════════════════════
+
+    # ═══════════════════════════════════════════
+    # Playwright 브라우저 크롤링 (map.naver.com)
+    # ═══════════════════════════════════════════
+
+    _pw_browser = None  # 클래스 레벨 브라우저 재사용
+
+    def _init_playwright(self):
+        """Playwright 브라우저 초기화 (최초 1회, 핑거프린트 우회)"""
+        if CrawlerEngine._pw_browser:
+            return True
+        try:
+            from playwright.sync_api import sync_playwright
+            self._pw = sync_playwright().start()
+            # 랜덤 UA 선택
+            fp = self._get_fingerprint()
+            CrawlerEngine._pw_browser = self._pw.chromium.launch(
+                headless=True,
+                args=[
+                    "--no-sandbox",
+                    "--disable-blink-features=AutomationControlled",
+                    f"--user-agent={fp['ua']}",
+                    "--disable-dev-shm-usage",
+                ],
+            )
+            # webdriver 플래그 숨기기용 init script 저장
+            CrawlerEngine._pw_init_script = """
+                Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+                Object.defineProperty(navigator, 'languages', {get: () => ['ko-KR', 'ko', 'en-US', 'en']});
+                Object.defineProperty(navigator, 'platform', {get: () => 'Win32'});
+            """
+            return True
+        except Exception as e:
+            logger.debug(f"Playwright init failed: {e}")
+            self.callback("log", f"⚠️ Playwright 초기화 실패: {e}")
+            return False
+
+    def _close_playwright(self):
+        """Playwright 정리"""
+        if CrawlerEngine._pw_browser:
+            try:
+                CrawlerEngine._pw_browser.close()
+            except Exception:
+                pass
+            CrawlerEngine._pw_browser = None
+        if hasattr(self, "_pw") and self._pw:
+            try:
+                self._pw.stop()
+            except Exception:
+                pass
+
+    def _playwright_search(self, keyword):
+        """Playwright로 map.naver.com에서 업체 목록 수집 (1페이지, 최대 30건).
+        반환: (items list, total int) 또는 ([], 0) on failure.
+        """
+        if not self._init_playwright():
+            return [], 0
+
+        try:
+            page = CrawlerEngine._pw_browser.new_page()
+            # 핑거프린트: 랜덤 viewport + webdriver 숨기기
+            vw = random.choice([1280, 1366, 1440, 1536, 1920])
+            vh = random.choice([720, 768, 800, 900, 1080])
+            page.set_viewport_size({"width": vw, "height": vh})
+            if hasattr(CrawlerEngine, "_pw_init_script"):
+                page.add_init_script(CrawlerEngine._pw_init_script)
+
+            # API 응답 가로채기
+            captured = {"items": [], "total": 0}
+            def on_response(response):
+                if "allSearch" in response.url:
+                    try:
+                        data = response.json()
+                        place = data.get("result", {}).get("place")
+                        if place and place.get("list"):
+                            captured["total"] = place.get("totalCount", 0)
+                            for it in place["list"]:
+                                cat = it.get("category", "")
+                                if isinstance(cat, list):
+                                    cat = cat[0] if cat else ""
+                                captured["items"].append({
+                                    "id": str(it.get("id", "")),
+                                    "name": it.get("name", ""),
+                                    "category": cat,
+                                    "phone": it.get("tel", ""),
+                                    "virtualPhone": it.get("virtualTel", "") or it.get("tel", ""),
+                                    "address": it.get("address", ""),
+                                    "roadAddress": it.get("roadAddress", "") or it.get("address", ""),
+                                    "reviewCount": it.get("reviewCount", 0),
+                                    "blogCafeReviewCount": it.get("blogReviewCount", 0),
+                                })
+                    except Exception:
+                        pass
+
+            page.on("response", on_response)
+
+            url = f"https://map.naver.com/p/search/{quote(keyword)}"
+            page.goto(url, wait_until="domcontentloaded", timeout=15000)
+            page.wait_for_timeout(3000)
+
+            page.close()
+            return captured["items"], captured["total"]
+
+        except Exception as e:
+            logger.debug(f"Playwright search error: {e}")
+            self.callback("log", f"⚠️ Playwright 오류: {e}")
+            return [], 0
+
+    # ═══════════════════════════════════════════
+    # 네이버 지역 검색 API (구/동 분할)
+    # ═══════════════════════════════════════════
+
+    # 주요 도시 구/군 목록 (자동 세분화용)
+    _CITY_DISTRICTS = {
+        "서울": ["강남구","강동구","강북구","강서구","관악구","광진구","구로구","금천구",
+                 "노원구","도봉구","동대문구","동작구","마포구","서대문구","서초구",
+                 "성동구","성북구","송파구","양천구","영등포구","용산구","은평구",
+                 "종로구","중구","중랑구"],
+        "부산": ["강서구","금정구","기장군","남구","동구","동래구","부산진구","북구",
+                 "사상구","사하구","서구","수영구","연제구","영도구","중구","해운대구"],
+        "대구": ["남구","달서구","달성군","동구","북구","서구","수성구","중구"],
+        "인천": ["강화군","계양구","남동구","동구","미추홀구","부평구","서구","연수구","옹진군","중구"],
+        "광주": ["광산구","남구","동구","북구","서구"],
+        "대전": ["대덕구","동구","서구","유성구","중구"],
+        "울산": ["남구","동구","북구","울주군","중구"],
+        "세종": ["세종시"],
+        "경기": ["가평군","고양시","과천시","광명시","광주시","구리시","군포시","김포시",
+                 "남양주시","동두천시","부천시","성남시","수원시","시흥시","안산시","안성시",
+                 "안양시","양주시","양평군","여주시","연천군","오산시","용인시","의왕시",
+                 "의정부시","이천시","파주시","평택시","포천시","하남시","화성시"],
+        "강원": ["강릉시","동해시","삼척시","속초시","원주시","춘천시","태백시","홍천군","횡성군","평창군","정선군","철원군","화천군","양구군","인제군","고성군","양양군","영월군"],
+        "충북": ["청주시","충주시","제천시","보은군","옥천군","영동군","증평군","진천군","괴산군","음성군","단양군"],
+        "충남": ["천안시","공주시","보령시","아산시","서산시","논산시","계룡시","당진시","금산군","부여군","서천군","청양군","홍성군","예산군","태안군"],
+        "전북": ["전주시","군산시","익산시","정읍시","남원시","김제시","완주군","진안군","무주군","장수군","임실군","순창군","고창군","부안군"],
+        "전남": ["목포시","여수시","순천시","나주시","광양시","담양군","곡성군","구례군","고흥군","보성군","화순군","장흥군","강진군","해남군","영암군","무안군","함평군","영광군","장성군","완도군","진도군","신안군"],
+        "경북": ["포항시","경주시","김천시","안동시","구미시","영주시","영천시","상주시","문경시","경산시","군위군","의성군","청송군","영양군","영덕군","청도군","고령군","성주군","칠곡군","예천군","봉화군","울진군","울릉군"],
+        "경남": ["창원시","진주시","통영시","사천시","김해시","밀양시","거제시","양산시","의령군","함안군","창녕군","고성군","남해군","하동군","산청군","함양군","거창군","합천군"],
+        "제주": ["제주시","서귀포시"],
+    }
+
+    # 지역명 사전 (붙여쓰기 파싱용)
+    _KNOWN_LOCATIONS = [
+        # 광역시/도
+        "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
+        "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주",
+        # 주요 시/구/동
+        "수원", "성남", "안양", "안산", "용인", "고양", "과천", "광명", "군포",
+        "의왕", "하남", "이천", "평택", "시흥", "파주", "김포", "화성", "양주",
+        "포천", "구리", "남양주", "오산", "안성", "동두천", "의정부", "양평",
+        "여주", "가평", "연천",
+        "청주", "충주", "제천", "천안", "아산", "서산", "논산", "공주", "보령", "당진",
+        "전주", "군산", "익산", "정읍", "남원", "김제",
+        "목포", "여수", "순천", "나주", "광양",
+        "포항", "경주", "김천", "안동", "구미", "영주", "영천", "상주", "문경",
+        "창원", "진주", "통영", "사천", "김해", "밀양", "거제", "양산",
+        "춘천", "원주", "강릉", "동해", "태백", "속초", "삼척",
+        "제주", "서귀포",
+        # 서울 구
+        "강남", "서초", "송파", "강동", "마포", "용산", "종로", "중구", "성북",
+        "강북", "도봉", "노원", "은평", "서대문", "광진", "동대문", "중랑",
+        "성동", "금천", "관악", "동작", "영등포", "양천", "강서", "구로",
+        # 부산 구/동
+        "해운대", "서면", "부산진", "동래", "남포", "사하", "북구", "사상",
+        "연제", "수영", "금정", "기장",
+        # 대구/인천/광주/대전
+        "수성", "달서", "남동", "부평", "계양", "연수", "미추홀",
+        "북구", "광산", "서구", "유성", "대덕",
+    ]
+
+    def _parse_keyword_location(self, keyword):
+        """키워드에서 지역명과 업종 분리.
+        '울산 피부과' → ('울산', '피부과')
+        '안양피부과' → ('안양', '피부과')  # 붙여쓰기도 지원
+        """
+        parts = keyword.strip().split()
+        if len(parts) >= 2:
+            return parts[0], " ".join(parts[1:])
+        # 붙여쓰기: 긴 지역명부터 매칭 시도
+        kw = keyword.strip()
+        for loc in sorted(self._KNOWN_LOCATIONS, key=len, reverse=True):
+            if kw.startswith(loc) and len(kw) > len(loc):
+                return loc, kw[len(loc):]
+        return keyword, ""
+
+    # 동/지역명 → 도시 매핑 (구/군 이외의 지역명)
+    _LOCATION_CITY_MAP = {
+        "서면": "부산", "남포": "부산", "해운대": "부산", "광안리": "부산",
+        "강남": "서울", "홍대": "서울", "신촌": "서울", "이태원": "서울",
+        "명동": "서울", "잠실": "서울", "건대": "서울", "신림": "서울",
+        "동성로": "대구", "범어": "대구", "수성": "대구",
+        "충장로": "광주", "상무": "광주",
+        "둔산": "대전", "유성": "대전",
+        "성산": "제주", "서귀포": "제주",
+        "안양": "경기", "수원": "경기", "성남": "경기", "안산": "경기",
+        "용인": "경기", "고양": "경기", "과천": "경기", "광명": "경기",
+        "군포": "경기", "의왕": "경기", "하남": "경기", "이천": "경기",
+        "평택": "경기", "시흥": "경기", "파주": "경기", "김포": "경기",
+        "화성": "경기", "양주": "경기", "포천": "경기", "구리": "경기",
+        "남양주": "경기", "오산": "경기", "의정부": "경기",
+        "춘천": "강원", "원주": "강원", "강릉": "강원", "속초": "강원",
+        "청주": "충북", "충주": "충북", "제천": "충북",
+        "천안": "충남", "아산": "충남", "서산": "충남",
+        "전주": "전북", "군산": "전북", "익산": "전북",
+        "목포": "전남", "여수": "전남", "순천": "전남",
+        "포항": "경북", "경주": "경북", "구미": "경북", "안동": "경북",
+        "창원": "경남", "진주": "경남", "김해": "경남", "거제": "경남",
+    }
+
+    def _find_city_for_location(self, location):
+        """지역명이 속한 도시 찾기. '울산' → '울산', '서면' → '부산'"""
+        # 직접 매칭
+        if location in self._CITY_DISTRICTS:
+            return location
+        # 명시적 매핑
+        if location in self._LOCATION_CITY_MAP:
+            return self._LOCATION_CITY_MAP[location]
+        # 구/군 이름으로 역매핑
+        for city, districts in self._CITY_DISTRICTS.items():
+            for d in districts:
+                if location in d or d.startswith(location):
+                    return city
+        return None
+
+    def _api_local_search(self, query, display=5, start=1):
+        """네이버 지역 검색 API 호출. 반환: items list"""
+        url = "https://openapi.naver.com/v1/search/local.json"
+        params = {"query": query, "display": display, "start": start}
+
+        # API 키 — 내장 키 사용
+        cid = getattr(self, "naver_client_id", "yoBUbNSW9MGSPH36zaHN")
+        csecret = getattr(self, "naver_client_secret", "wt0HPPOVKA")
+        headers = {
+            "X-Naver-Client-Id": cid,
+            "X-Naver-Client-Secret": csecret,
+        }
+        try:
+            resp = self.session.get(url, params=params, headers=headers, timeout=self.timeout)
+            if resp.status_code == 200:
+                return resp.json().get("items", [])
+        except Exception:
+            pass
+        return []
+
+    def _api_name_to_place_id(self, name, addr_hint=""):
+        """업체명+주소로 네이버 검색 → Place ID 추출"""
+        q = name
+        if addr_hint:
+            q += " " + addr_hint[:10]
+        search_url = f"https://search.naver.com/search.naver?query={quote(q)}"
+        fp = self._get_fingerprint()
+        headers = {"User-Agent": fp["ua"]}
+        try:
+            resp = self.session.get(search_url, headers=headers, timeout=self.timeout)
+            resp.encoding = "utf-8"
+            pids = re.findall(r'/place/(\d{5,})', resp.text)
+            if pids:
+                return pids[0]
+        except Exception:
+            pass
+        return ""
+
+    def _collect_all_places_api(self, keyword):
+        """네이버 지역 검색 API + 구/군 분할로 최대한 많은 Place ID 수집.
+        반환: items list (id, name, category, phone, address 등)
+        """
+        location, biz_type = self._parse_keyword_location(keyword)
+        if not biz_type:
+            # 업종이 없으면 분할 불가 → 빈 결과
+            return [], 0
+
+        city = self._find_city_for_location(location)
+        seen_names = set()
+        all_items = []
+
+        # 1단계: 원본 키워드 검색
+        base_results = self._api_local_search(keyword)
+        for it in base_results:
+            name = re.sub(r'</?b>', '', it.get("title", ""))
+            if name not in seen_names:
+                seen_names.add(name)
+                all_items.append(it)
+        self.callback("log", f"📍 API 기본 검색: {len(all_items)}건")
+
+        # 2단계: 구/군 분할 (같은 도시일 때만)
+        if city and city in self._CITY_DISTRICTS:
+            districts = self._CITY_DISTRICTS[city]
+            for di, dist in enumerate(districts):
+                if not self.running:
+                    break
+                q = f"{city} {dist} {biz_type}"
+                items = self._api_local_search(q)
+                new_count = 0
+                for it in items:
+                    name = re.sub(r'</?b>', '', it.get("title", ""))
+                    if name not in seen_names:
+                        seen_names.add(name)
+                        all_items.append(it)
+                        new_count += 1
+                self.callback("log", f"  [{di+1}/{len(districts)}] {dist}: +{new_count}건 (총 {len(all_items)}건)")
+                self._random_delay(0.3, 0.7)  # API는 짧은 딜레이
+        elif location:
+            # 도시 매칭 안 되면 원래 지역 + "동" 검색 1회만
+            pass
+
+        self.callback("log", f"📍 API 총 수집: {len(all_items)}건 (중복 제거)")
+
+        # 3단계: Place ID 매칭 (업체명 → 네이버 검색)
+        result_items = []
+        pid_found = 0
+        for idx, it in enumerate(all_items):
+            if not self.running:
+                break
+            name = re.sub(r'</?b>', '', it.get("title", ""))
+            addr = it.get("roadAddress", "") or it.get("address", "")
+            cat = it.get("category", "")
+            tel = it.get("telephone", "")
+
+            pid = self._api_name_to_place_id(name, addr)
+            item = {
+                "id": pid or "",
+                "name": name,
+                "category": cat,
+                "phone": tel,
+                "virtualPhone": tel,
+                "address": it.get("address", ""),
+                "roadAddress": addr,
+                "reviewCount": 0,
+                "blogCafeReviewCount": 0,
+            }
+            result_items.append(item)
+            if pid:
+                pid_found += 1
+                self.callback("log", f"  [{idx+1}/{len(all_items)}] {name}: PID={pid}")
+            else:
+                self.callback("log", f"  [{idx+1}/{len(all_items)}] {name}: PID 미발견 (name+addr로 포함)")
+            self._random_delay(0.5, 1.0)
+
+        self.callback("log", f"📍 PID 매칭: {pid_found}/{len(all_items)}건")
+        return result_items, len(result_items)
+
+    def _map_api_search(self, keyword, page_num=1):
+        """Map API 직접 HTTP 호출. 반환: (items, total) 또는 ([], 0)"""
+        from urllib.parse import quote as _quote
+        url = "https://map.naver.com/p/api/search/allSearch"
+        fp = self._get_fingerprint()
+        params = {
+            "query": keyword, "type": "all",
+            "searchCoord": "127.0;37.5", "page": page_num, "displayCount": 30,
+        }
+        headers = {
+            "User-Agent": fp["ua"],
+            "Referer": "https://map.naver.com/p/search/" + _quote(keyword),
+        }
+        try:
+            resp = self.session.get(url, params=params, headers=headers, timeout=self.timeout)
+            if resp.status_code == 200:
+                resp.encoding = "utf-8"
+                data = resp.json()
+                place = data.get("result", {}).get("place")
+                if not place or data.get("result", {}).get("ncaptcha"):
+                    return [], 0
+                if place and place.get("list"):
+                    raw_items = place["list"]
+                    items = []
+                    for it in raw_items:
+                        cat = it.get("category", "")
+                        if isinstance(cat, list):
+                            cat = cat[0] if cat else ""
+                        items.append({
+                            "id": str(it.get("id", "")),
+                            "name": it.get("name", ""),
+                            "category": cat,
+                            "phone": it.get("tel", ""),
+                            "virtualPhone": it.get("virtualTel", "") or it.get("tel", ""),
+                            "address": it.get("address", ""),
+                            "roadAddress": it.get("roadAddress", "") or it.get("address", ""),
+                            "reviewCount": it.get("reviewCount", 0),
+                            "blogCafeReviewCount": it.get("blogReviewCount", 0),
+                        })
+                    return items, place.get("totalCount", 0)
+        except Exception as e:
+            logger.debug(f"Map API error: {e}")
+        return [], 0
+
+    # JSON 기본정보 캐시 (PID → {name, tel, addr, ...})
+    _place_info_cache = {}
+
+    def _mobile_map_search_single(self, keyword):
+        """m.map.naver.com/search2에서 Place ID 수집 (75건/페이지).
+        JSON에서 기본정보도 캐싱 (place HTML fetch 절감).
+        반환: (pids set, total int)
+        """
+        url = f"https://m.map.naver.com/search2/search.naver?query={quote(keyword)}&sm=hty&style=v5"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+            "Referer": "https://m.map.naver.com/",
+        }
+        try:
+            resp = self.session.get(url, headers=headers, timeout=self.timeout)
+            resp.encoding = "utf-8"
+            if resp.status_code != 200 or len(resp.text) < 1000:
+                return set(), 0
+
+            # JSON items 추출 (기본정보 캐싱)
+            html = resp.text
+            m = re.search(r'"totalCount":(\d+),"items":\[', html)
+            total = 0
+            if m:
+                total = int(m.group(1))
+                try:
+                    start_i = html.index("[", m.start())
+                    depth, end_i = 0, start_i
+                    for i in range(start_i, min(start_i + 500000, len(html))):
+                        if html[i] == "[": depth += 1
+                        elif html[i] == "]": depth -= 1
+                        if depth == 0:
+                            end_i = i + 1
+                            break
+                    items = json.loads(html[start_i:end_i])
+                    for it in items:
+                        pid = str(it.get("id", ""))
+                        if pid:
+                            CrawlerEngine._place_info_cache[pid] = {
+                                "name": it.get("name", ""),
+                                "category": it.get("category", ""),
+                                "tel": it.get("tel", ""),
+                                "virtualTel": it.get("virtualTel", ""),
+                                "address": it.get("address", ""),
+                                "roadAddress": it.get("roadAddress", ""),
+                            }
+                except Exception:
+                    pass
+
+            pids = list(dict.fromkeys(re.findall(r'/place/(\d{5,})', html)))
+            if not total:
+                tm = re.search(r'totalCount["\s:]+(\d+)', html)
+                if tm:
+                    total = int(tm.group(1))
+            return set(pids), total
+        except Exception as e:
+            logger.debug(f"mobile map search error: {e}")
+        return set(), 0
+
+    # ── 전국 행정구역 데이터 (오프라인, API 불필요) ──
+    _DISTRICTS_DATA = None  # 지연 로딩
+
+    @classmethod
+    def _load_districts_data(cls):
+        """districts_data.json 로드 (최초 1회)"""
+        if cls._DISTRICTS_DATA is not None:
+            return cls._DISTRICTS_DATA
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "districts_data.json")
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                cls._DISTRICTS_DATA = json.load(f)
+                logger.debug(f"districts_data.json loaded: {len(cls._DISTRICTS_DATA)} cities")
+        except Exception as e:
+            logger.warning(f"districts_data.json 로드 실패: {e}")
+            cls._DISTRICTS_DATA = {}
+        return cls._DISTRICTS_DATA
+
+    def _fetch_sub_districts(self, city_name):
+        """전국 행정구역 데이터에서 구/군 + 동 목록 반환 (오프라인).
+        반환: {구이름: [동1, 동2, ...], ...}
+        """
+        data = self._load_districts_data()
+        return data.get(city_name, {})
+
+    # 시 → 하위 구 매핑 (하위 구가 있는 시)
+    _CITY_TO_GU = {
+        "안양": ["만안구", "동안구"],
+        "수원": ["장안구", "권선구", "팔달구", "영통구"],
+        "성남": ["수정구", "중원구", "분당구"],
+        "안산": ["상록구", "단원구"],
+        "용인": ["처인구", "기흥구", "수지구"],
+        "고양": ["덕양구", "일산동구", "일산서구"],
+        "천안": ["동남구", "서북구"],
+        "청주": ["상당구", "서원구", "흥덕구", "청원구"],
+        "전주": ["완산구", "덕진구"],
+        "창원": ["의창구", "성산구", "마산합포구", "마산회원구", "진해구"],
+        "포항": ["남구", "북구"],
+    }
+
+    def _fetch_sub_districts_for_area(self, city_name, area_name):
+        """특정 시/구 영역의 하위 구/동만 가져오기 (오프라인).
+        예: city=경기, area=안양 → 만안구(안양동,석수동,박달동), 동안구(비산동,관양동,평촌동,호계동)
+        """
+        data = self._load_districts_data()
+        city_data = data.get(city_name, {})
+        if not city_data:
+            return {}
+
+        filtered = {}
+
+        # 1차: 시→하위구 매핑 사전으로 정확 매칭
+        sub_gus = self._CITY_TO_GU.get(area_name, [])
+        if sub_gus:
+            for gu_name in sub_gus:
+                if gu_name in city_data and city_data[gu_name]:
+                    filtered[gu_name] = city_data[gu_name]
+            if filtered:
+                return filtered
+
+        # 2차: area_name이 구/군과 직접 매칭
+        for dist_name, dong_list in city_data.items():
+            if area_name in dist_name or dist_name.startswith(area_name):
+                if dong_list:
+                    filtered[dist_name] = dong_list
+
+        return filtered
+
+    def _mobile_map_search(self, keyword):
+        """m.map.naver.com에서 Place ID 대량 수집.
+        1차: 원본 키워드 (75건)
+        2차: 구/군 분할 (75건씩)
+        3차: 동 단위 분할 (75건씩) — 98%+ 커버
+        반환: (items list, total int)
+        """
+        all_pids = set()
+
+        # 1차: 원본 키워드
+        pids, total = self._mobile_map_search_single(keyword)
+        all_pids.update(pids)
+        self.callback("log", f"  원본 검색: {len(pids)}건 (전체 {total}건)")
+
+        # 2차+3차: 구/군 + 동 단위 분할
+        if total > len(pids) and self.running:
+            location, biz_type = self._parse_keyword_location(keyword)
+            city = self._find_city_for_location(location)
+            if city and biz_type:
+                # location이 시/구 단위면 (안양, 수원 등) → 해당 지역만 분할
+                # city가 광역시/도면 (경기, 충남 등) location 기준 분할
+                search_area = location if location != city else city
+                self.callback("log", f"  📍 {search_area} 행정구역 분할 수집 중...")
+
+                if location != city:
+                    # "안양" → 안양시 하위 구/동만 가져오기
+                    dist_dongs = self._fetch_sub_districts_for_area(city, location)
+                    if not dist_dongs:
+                        # 하위 구/동 없으면 city 전체로 폴백 (서면→부산 전체)
+                        dist_dongs = self._fetch_sub_districts(city)
+                        search_area = city
+                        self.callback("log", f"  📍 {location} 하위 없음 → {city} 전체 분할")
+                else:
+                    dist_dongs = self._fetch_sub_districts(city)
+                if not dist_dongs and city in self._CITY_DISTRICTS:
+                    # JSON 없으면 하드코딩 폴백 (구 단위만)
+                    dist_dongs = {d: [] for d in self._CITY_DISTRICTS[city]}
+
+                for dist_name, dong_list in dist_dongs.items():
+                    if not self.running:
+                        break
+                    # 구 단위 검색 (search_area 기준)
+                    sub_kw = f"{search_area} {dist_name} {biz_type}"
+                    sub_pids, _ = self._mobile_map_search_single(sub_kw)
+                    new = sub_pids - all_pids
+                    if new:
+                        all_pids.update(new)
+                        self.callback("log", f"  {dist_name}: +{len(new)}건 (누적 {len(all_pids)})")
+                    self._random_delay(0.3, 0.6)
+
+                    # 동 단위 검색 (아직 total 미달이면)
+                    if len(all_pids) < total and dong_list:
+                        for dong in dong_list:
+                            if not self.running:
+                                break
+                            dong_kw = f"{search_area} {dist_name} {dong} {biz_type}"
+                            dong_pids, _ = self._mobile_map_search_single(dong_kw)
+                            dong_new = dong_pids - all_pids
+                            if dong_new:
+                                all_pids.update(dong_new)
+                                self.callback("log", f"    {dong}: +{len(dong_new)}건 (누적 {len(all_pids)})")
+                            self._random_delay(0.3, 0.6)
+
+                    # 이미 total 도달하면 조기 종료
+                    if len(all_pids) >= total:
+                        self.callback("log", f"  ✅ 전체 {total}건 도달!")
+                        break
+
+        self.callback("log", f"  📊 최종: {len(all_pids)}/{total}건 ({len(all_pids)*100//max(total,1)}%)")
+
+        # items 생성
+        items = []
+        for pid in all_pids:
+            items.append({
+                "id": pid, "name": "", "category": "", "phone": "",
+                "virtualPhone": "", "address": "", "roadAddress": "",
+                "reviewCount": 0, "blogCafeReviewCount": 0,
+            })
+        return items, total or len(items)
+
+    def _html_search_fallback(self, keyword, start):
+        """HTML 파싱 폴백: 네이버 검색에서 place ID 추출 (스트리밍).
+        반환: (items list of dicts, total int estimate).
+        """
+        page_start = start
+        url = (
+            f"https://m.search.naver.com/search.naver"
+            f"?query={quote(keyword)}&sm=tab_jum&where=nexearch&start={page_start}"
+        )
+        # 스트리밍: Place ID가 포함된 부분만 받고 끊기 (속도 ~2x)
+        fp = self._get_fingerprint()
+        headers = {
+            "User-Agent": fp["ua"],
+            "Referer": "https://m.search.naver.com/",
+            "Accept-Encoding": "gzip, deflate",
+        }
+        html = ""
+        try:
+            resp = self.session.get(url, headers=headers, timeout=self.timeout, stream=True)
+            resp.encoding = "utf-8"
+            raw_bytes = b""
+            ids_found = set()
+            for chunk in resp.iter_content(chunk_size=16384):
+                if chunk:
+                    raw_bytes += chunk
+                    # Place ID 실시간 탐지 (바이트에서 ASCII 패턴)
+                    for m in re.finditer(rb'/place/(\d{5,})', raw_bytes[-20000:]):
+                        ids_found.add(m.group(1).decode())
+                    for m in re.finditer(rb'"id"\s*:\s*"(\d{5,})"', raw_bytes[-20000:]):
+                        ids_found.add(m.group(1).decode())
+                    # 충분한 ID 수집 → 조기 종료 (ID는 ~220KB 지점)
+                    if len(ids_found) >= 10:
+                        break
+            html = raw_bytes.decode("utf-8", errors="replace")
+            resp.close()
+        except Exception as e:
+            logger.debug(f"stream fetch error: {e}")
+        if not html:
+            return [], 0
+        # place ID 추출 — /place/ 우선 (가장 정확), 보조 패턴 추가
+        ids = re.findall(r'/place/(\d{5,})', html)
+        ids += re.findall(r'"id"\s*:\s*"(\d{5,})"', html)
+        ids += re.findall(r'placeId[=:]["]*(\d{5,})', html)
+        # 중복 제거, 순서 유지
+        unique_ids = list(dict.fromkeys(ids))
+        items = []
+        for pid in unique_ids:
+            items.append({"id": pid, "name": "", "category": "", "phone": "",
+                          "virtualPhone": "", "address": "", "roadAddress": "",
+                          "reviewCount": 0, "blogCafeReviewCount": 0})
+        # total 추정 (HTML에서 정확한 total 없음 → 결과 있으면 999로 설정)
+        total = 999 if items else 0
+        return items, total
+
+    def _detail_crawl_one(self, r, total, idx):
+        """1건 상세 크롤링 — GraphQL 우선, place HTML 폴백"""
+        name = r.get("상호명", "")
+        pid = r.get("고유번호", "")
+        log_items = []
+
+        # PID 없으면 검색으로 재시도
+        if not pid and name:
+            addr = r.get("업체주소", "")
+            pid = self._api_name_to_place_id(name, addr)
+            if pid:
+                r["고유번호"] = pid
+                r["플레이스URL"] = f"https://m.place.naver.com/place/{pid}"
+
+        # ═══ 1차: GraphQL API (전화/홈페이지/리뷰 정확도 최고) ═══
+        gql = {}
+        if pid:
+            gql = self._fetch_place_graphql(pid)
+
+        # ═══ 2차: place HTML 폴백 (GraphQL 실패 시) ═══
+        parsed_place = {}
+        need_hp = not (r.get("홈페이지URL") or "").strip() or (r.get("홈페이지URL") or "").strip() == "X"
+        need_nid = not (r.get("네이버아이디") or "").strip()
+        if pid and not gql and (need_hp or need_nid):
+            place_html = self._fetch_place_html(pid, name)
+            parsed_place = self._parse_place_html(place_html)
+
+        # ═══ 안심번호 ═══
+        current_phone = (r.get("안심번호") or "").strip()
+        if current_phone:
+            log_items.append(f"tel:{current_phone}")
+            self.stats["phone"] += 1
+        elif gql.get("phone"):
+            r["안심번호"] = gql["phone"]
+            log_items.append(f"tel:{gql['phone']}")
+            self.stats["phone"] += 1
+        elif parsed_place.get("phone"):
+            r["안심번호"] = parsed_place["phone"]
+            log_items.append(f"tel:{parsed_place['phone']}")
+            self.stats["phone"] += 1
+
+        # ═══ 방문자/블로그 리뷰 ═══
+        cur_vr = str(r.get("방문자리뷰수") or "0").strip()
+        cur_br = str(r.get("블로그리뷰수") or "0").strip()
+        if gql.get("visitor_review") and gql["visitor_review"] != "0":
+            r["방문자리뷰수"] = gql["visitor_review"]
+        elif cur_vr == "0" and parsed_place.get("visitor_review"):
+            r["방문자리뷰수"] = parsed_place["visitor_review"]
+
+        # 블로그 리뷰: GraphQL fsasReviews가 0이면 summary API로 보충
+        if gql.get("blog_review") and gql["blog_review"] != "0":
+            r["블로그리뷰수"] = gql["blog_review"]
+        elif cur_br == "0":
+            if pid:
+                summary = self._fetch_place_summary(pid)
+                if summary.get("blog_review") and summary["blog_review"] != "0":
+                    r["블로그리뷰수"] = summary["blog_review"]
+            if (r.get("블로그리뷰수") or "0") == "0" and parsed_place.get("blog_review"):
+                r["블로그리뷰수"] = parsed_place["blog_review"]
+
+        # ═══ 홈페이지 ═══
+        if need_hp:
+            if gql.get("homepage"):
+                r["홈페이지URL"] = gql["homepage"]
+                self.stats["hp"] += 1
+                log_items.append(f"hp:{gql['homepage']}")
+            elif parsed_place.get("homepage"):
+                r["홈페이지URL"] = parsed_place["homepage"]
+                self.stats["hp"] += 1
+                log_items.append(f"hp:{parsed_place['homepage']}")
+
+        # ═══ 이메일 (홈페이지에서 추출) ═══
+        need_email = not (r.get("업체이메일") or "").strip()
+        hp_url = (r.get("홈페이지URL") or "").strip()
+        if need_email and hp_url and hp_url != "X" and hp_url.startswith("http"):
+            html = self._fetch(hp_url, referer=f"https://www.google.com/search?q={quote(name)}", timeout=3)
+            emails = self.extract_emails(html)
+            if emails:
+                r["업체이메일"] = emails[0]
+                self.stats["email"] += 1
+                log_items.append(f"email:{emails[0]}")
+        # place HTML에서도 시도
+        if not (r.get("업체이메일") or "").strip() and parsed_place.get("email"):
+            r["업체이메일"] = parsed_place["email"]
+            self.stats["email"] += 1
+            log_items.append(f"email:{parsed_place['email']}(place)")
+
+        # ═══ 네이버아이디 ═══
+        if need_nid and name:
+            # GraphQL homepage가 블로그면 ID 추출
+            nid = None
+            hp_for_nid = gql.get("homepage", "") or ""
+            if "blog.naver.com" in hp_for_nid:
+                import re
+                # blogId= 파라미터 우선 (profile/intro.naver?blogId=xxx)
+                m = re.search(r'blogId=([a-zA-Z0-9_.-]+)', hp_for_nid)
+                if not m:
+                    m = re.search(r'blog\.naver\.com/([a-zA-Z0-9_.-]+)', hp_for_nid)
+                if m and m.group(1) not in ("profile", "intro", "PostList", "PostView"):
+                    nid = m.group(1) + "@naver.com"
+            # etc 링크에서도 블로그 찾기
+            if not nid and gql.get("etc_links"):
+                for link in gql["etc_links"]:
+                    if "blog.naver.com" in (link.get("url") or ""):
+                        import re
+                        m = re.search(r'blogId=([a-zA-Z0-9_.-]+)', link["url"])
+                        if not m:
+                            m = re.search(r'blog\.naver\.com/([a-zA-Z0-9_.-]+)', link["url"])
+                        if m and m.group(1) not in ("profile", "intro", "PostList", "PostView"):
+                            nid = m.group(1) + "@naver.com"
+                            break
+            # 기존 방식 폴백
+            if not nid:
+                nid = self._find_naver_id(name, parsed_place or gql)
+            if nid:
+                r["네이버아이디"] = nid
+                self.stats["naver_id"] += 1
+                log_items.append(f"nid:{nid}")
+        elif not need_nid:
+            naver_id = (r.get("네이버아이디") or "").replace("@naver.com", "").strip()
+            if naver_id and "@" not in (r.get("네이버아이디") or ""):
+                r["네이버아이디"] = naver_id + "@naver.com"
+                self.stats["naver_id"] += 1
+
+        # 로그
+        log_msg = f"[{idx}/{total}] {name}"
+        if log_items:
+            log_msg += " -> " + " ".join(log_items)
+        self.callback("log", log_msg)
+        self.callback("progress", idx)
+        self.callback("stats", dict(self.stats))
+
+        # 업체간 딜레이
+        self._random_delay()
+
+    def run_keyword_search(self, keyword, output_file, start_page=1, max_pages=0, progress_file=None):
+        """
+        키워드로 네이버 플레이스 검색 → 모든 방법 동원하여 업체 수집.
+
+        수집 순서:
+        1. Playwright (map.naver.com) — 30건/페이지
+        2. Map API — 30건/페이지
+        3. 네이버 지역 검색 API (구/군 분할) — 도시 전체
+        4. HTML 파싱 폴백 — 보충
+
+        Args:
+            keyword: 검색 키워드 (예: "수원 피부과")
+            output_file: 출력 파일 경로 (.csv 또는 .xlsx)
+            start_page: 시작 페이지 (기본 1)
+            max_pages: 최대 페이지 수 (0 = 무제한, 끝까지)
+            progress_file: 진행 저장 파일 (None이면 자동 생성)
+        """
+        self.running = True
+        self.stats = {
+            "place_id": 0, "category": 0, "name": 0, "address": 0,
+            "phone": 0, "visitor_review": 0, "blog_review": 0,
+            "hp": 0, "email": 0, "naver_id": 0,
+            "blocked": 0, "success": 0,
+        }
+
+        if not progress_file:
+            progress_file = output_file.rsplit(".", 1)[0] + "-progress.json"
+
+        self.callback("log", f"키워드: {keyword}")
+        self.callback("log", f"출력: {output_file}")
+        self.callback("log", f"딜레이: {self.delay_min}~{self.delay_max}초 (랜덤)")
+        if self.proxies:
+            self.callback("log", f"프록시: {len(self.proxies)}개")
+
+        # 이전 진행 복구 (같은 키워드일 때만)
+        rows = []
+        try:
+            with open(progress_file, "r", encoding="utf-8") as f:
+                prog = json.load(f)
+                if prog.get("keyword") == keyword:
+                    rows = prog.get("rows", [])
+                    if rows:
+                        self.callback("log", f"이전 진행 복구: {len(rows)}건")
+                else:
+                    os.remove(progress_file)
+        except Exception:
+            pass
+
+        existing_pids = {r.get("고유번호") for r in rows if r.get("고유번호")}
+
+        # ═══ PHASE 1: Place ID 수집 ═══
+        self.callback("log", "━━━ PHASE 1: 업체 목록 수집 ━━━")
+        all_items = []
+        seen_pids = set(existing_pids)
+
+        def _add_items(items, source=""):
+            added = 0
+            for it in items:
+                pid = str(it.get("id", ""))
+                if pid and pid not in seen_pids:
+                    seen_pids.add(pid)
+                    all_items.append(it)
+                    added += 1
+            if added:
+                self.callback("log", f"  → {source}: +{added}건 (총 {len(all_items)}건)")
+
+        # 방법 1: 모바일 지도 검색 (75건/페이지, 차단 안 됨)
+        self.callback("log", "📱 [1/4] 모바일 지도 검색 시도...")
+        if self.running:
+            items, total = self._mobile_map_search(keyword)
+            if items:
+                _add_items(items, f"모바일 지도 ({total}건 중)")
+            else:
+                self.callback("log", "  ⚠️ 모바일 지도 실패")
+
+        # 방법 2: Playwright (보충)
+        if self.running and len(all_items) < 10:
+            self.callback("log", "🌐 [2/4] Playwright 시도...")
+            items, total = self._playwright_search(keyword)
+            if items:
+                _add_items(items, "Playwright")
+
+        # 방법 3: Map API (보충)
+        if self.running and len(all_items) < 10:
+            self.callback("log", "🗺️ [3/4] Map API 시도...")
+            items, total = self._map_api_search(keyword, 1)
+            if items:
+                _add_items(items, "Map API")
+
+        # 방법 4: HTML 파싱 폴백 (5건 미만일 때만)
+        if self.running and len(all_items) < 5:
+            self.callback("log", "🔍 [4/4] HTML 파싱 폴백...")
+            html_items, _ = self._html_search_fallback(keyword, 1)
+            _add_items(html_items, "HTML 폴백")
+
+        if not all_items and not rows:
+            self.callback("log", "❌ 수집된 업체 없음")
+            return
+
+        self.callback("log", f"━━━ PHASE 1 완료: 총 {len(all_items)}건 신규 수집 ━━━")
+        self.callback("log", "")
+        self.callback("log", "━━━ PHASE 2: 상세 정보 크롤링 ━━━")
+        self.callback("total", len(all_items) + len(rows))
+
+        # ═══ PHASE 2: 상세 크롤링 ═══
+        for idx, item in enumerate(all_items):
+            if not self.running:
+                break
+
+            pid = str(item.get("id", ""))
+            # 캐시된 기본정보 활용 (m.map JSON에서)
+            cached = CrawlerEngine._place_info_cache.get(pid, {})
+            name = item.get("name", "") or cached.get("name", "")
+            category = item.get("category", "") or cached.get("category", "")
+            v_phone = item.get("virtualPhone", "") or item.get("phone", "") or cached.get("virtualTel", "") or cached.get("tel", "")
+            road_addr = item.get("roadAddress", "") or item.get("address", "") or cached.get("roadAddress", "") or cached.get("address", "")
+            visitor_review = str(item.get("reviewCount", 0) or 0)
+            blog_review = str(item.get("blogCafeReviewCount", 0) or 0)
+
+            row = {
+                "고유번호": pid,
+                "상호명": name,
+                "업종(키워드)": category,
+                "안심번호": v_phone,
+                "업체주소": road_addr,
+                "방문자리뷰수": visitor_review,
+                "블로그리뷰수": blog_review,
+                "플레이스URL": f"https://m.place.naver.com/place/{pid}" if pid else "",
+                "업데이트날짜": time.strftime("%Y-%m-%d"),
+                "홈페이지URL": "",
+                "업체이메일": "",
+                "네이버아이디": "",
+            }
+
+            # 기본 정보 부족 시 place HTML에서 보충
+            self._last_parsed_place = {}
+            if pid and (not name or not category):
+                place_html = self._fetch_place_html(pid, keyword)
+                parsed = self._parse_place_html(place_html)
+                self._last_parsed_place = parsed
+                if parsed.get("name") and not name:
+                    row["상호명"] = parsed["name"]
+                    name = parsed["name"]
+                if parsed.get("category") and not category:
+                    row["업종(키워드)"] = parsed["category"]
+                if parsed.get("address") and not road_addr:
+                    row["업체주소"] = parsed["address"]
+                if parsed.get("phone") and not v_phone:
+                    row["안심번호"] = parsed["phone"]
+                if parsed.get("visitor_review") and visitor_review == "0":
+                    row["방문자리뷰수"] = parsed["visitor_review"]
+                if parsed.get("blog_review") and blog_review == "0":
+                    row["블로그리뷰수"] = parsed["blog_review"]
+                self._random_delay()
+
+            rows.append(row)
+
+            # 상세 크롤링 (홈페이지/이메일/네이버ID)
+            self._detail_crawl_one(row, len(all_items), idx + 1)
+
+            # 매건 실시간 저장
+            try:
+                self.save_output(rows, output_file)
+            except Exception as e:
+                logger.debug(f"save error: {e}")
+
+            # 진행 저장
+            try:
+                with open(progress_file, "w", encoding="utf-8") as f:
+                    json.dump({"keyword": keyword, "rows": rows}, f, ensure_ascii=False)
+            except Exception:
+                pass
+
+            self.callback("progress", len(rows))
+
+        if not self.running and not rows:
+            self.callback("log", "사용자 중지 (수집 데이터 없음)")
+            return
+
+        # 이미 파이프라인에서 상세 크롤링 완료
+
+        # 최종 저장
+        self.save_output(rows, output_file)
+        try:
+            os.remove(progress_file)
+        except Exception:
+            pass
+
+        # 최종 통계
+        total = len(rows)
+
+        def _pct(field, empty_vals=("", "X")):
+            cnt = sum(1 for r in rows if (r.get(field) or "").strip() not in empty_vals)
+            return cnt, round(cnt / total * 100) if total else 0
+
+        c_cat, p_cat = _pct("업종(키워드)")
+        c_name, p_name = _pct("상호명")
+        c_email, p_email = _pct("업체이메일")
+        c_phone, p_phone = _pct("안심번호")
+        c_addr, p_addr = _pct("업체주소")
+        c_hp, p_hp = _pct("홈페이지URL")
+        c_visit, p_visit = _pct("방문자리뷰수")
+        c_blog, p_blog = _pct("블로그리뷰수")
+        c_nid, p_nid = _pct("네이버아이디")
+        c_pid, p_pid = _pct("고유번호")
+        c_purl, p_purl = _pct("플레이스URL")
+        c_date, p_date = _pct("업데이트날짜")
+
+        s = self.stats
+        summary = (
+            f"\n=== 최종 결과 ({total}건) ===\n"
+            f"  업종(키워드): {c_cat}/{total} ({p_cat}%)\n"
+            f"  상호명:       {c_name}/{total} ({p_name}%)\n"
+            f"  업체이메일:   {c_email}/{total} ({p_email}%)  +{s['email']}\n"
+            f"  안심번호:     {c_phone}/{total} ({p_phone}%)\n"
+            f"  업체주소:     {c_addr}/{total} ({p_addr}%)\n"
+            f"  홈페이지URL:  {c_hp}/{total} ({p_hp}%)  +{s['hp']}\n"
+            f"  방문자리뷰수: {c_visit}/{total} ({p_visit}%)\n"
+            f"  블로그리뷰수: {c_blog}/{total} ({p_blog}%)\n"
+            f"  네이버아이디: {c_nid}/{total} ({p_nid}%)  +{s['naver_id']}\n"
+            f"  고유번호:     {c_pid}/{total} ({p_pid}%)\n"
+            f"  플레이스URL:  {c_purl}/{total} ({p_purl}%)\n"
+            f"  업데이트날짜: {c_date}/{total} ({p_date}%)\n"
+            f"\n완료: {output_file}"
+        )
+        self.callback("log", summary)
+        self.callback("done", output_file)
+        self.running = False
+
+    def stop(self):
+        """크롤링 중지"""
+        self.running = False
