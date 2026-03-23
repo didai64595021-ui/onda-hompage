@@ -1468,8 +1468,8 @@ class CrawlerGUI:
             try:
                 self.engine.run_keyword_search(keyword, kw_temp, start_page, max_pages)
 
-                # 엔진이 중지로 인해 정상 리턴한 경우 (예외 없이 리턴)
-                if self._queue_stop_requested or not self.engine.running:
+                # 중지 판단: _queue_stop_requested만 사용 (engine.running은 정상완료에서도 False)
+                if self._queue_stop_requested:
                     item["status"] = "pending"
                     count = self._count_xlsx_rows(kw_temp)
                     if count > 0:
