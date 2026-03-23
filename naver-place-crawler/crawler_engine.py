@@ -2215,10 +2215,14 @@ class CrawlerEngine:
             self.callback("log", "❌ 수집된 업체 없음")
             return
 
+        resumed_count = len(rows)  # 이전 진행 복구된 건수 (이어하기 offset)
+        total_expected = len(all_items) + resumed_count  # 전체 예상 건수
         self.callback("log", f"━━━ PHASE 1 완료: 총 {len(all_items)}건 신규 수집 ━━━")
+        if resumed_count > 0:
+            self.callback("log", f"  (기존 {resumed_count}건 + 신규 {len(all_items)}건 = 총 {total_expected}건)")
         self.callback("log", "")
         self.callback("log", "━━━ PHASE 2: 상세 정보 크롤링 ━━━")
-        self.callback("total", len(all_items) + len(rows))
+        self.callback("total", total_expected)
 
         # ═══ PHASE 2: 상세 크롤링 ═══
         for idx, item in enumerate(all_items):
@@ -2273,8 +2277,8 @@ class CrawlerEngine:
 
             rows.append(row)
 
-            # 상세 크롤링 (홈페이지/이메일/네이버ID)
-            self._detail_crawl_one(row, len(all_items), idx + 1)
+            # 상세 크롤링 (홈페이지/이메일/네이버ID) — 번호는 기존건 포함한 전체 기준
+            self._detail_crawl_one(row, total_expected, resumed_count + idx + 1)
 
             # 매건 실시간 저장
             try:
