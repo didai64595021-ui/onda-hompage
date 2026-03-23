@@ -333,6 +333,23 @@ class CrawlerGUI:
                                          highlightthickness=1, highlightbackground=C_BORDER)
         self.max_pages_spin.pack(side="left", padx=(4, 0))
 
+        # ── 순위 모드 체크박스 ──
+        self.rank_mode_frame = tk.Frame(self.kw_search_card.content, bg=C_CARD)
+        self.rank_mode_frame.pack(fill="x", pady=(4, 2))
+        self.rank_mode_var = tk.BooleanVar(value=False)
+        self.rank_mode_check = tk.Checkbutton(
+            self.rank_mode_frame, text="📊 순위 모드 (Selenium — 실제 플레이스 순위대로 정렬)",
+            variable=self.rank_mode_var, font=FONT_BODY, fg=C_POINT, bg=C_CARD,
+            selectcolor=C_INPUT_BG, activebackground=C_CARD, activeforeground=C_POINT,
+            cursor="hand2",
+        )
+        self.rank_mode_check.pack(side="left")
+        self.rank_mode_note = tk.Label(
+            self.rank_mode_frame, text="Chrome 필요 · 느림",
+            font=("Pretendard", 9), fg=C_SUBTEXT, bg=C_CARD,
+        )
+        self.rank_mode_note.pack(side="left", padx=(8, 0))
+
         # 출력 파일 (내부 임시파일 사용)
         self.output_var = tk.StringVar()
         self._temp_output = ""
@@ -1397,7 +1414,9 @@ class CrawlerGUI:
 
     def _run_keyword_crawl(self, keyword, output_file, start_page, max_pages):
         try:
-            self.engine.run_keyword_search(keyword, output_file, start_page, max_pages)
+            rank_mode = getattr(self, 'rank_mode_var', None)
+            use_rank = rank_mode.get() if rank_mode else False
+            self.engine.run_keyword_search(keyword, output_file, start_page, max_pages, rank_mode=use_rank)
         except Exception as e:
             self._safe_callback("log", f"오류 발생: {e}")
         finally:
@@ -1466,7 +1485,9 @@ class CrawlerGUI:
             self.total_rows = 0
 
             try:
-                self.engine.run_keyword_search(keyword, kw_temp, start_page, max_pages)
+                rank_mode = getattr(self, 'rank_mode_var', None)
+                use_rank = rank_mode.get() if rank_mode else False
+                self.engine.run_keyword_search(keyword, kw_temp, start_page, max_pages, rank_mode=use_rank)
 
                 # 중지 판단: _queue_stop_requested만 사용 (engine.running은 정상완료에서도 False)
                 if self._queue_stop_requested:

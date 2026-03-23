@@ -1339,6 +1339,168 @@ class CrawlerEngine:
     # ═══════════════════════════════════════════
 
     # ═══════════════════════════════════════════
+    # Selenium 순위 크롤링 (map.naver.com)
+    # ═══════════════════════════════════════════
+
+    def _selenium_rank_search(self, keyword, max_pages=5):
+        """Selenium으로 네이버 지도 검색 → 실제 순위 + place ID 수집.
+        
+        Returns:
+            list of {"id": str, "name": str, "rank": int, "page": int} 또는 None (실패/차단 시)
+        """
+        try:
+            from selenium import webdriver
+            from selenium.webdriver.chrome.options import Options
+            from selenium.webdriver.chrome.service import Service
+            from selenium.webdriver.common.by import By
+        except ImportError:
+            self.callback("log", "  ⚠️ selenium 미설치 — pip install selenium")
+            return None
+
+        try:
+            from webdriver_manager.chrome import ChromeDriverManager
+            use_wdm = True
+        except ImportError:
+            use_wdm = False
+
+        opts = Options()
+        opts.add_argument("--headless=new")
+        opts.add_argument("--no-sandbox")
+        opts.add_argument("--disable-dev-shm-usage")
+        opts.add_argument("--disable-gpu")
+        opts.add_argument("--window-size=1920,1080")
+        fp = self._get_fingerprint()
+        opts.add_argument(f"user-agent={fp['ua']}")
+
+        try:
+            if use_wdm:
+                service = Service(ChromeDriverManager().install())
+                driver = webdriver.Chrome(service=service, options=opts)
+            else:
+                driver = webdriver.Chrome(options=opts)
+        except Exception as e:
+            self.callback("log", f"  ⚠️ Chrome 드라이버 실패: {e}")
+            return None
+
+        results = []
+        page = 1
+
+        try:
+            driver.get(f"https://map.naver.com/p/search/{quote(keyword)}")
+            time.sleep(4 + random.random() * 2)
+
+            # 차단 확인
+            if "서비스 이용이 제한" in driver.page_source or "ncaptcha" in driver.page_source:
+                self.callback("log", "  ❌ IP 차단됨 — Selenium 순위 수집 스킵")
+                driver.quit()
+                return None
+
+            while page <= max_pages:
+                driver.switch_to.default_content()
+                try:
+                    iframe = driver.find_element(By.CSS_SELECTOR, "iframe#searchIframe")
+                    driver.switch_to.frame(iframe)
+                except Exception:
+                    self.callback("log", f"  ⚠️ iframe 전환 실패 (페이지 {page})")
+                    break
+
+                time.sleep(2 + random.random())
+
+                # 스크롤해서 전체 로딩
+                body = driver.find_element(By.TAG_NAME, "body")
+                for _ in range(8):
+                    driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", body)
+                    time.sleep(0.3 + random.random() * 0.2)
+                time.sleep(1)
+
+                # HTML에서 place ID + 업체명 추출
+                html = driver.page_source
+                
+                # place ID가 있는 a 태그 찾기
+                import re as _re
+                # 패턴: /place/숫자 형태의 링크
+                pid_pattern = _re.compile(r'/place/(\d+)')
+                
+                # 업체 카드에서 이름+ID 매핑
+                links = driver.find_elements(By.CSS_SELECTOR, "a[href*='/place/']")
+                seen = {r["id"] for r in results}
+                page_items = []
+                
+                for link in links:
+                    href = link.get_attribute("href") or ""
+                    m = pid_pattern.search(href)
+                    if not m:
+                        continue
+                    pid = m.group(1)
+                    if pid in seen:
+                        continue
+                    
+                    # 이름 추출: 링크 텍스트 또는 상위 요소
+                    name = link.text.strip().split("\n")[0] if link.text.strip() else ""
+                    
+                    # "이미지 수", 숫자만, 빈 문자열 필터
+                    if not name or name.startswith("이미지") or _re.match(r'^\d+$', name):
+                        # 부모 요소에서 이름 찾기
+                        try:
+                            parent = link.find_element(By.XPATH, "./ancestor::li")
+                            lines = [l.strip() for l in parent.text.split("\n") if l.strip()]
+                            for line in lines:
+                                if (not line.startswith("이미지") and 
+                                    not _re.match(r'^\d+$', line) and
+                                    "광고" not in line and
+                                    len(line) > 1 and len(line) < 50):
+                                    name = line
+                                    break
+                        except Exception:
+                            pass
+                    
+                    if not name or "광고" in name:
+                        continue
+                    
+                    seen.add(pid)
+                    page_items.append({
+                        "id": pid,
+                        "name": name,
+                        "rank": len(results) + len(page_items) + 1,
+                        "page": page,
+                    })
+                
+                results.extend(page_items)
+                self.callback("log", f"  📊 Selenium 페이지 {page}: +{len(page_items)}건 (누적 {len(results)}건)")
+
+                if not page_items:
+                    break
+
+                # 다음 페이지
+                try:
+                    page_btns = driver.find_elements(By.CSS_SELECTOR, "a")
+                    next_found = False
+                    for btn in page_btns:
+                        try:
+                            if btn.text.strip() == str(page + 1):
+                                btn.click()
+                                page += 1
+                                next_found = True
+                                time.sleep(2 + random.random() * 2)
+                                break
+                        except Exception:
+                            continue
+                    if not next_found:
+                        break
+                except Exception:
+                    break
+
+        except Exception as e:
+            self.callback("log", f"  ⚠️ Selenium 오류: {e}")
+        finally:
+            try:
+                driver.quit()
+            except Exception:
+                pass
+
+        return results if results else None
+
+    # ═══════════════════════════════════════════
     # Playwright 브라우저 크롤링 (map.naver.com)
     # ═══════════════════════════════════════════
 
@@ -2117,15 +2279,20 @@ class CrawlerEngine:
         # 업체간 딜레이
         self._random_delay()
 
-    def run_keyword_search(self, keyword, output_file, start_page=1, max_pages=0, progress_file=None):
+    def run_keyword_search(self, keyword, output_file, start_page=1, max_pages=0, progress_file=None, rank_mode=False):
         """
         키워드로 네이버 플레이스 검색 → 모든 방법 동원하여 업체 수집.
 
-        수집 순서:
-        1. Playwright (map.naver.com) — 30건/페이지
-        2. Map API — 30건/페이지
-        3. 네이버 지역 검색 API (구/군 분할) — 도시 전체
+        수집 순서 (rank_mode=False):
+        1. 모바일 지도 — 75건/페이지
+        2. Playwright (map.naver.com) — 30건/페이지
+        3. Map API — 30건/페이지
         4. HTML 파싱 폴백 — 보충
+
+        수집 순서 (rank_mode=True):
+        0. Selenium으로 실제 순위 수집
+        1~4. 동일 (상세정보 보강)
+        → 최종 출력 시 실제 순위 기준 정렬
 
         Args:
             keyword: 검색 키워드 (예: "수원 피부과")
@@ -2133,6 +2300,7 @@ class CrawlerEngine:
             start_page: 시작 페이지 (기본 1)
             max_pages: 최대 페이지 수 (0 = 무제한, 끝까지)
             progress_file: 진행 저장 파일 (None이면 자동 생성)
+            rank_mode: True이면 Selenium으로 실제 검색 순위 수집
         """
         self.running = True
         self.stats = {
@@ -2166,6 +2334,19 @@ class CrawlerEngine:
             pass
 
         existing_pids = {r.get("고유번호") for r in rows if r.get("고유번호")}
+
+        # ═══ PHASE 0: Selenium 순위 수집 (rank_mode 시) ═══
+        selenium_ranks = {}  # pid → rank
+        if rank_mode and self.running:
+            self.callback("log", "━━━ PHASE 0: 실제 순위 수집 (Selenium) ━━━")
+            rank_results = self._selenium_rank_search(keyword, max_pages=5)
+            if rank_results:
+                for r in rank_results:
+                    selenium_ranks[str(r["id"])] = r["rank"]
+                self.callback("log", f"  → {len(selenium_ranks)}건 순위 확보")
+            else:
+                self.callback("log", "  ⚠️ Selenium 순위 수집 실패 — 기존 방식으로 진행")
+            self.callback("log", "")
 
         # ═══ PHASE 1: Place ID 수집 ═══
         self.callback("log", "━━━ PHASE 1: 업체 목록 수집 ━━━")
@@ -2308,8 +2489,30 @@ class CrawlerEngine:
 
         # 이미 파이프라인에서 상세 크롤링 완료
 
-        # 최종 저장 (업종 우선 정렬 적용)
-        self.save_output(rows, output_file, keyword=keyword)
+        # 순위 모드: Selenium 순위 기준 정렬
+        if rank_mode and selenium_ranks:
+            self.callback("log", "📊 Selenium 순위 기준 정렬 중...")
+            ranked = []
+            unranked = []
+            for r in rows:
+                pid = r.get("고유번호", "")
+                if pid in selenium_ranks:
+                    r["_rank"] = selenium_ranks[pid]
+                    ranked.append(r)
+                else:
+                    unranked.append(r)
+            ranked.sort(key=lambda x: x["_rank"])
+            # _rank 제거 (내부용)
+            for r in ranked:
+                r.pop("_rank", None)
+            rows = ranked + unranked
+            self.callback("log", f"  → 순위 확보 {len(ranked)}건 + 순위 없음 {len(unranked)}건")
+
+        # 최종 저장 (업종 우선 정렬 적용 — rank_mode 시에는 순위 정렬 우선)
+        if rank_mode and selenium_ranks:
+            self.save_output(rows, output_file)  # 이미 순위 정렬됨, 업종 정렬 스킵
+        else:
+            self.save_output(rows, output_file, keyword=keyword)
         try:
             os.remove(progress_file)
         except Exception:
