@@ -3,8 +3,8 @@ const cheerio = require('cheerio');
 const fs = require('fs');
 const path = require('path');
 
-const NAVER_CLIENT_ID = 'Su_kCP4chZNUyLO5wZEQ';
-const NAVER_CLIENT_SECRET = 'I4fA34bv0e';
+const NAVER_CLIENT_ID = 'j2jMCfsKAStJ10rb0Q2A';
+const NAVER_CLIENT_SECRET = 'nv10elHEYJ';
 const OUTPUT_DIR = path.join(__dirname, 'output');
 const DB_PATH = path.join(OUTPUT_DIR, 'history.json');
 const API_LOG_PATH = path.join(OUTPUT_DIR, 'api-usage.json');

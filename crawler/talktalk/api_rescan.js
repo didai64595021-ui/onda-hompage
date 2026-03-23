@@ -21,8 +21,7 @@ const PROXY_API_KEY = 'onda-proxy-2026-secret';
 
 // 네이버 검색 API 키 2개 (일 25,000 × 2 = 50,000건)
 const NAVER_API_KEYS = [
-  { id: 'Su_kCP4chZNUyLO5wZEQ', secret: 'I4fA34bv0e' },
-  { id: 'yoBUbNSW9MGSPH36zaHN', secret: 'wt0HPPOVKA' }
+  { id: 'j2jMCfsKAStJ10rb0Q2A', secret: 'nv10elHEYJ' }
 ];
 let currentKeyIdx = 0;
 let keyUsage = [0, 0];

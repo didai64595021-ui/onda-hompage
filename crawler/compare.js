@@ -12,8 +12,8 @@ const cheerio = require('cheerio');
 const fs = require('fs');
 const path = require('path');
 
-const NAVER_CLIENT_ID = 'Su_kCP4chZNUyLO5wZEQ';
-const NAVER_CLIENT_SECRET = 'I4fA34bv0e';
+const NAVER_CLIENT_ID = 'j2jMCfsKAStJ10rb0Q2A';
+const NAVER_CLIENT_SECRET = 'nv10elHEYJ';
 const OUTPUT_DIR = path.join(__dirname, 'output');
 const COMPARE_DIR = path.join(OUTPUT_DIR, 'comparisons');
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
