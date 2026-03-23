@@ -1342,8 +1342,125 @@ class CrawlerEngine:
     # Selenium 순위 크롤링 (map.naver.com)
     # ═══════════════════════════════════════════
 
-    def _selenium_rank_search(self, keyword, max_pages=0):
+    _naver_cookies = None  # 클래스 레벨 쿠키 캐시
+
+    def _selenium_naver_login(self, driver, naver_id, naver_pw):
+        """Selenium으로 네이버 자동 로그인 → 쿠키 저장.
+        
+        pyperclip(클립보드)을 사용하여 입력 감지 우회.
+        """
+        from selenium.webdriver.common.by import By
+        import pyperclip
+
+        self.callback("log", "  🔑 네이버 로그인 시도...")
+        driver.get("https://nid.naver.com/nidlogin.login?mode=form&url=https://map.naver.com")
+        time.sleep(2 + random.random())
+
+        try:
+            # ID 입력 (클립보드 붙여넣기로 자동입력 감지 우회)
+            id_input = driver.find_element(By.CSS_SELECTOR, "input#id")
+            id_input.click()
+            time.sleep(0.3)
+            
+            try:
+                pyperclip.copy(naver_id)
+                id_input.send_keys(__import__('selenium.webdriver.common.keys', fromlist=['Keys']).Keys.CONTROL, 'v')
+            except Exception:
+                # pyperclip 없으면 JS로 직접 값 설정
+                driver.execute_script(f"document.querySelector('#id').value = '{naver_id}';")
+            time.sleep(0.5 + random.random() * 0.5)
+
+            # PW 입력
+            pw_input = driver.find_element(By.CSS_SELECTOR, "input#pw")
+            pw_input.click()
+            time.sleep(0.3)
+            
+            try:
+                pyperclip.copy(naver_pw)
+                pw_input.send_keys(__import__('selenium.webdriver.common.keys', fromlist=['Keys']).Keys.CONTROL, 'v')
+            except Exception:
+                driver.execute_script(f"document.querySelector('#pw').value = '{naver_pw}';")
+            time.sleep(0.5 + random.random() * 0.5)
+
+            # 로그인 버튼 클릭
+            login_btn = driver.find_element(By.CSS_SELECTOR, "button.btn_login, #log\\.login, button[type='submit']")
+            login_btn.click()
+            time.sleep(3 + random.random() * 2)
+
+            # 캡차/2FA 체크
+            current_url = driver.current_url
+            if "nidlogin" in current_url or "captcha" in current_url.lower():
+                # 캡차 또는 추가 인증 필요
+                page_text = driver.find_element(By.TAG_NAME, "body").text
+                if "자동입력" in page_text or "captcha" in page_text.lower():
+                    self.callback("log", "  ❌ 캡차 감지 — 로그인 실패 (잠시 후 재시도)")
+                    return False
+                elif "새로운 기기" in page_text or "본인확인" in page_text:
+                    self.callback("log", "  ❌ 2단계 인증 필요 — 쿠키 방식으로 전환 권장")
+                    return False
+                else:
+                    self.callback("log", "  ❌ 로그인 실패 — ID/PW 확인")
+                    return False
+
+            # 로그인 성공 확인
+            cookies = driver.get_cookies()
+            nid_cookies = [c for c in cookies if "NID" in c.get("name", "") or "nid" in c.get("name", "")]
+            if nid_cookies:
+                # 쿠키 저장
+                CrawlerEngine._naver_cookies = cookies
+                cookie_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "naver_cookies.json")
+                try:
+                    with open(cookie_path, "w", encoding="utf-8") as f:
+                        json.dump(cookies, f, ensure_ascii=False)
+                    self.callback("log", f"  ✅ 로그인 성공! 쿠키 저장됨")
+                except Exception:
+                    self.callback("log", f"  ✅ 로그인 성공! (쿠키 파일 저장 실패)")
+                return True
+            else:
+                self.callback("log", "  ❌ 로그인 실패 — 쿠키 없음")
+                return False
+
+        except Exception as e:
+            self.callback("log", f"  ❌ 로그인 오류: {e}")
+            return False
+
+    def _selenium_load_cookies(self, driver):
+        """저장된 네이버 쿠키를 Selenium 드라이버에 로드."""
+        cookies = CrawlerEngine._naver_cookies
+        if not cookies:
+            cookie_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "naver_cookies.json")
+            if os.path.isfile(cookie_path):
+                try:
+                    with open(cookie_path, "r", encoding="utf-8") as f:
+                        cookies = json.load(f)
+                    CrawlerEngine._naver_cookies = cookies
+                except Exception:
+                    return False
+            else:
+                return False
+
+        # 먼저 naver.com 도메인으로 이동해야 쿠키 설정 가능
+        driver.get("https://map.naver.com")
+        time.sleep(2)
+        for cookie in cookies:
+            try:
+                # 필수 필드만
+                c = {
+                    "name": cookie["name"],
+                    "value": cookie["value"],
+                    "domain": cookie.get("domain", ".naver.com"),
+                }
+                if cookie.get("path"):
+                    c["path"] = cookie["path"]
+                driver.add_cookie(c)
+            except Exception:
+                continue
+        return True
+
+    def _selenium_rank_search(self, keyword, max_pages=0, naver_id=None, naver_pw=None):
         """Selenium으로 네이버 지도 검색 → 실제 순위 + place ID 수집.
+        
+        naver_id/naver_pw가 있으면 로그인 후 크롤링 (차단 위험 감소).
         
         Returns:
             list of {"id": str, "name": str, "rank": int, "page": int} 또는 None (실패/차단 시)
@@ -1381,6 +1498,21 @@ class CrawlerEngine:
         except Exception as e:
             self.callback("log", f"  ⚠️ Chrome 드라이버 실패: {e}")
             return None
+
+        # 네이버 로그인 (쿠키 우선 → ID/PW 폴백)
+        logged_in = False
+        if CrawlerEngine._naver_cookies or os.path.isfile(
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "naver_cookies.json")
+        ):
+            logged_in = self._selenium_load_cookies(driver)
+            if logged_in:
+                self.callback("log", "  🍪 저장된 쿠키로 로그인")
+        
+        if not logged_in and naver_id and naver_pw:
+            logged_in = self._selenium_naver_login(driver, naver_id, naver_pw)
+        
+        if not logged_in:
+            self.callback("log", "  ℹ️ 비로그인 모드로 진행")
 
         results = []
         page = 1
@@ -2279,7 +2411,7 @@ class CrawlerEngine:
         # 업체간 딜레이
         self._random_delay()
 
-    def run_keyword_search(self, keyword, output_file, start_page=1, max_pages=0, progress_file=None, rank_mode=False):
+    def run_keyword_search(self, keyword, output_file, start_page=1, max_pages=0, progress_file=None, rank_mode=False, naver_id=None, naver_pw=None):
         """
         키워드로 네이버 플레이스 검색 → 모든 방법 동원하여 업체 수집.
 
@@ -2340,7 +2472,7 @@ class CrawlerEngine:
         if rank_mode and self.running:
             self.callback("log", "━━━ PHASE 0: 실제 순위 수집 (Selenium) ━━━")
             sel_max = max_pages if max_pages > 0 else 0  # 0 = 무제한 (끝까지)
-            rank_results = self._selenium_rank_search(keyword, max_pages=sel_max)
+            rank_results = self._selenium_rank_search(keyword, max_pages=sel_max, naver_id=naver_id, naver_pw=naver_pw)
             if rank_results:
                 for r in rank_results:
                     selenium_ranks[str(r["id"])] = r["rank"]

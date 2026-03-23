@@ -350,6 +350,35 @@ class CrawlerGUI:
         )
         self.rank_mode_note.pack(side="left", padx=(8, 0))
 
+        # ── 네이버 로그인 (순위 모드용) ──
+        self.naver_login_frame = tk.Frame(self.kw_search_card.content, bg=C_CARD)
+        self.naver_login_frame.pack(fill="x", pady=(2, 2))
+
+        tk.Label(self.naver_login_frame, text="네이버 ID", font=FONT_BODY,
+                 fg=C_SUBTEXT, bg=C_CARD).pack(side="left")
+        self.naver_id_var = tk.StringVar()
+        self.naver_id_entry = tk.Entry(self.naver_login_frame, textvariable=self.naver_id_var,
+                                        width=15, font=FONT_BODY, bg=C_INPUT_BG, fg=C_INPUT_FG,
+                                        relief="flat", insertbackground=C_TEXT)
+        self.naver_id_entry.pack(side="left", padx=(4, 8))
+
+        tk.Label(self.naver_login_frame, text="PW", font=FONT_BODY,
+                 fg=C_SUBTEXT, bg=C_CARD).pack(side="left")
+        self.naver_pw_var = tk.StringVar()
+        self.naver_pw_entry = tk.Entry(self.naver_login_frame, textvariable=self.naver_pw_var,
+                                        width=15, font=FONT_BODY, bg=C_INPUT_BG, fg=C_INPUT_FG,
+                                        relief="flat", show="●", insertbackground=C_TEXT)
+        self.naver_pw_entry.pack(side="left", padx=(4, 8))
+
+        self.naver_login_status = tk.Label(self.naver_login_frame, text="미로그인",
+                                            font=("Pretendard", 9), fg=C_SUBTEXT, bg=C_CARD)
+        self.naver_login_status.pack(side="left", padx=(4, 0))
+
+        # 저장된 쿠키 확인
+        self._naver_cookie_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "naver_cookies.json")
+        if os.path.isfile(self._naver_cookie_file):
+            self.naver_login_status.config(text="🍪 쿠키 저장됨", fg="#4CAF50")
+
         # 출력 파일 (내부 임시파일 사용)
         self.output_var = tk.StringVar()
         self._temp_output = ""
@@ -1416,7 +1445,11 @@ class CrawlerGUI:
         try:
             rank_mode = getattr(self, 'rank_mode_var', None)
             use_rank = rank_mode.get() if rank_mode else False
-            self.engine.run_keyword_search(keyword, output_file, start_page, max_pages, rank_mode=use_rank)
+            nid = self.naver_id_var.get().strip() if hasattr(self, 'naver_id_var') else ""
+            npw = self.naver_pw_var.get().strip() if hasattr(self, 'naver_pw_var') else ""
+            self.engine.run_keyword_search(keyword, output_file, start_page, max_pages,
+                                            rank_mode=use_rank,
+                                            naver_id=nid or None, naver_pw=npw or None)
         except Exception as e:
             self._safe_callback("log", f"오류 발생: {e}")
         finally:
@@ -1487,7 +1520,11 @@ class CrawlerGUI:
             try:
                 rank_mode = getattr(self, 'rank_mode_var', None)
                 use_rank = rank_mode.get() if rank_mode else False
-                self.engine.run_keyword_search(keyword, kw_temp, start_page, max_pages, rank_mode=use_rank)
+                nid = self.naver_id_var.get().strip() if hasattr(self, 'naver_id_var') else ""
+                npw = self.naver_pw_var.get().strip() if hasattr(self, 'naver_pw_var') else ""
+                self.engine.run_keyword_search(keyword, kw_temp, start_page, max_pages,
+                                                rank_mode=use_rank,
+                                                naver_id=nid or None, naver_pw=npw or None)
 
                 # 중지 판단: _queue_stop_requested만 사용 (engine.running은 정상완료에서도 False)
                 if self._queue_stop_requested:
