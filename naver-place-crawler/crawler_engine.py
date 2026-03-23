@@ -1342,7 +1342,7 @@ class CrawlerEngine:
     # Selenium 순위 크롤링 (map.naver.com)
     # ═══════════════════════════════════════════
 
-    def _selenium_rank_search(self, keyword, max_pages=5):
+    def _selenium_rank_search(self, keyword, max_pages=0):
         """Selenium으로 네이버 지도 검색 → 실제 순위 + place ID 수집.
         
         Returns:
@@ -1395,7 +1395,7 @@ class CrawlerEngine:
                 driver.quit()
                 return None
 
-            while page <= max_pages:
+            while max_pages == 0 or page <= max_pages:
                 driver.switch_to.default_content()
                 try:
                     iframe = driver.find_element(By.CSS_SELECTOR, "iframe#searchIframe")
@@ -2339,7 +2339,8 @@ class CrawlerEngine:
         selenium_ranks = {}  # pid → rank
         if rank_mode and self.running:
             self.callback("log", "━━━ PHASE 0: 실제 순위 수집 (Selenium) ━━━")
-            rank_results = self._selenium_rank_search(keyword, max_pages=5)
+            sel_max = max_pages if max_pages > 0 else 0  # 0 = 무제한 (끝까지)
+            rank_results = self._selenium_rank_search(keyword, max_pages=sel_max)
             if rank_results:
                 for r in rank_results:
                     selenium_ranks[str(r["id"])] = r["rank"]
