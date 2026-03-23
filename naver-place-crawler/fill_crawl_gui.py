@@ -922,6 +922,15 @@ class CrawlerGUI:
                 os.remove(self._temp_output)
             except Exception:
                 pass
+        # 키워드별 임시 결과 파일 삭제
+        if hasattr(self, "_keyword_results"):
+            for kw_path in self._keyword_results.values():
+                try:
+                    if kw_path and os.path.isfile(kw_path):
+                        os.remove(kw_path)
+                except Exception:
+                    pass
+            self._keyword_results.clear()
         # Playwright 브라우저 정리
         if self.engine:
             try:
@@ -935,6 +944,18 @@ class CrawlerGUI:
         if not self._temp_output or not os.path.isfile(self._temp_output):
             messagebox.showerror("오류", "다운로드할 결과 파일이 없습니다.\n먼저 크롤링을 실행하세요.")
             return
+
+        # 큐 모드(키워드별 결과가 있을 때) → 선택 다운로드 팝업
+        if self._keyword_results:
+            self._download_select_dialog()
+            return
+
+        # 단일 키워드 모드 → 기존처럼 바로 다운로드
+        self._save_file_dialog(self._temp_output)
+
+    def _save_file_dialog(self, src_file):
+        """파일 저장 다이얼로그"""
+        import shutil
         path = filedialog.asksaveasfilename(
             title="결과 파일 저장",
             filetypes=[("엑셀 파일", "*.xlsx"), ("CSV 파일", "*.csv"), ("모든 파일", "*.*")],
@@ -942,13 +963,153 @@ class CrawlerGUI:
             initialfile="크롤링결과.xlsx",
         )
         if path:
-            import shutil
             try:
-                shutil.copy2(self._temp_output, path)
+                shutil.copy2(src_file, path)
                 messagebox.showinfo("완료", f"저장 완료!\n\n{path}")
                 self._append_log(f"파일 저장: {path}")
             except Exception as e:
                 messagebox.showerror("오류", f"저장 실패: {e}")
+
+    def _download_select_dialog(self):
+        """키워드별 선택 다운로드 팝업"""
+        dialog = tk.Toplevel(self.root)
+        dialog.title("결과 다운로드 — 키워드 선택")
+        dialog.configure(bg=C_BG)
+        dialog.transient(self.root)
+        dialog.grab_set()
+
+        # 크기/위치
+        dw, dh = 420, 400
+        x = self.root.winfo_x() + (self.root.winfo_width() - dw) // 2
+        y = self.root.winfo_y() + (self.root.winfo_height() - dh) // 2
+        dialog.geometry(f"{dw}x{dh}+{x}+{y}")
+        dialog.minsize(350, 300)
+
+        # 타이틀
+        tk.Label(dialog, text="다운로드할 키워드를 선택하세요",
+                 font=FONT_BODY_BOLD, fg=C_TEXT, bg=C_BG).pack(pady=(12, 6))
+
+        # 전체선택 / 선택해제 버튼 프레임
+        btn_frame = tk.Frame(dialog, bg=C_BG)
+        btn_frame.pack(fill="x", padx=16, pady=(0, 4))
+
+        check_vars = {}  # {keyword: BooleanVar}
+
+        def select_all():
+            for v in check_vars.values():
+                v.set(True)
+
+        def deselect_all():
+            for v in check_vars.values():
+                v.set(False)
+
+        tk.Button(btn_frame, text="전체선택", font=FONT_SMALL, fg=C_TEXT, bg=C_ACCENT,
+                  relief="flat", cursor="hand2", command=select_all).pack(side="left", padx=(0, 6))
+        tk.Button(btn_frame, text="선택해제", font=FONT_SMALL, fg=C_TEXT, bg=C_ACCENT,
+                  relief="flat", cursor="hand2", command=deselect_all).pack(side="left")
+
+        # 체크박스 목록 (스크롤 가능)
+        list_frame = tk.Frame(dialog, bg=C_CARD, highlightbackground=C_BORDER, highlightthickness=1)
+        list_frame.pack(fill="both", expand=True, padx=16, pady=4)
+
+        canvas = tk.Canvas(list_frame, bg=C_CARD, highlightthickness=0)
+        scrollbar = tk.Scrollbar(list_frame, orient="vertical", command=canvas.yview)
+        inner = tk.Frame(canvas, bg=C_CARD)
+
+        inner.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        canvas.create_window((0, 0), window=inner, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        for item in self._queue_items:
+            kw = item["keyword"]
+            if item["status"] == "done" and kw in self._keyword_results:
+                var = tk.BooleanVar(value=True)
+                check_vars[kw] = var
+                cb = tk.Checkbutton(inner, text=f"{kw}  ({item['count']}건)",
+                                    variable=var, font=FONT_BODY,
+                                    bg=C_CARD, fg=C_TEXT, selectcolor=C_INPUT_BG,
+                                    activebackground=C_CARD, activeforeground=C_TEXT,
+                                    anchor="w")
+                cb.pack(fill="x", padx=8, pady=2)
+
+        if not check_vars:
+            tk.Label(inner, text="다운로드 가능한 결과가 없습니다.",
+                     font=FONT_BODY, fg=C_SUBTEXT, bg=C_CARD).pack(padx=8, pady=8)
+
+        # 하단 버튼
+        bottom = tk.Frame(dialog, bg=C_BG)
+        bottom.pack(fill="x", padx=16, pady=(4, 12))
+
+        def do_download():
+            selected = [kw for kw, var in check_vars.items() if var.get()]
+            if not selected:
+                messagebox.showwarning("알림", "키워드를 1개 이상 선택하세요.", parent=dialog)
+                return
+
+            path = filedialog.asksaveasfilename(
+                parent=dialog,
+                title="결과 파일 저장",
+                filetypes=[("엑셀 파일", "*.xlsx"), ("모든 파일", "*.*")],
+                defaultextension=".xlsx",
+                initialfile="크롤링결과.xlsx",
+            )
+            if not path:
+                return
+
+            try:
+                import openpyxl
+                dst_wb = openpyxl.Workbook()
+                # 기본 시트 제거
+                if dst_wb.sheetnames:
+                    dst_wb.remove(dst_wb.active)
+
+                for kw in selected:
+                    src_path = self._keyword_results.get(kw)
+                    if not src_path or not os.path.isfile(src_path):
+                        continue
+                    try:
+                        src_wb = openpyxl.load_workbook(src_path)
+                        src_ws = src_wb.active
+                    except Exception:
+                        continue
+                    # 시트명 안전처리
+                    safe_name = kw[:31]
+                    for ch in ['\\', '/', '*', '?', ':', '[', ']']:
+                        safe_name = safe_name.replace(ch, '_')
+                    # 중복 시트명 처리
+                    base_name = safe_name
+                    n = 1
+                    while safe_name in dst_wb.sheetnames:
+                        suffix = f"_{n}"
+                        safe_name = base_name[:31 - len(suffix)] + suffix
+                        n += 1
+                    dst_ws = dst_wb.create_sheet(title=safe_name)
+                    for row in src_ws.iter_rows(values_only=True):
+                        dst_ws.append(row)
+                    src_wb.close()
+
+                dst_wb.save(path)
+                dst_wb.close()
+                messagebox.showinfo("완료", f"선택한 {len(selected)}개 키워드 결과 저장 완료!\n\n{path}", parent=dialog)
+                self._append_log(f"선택 다운로드 저장: {path} ({len(selected)}개 키워드)")
+                dialog.destroy()
+            except Exception as e:
+                messagebox.showerror("오류", f"저장 실패: {e}", parent=dialog)
+
+        # 전체 다운로드 (기존 병합파일 그대로)
+        def do_download_all():
+            dialog.destroy()
+            self._save_file_dialog(self._temp_output)
+
+        tk.Button(bottom, text="선택 다운로드", font=FONT_BTN, fg=C_TEXT, bg=C_POINT,
+                  relief="flat", cursor="hand2", padx=16, pady=6,
+                  command=do_download).pack(side="right", padx=(6, 0))
+        tk.Button(bottom, text="전체 다운로드", font=FONT_BODY_BOLD, fg=C_TEXT, bg=C_ACCENT,
+                  relief="flat", cursor="hand2", padx=12, pady=6,
+                  command=do_download_all).pack(side="right")
 
     # ═══════════════════════════════════════════
     # 키워드 큐 관리
