@@ -1413,12 +1413,22 @@ class CrawlerGUI:
 
         start_page = self.start_page_var.get()
         max_pages = self.max_pages_var.get()
-        pending_items = [i for i, item in enumerate(self._queue_items) if item["status"] == "pending"]
 
-        for queue_idx in pending_items:
+        # 실시간 큐 반영: 매번 pending을 새로 찾음 (진행 중 추가/삭제 반영)
+        while True:
             if self._queue_stop_requested:
                 self._safe_callback("log", "큐 중지됨. 남은 키워드는 대기 상태 유지.")
                 break
+
+            # 현재 시점의 pending 키워드 찾기
+            queue_idx = None
+            for i, item in enumerate(self._queue_items):
+                if item["status"] == "pending":
+                    queue_idx = i
+                    break
+
+            if queue_idx is None:
+                break  # pending 없음 → 큐 완료
 
             item = self._queue_items[queue_idx]
             keyword = item["keyword"]
