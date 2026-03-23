@@ -1306,6 +1306,14 @@ class CrawlerGUI:
             self.download_btn.config(state="disabled")
             self._clear_log()
             self._update_stats({})
+            # 새 크롤링 시작 시 이전 키워드별 결과 정리
+            for kw_path in self._keyword_results.values():
+                try:
+                    if kw_path and os.path.isfile(kw_path):
+                        os.remove(kw_path)
+                except Exception:
+                    pass
+            self._keyword_results.clear()
 
         if has_queue:
             # 큐 모드
