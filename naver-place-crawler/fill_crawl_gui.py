@@ -1029,10 +1029,13 @@ class CrawlerGUI:
 
         for item in self._queue_items:
             kw = item["keyword"]
-            if item["status"] == "done" and kw in self._keyword_results:
+            count = item.get("count", 0)
+            has_result = kw in self._keyword_results and count > 0
+            if has_result:
+                status_tag = "⏸" if item["status"] == "pending" else "✅"
                 var = tk.BooleanVar(value=True)
                 check_vars[kw] = var
-                cb = tk.Checkbutton(inner, text=f"{kw}  ({item['count']}건)",
+                cb = tk.Checkbutton(inner, text=f"{status_tag} {kw}  ({count}건)",
                                     variable=var, font=FONT_BODY,
                                     bg=C_CARD, fg=C_TEXT, selectcolor=C_INPUT_BG,
                                     activebackground=C_CARD, activeforeground=C_TEXT,
