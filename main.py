@@ -560,45 +560,7 @@ class CrawlerGUI:
                                           highlightthickness=1, highlightbackground=C_BORDER)
         self.api_secret2_entry.pack(side="left", ipady=2)
 
-        # ── 네이버 쿠키 로그인 (Selenium 차단 우회용) ──
-        naver_login_sep = tk.Frame(settings_inner, bg=C_BORDER, height=1)
-        naver_login_sep.pack(fill="x", pady=(8, 4))
-
-        naver_label_row = tk.Frame(settings_inner, bg=C_CARD)
-        naver_label_row.pack(fill="x", pady=(0, 2))
-        tk.Label(naver_label_row, text="\U0001f36a 네이버 쿠키 로그인 (Selenium 차단 우회)",
-                 font=FONT_BODY_BOLD, fg=C_SUCCESS, bg=C_CARD, anchor="w").pack(side="left")
-
-        naver_cookie_row = tk.Frame(settings_inner, bg=C_CARD)
-        naver_cookie_row.pack(fill="x", pady=1)
-        tk.Label(naver_cookie_row, text="쿠키 파일", font=FONT_SMALL,
-                 fg=C_SUBTEXT, bg=C_CARD, width=14, anchor="w").pack(side="left")
-        self.naver_cookie_var = tk.StringVar()
-        self.naver_cookie_entry = tk.Entry(naver_cookie_row, textvariable=self.naver_cookie_var,
-                                            bg=C_INPUT_BG, fg=C_INPUT_FG, font=FONT_SMALL,
-                                            relief="flat", width=24,
-                                            highlightthickness=1, highlightbackground=C_BORDER)
-        self.naver_cookie_entry.pack(side="left", padx=(0, 4), ipady=2)
-        ToolTip(self.naver_cookie_entry, "네이버 쿠키 JSON 파일 경로")
-        self.naver_cookie_btn = tk.Button(naver_cookie_row, text="파일선택", font=FONT_SMALL,
-                                           bg=C_ACCENT, fg=C_TEXT, relief="flat",
-                                           activebackground=C_POINT, command=self._browse_naver_cookie,
-                                           padx=8, pady=1)
-        self.naver_cookie_btn.pack(side="left", padx=(0, 4))
-        self.naver_cookie_export_btn = tk.Button(naver_cookie_row, text="\U0001f310 로그인", font=FONT_SMALL,
-                                                  bg="#005577", fg=C_SUCCESS, relief="flat",
-                                                  activebackground="#007799", command=self._export_naver_cookie,
-                                                  padx=8, pady=1)
-        self.naver_cookie_export_btn.pack(side="left")
-        ToolTip(self.naver_cookie_export_btn, "크롬 창이 열리면 네이버 로그인 \u2192 자동 쿠키 저장")
-
-        naver_cookie_status = tk.Frame(settings_inner, bg=C_CARD)
-        naver_cookie_status.pack(fill="x", pady=(0, 2))
-        self.naver_cookie_status_label = tk.Label(naver_cookie_status,
-                                                   text="\u2139\ufe0f 쿠키 없음 - 비로그인 모드",
-                                                   font=FONT_SMALL, fg=C_SUBTEXT, bg=C_CARD, anchor="w")
-        self.naver_cookie_status_label.pack(side="left", padx=(14, 0))
-        self._check_naver_cookie_status()
+        # (쿠키 로그인 제거됨 — GraphQL 방식은 비로그인으로 동작)
 
         # ── 액션 바 (입력 바로 다음에 삽입) ──
         action_card = tk.Frame(self._left_panel, bg=C_BG)
@@ -871,9 +833,7 @@ class CrawlerGUI:
         if cfg.get("api_key2_secret"):
             self.api_secret2_var.set(cfg["api_key2_secret"])
 
-        if cfg.get("naver_cookie"):
-            self.naver_cookie_var.set(cfg["naver_cookie"])
-            self._check_naver_cookie_status()
+        # (쿠키 설정 로드 제거됨)
         if cfg.get("keyword"):
             self.keyword_var.set(cfg["keyword"])
         if cfg.get("start_page") is not None:
@@ -915,7 +875,7 @@ class CrawlerGUI:
             "start_page": self.start_page_var.get(),
             "max_pages": self.max_pages_var.get(),
             "keyword_queue": queue_keywords,
-            "naver_cookie": self.naver_cookie_var.get(),
+            # "naver_cookie": 제거됨
         }
         try:
             with open(CONFIG_FILE, "w", encoding="utf-8") as f:
@@ -935,120 +895,7 @@ class CrawlerGUI:
             self.proxy_file_entry.config(state="disabled")
             self.proxy_file_btn.config(state="disabled")
 
-    def _browse_naver_cookie(self):
-        path = filedialog.askopenfilename(
-            title="네이버 쿠키 JSON 파일 선택",
-            filetypes=[("JSON", "*.json"), ("All", "*.*")]
-        )
-        if path:
-            self.naver_cookie_var.set(path)
-            import shutil
-            dst = os.path.join(os.path.dirname(os.path.abspath(__file__)), "naver_cookies.json")
-            try:
-                shutil.copy2(path, dst)
-                self._check_naver_cookie_status()
-            except Exception as e:
-                messagebox.showerror("오류", f"쿠키 복사 실패: {e}")
-
-    def _export_naver_cookie(self):
-        """크롬 창을 띄워서 사용자가 직접 네이버 로그인 → 쿠키 자동 저장"""
-        try:
-            from selenium import webdriver
-            from selenium.webdriver.chrome.options import Options
-        except ImportError:
-            messagebox.showerror("오류", "selenium이 설치되어 있지 않습니다.\n\npip install selenium")
-            return
-
-        def _login_thread():
-            try:
-                opts = Options()
-                # headless 아님! 실제 크롬 창을 띄움
-                opts.add_argument("--disable-blink-features=AutomationControlled")
-                opts.add_argument("--window-size=500,700")
-                opts.add_argument("--window-position=100,100")
-                opts.add_experimental_option("excludeSwitches", ["enable-automation"])
-                opts.add_experimental_option("useAutomationExtension", False)
-
-                try:
-                    from selenium.webdriver.chrome.service import Service
-                    from webdriver_manager.chrome import ChromeDriverManager
-                    service = Service(ChromeDriverManager().install())
-                    driver = webdriver.Chrome(service=service, options=opts)
-                except Exception:
-                    driver = webdriver.Chrome(options=opts)
-
-                # navigator.webdriver 숨기기
-                driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
-                    "source": "Object.defineProperty(navigator, 'webdriver', {get: () => undefined});"
-                })
-
-                driver.get("https://nid.naver.com/nidlogin.login?mode=form&url=https://map.naver.com")
-
-                self._safe_callback("log", "\U0001f310 네이버 로그인 창이 열렸습니다. 직접 로그인하세요...")
-                self._safe_callback("log", "   로그인 완료되면 자동으로 쿠키를 저장합니다.")
-
-                # 로그인 완료 대기 (최대 120초)
-                import time
-                for i in range(240):  # 0.5초 간격 x 240 = 120초
-                    time.sleep(0.5)
-                    try:
-                        url = driver.current_url
-                        # 로그인 성공 = nidlogin 페이지를 벗어남
-                        if "nidlogin" not in url and "nid.naver.com" not in url:
-                            break
-                        # 또는 NID 쿠키가 생기면
-                        cookies = driver.get_cookies()
-                        nid = [c for c in cookies if c.get("name", "").startswith("NID")]
-                        if len(nid) >= 2:  # NID_AUT + NID_SES
-                            break
-                    except Exception:
-                        break  # 브라우저 닫힘
-
-                # 쿠키 수집
-                try:
-                    cookies = driver.get_cookies()
-                except Exception:
-                    self._safe_callback("log", "\u274c 브라우저가 닫혔습니다.")
-                    return
-
-                driver.quit()
-
-                nid = [c for c in cookies if "NID" in c.get("name", "")]
-                if nid:
-                    dst = os.path.join(os.path.dirname(os.path.abspath(__file__)), "naver_cookies.json")
-                    with open(dst, "w", encoding="utf-8") as f:
-                        json.dump(cookies, f, ensure_ascii=False, indent=2)
-                    self.naver_cookie_var.set(dst)
-                    self.root.after(0, self._check_naver_cookie_status)
-                    self._safe_callback("log", f"\u2705 네이버 로그인 성공! 쿠키 {len(cookies)}개 저장됨")
-                else:
-                    self._safe_callback("log", "\u274c 로그인이 완료되지 않았습니다. 다시 시도하세요.")
-
-            except Exception as e:
-                self._safe_callback("log", f"\u274c 로그인 창 오류: {e}")
-
-        # 별도 스레드로 실행 (GUI 멈춤 방지)
-        t = threading.Thread(target=_login_thread, daemon=True)
-        t.start()
-
-    def _check_naver_cookie_status(self):
-        cookie_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "naver_cookies.json")
-        if os.path.isfile(cookie_path):
-            try:
-                with open(cookie_path, "r", encoding="utf-8") as f:
-                    cookies = json.load(f)
-                nid = [c for c in cookies if "NID" in c.get("name", "")]
-                if nid:
-                    self.naver_cookie_status_label.config(
-                        text=f"\u2705 쿠키 로드됨 ({len(cookies)}개, NID 확인)", fg=C_SUCCESS)
-                else:
-                    self.naver_cookie_status_label.config(
-                        text=f"\u26a0\ufe0f 쿠키 {len(cookies)}개 (NID 없음)", fg="#ffaa00")
-            except Exception:
-                self.naver_cookie_status_label.config(text="\u274c 쿠키 파일 읽기 실패", fg=C_POINT)
-        else:
-            self.naver_cookie_status_label.config(
-                text="\u2139\ufe0f 쿠키 없음 - 비로그인 모드", fg=C_SUBTEXT)
+    # (쿠키 관련 함수 제거됨 — GraphQL 방식은 비로그인으로 동작)
 
     def _on_api_mode_change(self, event=None):
         state = "normal" if self.api_mode_var.get() == "네이버 검색 API" else "disabled"

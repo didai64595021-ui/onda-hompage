@@ -1490,6 +1490,8 @@ class CrawlerEngine:
         opts.add_argument("--window-size=1920,1080")
         opts.add_experimental_option("excludeSwitches", ["enable-automation"])
         opts.add_experimental_option("useAutomationExtension", False)
+        # Performance 로그 (GraphQL 쿼리 캡처용)
+        opts.set_capability("goog:loggingPrefs", {"performance": "ALL"})
         fp = self._get_fingerprint()
         opts.add_argument(f"user-agent={fp['ua']}")
 
@@ -1511,314 +1513,265 @@ class CrawlerEngine:
         try:
             search_url = f"https://map.naver.com/p/search/{quote(keyword)}"
 
-            # ── 1단계: 검색 URL 직접 접속 (쿠키 없이) ──
+            # ── 1단계: 검색 URL 직접 접속 (쿠키 없이 — GraphQL 방식에서 쿠키 불필요) ──
             driver.get(search_url)
             time.sleep(5 + random.random() * 2)
 
-            # ── 2단계: 쿠키 있으면 현재 페이지에 추가 (추가 접속 없이) ──
-            cookie_loaded = False
-            cookies = CrawlerEngine._naver_cookies
-            if not cookies:
-                cookie_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "naver_cookies.json")
-                if os.path.isfile(cookie_path):
-                    try:
-                        with open(cookie_path, "r", encoding="utf-8") as f:
-                            cookies = json.load(f)
-                        CrawlerEngine._naver_cookies = cookies
-                    except Exception:
-                        cookies = None
-
-            if cookies:
-                for cookie in cookies:
-                    try:
-                        c = {"name": cookie["name"], "value": cookie["value"],
-                             "domain": cookie.get("domain", ".naver.com")}
-                        if cookie.get("path"):
-                            c["path"] = cookie["path"]
-                        driver.add_cookie(c)
-                        cookie_loaded = True
-                    except Exception:
-                        continue
-                if cookie_loaded:
-                    self.callback("log", "  🍪 쿠키 적용됨")
-
-            # ── 3단계: 차단 확인 ──
-            p_src = driver.page_source
-            has_iframe = "searchIframe" in p_src
-            is_blocked = ("서비스 이용이 제한" in p_src
-                          or "자동등록방지" in p_src)
-
-            # searchIframe 없으면 잠시 대기 후 재확인 (로딩 지연)
-            if not has_iframe and not is_blocked:
-                time.sleep(3)
+            # ── 2단계: iframe 로딩 대기 (최대 15초) ──
+            has_iframe = False
+            is_blocked = False
+            for _wait_iframe in range(15):
                 p_src = driver.page_source
                 has_iframe = "searchIframe" in p_src
-
-            if is_blocked or not has_iframe:
+                is_blocked = ("서비스 이용이 제한" in p_src
+                              or "자동등록방지" in p_src)
+                if has_iframe or is_blocked:
+                    break
+                time.sleep(1)
                 # 팝업 닫기 시도
                 try:
                     for btn in driver.find_elements(By.CSS_SELECTOR,
                         "button.btn_close, button[aria-label='닫기'], .layer_popup button"):
                         try:
                             btn.click()
-                            time.sleep(0.5)
+                            time.sleep(0.3)
                         except Exception:
                             pass
                 except Exception:
                     pass
-                time.sleep(2)
-                p_src = driver.page_source
-                has_iframe = "searchIframe" in p_src
 
             if not has_iframe:
                 self.callback("log", "  ⚠️ searchIframe 미발견 — Selenium 스킵")
                 driver.quit()
                 return None
 
-            while max_pages == 0 or page <= max_pages:
-                if not self.running:
+            # ── iframe 진입 ──
+            driver.switch_to.default_content()
+            iframe_found = False
+            for _retry in range(10):
+                try:
+                    iframe = driver.find_element(By.CSS_SELECTOR, "iframe#searchIframe")
+                    driver.switch_to.frame(iframe)
+                    iframe_found = True
                     break
-
-                driver.switch_to.default_content()
-
-                # iframe 찾기 (최대 10초 재시도)
-                iframe_found = False
-                for _retry in range(10):
+                except Exception:
+                    time.sleep(1)
                     try:
-                        iframe = driver.find_element(By.CSS_SELECTOR, "iframe#searchIframe")
-                        driver.switch_to.frame(iframe)
-                        iframe_found = True
-                        break
-                    except Exception:
-                        time.sleep(1)
-                        # 팝업 닫기 재시도
-                        try:
-                            for btn in driver.find_elements(By.CSS_SELECTOR,
-                                "button.btn_close, button[aria-label='닫기'], .layer_popup button"):
-                                btn.click()
-                                time.sleep(0.3)
-                        except Exception:
-                            pass
-
-                if not iframe_found:
-                    if page == 1:
-                        # 첫 페이지에서 iframe 실패 → 쿠키 제거 후 재로드 시도
-                        self.callback("log", f"  ⚠️ iframe 없음 → 쿠키 제거 후 재시도")
-                        driver.delete_all_cookies()
-                        driver.get(f"https://map.naver.com/p/search/{quote(keyword)}")
-                        time.sleep(5)
-                        try:
-                            iframe = driver.find_element(By.CSS_SELECTOR, "iframe#searchIframe")
-                            driver.switch_to.frame(iframe)
-                            iframe_found = True
-                        except Exception:
-                            pass
-                    if not iframe_found:
-                        self.callback("log", f"  ⚠️ iframe 전환 실패 (페이지 {page}) — 수집 종료")
-                        break
-
-                time.sleep(1.5 + random.random())
-
-                # ── 전체 PID 확보 (HTML에 이미 모든 페이지 PID 포함) ──
-                body = driver.find_element(By.TAG_NAME, "body")
-
-                # 스크롤로 전체 PID 로드 확인
-                for scroll_round in range(15):
-                    if not self.running:
-                        break
-                    driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", body)
-                    time.sleep(0.5)
-
-                all_pids = []
-                seen_pid = set()
-                src = driver.page_source
-                for m in _re.finditer(r'"id"\s*:\s*"(\d{5,})"', src):
-                    pid = m.group(1)
-                    if pid not in seen_pid:
-                        seen_pid.add(pid)
-                        all_pids.append(pid)
-
-                self.callback("log", f"    [전체 PID] {len(all_pids)}건 확보")
-
-                # ── 보이는 li에서 업체명 추출 함수 ──
-                # 업종 접미사 (업체명 뒤에 붙는 것 제거용)
-                _biz_suffixes = ["피부과", "내과", "외과", "의원", "병원", "클리닉",
-                                  "한의원", "치과", "안과", "정형외과", "성형외과",
-                                  "비뇨기과", "산부인과", "소아과", "이비인후과"]
-
-                def _clean_name(raw):
-                    """업체명에서 업종 접미사 제거 + 이미지 수 제거"""
-                    # "이미지 수13" 제거
-                    raw = _re.sub(r'이미지\s*수?\s*\d+', '', raw).strip()
-                    return raw
-
-                def _get_visible_names(drv):
-                    """현재 페이지에 보이는 li에서 업체명 + 광고여부 추출"""
-                    names = []
-                    for li in drv.find_elements(By.CSS_SELECTOR, "li"):
-                        try:
-                            li_text = li.text or ""
-                        except Exception:
-                            continue
-                        if not li_text.strip() or len(li_text) < 10:
-                            continue
-
-                        # 업체 카드가 아닌 li 필터
-                        # 업체 카드에는 "출발", "도착", 주소(km/구/동), 리뷰 등이 포함
-                        has_card_marker = any(kw in li_text for kw in
-                            ["출발", "도착", "km", "리뷰", "진료", "휴무",
-                             "접수", "상세주소"])
-                        if not has_card_marker:
-                            continue
-
-                        lines = [l.strip() for l in li_text.split("\n") if l.strip()]
-                        is_ad = "광고" in li_text
-
-                        # 업체명 추출: 첫 번째 의미있는 줄
-                        name = ""
-                        for line in lines:
-                            cleaned = _clean_name(line)
-                            if (len(cleaned) > 1 and len(cleaned) < 60
-                                and not _re.match(r'^[\d,]+$', cleaned)
-                                and not _re.match(r'^의\d+$', cleaned)
-                                and cleaned not in ("광고", "출발", "도착", "예약", "문의",
-                                                     "전화", "거리뷰", "상세주소 열기")
-                                and "에 진료" not in cleaned
-                                and "에 접수" not in cleaned
-                                and "현재 위치" not in cleaned
-                                and "km" not in cleaned
-                                and "블로그 리뷰" not in cleaned
-                                and "방문자 리뷰" not in cleaned
-                                and "진료 중" not in cleaned
-                                and "오늘 휴무" not in cleaned
-                                and "곧 진료" not in cleaned
-                                and "휴게시간" not in cleaned
-                                and "전문의" not in cleaned
-                                and "휠체어" not in cleaned
-                                and "매주" not in cleaned):
-                                name = cleaned
-                                break
-
-                        if name:
-                            names.append({"name": name, "is_ad": is_ad})
-                    return names
-
-                # ── 페이지 1~N 순서대로 보이는 업체명 수집 ──
-                all_names_ordered = []  # [{"name": str, "is_ad": bool, "page": int}]
-                max_page_count = 20  # 안전장치
-
-                for pg in range(1, max_page_count + 1):
-                    if not self.running:
-                        break
-
-                    # 전체 li 표시를 위해 스크롤 (페이지 내 모든 업체 로드)
-                    try:
-                        for _s in range(10):
-                            driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", body)
+                        for btn in driver.find_elements(By.CSS_SELECTOR,
+                            "button.btn_close, button[aria-label='닫기'], .layer_popup button"):
+                            btn.click()
                             time.sleep(0.3)
-                        # 맨 위로 복귀 (순서 보존)
-                        driver.execute_script("arguments[0].scrollTop = 0", body)
-                        time.sleep(0.5)
-                    except Exception:
-                        body = driver.find_element(By.TAG_NAME, "body")
-
-                    # 현재 보이는 업체명 수집
-                    vis = _get_visible_names(driver)
-                    non_ad = [v for v in vis if not v["is_ad"]]
-                    for v in non_ad:
-                        v["page"] = pg
-                    all_names_ordered.extend(non_ad)
-
-                    self.callback("log", f"  📊 페이지 {pg}: {len(non_ad)}건 (누적 {len(all_names_ordered)}건)")
-
-                    if not non_ad:
-                        break
-
-                    if max_pages > 0 and pg >= max_pages:
-                        break
-
-                    # ── 다음 페이지 클릭 ──
-                    next_pg = pg + 1
-                    clicked = False
-
-                    # 하단 스크롤
-                    try:
-                        driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", body)
-                    except Exception:
-                        body = driver.find_element(By.TAG_NAME, "body")
-                        driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", body)
-                    time.sleep(0.5)
-
-                    # a.mBN2s 클릭
-                    from selenium.webdriver.common.action_chains import ActionChains
-                    for btn in driver.find_elements(By.CSS_SELECTOR, "a.mBN2s"):
-                        try:
-                            if btn.text.strip() == str(next_pg):
-                                driver.execute_script("arguments[0].scrollIntoView({block:'center'})", btn)
-                                time.sleep(0.3)
-                                ActionChains(driver).move_to_element(btn).pause(0.2).click().perform()
-                                clicked = True
-                                self.callback("log", f"  🔄 페이지 {next_pg} 클릭")
-                                break
-                        except Exception:
-                            continue
-
-                    # "다음페이지" 버튼 (a.eUTV2, 5→6 넘어갈 때)
-                    if not clicked:
-                        for btn in driver.find_elements(By.CSS_SELECTOR, "a.eUTV2"):
-                            try:
-                                btn_text = btn.get_attribute("textContent") or ""
-                                disabled = btn.get_attribute("aria-disabled")
-                                if "다음" in btn_text and disabled != "true":
-                                    driver.execute_script("arguments[0].scrollIntoView({block:'center'})", btn)
-                                    time.sleep(0.3)
-                                    ActionChains(driver).move_to_element(btn).pause(0.2).click().perform()
-                                    clicked = True
-                                    self.callback("log", f"  🔄 다음페이지 버튼 클릭")
-                                    break
-                            except Exception:
-                                continue
-
-                    if not clicked:
-                        self.callback("log", f"  ℹ️ 마지막 페이지 ({pg}) → 수집 완료")
-                        break
-
-                    # 활성 페이지 변경 대기
-                    for _w in range(20):
-                        time.sleep(0.3)
-                        try:
-                            active = driver.find_elements(By.CSS_SELECTOR, "a.mBN2s.qxokY")
-                            if active and active[0].text.strip() == str(next_pg):
-                                break
-                        except Exception:
-                            pass
-                    time.sleep(1 + random.random())
-
-                    # body 재획득
-                    try:
-                        body = driver.find_element(By.TAG_NAME, "body")
                     except Exception:
                         pass
 
-                # ── PID + 이름 매칭 (순서 보존) ──
-                results = []
-                seen_names = set()
-                for i, pid in enumerate(all_pids):
-                    name = ""
-                    if i < len(all_names_ordered):
-                        name = all_names_ordered[i]["name"]
-                        pg = all_names_ordered[i]["page"]
-                    else:
-                        pg = 0
-                    results.append({
-                        "id": pid,
-                        "name": name,
-                        "rank": i + 1,
-                        "page": pg,
-                    })
+            if not iframe_found:
+                self.callback("log", "  ⚠️ iframe 전환 실패")
+                driver.quit()
+                return None
 
-                self.callback("log", f"  → Selenium 총 {len(results)}건 수집 완료")
-                break  # while 루프 탈출 (페이지 순회는 위에서 완료)
+            time.sleep(1.5 + random.random())
+
+            # ── GraphQL 쿼리 캡처를 위해 2페이지 클릭 ──
+            from selenium.webdriver.common.action_chains import ActionChains
+            body = driver.find_element(By.TAG_NAME, "body")
+
+            # 스크롤 (페이지 버튼 로드)
+            for _s in range(10):
+                driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", body)
+                time.sleep(0.3)
+
+            # Performance 로그 비우기
+            try:
+                driver.get_log("performance")
+            except Exception:
+                pass
+
+            # 2페이지 클릭
+            driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", body)
+            time.sleep(1)
+            gql_clicked = False
+            for btn in driver.find_elements(By.CSS_SELECTOR, "a.mBN2s"):
+                try:
+                    if btn.text.strip() == "2":
+                        driver.execute_script("arguments[0].scrollIntoView({block:'center'})", btn)
+                        time.sleep(0.3)
+                        ActionChains(driver).move_to_element(btn).pause(0.2).click().perform()
+                        gql_clicked = True
+                        break
+                except Exception:
+                    continue
+            
+            if not gql_clicked:
+                self.callback("log", "  ℹ️ 1페이지만 존재 — HTML에서 PID 수집")
+                import json as _json
+
+                # HTML 소스에서 PID(7자리+ 숫자) 추출 — 이름은 PHASE 2에서 상세 크롤링으로 보정
+                src = driver.page_source
+                pids = []
+                seen_p = set()
+                for m in _re.finditer(r'"id"\s*:\s*"(\d{7,})"', src):
+                    pid = m.group(1)
+                    if pid not in seen_p:
+                        seen_p.add(pid)
+                        pids.append(pid)
+
+                seen_ids = {r["id"] for r in results}
+                for pid in pids:
+                    if pid not in seen_ids:
+                        seen_ids.add(pid)
+                        results.append({"id": pid, "name": "", "rank": len(results) + 1, "page": 1})
+
+                self.callback("log", f"  → HTML PID {len(results)}건 수집 (이름은 상세에서 보정)")
+                driver.quit()
+                return results if results else None
+
+            time.sleep(4)
+
+            # ── GraphQL 원본 쿼리 캡처 ──
+            import json as _json
+            logs = driver.get_log("performance")
+            gql_payload = None
+
+            for entry in logs:
+                try:
+                    log = _json.loads(entry["message"])
+                    msg = log.get("message", {})
+                    if msg.get("method") == "Network.requestWillBeSent":
+                        params = msg.get("params", {})
+                        req = params.get("request", {})
+                        url = req.get("url", "")
+                        if "graphql" in url and req.get("method") == "POST":
+                            post_data = req.get("postData", "")
+                            if "getNxList" in post_data:
+                                gql_payload = _json.loads(post_data)
+                                if isinstance(gql_payload, list):
+                                    gql_payload = gql_payload[0]
+                                break
+                except Exception:
+                    continue
+
+            if not gql_payload:
+                self.callback("log", "  ⚠️ GraphQL 쿼리 캡처 실패 — HTML 폴백")
+                src = driver.page_source
+                for m in _re.finditer(r'"id"\s*:\s*"(\d{5,})"', src):
+                    pid = m.group(1)
+                    if pid not in {r["id"] for r in results}:
+                        results.append({"id": pid, "name": "", "rank": len(results) + 1, "page": 1})
+                driver.quit()
+                return results if results else None
+
+            self.callback("log", "  ✅ GraphQL 쿼리 캡처 성공")
+
+            # ── 페이지 1~N GraphQL 병렬 호출 (Promise.all) ──
+            import base64 as _b64
+            max_gql_pages = max_pages if max_pages > 0 else 20
+
+            # 1차: 페이지 1~max를 display=70으로 병렬 호출
+            payloads_b64 = []
+            for pg in range(1, max_gql_pages + 1):
+                p = _json.loads(_json.dumps(gql_payload))
+                p["variables"]["input"]["start"] = 1 + (pg - 1) * 70
+                p["variables"]["input"]["display"] = 70
+                payloads_b64.append(_b64.b64encode(_json.dumps([p]).encode("utf-8")).decode("ascii"))
+
+            # JS: Promise.all로 병렬 fetch
+            fetches_js = ",\n".join([
+                f"fetch('https://pcmap-api.place.naver.com/graphql',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:atob('{b}'),credentials:'include'}}).then(r=>r.text().then(t=>r.status+'|||'+t)).catch(e=>'ERROR:'+e.message)"
+                for b in payloads_b64
+            ])
+            js = f"try{{ return await Promise.all([{fetches_js}]); }}catch(e){{ return ['ERROR:'+e.message]; }}"
+
+            try:
+                all_results = driver.execute_script(js)
+            except Exception as e:
+                self.callback("log", f"  ⚠️ 병렬 fetch 에러: {e}")
+                all_results = []
+
+            # 결과 파싱
+            last_total = 0
+            for pg_idx, result in enumerate(all_results or []):
+                pg = pg_idx + 1
+                if not self.running:
+                    break
+
+                if not result or result.startswith("ERROR"):
+                    self.callback("log", f"  ⚠️ 페이지 {pg} 에러: {str(result)[:100]}")
+                    break
+
+                status, body_text = result.split("|||", 1)
+                if status != "200":
+                    self.callback("log", f"  ⚠️ 페이지 {pg}: HTTP {status}")
+                    break
+
+                try:
+                    data = _json.loads(body_text)
+                    if isinstance(data, list):
+                        data = data[0]
+                    biz = data.get("data", {}).get("businesses", {})
+                    total = biz.get("total", 0)
+                    items = biz.get("items", [])
+                    if total > 0:
+                        last_total = total
+
+                    if not items:
+                        break
+
+                    page_items = 0
+                    for it in items:
+                        pid = str(it.get("id", ""))
+                        name = it.get("name", "")
+                        if pid and pid not in {r["id"] for r in results}:
+                            results.append({"id": pid, "name": name, "rank": len(results) + 1, "page": pg})
+                            page_items += 1
+
+                    self.callback("log", f"  📊 페이지 {pg}: +{page_items}건 (누적 {len(results)}건)")
+
+                except Exception as e:
+                    self.callback("log", f"  ⚠️ 페이지 {pg} 파싱 에러: {e}")
+                    break
+
+            # 2차: 마지막 페이지 0건이면 display 줄여서 보충
+            if last_total > 0 and len(results) < last_total:
+                remaining = last_total - len(results)
+                if remaining > 0 and remaining <= 70:
+                    start_补 = len(results) + 1
+                    for smaller_display in [remaining, 50, 30, 20, 10]:
+                        if smaller_display > remaining + 10:
+                            continue
+                        retry_p = _json.loads(_json.dumps(gql_payload))
+                        retry_p["variables"]["input"]["start"] = start_补
+                        retry_p["variables"]["input"]["display"] = smaller_display
+                        retry_b64 = _b64.b64encode(_json.dumps([retry_p]).encode("utf-8")).decode("ascii")
+                        retry_js = f"""
+                        try {{
+                            const resp = await fetch('https://pcmap-api.place.naver.com/graphql', {{
+                                method:'POST', headers:{{'Content-Type':'application/json'}},
+                                body: atob('{retry_b64}'), credentials:'include'
+                            }});
+                            const text = await resp.text();
+                            return resp.status + '|||' + text;
+                        }} catch(e) {{ return 'ERROR:'+e.message; }}
+                        """
+                        try:
+                            retry_result = driver.execute_script(retry_js)
+                            if retry_result and "|||" in retry_result:
+                                r_status, r_body = retry_result.split("|||", 1)
+                                if r_status == "200":
+                                    r_data = _json.loads(r_body)
+                                    if isinstance(r_data, list):
+                                        r_data = r_data[0]
+                                    r_items = r_data.get("data", {}).get("businesses", {}).get("items", [])
+                                    if r_items:
+                                        extra_pg = len(results) // 70 + 1
+                                        for it in r_items:
+                                            pid = str(it.get("id", ""))
+                                            name = it.get("name", "")
+                                            if pid and pid not in {r["id"] for r in results}:
+                                                results.append({"id": pid, "name": name, "rank": len(results) + 1, "page": extra_pg})
+                                        self.callback("log", f"  🔄 보충: +{len(r_items)}건 (display={smaller_display}, 총 {len(results)}건)")
+                                        break
+                        except Exception:
+                            pass
 
         except Exception as e:
             self.callback("log", f"  ⚠️ Selenium 오류: {e}")
