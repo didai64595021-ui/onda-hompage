@@ -1150,9 +1150,28 @@ p {
   font-style: normal;
 }
 
-/* --- Section fade-in --- */
-/* 기본: 항상 보임. JS가 뷰포트 아래 요소만 인라인으로 애니메이션 처리 */
-.fade-in {
+/* --- Section fade-in (CSS 클래스 기반 scroll reveal) --- */
+/* 기본: 항상 보임 (JS 없거나 playwright 등 스크롤 없는 환경) */
+.fade-in,
+.services__card,
+.process__step {
+  opacity: 1;
+  transform: none;
+}
+
+/* JS 로드되면 아래 요소만 숨김 */
+.js-scroll-reveal .fade-in,
+.js-scroll-reveal .services__card,
+.js-scroll-reveal .process__step {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+/* 스크롤로 나타나면 보임 */
+.js-scroll-reveal .fade-in.revealed,
+.js-scroll-reveal .services__card.revealed,
+.js-scroll-reveal .process__step.revealed {
   opacity: 1;
   transform: none;
 }

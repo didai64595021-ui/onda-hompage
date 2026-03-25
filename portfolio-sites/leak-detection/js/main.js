@@ -197,25 +197,17 @@ function initScrollReveal() {
   const elements = document.querySelectorAll('.fade-in, .services__card, .process__step');
   if (!elements.length) return;
 
-  const vh = window.innerHeight;
+  // CSS 클래스로 제어 (인라인 스타일 사용 금지)
+  document.body.classList.add('js-scroll-reveal');
 
-  // Only hide elements below the fold; above-fold stays visible
-  elements.forEach(el => {
-    const rect = el.getBoundingClientRect();
-    if (rect.top >= vh) {
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(30px)';
-      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-    }
-  });
+  const vh = window.innerHeight;
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
         const delay = (entry.target.dataset.delay || 0) * 100;
         setTimeout(() => {
-          entry.target.style.opacity = '1';
-          entry.target.style.transform = 'none';
+          entry.target.classList.add('revealed');
         }, delay);
         observer.unobserve(entry.target);
       }
@@ -227,7 +219,11 @@ function initScrollReveal() {
 
   elements.forEach(el => {
     const rect = el.getBoundingClientRect();
-    if (rect.top >= vh) {
+    if (rect.top < vh) {
+      // Above fold: 즉시 보이게 (동기적)
+      el.classList.add('revealed');
+    } else {
+      // Below fold: 스크롤 시 애니메이션
       observer.observe(el);
     }
   });
