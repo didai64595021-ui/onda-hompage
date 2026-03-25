@@ -5,6 +5,15 @@
 ## 현재 작업
 없음 (대기 중)
 
+### 마르다누수탐지 반응형 대규모 수정 — 완료 (2026-03-26)
+- [x] text-scrub 300vh → auto (빈 공백 제거, sticky → relative)
+- [x] fade-in 기본 visible 처리 (JS 인라인 애니메이션으로 변경, 뷰포트 아래만 숨김)
+- [x] 반응형 미디어쿼리 강화 (768px/480px/375px)
+- [x] 인라인 padding:96px 모바일 오버라이드 (!important)
+- [x] container/trust/process max-width 확대 (960→1080)
+- [x] text-scrub JS: 스크롤 기반 → IntersectionObserver 기반 애니메이션
+- [x] 스크린샷 검증 (375px, 768px, 1440px)
+
 ### 마르다누수탐지 사진-텍스트 매칭 수정 — 완료 (2026-03-25)
 - [x] 히어로 배경: photo-11 → photo-15 (전문 장비 세트)
 - [x] 서비스 카드 3개 사진 교체 (photo-20, photo-10, photo-19)

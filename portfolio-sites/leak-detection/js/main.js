@@ -79,28 +79,30 @@ function initTextScrub() {
   if (!section) return;
 
   const textEl = section.querySelector('.text-scrub__text');
-  const subEl = section.querySelector('.text-scrub__sub');
+  if (!textEl) return;
 
-  window.addEventListener('scroll', () => {
-    const rect = section.getBoundingClientRect();
-    const sectionH = section.offsetHeight;
-    const viewH = window.innerHeight;
+  // Animate text fill when section enters viewport
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        // Animate from 0% to 100% over 1.5s
+        let start = null;
+        function animate(ts) {
+          if (!start) start = ts;
+          const elapsed = ts - start;
+          const progress = Math.min((elapsed / 1500) * 100, 100);
+          textEl.style.setProperty('--scrub-progress', progress + '%');
+          if (progress < 100) requestAnimationFrame(animate);
+        }
+        requestAnimationFrame(animate);
+        observer.unobserve(section);
+      }
+    });
+  }, { threshold: 0.3 });
 
-    // Calculate progress: 0 at section start, 100 at section end
-    const scrolled = -rect.top;
-    const total = sectionH - viewH;
-    let progress = (scrolled / total) * 100;
-    progress = Math.max(0, Math.min(100, progress));
-
-    textEl.style.setProperty('--scrub-progress', progress + '%');
-
-    // Show sub text when progress > 70%
-    if (progress > 70) {
-      subEl.classList.add('visible');
-    } else {
-      subEl.classList.remove('visible');
-    }
-  }, { passive: true });
+  // Set initial state
+  textEl.style.setProperty('--scrub-progress', '0%');
+  observer.observe(section);
 }
 
 /* --- Count Up Animation (Hero Stats) --- */
@@ -195,23 +197,40 @@ function initScrollReveal() {
   const elements = document.querySelectorAll('.fade-in, .services__card, .process__step');
   if (!elements.length) return;
 
+  const vh = window.innerHeight;
+
+  // Only hide elements below the fold; above-fold stays visible
+  elements.forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top >= vh) {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(30px)';
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    }
+  });
+
   const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry, index) => {
+    entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        // Stagger delay
         const delay = (entry.target.dataset.delay || 0) * 100;
         setTimeout(() => {
-          entry.target.classList.add('visible');
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'none';
         }, delay);
         observer.unobserve(entry.target);
       }
     });
   }, {
-    threshold: 0.15,
-    rootMargin: '0px 0px -50px 0px'
+    threshold: 0.1,
+    rootMargin: '0px 0px -30px 0px'
   });
 
-  elements.forEach(el => observer.observe(el));
+  elements.forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top >= vh) {
+      observer.observe(el);
+    }
+  });
 }
 
 /* --- Service Navigation (Split Screen) --- */
