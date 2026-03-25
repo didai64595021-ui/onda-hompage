@@ -5,6 +5,21 @@
 ## 현재 작업
 없음 (대기 중)
 
+### 마르다누수탐지 피드백 18개 항목 수정 + contact.html — 완료 (2026-03-26)
+- [x] 누수 유형 카드 4개에 실제 사진 삽입 (photo-1, 18, 14, 11)
+- [x] 서비스 카드 좌우 여백 통일 (padding 20px/32px)
+- [x] 장비 카드 4개에 실제 사진 삽입 + 컴팩트 레이아웃 (photo-15, 20, 24, 18)
+- [x] 전화번호 줄바꿈 방지 (white-space: nowrap)
+- [x] 히어로 정확히 100vh + 상단 여유 padding
+- [x] 스크롤 인디케이터/카카오 버튼 겹침 방지 (bottom 조정)
+- [x] 증상 카드 모바일 폰트 축소 (0.85rem)
+- [x] 서비스 아코디언 사진 교체 (photo-20, 22, 17, 19)
+- [x] 햄버거 메뉴 3개로 정리 (홈/서비스 안내/상담 문의)
+- [x] 메뉴 오버레이 불투명도 강화 (rgba(10,22,40,0.95))
+- [x] contact.html 제작 (폼 + 원클릭콜 + 카카오 + 지도 + 사업자정보)
+- [x] body padding-bottom 80px (모바일 CTA 바 가림 방지)
+- [x] service.html lazy-loading 제거
+
 ### 마르다누수탐지 scroll-reveal 빈공백 수정 — 완료 (2026-03-26)
 - [x] initScrollReveal() 인라인 opacity → CSS 클래스 방식(.js-scroll-reveal + .revealed) 전환
 - [x] above-fold 요소 즉시 revealed (동기적), below-fold만 IntersectionObserver

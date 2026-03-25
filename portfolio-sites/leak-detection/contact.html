@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="마르다누수탐지 상담 문의 — 전화, 카카오톡으로 무료 상담하세요. 서울 경기 인천 전 지역 출장 가능.">
+  <title>상담 문의 — 마르다누수탐지</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .contact-hero {
+      position: relative;
+      min-height: 40vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--navy-900) 0%, var(--navy-700) 50%, var(--navy-600) 100%);
+      text-align: center;
+      padding-top: var(--nav-height);
+      overflow: hidden;
+    }
+    .contact-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 30% 50%, rgba(37,99,235,0.15) 0%, transparent 60%),
+                  radial-gradient(ellipse at 70% 30%, rgba(96,165,250,0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .contact-hero__content {
+      position: relative;
+      z-index: 2;
+      padding: var(--space-8) var(--space-3);
+    }
+    .contact-hero__title {
+      font-family: var(--font-heading);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      color: var(--white);
+      margin-bottom: var(--space-2);
+    }
+    .contact-hero__sub {
+      color: var(--gray-300);
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .contact-section {
+      padding: 64px 0;
+      background: var(--white);
+    }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+    @media (max-width: 768px) {
+      .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+    }
+    .contact-form {
+      background: var(--gray-50);
+      border-radius: 20px;
+      padding: 40px 32px;
+    }
+    .contact-form h3 {
+      color: var(--navy-900);
+      margin-bottom: 24px;
+      font-size: 1.5rem;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--navy-900);
+      margin-bottom: 8px;
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      color: var(--gray-900);
+      background: var(--white);
+      transition: border-color 0.3s ease;
+      min-height: 48px;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,102,255,0.1);
+    }
+    .form-group textarea {
+      min-height: 140px;
+      resize: vertical;
+    }
+    .form-submit {
+      width: 100%;
+      padding: 16px;
+      background: var(--accent);
+      color: var(--white);
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      font-family: var(--font-body);
+      cursor: pointer;
+      min-height: 48px;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    .form-submit:hover {
+      background: var(--navy-700);
+      transform: translateY(-2px);
+    }
+    .contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .contact-card {
+      background: var(--gray-50);
+      border-radius: 16px;
+      padding: 28px 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      transition: transform 0.3s ease;
+    }
+    .contact-card:hover {
+      transform: translateY(-2px);
+    }
+    .contact-card-icon {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .contact-card-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+    .contact-card h4 {
+      font-size: 1rem;
+      color: var(--navy-900);
+      margin-bottom: 4px;
+    }
+    .contact-card p {
+      font-size: 0.9rem;
+      color: var(--gray-500);
+      line-height: 1.6;
+    }
+    .quick-call {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .quick-call a {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      min-height: 56px;
+      transition: transform 0.3s ease;
+    }
+    .quick-call a:hover {
+      transform: translateY(-2px);
+    }
+    .quick-call-phone {
+      background: var(--accent);
+      color: var(--white);
+    }
+    .quick-call-kakao {
+      background: #FEE500;
+      color: #3C1E1E;
+    }
+    @media (max-width: 480px) {
+      .quick-call {
+        flex-direction: column;
+      }
+      .contact-form {
+        padding: 28px 20px;
+      }
+    }
+    .map-section {
+      padding: 64px 0;
+      background: var(--gray-50);
+    }
+    .map-wrapper {
+      max-width: 1080px;
+      margin: 0 auto;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+    .map-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+      max-width: 1080px;
+      margin: 32px auto 0;
+    }
+    .map-info-card {
+      text-align: center;
+      padding: 24px;
+      background: var(--white);
+      border-radius: 12px;
+    }
+    .map-info-card h4 {
+      color: var(--navy-900);
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+    .map-info-card p {
+      color: var(--gray-500);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav class="nav" role="navigation" aria-label="메인 네비게이션">
+    <a href="index.html" class="nav__logo">마르다<span>누수탐지</span></a>
+    <button class="nav__hamburger" aria-label="메뉴 열기" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav__menu-overlay"></div>
+    <div class="nav__menu" role="dialog" aria-label="사이트 메뉴">
+      <ul class="nav__menu-list">
+        <li><a href="index.html">홈</a></li>
+        <li><a href="service.html">서비스 안내</a></li>
+        <li><a href="contact.html">상담 문의</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="contact-hero">
+    <div class="contact-hero__content">
+      <h1 class="contact-hero__title">상담 문의</h1>
+      <p class="contact-hero__sub">전화 한 통이면 전문가가 빠르게 안내해 드립니다. 편하신 방법으로 문의해 주세요.</p>
+    </div>
+  </section>
+
+  <!-- CONTACT SECTION -->
+  <section class="contact-section">
+    <div class="container">
+      <div class="contact-grid">
+        <!-- Left: Form -->
+        <div>
+          <div class="quick-call">
+            <a href="tel:010-8079-8019" class="quick-call-phone">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+              전화 상담
+            </a>
+            <a href="https://open.kakao.com/o/slHNuB0f" target="_blank" rel="noopener noreferrer" class="quick-call-kakao">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#3C1E1E"><path d="M12 3C6.48 3 2 6.58 2 10.94c0 2.8 1.86 5.27 4.66 6.67-.15.53-.54 1.91-.62 2.21-.1.37.14.37.29.27.12-.08 1.83-1.21 2.57-1.7.69.1 1.4.15 2.1.15 5.52 0 10-3.58 10-7.94S17.52 3 12 3z"/></svg>
+              카카오톡 상담
+            </a>
+          </div>
+          <div class="contact-form">
+            <h3>문의하기</h3>
+            <form action="#" method="post" onsubmit="alert('감사합니다! 빠른 시간 내에 연락드리겠습니다.'); return false;">
+              <div class="form-group">
+                <label for="name">이름</label>
+                <input type="text" id="name" name="name" placeholder="이름을 입력해 주세요" required>
+              </div>
+              <div class="form-group">
+                <label for="phone">연락처</label>
+                <input type="tel" id="phone" name="phone" placeholder="010-0000-0000" required>
+              </div>
+              <div class="form-group">
+                <label for="message">문의 내용</label>
+                <textarea id="message" name="message" placeholder="증상이나 문의 내용을 자유롭게 작성해 주세요" required></textarea>
+              </div>
+              <button type="submit" class="form-submit">문의 보내기</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Right: Info Cards -->
+        <div class="contact-info">
+          <div class="contact-card">
+            <div class="contact-card-icon" style="background:rgba(0,102,255,0.1);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+              </svg>
+            </div>
+            <div>
+              <h4>전화번호</h4>
+              <p><a href="tel:010-8079-8019" style="color:var(--accent);font-weight:600;white-space:nowrap;">010-8079-8019</a></p>
+            </div>
+          </div>
+
+          <div class="contact-card">
+            <div class="contact-card-icon" style="background:rgba(255,143,0,0.1);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
+            <div>
+              <h4>영업시간</h4>
+              <p>연중무휴 09:00 — 21:00<br><span style="font-size:0.85rem;color:var(--gray-500);">긴급 누수는 시간 외에도 상담 가능</span></p>
+            </div>
+          </div>
+
+          <div class="contact-card">
+            <div class="contact-card-icon" style="background:rgba(0,102,255,0.1);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+            </div>
+            <div>
+              <h4>주소</h4>
+              <p>경기도 안양시 동안구 벌말로 126</p>
+            </div>
+          </div>
+
+          <div class="contact-card">
+            <div class="contact-card-icon" style="background:rgba(37,99,235,0.1);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <div>
+              <h4>서비스 지역</h4>
+              <p>서울 · 경기 · 인천 전 지역<br><span style="font-size:0.85rem;">일부 지방 출장 가능</span></p>
+            </div>
+          </div>
+
+          <div class="contact-card">
+            <div class="contact-card-icon" style="background:rgba(0,102,255,0.08);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
+              </svg>
+            </div>
+            <div>
+              <h4>사업자 정보</h4>
+              <p>마르다누수탐지<br>대표: 이우준<br>사업자등록번호: 814-05-02362</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAP SECTION -->
+  <section class="map-section">
+    <div class="container">
+      <div style="text-align:center;margin-bottom:40px;">
+        <h2 style="color:var(--navy-900);margin-bottom:12px;">찾아오시는 길</h2>
+        <p style="color:var(--gray-500);">경기도 안양시 동안구 벌말로 126</p>
+      </div>
+      <div class="map-wrapper">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3174.5!2d126.9519!3d37.3897!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2z6rK96riw64-EIOyViOyWkeyLnCDrj5nslYjqtawg67KM66eQ66GcIDEyNg!5e0!3m2!1sko!2skr!4v1"
+          width="100%"
+          height="400"
+          style="border:0;display:block;"
+          allowfullscreen=""
+          referrerpolicy="no-referrer-when-downgrade"
+          title="마르다누수탐지 위치">
+        </iframe>
+      </div>
+      <div class="map-info">
+        <div class="map-info-card">
+          <h4>영업시간</h4>
+          <p>연중무휴<br>09:00 — 21:00</p>
+        </div>
+        <div class="map-info-card">
+          <h4>서비스 지역</h4>
+          <p>서울 · 경기 · 인천<br>전 지역 출장 가능</p>
+        </div>
+        <div class="map-info-card">
+          <h4>긴급 출장</h4>
+          <p>당일 방문 가능<br>365일 연중무휴</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__inner">
+        <div class="footer__info">
+          <strong>마르다누수탐지</strong> | 대표: 이우준 | 사업자등록번호: 814-05-02362<br>
+          주소: 경기도 안양시 동안구 벌말로 126 | 전화: <a href="tel:010-8079-8019" style="color:var(--blue-300);">010-8079-8019</a>
+        </div>
+        <div class="footer__copyright">
+          &copy; 2026 마르다누수탐지. All rights reserved.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- FLOATING ELEMENTS -->
+  <a href="https://open.kakao.com/o/slHNuB0f" target="_blank" rel="noopener noreferrer" class="floating-kakao" aria-label="카카오톡 상담">
+    <svg viewBox="0 0 24 24" fill="#3C1E1E"><path d="M12 3C6.48 3 2 6.58 2 10.94c0 2.8 1.86 5.27 4.66 6.67-.15.53-.54 1.91-.62 2.21-.1.37.14.37.29.27.12-.08 1.83-1.21 2.57-1.7.69.1 1.4.15 2.1.15 5.52 0 10-3.58 10-7.94S17.52 3 12 3z"/></svg>
+  </a>
+
+  <div class="mobile-bar" aria-label="빠른 연락">
+    <div class="mobile-bar__inner">
+      <a href="tel:010-8079-8019" class="mobile-bar__btn mobile-bar__btn--call">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+        </svg>
+        전화 상담
+      </a>
+      <a href="https://open.kakao.com/o/slHNuB0f" target="_blank" rel="noopener noreferrer" class="mobile-bar__btn mobile-bar__btn--kakao">
+        <svg viewBox="0 0 24 24" fill="#3C1E1E" width="24" height="24"><path d="M12 3C6.48 3 2 6.58 2 10.94c0 2.8 1.86 5.27 4.66 6.67-.15.53-.54 1.91-.62 2.21-.1.37.14.37.29.27.12-.08 1.83-1.21 2.57-1.7.69.1 1.4.15 2.1.15 5.52 0 10-3.58 10-7.94S17.52 3 12 3z"/></svg>
+        카카오톡
+      </a>
+    </div>
+  </div>
+
+  <!-- JS: Nav only -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const nav = document.querySelector('.nav');
+      const hamburger = document.querySelector('.nav__hamburger');
+      const menu = document.querySelector('.nav__menu');
+      const overlay = document.querySelector('.nav__menu-overlay');
+      const menuLinks = document.querySelectorAll('.nav__menu-list a');
+
+      window.addEventListener('scroll', () => {
+        nav.classList.toggle('scrolled', window.scrollY > 80);
+      }, { passive: true });
+
+      function toggleMenu() {
+        hamburger.classList.toggle('active');
+        menu.classList.toggle('active');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
+      }
+
+      hamburger.addEventListener('click', toggleMenu);
+      overlay.addEventListener('click', toggleMenu);
+      menuLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          if (menu.classList.contains('active')) toggleMenu();
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>
