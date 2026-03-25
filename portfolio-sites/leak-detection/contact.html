@@ -323,7 +323,7 @@
             </div>
             <div>
               <h4>영업시간</h4>
-              <p>연중무휴 09:00 — 21:00<br><span style="font-size:0.85rem;color:var(--gray-500);">긴급 누수는 시간 외에도 상담 가능</span></p>
+              <p data-cms="business-hours">연중무휴 09:00 — 21:00<br><span style="font-size:0.85rem;color:var(--gray-500);">긴급 누수는 시간 외에도 상담 가능</span></p>
             </div>
           </div>
 
@@ -336,7 +336,7 @@
             </div>
             <div>
               <h4>주소</h4>
-              <p>경기도 안양시 동안구 벌말로 126</p>
+              <p data-cms="address">경기도 안양시 동안구 벌말로 126</p>
             </div>
           </div>
 
@@ -348,7 +348,7 @@
             </div>
             <div>
               <h4>서비스 지역</h4>
-              <p>서울 · 경기 · 인천 전 지역<br><span style="font-size:0.85rem;">일부 지방 출장 가능</span></p>
+              <p data-cms="service-areas">서울 · 경기 · 인천 전 지역<br><span style="font-size:0.85rem;">일부 지방 출장 가능</span></p>
             </div>
           </div>
 
@@ -467,6 +467,24 @@
         });
       });
     });
+  </script>
+
+  <!-- CMS: localStorage 기반 콘텐츠 교체 -->
+  <script>
+  (function(){
+    try {
+      var d = JSON.parse(localStorage.getItem('marda-cms-data'));
+      if(!d) return;
+      document.querySelectorAll('[data-cms]').forEach(function(el){
+        var k = el.getAttribute('data-cms');
+        if(d[k]) {
+          if(el.tagName === 'IMG') el.src = d[k];
+          else if(el.tagName === 'A' && d[k].startsWith('http')) el.href = d[k];
+          else el.textContent = d[k];
+        }
+      });
+    } catch(e){}
+  })();
   </script>
 
 </body>
