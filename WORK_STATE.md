@@ -3,7 +3,13 @@
 > 자동 업데이트: 2026-03-25 KST
 
 ## 현재 작업
-없음 (대기 중)
+시그니처펍스 CMS 버전 제작 (portfolio-sites/pups/cms.html)
+
+### 시그니처펍스 CMS — 진행 중 (2026-03-26)
+- [ ] Step 1: cms.html Head + CSS + Admin Bar + HTML 섹션 구조 (data-cms 속성 포함)
+- [ ] Step 2: CMS JavaScript 엔진 (저장/로드, 인라인편집, 섹션컨트롤, 테마, SEO, 내보내기)
+- [ ] Step 3: 펫샵 특화 CMS 기능 (강아지/후기 관리, 연락처 편집)
+- [ ] Step 4: 검증 + 커밋 + 푸시
 
 ### 마르다누수탐지 피드백 18개 항목 수정 + contact.html — 완료 (2026-03-26)
 - [x] 누수 유형 카드 4개에 실제 사진 삽입 (photo-1, 18, 14, 11)
