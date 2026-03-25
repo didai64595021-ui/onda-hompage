@@ -5,6 +5,12 @@
 ## 현재 작업
 없음 (대기 중)
 
+### 마르다누수탐지 scroll-reveal 빈공백 수정 — 완료 (2026-03-26)
+- [x] initScrollReveal() 인라인 opacity → CSS 클래스 방식(.js-scroll-reveal + .revealed) 전환
+- [x] above-fold 요소 즉시 revealed (동기적), below-fold만 IntersectionObserver
+- [x] CSS: 기본 opacity:1, .js-scroll-reveal로 숨김→.revealed로 표시
+- [x] 스크린샷 검증 (375/768/1440px) 빈공백 해결 확인
+
 ### 마르다누수탐지 반응형 대규모 수정 — 완료 (2026-03-26)
 - [x] text-scrub 300vh → auto (빈 공백 제거, sticky → relative)
 - [x] fade-in 기본 visible 처리 (JS 인라인 애니메이션으로 변경, 뷰포트 아래만 숨김)
