@@ -1379,7 +1379,12 @@
         var k = el.getAttribute('data-cms');
         if(!d[k]) return;
         if(el.tagName === 'IMG') {
-          el.src = d[k];
+          var src = d[k];
+          // 캐시 버스팅 — 브라우저 캐시로 이전 이미지 보이는 문제 방지
+          if(src && src.indexOf('data:') !== 0) {
+            src += (src.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
+          }
+          el.src = src;
         } else if(k.match(/stat-\d+-number/) && el.hasAttribute('data-target')) {
           // 카운터 애니메이션 숫자 업데이트
           el.setAttribute('data-target', d[k].replace(/[^0-9]/g,''));

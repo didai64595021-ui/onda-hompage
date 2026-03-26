@@ -1340,7 +1340,11 @@
       document.querySelectorAll('[data-cms]').forEach(function(el){
         var k = el.getAttribute('data-cms');
         if(!d[k]) return;
-        if(el.tagName === 'IMG') el.src = d[k];
+        if(el.tagName === 'IMG') {
+          var src = d[k];
+          if(src && src.indexOf('data:') !== 0) src += (src.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
+          el.src = src;
+        }
         else el.textContent = d[k];
       });
       if(d.phone) {
