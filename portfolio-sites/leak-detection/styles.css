@@ -352,11 +352,12 @@ p {
   box-sizing: border-box;
 }
 
+/* Fix #1: 히어로 오버레이 그라데이션 강화 — rgba 0.6 이상 전체 */
 .hero::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(10,22,40,0.85) 0%, rgba(10,22,40,0.72) 50%, rgba(10,22,40,0.9) 100%);
+  background: linear-gradient(180deg, rgba(10,22,40,0.92) 0%, rgba(10,22,40,0.85) 50%, rgba(10,22,40,0.95) 100%);
   z-index: 1;
   pointer-events: none;
 }
@@ -1075,7 +1076,7 @@ p {
 }
 
 .footer__info {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   line-height: 1.8;
 }
 
@@ -1085,7 +1086,7 @@ p {
 }
 
 .footer__copyright {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--gray-500);
 }
 
@@ -1377,6 +1378,37 @@ p {
   .before-after__slider {
     aspect-ratio: 4/3;
   }
+
+  /* Fix #2: 갤러리 이미지 태블릿 비율 보정 + min-height */
+  .leak-type-img {
+    aspect-ratio: 3/2;
+    min-height: 200px;
+  }
+
+  /* Fix #3: 카드 내부 최소 패딩 (태블릿) */
+  .services__card-body,
+  .equip-card-body {
+    padding: 24px 16px;
+  }
+
+  /* Fix #4: 섹션 간 여백 통일 (모바일/태블릿) */
+  .leak-signs,
+  .why-us,
+  .leak-types,
+  .text-scrub,
+  .before-after,
+  .trust,
+  .faq {
+    padding-block: 48px !important;
+  }
+
+  /* Fix #9: 푸터 텍스트 최소 0.8rem */
+  .footer__info,
+  .footer__copyright,
+  .footer__info a,
+  .footer__info span {
+    font-size: max(0.8rem, 0.85rem);
+  }
 }
 
 /* 480px */
@@ -1435,17 +1467,18 @@ p {
     display: none;
   }
 
-    .floating-btns {
-    bottom: 100px;
+  /* Fix #10: 플로팅 버튼 위치 — bottom bar와 겹침 방지 */
+  .floating-btns {
+    bottom: 110px;
     right: 8px;
   }
   .floating-btns a {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
   }
   .floating-btns svg {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
   }
 
   .leak-signs p {
@@ -1457,12 +1490,65 @@ p {
   }
 
   body {
-    padding-bottom: 80px;
+    padding-bottom: 88px;
   }
 
   .mobile-bar {
     display: block;
   }
+
+  /* Fix #2: 갤러리/장비 이미지 모바일 비율 + min-height */
+  .leak-type-img,
+  .equip-card-img {
+    aspect-ratio: 4/3;
+    min-height: 180px;
+  }
+
+  /* Fix #3: 카드 내부 최소 패딩 확보 (16px 이상) */
+  .services__card-body {
+    padding: 20px 16px;
+  }
+
+  .equip-card-body {
+    padding: 16px;
+  }
+
+  .trust__card {
+    padding: 32px 16px;
+  }
+
+  /* Fix #4: 섹션 패딩 통일 (모바일 padding-block 일관) */
+  .leak-signs,
+  .why-us,
+  .leak-types,
+  .before-after,
+  .trust,
+  .faq {
+    padding-block: 32px !important;
+  }
+
+  /* Fix #9: 푸터 텍스트 최소 0.8rem */
+  .footer__info {
+    font-size: 0.8rem;
+  }
+  .footer__copyright {
+    font-size: 0.8rem;
+  }
+
+  /* Fix #12: 사업자번호/전화번호 줄바꿈 방지 */
+  .footer__info span,
+  .footer__info a,
+  .cta__phone,
+  .cta__info-item p {
+    white-space: nowrap;
+  }
+}
+
+/* ========================================
+   Fix #14: 모바일 터치타겟 — 버튼/링크 min-height: 48px (전역)
+   ======================================== */
+button, a, [role="button"], summary, .btn, .trust__region-tag {
+  min-height: 48px;
 }
 
 /* prefers-reduced-motion */
@@ -1499,6 +1585,11 @@ p {
 
   .text-scrub__text {
     font-size: 1.75rem;
+  }
+
+  /* Fix #8: CTA 전화번호 모바일 font-size 1.2rem 이상 */
+  .cta__phone {
+    font-size: clamp(1.5rem, 7vw, 2.5rem);
   }
 
   .cta__buttons {

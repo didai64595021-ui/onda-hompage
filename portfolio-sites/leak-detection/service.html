@@ -434,12 +434,11 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      filter: grayscale(100%);
       transition: filter 0.5s ease, transform 0.5s ease;
     }
 
     .gallery__item:hover img {
-      filter: grayscale(0%);
+      filter: brightness(1.05);
       transform: scale(1.05);
     }
 
@@ -617,16 +616,28 @@
         display: none;
       }
 
-      /* 모바일: 갤러리 라벨 항상 표시 + 이미지 컬러 + 오버레이 항상 표시 */
-      .gallery__item img {
-        filter: grayscale(0%);
-      }
+      /* 모바일: 갤러리 라벨 항상 표시 + 오버레이 항상 표시 */
       .gallery__item::after {
         opacity: 1;
       }
       .gallery__item-label {
         opacity: 1;
         transform: translateY(0);
+      }
+
+      /* Fix #7: 갤러리 이미지 비율 통일 (태블릿) */
+      .gallery__item {
+        aspect-ratio: 4/3;
+      }
+
+      /* Fix #5: 서비스 아이콘 48px 통일 (태블릿) */
+      .svc-accordion__icon {
+        width: 48px;
+        height: 48px;
+      }
+      .svc-accordion__icon svg {
+        width: 24px;
+        height: 24px;
       }
     }
 
@@ -643,6 +654,58 @@
       .svc-cta__buttons .btn {
         width: 100%;
         max-width: 300px;
+      }
+
+      /* Fix #5: 서비스 아이콘 크기 통일 — 모바일 48px 고정 */
+      .svc-accordion__icon {
+        width: 48px;
+        height: 48px;
+      }
+      .svc-accordion__icon svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      /* Fix #6: 장비 섹션 그리드 정렬 — 1열 */
+      .equipment__grid {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+      }
+      .equipment__card {
+        padding: var(--space-4) var(--space-3);
+      }
+
+      /* Fix #7: 갤러리 이미지 비율 통일 */
+      .gallery__item {
+        aspect-ratio: 4/3;
+      }
+      .gallery__item img {
+        object-fit: cover;
+      }
+
+      /* Fix #8: CTA 전화번호 모바일 크기 확대 (1.2rem 이상) */
+      .svc-cta__phone {
+        font-size: clamp(1.5rem, 8vw, 2.5rem);
+        letter-spacing: 0;
+      }
+
+      /* Fix #9: 푸터 텍스트 최소 0.8rem */
+      .footer__info {
+        font-size: 0.8rem;
+      }
+      .footer__copyright {
+        font-size: 0.8rem;
+      }
+
+      /* Fix #11: 하단 고정 버튼 바 — padding-bottom */
+      body {
+        padding-bottom: 88px;
+      }
+
+      /* Fix #12: 사업자번호/전화번호 줄바꿈 방지 */
+      .footer__info span,
+      .footer__info a {
+        white-space: nowrap;
       }
     }
   </style>
@@ -1105,8 +1168,8 @@
       <!-- 푸터 하단 -->
       <div class="footer__inner">
         <div class="footer__info">
-          <strong>마르다누수탐지</strong> | 대표: 이우준 | 사업자등록번호: 814-05-02362<br>
-          주소: 경기도 안양시 동안구 벌말로 126 | 전화: <a href="tel:010-8079-8019" style="color:var(--blue-300);">010-8079-8019</a>
+          <strong>마르다누수탐지</strong> | 대표: 이우준 | 사업자등록번호: <span style="white-space:nowrap;">814-05-02362</span><br>
+          주소: 경기도 안양시 동안구 벌말로 126 | 전화: <a href="tel:010-8079-8019" style="color:var(--blue-300);white-space:nowrap;">010-8079-8019</a>
         </div>
         <div class="footer__copyright">
           &copy; 2026 마르다누수탐지. All rights reserved.
