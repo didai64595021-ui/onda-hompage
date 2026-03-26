@@ -102,6 +102,8 @@ button, a, [role="button"] { min-height: 48px; min-width: 48px; }
 5. 플로팅 버튼/고정바 있는 페이지: `body { padding-bottom: 충분한px }` — 콘텐츠 가림 방지.
 6. 모바일에서 플로팅 버튼이 CTA와 겹치면 → 플로팅 숨김 or 위치 조정.
 7. 비포/애프터 슬라이더: 두 이미지 동일 비율 필수 (크롭으로 맞춤).
+8. **CMS 이미지 비율 자동 감지 필수** — `el.onload`에서 `naturalWidth/naturalHeight`와 `parent` 비율 비교, 차이 40%+ 시 `object-fit: contain` + 배경색 전환. 세로사진→가로컨테이너 잘림 방지.
+9. 정사각형/세로형/가로형 혼재 이미지를 한 그리드에 넣을 때 → 비율 감지 로직 필수.
 
 ### K2. 카드 높이 / 그리드
 1. display: flex + align-items: stretch 또는 display: grid로 카드 높이 균일.
@@ -221,6 +223,7 @@ grep -c "sans-serif" styles.css    # 2 이상
 | 16 | 플로팅버튼↔CTA 겹침 | 모바일에서 position fixed 요소들 충돌 | 버튼 클릭 불가 | 모바일에서 플로팅 숨김 or 위치 조정 |
 | 17 | 하단 고정바↔콘텐츠 겹침 | body padding-bottom 부족 | 마지막 콘텐츠가 고정바에 가려짐 | padding-bottom: 160px |
 | 18 | 비포/애프터 이미지 손상 | 원본 파일 전송 중 깨짐(하단 회색) | After 사진이 회색으로 표시 | 손상 영역 자동 크롭 + 동일 비율 맞춤 |
+| 19 | CMS 이미지 잘림 | 세로사진→가로컨테이너 object-fit:cover | 사진 중요 부분 잘림 | CMS 로드 시 비율 자동감지→contain 전환 |
 
 ---
 

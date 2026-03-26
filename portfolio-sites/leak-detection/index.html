@@ -1385,6 +1385,25 @@
             src += (src.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
           }
           el.src = src;
+          // 이미지 비율 자동 감지 → 잘림 방지
+          el.onload = function() {
+            var img = this;
+            var parent = img.parentElement;
+            if(!parent) return;
+            var pW = parent.offsetWidth;
+            var pH = parent.offsetHeight;
+            if(!pW || !pH) return;
+            var imgRatio = img.naturalWidth / img.naturalHeight;
+            var parentRatio = pW / pH;
+            // 비율 차이가 크면(세로사진→가로컨테이너 등) contain으로 전환
+            var diff = Math.abs(imgRatio - parentRatio) / parentRatio;
+            if(diff > 0.4) {
+              img.style.objectFit = 'contain';
+              img.style.backgroundColor = '#1a1a2e';
+            } else {
+              img.style.objectFit = 'cover';
+            }
+          };
         } else if(k.match(/stat-\d+-number/) && el.hasAttribute('data-target')) {
           // 카운터 애니메이션 숫자 업데이트
           el.setAttribute('data-target', d[k].replace(/[^0-9]/g,''));
