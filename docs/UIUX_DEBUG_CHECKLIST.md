@@ -119,7 +119,57 @@ button, a, [role="button"] { min-height: 48px; min-width: 48px; }
 8. 검증: `grep -c 'data-cms=' *.html` → 텍스트/이미지 수와 일치해야 함.
 9. **"CMS에서 수정 못 하는 텍스트/이미지 = 0개"가 목표.**
 
-### L2. 자체 스크린샷 검증 (제작 완료 후 필수)
+### L2. 다각화 검증 체계 (제작 완료 후 필수, 모든 방법 병행)
+
+#### 검증 1: Playwright 기능 테스트
+```python
+# 최소 검증 항목:
+# 1. 로그인(비밀번호 입력 → Enter → 오버레이 hidden)
+# 2. 편집 필드 수 >= 예상 (data-key 셀렉터)
+# 3. 패널 존재 확인 (document.getElementById)
+# 4. 이미지 필드 + 파일 업로드 수 일치
+# 5. 저장 → localStorage 반영
+# 6. 프론트(index/service/contact) data-cms 수
+# 7. 프론트 텍스트 반영 (저장값 = 프론트 표시값)
+# 8. 초기화 → localStorage null
+```
+
+#### 검증 2: 비전 AI (admin 스크린샷)
+```python
+# admin.html 풀페이지 스크린샷 → 비전 AI 분석
+# 확인: 사이드바 메뉴 전체 표시, 폼 레이아웃, 입력필드 정상, 다크테마 일관성
+page.screenshot(path='/tmp/admin-vision.png', full_page=True)
+```
+
+#### 검증 3: 비전 AI (프론트 스크린샷 — PC + 모바일)
+```python
+# PC(1440px) + 모바일(375px) 풀페이지 → 비전 AI
+# 확인: 빈 공백 없음, 이미지 전부 표시, 텍스트 겹침/잘림 없음, CTA 정상
+for vp in [(1440,900), (375,812)]:
+    page = browser.new_page(viewport={'width':vp[0],'height':vp[1]})
+    page.screenshot(path=f'/tmp/front-{vp[0]}.png', full_page=True)
+```
+
+#### 검증 4: HTML 정적 분석
+```bash
+# CMS 커버리지
+grep -c 'data-cms=' *.html
+# 이미지 경로 실존
+grep -oP 'src="([^"]+)"' index.html | while read src; do ls "$src" 2>/dev/null || echo "MISSING: $src"; done
+# 한글 폰트 깨짐 방지
+grep -n "Playfair\|Bricolage" *.html
+# 가로스크롤 방지
+grep -c "overflow-x" styles.css
+```
+
+#### 검증 5: 크로스 브라우저 (캐시/호환성)
+- CMS 이미지 캐시 버스팅 (`?_t=Date.now()`) 확인
+- `aspect-ratio` IE 폴백 (`@supports not`) 확인
+- `img { display: block }` 확인
+
+**5가지 검증 중 1개라도 FAIL → 수정 후 재검증. 전체 PASS 후에만 커밋.**
+
+### L3. 자체 스크린샷 검증 (제작 완료 후 필수)
 cd /path/to/site && python3 -m http.server 8765 &
 sleep 2
 npx playwright screenshot --viewport-size="375,900" --full-page "http://localhost:8765/index.html" "/tmp/check-375.png"
