@@ -94,7 +94,16 @@ button, a, [role="button"] { min-height: 48px; min-width: 48px; }
 4. 앵커 링크(#hero 등) 실제 id 존재 확인.
 5. 사업자번호/주소/연락처 오타 확인.
 
-### K. 카드 높이 / 그리드
+### K. CMS 이미지 / 캐시
+1. CMS에서 이미지 교체 시 반드시 캐시 버스팅: `src += '?_t=' + Date.now()`
+2. data: URL(base64)이면 캐시 버스팅 불필요 (indexOf('data:') !== 0 체크).
+3. `aspect-ratio` 사용 시 반드시 IE/Edge 폴백: `@supports not (aspect-ratio: X/Y) { padding-top: 비율%; img { position: absolute; top:0; left:0; } }`
+4. 모든 img에 `display: block` 필수 (인라인 이미지 하단 갭 방지).
+5. 플로팅 버튼/고정바 있는 페이지: `body { padding-bottom: 충분한px }` — 콘텐츠 가림 방지.
+6. 모바일에서 플로팅 버튼이 CTA와 겹치면 → 플로팅 숨김 or 위치 조정.
+7. 비포/애프터 슬라이더: 두 이미지 동일 비율 필수 (크롭으로 맞춤).
+
+### K2. 카드 높이 / 그리드
 1. display: flex + align-items: stretch 또는 display: grid로 카드 높이 균일.
 2. 각 카드 min-height 통일.
 3. 이미지 카드: aspect-ratio: 4/3 또는 16/9 필수.
@@ -145,9 +154,15 @@ grep -c "sans-serif" styles.css    # 2 이상
 | 10 | 섹션 과도한 여백 | padding: 96px | 빈 공간 느낌 | 64px로 축소 |
 | 11 | sticky 빈 공간 | sticky 부모 height:100vh | 스크롤 시 빈 영역 | auto로 변경 |
 | 12 | 텍스트 겹침 | header fixed + padding 부족 | 히어로 텍스트 가림 | padding-top 확보 |
+| 13 | CMS 이미지 브라우저별 다르게 표시 | 브라우저 캐시로 이전 이미지 로드 | 크롬/IE에서 서로 다른 이미지 보임 | CMS 로드 시 `?_t=Date.now()` 캐시 버스팅 |
+| 14 | 이미지 카드 크기 브라우저 불일치 | IE/Edge 구버전 aspect-ratio 미지원 | 카드 이미지 높이 제각각 | `@supports not` 폴백 padding-top |
+| 15 | img 하단 갭 | img가 inline 요소 기본값 | 이미지 아래 3~4px 빈 공간 | `img { display: block }` |
+| 16 | 플로팅버튼↔CTA 겹침 | 모바일에서 position fixed 요소들 충돌 | 버튼 클릭 불가 | 모바일에서 플로팅 숨김 or 위치 조정 |
+| 17 | 하단 고정바↔콘텐츠 겹침 | body padding-bottom 부족 | 마지막 콘텐츠가 고정바에 가려짐 | padding-bottom: 160px |
+| 18 | 비포/애프터 이미지 손상 | 원본 파일 전송 중 깨짐(하단 회색) | After 사진이 회색으로 표시 | 손상 영역 자동 크롭 + 동일 비율 맞춤 |
 
 ---
 
-*최종 갱신: 2026-03-26*
+*최종 갱신: 2026-03-26 22:23*
 *프로젝트: 마르다누수탐지 홈페이지 (leak-detection)*
 *디버깅 라운드: 7회 (2/10 → 9/10 달성)*
