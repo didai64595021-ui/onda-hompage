@@ -1334,8 +1334,9 @@
   <!-- CMS: localStorage 기반 콘텐츠 교체 -->
   <script>
   (function(){
-    try {
-      var d = JSON.parse(localStorage.getItem('marda-cms-data'));
+    var CMS_API = 'https://onda-cms-api.onda-workers.workers.dev/?site=leak-detection';
+    
+    function applyCMS(d) {
       if(!d) return;
       document.querySelectorAll('[data-cms]').forEach(function(el){
         var k = el.getAttribute('data-cms');
@@ -1344,23 +1345,14 @@
           var src = d[k];
           if(src && src.indexOf('data:') !== 0) src += (src.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
           el.src = src;
-          // 이미지 비율 자동 감지 → 잘림 방지
           el.onload = function() {
-            var img = this;
-            var parent = img.parentElement;
+            var img = this, parent = img.parentElement;
             if(!parent) return;
-            var pW = parent.offsetWidth;
-            var pH = parent.offsetHeight;
+            var pW = parent.offsetWidth, pH = parent.offsetHeight;
             if(!pW || !pH) return;
-            var imgRatio = img.naturalWidth / img.naturalHeight;
-            var parentRatio = pW / pH;
-            var diff = Math.abs(imgRatio - parentRatio) / parentRatio;
-            if(diff > 0.4) {
-              img.style.objectFit = 'contain';
-              img.style.backgroundColor = '#1a1a2e';
-            } else {
-              img.style.objectFit = 'cover';
-            }
+            var diff = Math.abs(img.naturalWidth/img.naturalHeight - pW/pH) / (pW/pH);
+            if(diff > 0.4) { img.style.objectFit = 'contain'; img.style.backgroundColor = '#1a1a2e'; }
+            else { img.style.objectFit = 'cover'; }
           };
         }
         else el.textContent = d[k];
@@ -1376,7 +1368,12 @@
           a.href = d['kakao-link'];
         });
       }
-    } catch(e){}
+    }
+    
+    try { var local = JSON.parse(localStorage.getItem('marda-cms-data')); if(local) applyCMS(local); } catch(e){}
+    fetch(CMS_API).then(function(r){return r.json()}).then(function(kv){
+      if(kv && Object.keys(kv).length > 0) { localStorage.setItem('marda-cms-data', JSON.stringify(kv)); applyCMS(kv); }
+    }).catch(function(){});
   })();
   </script>
   <script>

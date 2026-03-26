@@ -1368,11 +1368,12 @@
   <!-- JS -->
   <script src="js/main.js"></script>
 
-  <!-- CMS: localStorage 기반 콘텐츠 교체 -->
+  <!-- CMS: Cloudflare KV + localStorage 콘텐츠 교체 -->
   <script>
   (function(){
-    try {
-      var d = JSON.parse(localStorage.getItem('marda-cms-data'));
+    var CMS_API = 'https://onda-cms-api.onda-workers.workers.dev/?site=leak-detection';
+    
+    function applyCMS(d) {
       if(!d) return;
       // data-cms 속성 기반 교체
       document.querySelectorAll('[data-cms]').forEach(function(el){
@@ -1424,7 +1425,21 @@
           a.href = d['kakao-link'];
         });
       }
+    }
+    
+    // 1) localStorage 먼저 적용 (즉시)
+    try {
+      var local = JSON.parse(localStorage.getItem('marda-cms-data'));
+      if(local) applyCMS(local);
     } catch(e){}
+    
+    // 2) Cloudflare KV에서 최신 데이터 (비동기)
+    fetch(CMS_API).then(function(r){return r.json()}).then(function(kv){
+      if(kv && Object.keys(kv).length > 0) {
+        localStorage.setItem('marda-cms-data', JSON.stringify(kv));
+        applyCMS(kv);
+      }
+    }).catch(function(){});
   })();
   </script>
   <script>

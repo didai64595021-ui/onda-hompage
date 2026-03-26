@@ -108,6 +108,10 @@ button, a, [role="button"] { min-height: 48px; min-width: 48px; }
 11. **파일→base64→URL필드 연결 필수**: FileReader.readAsDataURL → 결과를 `data-key` input.value에 대입 → 저장 시 localStorage에 포함.
 12. **기본 이미지 비율 감지**: CMS 교체 이미지뿐 아니라 **페이지 로드 시 모든 img**에 비율 감지 적용. `window.addEventListener('load', ...)` 에서 전체 순회.
 13. **제작 후 반드시 테스트**: admin에서 파일 선택 → URL 필드에 base64 표시 → 저장 → 프론트에서 이미지 변경 확인. 이 플로우 1번이라도 안 되면 커밋 금지.
+14. **Cloudflare KV 클라우드 저장 필수** — localStorage만으로는 PC↔모바일 동기화 안 됨. 모든 CMS 사이트에 KV Worker 연동 필수.
+15. **CMS 데이터 로드 순서**: localStorage(즉시) → KV fetch(비동기) → KV 데이터 도착 시 localStorage 갱신 + UI 재적용.
+16. **CMS Worker API**: `https://onda-cms-api.onda-workers.workers.dev/?site={사이트ID}` — GET(읽기, 인증없음), PUT(저장, X-CMS-Password 헤더 필수).
+17. **새 사이트 추가 시**: KV에 `pw-{사이트ID}` 키로 SHA256 해시 저장 필요.
 
 ### K2. 카드 높이 / 그리드
 1. display: flex + align-items: stretch 또는 display: grid로 카드 높이 균일.
@@ -231,6 +235,7 @@ grep -c "sans-serif" styles.css    # 2 이상
 | 20 | 파일 업로드 안 됨 | data-upload-for input에 이벤트 리스너 없음 | 파일 선택해도 이미지 안 바뀜 | 모든 data-upload-for에 change 이벤트+FileReader 연결 |
 | 21 | preview 요소 없어서 업로드존 미생성 | initUploadZones()에서 preview-{key} 없으면 return | 드래그앤드롭 영역 안 나타남 | data-upload-for 방식 fallback 핸들러 추가 |
 | 22 | 기본 이미지도 잘림 | CMS 비율감지가 CMS 교체 이미지에만 작동 | 원본 이미지도 세로/정사각이면 잘림 | 페이지 로드 시 모든 img에 비율 감지 적용 |
+| 23 | CMS 데이터 기기간 미동기화 | localStorage는 브라우저별 독립 | PC 수정→모바일 미반영 | Cloudflare KV 클라우드 저장 필수 |
 
 ---
 

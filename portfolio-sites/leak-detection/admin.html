@@ -1311,6 +1311,7 @@
     var hash = await sha256(pw);
     if (hash === PASS_HASH) {
       sessionStorage.setItem(AUTH_KEY, 'true');
+      sessionStorage.setItem('cms-pw', pw);
       loginOverlay.classList.add('hidden');
       app.classList.add('active');
       loadData();
@@ -1467,7 +1468,20 @@
       }
     });
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    showToast('저장 완료! 사이트를 새로고침하면 반영됩니다.', 'success');
+    
+    // Cloudflare KV에도 저장 (모든 기기 동기화)
+    var CMS_API = 'https://onda-cms-api.onda-workers.workers.dev/?site=leak-detection';
+    fetch(CMS_API, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-CMS-Password': sessionStorage.getItem('cms-pw') || '' },
+      body: JSON.stringify(data)
+    }).then(function(r) { return r.json(); })
+    .then(function(r) {
+      if (r.success) showToast('저장 완료! 모든 기기에서 자동 반영됩니다.', 'success');
+      else showToast('로컬 저장 완료. 클라우드 동기화 실패.', 'warning');
+    }).catch(function() {
+      showToast('로컬 저장 완료. 클라우드 연결 실패 (오프라인).', 'warning');
+    });
   };
 
   // ===== RESET =====
