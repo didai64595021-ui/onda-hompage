@@ -271,6 +271,24 @@
       object-fit: cover;
       display: block;
     }
+    .img-upload-zone {
+      width: 100%; max-width: 300px;
+      padding: 16px;
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .img-upload-zone:hover, .img-upload-zone.dragover {
+      border-color: var(--accent);
+      background: rgba(59,130,246,0.05);
+    }
+    .img-upload-zone input[type="file"] { display: none; }
+    .img-or { font-size: 0.75rem; color: var(--text-muted); margin: 6px 0; text-align: center; max-width: 300px; }
 
     /* ===== TOAST ===== */
     .toast-container {
@@ -867,6 +885,66 @@
       updateImagePreview(key, e.target.value);
     }
   });
+
+  // ===== FILE UPLOAD ZONES =====
+  function initUploadZones() {
+    var imgInputs = document.querySelectorAll('input[data-key$="-img"]');
+    imgInputs.forEach(function(input) {
+      var key = input.getAttribute('data-key');
+      var previewEl = document.getElementById('preview-' + key);
+      if (!previewEl) return;
+
+      // "또는" 텍스트
+      var orText = document.createElement('div');
+      orText.className = 'img-or';
+      orText.textContent = '또는 파일을 업로드하세요';
+      previewEl.parentNode.insertBefore(orText, previewEl.nextSibling);
+
+      // 업로드 존
+      var zone = document.createElement('div');
+      zone.className = 'img-upload-zone';
+      zone.innerHTML = '📁 클릭하거나 이미지를 드래그하세요<input type="file" accept="image/*">';
+      orText.parentNode.insertBefore(zone, orText.nextSibling);
+
+      var fileInput = zone.querySelector('input[type="file"]');
+
+      zone.addEventListener('click', function() { fileInput.click(); });
+
+      zone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        zone.classList.add('dragover');
+      });
+      zone.addEventListener('dragleave', function() {
+        zone.classList.remove('dragover');
+      });
+      zone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        zone.classList.remove('dragover');
+        var file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) processFile(file, input, key);
+      });
+
+      fileInput.addEventListener('change', function() {
+        if (this.files[0]) processFile(this.files[0], input, key);
+      });
+    });
+  }
+
+  function processFile(file, input, key) {
+    if (file.size > 2 * 1024 * 1024) {
+      showToast('이미지 크기가 2MB를 초과합니다. 압축 후 다시 시도해주세요.', 'warning');
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      input.value = e.target.result;
+      updateImagePreview(key, e.target.result);
+      showToast('이미지가 업로드되었습니다. 저장 버튼을 눌러주세요.', 'success');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  initUploadZones();
 
   // ===== SAVE =====
   window.saveData = function() {
