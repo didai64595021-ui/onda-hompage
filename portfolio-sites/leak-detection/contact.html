@@ -230,7 +230,7 @@
 
   <!-- NAVIGATION -->
   <nav class="nav" role="navigation" aria-label="메인 네비게이션">
-    <a href="index.html" class="nav__logo"><img src="logo-marda.jpg" alt="마르다누수탐지 로고" class="nav__logo-img">마르다<span>누수탐지</span></a>
+    <a href="index.html" class="nav__logo"><img src="logo-marda.jpg" alt="마르다누수탐지 로고" class="nav__logo-img" data-cms="logo-img">마르다<span>누수탐지</span></a>
     <button class="nav__hamburger" aria-label="메뉴 열기" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
@@ -247,8 +247,8 @@
   <!-- HERO -->
   <section class="contact-hero">
     <div class="contact-hero__content">
-      <h1 class="contact-hero__title">상담 문의</h1>
-      <p class="contact-hero__sub">전화 한 통이면 전문가가 빠르게 안내해 드립니다.<br>편하신 방법으로 문의해 주세요.</p>
+      <h1 class="contact-hero__title" data-cms="contact-hero-title">상담 문의</h1>
+      <p class="contact-hero__sub" data-cms="contact-hero-desc">전화 한 통이면 전문가가 빠르게 안내해 드립니다.<br>편하신 방법으로 문의해 주세요.</p>
     </div>
   </section>
 
@@ -284,7 +284,7 @@
           </div>
           <div>
             <h4>영업시간</h4>
-            <p>연중무휴 09:00 — 21:00<br><span style="font-size:0.85rem;">긴급 누수는 시간 외에도 상담 가능</span></p>
+            <p data-cms="business-hours">연중무휴 09:00 — 21:00<br><span style="font-size:0.85rem;">긴급 누수는 시간 외에도 상담 가능</span></p>
           </div>
         </div>
 
@@ -297,7 +297,7 @@
           </div>
           <div>
             <h4>주소</h4>
-            <p>경기도 안양시 동안구 벌말로 126</p>
+            <p data-cms="address">경기도 안양시 동안구 벌말로 126</p>
           </div>
         </div>
 
@@ -309,7 +309,7 @@
           </div>
           <div>
             <h4>서비스 지역</h4>
-            <p>서울 · 경기 · 인천 전 지역<br><span style="font-size:0.85rem;">일부 지방 출장 가능</span></p>
+            <p data-cms="service-areas">서울 · 경기 · 인천 전 지역<br><span style="font-size:0.85rem;">일부 지방 출장 가능</span></p>
           </div>
         </div>
 
@@ -322,7 +322,7 @@
           </div>
           <div>
             <h4>사업자 정보</h4>
-            <p>마르다누수탐지<br>대표: 이우준<br>사업자등록번호: <span class="nowrap">814-05-02362</span></p>
+            <p>마르다누수탐지<br>대표: <span data-cms="ceo-name">이우준</span><br>사업자등록번호: <span class="nowrap" data-cms="business-id">814-05-02362</span></p>
           </div>
         </div>
       </div>
@@ -333,8 +333,8 @@
   <section class="map-section">
     <div class="container">
       <div style="text-align:center;margin-bottom:40px;">
-        <h2 style="color:var(--navy-900);margin-bottom:12px;">찾아오시는 길</h2>
-        <p style="color:var(--gray-500);">경기도 안양시 동안구 벌말로 126</p>
+        <h2 style="color:var(--navy-900);margin-bottom:12px;" data-cms="map-title">찾아오시는 길</h2>
+        <p style="color:var(--gray-500);" data-cms="address">경기도 안양시 동안구 벌말로 126</p>
       </div>
       <div class="map-wrapper">
         <iframe
@@ -430,6 +430,16 @@
     try {
       var d = JSON.parse(localStorage.getItem('marda-cms-data'));
       if(!d) return;
+      document.querySelectorAll('[data-cms]').forEach(function(el){
+        var k = el.getAttribute('data-cms');
+        if(!d[k]) return;
+        if(el.tagName === 'IMG') {
+          var src = d[k];
+          if(src && src.indexOf('data:') !== 0) src += (src.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
+          el.src = src;
+        }
+        else el.textContent = d[k];
+      });
       if(d.phone) {
         document.querySelectorAll('a[href^="tel:"]').forEach(function(a){
           a.href = 'tel:' + d.phone.replace(/-/g,'');
@@ -440,9 +450,6 @@
         document.querySelectorAll('a[href*="open.kakao.com"]').forEach(function(a){
           a.href = d['kakao-link'];
         });
-      }
-      if(d.address) {
-        document.querySelectorAll('[data-cms="address"]').forEach(function(el){ el.textContent = d.address; });
       }
     } catch(e){}
   })();
