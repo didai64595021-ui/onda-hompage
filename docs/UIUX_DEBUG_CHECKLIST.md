@@ -108,7 +108,18 @@ button, a, [role="button"] { min-height: 48px; min-width: 48px; }
 2. 각 카드 min-height 통일.
 3. 이미지 카드: aspect-ratio: 4/3 또는 16/9 필수.
 
-### L. 자체 스크린샷 검증 (제작 완료 후 필수)
+### L. CMS 전체 커버리지 (최초 생성 시 필수)
+1. **모든 텍스트 요소**(h1~h6, p, span, li, a, button)에 `data-cms` 속성 필수.
+2. **모든 이미지**(<img>)에 `data-cms` 속성 필수 (SVG 아이콘 제외).
+3. admin.html에 **모든 data-cms 키**에 대한 편집 필드 존재해야 함.
+4. admin.html DEFAULTS 객체에 **모든 키** 등록 (텍스트=실제값, 이미지='').
+5. 이미지 필드는 URL input + file upload(base64) 둘 다 지원.
+6. 전화번호/카카오 일괄 교체 스크립트 포함.
+7. CMS 로드 시 이미지 캐시 버스팅(`?_t=Date.now()`) 필수.
+8. 검증: `grep -c 'data-cms=' *.html` → 텍스트/이미지 수와 일치해야 함.
+9. **"CMS에서 수정 못 하는 텍스트/이미지 = 0개"가 목표.**
+
+### L2. 자체 스크린샷 검증 (제작 완료 후 필수)
 cd /path/to/site && python3 -m http.server 8765 &
 sleep 2
 npx playwright screenshot --viewport-size="375,900" --full-page "http://localhost:8765/index.html" "/tmp/check-375.png"
