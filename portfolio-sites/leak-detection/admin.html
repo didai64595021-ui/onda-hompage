@@ -1470,18 +1470,22 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     
     // Cloudflare KV에도 저장 (모든 기기 동기화)
-    var CMS_API = 'https://onda-cms-api.onda-workers.workers.dev/?site=leak-detection';
-    fetch(CMS_API, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-CMS-Password': sessionStorage.getItem('cms-pw') || '' },
-      body: JSON.stringify(data)
-    }).then(function(r) { return r.json(); })
-    .then(function(r) {
-      if (r.success) showToast('저장 완료! 모든 기기에서 자동 반영됩니다.', 'success');
-      else showToast('로컬 저장 완료. 클라우드 동기화 실패.', 'warning');
-    }).catch(function() {
-      showToast('로컬 저장 완료. 클라우드 연결 실패 (오프라인).', 'warning');
-    });
+    var CMS_API = 'https://marda-cms-api.marda-cms.workers.dev/?site=leak-detection';
+    var CMS_API_FALLBACK = 'https://onda-cms-api.onda-workers.workers.dev/?site=leak-detection';
+    function sendToKV(url, body, headers) {
+      return fetch(url, { method:'PUT', headers:headers, body:body });
+    }
+    var kvBody = JSON.stringify(data);
+    var kvHeaders = { 'Content-Type': 'application/json', 'X-CMS-Password': sessionStorage.getItem('cms-pw') || '' };
+    sendToKV(CMS_API, kvBody, kvHeaders)
+      .catch(function(){ return sendToKV(CMS_API_FALLBACK, kvBody, kvHeaders); })
+      .then(function(r) { return r.json(); })
+      .then(function(r) {
+        if (r.success) showToast('저장 완료! 모든 기기에서 자동 반영됩니다.', 'success');
+        else showToast('로컬 저장 완료. 클라우드 동기화 실패.', 'warning');
+      }).catch(function() {
+        showToast('로컬 저장 완료. 클라우드 연결 실패 (오프라인).', 'warning');
+      });
   };
 
   // ===== RESET =====

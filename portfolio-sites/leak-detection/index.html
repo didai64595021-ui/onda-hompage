@@ -1371,7 +1371,8 @@
   <!-- CMS: Cloudflare KV + localStorage 콘텐츠 교체 -->
   <script>
   (function(){
-    var CMS_API = 'https://onda-cms-api.onda-workers.workers.dev/?site=leak-detection';
+    var CMS_API = 'https://marda-cms-api.marda-cms.workers.dev/?site=leak-detection';
+    var CMS_API_FALLBACK = 'https://onda-cms-api.onda-workers.workers.dev/?site=leak-detection';
     
     function applyCMS(d) {
       if(!d) return;
@@ -1434,7 +1435,7 @@
     } catch(e){}
     
     // 2) Cloudflare KV에서 최신 데이터 (비동기)
-    fetch(CMS_API).then(function(r){return r.json()}).then(function(kv){
+    fetch(CMS_API).catch(function(){return fetch(CMS_API_FALLBACK)}).then(function(r){return r.json()}).then(function(kv){
       if(kv && Object.keys(kv).length > 0) {
         localStorage.setItem('marda-cms-data', JSON.stringify(kv));
         applyCMS(kv);
