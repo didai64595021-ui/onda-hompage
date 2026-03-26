@@ -1430,6 +1430,27 @@
 
   initUploadZones();
 
+  // ===== data-upload-for 파일 input 핸들러 (preview 없는 필드용) =====
+  document.querySelectorAll('input[data-upload-for]').forEach(function(fileInput) {
+    var key = fileInput.getAttribute('data-upload-for');
+    var urlInput = document.querySelector('input[data-key="' + key + '"]');
+    if (!urlInput) return;
+    fileInput.addEventListener('change', function() {
+      var file = this.files[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) {
+        showToast('이미지 크기가 2MB를 초과합니다.', 'warning');
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        urlInput.value = e.target.result;
+        showToast('이미지 업로드 완료! 저장 버튼을 눌러주세요.', 'success');
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
   // ===== SAVE =====
   window.saveData = function() {
     var data = {};

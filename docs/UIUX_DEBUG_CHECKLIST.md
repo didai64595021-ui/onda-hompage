@@ -104,6 +104,10 @@ button, a, [role="button"] { min-height: 48px; min-width: 48px; }
 7. 비포/애프터 슬라이더: 두 이미지 동일 비율 필수 (크롭으로 맞춤).
 8. **CMS 이미지 비율 자동 감지 필수** — `el.onload`에서 `naturalWidth/naturalHeight`와 `parent` 비율 비교, 차이 40%+ 시 `object-fit: contain` + 배경색 전환. 세로사진→가로컨테이너 잘림 방지.
 9. 정사각형/세로형/가로형 혼재 이미지를 한 그리드에 넣을 때 → 비율 감지 로직 필수.
+10. **파일 업로드 핸들러 2중 보장**: (1) initUploadZones()로 드래그앤드롭 존 생성 + (2) `data-upload-for` input에 직접 change 이벤트 리스너. 둘 중 하나라도 빠지면 파일 선택 안 먹힘.
+11. **파일→base64→URL필드 연결 필수**: FileReader.readAsDataURL → 결과를 `data-key` input.value에 대입 → 저장 시 localStorage에 포함.
+12. **기본 이미지 비율 감지**: CMS 교체 이미지뿐 아니라 **페이지 로드 시 모든 img**에 비율 감지 적용. `window.addEventListener('load', ...)` 에서 전체 순회.
+13. **제작 후 반드시 테스트**: admin에서 파일 선택 → URL 필드에 base64 표시 → 저장 → 프론트에서 이미지 변경 확인. 이 플로우 1번이라도 안 되면 커밋 금지.
 
 ### K2. 카드 높이 / 그리드
 1. display: flex + align-items: stretch 또는 display: grid로 카드 높이 균일.
@@ -224,6 +228,9 @@ grep -c "sans-serif" styles.css    # 2 이상
 | 17 | 하단 고정바↔콘텐츠 겹침 | body padding-bottom 부족 | 마지막 콘텐츠가 고정바에 가려짐 | padding-bottom: 160px |
 | 18 | 비포/애프터 이미지 손상 | 원본 파일 전송 중 깨짐(하단 회색) | After 사진이 회색으로 표시 | 손상 영역 자동 크롭 + 동일 비율 맞춤 |
 | 19 | CMS 이미지 잘림 | 세로사진→가로컨테이너 object-fit:cover | 사진 중요 부분 잘림 | CMS 로드 시 비율 자동감지→contain 전환 |
+| 20 | 파일 업로드 안 됨 | data-upload-for input에 이벤트 리스너 없음 | 파일 선택해도 이미지 안 바뀜 | 모든 data-upload-for에 change 이벤트+FileReader 연결 |
+| 21 | preview 요소 없어서 업로드존 미생성 | initUploadZones()에서 preview-{key} 없으면 return | 드래그앤드롭 영역 안 나타남 | data-upload-for 방식 fallback 핸들러 추가 |
+| 22 | 기본 이미지도 잘림 | CMS 비율감지가 CMS 교체 이미지에만 작동 | 원본 이미지도 세로/정사각이면 잘림 | 페이지 로드 시 모든 img에 비율 감지 적용 |
 
 ---
 

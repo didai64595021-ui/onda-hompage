@@ -1379,6 +1379,23 @@
     } catch(e){}
   })();
   </script>
+  <script>
+  window.addEventListener('load', function() {
+    document.querySelectorAll('img[data-cms]').forEach(function(img) {
+      if(!img.naturalWidth || !img.parentElement) return;
+      var p = img.parentElement;
+      var pW = p.offsetWidth, pH = p.offsetHeight;
+      if(!pW || !pH) return;
+      var imgR = img.naturalWidth / img.naturalHeight;
+      var parR = pW / pH;
+      var diff = Math.abs(imgR - parR) / parR;
+      if(diff > 0.4) {
+        img.style.objectFit = 'contain';
+        img.style.backgroundColor = '#f0f0f0';
+      }
+    });
+  });
+  </script>
 
 </body>
 </html>
