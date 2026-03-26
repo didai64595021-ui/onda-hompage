@@ -71,6 +71,27 @@
 - **서브에이전트 완료 감지 못 했을 경우:** 파일 존재 확인(ls) → 커밋 여부 확인(git log) → 수동 커밋+보고
 - **OCR 검증도 태스크에 필수 포함** (HTML 문법, 링크, 모바일 가로스크롤, 한글 텍스트, 스크린샷 비전 검증)
 
+## 포트폴리오 레퍼런스 자동 적용 (2026-03-26, 영구, 최우선)
+- **모든 포트폴리오/사이트 제작 시 아래 파일 자동 참조 (별도 지시 불필요)**
+- 서브에이전트 태스크에 아래 6개 파일 참조 지시를 **항상 자동 삽입**:
+  1. `docs/references/ANTI_TEMPLATE_DESIGN_SYSTEM.md` — 레이아웃 패턴 20종 + 업종별 레시피
+  2. `docs/references/AWARD_REFERENCES_2024_2025.md` — 글로벌 수상작 DB
+  3. `docs/references/CSS_INTERACTION_PATTERNS.md` — 복사용 인터랙션 코드
+  4. `docs/references/RESPONSIVE_CROSS_DEVICE_GUIDE.md` — 반응형+크로스체킹
+  5. `docs/references/KOREA_INDUSTRY_REFERENCES.md` — 한국 업종별 TOP
+  6. `docs/UIUX_DEBUG_CHECKLIST.md` — 디버깅 13규칙
+- **메인 세션 프로세스:**
+  1. 의뢰 수신 → 업종 파악
+  2. ANTI_TEMPLATE_DESIGN_SYSTEM.md에서 히어로/콘텐츠/효과 패턴 조합
+  3. SITE_GENERATOR_RULES.md에서 미사용 테마/액센트/폰트/레이아웃 선택
+  4. 구체적 섹션별 와이어프레임 + 컬러 + 인터랙션 설계
+  5. 서브에이전트 태스크에 설계안 + 6개 참조파일 cat 지시 포함
+- **서브에이전트는 제작 시 반드시:**
+  - RESPONSIVE_CROSS_DEVICE_GUIDE.md의 전역 리셋 CSS 적용
+  - CSS_INTERACTION_PATTERNS.md에서 인터랙션 코드 복사 사용
+  - UIUX_DEBUG_CHECKLIST.md 13규칙 전수 준수
+  - 375/768/1440px 스크린샷 자체 검증
+
 ## 컴팩션 방지: 코딩 서브에이전트 위임 (2026-03-10, 영구)
 - **메인 세션에서 직접 코딩 절대 금지**
 - 모든 코딩 작업 → coding-agent 스킬로 서브에이전트 위임
