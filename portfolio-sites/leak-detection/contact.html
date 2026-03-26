@@ -181,21 +181,21 @@
         padding: 32px 0 48px;
       }
       body {
-        padding-bottom: 96px;
+        padding-bottom: 100px;
       }
 
       /* Fix #10: 플로팅 소셜 버튼 겹침 방지 — CTA/하단 바와 안 겹치게 */
       .floating-btns {
-        bottom: 120px;
+        bottom: 160px;
         right: 8px;
       }
       .floating-btns a {
-        width: 44px;
-        height: 44px;
+        width: 40px;
+        height: 40px;
       }
       .floating-btns svg {
-        width: 22px;
-        height: 22px;
+        width: 20px;
+        height: 20px;
       }
 
       /* Fix #8: CTA 전화번호 모바일 크기 (1.2rem 이상) */
@@ -203,10 +203,14 @@
         font-size: 1.2rem;
       }
 
-      /* Fix #9: 푸터 텍스트 최소 0.8rem */
+      /* Fix #9: 푸터 텍스트 모바일 대응 */
       .footer__info,
       .footer__copyright {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
+        word-break: keep-all;
+      }
+      .footer__info .nowrap {
+        white-space: nowrap;
       }
 
       /* Fix #14: 모바일 터치타겟 */
@@ -427,6 +431,30 @@
         });
       });
     });
+  </script>
+
+  <!-- CMS: localStorage 기반 콘텐츠 교체 -->
+  <script>
+  (function(){
+    try {
+      var d = JSON.parse(localStorage.getItem('marda-cms-data'));
+      if(!d) return;
+      if(d.phone) {
+        document.querySelectorAll('a[href^="tel:"]').forEach(function(a){
+          a.href = 'tel:' + d.phone.replace(/-/g,'');
+          if(a.textContent.match(/010-/)) a.textContent = d.phone;
+        });
+      }
+      if(d['kakao-link']) {
+        document.querySelectorAll('a[href*="open.kakao.com"]').forEach(function(a){
+          a.href = d['kakao-link'];
+        });
+      }
+      if(d.address) {
+        document.querySelectorAll('[data-cms="address"]').forEach(function(el){ el.textContent = d.address; });
+      }
+    } catch(e){}
+  })();
   </script>
 </body>
 </html>

@@ -1339,12 +1339,21 @@
       if(!d) return;
       document.querySelectorAll('[data-cms]').forEach(function(el){
         var k = el.getAttribute('data-cms');
-        if(d[k]) {
-          if(el.tagName === 'IMG') el.src = d[k];
-          else if(el.tagName === 'A' && d[k].startsWith('http')) el.href = d[k];
-          else el.textContent = d[k];
-        }
+        if(!d[k]) return;
+        if(el.tagName === 'IMG') el.src = d[k];
+        else el.textContent = d[k];
       });
+      if(d.phone) {
+        document.querySelectorAll('a[href^="tel:"]').forEach(function(a){
+          a.href = 'tel:' + d.phone.replace(/-/g,'');
+          if(a.textContent.match(/010-/)) a.textContent = d.phone;
+        });
+      }
+      if(d['kakao-link']) {
+        document.querySelectorAll('a[href*="open.kakao.com"]').forEach(function(a){
+          a.href = d['kakao-link'];
+        });
+      }
     } catch(e){}
   })();
   </script>
