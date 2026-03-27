@@ -1335,6 +1335,10 @@
     }
   });
 
+  // ===== API ENDPOINTS =====
+  var CMS_API = 'https://marda-cms-api.marda-cms.workers.dev/?site=leak-detection';
+  var CMS_API_FALLBACK = 'https://onda-cms-api.onda-workers.workers.dev/?site=leak-detection';
+
   checkAuth();
 
   // ===== DATA =====
@@ -1364,6 +1368,29 @@
       document.querySelectorAll('.img-or').forEach(function(z) { z.remove(); });
       initUploadZones();
     }
+
+    // KV에서 최신 데이터 동기화 (특히 이미지 — localStorage에 용량 제한으로 누락될 수 있음)
+    fetch(CMS_API, {cache: 'no-cache'})
+      .catch(function() { return fetch(CMS_API_FALLBACK, {cache: 'no-cache'}); })
+      .then(function(r) { return r.json(); })
+      .then(function(kv) {
+        if (!kv || typeof kv !== 'object') return;
+        document.querySelectorAll('[data-key]').forEach(function(el) {
+          var key = el.getAttribute('data-key');
+          if (!kv[key]) return;
+          // 이미지 필드: KV 값이 있고 현재 input이 비어있으면 KV 값 사용
+          // (localStorage 용량 초과로 이미지가 누락된 경우 복원)
+          if (key.endsWith('-img') && kv[key] && !el.value) {
+            el.value = kv[key];
+            updateImagePreview(key, kv[key]);
+          }
+          // 텍스트 필드: 현재 비어있고 KV에 값이 있으면 KV 값 사용
+          if (!key.endsWith('-img') && !el.value && kv[key]) {
+            el.value = kv[key];
+          }
+        });
+      })
+      .catch(function() { /* KV 접근 실패 — localStorage 데이터로 진행 */ });
   }
 
   function updateImagePreview(key, val) {
@@ -1473,9 +1500,6 @@
   });
 
   // ===== SAVE =====
-  var CMS_API = 'https://marda-cms-api.marda-cms.workers.dev/?site=leak-detection';
-  var CMS_API_FALLBACK = 'https://onda-cms-api.onda-workers.workers.dev/?site=leak-detection';
-
   window.saveData = function() {
     // 현재 admin 화면의 모든 data-key 값 수집
     var localData = {};
@@ -1492,8 +1516,21 @@
 
     // 버전 타임스탬프 삽입 (프론트 캐시 무효화용)
     localData.__v = Date.now();
-    // localStorage 즉시 저장
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(localData));
+
+    // localStorage 저장 (이미지 Base64 때문에 용량 초과 가능 → try-catch)
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(localData));
+    } catch(e) {
+      // 용량 초과 시: 이미지 제외하고 텍스트만 localStorage에 저장
+      var textOnly = {};
+      Object.keys(localData).forEach(function(k) {
+        if (!k.endsWith('-img') || !localData[k] || localData[k].length < 500) {
+          textOnly[k] = localData[k];
+        }
+      });
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(textOnly)); } catch(e2) {}
+      console.warn('localStorage 용량 초과 — 이미지는 클라우드(KV)에만 저장됩니다.');
+    }
     showToast('저장 중...', 'info');
 
     var headers = { 'Content-Type': 'application/json', 'X-CMS-Password': sessionStorage.getItem('cms-pw') || '' };
@@ -1512,10 +1549,10 @@
       .then(function(r) {
         if (r.success) {
           showToast('저장 완료! 모든 기기에서 자동 반영됩니다.', 'success');
-        } else showToast('로컬 저장 완료. 클라우드 동기화 실패.', 'warning');
+        } else showToast('클라우드 동기화 실패. 다시 시도해주세요.', 'warning');
       })
       .catch(function() {
-        showToast('로컬 저장 완료. 클라우드 연결 실패 (오프라인).', 'warning');
+        showToast('클라우드 연결 실패 (오프라인). 인터넷 확인 후 다시 저장해주세요.', 'warning');
       });
   };
 
@@ -1540,7 +1577,13 @@
       else if (key.endsWith('-img')) localData[key] = '';
     });
     localData.__v = Date.now();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(localData));
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(localData)); } catch(e) {
+      var textOnly = {};
+      Object.keys(localData).forEach(function(k) {
+        if (!k.endsWith('-img') || !localData[k] || localData[k].length < 500) textOnly[k] = localData[k];
+      });
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(textOnly)); } catch(e2) {}
+    }
     fetch(CMS_API, {cache:'no-cache'})
       .catch(function(){ return fetch(CMS_API_FALLBACK, {cache:'no-cache'}); })
       .then(function(r){ return r.json(); })
