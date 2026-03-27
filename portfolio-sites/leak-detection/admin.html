@@ -1478,6 +1478,9 @@
         hasChanges = true;
       } else if (val) {
         data[key] = val;
+      } else if (key.endsWith('-img')) {
+        // 빈 이미지도 키 보존 (KV 동기화 시 누락 방지)
+        data[key] = '';
       }
     });
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
