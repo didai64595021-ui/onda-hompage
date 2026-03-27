@@ -1357,6 +1357,13 @@
       // Update image previews
       updateImagePreview(key, val);
     });
+    // 업로드존 재초기화 (loadData 후 DOM 재구성으로 이벤트 리스너 날아갈 수 있음)
+    if (typeof initUploadZones === 'function') {
+      // 기존 zone 제거 후 재생성
+      document.querySelectorAll('.img-upload-zone').forEach(function(z) { z.remove(); });
+      document.querySelectorAll('.img-or').forEach(function(z) { z.remove(); });
+      initUploadZones();
+    }
   }
 
   function updateImagePreview(key, val) {
@@ -1503,8 +1510,11 @@
       })
       .then(function(r) { return r.json(); })
       .then(function(r) {
-        if (r.success) showToast('저장 완료! 모든 기기에서 자동 반영됩니다.', 'success');
-        else showToast('로컬 저장 완료. 클라우드 동기화 실패.', 'warning');
+        if (r.success) {
+          showToast('저장 완료! 모든 기기에서 자동 반영됩니다.', 'success');
+          // KV 저장 완료 후 localStorage 최신화 (merged 데이터 기준)
+          loadData();
+        } else showToast('로컬 저장 완료. 클라우드 동기화 실패.', 'warning');
       })
       .catch(function() {
         showToast('로컬 저장 완료. 클라우드 연결 실패 (오프라인).', 'warning');
