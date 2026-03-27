@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """v6 계약서 docx - 표 없이 텍스트 나열 + 밝은 노란 하이라이트"""
 from docx import Document
-from docx.shared import Pt, Cm
+from docx.shared import Pt, Cm, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 
-LIGHT_YELLOW = 'FFFF99'
+LIGHT_YELLOW = 'FFFF00'  # 형광 노란색
+STAMP_PATH = 'docs/contracts/stamp.png'
 
 def set_hl(run):
     """밝은 노란색 하이라이트"""
@@ -306,7 +307,11 @@ txt('   상호: 온다마케팅')
 txt('   대표자: 황승현')
 txt(f'   사업자등록번호: {BIZ}')
 txt('   주소: 서울시 강남구 테헤란로 82길 15, 3층 304호')
-txt('   서명/날인: ____________________')
+p = doc.add_paragraph()
+r = p.add_run('   서명/날인: ')
+r.font.size = Pt(10)
+r = p.add_run()
+r.add_picture(STAMP_PATH, width=Cm(2.5))
 
 doc.add_paragraph()
 txt('■ 을 (광고주)')
