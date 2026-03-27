@@ -1512,8 +1512,6 @@
       .then(function(r) {
         if (r.success) {
           showToast('저장 완료! 모든 기기에서 자동 반영됩니다.', 'success');
-          // KV 저장 완료 후 localStorage 최신화 (merged 데이터 기준)
-          loadData();
         } else showToast('로컬 저장 완료. 클라우드 동기화 실패.', 'warning');
       })
       .catch(function() {
@@ -1531,9 +1529,28 @@
 
   // ===== PREVIEW =====
   window.openPreview = function() {
-    // Save current data first
-    saveData();
-    window.open('index.html', '_blank');
+    // 저장 완료 후 새 탭 열기 (저장 미완료 상태로 프론트 열기 방지)
+    var headers = { 'Content-Type': 'application/json', 'X-CMS-Password': sessionStorage.getItem('cms-pw') || '' };
+    var localData = {};
+    document.querySelectorAll('[data-key]').forEach(function(el) {
+      var key = el.getAttribute('data-key');
+      if (!key || key.indexOf("' +") > -1) return;
+      var val = el.value.trim();
+      if (val) localData[key] = val;
+      else if (key.endsWith('-img')) localData[key] = '';
+    });
+    localData.__v = Date.now();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(localData));
+    fetch(CMS_API, {cache:'no-cache'})
+      .catch(function(){ return fetch(CMS_API_FALLBACK, {cache:'no-cache'}); })
+      .then(function(r){ return r.json(); })
+      .then(function(existing){
+        var merged = Object.assign({}, existing, localData);
+        return fetch(CMS_API, {method:'PUT', headers:headers, body:JSON.stringify(merged)})
+          .catch(function(){ return fetch(CMS_API_FALLBACK, {method:'PUT', headers:headers, body:JSON.stringify(merged)}); });
+      })
+      .then(function(){ window.open('index.html', '_blank'); })
+      .catch(function(){ window.open('index.html', '_blank'); });
   };
 
   // ===== SIDEBAR NAV =====
