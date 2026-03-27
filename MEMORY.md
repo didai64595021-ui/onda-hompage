@@ -79,6 +79,15 @@
 5. **공통 styles.css 분리** — 헤더/푸터/변수/리셋은 공통 파일, 페이지별 스타일은 인라인 or 별도
 - 요청자: 000 (@gumibear012)
 
+## 마르다 Cloudflare 계정 (2026-03-27, 영구)
+- **계정**: Maleudanusu@naver.com
+- **Account ID**: f2302b2343c92ac63e5e0ff96e10c362
+- **API Token**: 환경변수 $MARDA_CLOUDFLARE_TOKEN (`/home/onda/.env`에 저장)
+- **Pages 프로젝트**: marda-leak-detection → https://marda-leak-detection.pages.dev
+- **배포 명령**: `CLOUDFLARE_API_TOKEN=$MARDA_CLOUDFLARE_TOKEN wrangler pages deploy . --project-name=marda-leak-detection`
+- **CMS Workers**: marda-cms-api.marda-cms.workers.dev (마르다 계정 소유)
+- **온다 폴백**: onda-cms-api.onda-workers.workers.dev (온다 계정)
+
 ## 배포 규칙 (2026-03-15 변경, 영구)
 - **정적 사이트/포트폴리오 = GitHub Pages** (무료, 무제한)
   - URL: `https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/<name>/`
