@@ -238,9 +238,11 @@ grep -c "sans-serif" styles.css    # 2 이상
 | 23 | CMS 데이터 기기간 미동기화 | localStorage는 브라우저별 독립 | PC 수정→모바일 미반영 | Cloudflare KV 클라우드 저장 필수 |
 | 24 | CMS 저장 시 다른 섹션 이미지 날아감 | PUT 시 현재 섹션 데이터만 전송 → 다른 섹션 덮어씀 | 누수유형 저장→장비 이미지 삭제 | GET→merge→PUT 방식으로 변경 |
 | 25 | CMS 저장 후 프론트 미반영 | fetch 캐시 + localStorage 버전 체크 없음 | Ctrl+Shift+R 해도 이전값 표시 | cache:'no-cache' + __v 버전 비교로 localStorage 자동 무효화 |
+| 26 | CMS 이미지 저장 안 됨 (새로고침 시 사라짐) | localStorage 5MB 한도 초과 — Base64 이미지(1장 0.6~2.1MB) 3장만으로 4.7MB. setItem 에러 시 KV 저장까지 중단 | 장비 사진 1장 O → 추가 이미지 X, 누수유형 이미지 항상 X | (1) localStorage.setItem try-catch 추가 (2) KV 동기화 loadData에 추가 (3) 빈 이미지 필드 KV 덮어쓰기 방지 |
+| 27 | CMS 이미지 저장 방식 근본 전환 | Base64→KV JSON 통합 저장 = localStorage 용량 문제 반복 | 이미지 많아지면 동일 증상 재발 | Worker에 이미지 업로드 API 추가 (POST /img) → KV 분리 저장 → URL만 CMS 데이터에 보관. 4.7MB→16KB로 감소 |
 
 ---
 
-*최종 갱신: 2026-03-27 22:13*
+*최종 갱신: 2026-03-28 00:30*
 *프로젝트: 마르다누수탐지 홈페이지 (leak-detection)*
-*디버깅 라운드: 8회 (23→25개)*
+*디버깅 라운드: 9회 (25→27개)*
