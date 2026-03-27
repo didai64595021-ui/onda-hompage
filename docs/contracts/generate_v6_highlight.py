@@ -5,6 +5,25 @@ from docx.shared import Pt, Cm
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_COLOR_INDEX
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml.ns import qn
+from docx.oxml import OxmlElement
+from lxml import etree
+
+LIGHT_YELLOW = 'FFFF99'
+
+def set_highlight_color(run, color_hex):
+    """밝은 노란색 등 커스텀 하이라이트를 XML shading으로 적용"""
+    rPr = run._r.get_or_add_rPr()
+    shd = OxmlElement('w:shd')
+    shd.set(qn('w:val'), 'clear')
+    shd.set(qn('w:color'), 'auto')
+    shd.set(qn('w:fill'), color_hex)
+    # 기존 shd 제거
+    for existing in rPr.findall(qn('w:shd')):
+        rPr.remove(existing)
+    # 기존 highlight 제거
+    for existing in rPr.findall(qn('w:highlight')):
+        rPr.remove(existing)
+    rPr.append(shd)
 
 doc = Document()
 
@@ -72,7 +91,7 @@ def add_text(text, highlight=False):
     run = p.add_run(text)
     run.font.size = Pt(10)
     if highlight:
-        run.font.highlight_color = WD_COLOR_INDEX.YELLOW
+        set_highlight_color(run, LIGHT_YELLOW)
 
 
 def add_table(headers, rows, highlight_cells=None):
@@ -97,7 +116,7 @@ def add_table(headers, rows, highlight_cells=None):
                 for r in p.runs:
                     r.font.size = Pt(9)
                     if (ri, ci) in highlight_cells:
-                        r.font.highlight_color = WD_COLOR_INDEX.YELLOW
+                        set_highlight_color(r, LIGHT_YELLOW)
 
 
 # ===================== 본문 시작 =====================
@@ -112,7 +131,7 @@ r1 = p.add_run('"갑"과 "을"은 ')
 r1.font.size = Pt(10)
 r2 = p.add_run(f'[ {CLIENT["contract_date"]} ]')
 r2.font.size = Pt(10)
-r2.font.highlight_color = WD_COLOR_INDEX.YELLOW
+set_highlight_color(r2, LIGHT_YELLOW)
 r3 = p.add_run(' 아래와 같이 온라인 마케팅 계약을 체결한다.')
 r3.font.size = Pt(10)
 
@@ -176,17 +195,17 @@ r = p.add_run('① 본 계약의 기간은 ')
 r.font.size = Pt(10)
 r = p.add_run(f'[ {CLIENT["period_start"]} ]')
 r.font.size = Pt(10)
-r.font.highlight_color = WD_COLOR_INDEX.YELLOW
+set_highlight_color(r, LIGHT_YELLOW)
 r = p.add_run(' 부터 ')
 r.font.size = Pt(10)
 r = p.add_run(f'[ {CLIENT["period_end"]} ]')
 r.font.size = Pt(10)
-r.font.highlight_color = WD_COLOR_INDEX.YELLOW
+set_highlight_color(r, LIGHT_YELLOW)
 r = p.add_run(' 까지 ')
 r.font.size = Pt(10)
 r = p.add_run(f'[ {CLIENT["period_months"]} ]개월')
 r.font.size = Pt(10)
-r.font.highlight_color = WD_COLOR_INDEX.YELLOW
+set_highlight_color(r, LIGHT_YELLOW)
 r = p.add_run('로 한다.')
 r.font.size = Pt(10)
 
@@ -351,7 +370,7 @@ r.font.bold = True
 r = p.add_run(f'[ {CLIENT["contract_date_text"]} ]')
 r.font.size = Pt(10)
 r.font.bold = True
-r.font.highlight_color = WD_COLOR_INDEX.YELLOW
+set_highlight_color(r, LIGHT_YELLOW)
 
 doc.add_paragraph()
 
