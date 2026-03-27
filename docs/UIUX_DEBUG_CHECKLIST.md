@@ -236,9 +236,11 @@ grep -c "sans-serif" styles.css    # 2 이상
 | 21 | preview 요소 없어서 업로드존 미생성 | initUploadZones()에서 preview-{key} 없으면 return | 드래그앤드롭 영역 안 나타남 | data-upload-for 방식 fallback 핸들러 추가 |
 | 22 | 기본 이미지도 잘림 | CMS 비율감지가 CMS 교체 이미지에만 작동 | 원본 이미지도 세로/정사각이면 잘림 | 페이지 로드 시 모든 img에 비율 감지 적용 |
 | 23 | CMS 데이터 기기간 미동기화 | localStorage는 브라우저별 독립 | PC 수정→모바일 미반영 | Cloudflare KV 클라우드 저장 필수 |
+| 24 | CMS 저장 시 다른 섹션 이미지 날아감 | PUT 시 현재 섹션 데이터만 전송 → 다른 섹션 덮어씀 | 누수유형 저장→장비 이미지 삭제 | GET→merge→PUT 방식으로 변경 |
+| 25 | CMS 저장 후 프론트 미반영 | fetch 캐시 + localStorage 버전 체크 없음 | Ctrl+Shift+R 해도 이전값 표시 | cache:'no-cache' + __v 버전 비교로 localStorage 자동 무효화 |
 
 ---
 
-*최종 갱신: 2026-03-26 22:23*
+*최종 갱신: 2026-03-27 22:13*
 *프로젝트: 마르다누수탐지 홈페이지 (leak-detection)*
-*디버깅 라운드: 7회 (2/10 → 9/10 달성)*
+*디버깅 라운드: 8회 (23→25개)*
