@@ -1509,9 +1509,9 @@
       var val = el.value.trim();
       if (val) {
         localData[key] = val;
-      } else if (key.endsWith('-img')) {
-        localData[key] = '';
       }
+      // 이미지 필드가 비어있으면 localData에 포함하지 않음
+      // → KV 머지 시 기존 이미지가 보존됨 (빈 값으로 덮어쓰기 방지)
     });
 
     // 버전 타임스탬프 삽입 (프론트 캐시 무효화용)
@@ -1574,7 +1574,6 @@
       if (!key || key.indexOf("' +") > -1) return;
       var val = el.value.trim();
       if (val) localData[key] = val;
-      else if (key.endsWith('-img')) localData[key] = '';
     });
     localData.__v = Date.now();
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(localData)); } catch(e) {
