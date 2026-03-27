@@ -1434,17 +1434,22 @@
       }
     }
     
-    // 1) localStorage 먼저 적용 (즉시)
+    // 1) localStorage 먼저 적용 (즉시, 빠른 렌더링)
+    var localVersion = 0;
     try {
       var local = JSON.parse(localStorage.getItem('marda-cms-data'));
-      if(local) applyCMS(local);
+      if(local) { applyCMS(local); localVersion = local.__v || 0; }
     } catch(e){}
     
-    // 2) Cloudflare KV에서 최신 데이터 (비동기)
-    fetch(CMS_API).catch(function(){return fetch(CMS_API_FALLBACK)}).then(function(r){return r.json()}).then(function(kv){
+    // 2) Cloudflare KV에서 최신 데이터 — 항상 캐시 무시하고 가져옴
+    fetch(CMS_API, {cache:'no-cache'}).catch(function(){return fetch(CMS_API_FALLBACK, {cache:'no-cache'})}).then(function(r){return r.json()}).then(function(kv){
       if(kv && Object.keys(kv).length > 0) {
-        localStorage.setItem('marda-cms-data', JSON.stringify(kv));
-        applyCMS(kv);
+        var kvVersion = kv.__v || 0;
+        // KV가 더 최신이면 localStorage 갱신 + 화면 재적용
+        if(kvVersion > localVersion) {
+          localStorage.setItem('marda-cms-data', JSON.stringify(kv));
+          applyCMS(kv);
+        }
       }
     }).catch(function(){});
   })();
