@@ -234,11 +234,89 @@
     }
     .save-status.show { opacity: 1; }
 
+    /* Mobile Topbar */
+    .mobile-topbar {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 1000;
+    }
+    .mobile-topbar__title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+    }
+    .mobile-topbar__save {
+      padding: 8px 16px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .mobile-topbar__save:hover { background: var(--accent-hover); }
+    .hamburger-btn {
+      display: none;
+      width: 40px;
+      height: 40px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+    }
+    .hamburger-btn span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--text);
+      transition: all 0.3s;
+    }
+    .hamburger-btn.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger-btn.active span:nth-child(2) { opacity: 0; }
+    .hamburger-btn.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 998;
+    }
+    .sidebar-overlay.open { display: block; }
+
     /* Responsive */
     @media (max-width: 768px) {
-      .sidebar { display: none; }
-      .main-content { padding: 16px; }
+      .mobile-topbar { display: flex; }
+      .hamburger-btn { display: flex; }
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 280px;
+        height: 100vh;
+        z-index: 999;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .main-content {
+        padding: 72px 16px 16px;
+        max-width: 100%;
+      }
       .field-row { grid-template-columns: 1fr; }
+      .main-header { flex-wrap: wrap; gap: 8px; }
     }
   </style>
 </head>
@@ -256,6 +334,18 @@
       </form>
     </div>
   </div>
+
+  <!-- Mobile Topbar -->
+  <div class="mobile-topbar" id="mobileTopbar">
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="메뉴 열기">
+      <span></span><span></span><span></span>
+    </button>
+    <span class="mobile-topbar__title">클린파트너 CMS</span>
+    <button class="mobile-topbar__save" id="btnSaveMobile">저장</button>
+  </div>
+
+  <!-- Sidebar Overlay (모바일) -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <!-- Admin Layout -->
   <div class="admin-layout">
@@ -773,6 +863,27 @@
       return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
+    /* ======================== MOBILE HAMBURGER ======================== */
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    function toggleSidebar() {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('open');
+      hamburgerBtn.classList.toggle('active');
+    }
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+      hamburgerBtn.classList.remove('active');
+    }
+    hamburgerBtn.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    // Mobile save button
+    document.getElementById('btnSaveMobile').addEventListener('click', () => saveData());
+
     /* ======================== SIDEBAR NAV ======================== */
     const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
     const panels = document.querySelectorAll('.panel');
@@ -787,6 +898,7 @@
         panels.forEach(p => p.classList.remove('active'));
         document.getElementById(`panel-${target}`).classList.add('active');
         panelTitle.textContent = link.textContent.replace(/^[^\s]+\s/, '');
+        closeSidebar();
       });
     });
 
