@@ -284,38 +284,78 @@ function initQuoteForm() {
 function handleFormSubmit(form) {
   const formData = new FormData(form);
   const data = Object.fromEntries(formData);
+  const submitBtn = form.querySelector('.btn-submit');
 
-  // Show success
+  // Show success helper
   const successEl = form.closest('.modal') ?
     form.closest('.modal').querySelector('.modal-success') :
     document.getElementById('formSuccess');
 
-  if (successEl) {
-    form.style.display = 'none';
-    successEl.style.display = 'block';
+  function showSuccess() {
+    if (successEl) {
+      form.style.display = 'none';
+      successEl.style.display = 'block';
+    }
+    setTimeout(() => {
+      form.reset();
+      form.style.display = '';
+      if (successEl) successEl.style.display = 'none';
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '견적 요청하기'; }
+      const overlay = form.closest('.modal-overlay');
+      if (overlay) {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }, 3000);
   }
 
-  // Construct mailto
-  const subject = encodeURIComponent('[클린파트너] 견적 문의');
-  const body = encodeURIComponent(
-    `이름: ${data.name || ''}\n` +
-    `연락처: ${data.phone || ''}\n` +
-    `업체명: ${data.company || ''}\n` +
-    `업종: ${data.industry || ''}\n` +
-    `문의내용: ${data.message || ''}`
-  );
+  function showError(msg) {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '견적 요청하기'; }
+    alert(msg || '전송에 실패했습니다. 전화(010-8892-3736)로 문의해 주세요.');
+  }
 
-  // Reset after 3 seconds
-  setTimeout(() => {
-    form.reset();
-    form.style.display = '';
-    if (successEl) successEl.style.display = 'none';
-    const overlay = form.closest('.modal-overlay');
-    if (overlay) {
-      overlay.classList.remove('active');
-      document.body.style.overflow = '';
-    }
-  }, 3000);
+  // Disable button during submit
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '전송 중...'; }
+
+  // Send via FormSubmit.co (replace email below with actual business email)
+  const FORM_EMAIL = 'clean-partner@ondamarketing.com';
+  const payload = new FormData();
+  payload.append('name', data.name || '');
+  payload.append('phone', data.phone || '');
+  payload.append('company', data.company || '');
+  payload.append('email', data.email || '');
+  payload.append('industry', data.industry || '');
+  payload.append('volume', data.volume || '');
+  payload.append('message', data.message || '');
+  payload.append('_subject', '[클린파트너] 새 견적 문의');
+  payload.append('_captcha', 'false');
+  payload.append('_template', 'table');
+
+  fetch('https://formsubmit.co/ajax/' + FORM_EMAIL, {
+    method: 'POST',
+    body: payload,
+  })
+    .then(r => r.json())
+    .then(result => {
+      if (result.success) {
+        showSuccess();
+      } else {
+        showError();
+      }
+    })
+    .catch(() => {
+      // Fallback: still show success to user, open mailto as backup
+      const subject = encodeURIComponent('[클린파트너] 견적 문의');
+      const body = encodeURIComponent(
+        '이름: ' + (data.name || '') + '\n' +
+        '연락처: ' + (data.phone || '') + '\n' +
+        '업체명: ' + (data.company || '') + '\n' +
+        '업종: ' + (data.industry || '') + '\n' +
+        '문의내용: ' + (data.message || '')
+      );
+      window.location.href = 'mailto:' + FORM_EMAIL + '?subject=' + subject + '&body=' + body;
+      showSuccess();
+    });
 }
 
 /* ============================================================
