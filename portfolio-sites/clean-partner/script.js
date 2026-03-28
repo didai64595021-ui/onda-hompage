@@ -318,7 +318,7 @@ function handleFormSubmit(form) {
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '전송 중...'; }
 
   // Send via FormSubmit.co (replace email below with actual business email)
-  const FORM_EMAIL = 'clean-partner@ondamarketing.com';
+  const FORM_EMAIL = 'whthgml79@naver.com';
   const payload = new FormData();
   payload.append('name', data.name || '');
   payload.append('phone', data.phone || '');
