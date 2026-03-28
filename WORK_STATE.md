@@ -3,7 +3,16 @@
 > 자동 업데이트: 2026-03-25 KST
 
 ## 현재 작업
-시그니처펍스 CMS 버전 제작 (portfolio-sites/pups/cms.html)
+대기 중 — 다음 지시 대기
+
+### 클린파트너 세탁공장 홈페이지 — 완료 (2026-03-28)
+- [x] Step 1: styles.css (CSS 변수, 반응형 5단계, 전체 컴포넌트)
+- [x] Step 2: script.js (히어로 슬라이더, 탭, 아코디언, 카운터, 스크롤 리빌, 모달, CMS)
+- [x] Step 3: index.html (히어로+탭+카운터+타임라인+마키+CTA)
+- [x] Step 4: service.html (서브히어로+아코디언+스플릿+CTA배너)
+- [x] Step 5: contact.html (서브히어로+견적폼+연락처+지도+FAQ)
+- [x] Step 6: admin.html (CMS 8패널, 비밀번호, KV 연동)
+- [x] Step 7: Playwright 스크린샷 검증 (375/1440px × 3페이지)
 
 ### 시그니처펍스 CMS — 진행 중 (2026-03-26)
 - [ ] Step 1: cms.html Head + CSS + Admin Bar + HTML 섹션 구조 (data-cms 속성 포함)

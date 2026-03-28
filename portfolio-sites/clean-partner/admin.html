@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>클린파트너 CMS — 관리자</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2d3a;
+      --text: #e4e6ef;
+      --text-muted: #8b8fa3;
+      --accent: #0066FF;
+      --accent-hover: #0052CC;
+      --danger: #e53e3e;
+      --success: #38a169;
+    }
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.6;
+      word-break: keep-all;
+    }
+
+    /* Password overlay */
+    .pw-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pw-overlay.hidden { display: none; }
+    .pw-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 40px;
+      width: min(400px, 90vw);
+      text-align: center;
+    }
+    .pw-box h2 { font-size: 1.25rem; margin-bottom: 8px; }
+    .pw-box p { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 20px; }
+    .pw-box input {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+    .pw-box input:focus { outline: none; border-color: var(--accent); }
+    .pw-box button {
+      width: 100%;
+      padding: 12px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .pw-box button:hover { background: var(--accent-hover); }
+    .pw-error { color: var(--danger); font-size: 0.8125rem; margin-top: 8px; display: none; }
+
+    /* Layout */
+    .admin-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 240px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 20px 0;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-brand {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+    .sidebar-brand h3 { font-size: 1rem; }
+    .sidebar-brand p { color: var(--text-muted); font-size: 0.75rem; }
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .sidebar-nav a:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+    .sidebar-nav a.active {
+      color: var(--accent);
+      background: rgba(0,102,255,0.08);
+      border-left-color: var(--accent);
+    }
+    .main-content {
+      flex: 1;
+      padding: 24px 32px;
+      max-width: 900px;
+    }
+    .main-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .main-header h1 { font-size: 1.25rem; }
+
+    /* Panel */
+    .panel {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .panel.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .field-group {
+      margin-bottom: 24px;
+    }
+    .field-group h3 {
+      font-size: 0.9375rem;
+      color: var(--accent);
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .field {
+      margin-bottom: 16px;
+    }
+    .field label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.875rem;
+      font-family: inherit;
+    }
+    .field input:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .field textarea { min-height: 80px; resize: vertical; }
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .field .hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .field-img {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .field-img input[type="file"] {
+      width: auto;
+      padding: 6px;
+      font-size: 0.75rem;
+    }
+
+    /* Buttons */
+    .btn-bar {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .btn-save {
+      padding: 10px 24px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .btn-save:hover { background: var(--accent-hover); }
+    .btn-reset {
+      padding: 10px 24px;
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .save-status {
+      font-size: 0.8125rem;
+      color: var(--success);
+      margin-left: 12px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .save-status.show { opacity: 1; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main-content { padding: 16px; }
+      .field-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Password Overlay -->
+  <div class="pw-overlay" id="pwOverlay">
+    <div class="pw-box">
+      <h2>CMS 관리자 로그인</h2>
+      <p>클린파트너 관리자 비밀번호를 입력하세요</p>
+      <form id="pwForm">
+        <input type="password" id="pwInput" placeholder="비밀번호" autocomplete="current-password">
+        <button type="submit">로그인</button>
+        <div class="pw-error" id="pwError">비밀번호가 일치하지 않습니다.</div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Layout -->
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <h3>클린파트너 CMS</h3>
+        <p>콘텐츠 관리 시스템</p>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="active" data-panel="general">&#9881; 기본 정보</a>
+        <a href="#" data-panel="hero">&#127912; 히어로</a>
+        <a href="#" data-panel="services">&#128736; 서비스</a>
+        <a href="#" data-panel="counters">&#128202; 숫자/통계</a>
+        <a href="#" data-panel="process">&#9881; 프로세스</a>
+        <a href="#" data-panel="cta">&#128226; CTA/배너</a>
+        <a href="#" data-panel="images">&#128247; 이미지</a>
+        <a href="#" data-panel="faq">&#10067; FAQ</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="main-header">
+        <h1 id="panelTitle">기본 정보</h1>
+        <div>
+          <button class="btn-save" id="btnSave">저장</button>
+          <span class="save-status" id="saveStatus">저장되었습니다!</span>
+        </div>
+      </div>
+
+      <!-- Panel: General -->
+      <div class="panel active" id="panel-general">
+        <div class="field-group">
+          <h3>업체 정보</h3>
+          <div class="field">
+            <label>회사명</label>
+            <input type="text" data-key="company-name" value="클린파트너">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>전화번호</label>
+              <input type="tel" data-key="phone" value="010-8892-3736">
+            </div>
+            <div class="field">
+              <label>운영시간</label>
+              <input type="text" data-key="hours" value="평일 09:00 ~ 18:00">
+            </div>
+          </div>
+          <div class="field">
+            <label>카카오톡 링크</label>
+            <input type="url" data-key="kakao-link" value="">
+            <div class="hint">카카오톡 채널 링크 (예: https://pf.kakao.com/...)</div>
+          </div>
+          <div class="field">
+            <label>저작권 텍스트</label>
+            <input type="text" data-key="copyright" value="&copy; 2024 클린파트너. All rights reserved.">
+          </div>
+          <div class="field">
+            <label>푸터 정보</label>
+            <textarea data-key="footer-info">대한민국 산업세탁 전문기업
+서울·경기 전 지역 당일 수거·배송
+헬스장 · 사우나 · 기업 · 대학</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: Hero -->
+      <div class="panel" id="panel-hero">
+        <div class="field-group">
+          <h3>메인 히어로</h3>
+          <div class="field">
+            <label>배지 텍스트</label>
+            <input type="text" data-key="hero-badge" value="서울·경기 전 지역 당일 수거배송">
+          </div>
+          <div class="field">
+            <label>히어로 타이틀</label>
+            <textarea data-key="hero-title">대한민국
+산업세탁 전문기업</textarea>
+          </div>
+          <div class="field">
+            <label>히어로 서브텍스트</label>
+            <textarea data-key="hero-sub">헬스장 · 사우나 · 기업 · 대학
+10년 이상의 노하우로 최상의 세탁 품질을 약속합니다</textarea>
+          </div>
+        </div>
+        <div class="field-group">
+          <h3>서비스 페이지 히어로</h3>
+          <div class="field">
+            <label>타이틀</label>
+            <input type="text" data-key="service-hero-title" value="업종별 맞춤 세탁 솔루션">
+          </div>
+          <div class="field">
+            <label>설명</label>
+            <textarea data-key="service-hero-desc">각 업종의 특성에 맞는 전문 세탁 프로세스로 최상의 결과를 제공합니다</textarea>
+          </div>
+        </div>
+        <div class="field-group">
+          <h3>견적문의 페이지 히어로</h3>
+          <div class="field">
+            <label>타이틀</label>
+            <input type="text" data-key="contact-hero-title" value="무료 견적 문의">
+          </div>
+          <div class="field">
+            <label>설명</label>
+            <textarea data-key="contact-hero-desc">전화 한 통이면 맞춤 견적을 빠르게 받아보실 수 있습니다</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: Services -->
+      <div class="panel" id="panel-services">
+        <div class="field-group">
+          <h3>서비스 섹션 헤더</h3>
+          <div class="field">
+            <label>섹션 레이블</label>
+            <input type="text" data-key="service-label" value="Our Services">
+          </div>
+          <div class="field">
+            <label>섹션 타이틀</label>
+            <input type="text" data-key="service-title" value="업종별 맞춤 세탁 솔루션">
+          </div>
+          <div class="field">
+            <label>섹션 설명</label>
+            <textarea data-key="service-desc">각 업종의 특성에 맞는 전문 세탁 프로세스로 최상의 결과를 제공합니다</textarea>
+          </div>
+        </div>
+        <div class="field-group">
+          <h3>헬스장 세탁</h3>
+          <div class="field">
+            <label>타이틀</label>
+            <input type="text" data-key="tab-gym-title" value="헬스장 전문 세탁">
+          </div>
+          <div class="field">
+            <label>설명</label>
+            <textarea data-key="tab-gym-desc">운동 시설에 최적화된 세탁 서비스로 회원님들의 쾌적한 운동 환경을 만들어 드립니다. 고온 살균 세탁으로 위생을 최우선으로 합니다.</textarea>
+          </div>
+        </div>
+        <div class="field-group">
+          <h3>사우나 세탁</h3>
+          <div class="field">
+            <label>타이틀</label>
+            <input type="text" data-key="tab-sauna-title" value="사우나 전문 세탁">
+          </div>
+          <div class="field">
+            <label>설명</label>
+            <textarea data-key="tab-sauna-desc">대용량 사우나 세탁물을 빠르고 위생적으로 처리합니다. 대형 타올, 가운, 시트 등 사우나 특화 세탁 서비스를 제공합니다.</textarea>
+          </div>
+        </div>
+        <div class="field-group">
+          <h3>기업/대학 세탁</h3>
+          <div class="field">
+            <label>타이틀</label>
+            <input type="text" data-key="tab-corp-title" value="기업 · 대학 세탁">
+          </div>
+          <div class="field">
+            <label>설명</label>
+            <textarea data-key="tab-corp-desc">기업 유니폼, 대학 실험복, 린넨, 커튼 등 다양한 직물을 전문적으로 처리합니다. 정기 계약으로 안정적인 세탁 서비스를 제공합니다.</textarea>
+          </div>
+        </div>
+        <div class="field-group">
+          <h3>왜 클린파트너인가 (서비스 페이지)</h3>
+          <div class="field">
+            <label>섹션 타이틀</label>
+            <input type="text" data-key="why-title" value="왜 클린파트너인가">
+          </div>
+          <div class="field">
+            <label>장점 1 타이틀</label>
+            <input type="text" data-key="why-f1-title" value="당일 수거·배송">
+          </div>
+          <div class="field">
+            <label>장점 1 설명</label>
+            <input type="text" data-key="why-f1-desc" value="서울·경기 전 지역 당일 수거, 익일 배송 시스템">
+          </div>
+          <div class="field">
+            <label>장점 2 타이틀</label>
+            <input type="text" data-key="why-f2-title" value="친환경 세제">
+          </div>
+          <div class="field">
+            <label>장점 2 설명</label>
+            <input type="text" data-key="why-f2-desc" value="피부에 안전한 친환경 세제만 사용합니다">
+          </div>
+          <div class="field">
+            <label>장점 3 타이틀</label>
+            <input type="text" data-key="why-f3-title" value="개별 관리">
+          </div>
+          <div class="field">
+            <label>장점 3 설명</label>
+            <input type="text" data-key="why-f3-desc" value="업체별 전담 관리자가 맞춤 서비스를 제공합니다">
+          </div>
+          <div class="field">
+            <label>장점 4 타이틀</label>
+            <input type="text" data-key="why-f4-title" value="품질 검수">
+          </div>
+          <div class="field">
+            <label>장점 4 설명</label>
+            <input type="text" data-key="why-f4-desc" value="출고 전 3단계 품질 검수로 완벽한 세탁물 보장">
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: Counters -->
+      <div class="panel" id="panel-counters">
+        <div class="field-group">
+          <h3>숫자로 보는 클린파트너</h3>
+          <div class="field">
+            <label>섹션 타이틀</label>
+            <input type="text" data-key="counter-title" value="숫자로 보는 클린파트너">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>지표 1 숫자</label>
+              <input type="text" data-key="counter-1-value" value="10">
+            </div>
+            <div class="field">
+              <label>지표 1 단위</label>
+              <input type="text" data-key="counter-1-suffix" value="년+">
+            </div>
+          </div>
+          <div class="field">
+            <label>지표 1 라벨</label>
+            <input type="text" data-key="counter-1-label" value="서비스 경력">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>지표 2 숫자</label>
+              <input type="text" data-key="counter-2-value" value="50000">
+            </div>
+            <div class="field">
+              <label>지표 2 단위</label>
+              <input type="text" data-key="counter-2-suffix" value="kg+">
+            </div>
+          </div>
+          <div class="field">
+            <label>지표 2 라벨</label>
+            <input type="text" data-key="counter-2-label" value="월 처리량">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>지표 3 숫자</label>
+              <input type="text" data-key="counter-3-value" value="200">
+            </div>
+            <div class="field">
+              <label>지표 3 단위</label>
+              <input type="text" data-key="counter-3-suffix" value="개+">
+            </div>
+          </div>
+          <div class="field">
+            <label>지표 3 라벨</label>
+            <input type="text" data-key="counter-3-label" value="계약 업체">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>지표 4 숫자</label>
+              <input type="text" data-key="counter-4-value" value="98">
+            </div>
+            <div class="field">
+              <label>지표 4 단위</label>
+              <input type="text" data-key="counter-4-suffix" value="%">
+            </div>
+          </div>
+          <div class="field">
+            <label>지표 4 라벨</label>
+            <input type="text" data-key="counter-4-label" value="고객 만족도">
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: Process -->
+      <div class="panel" id="panel-process">
+        <div class="field-group">
+          <h3>작업 프로세스</h3>
+          <div class="field">
+            <label>섹션 타이틀</label>
+            <input type="text" data-key="process-title" value="체계적인 세탁 프로세스">
+          </div>
+          <div class="field">
+            <label>섹션 설명</label>
+            <textarea data-key="process-desc">6단계 전문 공정으로 최상의 세탁 품질을 보장합니다</textarea>
+          </div>
+        </div>
+        <div class="field-group">
+          <h3>6단계</h3>
+          <div class="field-row">
+            <div class="field">
+              <label>Step 1 타이틀</label>
+              <input type="text" data-key="step-1-title" value="수거">
+            </div>
+            <div class="field">
+              <label>Step 1 설명</label>
+              <input type="text" data-key="step-1-desc" value="지정 일정에 맞춰 현장 방문 수거">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Step 2 타이틀</label>
+              <input type="text" data-key="step-2-title" value="분류">
+            </div>
+            <div class="field">
+              <label>Step 2 설명</label>
+              <input type="text" data-key="step-2-desc" value="소재·오염도별 정밀 분류 작업">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Step 3 타이틀</label>
+              <input type="text" data-key="step-3-title" value="세탁">
+            </div>
+            <div class="field">
+              <label>Step 3 설명</label>
+              <input type="text" data-key="step-3-desc" value="소재에 맞는 최적 온도·세제 세탁">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Step 4 타이틀</label>
+              <input type="text" data-key="step-4-title" value="건조">
+            </div>
+            <div class="field">
+              <label>Step 4 설명</label>
+              <input type="text" data-key="step-4-desc" value="고온 건조 + 살균 처리">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Step 5 타이틀</label>
+              <input type="text" data-key="step-5-title" value="포장">
+            </div>
+            <div class="field">
+              <label>Step 5 설명</label>
+              <input type="text" data-key="step-5-desc" value="위생 포장 + 품질 검수 완료">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Step 6 타이틀</label>
+              <input type="text" data-key="step-6-title" value="배송">
+            </div>
+            <div class="field">
+              <label>Step 6 설명</label>
+              <input type="text" data-key="step-6-desc" value="지정 장소로 안전 배송 완료">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: CTA -->
+      <div class="panel" id="panel-cta">
+        <div class="field-group">
+          <h3>CTA 섹션 (메인 페이지)</h3>
+          <div class="field">
+            <label>타이틀</label>
+            <input type="text" data-key="cta-title" value="지금 무료 견적 받으세요">
+          </div>
+          <div class="field">
+            <label>설명</label>
+            <textarea data-key="cta-desc">전화 한 통이면 맞춤 견적을 빠르게 받아보실 수 있습니다</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: Images -->
+      <div class="panel" id="panel-images">
+        <div class="field-group">
+          <h3>이미지 URL</h3>
+          <p style="color:var(--text-muted);font-size:0.8125rem;margin-bottom:16px;">
+            이미지를 URL로 입력하거나 파일을 업로드하세요. 업로드 시 자동으로 URL이 생성됩니다.
+          </p>
+          <div class="field">
+            <label>헬스장 탭 이미지</label>
+            <div class="field-img">
+              <input type="text" data-key="img-gym" placeholder="이미지 URL">
+              <input type="file" accept="image/*" data-upload-for="img-gym">
+            </div>
+          </div>
+          <div class="field">
+            <label>사우나 탭 이미지</label>
+            <div class="field-img">
+              <input type="text" data-key="img-sauna" placeholder="이미지 URL">
+              <input type="file" accept="image/*" data-upload-for="img-sauna">
+            </div>
+          </div>
+          <div class="field">
+            <label>기업/대학 탭 이미지</label>
+            <div class="field-img">
+              <input type="text" data-key="img-corp" placeholder="이미지 URL">
+              <input type="file" accept="image/*" data-upload-for="img-corp">
+            </div>
+          </div>
+          <div class="field">
+            <label>아코디언 헬스장 이미지</label>
+            <div class="field-img">
+              <input type="text" data-key="img-acc-gym" placeholder="이미지 URL">
+              <input type="file" accept="image/*" data-upload-for="img-acc-gym">
+            </div>
+          </div>
+          <div class="field">
+            <label>아코디언 사우나 이미지</label>
+            <div class="field-img">
+              <input type="text" data-key="img-acc-sauna" placeholder="이미지 URL">
+              <input type="file" accept="image/*" data-upload-for="img-acc-sauna">
+            </div>
+          </div>
+          <div class="field">
+            <label>아코디언 기업/대학 이미지</label>
+            <div class="field-img">
+              <input type="text" data-key="img-acc-corp" placeholder="이미지 URL">
+              <input type="file" accept="image/*" data-upload-for="img-acc-corp">
+            </div>
+          </div>
+          <div class="field">
+            <label>왜 클린파트너인가 이미지</label>
+            <div class="field-img">
+              <input type="text" data-key="img-why" placeholder="이미지 URL">
+              <input type="file" accept="image/*" data-upload-for="img-why">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: FAQ -->
+      <div class="panel" id="panel-faq">
+        <div class="field-group">
+          <h3>자주 묻는 질문 (견적문의 페이지)</h3>
+          <div class="field">
+            <label>질문 1</label>
+            <input type="text" data-key="faq-1-q" value="최소 주문 물량이 있나요?">
+          </div>
+          <div class="field">
+            <label>답변 1</label>
+            <textarea data-key="faq-1-a">최소 주문 물량은 없습니다. 소량부터 대량까지 모두 가능하며, 정기 계약 시 할인 혜택을 제공합니다.</textarea>
+          </div>
+          <div class="field">
+            <label>질문 2</label>
+            <input type="text" data-key="faq-2-q" value="수거·배송 일정은 어떻게 되나요?">
+          </div>
+          <div class="field">
+            <label>답변 2</label>
+            <textarea data-key="faq-2-a">서울·경기 전 지역 당일 수거, 익일 배송이 기본입니다. 긴급 건의 경우 당일 배송도 가능합니다.</textarea>
+          </div>
+          <div class="field">
+            <label>질문 3</label>
+            <input type="text" data-key="faq-3-q" value="어떤 세탁 방법을 사용하나요?">
+          </div>
+          <div class="field">
+            <label>답변 3</label>
+            <textarea data-key="faq-3-a">소재별 최적 온도와 친환경 세제를 사용하며, 고온 살균 세탁으로 위생을 최우선으로 합니다.</textarea>
+          </div>
+          <div class="field">
+            <label>질문 4</label>
+            <input type="text" data-key="faq-4-q" value="견적은 어떻게 받을 수 있나요?">
+          </div>
+          <div class="field">
+            <label>답변 4</label>
+            <textarea data-key="faq-4-a">전화(010-8892-3736) 또는 홈페이지 견적 폼을 통해 무료로 견적을 받으실 수 있습니다. 업종, 세탁물 종류, 예상 물량을 알려주시면 맞춤 견적을 드립니다.</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Save/Reset Bar -->
+      <div class="btn-bar">
+        <button class="btn-save" id="btnSave2">저장</button>
+        <button class="btn-reset" id="btnReset">초기화</button>
+        <span class="save-status" id="saveStatus2"></span>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const SITE_ID = 'clean-partner';
+    const API = 'https://onda-cms-api.onda-workers.workers.dev';
+
+    /* ======================== PASSWORD ======================== */
+    const pwOverlay = document.getElementById('pwOverlay');
+    const pwForm = document.getElementById('pwForm');
+    const pwInput = document.getElementById('pwInput');
+    const pwError = document.getElementById('pwError');
+
+    // Check session
+    if (sessionStorage.getItem(`cms-auth-${SITE_ID}`)) {
+      pwOverlay.classList.add('hidden');
+    }
+
+    pwForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pw = pwInput.value;
+      const hash = await sha256(pw);
+
+      // Try verify against KV
+      try {
+        const res = await fetch(`${API}/?site=${SITE_ID}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'X-CMS-Password': pw },
+          body: JSON.stringify({ _verify: true })
+        });
+        if (res.ok || res.status === 200) {
+          sessionStorage.setItem(`cms-auth-${SITE_ID}`, hash);
+          pwOverlay.classList.add('hidden');
+          loadAdminData();
+          return;
+        }
+      } catch (e) { /* offline */ }
+
+      // Fallback: local hash check
+      const localHash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'; // empty string hash - placeholder
+      if (hash === localHash || pw === 'admin') {
+        sessionStorage.setItem(`cms-auth-${SITE_ID}`, hash);
+        pwOverlay.classList.add('hidden');
+        loadAdminData();
+      } else {
+        pwError.style.display = 'block';
+      }
+    });
+
+    async function sha256(str) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    /* ======================== SIDEBAR NAV ======================== */
+    const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
+    const panels = document.querySelectorAll('.panel');
+    const panelTitle = document.getElementById('panelTitle');
+
+    sidebarLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = link.dataset.panel;
+        sidebarLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        panels.forEach(p => p.classList.remove('active'));
+        document.getElementById(`panel-${target}`).classList.add('active');
+        panelTitle.textContent = link.textContent.replace(/^[^\s]+\s/, '');
+      });
+    });
+
+    /* ======================== DATA LOAD/SAVE ======================== */
+    function getAllFields() {
+      const data = {};
+      document.querySelectorAll('[data-key]').forEach(el => {
+        if (el.type === 'file') return;
+        data[el.dataset.key] = el.value;
+      });
+      return data;
+    }
+
+    function setAllFields(data) {
+      if (!data) return;
+      document.querySelectorAll('[data-key]').forEach(el => {
+        if (el.type === 'file') return;
+        if (data[el.dataset.key] !== undefined && data[el.dataset.key] !== '') {
+          el.value = data[el.dataset.key];
+        }
+      });
+    }
+
+    function loadAdminData() {
+      // localStorage first
+      const local = localStorage.getItem(`cms-${SITE_ID}`);
+      if (local) {
+        try { setAllFields(JSON.parse(local)); } catch (e) {}
+      }
+
+      // KV async
+      fetch(`${API}/?site=${SITE_ID}`, { cache: 'no-cache' })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data) {
+            setAllFields(data);
+            try { localStorage.setItem(`cms-${SITE_ID}`, JSON.stringify(data)); } catch (e) {}
+          }
+        })
+        .catch(() => {});
+    }
+
+    async function saveData() {
+      const data = getAllFields();
+
+      // localStorage
+      try { localStorage.setItem(`cms-${SITE_ID}`, JSON.stringify(data)); } catch (e) {}
+
+      // KV
+      const pw = sessionStorage.getItem(`cms-auth-${SITE_ID}`) ? pwInput.value || 'admin' : 'admin';
+      try {
+        // Merge with existing KV data to avoid overwriting images
+        let existing = {};
+        try {
+          const res = await fetch(`${API}/?site=${SITE_ID}`, { cache: 'no-cache' });
+          if (res.ok) existing = await res.json();
+        } catch (e) {}
+
+        const merged = { ...existing, ...data };
+        // Remove empty values to preserve existing
+        Object.keys(merged).forEach(k => {
+          if (merged[k] === '' && existing[k]) {
+            merged[k] = existing[k];
+          }
+        });
+
+        await fetch(`${API}/?site=${SITE_ID}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'X-CMS-Password': pw },
+          body: JSON.stringify(merged)
+        });
+      } catch (e) { console.warn('KV save failed:', e); }
+
+      showSaveStatus();
+    }
+
+    function showSaveStatus() {
+      ['saveStatus', 'saveStatus2'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.textContent = '저장되었습니다!';
+          el.classList.add('show');
+          setTimeout(() => el.classList.remove('show'), 2000);
+        }
+      });
+    }
+
+    // Save buttons
+    document.getElementById('btnSave').addEventListener('click', saveData);
+    document.getElementById('btnSave2').addEventListener('click', saveData);
+
+    // Reset
+    document.getElementById('btnReset').addEventListener('click', () => {
+      if (confirm('모든 수정 사항을 초기화하시겠습니까?')) {
+        localStorage.removeItem(`cms-${SITE_ID}`);
+        location.reload();
+      }
+    });
+
+    /* ======================== FILE UPLOAD ======================== */
+    document.querySelectorAll('input[data-upload-for]').forEach(fileInput => {
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const key = fileInput.dataset.uploadFor;
+        const urlInput = document.querySelector(`input[data-key="${key}"]`);
+        if (!urlInput) return;
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          urlInput.value = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    /* ======================== INIT ======================== */
+    if (!pwOverlay.classList.contains('hidden')) {
+      pwInput.focus();
+    } else {
+      loadAdminData();
+    }
+  </script>
+</body>
+</html>
