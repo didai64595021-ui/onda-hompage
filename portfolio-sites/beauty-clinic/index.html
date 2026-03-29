@@ -2466,6 +2466,72 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   window.addEventListener('scroll', handleFloatingVisibility, { passive: true });
 
+  /* ============================================
+     13. SCROLL PROGRESS BAR
+     ============================================ */
+  const scrollProgressBar = document.getElementById('scrollProgress');
+  function updateScrollProgress() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    if (docHeight > 0) {
+      scrollProgressBar.style.width = (scrollTop / docHeight * 100) + '%';
+    }
+  }
+  window.addEventListener('scroll', updateScrollProgress, { passive: true });
+
+  /* ============================================
+     14. AMBIENT LIGHT (Mouse follower)
+     ============================================ */
+  var ambientLight = document.getElementById('ambientLight');
+  var isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  if (!isTouchDevice && ambientLight) {
+    document.addEventListener('mousemove', function(e) {
+      ambientLight.style.left = e.clientX + 'px';
+      ambientLight.style.top = e.clientY + 'px';
+      // Show only on light sections
+      var el = document.elementFromPoint(e.clientX, e.clientY);
+      if (el) {
+        var sec = el.closest('section');
+        if (sec && (sec.classList.contains('section-dark') || sec.classList.contains('ba-section'))) {
+          ambientLight.classList.remove('active');
+        } else {
+          ambientLight.classList.add('active');
+        }
+      }
+    }, { passive: true });
+  }
+
+  /* ============================================
+     15. WATERMARK PARALLAX
+     ============================================ */
+  var watermarks = document.querySelectorAll('[data-watermark]');
+  function updateWatermarkParallax() {
+    var scrollY = window.pageYOffset;
+    watermarks.forEach(function(wm) {
+      var rect = wm.parentElement.getBoundingClientRect();
+      var offset = (rect.top + rect.height / 2) * 0.1;
+      wm.style.transform = wm.style.transform.replace(/translateY\([^)]*\)/, '') + ' translateY(' + (-offset) + 'px)';
+    });
+  }
+  if (watermarks.length > 0) {
+    window.addEventListener('scroll', updateWatermarkParallax, { passive: true });
+  }
+
+  /* ============================================
+     16. TEXT HIGHLIGHT MARKER (IntersectionObserver)
+     ============================================ */
+  var highlightObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        highlightObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.text-highlight').forEach(function(el) {
+    highlightObserver.observe(el);
+  });
+
 });
 </script>
 
