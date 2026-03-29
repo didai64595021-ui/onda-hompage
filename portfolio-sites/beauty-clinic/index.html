@@ -7,7 +7,7 @@
 <meta name="description" content="LÚMINE 뷰티클리닉 — 광주 프리미엄 피부과, 에스테틱. 울쎄라, 써마지, 피코슈어 등 최신 장비 시술. 전남대 의대 출신 피부과 전문의 직접 시술.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Nunito:wght@300;400;600;700&family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Great+Vibes&family=Nunito:wght@300;400;600;700&family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ============================================
    LÚMINE Beauty Clinic — Design System
@@ -1287,6 +1287,114 @@ section {
 }
 
 /* ============================================
+   SECTION DIVIDER SCRIPT (Great Vibes)
+   ============================================ */
+.section-script {
+  position: absolute;
+  font-family: 'Great Vibes', cursive;
+  color: rgba(236,72,153,0.06);
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* ============================================
+   BACKGROUND WATERMARK
+   ============================================ */
+.bg-watermark {
+  position: absolute;
+  font-family: var(--font-heading);
+  font-weight: 300;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  line-height: 1;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+/* ============================================
+   SVG CURVED SECTION DIVIDERS
+   ============================================ */
+.section-curve {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  z-index: 2;
+  pointer-events: none;
+  display: block;
+}
+
+/* ============================================
+   GRADIENT TEXT
+   ============================================ */
+.gradient-text {
+  background: linear-gradient(135deg, #EC4899 0%, #C48B5C 50%, #EC4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+@supports not (-webkit-background-clip: text) {
+  .gradient-text {
+    color: var(--accent);
+    background: none;
+  }
+}
+
+/* ============================================
+   AMBIENT LIGHT (Mouse follower)
+   ============================================ */
+.ambient-light {
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(236,72,153,0.04) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  transform: translate(-50%, -50%);
+  transition: transform 0.3s ease-out, opacity 0.4s ease;
+  will-change: transform;
+  opacity: 0;
+}
+.ambient-light.active {
+  opacity: 1;
+}
+
+/* ============================================
+   TEXT HIGHLIGHT MARKER
+   ============================================ */
+.text-highlight {
+  background: linear-gradient(transparent 60%, rgba(236,72,153,0.15) 60%);
+  background-size: 0% 100%;
+  background-repeat: no-repeat;
+  padding: 0 4px;
+  transition: background-size 0.8s ease;
+}
+.text-highlight.visible {
+  background-size: 100% 100%;
+}
+
+/* ============================================
+   SCROLL PROGRESS BAR
+   ============================================ */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, #EC4899, #C48B5C);
+  z-index: 10000;
+  pointer-events: none;
+  transition: width 0.05s linear;
+}
+
+/* ============================================
    RESPONSIVE
    ============================================ */
 
@@ -1310,6 +1418,10 @@ section {
 
 /* 768px */
 @media (max-width: 768px) {
+  .section-script { display: none; }
+  .bg-watermark { display: none; }
+  .ambient-light { display: none; }
+  .section-curve { height: 40px; }
   .container { padding: 0 16px; }
   section { padding: 56px 0; }
   .heading-xl, .hero__title { font-size: 36px; }
@@ -1380,6 +1492,8 @@ section {
     transition-duration: 0.01ms !important;
   }
   .preloader { display: none; }
+  .ambient-light { display: none; }
+  .bg-watermark { transform: none !important; }
 }
 </style>
 </head>
