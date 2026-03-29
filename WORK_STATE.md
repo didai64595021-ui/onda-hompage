@@ -3,7 +3,15 @@
 > 자동 업데이트: 2026-03-28 KST
 
 ## 현재 작업
-LÚMINE 뷰티클리닉 포트폴리오 사이트 제작 (미의원 어워드급 업그레이드)
+LEX & PARTNERS 법률사무소 포트폴리오 사이트 제작 (Awwwards급 다크 모던)
+
+### LEX & PARTNERS 법률사무소 — 완료 (2026-03-30)
+- [x] Step 1: index.html Part 1 (Head + CSS 전체 — 변수, 베이스, 컴포넌트, 인터랙션, 반응형, 1502줄)
+- [x] Step 2: index.html Part 2 (HTML: 헤더 + 히어로 + 섹션2 소개)
+- [x] Step 3: index.html Part 3 (HTML: 섹션3 전문분야 사이드스크롤 + 섹션4 변호사팀)
+- [x] Step 4: index.html Part 4 (HTML: 섹션5 타임라인 + 섹션6 실적 + 섹션7 상담/푸터)
+- [x] Step 5: index.html Part 5 (JavaScript 전체 — 17개 인터랙션 함수)
+- [x] Step 6: 검증 (이미지 4개 200OK, 앵커6개 매칭, 한글폰트 안전) + Git commit + push
 
 ### LÚMINE 뷰티클리닉 포트폴리오 — 완료 (2026-03-30)
 - [x] Step 1: index.html Part 1 (Head + CSS 전체 — 뉴모피즘, 에디토리얼, 반응형)
@@ -137,7 +145,7 @@ LÚMINE 뷰티클리닉 포트폴리오 사이트 제작 (미의원 어워드급
 - [x] Step 3: Git commit + push
 
 ## 다음 단계
-LÚMINE 세부 디자인 업그레이드 완료 — 다음 지시 대기
+LEX & PARTNERS 완료 — 다음 지시 대기
 
 ## Git 상태 (자동)
 - **브랜치**: main
