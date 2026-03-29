@@ -483,7 +483,7 @@ tr:hover td { background: rgba(13,153,255,0.04); }
         </div>
       </div>
       <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>상품별 CPC 성과</div>
-      <div class="table-wrap"><table id="tableCpc"><thead><tr><th>상품명</th><th>노출</th><th>클릭</th><th>CTR</th><th>CPC비용</th><th>소재변경</th></tr></thead><tbody></tbody></table></div>
+      <div class="table-wrap"><table id="tableCpc"><thead><tr><th>상품명</th><th>노출</th><th>클릭</th><th>CTR</th><th>문의</th><th>문의전환율</th><th>CPC비용</th><th>소재변경</th></tr></thead><tbody></tbody></table></div>
       <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>소재 변경 이력</div>
       <div class="table-wrap"><table id="tableCreative"><thead><tr><th>날짜</th><th>상품</th><th>변경유형</th><th>이전값</th><th>새값</th></tr></thead><tbody></tbody></table></div>
     </div>
@@ -506,7 +506,7 @@ tr:hover td { background: rgba(13,153,255,0.04); }
         </div>
       </div>
       <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>상품별 전환율</div>
-      <div class="table-wrap"><table id="tableConversion"><thead><tr><th>상품명</th><th>문의수</th><th>견적수</th><th>결제수</th><th>전환율</th></tr></thead><tbody></tbody></table></div>
+      <div class="table-wrap"><table id="tableConversion"><thead><tr><th>상품명</th><th>CPC클릭</th><th>문의수</th><th>클릭→문의</th><th>견적수</th><th>결제수</th><th>문의→결제</th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <!-- 탭 3: 서비스별 문의량 -->
@@ -799,16 +799,27 @@ async function loadCpcTab() {
   const { data: cpcData } = await q;
   const rows = cpcData || [];
 
+  // 문의 데이터 로드
+  let inqQ = sb.from('kmong_inquiries').select('product_id');
+  if (dateFrom) inqQ = inqQ.gte('inquiry_date', dateFrom);
+  const { data: inqData } = await inqQ;
+  const inqRows = inqData || [];
+  const inqByProduct = {};
+  inqRows.forEach(i => { if (i.product_id) inqByProduct[i.product_id] = (inqByProduct[i.product_id] || 0) + 1; });
+  const totalInquiries = inqRows.length;
+
   // KPI
   const totalClicks = rows.reduce((s, r) => s + (r.clicks || 0), 0);
   const totalImpressions = rows.reduce((s, r) => s + (r.impressions || 0), 0);
   const avgCtr = totalImpressions > 0 ? (totalClicks / totalImpressions * 100) : 0;
   const totalCost = rows.reduce((s, r) => s + (r.cpc_cost || 0), 0);
+  const inquiryRate = totalClicks > 0 ? (totalInquiries / totalClicks * 100) : 0;
 
   document.getElementById('cpcKpi').innerHTML = [
     { label: '총 클릭수', value: fmt(totalClicks) },
     { label: '총 노출수', value: fmt(totalImpressions) },
     { label: '평균 CTR', value: fmtPct(avgCtr) },
+    { label: '문의 전환율', value: fmtPct(inquiryRate) },
     { label: '총 CPC 비용', value: fmtMoney(totalCost) },
   ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join('');
 
@@ -860,8 +871,10 @@ async function loadCpcTab() {
   document.querySelector('#tableCpc tbody').innerHTML = pids.length ? pids.map(pid => {
     const d = byProduct[pid];
     const ctr = d.impressions > 0 ? (d.clicks / d.impressions * 100) : 0;
-    return `<tr><td>${productName(pid)}</td><td>${fmt(d.impressions)}</td><td>${fmt(d.clicks)}</td><td>${fmtPct(ctr)}</td><td>${fmtMoney(d.cost)}</td><td>${changeCounts[pid] || 0}회</td></tr>`;
-  }).join('') : '<tr><td colspan="6"><div class="empty-state"><p>데이터가 없습니다</p></div></td></tr>';
+    const inqCount = inqByProduct[pid] || 0;
+    const inqRate = d.clicks > 0 ? (inqCount / d.clicks * 100) : 0;
+    return `<tr><td>${productName(pid)}</td><td>${fmt(d.impressions)}</td><td>${fmt(d.clicks)}</td><td>${fmtPct(ctr)}</td><td>${inqCount}</td><td>${fmtPct(inqRate)}</td><td>${fmtMoney(d.cost)}</td><td>${changeCounts[pid] || 0}회</td></tr>`;
+  }).join('') : '<tr><td colspan="8"><div class="empty-state"><p>데이터가 없습니다</p></div></td></tr>';
 
   // CPC 비용 차트
   const topProducts = pids.sort((a, b) => byProduct[b].cost - byProduct[a].cost).slice(0, 8);
@@ -917,7 +930,7 @@ async function loadFunnelTab() {
   const dateFrom = getDateFrom();
 
   // CPC 집계
-  let cpcQ = sb.from('kmong_cpc_daily').select('impressions,clicks');
+  let cpcQ = sb.from('kmong_cpc_daily').select('product_id,impressions,clicks');
   if (dateFrom) cpcQ = cpcQ.gte('date', dateFrom);
   const { data: cpcData } = await cpcQ;
   const totalImp = (cpcData || []).reduce((s, r) => s + (r.impressions || 0), 0);
@@ -933,11 +946,15 @@ async function loadFunnelTab() {
   const paid = inquiries.filter(i => i.status === 'paid').length;
 
   // KPI
+  const clickToInqRate = totalClk > 0 ? (totalInq / totalClk * 100) : 0;
+  const inqToPayRate = totalInq > 0 ? (paid / totalInq * 100) : 0;
   document.getElementById('funnelKpi').innerHTML = [
     { label: '총 노출', value: fmt(totalImp) },
     { label: '총 클릭', value: fmt(totalClk) },
     { label: '총 문의', value: fmt(totalInq) },
+    { label: '클릭→문의율', value: fmtPct(clickToInqRate) },
     { label: '총 결제', value: fmt(paid) },
+    { label: '문의→결제율', value: fmtPct(inqToPayRate) },
   ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join('');
 
   // 퍼널
@@ -976,6 +993,13 @@ async function loadFunnelTab() {
   }
   document.getElementById('heatmap').innerHTML = heatHtml;
 
+  // 상품별 CPC 클릭 집계
+  const cpcByProduct = {};
+  (cpcData || []).forEach(r => {
+    if (!r.product_id) return;
+    cpcByProduct[r.product_id] = (cpcByProduct[r.product_id] || 0) + (r.clicks || 0);
+  });
+
   // 상품별 전환율 테이블
   const byProduct = {};
   inquiries.forEach(i => {
@@ -985,12 +1009,18 @@ async function loadFunnelTab() {
     if (['quoted', 'paid'].includes(i.status)) byProduct[i.product_id].quoted++;
     if (i.status === 'paid') byProduct[i.product_id].paid++;
   });
+  // CPC 데이터만 있는 상품도 포함
+  Object.keys(cpcByProduct).forEach(pid => {
+    if (!byProduct[pid]) byProduct[pid] = { inq: 0, quoted: 0, paid: 0 };
+  });
   const pids = Object.keys(byProduct);
   document.querySelector('#tableConversion tbody').innerHTML = pids.length ? pids.map(pid => {
     const d = byProduct[pid];
-    const rate = d.inq > 0 ? (d.paid / d.inq * 100).toFixed(1) + '%' : '-';
-    return `<tr><td>${productName(pid)}</td><td>${d.inq}</td><td>${d.quoted}</td><td>${d.paid}</td><td>${rate}</td></tr>`;
-  }).join('') : '<tr><td colspan="5"><div class="empty-state"><p>데이터가 없습니다</p></div></td></tr>';
+    const cpcClicks = cpcByProduct[pid] || 0;
+    const clickToInq = cpcClicks > 0 ? (d.inq / cpcClicks * 100).toFixed(1) + '%' : '-';
+    const inqToPay = d.inq > 0 ? (d.paid / d.inq * 100).toFixed(1) + '%' : '-';
+    return `<tr><td>${productName(pid)}</td><td>${fmt(cpcClicks)}</td><td>${d.inq}</td><td>${clickToInq}</td><td>${d.quoted}</td><td>${d.paid}</td><td>${inqToPay}</td></tr>`;
+  }).join('') : '<tr><td colspan="7"><div class="empty-state"><p>데이터가 없습니다</p></div></td></tr>';
 
   // 평균 전환 소요일 차트
   const convDays = {};
