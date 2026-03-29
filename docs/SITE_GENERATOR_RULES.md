@@ -268,6 +268,8 @@
 | dermatology | T5 | C7 | F4 | L4 | I1,I4,I7,I8,I11 | H10 | N3 | S2 | IMG2 | B4 |
 | premium-dining | T14 | C15 | F11 | L10 | I6,I8,I14,I32,I34 | H7 | N9 | S4 | IMG6 | B5 |
 | cocktail-bar | T3 | C8 | F13 | L2 | I2,I9,I12,I30,I33 | H1 | N5 | S5 | IMG5 | B9 |
+| korean-clinic | T9 | C14 | F8 | L15 | I4,I17,I22,I27,I28 | H9 | N7 | S2 | IMG4 | B10 |
+| premium-gym | T8 | C19 | F10 | L9 | I3,I10,I13,I21,I35 | H12 | N4 | S7 | IMG10 | B6 |
 
 ### 금지 조합 (과다 사용)
 - T1+C1+F1 (다크+골드+Playfair) — 5회, 금지
