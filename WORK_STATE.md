@@ -3,7 +3,16 @@
 > 자동 업데이트: 2026-03-28 KST
 
 ## 현재 작업
-GLOW 더마 클리닉 피부과 포트폴리오 사이트 제작
+LÚMINE 뷰티클리닉 포트폴리오 사이트 제작 (미의원 어워드급 업그레이드)
+
+### LÚMINE 뷰티클리닉 포트폴리오 — 진행 중 (2026-03-30)
+- [x] Step 1: index.html Part 1 (Head + CSS 전체 — 뉴모피즘, 에디토리얼, 반응형)
+- [x] Step 2: index.html Part 2 (HTML: 프리로더 + 헤더 + 네비 + 히어로 + 이벤트)
+- [x] Step 3: index.html Part 3 (HTML: 시술탭 + B/A슬라이더 + 의료진)
+- [x] Step 4: index.html Part 4 (HTML: 시설 + 오시는길/연락처 + 푸터 + 플로팅)
+- [x] Step 5: index.html Part 5 (JavaScript 전체 — 타이핑, 탭, 슬라이더, SVG, 스크롤)
+- [x] Step 6: 검증 (이미지 URL 15개 200 확인, 404 2개 교체 완료)
+- [x] Step 7: Git commit + push
 
 ### GLOW 더마 클리닉 포트폴리오 — 진행 중 (2026-03-30)
 - [x] Step 1: index.html Part 1 (Head + CSS + Hero + Treatment + B/A 섹션)
@@ -122,7 +131,7 @@ GLOW 더마 클리닉 피부과 포트폴리오 사이트 제작
 - [x] Step 3: Git commit + push
 
 ## 다음 단계
-GLOW 더마 클리닉 완료 — 다음 지시 대기
+LÚMINE 뷰티클리닉 완료 — 다음 지시 대기
 
 ## Git 상태 (자동)
 - **브랜치**: main
