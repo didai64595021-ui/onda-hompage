@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>크몽 CPC 대시보드</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* === 전역 리셋 === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { overflow-x: hidden; scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: 'Pretendard', sans-serif;
+  background: #0f1117;
+  color: #e1e4ea;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+}
+img, video, svg { max-width: 100%; height: auto; display: block; }
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; border: none; background: none; font: inherit; color: inherit; }
+input, select, textarea { font-size: 16px; font-family: inherit; color: inherit; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* === 변수 === */
+:root {
+  --primary: #0D99FF;
+  --primary-dim: rgba(13,153,255,0.15);
+  --bg-body: #0f1117;
+  --bg-card: #181b23;
+  --bg-sidebar: #141720;
+  --bg-input: #1e2130;
+  --border: #2a2d3a;
+  --text-1: #e1e4ea;
+  --text-2: #8b8fa4;
+  --text-3: #5a5e72;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --sidebar-w: 220px;
+}
+
+/* === 사이드바 === */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+.sidebar-logo {
+  padding: 20px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sidebar-logo span { font-size: 11px; color: var(--text-2); font-weight: 400; }
+.sidebar-nav { padding: 12px 8px; flex: 1; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-2);
+  transition: all 0.2s;
+  cursor: pointer;
+  min-height: 40px;
+}
+.nav-item:hover { background: var(--primary-dim); color: var(--text-1); }
+.nav-item.active { background: var(--primary-dim); color: var(--primary); font-weight: 600; }
+.nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+.sidebar-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+/* === 메인 === */
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* === 헤더 === */
+.header {
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-body);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.header-left { display: flex; align-items: center; gap: 12px; }
+.header-left h1 { font-size: 18px; font-weight: 700; }
+.header-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.date-range {
+  display: flex;
+  background: var(--bg-input);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.date-range button {
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--text-2);
+  transition: all 0.2s;
+  min-height: 32px;
+}
+.date-range button.active { background: var(--primary); color: #fff; }
+.date-range button:hover:not(.active) { color: var(--text-1); }
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
+  transition: opacity 0.2s;
+  min-height: 36px;
+}
+.btn-primary:hover { opacity: 0.85; }
+.btn-icon {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  display: flex; align-items: center; gap: 4px;
+  transition: all 0.2s;
+  min-height: 36px;
+}
+.btn-icon:hover { border-color: var(--primary); color: var(--primary); }
+.hamburger { display: none; padding: 8px; }
+.hamburger span { display: block; width: 20px; height: 2px; background: var(--text-1); margin: 4px 0; transition: all 0.3s; }
+
+/* === 콘텐츠 === */
+.content { padding: 24px; flex: 1; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* === KPI 카드 === */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+.kpi-label { font-size: 12px; color: var(--text-2); margin-bottom: 4px; }
+.kpi-value { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.kpi-change { font-size: 11px; margin-top: 4px; }
+.kpi-change.up { color: var(--success); }
+.kpi-change.down { color: var(--danger); }
+
+/* === 차트 카드 === */
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.chart-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+.chart-card.full { grid-column: 1 / -1; }
+.chart-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.chart-title .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); }
+.chart-wrap { position: relative; width: 100%; }
+.chart-wrap canvas { width: 100% !important; }
+
+/* === 테이블 === */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  margin-bottom: 24px;
+}
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead { background: var(--bg-input); }
+th { padding: 10px 12px; text-align: left; font-weight: 600; color: var(--text-2); font-size: 12px; white-space: nowrap; cursor: pointer; user-select: none; }
+th:hover { color: var(--primary); }
+td { padding: 10px 12px; border-top: 1px solid var(--border); white-space: nowrap; }
+tr:hover td { background: rgba(13,153,255,0.04); }
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-pending { background: rgba(251,191,36,0.15); color: var(--warning); }
+.badge-quoted { background: rgba(13,153,255,0.15); color: var(--primary); }
+.badge-paid { background: rgba(52,211,153,0.15); color: var(--success); }
+.badge-cancelled { background: rgba(248,113,113,0.15); color: var(--danger); }
+
+/* === 퍼널 === */
+.funnel { display: flex; flex-direction: column; gap: 4px; padding: 12px 0; }
+.funnel-step {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 0;
+}
+.funnel-bar {
+  height: 32px;
+  background: var(--primary);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  transition: width 0.6s ease;
+  min-width: 40px;
+}
+.funnel-label { font-size: 13px; color: var(--text-2); width: 60px; flex-shrink: 0; text-align: right; }
+.funnel-pct { font-size: 11px; color: var(--text-3); width: 50px; }
+
+/* === 히트맵 === */
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: 40px repeat(24, 1fr);
+  gap: 2px;
+  font-size: 10px;
+}
+.heatmap-cell {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: rgba(255,255,255,0.6);
+}
+.heatmap-label { display: flex; align-items: center; justify-content: center; color: var(--text-3); font-size: 11px; }
+
+/* === 입력 패널 === */
+.input-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.input-overlay.open { opacity: 1; pointer-events: auto; }
+.input-panel {
+  position: fixed;
+  top: 0; right: -420px; bottom: 0;
+  width: 400px;
+  max-width: 100vw;
+  background: var(--bg-sidebar);
+  border-left: 1px solid var(--border);
+  z-index: 201;
+  transition: right 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.input-panel.open { right: 0; }
+.panel-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: var(--bg-sidebar);
+  z-index: 1;
+}
+.panel-header h2 { font-size: 16px; font-weight: 700; }
+.panel-close { font-size: 20px; padding: 4px; }
+.panel-body { padding: 20px; flex: 1; }
+.panel-tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+.panel-tab {
+  flex: 1;
+  padding: 8px 4px;
+  font-size: 12px;
+  text-align: center;
+  border-radius: 6px;
+  background: var(--bg-input);
+  color: var(--text-2);
+  transition: all 0.2s;
+}
+.panel-tab.active { background: var(--primary); color: #fff; }
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-size: 12px; color: var(--text-2); margin-bottom: 4px; }
+.form-input {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-1);
+  font-size: 14px;
+  transition: border-color 0.2s;
+  min-height: 38px;
+}
+.form-input:focus { outline: none; border-color: var(--primary); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-submit {
+  width: 100%;
+  padding: 10px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 8px;
+  transition: opacity 0.2s;
+  min-height: 42px;
+}
+.form-submit:hover { opacity: 0.85; }
+.form-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* === 빈 상태 === */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-3);
+}
+.empty-state svg { width: 48px; height: 48px; margin: 0 auto 12px; opacity: 0.3; }
+.empty-state p { font-size: 14px; }
+
+/* === 토스트 === */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 13px;
+  z-index: 300;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.3s;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { border-color: var(--success); }
+.toast.error { border-color: var(--danger); }
+
+/* === 로딩 === */
+.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* === 반응형 === */
+@media (max-width: 1024px) {
+  :root { --sidebar-w: 0px; }
+  .sidebar { transform: translateX(-100%); width: 220px; }
+  .sidebar.open { transform: translateX(0); }
+  .hamburger { display: block; }
+  .main { margin-left: 0; }
+}
+@media (max-width: 768px) {
+  .content { padding: 16px; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .chart-grid { grid-template-columns: 1fr; }
+  .header { padding: 12px 16px; }
+  .header-left h1 { font-size: 15px; }
+  .date-range button { padding: 5px 8px; font-size: 11px; }
+  .input-panel { width: 100vw; right: -100vw; }
+  .heatmap-grid { font-size: 8px; }
+}
+@media (max-width: 480px) {
+  .kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .kpi-value { font-size: 20px; }
+  .kpi-card { padding: 12px; }
+  .form-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- 사이드바 -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 3v18M3 9h18"/></svg>
+    크몽 대시보드 <span>v1.0</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-item active" data-tab="cpc" onclick="switchTab('cpc')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+      CPC 소재테스트
+    </div>
+    <div class="nav-item" data-tab="funnel" onclick="switchTab('funnel')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+      전환 퍼널
+    </div>
+    <div class="nav-item" data-tab="inquiry" onclick="switchTab('inquiry')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      서비스별 문의량
+    </div>
+  </nav>
+  <div class="sidebar-footer">온다마케팅 &copy; 2026</div>
+</aside>
+
+<!-- 메인 -->
+<div class="main">
+  <!-- 헤더 -->
+  <header class="header">
+    <div class="header-left">
+      <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+      <h1 id="pageTitle">CPC 소재테스트</h1>
+    </div>
+    <div class="header-right">
+      <div class="date-range" id="dateRange">
+        <button data-days="7" onclick="setDateRange(7)">7일</button>
+        <button data-days="30" class="active" onclick="setDateRange(30)">30일</button>
+        <button data-days="90" onclick="setDateRange(90)">90일</button>
+        <button data-days="0" onclick="setDateRange(0)">전체</button>
+      </div>
+      <button class="btn-icon" onclick="refreshData()">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+        새로고침
+      </button>
+      <button class="btn-primary" onclick="openInputPanel()">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        데이터 입력
+      </button>
+    </div>
+  </header>
+
+  <!-- 콘텐츠 -->
+  <div class="content">
+
+    <!-- 탭 1: CPC 소재테스트 -->
+    <div class="tab-panel active" id="tab-cpc">
+      <div class="kpi-grid" id="cpcKpi"></div>
+      <div class="chart-grid">
+        <div class="chart-card full">
+          <div class="chart-title"><span class="dot"></span>일별 클릭수 / 노출수 추이</div>
+          <div class="chart-wrap"><canvas id="chartCpcDaily"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title"><span class="dot"></span>소재 변경 전후 CTR 비교</div>
+          <div class="chart-wrap"><canvas id="chartCtrCompare"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title"><span class="dot"></span>상품별 CPC 비용</div>
+          <div class="chart-wrap"><canvas id="chartCpcCost"></canvas></div>
+        </div>
+      </div>
+      <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>상품별 CPC 성과</div>
+      <div class="table-wrap"><table id="tableCpc"><thead><tr><th>상품명</th><th>노출</th><th>클릭</th><th>CTR</th><th>CPC비용</th><th>소재변경</th></tr></thead><tbody></tbody></table></div>
+      <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>소재 변경 이력</div>
+      <div class="table-wrap"><table id="tableCreative"><thead><tr><th>날짜</th><th>상품</th><th>변경유형</th><th>이전값</th><th>새값</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <!-- 탭 2: 전환 퍼널 -->
+    <div class="tab-panel" id="tab-funnel">
+      <div class="kpi-grid" id="funnelKpi"></div>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-title"><span class="dot"></span>전환 퍼널</div>
+          <div class="funnel" id="funnelChart"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title"><span class="dot"></span>평균 전환 소요일</div>
+          <div class="chart-wrap"><canvas id="chartConvDays"></canvas></div>
+        </div>
+        <div class="chart-card full">
+          <div class="chart-title"><span class="dot"></span>요일별 문의 히트맵</div>
+          <div class="heatmap-grid" id="heatmap"></div>
+        </div>
+      </div>
+      <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>상품별 전환율</div>
+      <div class="table-wrap"><table id="tableConversion"><thead><tr><th>상품명</th><th>문의수</th><th>견적수</th><th>결제수</th><th>전환율</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <!-- 탭 3: 서비스별 문의량 -->
+    <div class="tab-panel" id="tab-inquiry">
+      <div class="kpi-grid" id="inquiryKpi"></div>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-title"><span class="dot"></span>카테고리별 문의 건수</div>
+          <div class="chart-wrap"><canvas id="chartCatInquiry"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title"><span class="dot"></span>월별 문의 추이</div>
+          <div class="chart-wrap"><canvas id="chartMonthly"></canvas></div>
+        </div>
+        <div class="chart-card full">
+          <div class="chart-title"><span class="dot"></span>상품별 문의 vs 결제</div>
+          <div class="chart-wrap"><canvas id="chartInqVsPay"></canvas></div>
+        </div>
+      </div>
+      <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>최근 문의 목록</div>
+      <div class="table-wrap"><table id="tableInquiries"><thead><tr><th>날짜</th><th>고객</th><th>상품</th><th>상태</th><th>금액</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 입력 패널 오버레이 -->
+<div class="input-overlay" id="inputOverlay" onclick="closeInputPanel()"></div>
+<div class="input-panel" id="inputPanel">
+  <div class="panel-header">
+    <h2>데이터 입력</h2>
+    <button class="panel-close" onclick="closeInputPanel()">&times;</button>
+  </div>
+  <div class="panel-body">
+    <div class="panel-tabs">
+      <button class="panel-tab active" onclick="switchPanelTab(this,'form-cpc')">CPC</button>
+      <button class="panel-tab" onclick="switchPanelTab(this,'form-inquiry')">문의</button>
+      <button class="panel-tab" onclick="switchPanelTab(this,'form-order')">주문</button>
+      <button class="panel-tab" onclick="switchPanelTab(this,'form-creative')">소재변경</button>
+    </div>
+
+    <!-- CPC 입력폼 -->
+    <form id="form-cpc" onsubmit="return submitCpc(event)">
+      <div class="form-group">
+        <label class="form-label">상품</label>
+        <select class="form-input" name="product_id" required></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">날짜</label>
+        <input type="date" class="form-input" name="date" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">노출수</label>
+          <input type="number" class="form-input" name="impressions" min="0" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">클릭수</label>
+          <input type="number" class="form-input" name="clicks" min="0" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">CPC 비용 (원)</label>
+        <input type="number" class="form-input" name="cpc_cost" min="0" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">광고 타이틀</label>
+        <input type="text" class="form-input" name="title_text">
+      </div>
+      <button type="submit" class="form-submit">저장</button>
+    </form>
+
+    <!-- 문의 입력폼 -->
+    <form id="form-inquiry" style="display:none" onsubmit="return submitInquiry(event)">
+      <div class="form-group">
+        <label class="form-label">상품</label>
+        <select class="form-input" name="product_id"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">문의 일시</label>
+        <input type="datetime-local" class="form-input" name="inquiry_date" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">고객명</label>
+        <input type="text" class="form-input" name="customer_name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">유형</label>
+        <select class="form-input" name="inquiry_type">
+          <option value="message">메시지</option>
+          <option value="order_inquiry">주문문의</option>
+          <option value="custom_request">커스텀 요청</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">메모</label>
+        <textarea class="form-input" name="notes" rows="3"></textarea>
+      </div>
+      <button type="submit" class="form-submit">저장</button>
+    </form>
+
+    <!-- 주문 입력폼 -->
+    <form id="form-order" style="display:none" onsubmit="return submitOrder(event)">
+      <div class="form-group">
+        <label class="form-label">상품</label>
+        <select class="form-input" name="product_id" required></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">주문일</label>
+        <input type="datetime-local" class="form-input" name="order_date" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">패키지</label>
+          <select class="form-input" name="package_type">
+            <option value="standard">스탠다드</option>
+            <option value="deluxe">디럭스</option>
+            <option value="premium">프리미엄</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">금액 (원)</label>
+          <input type="number" class="form-input" name="amount" min="0" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">상태</label>
+        <select class="form-input" name="status">
+          <option value="in_progress">진행중</option>
+          <option value="completed">완료</option>
+          <option value="cancelled">취소</option>
+        </select>
+      </div>
+      <button type="submit" class="form-submit">저장</button>
+    </form>
+
+    <!-- 소재변경 입력폼 -->
+    <form id="form-creative" style="display:none" onsubmit="return submitCreative(event)">
+      <div class="form-group">
+        <label class="form-label">상품</label>
+        <select class="form-input" name="product_id" required></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">변경일</label>
+        <input type="date" class="form-input" name="change_date" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">변경유형</label>
+        <select class="form-input" name="change_type">
+          <option value="title">타이틀</option>
+          <option value="thumbnail">썸네일</option>
+          <option value="description">설명</option>
+          <option value="price">가격</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">이전값</label>
+        <input type="text" class="form-input" name="old_value">
+      </div>
+      <div class="form-group">
+        <label class="form-label">새값</label>
+        <input type="text" class="form-input" name="new_value">
+      </div>
+      <button type="submit" class="form-submit">저장</button>
+    </form>
+
+    <!-- CSV 업로드 -->
+    <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border)">
+      <div class="form-label" style="margin-bottom:8px">CSV 일괄 업로드 (크몽 광고 리포트)</div>
+      <label class="btn-icon" style="display:inline-flex; cursor:pointer">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        파일 선택
+        <input type="file" accept=".csv" style="display:none" onchange="handleCsvUpload(event)">
+      </label>
+      <span id="csvStatus" style="font-size:12px;color:var(--text-3);margin-left:8px"></span>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* === Supabase 초기화 === */
+const SUPABASE_URL = 'https://byaipfmwicukyzruqtsj.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5YWlwZm13aWN1a3l6cnVxdHNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTc3MjgsImV4cCI6MjA4NjUzMzcyOH0.GGm46X0W0joFXdYtdg-N9n8UQYiVHpbtZVZ__jfbY40';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* === 상태 === */
+let products = [];
+let dateRangeDays = 30;
+let charts = {};
+
+/* === 유틸 === */
+const fmt = n => n == null ? '-' : n.toLocaleString('ko-KR');
+const fmtPct = n => n == null ? '-' : n.toFixed(2) + '%';
+const fmtDate = d => d ? new Date(d).toLocaleDateString('ko-KR') : '-';
+const fmtDateTime = d => d ? new Date(d).toLocaleString('ko-KR') : '-';
+const fmtMoney = n => n == null ? '-' : '₩' + n.toLocaleString('ko-KR');
+const getDateFrom = () => {
+  if (dateRangeDays === 0) return null;
+  const d = new Date();
+  d.setDate(d.getDate() - dateRangeDays);
+  return d.toISOString().split('T')[0];
+};
+const productName = pid => (products.find(p => p.product_id === pid) || {}).product_name || pid;
+const statusBadge = s => {
+  const m = { pending: ['대기','badge-pending'], quoted: ['견적','badge-quoted'], paid: ['결제','badge-paid'], cancelled: ['취소','badge-cancelled'], in_progress: ['진행','badge-quoted'], completed: ['완료','badge-paid'] };
+  const [t, c] = m[s] || [s, ''];
+  return `<span class="badge ${c}">${t}</span>`;
+};
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+/* === 차트 기본 옵션 === */
+Chart.defaults.color = '#8b8fa4';
+Chart.defaults.borderColor = '#2a2d3a';
+Chart.defaults.font.family = 'Pretendard';
+Chart.defaults.font.size = 11;
+const chartColors = ['#0D99FF','#34d399','#fbbf24','#f87171','#a78bfa','#fb923c','#38bdf8','#e879f9'];
+
+function makeChart(id, config) {
+  if (charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id);
+  if (!ctx) return null;
+  charts[id] = new Chart(ctx, config);
+  return charts[id];
+}
+
+/* === 탭 전환 === */
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelector(`.nav-item[data-tab="${tab}"]`).classList.add('active');
+  const titles = { cpc: 'CPC 소재테스트', funnel: '전환 퍼널', inquiry: '서비스별 문의량' };
+  document.getElementById('pageTitle').textContent = titles[tab];
+  if (window.innerWidth <= 1024) closeSidebar();
+}
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); }
+
+/* === 날짜 범위 === */
+function setDateRange(days) {
+  dateRangeDays = days;
+  document.querySelectorAll('#dateRange button').forEach(b => b.classList.toggle('active', +b.dataset.days === days));
+  refreshData();
+}
+
+/* === 입력 패널 === */
+function openInputPanel() {
+  document.getElementById('inputOverlay').classList.add('open');
+  document.getElementById('inputPanel').classList.add('open');
+}
+function closeInputPanel() {
+  document.getElementById('inputOverlay').classList.remove('open');
+  document.getElementById('inputPanel').classList.remove('open');
+}
+function switchPanelTab(btn, formId) {
+  btn.parentElement.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.panel-body form').forEach(f => f.style.display = 'none');
+  document.getElementById(formId).style.display = 'block';
+}
+
+/* === 상품 셀렉트 채우기 === */
+function fillProductSelects() {
+  document.querySelectorAll('.input-panel select[name="product_id"]').forEach(sel => {
+    sel.innerHTML = '<option value="">선택...</option>' + products.map(p => `<option value="${p.product_id}">${p.product_name} (${p.category})</option>`).join('');
+  });
+}
+
+/* === 데이터 로드 === */
+async function loadProducts() {
+  const { data, error } = await sb.from('kmong_products').select('*').eq('status', 'active');
+  if (error) { console.error('products:', error); return; }
+  products = data || [];
+  fillProductSelects();
+}
+
+async function loadCpcTab() {
+  const dateFrom = getDateFrom();
+  let q = sb.from('kmong_cpc_daily').select('*').order('date', { ascending: true });
+  if (dateFrom) q = q.gte('date', dateFrom);
+  const { data: cpcData } = await q;
+  const rows = cpcData || [];
+
+  // KPI
+  const totalClicks = rows.reduce((s, r) => s + (r.clicks || 0), 0);
+  const totalImpressions = rows.reduce((s, r) => s + (r.impressions || 0), 0);
+  const avgCtr = totalImpressions > 0 ? (totalClicks / totalImpressions * 100) : 0;
+  const totalCost = rows.reduce((s, r) => s + (r.cpc_cost || 0), 0);
+
+  document.getElementById('cpcKpi').innerHTML = [
+    { label: '총 클릭수', value: fmt(totalClicks) },
+    { label: '총 노출수', value: fmt(totalImpressions) },
+    { label: '평균 CTR', value: fmtPct(avgCtr) },
+    { label: '총 CPC 비용', value: fmtMoney(totalCost) },
+  ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join('');
+
+  // 일별 차트
+  const byDate = {};
+  rows.forEach(r => {
+    if (!byDate[r.date]) byDate[r.date] = { clicks: 0, impressions: 0 };
+    byDate[r.date].clicks += r.clicks || 0;
+    byDate[r.date].impressions += r.impressions || 0;
+  });
+  const dates = Object.keys(byDate).sort();
+  makeChart('chartCpcDaily', {
+    type: 'line',
+    data: {
+      labels: dates.map(d => d.slice(5)),
+      datasets: [
+        { label: '클릭수', data: dates.map(d => byDate[d].clicks), borderColor: '#0D99FF', backgroundColor: 'rgba(13,153,255,0.1)', fill: true, tension: 0.3 },
+        { label: '노출수', data: dates.map(d => byDate[d].impressions), borderColor: '#34d399', backgroundColor: 'rgba(52,211,153,0.1)', fill: true, tension: 0.3, yAxisID: 'y1' }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      scales: {
+        y: { position: 'left', grid: { color: '#1e2130' } },
+        y1: { position: 'right', grid: { display: false } },
+        x: { grid: { color: '#1e2130' } }
+      },
+      plugins: { legend: { position: 'top' } }
+    }
+  });
+
+  // 상품별 집계
+  const byProduct = {};
+  rows.forEach(r => {
+    if (!byProduct[r.product_id]) byProduct[r.product_id] = { impressions: 0, clicks: 0, cost: 0 };
+    byProduct[r.product_id].impressions += r.impressions || 0;
+    byProduct[r.product_id].clicks += r.clicks || 0;
+    byProduct[r.product_id].cost += r.cpc_cost || 0;
+  });
+
+  // 소재변경 횟수
+  const { data: changes } = await sb.from('kmong_creative_changes').select('*').order('change_date', { ascending: false });
+  const changeCounts = {};
+  (changes || []).forEach(c => { changeCounts[c.product_id] = (changeCounts[c.product_id] || 0) + 1; });
+
+  // 상품별 테이블
+  const pids = Object.keys(byProduct);
+  document.querySelector('#tableCpc tbody').innerHTML = pids.length ? pids.map(pid => {
+    const d = byProduct[pid];
+    const ctr = d.impressions > 0 ? (d.clicks / d.impressions * 100) : 0;
+    return `<tr><td>${productName(pid)}</td><td>${fmt(d.impressions)}</td><td>${fmt(d.clicks)}</td><td>${fmtPct(ctr)}</td><td>${fmtMoney(d.cost)}</td><td>${changeCounts[pid] || 0}회</td></tr>`;
+  }).join('') : '<tr><td colspan="6"><div class="empty-state"><p>데이터가 없습니다</p></div></td></tr>';
+
+  // CPC 비용 차트
+  const topProducts = pids.sort((a, b) => byProduct[b].cost - byProduct[a].cost).slice(0, 8);
+  makeChart('chartCpcCost', {
+    type: 'bar',
+    data: {
+      labels: topProducts.map(p => productName(p).slice(0, 10)),
+      datasets: [{ label: 'CPC 비용', data: topProducts.map(p => byProduct[p].cost), backgroundColor: chartColors }]
+    },
+    options: { responsive: true, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#1e2130' } }, y: { grid: { display: false } } } }
+  });
+
+  // CTR 비교 차트 (소재 변경 전후)
+  const ctrBefore = [], ctrAfter = [], ctrLabels = [];
+  if (changes && changes.length > 0) {
+    const grouped = {};
+    changes.forEach(c => { if (!grouped[c.product_id]) grouped[c.product_id] = []; grouped[c.product_id].push(c); });
+    for (const [pid, clist] of Object.entries(grouped)) {
+      const latest = clist[0];
+      const cd = latest.change_date;
+      const before = rows.filter(r => r.product_id === pid && r.date < cd).slice(-7);
+      const after = rows.filter(r => r.product_id === pid && r.date >= cd).slice(0, 7);
+      const bImp = before.reduce((s, r) => s + (r.impressions || 0), 0);
+      const bClk = before.reduce((s, r) => s + (r.clicks || 0), 0);
+      const aImp = after.reduce((s, r) => s + (r.impressions || 0), 0);
+      const aClk = after.reduce((s, r) => s + (r.clicks || 0), 0);
+      if (bImp > 0 || aImp > 0) {
+        ctrLabels.push(productName(pid).slice(0, 8));
+        ctrBefore.push(bImp > 0 ? +(bClk / bImp * 100).toFixed(2) : 0);
+        ctrAfter.push(aImp > 0 ? +(aClk / aImp * 100).toFixed(2) : 0);
+      }
+    }
+  }
+  makeChart('chartCtrCompare', {
+    type: 'bar',
+    data: {
+      labels: ctrLabels.length ? ctrLabels : ['데이터 없음'],
+      datasets: [
+        { label: '변경 전 CTR', data: ctrBefore.length ? ctrBefore : [0], backgroundColor: 'rgba(139,143,164,0.4)' },
+        { label: '변경 후 CTR', data: ctrAfter.length ? ctrAfter : [0], backgroundColor: 'rgba(13,153,255,0.7)' }
+      ]
+    },
+    options: { responsive: true, scales: { y: { grid: { color: '#1e2130' } }, x: { grid: { display: false } } } }
+  });
+
+  // 소재변경 이력 테이블
+  document.querySelector('#tableCreative tbody').innerHTML = (changes && changes.length) ? changes.slice(0, 20).map(c =>
+    `<tr><td>${fmtDate(c.change_date)}</td><td>${productName(c.product_id)}</td><td>${c.change_type}</td><td>${c.old_value || '-'}</td><td>${c.new_value || '-'}</td></tr>`
+  ).join('') : '<tr><td colspan="5"><div class="empty-state"><p>데이터가 없습니다</p></div></td></tr>';
+}
+
+async function loadFunnelTab() {
+  const dateFrom = getDateFrom();
+
+  // CPC 집계
+  let cpcQ = sb.from('kmong_cpc_daily').select('impressions,clicks');
+  if (dateFrom) cpcQ = cpcQ.gte('date', dateFrom);
+  const { data: cpcData } = await cpcQ;
+  const totalImp = (cpcData || []).reduce((s, r) => s + (r.impressions || 0), 0);
+  const totalClk = (cpcData || []).reduce((s, r) => s + (r.clicks || 0), 0);
+
+  // 문의 집계
+  let inqQ = sb.from('kmong_inquiries').select('*');
+  if (dateFrom) inqQ = inqQ.gte('inquiry_date', dateFrom);
+  const { data: inqData } = await inqQ;
+  const inquiries = inqData || [];
+  const totalInq = inquiries.length;
+  const quoted = inquiries.filter(i => ['quoted','paid'].includes(i.status)).length;
+  const paid = inquiries.filter(i => i.status === 'paid').length;
+
+  // KPI
+  document.getElementById('funnelKpi').innerHTML = [
+    { label: '총 노출', value: fmt(totalImp) },
+    { label: '총 클릭', value: fmt(totalClk) },
+    { label: '총 문의', value: fmt(totalInq) },
+    { label: '총 결제', value: fmt(paid) },
+  ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join('');
+
+  // 퍼널
+  const funnelSteps = [
+    { label: '노출', value: totalImp },
+    { label: '클릭', value: totalClk },
+    { label: '문의', value: totalInq },
+    { label: '견적', value: quoted },
+    { label: '결제', value: paid },
+  ];
+  const maxVal = Math.max(...funnelSteps.map(s => s.value), 1);
+  document.getElementById('funnelChart').innerHTML = funnelSteps.map((s, i) => {
+    const pct = (s.value / maxVal * 100);
+    const convPct = i > 0 && funnelSteps[i - 1].value > 0 ? (s.value / funnelSteps[i - 1].value * 100).toFixed(1) + '%' : '';
+    return `<div class="funnel-step"><span class="funnel-label">${s.label}</span><div class="funnel-bar" style="width:${Math.max(pct, 5)}%;opacity:${1 - i * 0.12}">${fmt(s.value)}</div><span class="funnel-pct">${convPct}</span></div>`;
+  }).join('');
+
+  // 히트맵 (요일 x 시간)
+  const heatData = Array.from({ length: 7 }, () => new Array(24).fill(0));
+  inquiries.forEach(i => {
+    const d = new Date(i.inquiry_date);
+    heatData[d.getDay()][d.getHours()]++;
+  });
+  const maxHeat = Math.max(...heatData.flat(), 1);
+  const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+  let heatHtml = '<div class="heatmap-label"></div>';
+  for (let h = 0; h < 24; h++) heatHtml += `<div class="heatmap-label">${h}</div>`;
+  for (let d = 0; d < 7; d++) {
+    heatHtml += `<div class="heatmap-label">${dayNames[d]}</div>`;
+    for (let h = 0; h < 24; h++) {
+      const v = heatData[d][h];
+      const intensity = v / maxHeat;
+      const bg = v === 0 ? 'rgba(13,153,255,0.05)' : `rgba(13,153,255,${0.15 + intensity * 0.75})`;
+      heatHtml += `<div class="heatmap-cell" style="background:${bg}" title="${dayNames[d]} ${h}시: ${v}건">${v || ''}</div>`;
+    }
+  }
+  document.getElementById('heatmap').innerHTML = heatHtml;
+
+  // 상품별 전환율 테이블
+  const byProduct = {};
+  inquiries.forEach(i => {
+    if (!i.product_id) return;
+    if (!byProduct[i.product_id]) byProduct[i.product_id] = { inq: 0, quoted: 0, paid: 0 };
+    byProduct[i.product_id].inq++;
+    if (['quoted', 'paid'].includes(i.status)) byProduct[i.product_id].quoted++;
+    if (i.status === 'paid') byProduct[i.product_id].paid++;
+  });
+  const pids = Object.keys(byProduct);
+  document.querySelector('#tableConversion tbody').innerHTML = pids.length ? pids.map(pid => {
+    const d = byProduct[pid];
+    const rate = d.inq > 0 ? (d.paid / d.inq * 100).toFixed(1) + '%' : '-';
+    return `<tr><td>${productName(pid)}</td><td>${d.inq}</td><td>${d.quoted}</td><td>${d.paid}</td><td>${rate}</td></tr>`;
+  }).join('') : '<tr><td colspan="5"><div class="empty-state"><p>데이터가 없습니다</p></div></td></tr>';
+
+  // 평균 전환 소요일 차트
+  const convDays = {};
+  inquiries.filter(i => i.converted_at && i.product_id).forEach(i => {
+    const days = Math.max(0, Math.round((new Date(i.converted_at) - new Date(i.inquiry_date)) / 86400000));
+    if (!convDays[i.product_id]) convDays[i.product_id] = [];
+    convDays[i.product_id].push(days);
+  });
+  const convLabels = Object.keys(convDays);
+  const convAvg = convLabels.map(pid => {
+    const arr = convDays[pid];
+    return +(arr.reduce((s, v) => s + v, 0) / arr.length).toFixed(1);
+  });
+  makeChart('chartConvDays', {
+    type: 'bar',
+    data: {
+      labels: convLabels.length ? convLabels.map(p => productName(p).slice(0, 10)) : ['데이터 없음'],
+      datasets: [{ label: '평균 일수', data: convAvg.length ? convAvg : [0], backgroundColor: chartColors }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#1e2130' }, title: { display: true, text: '일' } }, x: { grid: { display: false } } } }
+  });
+}
+
+async function loadInquiryTab() {
+  const dateFrom = getDateFrom();
+
+  // 문의 로드
+  let inqQ = sb.from('kmong_inquiries').select('*').order('inquiry_date', { ascending: false });
+  if (dateFrom) inqQ = inqQ.gte('inquiry_date', dateFrom);
+  const { data: inqData } = await inqQ;
+  const inquiries = inqData || [];
+
+  // 주문 로드
+  let ordQ = sb.from('kmong_orders').select('*');
+  if (dateFrom) ordQ = ordQ.gte('order_date', dateFrom);
+  const { data: ordData } = await ordQ;
+  const orders = ordData || [];
+
+  const totalInq = inquiries.length;
+  const totalOrd = orders.length;
+  const totalRev = orders.reduce((s, r) => s + (r.amount || 0), 0);
+  const avgDeal = totalOrd > 0 ? Math.round(totalRev / totalOrd) : 0;
+
+  // KPI
+  document.getElementById('inquiryKpi').innerHTML = [
+    { label: '총 문의', value: fmt(totalInq) },
+    { label: '총 주문', value: fmt(totalOrd) },
+    { label: '총 매출', value: fmtMoney(totalRev) },
+    { label: '평균 객단가', value: fmtMoney(avgDeal) },
+  ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join('');
+
+  // 카테고리별 문의 (Doughnut)
+  const byCat = {};
+  inquiries.forEach(i => {
+    const cat = i.product_id ? (products.find(p => p.product_id === i.product_id) || {}).category || '기타' : '기타';
+    byCat[cat] = (byCat[cat] || 0) + 1;
+  });
+  const catLabels = Object.keys(byCat);
+  makeChart('chartCatInquiry', {
+    type: 'doughnut',
+    data: {
+      labels: catLabels.length ? catLabels : ['데이터 없음'],
+      datasets: [{ data: catLabels.length ? catLabels.map(c => byCat[c]) : [1], backgroundColor: catLabels.length ? chartColors : ['#2a2d3a'] }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { padding: 12 } },
+        datalabels: { color: '#fff', font: { weight: 'bold', size: 12 }, formatter: (v, ctx) => { const total = ctx.dataset.data.reduce((a, b) => a + b, 0); return total > 0 ? (v / total * 100).toFixed(0) + '%' : ''; } }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+
+  // 월별 추이 (Line)
+  const byMonth = {};
+  inquiries.forEach(i => {
+    const m = i.inquiry_date.slice(0, 7);
+    const cat = i.product_id ? (products.find(p => p.product_id === i.product_id) || {}).category || '기타' : '기타';
+    if (!byMonth[m]) byMonth[m] = {};
+    byMonth[m][cat] = (byMonth[m][cat] || 0) + 1;
+  });
+  const months = Object.keys(byMonth).sort();
+  const allCats = [...new Set(inquiries.map(i => i.product_id ? (products.find(p => p.product_id === i.product_id) || {}).category || '기타' : '기타'))];
+  makeChart('chartMonthly', {
+    type: 'line',
+    data: {
+      labels: months.length ? months : ['데이터 없음'],
+      datasets: allCats.map((cat, ci) => ({
+        label: cat,
+        data: months.map(m => (byMonth[m] || {})[cat] || 0),
+        borderColor: chartColors[ci % chartColors.length],
+        tension: 0.3,
+        fill: false
+      }))
+    },
+    options: { responsive: true, scales: { y: { grid: { color: '#1e2130' } }, x: { grid: { display: false } } } }
+  });
+
+  // 상품별 문의 vs 결제 (Grouped Bar)
+  const inqByProd = {}, ordByProd = {};
+  inquiries.forEach(i => { if (i.product_id) inqByProd[i.product_id] = (inqByProd[i.product_id] || 0) + 1; });
+  orders.forEach(o => { if (o.product_id) ordByProd[o.product_id] = (ordByProd[o.product_id] || 0) + 1; });
+  const allPids = [...new Set([...Object.keys(inqByProd), ...Object.keys(ordByProd)])];
+  makeChart('chartInqVsPay', {
+    type: 'bar',
+    data: {
+      labels: allPids.length ? allPids.map(p => productName(p).slice(0, 12)) : ['데이터 없음'],
+      datasets: [
+        { label: '문의', data: allPids.map(p => inqByProd[p] || 0), backgroundColor: 'rgba(13,153,255,0.6)' },
+        { label: '결제', data: allPids.map(p => ordByProd[p] || 0), backgroundColor: 'rgba(52,211,153,0.6)' }
+      ]
+    },
+    options: { responsive: true, scales: { y: { grid: { color: '#1e2130' } }, x: { grid: { display: false } } } }
+  });
+
+  // 최근 문의 테이블
+  document.querySelector('#tableInquiries tbody').innerHTML = inquiries.length ? inquiries.slice(0, 30).map(i =>
+    `<tr><td>${fmtDateTime(i.inquiry_date)}</td><td>${i.customer_name || '-'}</td><td>${productName(i.product_id)}</td><td>${statusBadge(i.status)}</td><td>${fmtMoney(i.paid_amount || i.quoted_amount)}</td></tr>`
+  ).join('') : '<tr><td colspan="5"><div class="empty-state"><p>데이터가 없습니다</p></div></td></tr>';
+}
+
+/* === 데이터 새로고침 === */
+async function refreshData() {
+  await loadProducts();
+  await Promise.all([loadCpcTab(), loadFunnelTab(), loadInquiryTab()]);
+}
+
+/* === 폼 제출 === */
+async function submitCpc(e) {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const clicks = +f.get('clicks'), impressions = +f.get('impressions');
+  const ctr = impressions > 0 ? +(clicks / impressions * 100).toFixed(2) : 0;
+  const { error } = await sb.from('kmong_cpc_daily').upsert({
+    product_id: f.get('product_id'), date: f.get('date'),
+    impressions, clicks, cpc_cost: +f.get('cpc_cost'), ctr, title_text: f.get('title_text')
+  }, { onConflict: 'product_id,date' });
+  if (error) { showToast('저장 실패: ' + error.message, 'error'); return false; }
+  showToast('CPC 데이터 저장 완료');
+  e.target.reset();
+  refreshData();
+  return false;
+}
+async function submitInquiry(e) {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const { error } = await sb.from('kmong_inquiries').insert({
+    product_id: f.get('product_id') || null, inquiry_date: f.get('inquiry_date'),
+    customer_name: f.get('customer_name'), inquiry_type: f.get('inquiry_type'), notes: f.get('notes')
+  });
+  if (error) { showToast('저장 실패: ' + error.message, 'error'); return false; }
+  showToast('문의 등록 완료');
+  e.target.reset();
+  refreshData();
+  return false;
+}
+async function submitOrder(e) {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const { error } = await sb.from('kmong_orders').insert({
+    product_id: f.get('product_id'), order_date: f.get('order_date'),
+    package_type: f.get('package_type'), amount: +f.get('amount'), status: f.get('status')
+  });
+  if (error) { showToast('저장 실패: ' + error.message, 'error'); return false; }
+  showToast('주문 등록 완료');
+  e.target.reset();
+  refreshData();
+  return false;
+}
+async function submitCreative(e) {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const { error } = await sb.from('kmong_creative_changes').insert({
+    product_id: f.get('product_id'), change_date: f.get('change_date'),
+    change_type: f.get('change_type'), old_value: f.get('old_value'), new_value: f.get('new_value')
+  });
+  if (error) { showToast('저장 실패: ' + error.message, 'error'); return false; }
+  showToast('소재 변경 기록 완료');
+  e.target.reset();
+  refreshData();
+  return false;
+}
+
+/* === CSV 업로드 === */
+async function handleCsvUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const status = document.getElementById('csvStatus');
+  status.textContent = '처리 중...';
+  const text = await file.text();
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) { status.textContent = '데이터 없음'; return; }
+  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const vals = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+    const row = {};
+    headers.forEach((h, idx) => { row[h] = vals[idx]; });
+    // 크몽 광고 리포트 형식 매핑
+    rows.push({
+      product_id: row['상품ID'] || row['product_id'] || '',
+      date: row['날짜'] || row['date'] || '',
+      impressions: parseInt(row['노출수'] || row['impressions'] || 0),
+      clicks: parseInt(row['클릭수'] || row['clicks'] || 0),
+      cpc_cost: parseInt(row['광고비'] || row['cpc_cost'] || 0),
+    });
+  }
+  const valid = rows.filter(r => r.product_id && r.date);
+  if (valid.length === 0) { status.textContent = '유효한 데이터 없음'; return; }
+  valid.forEach(r => { r.ctr = r.impressions > 0 ? +(r.clicks / r.impressions * 100).toFixed(2) : 0; });
+  const { error } = await sb.from('kmong_cpc_daily').upsert(valid, { onConflict: 'product_id,date' });
+  if (error) { status.textContent = '업로드 실패: ' + error.message; return; }
+  status.textContent = `${valid.length}건 업로드 완료`;
+  showToast(`CSV ${valid.length}건 업로드 완료`);
+  refreshData();
+}
+
+/* === 테이블 정렬 === */
+document.querySelectorAll('table').forEach(table => {
+  table.querySelectorAll('th').forEach((th, col) => {
+    th.addEventListener('click', () => {
+      const tbody = table.querySelector('tbody');
+      const rows = [...tbody.querySelectorAll('tr')];
+      if (rows.length <= 1) return;
+      const asc = th.dataset.sort !== 'asc';
+      th.dataset.sort = asc ? 'asc' : 'desc';
+      rows.sort((a, b) => {
+        const av = a.cells[col]?.textContent.replace(/[₩,%회건]/g, '').trim() || '';
+        const bv = b.cells[col]?.textContent.replace(/[₩,%회건]/g, '').trim() || '';
+        const an = parseFloat(av.replace(/,/g, '')), bn = parseFloat(bv.replace(/,/g, ''));
+        if (!isNaN(an) && !isNaN(bn)) return asc ? an - bn : bn - an;
+        return asc ? av.localeCompare(bv, 'ko') : bv.localeCompare(av, 'ko');
+      });
+      rows.forEach(r => tbody.appendChild(r));
+    });
+  });
+});
+
+/* === 초기화 === */
+(async () => {
+  // 오늘 날짜를 기본값으로 설정
+  const today = new Date().toISOString().split('T')[0];
+  const now = new Date().toISOString().slice(0, 16);
+  document.querySelectorAll('input[type="date"]').forEach(i => i.value = today);
+  document.querySelectorAll('input[type="datetime-local"]').forEach(i => i.value = now);
+  await refreshData();
+})();
+</script>
+</body>
+</html>
