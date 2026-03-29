@@ -500,4 +500,7 @@
 - **각 업종별 포함 내용**: 수상 사이트 목록 + 디자인 패턴 분석 (히어로/컬러/타이포/레이아웃/기능/인터랙션) + 레퍼런스 사이트 + 반드시 차용할 것/절대 금지 요약
 - **추가 포함**: 글로벌 웹디자인 트렌드 2024-2025 (타이포/컬러/인터랙션/스크롤 트렌드), 업종별 추천 레이아웃 패턴 6종 (A~F), CSS 기법 업종별 매핑
 - **모든 포트폴리오 제작 시 서브에이전트 태스크에 자동 참조 삽입 (기존 6개 + 이 메가 DB)**
-- 서브에이전트 지시 시: `cat docs/references/INDUSTRY_AWARD_REFERENCES_MEGA.md docs/references/INDUSTRY_AWARD_REFERENCES_MEGA_PART2.md docs/references/INDUSTRY_AWARD_REFERENCES_MEGA_PART3.md` 추가
+- 서브에이전트 지시 시: `cat docs/references/INDUSTRY_AWARD_REFERENCES_MEGA.md` + Part2~5 추가
+- **2차 확장 (2026-03-29)**: Part 4-5 추가 — 32개 업종 추가, 총 60개 업종 2000+ 사이트
+- 추가 업종: 화장품/K-뷰티, 코워킹, 음악/아티스트, 가구, 주류/바, 게이밍, 팟캐스트, 유기농, 바버샵/타투, 태양광, 약국, 어린이집, 세차, 보안/CCTV, 인쇄/패키지, 컨설팅, 프리랜서, 푸드트럭, 시계/안경, 캠핑/아웃도어, 한의원, 엔터테인먼트, 편의점/프랜차이즈, 학원, HVAC, 케이크/디저트, 제조업, 웨딩홀, 앱 랜딩, 브루어리, 크로스핏/복싱, 인테리어 시공
+- 2025 신규 트렌드 추가: AI 개인화, 디지털 텍스처, CSS Container Queries, View Transitions API, Scroll-Driven Animations
