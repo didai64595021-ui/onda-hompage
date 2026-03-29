@@ -272,6 +272,7 @@
 | premium-gym | T8 | C19 | F10 | L9 | I3,I10,I13,I21,I35 | H12 | N4 | S7 | IMG10 | B6 |
 | derma-clinic | T6 | C10 | F5 | L3 | I7,I11,I15,I23,I26 | H4 | N8 | S3 | IMG8 | B2 |
 | beauty-clinic | T12 | C12 | F7 | L7 | I1,I5,I18,I24,I29 | H6 | N2 | S6 | IMG3 | B4 |
+| law-firm | T7 | C2 | F14 | L6 | I6,I16,I19,I25,I31 | H3 | N1 | S8 | IMG9 | B3 |
 
 ### 금지 조합 (과다 사용)
 - T1+C1+F1 (다크+골드+Playfair) — 5회, 금지
