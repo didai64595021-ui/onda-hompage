@@ -491,3 +491,13 @@
 - **태스크 프롬프트 크기 제한**: 2000자 이내 권장. 길면 /tmp/task.md에 저장 후 `cat` 참조
 - sessions_spawn 우선 사용 (claude -p는 출력 캡처 안 되는 경우 있음)
 - 3개+ 병렬 시 서버 메모리 고려 (4GB 서버에서 동시 3개가 한계)
+
+## 업종별 어워드급 레퍼런스 메가 DB (2026-03-29, 영구, 최우선)
+- **28개 업종, 1000+ 사이트 레퍼런스 학습 완료**
+- **파일 위치**: `docs/references/INDUSTRY_AWARD_REFERENCES_MEGA.md` (Part 1~3)
+- 출처: Awwwards, FWA, CSS Design Awards, Webby Awards, WebAward, A' Design Award, 웹어워드코리아, GDWEB, Horizon Interactive Awards 등
+- **포함 업종**: 음식점/카페, 의료/클리닉, 법률, 부동산/분양, 뷰티/살롱, 피트니스, 호텔/리조트, 패션, 건축/인테리어, 교육, 자동차, 웨딩/사진, 이커머스, SaaS/테크, 여행/관광, 건설/시공, 반려동물, 마케팅에이전시, 박물관/갤러리, 주얼리/럭셔리, 종교/교회, 꽃집/이벤트, 요가/필라테스, 이사/물류, 금융/보험, 청소/홈서비스, 비영리/NGO, 한국 수상작
+- **각 업종별 포함 내용**: 수상 사이트 목록 + 디자인 패턴 분석 (히어로/컬러/타이포/레이아웃/기능/인터랙션) + 레퍼런스 사이트 + 반드시 차용할 것/절대 금지 요약
+- **추가 포함**: 글로벌 웹디자인 트렌드 2024-2025 (타이포/컬러/인터랙션/스크롤 트렌드), 업종별 추천 레이아웃 패턴 6종 (A~F), CSS 기법 업종별 매핑
+- **모든 포트폴리오 제작 시 서브에이전트 태스크에 자동 참조 삽입 (기존 6개 + 이 메가 DB)**
+- 서브에이전트 지시 시: `cat docs/references/INDUSTRY_AWARD_REFERENCES_MEGA.md docs/references/INDUSTRY_AWARD_REFERENCES_MEGA_PART2.md docs/references/INDUSTRY_AWARD_REFERENCES_MEGA_PART3.md` 추가
