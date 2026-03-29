@@ -271,6 +271,7 @@
 | korean-clinic | T9 | C14 | F8 | L15 | I4,I17,I22,I27,I28 | H9 | N7 | S2 | IMG4 | B10 |
 | premium-gym | T8 | C19 | F10 | L9 | I3,I10,I13,I21,I35 | H12 | N4 | S7 | IMG10 | B6 |
 | derma-clinic | T6 | C10 | F5 | L3 | I7,I11,I15,I23,I26 | H4 | N8 | S3 | IMG8 | B2 |
+| beauty-clinic | T12 | C12 | F7 | L7 | I1,I5,I18,I24,I29 | H6 | N2 | S6 | IMG3 | B4 |
 
 ### 금지 조합 (과다 사용)
 - T1+C1+F1 (다크+골드+Playfair) — 5회, 금지
