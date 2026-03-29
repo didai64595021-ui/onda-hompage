@@ -5,7 +5,7 @@
 ## 현재 작업
 LÚMINE 뷰티클리닉 포트폴리오 사이트 제작 (미의원 어워드급 업그레이드)
 
-### LÚMINE 뷰티클리닉 포트폴리오 — 진행 중 (2026-03-30)
+### LÚMINE 뷰티클리닉 포트폴리오 — 완료 (2026-03-30)
 - [x] Step 1: index.html Part 1 (Head + CSS 전체 — 뉴모피즘, 에디토리얼, 반응형)
 - [x] Step 2: index.html Part 2 (HTML: 프리로더 + 헤더 + 네비 + 히어로 + 이벤트)
 - [x] Step 3: index.html Part 3 (HTML: 시술탭 + B/A슬라이더 + 의료진)
@@ -13,6 +13,12 @@ LÚMINE 뷰티클리닉 포트폴리오 사이트 제작 (미의원 어워드급
 - [x] Step 5: index.html Part 5 (JavaScript 전체 — 타이핑, 탭, 슬라이더, SVG, 스크롤)
 - [x] Step 6: 검증 (이미지 URL 15개 200 확인, 404 2개 교체 완료)
 - [x] Step 7: Git commit + push
+
+### LÚMINE 세부 디자인 요소 업그레이드 — 완료 (2026-03-30)
+- [x] Step 1: CSS 추가 (Great Vibes 폰트, 필기체/워터마크/곡선/그라데이션/광원/마커/프로그레스 스타일)
+- [x] Step 2: HTML 장식 요소 배치 (6개 필기체 디바이더, 4개 워터마크, 4개 SVG 곡선, 그라데이션 텍스트, 하이라이트 마커)
+- [x] Step 3: JavaScript 인터랙션 (스크롤 프로그레스, 앰비언트 라이트, 워터마크 패럴랙스, 하이라이트 마커 옵저버)
+- [x] Step 4: 검증 + Git commit + push
 
 ### GLOW 더마 클리닉 포트폴리오 — 진행 중 (2026-03-30)
 - [x] Step 1: index.html Part 1 (Head + CSS + Hero + Treatment + B/A 섹션)
@@ -131,7 +137,7 @@ LÚMINE 뷰티클리닉 포트폴리오 사이트 제작 (미의원 어워드급
 - [x] Step 3: Git commit + push
 
 ## 다음 단계
-LÚMINE 뷰티클리닉 완료 — 다음 지시 대기
+LÚMINE 세부 디자인 업그레이드 완료 — 다음 지시 대기
 
 ## Git 상태 (자동)
 - **브랜치**: main
