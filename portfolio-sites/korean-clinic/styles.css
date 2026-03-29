@@ -1,0 +1,1768 @@
+/* ============================================
+   경락당(經絡堂) — Premium Korean Medicine Clinic
+   Theme: T9 Pastel | Accent: C14 Emerald
+   Font: F8 Instrument Serif/Sans + Pretendard
+   Layout: L15 Storytelling
+   ============================================ */
+
+/* --- Google Fonts --- */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
+
+/* --- CSS Custom Properties --- */
+:root {
+  /* Colors */
+  --bg-main: #F7F5F0;
+  --bg-sub: #EDE8DF;
+  --bg-accent: #059669;
+  --text-main: #2D2A26;
+  --text-sub: #6B6560;
+  --accent: #059669;
+  --accent-dark: #047857;
+  --accent-light: #D1FAE5;
+  --sub-accent: #D4C5A9;
+  --border: #C4BFB4;
+  --white: #FFFFFF;
+  --black: #1A1A1A;
+
+  /* Typography */
+  --font-heading: 'Instrument Serif', 'Noto Serif KR', Georgia, serif;
+  --font-body: 'Instrument Sans', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-korean: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+
+  /* Spacing */
+  --section-py: 120px;
+  --container-max: 1200px;
+  --gap: 24px;
+
+  /* Transitions */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --duration: 0.6s;
+  --duration-fast: 0.3s;
+
+  /* Blob masks */
+  --blob-1: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+  --blob-2: path('M45.3,-51.2C58.3,-42.8,68.2,-28.3,71.4,-12.2C74.5,3.9,70.9,21.6,61.5,35.1C52.1,48.6,36.9,57.9,20.3,63.1C3.7,68.3,-14.3,69.4,-29.8,63.3C-45.3,57.2,-58.3,43.9,-65.2,27.8C-72.1,11.7,-72.9,-7.2,-67.1,-23.2C-61.3,-39.2,-49,-52.3,-35.1,-60.5C-21.2,-68.7,-5.8,-72,7.6,-80.8C21,-89.6,32.3,-59.6,45.3,-51.2Z');
+}
+
+/* --- CSS Reset & Base --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+html, body {
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--text-main);
+  background-color: var(--bg-main);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+/* --- Typography --- */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.heading-serif {
+  font-family: var(--font-heading);
+  letter-spacing: -0.01em;
+}
+
+.heading-kr {
+  font-family: var(--font-korean);
+  font-weight: 600;
+}
+
+.caption {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-sub);
+}
+
+.chapter-label {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chapter-label::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: var(--accent);
+}
+
+/* --- Container --- */
+.container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+}
+
+.container--narrow {
+  max-width: 900px;
+}
+
+.container--wide {
+  max-width: 1400px;
+}
+
+/* --- Section base --- */
+section {
+  height: auto;
+  position: relative;
+}
+
+.section-padding {
+  padding: var(--section-py) 0;
+}
+
+/* --- Blob Mask --- */
+.blob-mask {
+  border-radius: 42% 58% 62% 38% / 45% 55% 45% 55%;
+  overflow: hidden;
+}
+
+.blob-mask--alt {
+  border-radius: 58% 42% 38% 62% / 55% 45% 55% 45%;
+  overflow: hidden;
+}
+
+.blob-mask--round {
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  overflow: hidden;
+}
+
+.blob-mask img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* --- Pill Button (B10) --- */
+.btn-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 36px;
+  border-radius: 999px;
+  font-family: var(--font-korean);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: all var(--duration-fast) var(--ease);
+  min-height: 48px;
+  min-width: 48px;
+  cursor: pointer;
+}
+
+.btn-pill--primary {
+  background: var(--accent);
+  color: var(--white);
+}
+
+.btn-pill--primary:hover {
+  background: var(--accent-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(5, 150, 105, 0.3);
+}
+
+.btn-pill--primary:active {
+  transform: translateY(0);
+}
+
+.btn-pill--outline {
+  background: transparent;
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+}
+
+.btn-pill--outline:hover {
+  background: var(--accent);
+  color: var(--white);
+}
+
+.btn-pill--white {
+  background: var(--white);
+  color: var(--accent);
+}
+
+.btn-pill--white:hover {
+  background: var(--bg-main);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+}
+
+.btn-pill--white:active {
+  transform: translateY(0);
+}
+
+.btn-pill--tag {
+  padding: 6px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  background: rgba(5, 150, 105, 0.08);
+  color: var(--accent);
+  border-radius: 999px;
+  cursor: default;
+}
+
+/* --- Wave SVG Divider (S2) --- */
+.wave-divider {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.wave-divider svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.wave-divider--flip {
+  transform: scaleY(-1);
+}
+
+/* ============================================
+   NAVIGATION — N7 Minimal Logo + Hamburger
+   ============================================ */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  padding: 20px 0;
+  transition: background var(--duration-fast) var(--ease),
+              padding var(--duration-fast) var(--ease),
+              box-shadow var(--duration-fast) var(--ease);
+}
+
+.nav.scrolled {
+  background: rgba(247, 245, 240, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 12px 0;
+  box-shadow: 0 1px 20px rgba(0, 0, 0, 0.06);
+}
+
+.nav__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.nav__logo {
+  font-family: var(--font-korean);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav__logo-sub {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-sub);
+  letter-spacing: 0.05em;
+}
+
+.nav__hamburger {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  position: relative;
+  z-index: 1001;
+}
+
+.nav__hamburger span {
+  display: block;
+  width: 24px;
+  height: 1.5px;
+  background: var(--text-main);
+  transition: all var(--duration-fast) var(--ease);
+  transform-origin: center;
+}
+
+.nav__hamburger.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+  background: var(--white);
+}
+
+.nav__hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav__hamburger.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+  background: var(--white);
+}
+
+/* Fullscreen menu overlay */
+.nav__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 150, 105, 0.97);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--duration) var(--ease);
+}
+
+.nav__overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.nav__menu {
+  text-align: center;
+}
+
+.nav__menu-item {
+  display: block;
+  margin-bottom: 24px;
+}
+
+.nav__menu-item a {
+  font-family: var(--font-heading);
+  font-size: 42px;
+  color: var(--white);
+  transition: opacity var(--duration-fast) var(--ease);
+  display: inline-block;
+}
+
+.nav__menu-item a:hover {
+  opacity: 0.7;
+}
+
+.nav__menu-item .caption {
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 4px;
+  display: block;
+}
+
+/* ============================================
+   SECTION 1: HERO — H9 Collage + Parallax
+   ============================================ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  background: var(--bg-main);
+  overflow: hidden;
+  padding: 0;
+}
+
+.hero__content {
+  position: relative;
+  z-index: 2;
+  max-width: 600px;
+  padding-left: 24px;
+}
+
+.hero__title-kr {
+  font-family: var(--font-korean);
+  font-size: 72px;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+
+.hero__title-hanja {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  color: var(--text-sub);
+  margin-bottom: 24px;
+  font-style: italic;
+}
+
+.hero__subtitle {
+  font-family: var(--font-korean);
+  font-size: 18px;
+  color: var(--text-sub);
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.hero__cta {
+  margin-top: 40px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Hero collage images */
+.hero__images {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hero__img {
+  position: absolute;
+  overflow: hidden;
+  will-change: transform;
+}
+
+.hero__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hero__img--main {
+  width: 420px;
+  height: 520px;
+  right: 8%;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 42% 58% 62% 38% / 45% 55% 45% 55%;
+}
+
+.hero__img--secondary {
+  width: 260px;
+  height: 320px;
+  left: 35%;
+  top: 8%;
+  border-radius: 58% 42% 38% 62% / 55% 45% 55% 45%;
+  opacity: 0.9;
+}
+
+.hero__img--tertiary {
+  width: 180px;
+  height: 220px;
+  right: 5%;
+  bottom: 10%;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  transform: rotate(5deg);
+  opacity: 0.85;
+}
+
+/* Hero scroll indicator */
+.hero__scroll {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero__scroll-text {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-sub);
+}
+
+.hero__scroll-line {
+  width: 1px;
+  height: 40px;
+  background: var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero__scroll-line::after {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--accent);
+  animation: scrollDown 2s var(--ease) infinite;
+}
+
+@keyframes scrollDown {
+  0% { top: -100%; }
+  100% { top: 100%; }
+}
+
+/* ============================================
+   SECTION 2: PHILOSOPHY — Sticky + Scroll
+   ============================================ */
+.philosophy {
+  background: var(--bg-sub);
+  position: relative;
+}
+
+.philosophy__inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: start;
+}
+
+.philosophy__sticky {
+  position: sticky;
+  top: 120px;
+  height: fit-content;
+}
+
+.philosophy__big-text {
+  font-family: var(--font-korean);
+  font-size: 120px;
+  font-weight: 800;
+  color: var(--border);
+  line-height: 1;
+  transition: color 0.8s var(--ease);
+  letter-spacing: -0.05em;
+}
+
+.philosophy__big-text.active {
+  color: var(--accent);
+}
+
+.philosophy__scroll-blocks {
+  padding: 40px 0 80px;
+}
+
+.philosophy__block {
+  margin-bottom: 80px;
+  opacity: 1;
+}
+
+.philosophy__block:last-child {
+  margin-bottom: 0;
+}
+
+.philosophy__block-number {
+  font-family: var(--font-heading);
+  font-size: 48px;
+  color: var(--sub-accent);
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+.philosophy__block-title {
+  font-family: var(--font-korean);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 16px;
+}
+
+.philosophy__block-text {
+  font-family: var(--font-korean);
+  font-size: 16px;
+  color: var(--text-sub);
+  line-height: 1.8;
+  max-width: 460px;
+}
+
+.philosophy__block-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+}
+
+.philosophy__block-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: var(--accent);
+  fill: none;
+  stroke-width: 1.5;
+}
+
+/* ============================================
+   SECTION 3: TREATMENT — Accordion + Image (I28)
+   ============================================ */
+.treatment {
+  background: var(--bg-main);
+}
+
+.treatment__inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: start;
+}
+
+.treatment__image-area {
+  position: sticky;
+  top: 120px;
+  height: fit-content;
+}
+
+.treatment__image-wrapper {
+  width: 100%;
+  aspect-ratio: 4/5;
+  border-radius: 42% 58% 62% 38% / 45% 55% 45% 55%;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg-sub);
+}
+
+.treatment__image {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.8s var(--ease);
+}
+
+.treatment__image.active {
+  opacity: 1;
+}
+
+.treatment__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Accordion */
+.treatment__accordion {
+  padding: 20px 0;
+}
+
+.accordion-item {
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.accordion-item:first-child {
+  border-top: 1px solid var(--border);
+}
+
+.accordion-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 0;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: color var(--duration-fast) var(--ease);
+}
+
+.accordion-header:hover {
+  color: var(--accent);
+}
+
+.accordion-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: rgba(5, 150, 105, 0.08);
+  color: var(--accent);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.accordion-item.active .accordion-number {
+  background: var(--accent);
+  color: var(--white);
+}
+
+.accordion-title {
+  font-family: var(--font-korean);
+  font-size: 20px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.accordion-icon {
+  width: 24px;
+  height: 24px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.accordion-icon::before,
+.accordion-icon::after {
+  content: '';
+  position: absolute;
+  background: var(--text-sub);
+  transition: transform var(--duration-fast) var(--ease);
+}
+
+.accordion-icon::before {
+  width: 14px;
+  height: 1.5px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.accordion-icon::after {
+  width: 1.5px;
+  height: 14px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.accordion-item.active .accordion-icon::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.accordion-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s var(--ease);
+}
+
+.accordion-item.active .accordion-body {
+  max-height: 400px;
+}
+
+.accordion-content {
+  padding: 0 0 24px 52px;
+}
+
+.accordion-desc {
+  font-family: var(--font-korean);
+  font-size: 15px;
+  color: var(--text-sub);
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+
+.accordion-methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.accordion-method-tag {
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-family: var(--font-korean);
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--bg-sub);
+  color: var(--text-sub);
+}
+
+/* Progress Circle (I17) */
+.progress-circle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.progress-circle {
+  width: 52px;
+  height: 52px;
+  position: relative;
+}
+
+.progress-circle svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.progress-circle__bg {
+  fill: none;
+  stroke: var(--bg-sub);
+  stroke-width: 3;
+}
+
+.progress-circle__fill {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 138.23;
+  stroke-dashoffset: 138.23;
+  transition: stroke-dashoffset 1.5s var(--ease-out);
+}
+
+.progress-circle__text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.progress-circle-label {
+  font-family: var(--font-korean);
+  font-size: 13px;
+  color: var(--text-sub);
+}
+
+/* ============================================
+   SECTION 4: DOCTOR
+   ============================================ */
+.doctor {
+  background: var(--accent);
+  color: var(--white);
+  position: relative;
+}
+
+.doctor__inner {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 64px;
+  align-items: center;
+}
+
+.doctor__image {
+  width: 100%;
+  aspect-ratio: 3/4;
+  border-radius: 42% 58% 62% 38% / 45% 55% 45% 55%;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.doctor__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.doctor__info {
+  padding: 20px 0;
+}
+
+.doctor .chapter-label {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.doctor .chapter-label::before {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.doctor__name {
+  font-family: var(--font-korean);
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.doctor__title-en {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+  margin-bottom: 32px;
+}
+
+.doctor__career {
+  margin-bottom: 32px;
+}
+
+.doctor__career-item {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-family: var(--font-korean);
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.doctor__career-item::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--sub-accent);
+  flex-shrink: 0;
+  margin-top: 8px;
+}
+
+.doctor__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 40px;
+}
+
+.doctor__tag {
+  padding: 8px 20px;
+  border-radius: 999px;
+  font-family: var(--font-korean);
+  font-size: 13px;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--white);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.doctor__certs {
+  display: flex;
+  gap: 24px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.doctor__cert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-korean);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.doctor__cert-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.doctor__cert-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: var(--sub-accent);
+  fill: none;
+  stroke-width: 1.5;
+}
+
+/* ============================================
+   SECTION 5: SPACE
+   ============================================ */
+.space {
+  background: var(--bg-sub);
+}
+
+.space__grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-rows: auto auto;
+  gap: 24px;
+  margin-top: 48px;
+}
+
+.space__item {
+  overflow: hidden;
+  position: relative;
+  will-change: transform;
+}
+
+.space__item--large {
+  grid-row: 1 / 3;
+  border-radius: 42% 58% 62% 38% / 45% 55% 45% 55%;
+  aspect-ratio: 3/4;
+}
+
+.space__item--medium {
+  border-radius: 58% 42% 38% 62% / 55% 45% 55% 45%;
+  aspect-ratio: 4/3;
+}
+
+.space__item--small {
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  aspect-ratio: 4/3;
+}
+
+.space__item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s var(--ease);
+}
+
+.space__item:hover img {
+  transform: scale(1.05);
+}
+
+.space__caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 40px 24px 24px;
+  background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
+  color: var(--white);
+  font-family: var(--font-korean);
+  font-size: 16px;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.space__item:hover .space__caption {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================
+   SECTION 6: REVIEWS
+   ============================================ */
+.reviews {
+  background: var(--bg-main);
+}
+
+.reviews__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+}
+
+.review-card {
+  background: var(--white);
+  border-radius: 24px;
+  padding: 40px 32px;
+  transition: transform var(--duration-fast) var(--ease),
+              box-shadow var(--duration-fast) var(--ease);
+}
+
+.review-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+.review-card__stars {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 20px;
+}
+
+.review-card__star {
+  width: 18px;
+  height: 18px;
+  color: #F59E0B;
+}
+
+.review-card__text {
+  font-family: var(--font-korean);
+  font-size: 15px;
+  color: var(--text-main);
+  line-height: 1.8;
+  margin-bottom: 24px;
+}
+
+.review-card__author {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.review-card__name {
+  font-family: var(--font-korean);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.review-card__tag {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-family: var(--font-korean);
+  font-size: 12px;
+  font-weight: 500;
+  background: rgba(5, 150, 105, 0.08);
+  color: var(--accent);
+}
+
+/* ============================================
+   SECTION 7: RESERVATION + FOOTER
+   ============================================ */
+.reservation {
+  background: var(--accent);
+  color: var(--white);
+  text-align: center;
+}
+
+.reservation__title {
+  font-family: var(--font-heading);
+  font-size: 48px;
+  color: var(--white);
+  margin-bottom: 16px;
+}
+
+.reservation__subtitle {
+  font-family: var(--font-korean);
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 40px;
+}
+
+.reservation__phone {
+  font-family: var(--font-heading);
+  font-size: 36px;
+  color: var(--white);
+  display: block;
+  margin-bottom: 24px;
+  transition: opacity var(--duration-fast) var(--ease);
+}
+
+.reservation__phone:hover {
+  opacity: 0.8;
+}
+
+.reservation__hours {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 32px;
+  justify-content: center;
+  margin-top: 48px;
+  padding-top: 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.reservation__hour-item {
+  text-align: center;
+}
+
+.reservation__hour-label {
+  font-family: var(--font-korean);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 4px;
+}
+
+.reservation__hour-time {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--white);
+}
+
+/* Footer info */
+.footer-info {
+  background: var(--bg-main);
+  padding: 64px 0;
+}
+
+.footer-info__inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 48px;
+}
+
+.footer-info__col-title {
+  font-family: var(--font-korean);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 16px;
+}
+
+.footer-info__address,
+.footer-info__text {
+  font-family: var(--font-korean);
+  font-size: 14px;
+  color: var(--text-sub);
+  line-height: 1.8;
+}
+
+.footer-info__map-placeholder {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: var(--bg-sub);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-sub);
+  font-family: var(--font-korean);
+  font-size: 14px;
+  overflow: hidden;
+}
+
+/* Footer bottom */
+.footer {
+  background: var(--text-main);
+  color: rgba(255, 255, 255, 0.5);
+  padding: 32px 0;
+}
+
+.footer__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer__logo {
+  font-family: var(--font-korean);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.footer__sns {
+  display: flex;
+  gap: 16px;
+}
+
+.footer__sns a {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.5);
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.footer__sns a:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.footer__sns svg {
+  width: 18px;
+  height: 18px;
+}
+
+.footer__copy {
+  font-size: 12px;
+}
+
+/* ============================================
+   SCROLL REVEAL ANIMATIONS
+   ============================================ */
+.fade-in {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+
+.js-scroll-reveal .fade-in:not(.revealed) {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.js-scroll-reveal .fade-in-left:not(.revealed) {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.js-scroll-reveal .fade-in-right:not(.revealed) {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.js-scroll-reveal .fade-in-scale:not(.revealed) {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.js-scroll-reveal .revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* Stagger delays */
+.fade-in[data-delay="1"] { transition-delay: 0.15s; }
+.fade-in[data-delay="2"] { transition-delay: 0.3s; }
+.fade-in[data-delay="3"] { transition-delay: 0.45s; }
+.fade-in[data-delay="4"] { transition-delay: 0.6s; }
+
+/* ============================================
+   LOADER
+   ============================================ */
+.loader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-main);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  transition: opacity 0.6s var(--ease), visibility 0.6s var(--ease);
+}
+
+.loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.loader__text {
+  font-family: var(--font-korean);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.loader__bar {
+  width: 120px;
+  height: 2px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.loader__bar-fill {
+  width: 0%;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  animation: loaderFill 1.5s var(--ease) forwards;
+}
+
+@keyframes loaderFill {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
+/* ============================================
+   RESPONSIVE — 1024px
+   ============================================ */
+@media (max-width: 1024px) {
+  :root {
+    --section-py: 80px;
+  }
+
+  .hero__title-kr {
+    font-size: 56px;
+  }
+
+  .hero__img--main {
+    width: 340px;
+    height: 420px;
+  }
+
+  .hero__img--secondary {
+    width: 200px;
+    height: 250px;
+  }
+
+  .hero__img--tertiary {
+    width: 140px;
+    height: 180px;
+  }
+
+  .philosophy__inner {
+    gap: 40px;
+  }
+
+  .philosophy__big-text {
+    font-size: 90px;
+  }
+
+  .treatment__inner {
+    gap: 40px;
+  }
+
+  .doctor__inner {
+    grid-template-columns: 300px 1fr;
+    gap: 40px;
+  }
+
+  .footer-info__inner {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+}
+
+/* ============================================
+   RESPONSIVE — 768px (Tablet)
+   ============================================ */
+@media (max-width: 768px) {
+  :root {
+    --section-py: 64px;
+  }
+
+  .container {
+    padding: 0 16px;
+  }
+
+  /* Hero */
+  .hero {
+    min-height: auto;
+    padding: 120px 0 80px;
+  }
+
+  .hero__content {
+    position: relative;
+    z-index: 2;
+    max-width: 100%;
+    padding: 0 16px;
+    text-align: center;
+  }
+
+  .hero__title-kr {
+    font-size: 48px;
+  }
+
+  .hero__title-hanja {
+    font-size: 24px;
+  }
+
+  .hero__subtitle {
+    font-size: 16px;
+  }
+
+  .hero__cta {
+    justify-content: center;
+  }
+
+  .hero__images {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 40px;
+    padding: 0 16px;
+  }
+
+  .hero__img {
+    position: relative;
+    inset: auto;
+    transform: none;
+  }
+
+  .hero__img--main {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3/4;
+    grid-column: 1 / -1;
+    right: auto;
+    top: auto;
+  }
+
+  .hero__img--secondary {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    left: auto;
+    top: auto;
+  }
+
+  .hero__img--tertiary {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    right: auto;
+    bottom: auto;
+    transform: none;
+  }
+
+  .hero__scroll {
+    display: none;
+  }
+
+  /* Philosophy */
+  .philosophy__inner {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .philosophy__sticky {
+    position: relative;
+    top: auto;
+    text-align: center;
+  }
+
+  .philosophy__big-text {
+    font-size: 72px;
+  }
+
+  .philosophy__scroll-blocks {
+    padding: 0;
+  }
+
+  .philosophy__block {
+    margin-bottom: 48px;
+  }
+
+  /* Treatment */
+  .treatment__inner {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .treatment__image-area {
+    position: relative;
+    top: auto;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  /* Doctor */
+  .doctor__inner {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    text-align: center;
+  }
+
+  .doctor__image {
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  .doctor__career-item {
+    justify-content: center;
+  }
+
+  .doctor__tags {
+    justify-content: center;
+  }
+
+  .doctor__certs {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* Space */
+  .space__grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+
+  .space__item--large {
+    grid-row: auto;
+    aspect-ratio: 4/3;
+  }
+
+  /* Reviews */
+  .reviews__grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* Reservation */
+  .reservation__title {
+    font-size: 36px;
+  }
+
+  .reservation__phone {
+    font-size: 28px;
+  }
+
+  .reservation__hours {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* Footer info */
+  .footer-info__inner {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  /* Footer */
+  .footer__inner {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+
+  /* Nav menu */
+  .nav__menu-item a {
+    font-size: 32px;
+  }
+}
+
+/* ============================================
+   RESPONSIVE — 480px (Small Mobile)
+   ============================================ */
+@media (max-width: 480px) {
+  :root {
+    --section-py: 48px;
+  }
+
+  section {
+    padding: 48px 0;
+  }
+
+  .hero__title-kr {
+    font-size: 40px;
+  }
+
+  .hero__title-hanja {
+    font-size: 20px;
+  }
+
+  .hero__subtitle {
+    font-size: 15px;
+  }
+
+  .hero__cta {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .philosophy__big-text {
+    font-size: 56px;
+  }
+
+  .philosophy__block-title {
+    font-size: 20px;
+  }
+
+  .accordion-title {
+    font-size: 17px;
+  }
+
+  .accordion-content {
+    padding-left: 36px;
+  }
+
+  .doctor__name {
+    font-size: 28px;
+  }
+
+  .review-card {
+    padding: 28px 20px;
+  }
+
+  .reservation__title {
+    font-size: 28px;
+  }
+
+  .reservation__phone {
+    font-size: 24px;
+  }
+
+  .chapter-label {
+    font-size: 12px;
+  }
+}
+
+/* ============================================
+   RESPONSIVE — 375px (iPhone SE)
+   ============================================ */
+@media (max-width: 375px) {
+  .hero__title-kr {
+    font-size: 36px;
+  }
+
+  .hero__title-hanja {
+    font-size: 18px;
+  }
+
+  .philosophy__big-text {
+    font-size: 48px;
+  }
+
+  .doctor__name {
+    font-size: 24px;
+  }
+
+  .btn-pill {
+    padding: 12px 28px;
+    font-size: 14px;
+  }
+
+  .accordion-title {
+    font-size: 16px;
+  }
+
+  .review-card {
+    padding: 24px 16px;
+  }
+
+  .reservation__title {
+    font-size: 24px;
+  }
+
+  .reservation__phone {
+    font-size: 20px;
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
