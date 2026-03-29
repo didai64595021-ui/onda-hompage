@@ -3,7 +3,14 @@
 > 자동 업데이트: 2026-03-28 KST
 
 ## 현재 작업
-경락당 한의원 포트폴리오 사이트 제작
+GLOW 더마 클리닉 피부과 포트폴리오 사이트 제작
+
+### GLOW 더마 클리닉 포트폴리오 — 진행 중 (2026-03-30)
+- [x] Step 1: index.html Part 1 (Head + CSS + Hero + Treatment + B/A 섹션)
+- [x] Step 2: index.html Part 2 (Skin Map + Doctor + Space/Review + Reserve/Footer)
+- [x] Step 3: index.html Part 3 (JavaScript 전체 — 슬라이더, 스크롤, 맵, 카운터)
+- [x] Step 4: 검증 (이미지 URL 19개 200 확인, 404 교체 완료)
+- [x] Step 5: Git commit + push
 
 ### 경락당 한의원 포트폴리오 — 완료 (2026-03-30)
 - [x] Step 1: styles.css (CSS 변수, 리셋, 타이포, 전체 섹션 스타일, 애니메이션, 반응형, 1768줄)
@@ -115,7 +122,7 @@
 - [x] Step 3: Git commit + push
 
 ## 다음 단계
-경락당 한의원 완료 — 다음 지시 대기
+GLOW 더마 클리닉 완료 — 다음 지시 대기
 
 ## Git 상태 (자동)
 - **브랜치**: main
