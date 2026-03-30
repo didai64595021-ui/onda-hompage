@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMS 관리 | 쓰리웨이펜션</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { background: #FAFAF5; padding-top: 0; }
+  </style>
+</head>
+<body>
+
+<div class="cms-admin-wrap">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:32px;">
+    <div>
+      <h1>🛠️ 쓰리웨이펜션 CMS</h1>
+      <p class="cms-subtitle">텍스트, 이미지, 가격을 수정하면 사이트에 즉시 반영됩니다.</p>
+    </div>
+    <a href="index.html" style="color:#7BA17F;font-weight:600;font-size:0.9rem;">← 사이트로 돌아가기</a>
+  </div>
+
+  <!-- 검색 -->
+  <input type="text" class="cms-search" id="cmsSearch" placeholder="검색 (예: 가격, 히어로, 패키지...)">
+
+  <!-- 폼 영역 -->
+  <div id="cmsForm"></div>
+
+  <!-- 액션 버튼 -->
+  <div class="cms-actions">
+    <button class="cms-btn cms-btn-save" id="btnSave">💾 저장하기</button>
+    <button class="cms-btn cms-btn-export" id="btnExport">📥 JSON 내보내기</button>
+    <button class="cms-btn cms-btn-reset" id="btnReset">🔄 초기값 복원</button>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="cms-toast" id="cmsToast"></div>
+
+<script src="cms.js"></script>
+<script>
+(async function() {
+  'use strict';
+
+  // CMS 키 카테고리 매핑
+  const categories = {
+    '🏠 메인 히어로': ['hero-img','hero-label','hero-title','hero-title-kr','hero-sub','site-name'],
+    '📺 방송 배지': ['badge-mbc','badge-kbs','badge-star'],
+    '🛏️ 객실 미리보기 (메인)': [
+      'room-preview-1-img','room-preview-1-name','room-preview-1-desc',
+      'room-preview-2-img','room-preview-2-name','room-preview-2-desc',
+      'room-preview-3-img','room-preview-3-name','room-preview-3-desc',
+      'rooms-subtitle'
+    ],
+    '🥩 바비큐 하이라이트': ['bbq-highlight-img','bbq-highlight-title','bbq-highlight-desc'],
+    '🏊 시설 스크롤 (메인)': [
+      'fac-scroll-1-img','fac-scroll-1-name','fac-scroll-1-desc',
+      'fac-scroll-2-img','fac-scroll-2-name','fac-scroll-2-desc',
+      'fac-scroll-3-img','fac-scroll-3-name','fac-scroll-3-desc',
+      'fac-scroll-4-img','fac-scroll-4-name','fac-scroll-4-desc',
+      'fac-scroll-5-img','fac-scroll-5-name','fac-scroll-5-desc',
+      'facilities-subtitle'
+    ],
+    '📞 CTA & 푸터': ['cta-title','cta-desc','footer-desc','footer-phone','footer-address'],
+    '💰 요금 - 비수기': [
+      'season-low-period',
+      'rate-low-sonamu','rate-low-danpung','rate-low-tulip',
+      'rate-low-suite1','rate-low-suite2','rate-low-suite3','rate-low-disney'
+    ],
+    '💰 요금 - 준성수기': [
+      'season-mid-period',
+      'rate-mid-sonamu','rate-mid-danpung','rate-mid-tulip',
+      'rate-mid-suite1','rate-mid-suite2','rate-mid-suite3','rate-mid-disney'
+    ],
+    '💰 요금 - 성수기': [
+      'season-high-period',
+      'rate-high-sonamu','rate-high-danpung','rate-high-tulip',
+      'rate-high-suite1','rate-high-suite2','rate-high-suite3','rate-high-disney'
+    ],
+    '🐷 돼지고기나라 패키지': [
+      'pkg-pork-img','pkg-pork-name','pkg-pork-subtitle',
+      'pkg-pork-menu1','pkg-pork-menu2','pkg-pork-menu3','pkg-pork-menu4','pkg-pork-menu5',
+      'pkg-pork-inc1','pkg-pork-inc2','pkg-pork-inc3','pkg-pork-inc4',
+      'pkg-pork-breakfast',
+      'pkg-pork-price-low','pkg-pork-price-mid','pkg-pork-price-high'
+    ],
+    '🦐 해산물나라 패키지': [
+      'pkg-seafood-img','pkg-seafood-name','pkg-seafood-subtitle','pkg-seafood-note',
+      'pkg-seafood-menu1','pkg-seafood-menu2','pkg-seafood-menu3','pkg-seafood-menu4','pkg-seafood-menu5',
+      'pkg-seafood-inc1','pkg-seafood-inc2',
+      'pkg-seafood-price-low','pkg-seafood-price-mid','pkg-seafood-price-high'
+    ]
+  };
+
+  // 키 → 라벨 (한국어)
+  const labels = {
+    'hero-img': '히어로 배경 이미지',
+    'hero-label': '히어로 라벨 (영문)',
+    'hero-title': '히어로 타이틀 (영문)',
+    'hero-title-kr': '히어로 타이틀 (한글)',
+    'hero-sub': '히어로 설명글',
+    'site-name': '사이트명 (HTML 가능)',
+    'badge-mbc': 'MBC 배지 텍스트',
+    'badge-kbs': 'KBS 배지 텍스트',
+    'badge-star': '별점 배지 텍스트',
+    'rooms-subtitle': '객실 섹션 부제',
+    'facilities-subtitle': '시설 섹션 부제',
+    'cta-title': 'CTA 제목',
+    'cta-desc': 'CTA 설명',
+    'footer-desc': '푸터 소개글',
+    'footer-phone': '전화번호',
+    'footer-address': '주소',
+    'season-low-period': '비수기 기간',
+    'season-mid-period': '준성수기 기간',
+    'season-high-period': '성수기 기간',
+    'bbq-highlight-img': '바비큐 하이라이트 이미지',
+    'bbq-highlight-title': '바비큐 제목 (HTML 가능)',
+    'bbq-highlight-desc': '바비큐 설명',
+    'pkg-pork-img': '돼지고기 패키지 이미지',
+    'pkg-pork-name': '패키지명',
+    'pkg-pork-subtitle': '부제',
+    'pkg-pork-breakfast': '조식 메뉴',
+    'pkg-pork-price-low': '비수기 가격',
+    'pkg-pork-price-mid': '준성수기 가격',
+    'pkg-pork-price-high': '성수기 가격',
+    'pkg-seafood-img': '해산물 패키지 이미지',
+    'pkg-seafood-name': '패키지명',
+    'pkg-seafood-subtitle': '부제',
+    'pkg-seafood-note': '메뉴 안내',
+    'pkg-seafood-price-low': '비수기 가격',
+    'pkg-seafood-price-mid': '준성수기 가격',
+    'pkg-seafood-price-high': '성수기 가격'
+  };
+
+  function getLabel(key) {
+    if (labels[key]) return labels[key];
+    // auto-generate label from key
+    return key.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  function isImageKey(key) {
+    return key.endsWith('-img') || key.includes('-img-');
+  }
+
+  // Load data
+  let cmsData = await CMS.load();
+
+  // Render form
+  const formEl = document.getElementById('cmsForm');
+
+  Object.entries(categories).forEach(([catName, keys]) => {
+    const section = document.createElement('div');
+    section.className = 'cms-section';
+    section.innerHTML = '<h2>' + catName + '</h2>';
+
+    keys.forEach(key => {
+      const value = cmsData[key] || '';
+      const field = document.createElement('div');
+      field.className = 'cms-field';
+      field.dataset.searchText = (getLabel(key) + ' ' + key + ' ' + value).toLowerCase();
+
+      const label = document.createElement('label');
+      label.innerHTML = getLabel(key) + ' <code>' + key + '</code>';
+      field.appendChild(label);
+
+      if (isImageKey(key)) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = value;
+        input.dataset.cmsKey = key;
+        input.placeholder = 'images/파일명.jpg';
+        field.appendChild(input);
+
+        if (value) {
+          const preview = document.createElement('div');
+          preview.className = 'cms-img-preview';
+          preview.innerHTML = '<img src="' + value + '" alt="미리보기">';
+          field.appendChild(preview);
+
+          // Update preview on input change
+          input.addEventListener('input', () => {
+            const img = preview.querySelector('img');
+            if (img) img.src = input.value;
+          });
+        }
+      } else if (value.length > 60 || value.includes('<br') || value.includes('\n')) {
+        const textarea = document.createElement('textarea');
+        textarea.value = value;
+        textarea.dataset.cmsKey = key;
+        field.appendChild(textarea);
+      } else {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = value;
+        input.dataset.cmsKey = key;
+        field.appendChild(input);
+      }
+
+      section.appendChild(field);
+    });
+
+    formEl.appendChild(section);
+  });
+
+  // Search
+  const searchInput = document.getElementById('cmsSearch');
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.toLowerCase().trim();
+    document.querySelectorAll('.cms-field').forEach(field => {
+      const text = field.dataset.searchText || '';
+      field.classList.toggle('hidden', q && !text.includes(q));
+    });
+    // Hide empty sections
+    document.querySelectorAll('.cms-section').forEach(sec => {
+      const visibleFields = sec.querySelectorAll('.cms-field:not(.hidden)');
+      sec.style.display = visibleFields.length === 0 && q ? 'none' : '';
+    });
+  });
+
+  // Toast
+  function showToast(msg) {
+    const toast = document.getElementById('cmsToast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  // Save
+  document.getElementById('btnSave').addEventListener('click', () => {
+    document.querySelectorAll('[data-cms-key]').forEach(input => {
+      const key = input.dataset.cmsKey;
+      cmsData[key] = input.value;
+    });
+    CMS.save(cmsData);
+    showToast('✅ 저장 완료! 사이트에 즉시 반영됩니다.');
+  });
+
+  // Export
+  document.getElementById('btnExport').addEventListener('click', () => {
+    document.querySelectorAll('[data-cms-key]').forEach(input => {
+      const key = input.dataset.cmsKey;
+      cmsData[key] = input.value;
+    });
+    CMS.export(cmsData);
+    showToast('📥 JSON 파일이 다운로드됩니다.');
+  });
+
+  // Reset
+  document.getElementById('btnReset').addEventListener('click', () => {
+    if (!confirm('⚠️ 모든 수정사항을 초기값으로 되돌립니다. 계속하시겠습니까?')) return;
+    CMS.reset();
+    showToast('🔄 초기값 복원 완료. 페이지를 새로고침합니다...');
+    setTimeout(() => location.reload(), 1000);
+  });
+
+})();
+</script>
+</body>
+</html>
