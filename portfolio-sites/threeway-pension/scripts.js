@@ -53,9 +53,18 @@ document.addEventListener('DOMContentLoaded', () => {
           observer.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
 
     fadeEls.forEach(el => observer.observe(el));
+
+    // Fallback: 3초 후에도 revealed 안 된 요소 모두 표시 (안전장치)
+    setTimeout(() => {
+      fadeEls.forEach(el => {
+        if (!el.classList.contains('revealed')) {
+          el.classList.add('revealed');
+        }
+      });
+    }, 3000);
   } else {
     // fallback: 모두 보이게
     fadeEls.forEach(el => el.classList.add('revealed'));
