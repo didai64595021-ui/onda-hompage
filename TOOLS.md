@@ -38,3 +38,12 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
 ---
 
 Add whatever helps you do your job. This is your cheat sheet.
+
+## 이미지 생성 (Image Generation)
+
+이미지 생성 요청 시 **반드시 OpenAI API**를 사용할 것:
+- **모델**: `openai/gpt-image-1` (기본) 또는 `openai/dall-e-3`
+- **Gemini 이미지 생성 사용 금지** — OpenAI가 품질이 훨씬 좋음
+- 환경변수 `OPENAI_API_KEY`가 `.env`에 설정됨
+- 이미지 생성 tool 호출 시 provider를 `openai`로 명시
+
