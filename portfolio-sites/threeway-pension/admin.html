@@ -250,9 +250,73 @@
     .cms-field.empty-field { background: rgba(231,76,60,.03); border-radius: 8px; padding: 8px; }
     .cms-field.empty-field label::after { content: ' \u26A0\uFE0F 미입력'; font-size: 0.75rem; color: #e74c3c; font-weight: 400; }
     .cms-field.modified.empty-field label::after { content: ' (수정됨)'; color: #f0ad4e; }
+
+    /* === 반응형 === */
+    @media(max-width:768px){
+      .cms-admin-wrap{padding:16px 12px;}
+      .cms-admin-wrap h1{font-size:1.3rem;}
+      .cms-section{padding:16px 12px;margin-bottom:16px;}
+      .cms-section h2{font-size:1rem;}
+      .cms-tabs{gap:2px;padding:0 0 12px;margin-bottom:16px;}
+      .cms-tab{padding:8px 14px;font-size:.8rem;}
+      .cms-actions{flex-direction:column;gap:8px;}
+      .cms-btn{width:100%;padding:12px 16px;font-size:.9rem;}
+      .cms-field input[type="text"],.cms-field textarea{font-size:.9rem;padding:10px 12px;}
+      .cms-img-preview{flex-direction:column;align-items:flex-start;}
+      .cms-img-preview img{max-width:100%;}
+      .cms-drop-zone{padding:16px;}
+      .cms-floating-bar{flex-direction:row;gap:6px;padding:10px 12px;}
+      .cms-floating-bar .cms-btn{padding:10px 12px;font-size:.82rem;min-height:40px;}
+      .cms-toc{margin-bottom:12px;}
+      .cms-search{font-size:.9rem;padding:10px 12px 10px 36px;margin-bottom:16px;}
+      .cms-preview-panel{width:100%!important;right:0!important;}
+    }
+    @media(max-width:480px){
+      .cms-admin-wrap h1{font-size:1.1rem;}
+      .cms-tab{padding:7px 10px;font-size:.75rem;}
+      .cms-section{padding:12px 10px;}
+      .cms-field label{font-size:.8rem;}
+      .cms-field label code{font-size:.7rem;}
+    }
   </style>
 </head>
 <body>
+
+<!-- 비밀번호 잠금 화면 -->
+<div id="authGate" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#FAFAF5;z-index:99999;display:flex;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:20px;padding:48px 40px;box-shadow:0 8px 40px rgba(44,62,45,.12);text-align:center;max-width:380px;width:90%;">
+    <div style="font-size:2.5rem;margin-bottom:16px;">🔒</div>
+    <h2 style="font-size:1.3rem;font-weight:700;color:#2C3E2D;margin-bottom:8px;">CMS 관리자 인증</h2>
+    <p style="font-size:.88rem;color:#8B9A8E;margin-bottom:24px;">비밀번호를 입력해주세요</p>
+    <input type="password" id="authPw" placeholder="비밀번호" style="width:100%;padding:14px 18px;border:2px solid #ddd;border-radius:12px;font-size:1rem;font-family:inherit;text-align:center;margin-bottom:16px;box-sizing:border-box;" autofocus>
+    <button id="authBtn" style="width:100%;padding:14px;background:#7BA17F;color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background .2s;">로그인</button>
+    <p id="authError" style="color:#e74c3c;font-size:.85rem;margin-top:12px;display:none;">비밀번호가 올바르지 않습니다.</p>
+  </div>
+</div>
+<script>
+(function(){
+  const HASH='a3f5b2c8d1e9';// threeway123 hash marker
+  const gate=document.getElementById('authGate');
+  const inp=document.getElementById('authPw');
+  const btn=document.getElementById('authBtn');
+  const err=document.getElementById('authError');
+  if(sessionStorage.getItem('cms-auth')==='ok'){gate.style.display='none';}
+  function check(){
+    if(inp.value==='threeway123'){
+      sessionStorage.setItem('cms-auth','ok');
+      gate.style.display='none';
+    } else {
+      err.style.display='block';
+      inp.value='';
+      inp.focus();
+      inp.style.borderColor='#e74c3c';
+      setTimeout(()=>{inp.style.borderColor='#ddd';},1500);
+    }
+  }
+  btn.addEventListener('click',check);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')check();});
+})();
+</script>
 
 <!-- 미리보기 오버레이 -->
 <div class="cms-preview-overlay" id="previewOverlay"></div>
@@ -389,6 +453,25 @@
       'fac-detail-2-img','fac-detail-2-title','fac-detail-2-desc'
     ],
 
+    // 주변관광 - attractions.html
+    '🗺️ 주변관광 히어로': ['attr-hero-img','attr-hero-title','attr-hero-sub'],
+    '🗺️ 관광명소': [
+      'attr-spot-1-img','attr-spot-1-name','attr-spot-1-tag','attr-spot-1-dist','attr-spot-1-desc',
+      'attr-spot-2-img','attr-spot-2-name','attr-spot-2-tag','attr-spot-2-dist','attr-spot-2-desc',
+      'attr-spot-3-img','attr-spot-3-name','attr-spot-3-tag','attr-spot-3-dist','attr-spot-3-desc',
+      'attr-spot-4-img','attr-spot-4-name','attr-spot-4-tag','attr-spot-4-dist','attr-spot-4-desc',
+      'attr-spot-5-img','attr-spot-5-name','attr-spot-5-tag','attr-spot-5-dist','attr-spot-5-desc',
+      'attr-spot-6-img','attr-spot-6-name','attr-spot-6-tag','attr-spot-6-dist','attr-spot-6-desc',
+      'attr-spot-7-img','attr-spot-7-name','attr-spot-7-tag','attr-spot-7-dist','attr-spot-7-desc',
+      'attr-spot-8-img','attr-spot-8-name','attr-spot-8-tag','attr-spot-8-dist','attr-spot-8-desc'
+    ],
+    '🤝 제휴할인': [
+      'attr-partner-1-name','attr-partner-1-discount','attr-partner-1-note',
+      'attr-partner-2-name','attr-partner-2-discount','attr-partner-2-note',
+      'attr-partner-3-name','attr-partner-3-discount','attr-partner-3-note',
+      'attr-partner-4-name','attr-partner-4-discount','attr-partner-4-note'
+    ],
+
     // FAQ - faq.html
     '❓ FAQ 페이지': ['faq-hero-img'],
 
@@ -411,6 +494,7 @@
     '요금안내': ['💰 요금 페이지 히어로','💰 요금 - 비수기','💰 요금 - 준성수기','💰 요금 - 성수기'],
     '패키지': ['📦 패키지 페이지 히어로','🐷 돼지고기나라 패키지','🦐 해산물나라 패키지','📸 패키지 갤러리'],
     '시설안내': ['🏊 시설 페이지 히어로','🏊 시설 카드','🏊 시설 상세'],
+    '주변관광': ['🗺️ 주변관광 히어로','🗺️ 관광명소','🤝 제휴할인'],
     'FAQ': ['❓ FAQ 페이지'],
     '소개': ['📖 소개 히어로','📖 소개 스토리','📖 소개 정보'],
     '공통(헤더/푸터)': ['📞 CTA & 푸터']
@@ -426,6 +510,7 @@
     '요금안내': 'rates.html',
     '패키지': 'package.html',
     '시설안내': 'facilities.html',
+    '주변관광': 'attractions.html',
     'FAQ': 'faq.html',
     '소개': 'about.html',
     '공통(헤더/푸터)': 'index.html'
