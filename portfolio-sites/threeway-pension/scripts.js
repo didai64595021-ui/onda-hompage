@@ -46,6 +46,16 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = '';
       });
     });
+
+    const closeBtn = mobileOverlay.querySelector('.mobile-menu-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        mobileOverlay.classList.remove('active');
+        setTimeout(() => { mobileOverlay.style.display = 'none'; }, 400);
+        document.body.style.overflow = '';
+      });
+    }
   }
 
   /* --- 3. 현재 페이지 메뉴 하이라이트 --- */
