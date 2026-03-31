@@ -11,6 +11,111 @@
   <link rel="stylesheet" href="styles.css">
   <style>
     body { background: #FAFAF5; padding-top: 0; }
+
+    /* === 탭 네비게이션 === */
+    .cms-tabs {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      padding: 0 0 16px;
+      margin-bottom: 24px;
+      border-bottom: 2px solid #eee;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+    .cms-tabs::-webkit-scrollbar { height: 4px; }
+    .cms-tabs::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    .cms-tab {
+      padding: 10px 20px;
+      border-radius: 8px 8px 0 0;
+      border: 1px solid #ddd;
+      border-bottom: none;
+      background: #f5f5f0;
+      cursor: pointer;
+      white-space: nowrap;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #666;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .cms-tab.active {
+      background: #fff;
+      color: #2C3E2D;
+      border-color: #7BA17F;
+      font-weight: 600;
+    }
+    .cms-tab:hover:not(.active) {
+      background: #eee;
+    }
+
+    /* === 드래그앤드랍 영역 === */
+    .cms-drop-zone {
+      border: 2px dashed #ccc;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      color: #999;
+      cursor: pointer;
+      transition: border-color 0.3s, background 0.3s;
+      margin-top: 8px;
+    }
+    .cms-drop-zone.drag-over {
+      border-color: #7BA17F;
+      background: rgba(123, 161, 127, 0.08);
+    }
+    .cms-drop-zone p {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+    .cms-drop-zone .drop-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+    .cms-drop-zone .drop-hint {
+      font-size: 0.78rem;
+      color: #bbb;
+      margin-top: 6px;
+    }
+
+    /* 이미지 미리보기 개선 */
+    .cms-img-preview {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 8px;
+    }
+    .cms-img-preview img {
+      max-width: 200px;
+      max-height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid rgba(44,62,45,.1);
+    }
+    .cms-img-preview .remove-img-btn {
+      background: none;
+      border: 1px solid #e74c3c;
+      color: #e74c3c;
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      min-height: 32px;
+      min-width: auto;
+      transition: all 0.2s;
+    }
+    .cms-img-preview .remove-img-btn:hover {
+      background: #e74c3c;
+      color: #fff;
+    }
+
+    /* 빈 탭 상태 */
+    .cms-empty-tab {
+      text-align: center;
+      padding: 48px 24px;
+      color: #999;
+      font-size: 0.95rem;
+    }
   </style>
 </head>
 <body>
@@ -23,6 +128,9 @@
     </div>
     <a href="index.html" style="color:#7BA17F;font-weight:600;font-size:0.9rem;">← 사이트로 돌아가기</a>
   </div>
+
+  <!-- 탭 네비게이션 -->
+  <div class="cms-tabs" id="cmsTabs"></div>
 
   <!-- 검색 -->
   <input type="text" class="cms-search" id="cmsSearch" placeholder="검색 (예: 가격, 히어로, 패키지...)">
@@ -46,10 +154,13 @@
 (async function() {
   'use strict';
 
-  // CMS 키 카테고리 매핑
+  // ============================================
+  // CMS 키 카테고리 매핑 (모든 페이지 포함)
+  // ============================================
   const categories = {
-    '🏠 메인 히어로': ['hero-img','hero-label','hero-title','hero-title-kr','hero-sub','site-name'],
-    '📺 방송 배지': ['badge-mbc','badge-kbs','badge-star'],
+    // 메인(홈) - index.html
+    '🏠 메인 히어로': ['hero-img','hero-label','hero-title','hero-title-kr','hero-sub'],
+    '📺 방송 배지': ['badge-mbc','badge-kbs','badge-star','badge-broadcast','badge-insta'],
     '🛏️ 객실 미리보기 (메인)': [
       'room-preview-1-img','room-preview-1-name','room-preview-1-desc',
       'room-preview-2-img','room-preview-2-name','room-preview-2-desc',
@@ -65,22 +176,30 @@
       'fac-scroll-5-img','fac-scroll-5-name','fac-scroll-5-desc',
       'facilities-subtitle'
     ],
-    '📞 CTA & 푸터': ['cta-title','cta-desc','footer-desc','footer-phone','footer-address'],
+
+    // 객실소개 - rooms.html
+    '🛏️ 객실소개 페이지': ['rooms-hero-title','rooms-hero-sub'],
+
+    // 요금안내 - rates.html
+    '💰 요금 페이지 히어로': ['rates-hero-img','rates-hero-title','rates-hero-sub','rates-table-desc'],
     '💰 요금 - 비수기': [
       'season-low-period',
-      'rate-low-sonamu','rate-low-danpung','rate-low-tulip',
+      'rate-low-sonamu','rate-low-danpung','rate-low-tulip','rate-low-mint',
       'rate-low-suite1','rate-low-suite2','rate-low-suite3','rate-low-disney'
     ],
     '💰 요금 - 준성수기': [
       'season-mid-period',
-      'rate-mid-sonamu','rate-mid-danpung','rate-mid-tulip',
+      'rate-mid-sonamu','rate-mid-danpung','rate-mid-tulip','rate-mid-mint',
       'rate-mid-suite1','rate-mid-suite2','rate-mid-suite3','rate-mid-disney'
     ],
     '💰 요금 - 성수기': [
       'season-high-period',
-      'rate-high-sonamu','rate-high-danpung','rate-high-tulip',
+      'rate-high-sonamu','rate-high-danpung','rate-high-tulip','rate-high-mint',
       'rate-high-suite1','rate-high-suite2','rate-high-suite3','rate-high-disney'
     ],
+
+    // 패키지 - package.html
+    '📦 패키지 페이지 히어로': ['pkg-hero-img','pkg-hero-title','pkg-hero-sub','pkg-section-desc'],
     '🐷 돼지고기나라 패키지': [
       'pkg-pork-img','pkg-pork-name','pkg-pork-subtitle',
       'pkg-pork-menu1','pkg-pork-menu2','pkg-pork-menu3','pkg-pork-menu4','pkg-pork-menu5',
@@ -93,10 +212,54 @@
       'pkg-seafood-menu1','pkg-seafood-menu2','pkg-seafood-menu3','pkg-seafood-menu4','pkg-seafood-menu5',
       'pkg-seafood-inc1','pkg-seafood-inc2',
       'pkg-seafood-price-low','pkg-seafood-price-mid','pkg-seafood-price-high'
-    ]
+    ],
+    '📸 패키지 갤러리': ['pkg-gallery-1','pkg-gallery-2','pkg-gallery-3','pkg-gallery-4','pkg-gallery-5','pkg-gallery-6'],
+
+    // 시설안내 - facilities.html
+    '🏊 시설 페이지 히어로': ['fac-hero-img','fac-hero-title','fac-hero-sub'],
+    '🏊 시설 카드': [
+      'fac-card-1-img','fac-card-1-name','fac-card-1-desc',
+      'fac-card-2-img','fac-card-2-name','fac-card-2-desc',
+      'fac-card-3-img','fac-card-3-name','fac-card-3-desc',
+      'fac-card-4-img','fac-card-4-name','fac-card-4-desc',
+      'fac-card-5-img','fac-card-5-name','fac-card-5-desc',
+      'fac-card-6-img','fac-card-6-name','fac-card-6-desc'
+    ],
+    '🏊 시설 상세': [
+      'fac-detail-1-img','fac-detail-1-title','fac-detail-1-desc',
+      'fac-detail-2-img','fac-detail-2-title','fac-detail-2-desc'
+    ],
+
+    // FAQ - faq.html
+    '❓ FAQ 페이지': ['faq-hero-img'],
+
+    // 소개 - about.html
+    '📖 소개 히어로': ['about-hero-img','about-hero-title','about-hero-sub'],
+    '📖 소개 스토리': ['about-story-img','about-story-title','about-story-desc1','about-story-desc2'],
+    '📖 소개 정보': ['about-mbc-desc','about-kbs-desc','about-address','about-owner','about-bizno','about-phone'],
+
+    // 공통(헤더/푸터)
+    '📞 CTA & 푸터': ['cta-title','cta-desc','footer-desc','footer-phone','footer-address','site-name']
   };
 
+  // ============================================
+  // 탭 ↔ 카테고리 매핑
+  // ============================================
+  const tabMapping = {
+    '전체': null,
+    '메인(홈)': ['🏠 메인 히어로','📺 방송 배지','🛏️ 객실 미리보기 (메인)','🥩 바비큐 하이라이트','🏊 시설 스크롤 (메인)'],
+    '객실소개': ['🛏️ 객실소개 페이지'],
+    '요금안내': ['💰 요금 페이지 히어로','💰 요금 - 비수기','💰 요금 - 준성수기','💰 요금 - 성수기'],
+    '패키지': ['📦 패키지 페이지 히어로','🐷 돼지고기나라 패키지','🦐 해산물나라 패키지','📸 패키지 갤러리'],
+    '시설안내': ['🏊 시설 페이지 히어로','🏊 시설 카드','🏊 시설 상세'],
+    'FAQ': ['❓ FAQ 페이지'],
+    '소개': ['📖 소개 히어로','📖 소개 스토리','📖 소개 정보'],
+    '공통(헤더/푸터)': ['📞 CTA & 푸터']
+  };
+
+  // ============================================
   // 키 → 라벨 (한국어)
+  // ============================================
   const labels = {
     'hero-img': '히어로 배경 이미지',
     'hero-label': '히어로 라벨 (영문)',
@@ -107,6 +270,8 @@
     'badge-mbc': 'MBC 배지 텍스트',
     'badge-kbs': 'KBS 배지 텍스트',
     'badge-star': '별점 배지 텍스트',
+    'badge-broadcast': '방송 배지 텍스트',
+    'badge-insta': '인스타 배지 텍스트',
     'rooms-subtitle': '객실 섹션 부제',
     'facilities-subtitle': '시설 섹션 부제',
     'cta-title': 'CTA 제목',
@@ -133,28 +298,173 @@
     'pkg-seafood-note': '메뉴 안내',
     'pkg-seafood-price-low': '비수기 가격',
     'pkg-seafood-price-mid': '준성수기 가격',
-    'pkg-seafood-price-high': '성수기 가격'
+    'pkg-seafood-price-high': '성수기 가격',
+    'rooms-hero-title': '객실소개 히어로 제목',
+    'rooms-hero-sub': '객실소개 히어로 부제',
+    'rates-hero-img': '요금 페이지 히어로 이미지',
+    'rates-hero-title': '요금 페이지 히어로 제목',
+    'rates-hero-sub': '요금 페이지 히어로 부제',
+    'rates-table-desc': '요금표 설명',
+    'pkg-hero-img': '패키지 페이지 히어로 이미지',
+    'pkg-hero-title': '패키지 페이지 히어로 제목',
+    'pkg-hero-sub': '패키지 페이지 히어로 부제',
+    'pkg-section-desc': '패키지 섹션 설명',
+    'fac-hero-img': '시설 페이지 히어로 이미지',
+    'fac-hero-title': '시설 페이지 히어로 제목',
+    'fac-hero-sub': '시설 페이지 히어로 부제',
+    'faq-hero-img': 'FAQ 페이지 히어로 이미지',
+    'about-hero-img': '소개 페이지 히어로 이미지',
+    'about-hero-title': '소개 페이지 히어로 제목',
+    'about-hero-sub': '소개 페이지 히어로 부제',
+    'about-story-img': '소개 스토리 이미지',
+    'about-story-title': '소개 스토리 제목',
+    'about-story-desc1': '소개 스토리 설명 1',
+    'about-story-desc2': '소개 스토리 설명 2',
+    'about-mbc-desc': 'MBC 방송 설명',
+    'about-kbs-desc': 'KBS 방송 설명',
+    'about-address': '소개 페이지 주소',
+    'about-owner': '대표자명',
+    'about-bizno': '사업자등록번호',
+    'about-phone': '소개 페이지 전화번호'
   };
 
   function getLabel(key) {
     if (labels[key]) return labels[key];
-    // auto-generate label from key
     return key.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }
 
   function isImageKey(key) {
-    return key.endsWith('-img') || key.includes('-img-');
+    return key.endsWith('-img') || key.includes('-img-') || key.startsWith('pkg-gallery-');
   }
 
-  // Load data
+  // ============================================
+  // 드래그앤드랍 이미지 업로드 헬퍼
+  // ============================================
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+  function createDropZone(key, input, previewContainer) {
+    const dropZone = document.createElement('div');
+    dropZone.className = 'cms-drop-zone';
+    dropZone.innerHTML = '<div class="drop-icon">📁</div><p>이미지를 드래그하여 놓으세요</p><p class="drop-hint">또는 클릭하여 파일 선택 (jpg, png, webp / 최대 5MB)</p>';
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/jpeg,image/png,image/webp';
+    fileInput.style.display = 'none';
+
+    dropZone.appendChild(fileInput);
+
+    // 클릭 → 파일 선택
+    dropZone.addEventListener('click', (e) => {
+      if (e.target === fileInput) return;
+      fileInput.click();
+    });
+
+    // 파일 선택 처리
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) {
+        handleFile(fileInput.files[0], key, input, previewContainer, dropZone);
+      }
+    });
+
+    // 드래그 이벤트
+    dropZone.addEventListener('dragenter', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('drag-over'); });
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      if (e.dataTransfer.files.length > 0) {
+        handleFile(e.dataTransfer.files[0], key, input, previewContainer, dropZone);
+      }
+    });
+
+    return dropZone;
+  }
+
+  function handleFile(file, key, input, previewContainer, dropZone) {
+    // 형식 확인
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      showToast('⚠️ 지원하지 않는 형식입니다. jpg, png, webp만 가능합니다.');
+      return;
+    }
+    // 크기 확인
+    if (file.size > MAX_FILE_SIZE) {
+      showToast('⚠️ 파일이 너무 큽니다. 최대 5MB까지 가능합니다.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64 = e.target.result;
+      input.value = base64;
+      updatePreview(previewContainer, base64, input, dropZone);
+      showToast('✅ 이미지가 로드되었습니다. 저장을 눌러주세요.');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function updatePreview(container, src, input, dropZone) {
+    container.innerHTML = '';
+    if (!src) {
+      if (dropZone) dropZone.style.display = '';
+      return;
+    }
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = '미리보기';
+    container.appendChild(img);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-img-btn';
+    removeBtn.textContent = '✕ 제거';
+    removeBtn.addEventListener('click', () => {
+      input.value = '';
+      container.innerHTML = '';
+      if (dropZone) dropZone.style.display = '';
+    });
+    container.appendChild(removeBtn);
+
+    // 이미지가 설정되면 드랍존 숨기기 (선택적)
+    if (dropZone) dropZone.style.display = 'none';
+  }
+
+  // ============================================
+  // Load CMS data
+  // ============================================
   let cmsData = await CMS.load();
 
-  // Render form
+  // ============================================
+  // 탭 렌더링
+  // ============================================
+  const tabsEl = document.getElementById('cmsTabs');
+  let activeTab = '전체';
+
+  // URL 해시에서 초기 탭 결정
+  const hashTab = decodeURIComponent(location.hash.replace('#tab-', ''));
+  if (hashTab && tabMapping.hasOwnProperty(hashTab)) {
+    activeTab = hashTab;
+  }
+
+  Object.keys(tabMapping).forEach(tabName => {
+    const btn = document.createElement('button');
+    btn.className = 'cms-tab' + (tabName === activeTab ? ' active' : '');
+    btn.textContent = tabName;
+    btn.dataset.tab = tabName;
+    btn.addEventListener('click', () => switchTab(tabName));
+    tabsEl.appendChild(btn);
+  });
+
+  // ============================================
+  // 폼 렌더링
+  // ============================================
   const formEl = document.getElementById('cmsForm');
 
   Object.entries(categories).forEach(([catName, keys]) => {
     const section = document.createElement('div');
     section.className = 'cms-section';
+    section.dataset.category = catName;
     section.innerHTML = '<h2>' + catName + '</h2>';
 
     keys.forEach(key => {
@@ -168,25 +478,37 @@
       field.appendChild(label);
 
       if (isImageKey(key)) {
+        // URL 텍스트 입력
         const input = document.createElement('input');
         input.type = 'text';
         input.value = value;
         input.dataset.cmsKey = key;
-        input.placeholder = 'images/파일명.jpg';
+        input.placeholder = 'images/파일명.jpg 또는 드래그앤드랍';
         field.appendChild(input);
 
-        if (value) {
-          const preview = document.createElement('div');
-          preview.className = 'cms-img-preview';
-          preview.innerHTML = '<img src="' + value + '" alt="미리보기">';
-          field.appendChild(preview);
+        // 미리보기 컨테이너
+        const preview = document.createElement('div');
+        preview.className = 'cms-img-preview';
+        field.appendChild(preview);
 
-          // Update preview on input change
-          input.addEventListener('input', () => {
-            const img = preview.querySelector('img');
-            if (img) img.src = input.value;
-          });
+        // 드래그앤드랍 영역
+        const dropZone = createDropZone(key, input, preview);
+        field.appendChild(dropZone);
+
+        // 초기 값이 있으면 미리보기 표시
+        if (value) {
+          updatePreview(preview, value, input, dropZone);
         }
+
+        // URL 입력 변경 시 미리보기 업데이트
+        input.addEventListener('input', () => {
+          if (input.value) {
+            updatePreview(preview, input.value, input, dropZone);
+          } else {
+            preview.innerHTML = '';
+            dropZone.style.display = '';
+          }
+        });
       } else if (value.length > 60 || value.includes('<br') || value.includes('\n')) {
         const textarea = document.createElement('textarea');
         textarea.value = value;
@@ -206,22 +528,78 @@
     formEl.appendChild(section);
   });
 
-  // Search
-  const searchInput = document.getElementById('cmsSearch');
-  searchInput.addEventListener('input', () => {
-    const q = searchInput.value.toLowerCase().trim();
-    document.querySelectorAll('.cms-field').forEach(field => {
-      const text = field.dataset.searchText || '';
-      field.classList.toggle('hidden', q && !text.includes(q));
-    });
-    // Hide empty sections
-    document.querySelectorAll('.cms-section').forEach(sec => {
-      const visibleFields = sec.querySelectorAll('.cms-field:not(.hidden)');
-      sec.style.display = visibleFields.length === 0 && q ? 'none' : '';
-    });
-  });
+  // ============================================
+  // 탭 전환 로직
+  // ============================================
+  function switchTab(tabName) {
+    activeTab = tabName;
 
+    // URL 해시 업데이트
+    if (tabName === '전체') {
+      history.replaceState(null, '', location.pathname);
+    } else {
+      history.replaceState(null, '', '#tab-' + encodeURIComponent(tabName));
+    }
+
+    // 탭 버튼 활성 상태
+    tabsEl.querySelectorAll('.cms-tab').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === tabName);
+    });
+
+    // 섹션 표시/숨김
+    const allowedCategories = tabMapping[tabName]; // null이면 전체
+
+    document.querySelectorAll('.cms-section').forEach(sec => {
+      if (allowedCategories === null) {
+        sec.style.display = '';
+      } else {
+        sec.style.display = allowedCategories.includes(sec.dataset.category) ? '' : 'none';
+      }
+    });
+
+    // 검색 다시 적용
+    applySearch();
+  }
+
+  // ============================================
+  // 검색 (현재 활성 탭 내에서만)
+  // ============================================
+  const searchInput = document.getElementById('cmsSearch');
+
+  function applySearch() {
+    const q = searchInput.value.toLowerCase().trim();
+    const allowedCategories = tabMapping[activeTab];
+
+    document.querySelectorAll('.cms-section').forEach(sec => {
+      const catName = sec.dataset.category;
+      const inTab = allowedCategories === null || allowedCategories.includes(catName);
+
+      if (!inTab) {
+        sec.style.display = 'none';
+        return;
+      }
+
+      // 필드 검색 필터
+      let visibleCount = 0;
+      sec.querySelectorAll('.cms-field').forEach(field => {
+        const text = field.dataset.searchText || '';
+        const matchesSearch = !q || text.includes(q);
+        field.classList.toggle('hidden', !matchesSearch);
+        if (matchesSearch) visibleCount++;
+      });
+
+      sec.style.display = (visibleCount === 0 && q) ? 'none' : '';
+    });
+  }
+
+  searchInput.addEventListener('input', applySearch);
+
+  // 초기 탭 적용
+  switchTab(activeTab);
+
+  // ============================================
   // Toast
+  // ============================================
   function showToast(msg) {
     const toast = document.getElementById('cmsToast');
     toast.textContent = msg;
@@ -229,7 +607,9 @@
     setTimeout(() => toast.classList.remove('show'), 2500);
   }
 
-  // Save
+  // ============================================
+  // 저장
+  // ============================================
   document.getElementById('btnSave').addEventListener('click', () => {
     document.querySelectorAll('[data-cms-key]').forEach(input => {
       const key = input.dataset.cmsKey;
@@ -239,7 +619,9 @@
     showToast('✅ 저장 완료! 사이트에 즉시 반영됩니다.');
   });
 
-  // Export
+  // ============================================
+  // JSON 내보내기
+  // ============================================
   document.getElementById('btnExport').addEventListener('click', () => {
     document.querySelectorAll('[data-cms-key]').forEach(input => {
       const key = input.dataset.cmsKey;
@@ -249,7 +631,9 @@
     showToast('📥 JSON 파일이 다운로드됩니다.');
   });
 
-  // Reset
+  // ============================================
+  // 초기화
+  // ============================================
   document.getElementById('btnReset').addEventListener('click', () => {
     if (!confirm('⚠️ 모든 수정사항을 초기값으로 되돌립니다. 계속하시겠습니까?')) return;
     CMS.reset();
