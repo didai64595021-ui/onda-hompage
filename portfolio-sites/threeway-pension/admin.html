@@ -12,42 +12,22 @@
   <style>
     body { background: #FAFAF5; padding-top: 0; }
 
-    /* === 탭 네비게이션 === */
-    .cms-tabs {
-      display: flex;
-      gap: 4px;
-      overflow-x: auto;
-      padding: 0 0 16px;
-      margin-bottom: 24px;
-      border-bottom: 2px solid #eee;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
+    /* === 드롭다운 네비게이션 === */
+    .cms-nav-row {
+      display: flex; gap: 12px; margin-bottom: 24px; align-items: center;
+      flex-wrap: wrap; justify-content: center;
     }
-    .cms-tabs::-webkit-scrollbar { height: 4px; }
-    .cms-tabs::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-    .cms-tab {
-      padding: 10px 20px;
-      border-radius: 8px 8px 0 0;
-      border: 1px solid #ddd;
-      border-bottom: none;
-      background: #f5f5f0;
-      cursor: pointer;
-      white-space: nowrap;
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: #666;
-      transition: all 0.2s;
-      user-select: none;
+    .cms-nav-row label {
+      font-size: .85rem; font-weight: 600; color: #2C3E2D; white-space: nowrap;
     }
-    .cms-tab.active {
-      background: #fff;
-      color: #2C3E2D;
-      border-color: #7BA17F;
-      font-weight: 600;
+    .cms-select {
+      padding: 12px 40px 12px 16px; border: 2px solid #ddd; border-radius: 12px;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E") no-repeat right 14px center;
+      font-size: 1rem; font-weight: 600; color: #2C3E2D; font-family: inherit;
+      appearance: none; -webkit-appearance: none; cursor: pointer;
+      min-width: 200px; transition: border-color .2s;
     }
-    .cms-tab:hover:not(.active) {
-      background: #eee;
-    }
+    .cms-select:focus { outline: none; border-color: #7BA17F; }
 
     /* === 드래그앤드랍 영역 === */
     .cms-drop-zone {
@@ -120,17 +100,18 @@
     /* === 개선 1: 실시간 미리보기 사이드바 === */
     .cms-preview-panel {
       position: fixed;
-      top: 0; right: -50%;
+      top: 0; right: 0;
       width: 45%;
       height: 100vh;
       background: #fff;
       box-shadow: -4px 0 24px rgba(0,0,0,.12);
       z-index: 1000;
-      transition: right 0.35s ease;
+      transform: translateX(100%);
+      transition: transform 0.35s ease;
       display: flex;
       flex-direction: column;
     }
-    .cms-preview-panel.open { right: 0; }
+    .cms-preview-panel.open { transform: translateX(0); }
     .cms-preview-panel .preview-header {
       display: flex; align-items: center; justify-content: space-between;
       padding: 12px 16px;
@@ -197,53 +178,48 @@
     .input-with-prefix input { padding-left: 36px !important; }
     .char-count { text-align: right; font-size: 0.75rem; color: #bbb; margin-top: 4px; }
 
-    /* === 개선 5: 플로팅 저장 바 === */
-    .cms-floating-bar {
+    /* === 우측 고정 액션 바 === */
+    .cms-fixed-actions {
       position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: rgba(250,250,245,.95);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      padding: 12px 24px;
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      box-shadow: 0 -4px 24px rgba(0,0,0,.08);
-      z-index: 999;
-      transform: translateY(100%);
-      transition: transform 0.3s ease;
+      right: 20px; top: 50%; transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 10px;
+      z-index: 998;
     }
-    .cms-floating-bar.visible { transform: translateY(0); }
-    .cms-floating-bar .cms-btn { padding: 10px 24px; font-size: 0.9rem; min-height: 40px; }
+    .cms-fixed-btn {
+      width: 52px; height: 52px; border-radius: 50%;
+      border: none; cursor: pointer; font-size: 1.2rem;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,.15);
+      transition: transform .2s, box-shadow .2s;
+      position: relative;
+    }
+    .cms-fixed-btn:hover { transform: scale(1.1); box-shadow: 0 6px 24px rgba(0,0,0,.2); }
+    .cms-fixed-btn-save { background: #7BA17F; color: #fff; }
+    .cms-fixed-btn-save.has-changes { animation: pulse-save 2s infinite; }
+    .cms-fixed-btn-export { background: #2C3E2D; color: #fff; }
+    .cms-fixed-btn-reset { background: #fff; color: #e74c3c; border: 2px solid #eee; }
+    .cms-fixed-btn-preview { background: #fff; color: #2C3E2D; border: 2px solid #eee; }
+    .cms-fixed-btn .tooltip {
+      position: absolute; right: 62px; top: 50%; transform: translateY(-50%);
+      background: #333; color: #fff; padding: 6px 12px; border-radius: 8px;
+      font-size: .78rem; font-weight: 600; white-space: nowrap;
+      opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    .cms-fixed-btn:hover .tooltip { opacity: 1; }
+    .cms-fixed-btn .save-badge {
+      position: absolute; top: -4px; right: -4px;
+      background: #e74c3c; color: #fff; border-radius: 50%;
+      width: 20px; height: 20px; font-size: .7rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
 
-    /* === 개선 6: 빠른 네비게이션 (목차) === */
-    .cms-toc {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding: 8px 0 16px;
-      margin-bottom: 8px;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
-    }
-    .cms-toc::-webkit-scrollbar { height: 3px; }
-    .cms-toc::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-    .toc-item {
-      padding: 6px 14px;
-      border-radius: 20px;
-      background: #f0f0ea;
-      color: #666;
-      font-size: 0.8rem;
-      white-space: nowrap;
-      text-decoration: none;
-      transition: all 0.2s;
-      cursor: pointer;
-      border: none;
-      font-family: inherit;
-    }
-    .toc-item.active, .toc-item:hover {
-      background: #7BA17F;
-      color: #fff;
+    /* === 서브카테고리 드롭다운 === */
+    .cms-sub-nav { margin-bottom: 20px; text-align: center; }
+    .cms-sub-select {
+      padding: 10px 36px 10px 14px; border: 1px solid #ddd; border-radius: 10px;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E") no-repeat right 12px center;
+      font-size: .9rem; font-weight: 500; color: #555; font-family: inherit;
+      appearance: none; -webkit-appearance: none; cursor: pointer; min-width: 180px;
     }
 
     /* === 개선 8: 빈 필드 하이라이트 === */
@@ -253,30 +229,31 @@
 
     /* === 반응형 === */
     @media(max-width:768px){
-      .cms-admin-wrap{padding:16px 12px;}
+      .cms-admin-wrap{padding:16px 12px;padding-right:12px;}
       .cms-admin-wrap h1{font-size:1.3rem;}
       .cms-section{padding:16px 12px;margin-bottom:16px;}
       .cms-section h2{font-size:1rem;}
-      .cms-tabs{gap:2px;padding:0 0 12px;margin-bottom:16px;}
-      .cms-tab{padding:8px 14px;font-size:.8rem;}
+      .cms-nav-row{flex-direction:column;gap:8px;}
+      .cms-select,.cms-sub-select{width:100%;min-width:0;}
       .cms-actions{flex-direction:column;gap:8px;}
       .cms-btn{width:100%;padding:12px 16px;font-size:.9rem;}
       .cms-field input[type="text"],.cms-field textarea{font-size:.9rem;padding:10px 12px;}
       .cms-img-preview{flex-direction:column;align-items:flex-start;}
       .cms-img-preview img{max-width:100%;}
       .cms-drop-zone{padding:16px;}
-      .cms-floating-bar{flex-direction:row;gap:6px;padding:10px 12px;}
-      .cms-floating-bar .cms-btn{padding:10px 12px;font-size:.82rem;min-height:40px;}
-      .cms-toc{margin-bottom:12px;}
       .cms-search{font-size:.9rem;padding:10px 12px 10px 36px;margin-bottom:16px;}
-      .cms-preview-panel{width:100%!important;right:0!important;}
+      .cms-preview-panel{width:100%!important;}
+      .cms-fixed-actions{right:12px;gap:8px;}
+      .cms-fixed-btn{width:44px;height:44px;font-size:1rem;}
+      .cms-fixed-btn .tooltip{display:none;}
     }
     @media(max-width:480px){
       .cms-admin-wrap h1{font-size:1.1rem;}
-      .cms-tab{padding:7px 10px;font-size:.75rem;}
       .cms-section{padding:12px 10px;}
       .cms-field label{font-size:.8rem;}
       .cms-field label code{font-size:.7rem;}
+      .cms-fixed-actions{right:8px;}
+      .cms-fixed-btn{width:40px;height:40px;font-size:.9rem;}
     }
   </style>
 </head>
@@ -331,22 +308,19 @@
 </div>
 
 <div class="cms-admin-wrap">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:32px;">
-    <div>
-      <h1>🛠️ 쓰리웨이펜션 CMS</h1>
-      <p class="cms-subtitle">텍스트, 이미지, 가격을 수정하면 사이트에 즉시 반영됩니다.</p>
-    </div>
-    <div style="display:flex;align-items:center;gap:12px;">
-      <button class="cms-preview-toggle" id="btnPreview">👁️ 미리보기</button>
-      <a href="index.html" style="color:#7BA17F;font-weight:600;font-size:0.9rem;">← 사이트로 돌아가기</a>
-    </div>
+  <div style="text-align:center;margin-bottom:28px;">
+    <h1>🛠️ 쓰리웨이펜션 CMS</h1>
+    <p class="cms-subtitle">텍스트, 이미지, 가격을 수정하면 사이트에 즉시 반영됩니다.</p>
+    <a href="index.html" style="color:#7BA17F;font-weight:600;font-size:0.85rem;display:inline-block;margin-top:8px;">← 사이트로 돌아가기</a>
   </div>
 
-  <!-- 탭 네비게이션 -->
-  <div class="cms-tabs" id="cmsTabs"></div>
-
-  <!-- 빠른 네비게이션 (목차) -->
-  <div class="cms-toc" id="cmsTOC"></div>
+  <!-- 페이지 선택 드롭다운 -->
+  <div class="cms-nav-row">
+    <label for="cmsPageSelect">📄 페이지</label>
+    <select class="cms-select" id="cmsPageSelect"></select>
+    <label for="cmsCatSelect">📁 섹션</label>
+    <select class="cms-select" id="cmsCatSelect"><option value="all">전체 섹션</option></select>
+  </div>
 
   <!-- 검색 -->
   <input type="text" class="cms-search" id="cmsSearch" placeholder="검색 (예: 가격, 히어로, 패키지...) — Ctrl+F">
@@ -354,8 +328,8 @@
   <!-- 폼 영역 -->
   <div id="cmsForm"></div>
 
-  <!-- 액션 버튼 -->
-  <div class="cms-actions" id="cmsActions">
+  <!-- 하단 액션 (스크롤 시 우측 고정 버튼으로 대체됨) -->
+  <div class="cms-actions" id="cmsActions" style="margin-top:40px;">
     <button class="cms-btn cms-btn-save" id="btnSave">💾 저장하기</button>
     <button class="cms-btn cms-btn-export" id="btnExport">📥 JSON 내보내기</button>
     <button class="cms-btn cms-btn-reset" id="btnReset">🔄 초기값 복원</button>
@@ -363,11 +337,12 @@
   <div class="autosave-timer" id="autosaveTimer"></div>
 </div>
 
-<!-- 플로팅 저장 바 -->
-<div class="cms-floating-bar" id="floatingBar">
-  <button class="cms-btn cms-btn-save" id="floatBtnSave">💾 저장하기</button>
-  <button class="cms-btn cms-btn-export" id="floatBtnExport">📥 내보내기</button>
-  <button class="cms-btn cms-btn-reset" id="floatBtnReset">🔄 초기화</button>
+<!-- 우측 고정 액션 버튼 -->
+<div class="cms-fixed-actions" id="fixedActions">
+  <button class="cms-fixed-btn cms-fixed-btn-save" id="fixedSave" title="저장">💾<span class="tooltip">저장하기 (Ctrl+S)</span></button>
+  <button class="cms-fixed-btn cms-fixed-btn-preview" id="fixedPreview" title="미리보기">👁️<span class="tooltip">미리보기</span></button>
+  <button class="cms-fixed-btn cms-fixed-btn-export" id="fixedExport" title="내보내기">📥<span class="tooltip">JSON 내보내기</span></button>
+  <button class="cms-fixed-btn cms-fixed-btn-reset" id="fixedReset" title="초기화">🔄<span class="tooltip">초기값 복원</span></button>
 </div>
 
 <!-- 토스트 -->
@@ -751,7 +726,7 @@
     hasUnsavedChanges = changeCount > 0;
 
     // 저장 버튼 배지 업데이트
-    const saveBtns = document.querySelectorAll('#btnSave, #floatBtnSave');
+    const saveBtns = document.querySelectorAll('#btnSave, #fixedSave');
     saveBtns.forEach(btn => {
       let badge = btn.querySelector('.save-badge');
       if (changeCount > 0) {
@@ -840,9 +815,10 @@
   }
 
   // ============================================
-  // 탭 렌더링
+  // 드롭다운 렌더링
   // ============================================
-  const tabsEl = document.getElementById('cmsTabs');
+  const pageSelect = document.getElementById('cmsPageSelect');
+  const catSelect = document.getElementById('cmsCatSelect');
   let activeTab = '전체';
 
   const hashTab = decodeURIComponent(location.hash.replace('#tab-', ''));
@@ -851,12 +827,36 @@
   }
 
   Object.keys(tabMapping).forEach(tabName => {
-    const btn = document.createElement('button');
-    btn.className = 'cms-tab' + (tabName === activeTab ? ' active' : '');
-    btn.textContent = tabName;
-    btn.dataset.tab = tabName;
-    btn.addEventListener('click', () => switchTab(tabName));
-    tabsEl.appendChild(btn);
+    const opt = document.createElement('option');
+    opt.value = tabName;
+    opt.textContent = tabName;
+    if (tabName === activeTab) opt.selected = true;
+    pageSelect.appendChild(opt);
+  });
+
+  pageSelect.addEventListener('change', () => switchTab(pageSelect.value));
+
+  // 섹션(카테고리) 드롭다운
+  function updateCatSelect() {
+    const allowed = tabMapping[activeTab];
+    catSelect.innerHTML = '<option value="all">전체 섹션</option>';
+    const cats = allowed === null ? Object.keys(categories) : allowed;
+    cats.forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat;
+      opt.textContent = cat;
+      catSelect.appendChild(opt);
+    });
+  }
+
+  catSelect.addEventListener('change', () => {
+    const val = catSelect.value;
+    if (val === 'all') {
+      applySearch();
+      return;
+    }
+    const sec = document.querySelector('[data-category="' + val + '"]');
+    if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
   // ============================================
@@ -1036,49 +1036,9 @@
   checkEmptyFields();
 
   // ============================================
-  // 목차 (TOC) 렌더링 (개선 6)
+  // 카테고리 드롭다운 초기화
   // ============================================
-  const tocEl = document.getElementById('cmsTOC');
-
-  function renderTOC() {
-    tocEl.innerHTML = '';
-    const allowedCategories = tabMapping[activeTab];
-
-    Object.keys(categories).forEach(catName => {
-      const inTab = allowedCategories === null || (allowedCategories && allowedCategories.includes(catName));
-      if (!inTab) return;
-
-      const section = document.querySelector('[data-category="' + catName + '"]');
-      if (!section || section.style.display === 'none') return;
-
-      const btn = document.createElement('button');
-      btn.className = 'toc-item';
-      btn.textContent = catName;
-      btn.addEventListener('click', () => {
-        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-      tocEl.appendChild(btn);
-    });
-  }
-
-  // TOC 활성 섹션 하이라이트 (IntersectionObserver)
-  const tocObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const catName = entry.target.dataset.category;
-        tocEl.querySelectorAll('.toc-item').forEach(item => {
-          item.classList.toggle('active', item.textContent === catName);
-        });
-      }
-    });
-  }, { threshold: 0.3, rootMargin: '-80px 0px -60% 0px' });
-
-  function observeSections() {
-    document.querySelectorAll('.cms-section').forEach(sec => {
-      tocObserver.observe(sec);
-    });
-  }
-  observeSections();
+  updateCatSelect();
 
   // ============================================
   // 탭 전환 로직
@@ -1092,9 +1052,7 @@
       history.replaceState(null, '', '#tab-' + encodeURIComponent(tabName));
     }
 
-    tabsEl.querySelectorAll('.cms-tab').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.tab === tabName);
-    });
+    pageSelect.value = tabName;
 
     const allowedCategories = tabMapping[tabName];
 
@@ -1107,7 +1065,7 @@
     });
 
     applySearch();
-    renderTOC();
+    updateCatSelect();
 
     // 미리보기 iframe 업데이트
     if (previewPanel.classList.contains('open')) {
@@ -1218,25 +1176,15 @@
   document.getElementById('btnReset').addEventListener('click', doReset);
 
   // ============================================
-  // 플로팅 바 이벤트 연결 (개선 5)
+  // 우측 고정 버튼 이벤트 연결
   // ============================================
-  document.getElementById('floatBtnSave').addEventListener('click', () => {
+  document.getElementById('fixedSave').addEventListener('click', () => {
     doSave();
     showToast('✅ 저장 완료! 사이트에 즉시 반영됩니다.');
   });
-  document.getElementById('floatBtnExport').addEventListener('click', doExport);
-  document.getElementById('floatBtnReset').addEventListener('click', doReset);
-
-  // 플로팅 바 표시/숨김 (IntersectionObserver)
-  const actionsEl = document.getElementById('cmsActions');
-  const floatingBar = document.getElementById('floatingBar');
-
-  const floatObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      floatingBar.classList.toggle('visible', !entry.isIntersecting);
-    });
-  }, { threshold: 0 });
-  floatObserver.observe(actionsEl);
+  document.getElementById('fixedExport').addEventListener('click', doExport);
+  document.getElementById('fixedReset').addEventListener('click', doReset);
+  document.getElementById('fixedPreview').addEventListener('click', openPreview);
 
   // ============================================
   // 미리보기 패널 (개선 1)
@@ -1260,7 +1208,7 @@
     setTimeout(() => { previewFrame.src = 'about:blank'; }, 350);
   }
 
-  document.getElementById('btnPreview').addEventListener('click', openPreview);
+  // btnPreview는 fixedPreview로 대체됨
   document.getElementById('previewClose').addEventListener('click', closePreview);
   previewOverlay.addEventListener('click', closePreview);
 
