@@ -116,9 +116,155 @@
       color: #999;
       font-size: 0.95rem;
     }
+
+    /* === 개선 1: 실시간 미리보기 사이드바 === */
+    .cms-preview-panel {
+      position: fixed;
+      top: 0; right: -50%;
+      width: 45%;
+      height: 100vh;
+      background: #fff;
+      box-shadow: -4px 0 24px rgba(0,0,0,.12);
+      z-index: 1000;
+      transition: right 0.35s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .cms-preview-panel.open { right: 0; }
+    .cms-preview-panel .preview-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px;
+      background: #2C3E2D; color: #fff;
+      font-weight: 600; font-size: 0.9rem;
+    }
+    .cms-preview-panel .preview-header button {
+      background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer;
+      padding: 4px 8px; border-radius: 4px; transition: background 0.2s;
+    }
+    .cms-preview-panel .preview-header button:hover { background: rgba(255,255,255,.15); }
+    .cms-preview-panel iframe {
+      flex: 1; border: none; width: 100%;
+    }
+    .cms-preview-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,.3); z-index: 999;
+      opacity: 0; pointer-events: none; transition: opacity 0.35s;
+    }
+    .cms-preview-overlay.open { opacity: 1; pointer-events: auto; }
+    @media (max-width: 768px) {
+      .cms-preview-panel { width: 100%; right: -100%; }
+    }
+    .cms-preview-toggle {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #2C3E2D; color: #fff; border: none;
+      padding: 8px 16px; border-radius: 8px; font-size: 0.85rem;
+      font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit;
+    }
+    .cms-preview-toggle:hover { background: #3d5a3f; transform: translateY(-1px); }
+
+    /* === 개선 2: 변경사항 표시 + 자동저장 === */
+    .cms-field.modified { border-left: 3px solid #f0ad4e; padding-left: 12px; }
+    .cms-field.modified label::after { content: ' (수정됨)'; color: #f0ad4e; font-weight: 400; font-size: 0.78rem; }
+    .save-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: #e74c3c; color: #fff; border-radius: 50%;
+      width: 22px; height: 22px; font-size: 0.75rem; font-weight: 700; margin-left: 6px;
+    }
+    @keyframes pulse-save { 0%,100%{box-shadow:0 0 0 0 rgba(123,161,127,.4)} 50%{box-shadow:0 0 0 8px rgba(123,161,127,0)} }
+    .cms-btn-save.has-changes { animation: pulse-save 2s infinite; }
+    .autosave-timer { font-size: 0.78rem; color: #999; margin-top: 4px; text-align: center; }
+
+    /* === 개선 3: 접기/펼치기 (아코디언) === */
+    .cms-section h2 {
+      cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+      user-select: none; margin-bottom: 20px; padding-bottom: 12px;
+      border-bottom: 1px solid rgba(44,62,45,.08);
+    }
+    .cms-section h2 .section-toggle {
+      font-size: 0.8rem; color: #999; transition: transform 0.3s; margin-left: 8px;
+    }
+    .cms-section.collapsed h2 .section-toggle { transform: rotate(-90deg); }
+    .cms-section.collapsed .cms-section-body { display: none; }
+    .section-count { font-size: 0.75rem; color: #999; font-weight: 400; margin-left: 8px; }
+    .cms-section h2 .section-left { display: flex; align-items: center; }
+
+    /* === 개선 4: 필드 타입별 UI === */
+    .input-with-prefix { position: relative; }
+    .input-with-prefix .prefix {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: #999; font-size: 0.9rem; pointer-events: none;
+    }
+    .input-with-prefix input { padding-left: 36px !important; }
+    .char-count { text-align: right; font-size: 0.75rem; color: #bbb; margin-top: 4px; }
+
+    /* === 개선 5: 플로팅 저장 바 === */
+    .cms-floating-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(250,250,245,.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 -4px 24px rgba(0,0,0,.08);
+      z-index: 999;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+    }
+    .cms-floating-bar.visible { transform: translateY(0); }
+    .cms-floating-bar .cms-btn { padding: 10px 24px; font-size: 0.9rem; min-height: 40px; }
+
+    /* === 개선 6: 빠른 네비게이션 (목차) === */
+    .cms-toc {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 8px 0 16px;
+      margin-bottom: 8px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+    .cms-toc::-webkit-scrollbar { height: 3px; }
+    .cms-toc::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    .toc-item {
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: #f0f0ea;
+      color: #666;
+      font-size: 0.8rem;
+      white-space: nowrap;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+    }
+    .toc-item.active, .toc-item:hover {
+      background: #7BA17F;
+      color: #fff;
+    }
+
+    /* === 개선 8: 빈 필드 하이라이트 === */
+    .cms-field.empty-field { background: rgba(231,76,60,.03); border-radius: 8px; padding: 8px; }
+    .cms-field.empty-field label::after { content: ' \u26A0\uFE0F 미입력'; font-size: 0.75rem; color: #e74c3c; font-weight: 400; }
+    .cms-field.modified.empty-field label::after { content: ' (수정됨)'; color: #f0ad4e; }
   </style>
 </head>
 <body>
+
+<!-- 미리보기 오버레이 -->
+<div class="cms-preview-overlay" id="previewOverlay"></div>
+
+<!-- 미리보기 사이드 패널 -->
+<div class="cms-preview-panel" id="previewPanel">
+  <div class="preview-header">
+    <span id="previewTitle">미리보기</span>
+    <button id="previewClose" title="닫기">&times;</button>
+  </div>
+  <iframe id="previewFrame" src="about:blank"></iframe>
+</div>
 
 <div class="cms-admin-wrap">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:32px;">
@@ -126,24 +272,38 @@
       <h1>🛠️ 쓰리웨이펜션 CMS</h1>
       <p class="cms-subtitle">텍스트, 이미지, 가격을 수정하면 사이트에 즉시 반영됩니다.</p>
     </div>
-    <a href="index.html" style="color:#7BA17F;font-weight:600;font-size:0.9rem;">← 사이트로 돌아가기</a>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="cms-preview-toggle" id="btnPreview">👁️ 미리보기</button>
+      <a href="index.html" style="color:#7BA17F;font-weight:600;font-size:0.9rem;">← 사이트로 돌아가기</a>
+    </div>
   </div>
 
   <!-- 탭 네비게이션 -->
   <div class="cms-tabs" id="cmsTabs"></div>
 
+  <!-- 빠른 네비게이션 (목차) -->
+  <div class="cms-toc" id="cmsTOC"></div>
+
   <!-- 검색 -->
-  <input type="text" class="cms-search" id="cmsSearch" placeholder="검색 (예: 가격, 히어로, 패키지...)">
+  <input type="text" class="cms-search" id="cmsSearch" placeholder="검색 (예: 가격, 히어로, 패키지...) — Ctrl+F">
 
   <!-- 폼 영역 -->
   <div id="cmsForm"></div>
 
   <!-- 액션 버튼 -->
-  <div class="cms-actions">
+  <div class="cms-actions" id="cmsActions">
     <button class="cms-btn cms-btn-save" id="btnSave">💾 저장하기</button>
     <button class="cms-btn cms-btn-export" id="btnExport">📥 JSON 내보내기</button>
     <button class="cms-btn cms-btn-reset" id="btnReset">🔄 초기값 복원</button>
   </div>
+  <div class="autosave-timer" id="autosaveTimer"></div>
+</div>
+
+<!-- 플로팅 저장 바 -->
+<div class="cms-floating-bar" id="floatingBar">
+  <button class="cms-btn cms-btn-save" id="floatBtnSave">💾 저장하기</button>
+  <button class="cms-btn cms-btn-export" id="floatBtnExport">📥 내보내기</button>
+  <button class="cms-btn cms-btn-reset" id="floatBtnReset">🔄 초기화</button>
 </div>
 
 <!-- 토스트 -->
@@ -258,6 +418,21 @@
   };
 
   // ============================================
+  // 탭 ↔ 페이지 매핑 (미리보기용)
+  // ============================================
+  const tabPageMap = {
+    '전체': 'index.html',
+    '메인(홈)': 'index.html',
+    '객실소개': 'rooms.html',
+    '요금안내': 'rates.html',
+    '패키지': 'package.html',
+    '시설안내': 'facilities.html',
+    'FAQ': 'faq.html',
+    '소개': 'about.html',
+    '공통(헤더/푸터)': 'index.html'
+  };
+
+  // ============================================
   // 키 → 라벨 (한국어)
   // ============================================
   const labels = {
@@ -337,6 +512,14 @@
     return key.endsWith('-img') || key.includes('-img-') || key.startsWith('pkg-gallery-');
   }
 
+  function isPriceKey(key) {
+    return key.startsWith('rate-') || key.startsWith('price-') || key.includes('-price-');
+  }
+
+  function isPhoneKey(key) {
+    return key.includes('phone');
+  }
+
   // ============================================
   // 드래그앤드랍 이미지 업로드 헬퍼
   // ============================================
@@ -384,12 +567,10 @@
   }
 
   function handleFile(file, key, input, previewContainer, dropZone) {
-    // 형식 확인
     if (!ALLOWED_TYPES.includes(file.type)) {
       showToast('⚠️ 지원하지 않는 형식입니다. jpg, png, webp만 가능합니다.');
       return;
     }
-    // 크기 확인
     if (file.size > MAX_FILE_SIZE) {
       showToast('⚠️ 파일이 너무 큽니다. 최대 5MB까지 가능합니다.');
       return;
@@ -400,6 +581,7 @@
       const base64 = e.target.result;
       input.value = base64;
       updatePreview(previewContainer, base64, input, dropZone);
+      markFieldChanged(input);
       showToast('✅ 이미지가 로드되었습니다. 저장을 눌러주세요.');
     };
     reader.readAsDataURL(file);
@@ -423,17 +605,138 @@
       input.value = '';
       container.innerHTML = '';
       if (dropZone) dropZone.style.display = '';
+      markFieldChanged(input);
     });
     container.appendChild(removeBtn);
 
-    // 이미지가 설정되면 드랍존 숨기기 (선택적)
     if (dropZone) dropZone.style.display = 'none';
   }
 
   // ============================================
-  // Load CMS data
+  // Load CMS data & snapshot for change detection
   // ============================================
   let cmsData = await CMS.load();
+  const originalData = JSON.parse(JSON.stringify(cmsData));
+
+  // ============================================
+  // 변경 감지 (개선 2)
+  // ============================================
+  let changeCount = 0;
+  let autosaveTimeout = null;
+  let autosaveCountdown = null;
+  let hasUnsavedChanges = false;
+
+  function markFieldChanged(inputEl) {
+    const key = inputEl.dataset.cmsKey;
+    if (!key) return;
+    const field = inputEl.closest('.cms-field');
+    if (!field) return;
+
+    const currentVal = inputEl.value;
+    const origVal = originalData[key] || '';
+
+    if (currentVal !== origVal) {
+      field.classList.add('modified');
+    } else {
+      field.classList.remove('modified');
+    }
+
+    updateChangeCount();
+    resetAutosaveTimer();
+  }
+
+  function updateChangeCount() {
+    changeCount = document.querySelectorAll('.cms-field.modified').length;
+    hasUnsavedChanges = changeCount > 0;
+
+    // 저장 버튼 배지 업데이트
+    const saveBtns = document.querySelectorAll('#btnSave, #floatBtnSave');
+    saveBtns.forEach(btn => {
+      let badge = btn.querySelector('.save-badge');
+      if (changeCount > 0) {
+        btn.classList.add('has-changes');
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'save-badge';
+          btn.appendChild(badge);
+        }
+        badge.textContent = changeCount;
+      } else {
+        btn.classList.remove('has-changes');
+        if (badge) badge.remove();
+      }
+    });
+
+    // 빈 필드 검사
+    checkEmptyFields();
+  }
+
+  function resetAutosaveTimer() {
+    if (!hasUnsavedChanges) return;
+    clearTimeout(autosaveTimeout);
+    clearInterval(autosaveCountdown);
+
+    const timerEl = document.getElementById('autosaveTimer');
+    let seconds = 30;
+    timerEl.textContent = seconds + '초 후 자동저장...';
+
+    autosaveCountdown = setInterval(() => {
+      seconds--;
+      if (seconds > 0) {
+        timerEl.textContent = seconds + '초 후 자동저장...';
+      } else {
+        timerEl.textContent = '';
+        clearInterval(autosaveCountdown);
+      }
+    }, 1000);
+
+    autosaveTimeout = setTimeout(() => {
+      if (hasUnsavedChanges) {
+        doSave();
+        showToast('💾 자동 저장됨');
+      }
+      timerEl.textContent = '';
+    }, 30000);
+  }
+
+  function clearAutosaveTimer() {
+    clearTimeout(autosaveTimeout);
+    clearInterval(autosaveCountdown);
+    document.getElementById('autosaveTimer').textContent = '';
+  }
+
+  // beforeunload 경고
+  window.addEventListener('beforeunload', (e) => {
+    if (hasUnsavedChanges) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+
+  // ============================================
+  // 빈 필드 하이라이트 (개선 8)
+  // ============================================
+  function checkEmptyFields() {
+    document.querySelectorAll('.cms-field').forEach(field => {
+      const input = field.querySelector('[data-cms-key]');
+      if (!input) return;
+      const val = input.value.trim();
+      if (!val) {
+        field.classList.add('empty-field');
+      } else {
+        field.classList.remove('empty-field');
+      }
+    });
+  }
+
+  // ============================================
+  // 가격 필드 콤마 포맷 (개선 4)
+  // ============================================
+  function formatPrice(value) {
+    const num = value.replace(/[^0-9]/g, '');
+    if (!num) return '';
+    return Number(num).toLocaleString('ko-KR');
+  }
 
   // ============================================
   // 탭 렌더링
@@ -441,7 +744,6 @@
   const tabsEl = document.getElementById('cmsTabs');
   let activeTab = '전체';
 
-  // URL 해시에서 초기 탭 결정
   const hashTab = decodeURIComponent(location.hash.replace('#tab-', ''));
   if (hashTab && tabMapping.hasOwnProperty(hashTab)) {
     activeTab = hashTab;
@@ -465,7 +767,39 @@
     const section = document.createElement('div');
     section.className = 'cms-section';
     section.dataset.category = catName;
-    section.innerHTML = '<h2>' + catName + '</h2>';
+
+    // 아코디언 헤더 (개선 3)
+    const sectionId = 'section-' + catName.replace(/[^a-zA-Z0-9가-힣]/g, '_');
+    section.id = sectionId;
+
+    const h2 = document.createElement('h2');
+    const leftSpan = document.createElement('span');
+    leftSpan.className = 'section-left';
+    leftSpan.textContent = catName;
+    const countSpan = document.createElement('span');
+    countSpan.className = 'section-count';
+    countSpan.textContent = '(' + keys.length + ')';
+    leftSpan.appendChild(countSpan);
+    h2.appendChild(leftSpan);
+
+    const toggleSpan = document.createElement('span');
+    toggleSpan.className = 'section-toggle';
+    toggleSpan.textContent = '▼';
+    h2.appendChild(toggleSpan);
+
+    h2.addEventListener('click', () => {
+      section.classList.toggle('collapsed');
+      // localStorage 저장
+      const collapsed = JSON.parse(localStorage.getItem('cms-collapsed') || '{}');
+      collapsed[catName] = section.classList.contains('collapsed');
+      localStorage.setItem('cms-collapsed', JSON.stringify(collapsed));
+    });
+
+    section.appendChild(h2);
+
+    // 섹션 바디 (접기/펼치기 대상)
+    const sectionBody = document.createElement('div');
+    sectionBody.className = 'cms-section-body';
 
     keys.forEach(key => {
       const value = cmsData[key] || '';
@@ -478,30 +812,21 @@
       field.appendChild(label);
 
       if (isImageKey(key)) {
-        // URL 텍스트 입력
+        // 이미지 필드 - prefix 아이콘
+        const wrapper = document.createElement('div');
+        wrapper.className = 'input-with-prefix';
+        const prefix = document.createElement('span');
+        prefix.className = 'prefix';
+        prefix.textContent = '🖼️';
+        wrapper.appendChild(prefix);
+
         const input = document.createElement('input');
         input.type = 'text';
         input.value = value;
         input.dataset.cmsKey = key;
         input.placeholder = 'images/파일명.jpg 또는 드래그앤드랍';
-        field.appendChild(input);
-
-        // 미리보기 컨테이너
-        const preview = document.createElement('div');
-        preview.className = 'cms-img-preview';
-        field.appendChild(preview);
-
-        // 드래그앤드랍 영역
-        const dropZone = createDropZone(key, input, preview);
-        field.appendChild(dropZone);
-
-        // 초기 값이 있으면 미리보기 표시
-        if (value) {
-          updatePreview(preview, value, input, dropZone);
-        }
-
-        // URL 입력 변경 시 미리보기 업데이트
         input.addEventListener('input', () => {
+          markFieldChanged(input);
           if (input.value) {
             updatePreview(preview, input.value, input, dropZone);
           } else {
@@ -509,24 +834,150 @@
             dropZone.style.display = '';
           }
         });
+        wrapper.appendChild(input);
+        field.appendChild(wrapper);
+
+        const preview = document.createElement('div');
+        preview.className = 'cms-img-preview';
+        field.appendChild(preview);
+
+        const dropZone = createDropZone(key, input, preview);
+        field.appendChild(dropZone);
+
+        if (value) {
+          updatePreview(preview, value, input, dropZone);
+        }
+      } else if (isPriceKey(key)) {
+        // 가격 필드 (개선 4)
+        const wrapper = document.createElement('div');
+        wrapper.className = 'input-with-prefix';
+        const prefix = document.createElement('span');
+        prefix.className = 'prefix';
+        prefix.textContent = '₩';
+        wrapper.appendChild(prefix);
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.inputMode = 'numeric';
+        input.value = value;
+        input.dataset.cmsKey = key;
+        input.addEventListener('input', () => {
+          // 콤마 포맷 적용 (숫자만 있는 경우)
+          const raw = input.value.replace(/,/g, '');
+          if (/^\d+$/.test(raw)) {
+            const pos = input.selectionStart;
+            const oldLen = input.value.length;
+            input.value = formatPrice(raw);
+            const newLen = input.value.length;
+            input.setSelectionRange(pos + (newLen - oldLen), pos + (newLen - oldLen));
+          }
+          markFieldChanged(input);
+        });
+        wrapper.appendChild(input);
+        field.appendChild(wrapper);
+      } else if (isPhoneKey(key)) {
+        // 전화번호 필드 (개선 4)
+        const wrapper = document.createElement('div');
+        wrapper.className = 'input-with-prefix';
+        const prefix = document.createElement('span');
+        prefix.className = 'prefix';
+        prefix.textContent = '📞';
+        wrapper.appendChild(prefix);
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.inputMode = 'tel';
+        input.value = value;
+        input.dataset.cmsKey = key;
+        input.addEventListener('input', () => markFieldChanged(input));
+        wrapper.appendChild(input);
+        field.appendChild(wrapper);
       } else if (value.length > 60 || value.includes('<br') || value.includes('\n')) {
+        // textarea + 글자수 카운터 (개선 4)
         const textarea = document.createElement('textarea');
         textarea.value = value;
         textarea.dataset.cmsKey = key;
+        textarea.addEventListener('input', () => {
+          markFieldChanged(textarea);
+          charCount.textContent = textarea.value.length + '자';
+        });
         field.appendChild(textarea);
+
+        const charCount = document.createElement('div');
+        charCount.className = 'char-count';
+        charCount.textContent = value.length + '자';
+        field.appendChild(charCount);
       } else {
         const input = document.createElement('input');
         input.type = 'text';
         input.value = value;
         input.dataset.cmsKey = key;
+        input.addEventListener('input', () => markFieldChanged(input));
         field.appendChild(input);
       }
 
-      section.appendChild(field);
+      sectionBody.appendChild(field);
     });
 
+    section.appendChild(sectionBody);
     formEl.appendChild(section);
+
+    // localStorage에서 접기 상태 복원
+    const collapsed = JSON.parse(localStorage.getItem('cms-collapsed') || '{}');
+    if (collapsed[catName]) {
+      section.classList.add('collapsed');
+    }
   });
+
+  // ============================================
+  // 빈 필드 초기 검사
+  // ============================================
+  checkEmptyFields();
+
+  // ============================================
+  // 목차 (TOC) 렌더링 (개선 6)
+  // ============================================
+  const tocEl = document.getElementById('cmsTOC');
+
+  function renderTOC() {
+    tocEl.innerHTML = '';
+    const allowedCategories = tabMapping[activeTab];
+
+    Object.keys(categories).forEach(catName => {
+      const inTab = allowedCategories === null || (allowedCategories && allowedCategories.includes(catName));
+      if (!inTab) return;
+
+      const section = document.querySelector('[data-category="' + catName + '"]');
+      if (!section || section.style.display === 'none') return;
+
+      const btn = document.createElement('button');
+      btn.className = 'toc-item';
+      btn.textContent = catName;
+      btn.addEventListener('click', () => {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      tocEl.appendChild(btn);
+    });
+  }
+
+  // TOC 활성 섹션 하이라이트 (IntersectionObserver)
+  const tocObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const catName = entry.target.dataset.category;
+        tocEl.querySelectorAll('.toc-item').forEach(item => {
+          item.classList.toggle('active', item.textContent === catName);
+        });
+      }
+    });
+  }, { threshold: 0.3, rootMargin: '-80px 0px -60% 0px' });
+
+  function observeSections() {
+    document.querySelectorAll('.cms-section').forEach(sec => {
+      tocObserver.observe(sec);
+    });
+  }
+  observeSections();
 
   // ============================================
   // 탭 전환 로직
@@ -534,20 +985,17 @@
   function switchTab(tabName) {
     activeTab = tabName;
 
-    // URL 해시 업데이트
     if (tabName === '전체') {
       history.replaceState(null, '', location.pathname);
     } else {
       history.replaceState(null, '', '#tab-' + encodeURIComponent(tabName));
     }
 
-    // 탭 버튼 활성 상태
     tabsEl.querySelectorAll('.cms-tab').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.tab === tabName);
     });
 
-    // 섹션 표시/숨김
-    const allowedCategories = tabMapping[tabName]; // null이면 전체
+    const allowedCategories = tabMapping[tabName];
 
     document.querySelectorAll('.cms-section').forEach(sec => {
       if (allowedCategories === null) {
@@ -557,12 +1005,18 @@
       }
     });
 
-    // 검색 다시 적용
     applySearch();
+    renderTOC();
+
+    // 미리보기 iframe 업데이트
+    if (previewPanel.classList.contains('open')) {
+      previewFrame.src = tabPageMap[tabName] || 'index.html';
+      previewTitle.textContent = '미리보기 — ' + tabName;
+    }
   }
 
   // ============================================
-  // 검색 (현재 활성 탭 내에서만)
+  // 검색
   // ============================================
   const searchInput = document.getElementById('cmsSearch');
 
@@ -579,7 +1033,6 @@
         return;
       }
 
-      // 필드 검색 필터
       let visibleCount = 0;
       sec.querySelectorAll('.cms-field').forEach(field => {
         const text = field.dataset.searchText || '';
@@ -610,35 +1063,131 @@
   // ============================================
   // 저장
   // ============================================
-  document.getElementById('btnSave').addEventListener('click', () => {
+  function doSave() {
     document.querySelectorAll('[data-cms-key]').forEach(input => {
       const key = input.dataset.cmsKey;
       cmsData[key] = input.value;
     });
     CMS.save(cmsData);
+
+    // 원본 데이터 갱신 & 변경 상태 초기화
+    Object.assign(originalData, JSON.parse(JSON.stringify(cmsData)));
+    document.querySelectorAll('.cms-field.modified').forEach(f => f.classList.remove('modified'));
+    changeCount = 0;
+    hasUnsavedChanges = false;
+    updateChangeCount();
+    clearAutosaveTimer();
+
+    // 미리보기 iframe 새로고침
+    if (previewPanel.classList.contains('open')) {
+      previewFrame.contentWindow.location.reload();
+    }
+  }
+
+  document.getElementById('btnSave').addEventListener('click', () => {
+    doSave();
     showToast('✅ 저장 완료! 사이트에 즉시 반영됩니다.');
   });
 
   // ============================================
   // JSON 내보내기
   // ============================================
-  document.getElementById('btnExport').addEventListener('click', () => {
+  function doExport() {
     document.querySelectorAll('[data-cms-key]').forEach(input => {
       const key = input.dataset.cmsKey;
       cmsData[key] = input.value;
     });
     CMS.export(cmsData);
     showToast('📥 JSON 파일이 다운로드됩니다.');
-  });
+  }
+
+  document.getElementById('btnExport').addEventListener('click', doExport);
 
   // ============================================
   // 초기화
   // ============================================
-  document.getElementById('btnReset').addEventListener('click', () => {
+  function doReset() {
     if (!confirm('⚠️ 모든 수정사항을 초기값으로 되돌립니다. 계속하시겠습니까?')) return;
+    hasUnsavedChanges = false;
     CMS.reset();
     showToast('🔄 초기값 복원 완료. 페이지를 새로고침합니다...');
     setTimeout(() => location.reload(), 1000);
+  }
+
+  document.getElementById('btnReset').addEventListener('click', doReset);
+
+  // ============================================
+  // 플로팅 바 이벤트 연결 (개선 5)
+  // ============================================
+  document.getElementById('floatBtnSave').addEventListener('click', () => {
+    doSave();
+    showToast('✅ 저장 완료! 사이트에 즉시 반영됩니다.');
+  });
+  document.getElementById('floatBtnExport').addEventListener('click', doExport);
+  document.getElementById('floatBtnReset').addEventListener('click', doReset);
+
+  // 플로팅 바 표시/숨김 (IntersectionObserver)
+  const actionsEl = document.getElementById('cmsActions');
+  const floatingBar = document.getElementById('floatingBar');
+
+  const floatObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      floatingBar.classList.toggle('visible', !entry.isIntersecting);
+    });
+  }, { threshold: 0 });
+  floatObserver.observe(actionsEl);
+
+  // ============================================
+  // 미리보기 패널 (개선 1)
+  // ============================================
+  const previewPanel = document.getElementById('previewPanel');
+  const previewOverlay = document.getElementById('previewOverlay');
+  const previewFrame = document.getElementById('previewFrame');
+  const previewTitle = document.getElementById('previewTitle');
+
+  function openPreview() {
+    const page = tabPageMap[activeTab] || 'index.html';
+    previewFrame.src = page;
+    previewTitle.textContent = '미리보기 — ' + activeTab;
+    previewPanel.classList.add('open');
+    previewOverlay.classList.add('open');
+  }
+
+  function closePreview() {
+    previewPanel.classList.remove('open');
+    previewOverlay.classList.remove('open');
+    setTimeout(() => { previewFrame.src = 'about:blank'; }, 350);
+  }
+
+  document.getElementById('btnPreview').addEventListener('click', openPreview);
+  document.getElementById('previewClose').addEventListener('click', closePreview);
+  previewOverlay.addEventListener('click', closePreview);
+
+  // ============================================
+  // 키보드 단축키 (개선 7)
+  // ============================================
+  document.addEventListener('keydown', (e) => {
+    // Ctrl+S / Cmd+S → 저장
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      doSave();
+      showToast('✅ 저장 완료! (Ctrl+S)');
+    }
+
+    // Ctrl+F → 검색 포커스
+    if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+      // 기본 브라우저 검색 대신 CMS 검색 사용
+      e.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+    }
+
+    // Escape → 미리보기 닫기
+    if (e.key === 'Escape') {
+      if (previewPanel.classList.contains('open')) {
+        closePreview();
+      }
+    }
   });
 
 })();
