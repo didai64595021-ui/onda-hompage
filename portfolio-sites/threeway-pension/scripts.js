@@ -270,3 +270,96 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+/* ============================================
+   Why Us 갤러리 슬라이드 (CMS 연동)
+   ============================================ */
+const WHY_GALLERY_DATA = [
+  {title:'청정계곡(오안천)',images:['images/20240704104415_4_1.jpg','images/20240818073009-.jpg','images/20230509210640-.jpg']},
+  {title:'무한리필 바비큐',images:['images/20240710142546_9.jpg','images/20240704104504_10.jpg','images/20240710142546_7.jpg']},
+  {title:'2000평 펜션 전경',images:['images/20240704104415_1.jpg','images/20240704104415_2.jpg','images/20240704111729-.jpg']},
+  {title:'사우나 · 찜질방',images:['images/20250118135306-.jpg','images/20250118135114-.jpg','images/20250118135133-.jpg','images/20250118135202-.jpg']},
+  {title:'족구장 · 축구장',images:['images/20240704104415_6.jpg','images/20230509211003-.jpg']},
+  {title:'세미나실',images:['images/20240704104415_5.jpg','images/20230509211201-.jpg']},
+  {title:'워터슬라이드 수영장',images:['images/20240704104415_3.jpg','images/20230509210942-.jpg','images/20240818073009-.jpg']},
+  {title:'객실별 개별 바비큐',images:['images/20240704104504_8.jpg','images/20240604173746-.jpg','images/20240604173817-.jpg']},
+  {title:'객실별 대형화로',images:['images/20240604173732-.jpg','images/20230509211220-.jpg','images/20230509211211-.jpg']},
+];
+let whyGalleryCurrent = 0;
+let whyGalleryIdx = 0;
+
+function openWhyGallery(cardIdx) {
+  // CMS에서 추가 이미지가 있으면 로드
+  const cmsKey = 'why-' + (cardIdx + 1) + '-gallery';
+  const stored = localStorage.getItem('threeway-cms-data');
+  if (stored) {
+    try {
+      const cms = JSON.parse(stored);
+      if (cms[cmsKey]) {
+        const extra = JSON.parse(cms[cmsKey]);
+        if (Array.isArray(extra) && extra.length > 0) {
+          WHY_GALLERY_DATA[cardIdx].images = extra;
+        }
+      }
+    } catch(e) {}
+  }
+
+  whyGalleryCurrent = cardIdx;
+  whyGalleryIdx = 0;
+  const data = WHY_GALLERY_DATA[cardIdx];
+  if (!data) return;
+
+  document.getElementById('why-gallery-title').textContent = data.title;
+  renderWhyGalleryDots(data.images.length);
+  updateWhyGallerySlide();
+  document.getElementById('why-gallery-modal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeWhyGallery() {
+  document.getElementById('why-gallery-modal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function whyGalleryPrev() {
+  const imgs = WHY_GALLERY_DATA[whyGalleryCurrent].images;
+  whyGalleryIdx = (whyGalleryIdx - 1 + imgs.length) % imgs.length;
+  updateWhyGallerySlide();
+}
+
+function whyGalleryNext() {
+  const imgs = WHY_GALLERY_DATA[whyGalleryCurrent].images;
+  whyGalleryIdx = (whyGalleryIdx + 1) % imgs.length;
+  updateWhyGallerySlide();
+}
+
+function updateWhyGallerySlide() {
+  const data = WHY_GALLERY_DATA[whyGalleryCurrent];
+  const img = document.getElementById('why-gallery-img');
+  img.style.opacity = '0';
+  setTimeout(() => {
+    img.src = data.images[whyGalleryIdx];
+    img.alt = data.title;
+    img.style.opacity = '1';
+  }, 150);
+  document.getElementById('why-gallery-counter').textContent = (whyGalleryIdx + 1) + ' / ' + data.images.length;
+  document.querySelectorAll('.why-gallery-dot').forEach((d, i) => d.classList.toggle('active', i === whyGalleryIdx));
+}
+
+function renderWhyGalleryDots(count) {
+  const wrap = document.getElementById('why-gallery-dots');
+  wrap.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'why-gallery-dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => { whyGalleryIdx = i; updateWhyGallerySlide(); };
+    wrap.appendChild(dot);
+  }
+}
+
+// ESC 키로 닫기
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeWhyGallery();
+  if (e.key === 'ArrowLeft') whyGalleryPrev();
+  if (e.key === 'ArrowRight') whyGalleryNext();
+});
