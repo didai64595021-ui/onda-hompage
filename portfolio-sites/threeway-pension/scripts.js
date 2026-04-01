@@ -1,6 +1,20 @@
 /* ============================================
    쓰리웨이펜션 — Award-Level 인터랙션
    ============================================ */
+
+/* --- PC 전화번호 → 네이버 예약 링크 변환 --- */
+const NAVER_BOOKING_URL = 'https://map.naver.com/p/entry/place/38426160?lng=127.8507685&lat=37.6400166&placePath=/room&entry=plt&searchType=place';
+(function() {
+  const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+  if (isMobile) return; // 모바일은 tel: 그대로
+  document.addEventListener('click', function(e) {
+    const link = e.target.closest('a[href^="tel:"]');
+    if (!link) return;
+    e.preventDefault();
+    window.open(NAVER_BOOKING_URL, '_blank', 'noopener');
+  }, true);
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
   'use strict';
 
