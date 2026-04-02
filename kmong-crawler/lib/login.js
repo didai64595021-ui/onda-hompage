@@ -97,14 +97,9 @@ async function login(opts = {}) {
   // 새 로그인 — 크몽은 메인에서 모달 로그인
   const page = await context.newPage();
   console.log('[로그인] 크몽 메인 페이지 접속...');
-  await page.goto(MAIN_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-  // 리다이렉트(크몽 메인 → /biz 등) 완전 종료 대기
-  try {
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
-  } catch (e) {
-    console.log(`[로그인] networkidle 타임아웃 - 계속 진행`);
-  }
-  await page.waitForTimeout(2000);
+  await page.goto(MAIN_URL, { waitUntil: 'load', timeout: 30000 });
+  // React hydration 완료 대기 (네트워크 idle이 아닌 load + 고정 대기)
+  await page.waitForTimeout(5000);
   console.log(`[로그인] 현재 URL: ${page.url()}`);
 
   try {
