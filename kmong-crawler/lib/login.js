@@ -98,7 +98,14 @@ async function login(opts = {}) {
   const page = await context.newPage();
   console.log('[로그인] 크몽 메인 페이지 접속...');
   await page.goto(MAIN_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-  await page.waitForTimeout(3000);
+  // 리다이렉트(크몽 메인 → /biz 등) 완전 종료 대기
+  try {
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
+  } catch (e) {
+    console.log(`[로그인] networkidle 타임아웃 - 계속 진행`);
+  }
+  await page.waitForTimeout(2000);
+  console.log(`[로그인] 현재 URL: ${page.url()}`);
 
   try {
     // 헤더의 "로그인" 버튼 클릭 → 모달 오픈
