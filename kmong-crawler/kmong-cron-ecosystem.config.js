@@ -1,3 +1,36 @@
+const fs = require('fs');
+const path = require('path');
+
+// .env 수동 파싱
+function loadEnv(envPath) {
+  const result = {};
+  try {
+    const lines = fs.readFileSync(envPath, 'utf-8').split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const idx = trimmed.indexOf('=');
+      if (idx < 0) continue;
+      const key = trimmed.slice(0, idx).trim();
+      const val = trimmed.slice(idx + 1).trim().replace(/^['"]|['"]$/g, '');
+      result[key] = val;
+    }
+  } catch {}
+  return result;
+}
+
+const envVars = loadEnv(path.join(__dirname, '..', '.env'));
+
+const COMMON_ENV = {
+  NODE_ENV: 'production',
+  KMONG_EMAIL: envVars.KMONG_EMAIL || 'didai21@naver.com',
+  KMONG_PW: envVars.KMONG_PW || 'tmdgus19',
+  SUPABASE_URL: envVars.SUPABASE_URL || '',
+  SUPABASE_SERVICE_ROLE_KEY: envVars.SUPABASE_SERVICE_ROLE_KEY || '',
+  TELEGRAM_BOT_TOKEN: envVars.TELEGRAM_BOT_TOKEN || '8574880668:AAHb75dmkFchbjBNj7VgPZuKrptFgIjQ_es',
+  OPENAI_API_KEY: envVars.OPENAI_API_KEY || '',
+};
+
 module.exports = {
   apps: [
     // === Phase 1: 크롤러 ===
@@ -8,9 +41,7 @@ module.exports = {
       cron_restart: '0 */2 * * *',  // 2시간마다
       autorestart: false,
       watch: false,
-      env: {
-        NODE_ENV: 'production',
-      },
+      env: { ...COMMON_ENV },
     },
     {
       name: 'kmong-crawl-inbox',
@@ -19,9 +50,7 @@ module.exports = {
       cron_restart: '0 */2 * * *',  // 2시간마다
       autorestart: false,
       watch: false,
-      env: {
-        NODE_ENV: 'production',
-      },
+      env: { ...COMMON_ENV },
     },
     {
       name: 'kmong-crawl-orders',
@@ -30,9 +59,7 @@ module.exports = {
       cron_restart: '0 */2 * * *',  // 2시간마다
       autorestart: false,
       watch: false,
-      env: {
-        NODE_ENV: 'production',
-      },
+      env: { ...COMMON_ENV },
     },
     {
       name: 'kmong-crawl-profits',
@@ -41,9 +68,7 @@ module.exports = {
       cron_restart: '0 9 * * *',  // 매일 오전 9시
       autorestart: false,
       watch: false,
-      env: {
-        NODE_ENV: 'production',
-      },
+      env: { ...COMMON_ENV },
     },
     {
       name: 'kmong-crawl-gig-status',
@@ -52,9 +77,7 @@ module.exports = {
       cron_restart: '0 */2 * * *',  // 2시간마다
       autorestart: false,
       watch: false,
-      env: {
-        NODE_ENV: 'production',
-      },
+      env: { ...COMMON_ENV },
     },
     // === Phase 2: 자동 분석 + 자동 답장 ===
     {
@@ -64,31 +87,25 @@ module.exports = {
       cron_restart: '0 9 * * *',  // 매일 오전 9시
       autorestart: false,
       watch: false,
-      env: {
-        NODE_ENV: 'production',
-      },
+      env: { ...COMMON_ENV },
     },
     {
       name: 'kmong-auto-reply',
       script: './auto-reply.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '0 */2 * * *',  // 2시간마다 (inbox 크롤러 직후)
+      cron_restart: '0 */2 * * *',  // 2시간마다
       autorestart: false,
       watch: false,
-      env: {
-        NODE_ENV: 'production',
-      },
+      env: { ...COMMON_ENV },
     },
     {
       name: 'kmong-send-reply',
       script: './send-reply.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '*/30 * * * *',  // 30분마다 (승인 확인)
+      cron_restart: '*/30 * * * *',  // 30분마다
       autorestart: false,
       watch: false,
-      env: {
-        NODE_ENV: 'production',
-      },
+      env: { ...COMMON_ENV },
     },
     // === Phase 3: AI 콘텐츠 생성 + A/B 테스트 ===
     {
@@ -98,9 +115,7 @@ module.exports = {
       cron_restart: '0 10 * * *',  // 매일 오전 10시
       autorestart: false,
       watch: false,
-      env: {
-        NODE_ENV: 'production',
-      },
+      env: { ...COMMON_ENV },
     },
     {
       name: 'kmong-ab-eval',
@@ -109,9 +124,7 @@ module.exports = {
       cron_restart: '0 21 * * *',  // 매일 오후 9시
       autorestart: false,
       watch: false,
-      env: {
-        NODE_ENV: 'production',
-      },
+      env: { ...COMMON_ENV },
     },
     // === Phase 4: 학습 루프 ===
     {
@@ -121,21 +134,7 @@ module.exports = {
       cron_restart: '0 6 * * 1',  // 매주 월요일 오전 6시
       autorestart: false,
       watch: false,
-      env: {
-        NODE_ENV: 'production',
-      },
-    },
-    // === Phase 7: 시간대별 광고 스케줄러 ===
-    {
-      name: 'kmong-ad-scheduler',
-      script: './ad-scheduler.js',
-      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '*/30 * * * *',  // 30분마다
-      autorestart: false,
-      watch: false,
-      env: {
-        NODE_ENV: 'production',
-      },
+      env: { ...COMMON_ENV },
     },
     // === Phase 6: 예산 모니터 + 명령 처리기 ===
     {
@@ -145,9 +144,7 @@ module.exports = {
       cron_restart: '0 */2 * * *',  // 2시간마다
       autorestart: false,
       watch: false,
-      env: {
-        NODE_ENV: 'production',
-      },
+      env: { ...COMMON_ENV },
     },
     {
       name: 'kmong-command-processor',
@@ -156,9 +153,17 @@ module.exports = {
       cron_restart: '*/5 * * * *',  // 5분마다
       autorestart: false,
       watch: false,
-      env: {
-        NODE_ENV: 'production',
-      },
+      env: { ...COMMON_ENV },
+    },
+    // === Phase 7: 시간대별 광고 스케줄러 ===
+    {
+      name: 'kmong-ad-scheduler',
+      script: './ad-scheduler.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '*/30 * * * *',  // 30분마다
+      autorestart: false,
+      watch: false,
+      env: { ...COMMON_ENV },
     },
     // === Phase 5: 텔레그램 봇 (상시 구동) ===
     {
@@ -169,10 +174,7 @@ module.exports = {
       watch: false,
       max_restarts: 10,
       restart_delay: 5000,
-      env: {
-        NODE_ENV: 'production',
-        TELEGRAM_BOT_TOKEN: '8574880668:AAHb75dmkFchbjBNj7VgPZuKrptFgIjQ_es',
-      },
+      env: { ...COMMON_ENV },
     },
   ],
 };

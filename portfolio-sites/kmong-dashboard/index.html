@@ -854,6 +854,104 @@ td .reply-preview:hover { color: var(--primary); }
     <!-- 탭 9: 광고 제어 -->
     <div class="tab-panel" id="tab-adcontrol">
       <div class="kpi-grid" id="adcontrolKpi"></div>
+
+      <!-- AI 자동관리 마스터 패널 -->
+      <div class="chart-card full" style="margin-bottom:16px;border:1px solid rgba(13,153,255,0.3);background:linear-gradient(135deg,var(--bg-card),rgba(13,153,255,0.05))">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div>
+            <div class="chart-title" style="margin-bottom:4px"><span class="dot" style="background:var(--primary)"></span>AI 자동관리</div>
+            <p style="font-size:11px;color:var(--text-2);margin:0">CTR·ROI 기반 광고 ON/OFF + 입찰가 자동 제어. 직원이 수동 변경 시 해당 서비스만 수동모드로 전환.</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span id="autoModeLabel" style="font-size:12px;font-weight:600;color:var(--text-2)">OFF</span>
+            <label class="toggle-switch"><input type="checkbox" id="masterAutoToggle" onchange="toggleMasterAuto(this.checked)"><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+        <!-- AI 자동관리 상세 (ON일 때만 표시) -->
+        <div id="autoModeDetail" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:16px">
+            <div style="background:var(--bg-input);border-radius:10px;padding:12px">
+              <div style="font-size:10px;color:var(--text-3);margin-bottom:4px">AI 관리 서비스</div>
+              <div id="autoServiceCount" style="font-size:20px;font-weight:700;color:var(--primary)">-</div>
+            </div>
+            <div style="background:var(--bg-input);border-radius:10px;padding:12px">
+              <div style="font-size:10px;color:var(--text-3);margin-bottom:4px">수동 전환된 서비스</div>
+              <div id="manualServiceCount" style="font-size:20px;font-weight:700;color:var(--warning)">-</div>
+            </div>
+            <div style="background:var(--bg-input);border-radius:10px;padding:12px">
+              <div style="font-size:10px;color:var(--text-3);margin-bottom:4px">AI 입찰 조정 횟수 (24h)</div>
+              <div id="aiBidAdjustCount" style="font-size:20px;font-weight:700;color:var(--success)">-</div>
+            </div>
+            <div style="background:var(--bg-input);border-radius:10px;padding:12px">
+              <div style="font-size:10px;color:var(--text-3);margin-bottom:4px">평균 ROI 변화</div>
+              <div id="avgRoiChange" style="font-size:20px;font-weight:700;color:var(--success)">-</div>
+            </div>
+          </div>
+          <!-- 서비스별 AI 제어 상태 -->
+          <div class="table-wrap" style="border:0;margin:0">
+            <table id="tableAutoControl">
+              <thead><tr><th>서비스명</th><th>모드</th><th>CTR</th><th>ROI</th><th>현재 입찰가</th><th>AI 추천가</th><th>AI 판단</th><th>자동/수동</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <!-- 예산 설정 -->
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+            <div style="font-size:12px;font-weight:600;color:var(--text-1);margin-bottom:10px">💰 AI 예산 한도 설정</div>
+            <p style="font-size:11px;color:var(--text-3);margin-bottom:12px">설정된 예산 내에서만 AI가 입찰가/ON/OFF 제어. 초과 시 자동으로 광고 중단.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+              <div>
+                <label style="font-size:10px;color:var(--text-3);display:block;margin-bottom:4px">일 예산 한도</label>
+                <div style="display:flex;align-items:center;gap:4px">
+                  <input type="number" id="budgetDaily" placeholder="50000" style="flex:1;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text-1);font-size:13px" />
+                  <span style="font-size:11px;color:var(--text-3)">원</span>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:10px;color:var(--text-3);display:block;margin-bottom:4px">주간 예산 한도</label>
+                <div style="display:flex;align-items:center;gap:4px">
+                  <input type="number" id="budgetWeekly" placeholder="300000" style="flex:1;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text-1);font-size:13px" />
+                  <span style="font-size:11px;color:var(--text-3)">원</span>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:10px;color:var(--text-3);display:block;margin-bottom:4px">월간 예산 한도</label>
+                <div style="display:flex;align-items:center;gap:4px">
+                  <input type="number" id="budgetMonthly" placeholder="1000000" style="flex:1;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text-1);font-size:13px" />
+                  <span style="font-size:11px;color:var(--text-3)">원</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+              <button class="btn-primary" onclick="saveBudgetSettings()" style="font-size:12px;padding:8px 16px">예산 저장</button>
+              <div id="budgetStatus" style="font-size:11px;color:var(--text-2)"></div>
+            </div>
+            <!-- 현재 소진 현황 -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px" id="budgetProgress"></div>
+          </div>
+          <!-- 수동 크롤링 -->
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div>
+                <div style="font-size:12px;font-weight:600;color:var(--text-1)">🔄 수동 강제 크롤링</div>
+                <p style="font-size:11px;color:var(--text-3);margin:4px 0 0">CPC/문의/주문 데이터 즉시 수집 (2시간 자동주기 외 수동 실행)</p>
+              </div>
+              <div style="display:flex;gap:6px">
+                <button class="btn-primary" onclick="manualCrawl('cpc')" style="font-size:11px;padding:6px 12px">CPC 크롤링</button>
+                <button class="btn-primary" onclick="manualCrawl('inquiry')" style="font-size:11px;padding:6px 12px;background:var(--success)">문의 크롤링</button>
+                <button class="btn-primary" onclick="manualCrawl('order')" style="font-size:11px;padding:6px 12px;background:var(--warning);color:#000">주문 크롤링</button>
+                <button class="btn-primary" onclick="manualCrawl('all')" style="font-size:11px;padding:6px 12px;background:var(--danger)">전체 크롤링</button>
+              </div>
+            </div>
+            <div id="crawlStatus" style="margin-top:8px;font-size:11px;color:var(--text-2)"></div>
+          </div>
+          <!-- AI 로그 -->
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+            <div style="font-size:12px;font-weight:600;color:var(--text-1);margin-bottom:8px">AI 제어 로그 (최근 10건)</div>
+            <div id="aiControlLog" style="max-height:200px;overflow-y:auto;font-size:11px;color:var(--text-2)"></div>
+          </div>
+        </div>
+      </div>
+
       <div class="chart-card full" style="margin-bottom:16px">
         <div class="chart-title"><span class="dot" style="background:var(--success)"></span>서비스별 광고 ON/OFF 제어</div>
         <div class="table-wrap" style="border:0;margin:0">
@@ -2527,7 +2625,7 @@ async function loadAdControlTab() {
         <td>${productName(r.product_id)}</td>
         <td><code style="font-size:11px">${r.product_id}</code></td>
         <td>${statusText}</td>
-        <td><label class="toggle-switch" data-pid="${r.product_id}"><input type="checkbox" ${checked} onchange="toggleAdFromDashboard('${r.product_id}', this.checked)"><span class="toggle-slider"></span></label></td>
+        <td><label class="toggle-switch" data-pid="${r.product_id}"><input type="checkbox" ${checked} onchange="toggleAdFromDashboardWrapped('${r.product_id}', this.checked)"><span class="toggle-slider"></span></label></td>
         <td>-</td>
       </tr>`;
     }).join('');
@@ -2541,6 +2639,9 @@ async function loadAdControlTab() {
   } else {
     cmdBody.innerHTML = cmds.map(c => `<tr><td>${fmtDateTime(c.created_at)}</td><td>${productName(c.product_id)}</td><td>${c.action.toUpperCase()}</td><td>${statusBadge(c.status)}</td><td style="font-size:11px">${c.result_message || '-'}</td></tr>`).join('');
   }
+
+  // AI 자동관리 패널 로드
+  await loadAutoControlPanel();
 
   // 스케줄 그리드 + CTR 히트맵 로드
   await loadScheduleGrid();
@@ -2834,6 +2935,211 @@ async function toggleAdFromDashboard(productId, enable) {
   }
   showToast(`${productName(productId)} 광고 ${action.toUpperCase()} 명령 등록 완료`);
   if (toggle) toggle.classList.remove('loading');
+}
+
+/* === AI 자동관리 시스템 === */
+let masterAutoMode = false;
+let serviceAutoStates = {}; // {productId: {auto: bool, bid: number, aiRecommendBid: number, ctr: number, roi: number}}
+
+async function toggleMasterAuto(enabled) {
+  masterAutoMode = enabled;
+  const { error } = await sb.from('kmong_settings').upsert({ key: 'ai_auto_manage', value: enabled ? 'true' : 'false' }, { onConflict: 'key' });
+  if (error) { showToast('설정 저장 실패', 'error'); return; }
+
+  document.getElementById('autoModeDetail').style.display = enabled ? 'block' : 'none';
+  document.getElementById('autoModeLabel').textContent = enabled ? 'ON' : 'OFF';
+  document.getElementById('autoModeLabel').style.color = enabled ? 'var(--primary)' : 'var(--text-2)';
+
+  if (enabled) {
+    // 모든 서비스 자동모드로 초기화
+    for (const p of PRODUCT_LIST) {
+      if (!serviceAutoStates[p.id]) serviceAutoStates[p.id] = { auto: true };
+      else serviceAutoStates[p.id].auto = true;
+    }
+    await sb.from('kmong_settings').upsert({ key: 'ai_service_modes', value: JSON.stringify(serviceAutoStates) }, { onConflict: 'key' });
+    await loadAutoControlPanel();
+  }
+  showToast(`AI 자동관리 ${enabled ? 'ON — 전 서비스 자동모드' : 'OFF'}`);
+}
+
+async function loadAutoControlPanel() {
+  // 설정 로드
+  const { data: setting } = await sb.from('kmong_settings').select('value').eq('key', 'ai_auto_manage').single();
+  masterAutoMode = setting?.value === 'true';
+  document.getElementById('masterAutoToggle').checked = masterAutoMode;
+  document.getElementById('autoModeDetail').style.display = masterAutoMode ? 'block' : 'none';
+  document.getElementById('autoModeLabel').textContent = masterAutoMode ? 'ON' : 'OFF';
+  document.getElementById('autoModeLabel').style.color = masterAutoMode ? 'var(--primary)' : 'var(--text-2)';
+
+  if (!masterAutoMode) return;
+
+  // 서비스별 모드 로드
+  const { data: modeData } = await sb.from('kmong_settings').select('value').eq('key', 'ai_service_modes').single();
+  serviceAutoStates = modeData?.value ? JSON.parse(modeData.value) : {};
+
+  // CTR/ROI 데이터 로드 (최근 7일)
+  const since7d = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString().split('T')[0];
+  const { data: cpcData } = await sb.from('kmong_cpc_daily').select('product_id, ctr, cost, date, ad_enabled, bid_amount').gte('date', since7d).order('date', { ascending: false });
+  const { data: roiData } = await sb.from('kmong_roi_analysis').select('product_id, roi_pct, revenue, cost').order('period_end', { ascending: false }).limit(50);
+
+  // AI 제어 로그
+  const { data: logData } = await sb.from('kmong_ad_commands').select('*').order('created_at', { ascending: false }).limit(10);
+
+  // 서비스별 집계
+  const svcStats = {};
+  for (const p of PRODUCT_LIST) {
+    const pCpc = (cpcData || []).filter(r => r.product_id === p.id);
+    const pRoi = (roiData || []).find(r => r.product_id === p.id);
+    const latestCpc = pCpc[0] || {};
+    const avgCtr = pCpc.length > 0 ? pCpc.reduce((s, r) => s + parseFloat(r.ctr || 0), 0) / pCpc.length : 0;
+    const currentBid = latestCpc.bid_amount || 300;
+    const roi = pRoi?.roi_pct || 0;
+
+    // AI 입찰가 추천 로직
+    let recommendBid = currentBid;
+    let aiAction = '유지';
+    if (avgCtr > 5 && roi > 200) { recommendBid = Math.round(currentBid * 1.15); aiAction = '입찰↑ (고성과)'; }
+    else if (avgCtr > 3 && roi > 100) { recommendBid = Math.round(currentBid * 1.05); aiAction = '소폭↑'; }
+    else if (avgCtr < 1 || roi < 50) { recommendBid = Math.max(100, Math.round(currentBid * 0.8)); aiAction = '입찰↓ (저효율)'; }
+    else if (avgCtr < 2 && roi < 80) { recommendBid = Math.max(100, Math.round(currentBid * 0.9)); aiAction = '소폭↓'; }
+
+    // 자동모드 상태
+    if (!serviceAutoStates[p.id]) serviceAutoStates[p.id] = { auto: true };
+    serviceAutoStates[p.id].ctr = avgCtr;
+    serviceAutoStates[p.id].roi = roi;
+    serviceAutoStates[p.id].bid = currentBid;
+    serviceAutoStates[p.id].aiRecommendBid = recommendBid;
+    serviceAutoStates[p.id].aiAction = aiAction;
+    svcStats[p.id] = serviceAutoStates[p.id];
+  }
+
+  // KPI 업데이트
+  const autoCount = Object.values(svcStats).filter(s => s.auto).length;
+  const manualCount = Object.values(svcStats).filter(s => !s.auto).length;
+  const bidChanges = (logData || []).filter(l => l.action?.includes('bid')).length;
+  const avgRoi = Object.values(svcStats).reduce((s, v) => s + (v.roi || 0), 0) / Math.max(Object.keys(svcStats).length, 1);
+
+  document.getElementById('autoServiceCount').textContent = autoCount;
+  document.getElementById('manualServiceCount').textContent = manualCount;
+  document.getElementById('aiBidAdjustCount').textContent = bidChanges;
+  document.getElementById('avgRoiChange').textContent = avgRoi > 0 ? '+' + avgRoi.toFixed(0) + '%' : avgRoi.toFixed(0) + '%';
+
+  // 테이블
+  const tbody = document.querySelector('#tableAutoControl tbody');
+  tbody.innerHTML = PRODUCT_LIST.map(p => {
+    const s = svcStats[p.id] || {};
+    const isAuto = s.auto !== false;
+    const modeBadge = isAuto
+      ? '<span class="badge badge-paid">자동</span>'
+      : '<span class="badge badge-cancelled">수동</span>';
+    const ctrColor = (s.ctr || 0) > 3 ? 'var(--success)' : (s.ctr || 0) > 1 ? 'var(--warning)' : 'var(--danger)';
+    const roiColor = (s.roi || 0) > 150 ? 'var(--success)' : (s.roi || 0) > 80 ? 'var(--warning)' : 'var(--danger)';
+    const bidDiff = (s.aiRecommendBid || 0) - (s.bid || 0);
+    const bidDiffStr = bidDiff > 0 ? `<span style="color:var(--success)">+${bidDiff}원</span>` : bidDiff < 0 ? `<span style="color:var(--danger)">${bidDiff}원</span>` : '-';
+    const actionColor = (s.aiAction || '').includes('↑') ? 'var(--success)' : (s.aiAction || '').includes('↓') ? 'var(--danger)' : 'var(--text-2)';
+
+    return `<tr>
+      <td>${p.name}</td>
+      <td>${modeBadge}</td>
+      <td style="color:${ctrColor};font-weight:600">${(s.ctr || 0).toFixed(2)}%</td>
+      <td style="color:${roiColor};font-weight:600">${(s.roi || 0).toFixed(0)}%</td>
+      <td>₩${fmt(s.bid || 0)}</td>
+      <td>₩${fmt(s.aiRecommendBid || 0)} <span style="font-size:10px">${bidDiffStr}</span></td>
+      <td style="color:${actionColor};font-size:11px;font-weight:600">${s.aiAction || '-'}</td>
+      <td><label class="toggle-switch"><input type="checkbox" ${isAuto ? 'checked' : ''} onchange="toggleServiceAutoMode('${p.id}', this.checked)"><span class="toggle-slider"></span></label></td>
+    </tr>`;
+  }).join('');
+
+  // AI 로그
+  const logDiv = document.getElementById('aiControlLog');
+  if (!logData || logData.length === 0) {
+    logDiv.innerHTML = '<div style="padding:8px;color:var(--text-3)">아직 AI 제어 로그 없음</div>';
+  } else {
+    logDiv.innerHTML = logData.map(l => {
+      const icon = l.action === 'on' ? '🟢' : l.action === 'off' ? '🔴' : l.action?.includes('bid') ? '💰' : '⚙️';
+      return `<div style="padding:4px 0;border-bottom:1px solid var(--border)">${icon} ${fmtDateTime(l.created_at)} — ${productName(l.product_id)} : ${l.action?.toUpperCase()} ${l.result_message || ''}</div>`;
+    }).join('');
+  }
+}
+
+async function toggleServiceAutoMode(productId, isAuto) {
+  serviceAutoStates[productId] = serviceAutoStates[productId] || {};
+  serviceAutoStates[productId].auto = isAuto;
+  await sb.from('kmong_settings').upsert({ key: 'ai_service_modes', value: JSON.stringify(serviceAutoStates) }, { onConflict: 'key' });
+  showToast(`${productName(productId)}: ${isAuto ? '자동모드' : '수동모드'} 전환`);
+  loadAutoControlPanel();
+}
+
+// 기존 toggleAdFromDashboard를 래핑 — 직원이 수동으로 ON/OFF하면 해당 서비스 수동모드 전환
+const _origToggleAd = toggleAdFromDashboard;
+async function toggleAdFromDashboardWrapped(productId, enable) {
+  // 자동관리 ON이면 해당 서비스를 수동으로 전환
+  if (masterAutoMode && serviceAutoStates[productId]?.auto) {
+    serviceAutoStates[productId].auto = false;
+    await sb.from('kmong_settings').upsert({ key: 'ai_service_modes', value: JSON.stringify(serviceAutoStates) }, { onConflict: 'key' });
+    showToast(`${productName(productId)}: 수동 변경 감지 → 수동모드로 전환`, 'warning');
+  }
+  await _origToggleAd(productId, enable);
+  if (masterAutoMode) loadAutoControlPanel();
+}
+
+/* === 예산 설정 === */
+async function saveBudgetSettings() {
+  const daily = document.getElementById('budgetDaily').value || '0';
+  const weekly = document.getElementById('budgetWeekly').value || '0';
+  const monthly = document.getElementById('budgetMonthly').value || '0';
+  const budget = { daily: parseInt(daily), weekly: parseInt(weekly), monthly: parseInt(monthly) };
+  const { error } = await sb.from('kmong_settings').upsert({ key: 'ai_budget_limits', value: JSON.stringify(budget) }, { onConflict: 'key' });
+  if (error) { showToast('예산 저장 실패', 'error'); return; }
+  showToast(`예산 저장: 일 ₩${fmt(budget.daily)} / 주 ₩${fmt(budget.weekly)} / 월 ₩${fmt(budget.monthly)}`);
+  loadBudgetStatus();
+}
+
+async function loadBudgetStatus() {
+  const { data: budgetSetting } = await sb.from('kmong_settings').select('value').eq('key', 'ai_budget_limits').single();
+  const budget = budgetSetting?.value ? JSON.parse(budgetSetting.value) : { daily: 0, weekly: 0, monthly: 0 };
+  document.getElementById('budgetDaily').value = budget.daily || '';
+  document.getElementById('budgetWeekly').value = budget.weekly || '';
+  document.getElementById('budgetMonthly').value = budget.monthly || '';
+
+  // 현재 소진액 계산
+  const today = new Date().toISOString().split('T')[0];
+  const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
+  const monthStart = today.substring(0, 7) + '-01';
+
+  const { data: costs } = await sb.from('kmong_cpc_daily').select('date, cost').gte('date', monthStart);
+  const dailySpent = (costs || []).filter(c => c.date === today).reduce((s, c) => s + (c.cost || 0), 0);
+  const weeklySpent = (costs || []).filter(c => c.date >= weekAgo).reduce((s, c) => s + (c.cost || 0), 0);
+  const monthlySpent = (costs || []).reduce((s, c) => s + (c.cost || 0), 0);
+
+  const progress = document.getElementById('budgetProgress');
+  progress.innerHTML = [
+    { label: '오늘 소진', spent: dailySpent, limit: budget.daily },
+    { label: '이번주 소진', spent: weeklySpent, limit: budget.weekly },
+    { label: '이번달 소진', spent: monthlySpent, limit: budget.monthly },
+  ].map(b => {
+    const pct = b.limit > 0 ? Math.min(100, (b.spent / b.limit * 100)).toFixed(0) : 0;
+    const barColor = pct > 90 ? 'var(--danger)' : pct > 70 ? 'var(--warning)' : 'var(--success)';
+    return `<div style="background:var(--bg-input);border-radius:10px;padding:10px">
+      <div style="font-size:10px;color:var(--text-3)">${b.label}</div>
+      <div style="font-size:14px;font-weight:700;color:var(--text-1);margin:4px 0">₩${fmt(b.spent)} <span style="font-size:10px;color:var(--text-3)">/ ₩${fmt(b.limit)}</span></div>
+      <div style="background:var(--border);border-radius:4px;height:4px;margin-top:4px"><div style="background:${barColor};border-radius:4px;height:4px;width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('budgetStatus').textContent = budget.daily > 0 ? '설정됨' : '미설정';
+}
+
+/* === 수동 크롤링 === */
+async function manualCrawl(type) {
+  document.getElementById('crawlStatus').innerHTML = `<span style="color:var(--primary)">⏳ ${type} 크롤링 명령 등록 중...</span>`;
+  const { error } = await sb.from('kmong_ad_commands').insert({ product_id: 'system', action: `crawl_${type}`, status: 'pending' });
+  if (error) {
+    document.getElementById('crawlStatus').innerHTML = `<span style="color:var(--danger)">❌ 등록 실패: ${error.message}</span>`;
+    return;
+  }
+  document.getElementById('crawlStatus').innerHTML = `<span style="color:var(--success)">✅ ${type} 크롤링 명령 등록 완료 — 봇이 다음 주기에 처리합니다</span>`;
+  showToast(`${type} 수동 크롤링 명령 등록`);
 }
 
 /* === 탭 10: 자동응답 === */
