@@ -6,7 +6,7 @@
  * - kmong_ad_schedule 테이블에서 해당 시간대/요일 조회
  * - 예산 초과 시 무조건 OFF (budget-monitor 연동)
  *
- * PM2 크론: */30 * * * *
+ * PM2 크론: 매 30분 실행
  */
 
 const { supabase } = require('./lib/supabase');
@@ -56,16 +56,29 @@ async function getMonthlySpend() {
   return (data || []).reduce((sum, row) => sum + (row.cpc_cost || 0), 0);
 }
 
-async function getScheduleSlot(day, hour) {
-  const { data, error } = await supabase
+async function getScheduleSlot(day, hour, productId) {
+  // 1. 서비스별 레코드 조회
+  const { data: specific } = await supabase
     .from('kmong_ad_schedule')
-    .select('enabled, mode')
+    .select('enabled, mode, product_id')
     .eq('day_of_week', day)
     .eq('hour', hour)
+    .eq('product_id', productId)
     .single();
 
-  if (error || !data) return { enabled: false, mode: 'off' };
-  return data;
+  if (specific) return specific;
+
+  // 2. 폴백: product_id='all' 전체 설정
+  const { data: fallback } = await supabase
+    .from('kmong_ad_schedule')
+    .select('enabled, mode, product_id')
+    .eq('day_of_week', day)
+    .eq('hour', hour)
+    .eq('product_id', 'all')
+    .single();
+
+  if (fallback) return fallback;
+  return { enabled: false, mode: 'off', product_id: 'all' };
 }
 
 async function setAllAds(action) {
@@ -117,7 +130,8 @@ async function autoOptimize() {
         .from('kmong_ad_schedule')
         .update({ enabled: true, mode: 'on', note: `자동최적화: CTR ${slotCtr.toFixed(2)}% > 평균 ${avgCtr.toFixed(2)}%` })
         .eq('day_of_week', stats.day)
-        .eq('hour', stats.hour);
+        .eq('hour', stats.hour)
+        .eq('product_id', 'all');
 
       if (!error) optimized++;
     }
@@ -162,44 +176,55 @@ async function main() {
       await autoOptimize();
     }
 
-    // 4. 현재 시간대 스케줄 조회
-    const slot = await getScheduleSlot(kst.day, kst.hour);
-    console.log(`[스케줄] ${dayNames[kst.day]} ${kst.hour}시 → enabled=${slot.enabled}, mode=${slot.mode}`);
+    // 4. 서비스별 개별 스케줄 조회 + 상태 비교
+    const changedProducts = []; // 상태가 변경된 서비스만 수집
 
-    // 5. 테스트 모드 처리
-    if (slot.mode === 'test' && !settings.testMode) {
-      console.log('[스킵] 테스트 슬롯이지만 test_mode=false');
-      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-      console.log(`\n=== 스케줄러 완료 (${elapsed}초) ===`);
-      return;
+    for (const product of PRODUCT_MAP) {
+      const slot = await getScheduleSlot(kst.day, kst.hour, product.id);
+      const currentAction = (slot.enabled && (slot.mode !== 'test' || settings.testMode)) ? 'on' : 'off';
+
+      // 서비스별 이전 상태 조회
+      const stateKey = `last_ad_state_${product.id}`;
+      const { data: prevState } = await supabase
+        .from('kmong_settings')
+        .select('value')
+        .eq('key', stateKey)
+        .single();
+
+      const prevAction = prevState?.value || 'unknown';
+
+      console.log(`[스케줄] ${product.id}: ${dayNames[kst.day]} ${kst.hour}시 → ${currentAction} (이전: ${prevAction}, source: ${slot.product_id})`);
+
+      if (currentAction !== prevAction) {
+        changedProducts.push({ id: product.id, action: currentAction, mode: slot.mode, stateKey });
+      }
     }
 
-    // 6. 이전 상태와 비교 → 변경 시에만 Playwright 실행 (리소스 절약)
-    const { data: prevState } = await supabase
-      .from('kmong_settings')
-      .select('value')
-      .eq('key', 'last_ad_state')
-      .single();
-
-    const currentAction = slot.enabled ? 'on' : 'off';
-    const prevAction = prevState?.value || 'unknown';
-
-    if (currentAction === prevAction) {
-      console.log(`[스킵] 상태 변경 없음 (${currentAction}) — 브라우저 미실행`);
+    // 5. 변경된 서비스만 Playwright 실행 (1세션으로 순차 처리)
+    if (changedProducts.length === 0) {
+      console.log('[스킵] 전체 서비스 상태 변경 없음 — 브라우저 미실행');
     } else {
-      console.log(`[실행] 광고 ${prevAction} → ${currentAction} (Playwright 실행)`);
-      await setAllAds(currentAction);
+      console.log(`[실행] ${changedProducts.length}개 서비스 상태 변경 (Playwright 실행)`);
+      for (const cp of changedProducts) {
+        try {
+          const result = await toggleAd(cp.id, cp.action);
+          console.log(`[광고 ${cp.action.toUpperCase()}] ${cp.id}: ${result.message}`);
+        } catch (err) {
+          console.error(`[광고 ${cp.action.toUpperCase()} 실패] ${cp.id}: ${err.message}`);
+        }
 
-      // 상태 저장
-      await supabase
-        .from('kmong_settings')
-        .upsert({ key: 'last_ad_state', value: currentAction, updated_at: new Date().toISOString() }, { onConflict: 'key' });
-
-      if (currentAction === 'on') {
-        notify(`📢 스케줄러: ${dayNames[kst.day]} ${kst.hour}시 광고 ON (mode: ${slot.mode})`);
-      } else {
-        notify(`🔕 스케줄러: ${dayNames[kst.day]} ${kst.hour}시 광고 OFF`);
+        // 서비스별 상태 저장
+        await supabase
+          .from('kmong_settings')
+          .upsert({ key: cp.stateKey, value: cp.action, updated_at: new Date().toISOString() }, { onConflict: 'key' });
       }
+
+      const onList = changedProducts.filter(p => p.action === 'on').map(p => p.id);
+      const offList = changedProducts.filter(p => p.action === 'off').map(p => p.id);
+      let msg = `스케줄러 ${dayNames[kst.day]} ${kst.hour}시:`;
+      if (onList.length > 0) msg += ` ON[${onList.join(',')}]`;
+      if (offList.length > 0) msg += ` OFF[${offList.join(',')}]`;
+      notify(msg);
     }
 
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);

@@ -500,6 +500,21 @@ td .reply-preview:hover { color: var(--primary); }
 .schedule-legend { display: flex; gap: 16px; font-size: 11px; color: var(--text-2); margin-top: 8px; }
 .schedule-legend span { display: flex; align-items: center; gap: 4px; }
 .schedule-legend .dot-sm { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+/* 폴백 셀 (서비스별 설정 없을 때 'all' 설정을 반투명으로 표시) */
+.schedule-cell.on.fallback { opacity: 0.35; }
+.schedule-cell.test.fallback { opacity: 0.35; }
+/* 서비스 선택 드롭다운 */
+.schedule-service-select { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+.schedule-service-select select { background: var(--bg-input); border: 1px solid var(--border); color: var(--text-1); padding: 6px 12px; border-radius: 6px; font-size: 13px; }
+.schedule-service-select .btn-reset { padding: 6px 12px; font-size: 11px; border-radius: 6px; background: rgba(248,113,113,0.15); color: var(--danger); font-weight: 600; }
+.schedule-service-select .btn-reset:hover { opacity: 0.7; }
+/* 서비스별 상태 요약 테이블 */
+.service-summary-table { width: 100%; font-size: 12px; border-collapse: collapse; margin-top: 12px; }
+.service-summary-table th { text-align: left; padding: 6px 8px; color: var(--text-3); border-bottom: 1px solid var(--border); font-weight: 600; font-size: 11px; }
+.service-summary-table td { padding: 5px 8px; border-bottom: 1px solid rgba(42,45,58,0.5); }
+.service-summary-table .badge-custom { padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+.service-summary-table .badge-custom.yes { background: rgba(13,153,255,0.15); color: var(--primary); }
+.service-summary-table .badge-custom.no { background: rgba(139,143,164,0.1); color: var(--text-3); }
 .heatmap-grid {
   display: grid;
   grid-template-columns: 40px repeat(24, 1fr);
@@ -851,10 +866,32 @@ td .reply-preview:hover { color: var(--primary); }
       <!-- 시간대 스케줄 그리드 -->
       <div class="chart-card full" style="margin-bottom:16px">
         <div class="chart-title"><span class="dot" style="background:var(--warning)"></span>시간대별 광고 스케줄 (클릭으로 ON/OFF 토글)</div>
+        <div class="schedule-service-select">
+          <select id="scheduleProductSelect" onchange="loadScheduleGrid()">
+            <option value="all">전체 (기본)</option>
+            <option value="no-homepage">홈페이지 없는 사장님</option>
+            <option value="onepage">원페이지/랜딩</option>
+            <option value="corp-seo">기업 SEO</option>
+            <option value="corp-renew">기업 리뉴얼</option>
+            <option value="mobile-fix">모바일 깨짐 해결</option>
+            <option value="pc-mobile">PC+모바일 반응형</option>
+            <option value="responsive">반응형 전환</option>
+            <option value="design-html">디자인→HTML</option>
+            <option value="imweb-html">아임웹→HTML</option>
+            <option value="cafe24">카페24 수정</option>
+            <option value="maintenance">월 유지보수</option>
+            <option value="portal-map">포털/지도</option>
+            <option value="insta-atoz">인스타 A to Z</option>
+            <option value="insta-core">인스타 핵심</option>
+          </select>
+          <button class="btn-reset" onclick="resetServiceSchedule()" title="선택한 서비스의 개별 설정을 삭제하고 전체 설정으로 되돌림">서비스 개별설정 초기화</button>
+        </div>
         <div class="schedule-actions">
           <button class="btn-off" onclick="schedulePreset('allOff')">전체 OFF</button>
           <button class="btn-weekday" onclick="schedulePreset('weekday')">평일 업무시간만</button>
           <button class="btn-test" onclick="schedulePreset('test')">테스트 모드</button>
+          <button class="btn-weekday" onclick="schedulePreset('applyAll')" style="background:rgba(13,153,255,0.15);color:var(--primary)">전체 서비스에 적용</button>
+          <button class="btn-weekday" onclick="schedulePreset('applyThis')" style="background:rgba(52,211,153,0.25);color:var(--success)">이 서비스만 적용</button>
         </div>
         <div class="schedule-grid" id="scheduleGrid"></div>
         <div class="schedule-legend">
@@ -862,6 +899,18 @@ td .reply-preview:hover { color: var(--primary); }
           <span><i class="dot-sm" style="background:var(--success)"></i> ON</span>
           <span><i class="dot-sm" style="background:var(--warning)"></i> TEST</span>
           <span><i class="dot-sm" style="border:2px solid var(--primary)"></i> 현재</span>
+          <span><i class="dot-sm" style="background:var(--success);opacity:0.35"></i> 폴백(전체설정)</span>
+        </div>
+      </div>
+
+      <!-- 서비스별 스케줄 상태 요약 -->
+      <div class="chart-card full" style="margin-bottom:16px">
+        <div class="chart-title"><span class="dot" style="background:var(--success)"></span>서비스별 스케줄 상태 요약</div>
+        <div class="table-wrap" style="border:0;margin:0">
+          <table class="service-summary-table" id="serviceSummaryTable">
+            <thead><tr><th>서비스명</th><th>오늘 ON 시간대</th><th>현재 상태</th><th>개별설정</th></tr></thead>
+            <tbody></tbody>
+          </table>
         </div>
       </div>
 
@@ -2499,11 +2548,38 @@ async function loadAdControlTab() {
 }
 
 /* === 시간대 스케줄 그리드 === */
-let scheduleData = []; // [{day_of_week, hour, enabled, mode}]
+let scheduleData = []; // [{day_of_week, hour, enabled, mode, product_id}]
+let allScheduleData = []; // 전체 데이터 캐시
+
+const PRODUCT_LIST = [
+  { id: 'no-homepage', name: '홈페이지 없는 사장님' },
+  { id: 'onepage', name: '원페이지/랜딩' },
+  { id: 'corp-seo', name: '기업 SEO' },
+  { id: 'corp-renew', name: '기업 리뉴얼' },
+  { id: 'mobile-fix', name: '모바일 깨짐 해결' },
+  { id: 'pc-mobile', name: 'PC+모바일 반응형' },
+  { id: 'responsive', name: '반응형 전환' },
+  { id: 'design-html', name: '디자인→HTML' },
+  { id: 'imweb-html', name: '아임웹→HTML' },
+  { id: 'cafe24', name: '카페24 수정' },
+  { id: 'maintenance', name: '월 유지보수' },
+  { id: 'portal-map', name: '포털/지도' },
+  { id: 'insta-atoz', name: '인스타 A to Z' },
+  { id: 'insta-core', name: '인스타 핵심' },
+];
+
+function getSelectedProduct() {
+  return document.getElementById('scheduleProductSelect')?.value || 'all';
+}
 
 async function loadScheduleGrid() {
   const { data } = await sb.from('kmong_ad_schedule').select('*').order('day_of_week').order('hour');
-  scheduleData = data || [];
+  allScheduleData = data || [];
+
+  const selectedPid = getSelectedProduct();
+  // 선택된 서비스의 레코드 + 'all' 레코드
+  const specificData = allScheduleData.filter(s => s.product_id === selectedPid);
+  const allData = allScheduleData.filter(s => s.product_id === 'all');
 
   const now = new Date();
   const kstOffset = 9 * 60 * 60 * 1000;
@@ -2514,18 +2590,25 @@ async function loadScheduleGrid() {
   const dayLabels = ['일', '월', '화', '수', '목', '금', '토'];
   const grid = document.getElementById('scheduleGrid');
 
-  // 헤더 행: 빈칸 + 0~23시
   let html = '<div class="sh"></div>';
   for (let h = 0; h < 24; h++) html += `<div class="sh">${h}</div>`;
 
-  // 각 요일 행
   for (let d = 0; d < 7; d++) {
     html += `<div class="sd">${dayLabels[d]}</div>`;
     for (let h = 0; h < 24; h++) {
-      const slot = scheduleData.find(s => s.day_of_week === d && s.hour === h) || { enabled: false, mode: 'off' };
+      let slot = specificData.find(s => s.day_of_week === d && s.hour === h);
+      let isFallback = false;
+      if (!slot && selectedPid !== 'all') {
+        slot = allData.find(s => s.day_of_week === d && s.hour === h);
+        isFallback = true;
+      }
+      if (!slot) slot = { enabled: false, mode: 'off' };
+
       const cls = slot.enabled ? slot.mode : 'off';
       const isNow = d === nowDay && h === nowHour ? ' now' : '';
-      html += `<div class="schedule-cell ${cls}${isNow}" data-day="${d}" data-hour="${h}" onclick="toggleScheduleCell(${d},${h})" title="${dayLabels[d]} ${h}시 (${slot.mode})"></div>`;
+      const fallbackCls = isFallback && slot.enabled ? ' fallback' : '';
+      const src = isFallback ? ' [전체설정]' : '';
+      html += `<div class="schedule-cell ${cls}${isNow}${fallbackCls}" data-day="${d}" data-hour="${h}" onclick="toggleScheduleCell(${d},${h})" title="${dayLabels[d]} ${h}시 (${slot.mode})${src}"></div>`;
     }
   }
 
@@ -2534,45 +2617,101 @@ async function loadScheduleGrid() {
   // 자동 최적화 토글 상태
   const { data: optSetting } = await sb.from('kmong_settings').select('value').eq('key', 'auto_optimize_schedule').single();
   document.getElementById('autoOptimizeToggle').checked = optSetting?.value === 'true';
+
+  // 서비스별 상태 요약 로드
+  loadServiceSummary(allScheduleData, nowDay, nowHour);
 }
 
 async function toggleScheduleCell(day, hour) {
-  const slot = scheduleData.find(s => s.day_of_week === day && s.hour === hour);
+  const selectedPid = getSelectedProduct();
+  const specificData = allScheduleData.filter(s => s.product_id === selectedPid);
+  const allData = allScheduleData.filter(s => s.product_id === 'all');
+
+  let slot = specificData.find(s => s.day_of_week === day && s.hour === hour);
+  let isFallback = false;
+  if (!slot && selectedPid !== 'all') {
+    slot = allData.find(s => s.day_of_week === day && s.hour === hour);
+    isFallback = true;
+  }
+
   // off → on → test → off 순환
   let newMode, newEnabled;
-  if (!slot || slot.mode === 'off') { newMode = 'on'; newEnabled = true; }
+  if (!slot || slot.mode === 'off' || !slot.enabled) { newMode = 'on'; newEnabled = true; }
   else if (slot.mode === 'on') { newMode = 'test'; newEnabled = true; }
   else { newMode = 'off'; newEnabled = false; }
 
+  // upsert로 해당 product_id에 레코드 생성/업데이트
   const { error } = await sb.from('kmong_ad_schedule')
-    .update({ enabled: newEnabled, mode: newMode, updated_at: new Date().toISOString() })
-    .eq('day_of_week', day)
-    .eq('hour', hour);
+    .upsert({
+      day_of_week: day, hour: hour, product_id: selectedPid,
+      enabled: newEnabled, mode: newMode, updated_at: new Date().toISOString()
+    }, { onConflict: 'day_of_week,hour,product_id' });
 
   if (error) { showToast('스케줄 변경 실패: ' + error.message, 'error'); return; }
-
-  // 로컬 업데이트
-  const idx = scheduleData.findIndex(s => s.day_of_week === day && s.hour === hour);
-  if (idx >= 0) { scheduleData[idx].mode = newMode; scheduleData[idx].enabled = newEnabled; }
   loadScheduleGrid();
 }
 
 async function schedulePreset(preset) {
+  const selectedPid = getSelectedProduct();
+
+  if (preset === 'applyAll') {
+    // 현재 그리드 상태를 product_id='all'로 저장
+    const target = allScheduleData.filter(s => s.product_id === 'all');
+    if (selectedPid === 'all') {
+      showToast('이미 전체 설정을 보고 있습니다');
+      return;
+    }
+    // 선택된 서비스의 설정을 'all'에 복사
+    const specificData = allScheduleData.filter(s => s.product_id === selectedPid);
+    for (const s of specificData) {
+      await sb.from('kmong_ad_schedule')
+        .upsert({ day_of_week: s.day_of_week, hour: s.hour, product_id: 'all', enabled: s.enabled, mode: s.mode, updated_at: new Date().toISOString() }, { onConflict: 'day_of_week,hour,product_id' });
+    }
+    showToast('현재 설정을 전체 서비스에 적용 완료');
+    loadScheduleGrid();
+    return;
+  }
+
+  if (preset === 'applyThis') {
+    if (selectedPid === 'all') {
+      showToast('서비스를 먼저 선택하세요');
+      return;
+    }
+    showToast(`${selectedPid} 서비스에 개별 설정 적용 중...`);
+    // 현재 보이는 그리드 상태(all 폴백 포함)를 해당 서비스 전용 레코드로 복사
+    const allData = allScheduleData.filter(s => s.product_id === 'all');
+    const specificData = allScheduleData.filter(s => s.product_id === selectedPid);
+    for (let d = 0; d < 7; d++) {
+      for (let h = 0; h < 24; h++) {
+        let slot = specificData.find(s => s.day_of_week === d && s.hour === h);
+        if (!slot) slot = allData.find(s => s.day_of_week === d && s.hour === h);
+        if (!slot) slot = { enabled: false, mode: 'off' };
+        await sb.from('kmong_ad_schedule')
+          .upsert({ day_of_week: d, hour: h, product_id: selectedPid, enabled: slot.enabled, mode: slot.mode, updated_at: new Date().toISOString() }, { onConflict: 'day_of_week,hour,product_id' });
+      }
+    }
+    showToast(`${selectedPid} 서비스 개별 설정 저장 완료`);
+    loadScheduleGrid();
+    return;
+  }
+
+  // 기존 프리셋들 — 선택된 product_id에 적용
   let updates = [];
+  const base168 = [];
+  for (let d = 0; d < 7; d++) for (let h = 0; h < 24; h++) base168.push({ day_of_week: d, hour: h });
+
   if (preset === 'allOff') {
-    updates = scheduleData.map(s => ({ day_of_week: s.day_of_week, hour: s.hour, enabled: false, mode: 'off' }));
+    updates = base168.map(s => ({ ...s, enabled: false, mode: 'off' }));
   } else if (preset === 'weekday') {
-    updates = scheduleData.map(s => {
+    updates = base168.map(s => {
       const isWeekday = s.day_of_week >= 1 && s.day_of_week <= 5;
       const isBusiness = s.hour >= 9 && s.hour <= 18;
-      return { day_of_week: s.day_of_week, hour: s.hour, enabled: isWeekday && isBusiness, mode: (isWeekday && isBusiness) ? 'on' : 'off' };
+      return { ...s, enabled: isWeekday && isBusiness, mode: (isWeekday && isBusiness) ? 'on' : 'off' };
     });
   } else if (preset === 'test') {
-    // 랜덤 시간대 테스트: 각 요일에서 2~3개 랜덤 시간대 test로
-    updates = scheduleData.map(s => ({ day_of_week: s.day_of_week, hour: s.hour, enabled: false, mode: 'off' }));
+    updates = base168.map(s => ({ ...s, enabled: false, mode: 'off' }));
     for (let d = 0; d < 7; d++) {
-      const slots = [10, 14, 20]; // 오전, 오후, 저녁 각 1개
-      for (const h of slots) {
+      for (const h of [10, 14, 20]) {
         const u = updates.find(s => s.day_of_week === d && s.hour === h);
         if (u) { u.enabled = true; u.mode = 'test'; }
       }
@@ -2581,13 +2720,54 @@ async function schedulePreset(preset) {
 
   for (const u of updates) {
     await sb.from('kmong_ad_schedule')
-      .update({ enabled: u.enabled, mode: u.mode, updated_at: new Date().toISOString() })
-      .eq('day_of_week', u.day_of_week)
-      .eq('hour', u.hour);
+      .upsert({ day_of_week: u.day_of_week, hour: u.hour, product_id: selectedPid, enabled: u.enabled, mode: u.mode, updated_at: new Date().toISOString() }, { onConflict: 'day_of_week,hour,product_id' });
   }
 
-  showToast(`스케줄 프리셋 적용: ${preset === 'allOff' ? '전체 OFF' : preset === 'weekday' ? '평일 업무시간' : '테스트 모드'}`);
+  const presetNames = { allOff: '전체 OFF', weekday: '평일 업무시간', test: '테스트 모드' };
+  showToast(`${selectedPid === 'all' ? '전체' : selectedPid} 스케줄 프리셋: ${presetNames[preset]}`);
   loadScheduleGrid();
+}
+
+async function resetServiceSchedule() {
+  const selectedPid = getSelectedProduct();
+  if (selectedPid === 'all') { showToast('전체 설정은 초기화할 수 없습니다', 'error'); return; }
+  if (!confirm(`${selectedPid} 서비스의 개별 스케줄 설정을 삭제하고\n전체 설정으로 되돌리시겠습니까?`)) return;
+
+  const { error } = await sb.from('kmong_ad_schedule').delete().eq('product_id', selectedPid);
+  if (error) { showToast('초기화 실패: ' + error.message, 'error'); return; }
+  showToast(`${selectedPid} 개별 설정 삭제 완료 → 전체 설정으로 폴백`);
+  loadScheduleGrid();
+}
+
+function loadServiceSummary(allData, nowDay, nowHour) {
+  const allSlots = allData.filter(s => s.product_id === 'all');
+  const tbody = document.querySelector('#serviceSummaryTable tbody');
+
+  const rows = PRODUCT_LIST.map(p => {
+    const specificSlots = allData.filter(s => s.product_id === p.id);
+    const hasCustom = specificSlots.length > 0;
+
+    // 오늘 ON 시간대 계산
+    const todayOnHours = [];
+    for (let h = 0; h < 24; h++) {
+      let slot = specificSlots.find(s => s.day_of_week === nowDay && s.hour === h);
+      if (!slot) slot = allSlots.find(s => s.day_of_week === nowDay && s.hour === h);
+      if (slot && slot.enabled) todayOnHours.push(h);
+    }
+
+    // 현재 상태
+    let nowSlot = specificSlots.find(s => s.day_of_week === nowDay && s.hour === nowHour);
+    if (!nowSlot) nowSlot = allSlots.find(s => s.day_of_week === nowDay && s.hour === nowHour);
+    const isOn = nowSlot?.enabled;
+
+    const onHoursStr = todayOnHours.length > 0 ? todayOnHours.map(h => `${h}시`).join(', ') : '-';
+    const statusBadge = isOn ? '<span class="badge badge-paid">ON</span>' : '<span class="badge badge-pending">OFF</span>';
+    const customBadge = hasCustom ? '<span class="badge-custom yes">개별</span>' : '<span class="badge-custom no">전체</span>';
+
+    return `<tr><td>${p.name}</td><td style="font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis">${onHoursStr}</td><td>${statusBadge}</td><td>${customBadge}</td></tr>`;
+  });
+
+  tbody.innerHTML = rows.join('');
 }
 
 async function loadCtrHeatmap() {
