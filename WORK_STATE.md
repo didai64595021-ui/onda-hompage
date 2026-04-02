@@ -3,6 +3,18 @@
 > 자동 업데이트: 2026-03-28 KST
 
 ## 현재 작업
+크몽 Playwright 자동 크롤러 Phase 1 — 완료 (2026-04-02)
+
+### 크몽 자동 크롤러 Phase 1 — 완료 (2026-04-02)
+- [x] Step 1: 프로젝트 초기 설정 (package.json, npm install, 디렉토리 구조)
+- [x] Step 2: 공통 모듈 (supabase.js, product-map.js, telegram.js)
+- [x] Step 3: 로그인 헬퍼 (login.js — 모달 로그인 + 쿠키 캐싱)
+- [x] Step 4: crawl-cpc.js (클릭업 CPC 광고 데이터 14건 수집 성공)
+- [x] Step 5: crawl-inbox.js (메시지함 문의 데이터 수집 성공)
+- [x] Step 6: crawl-orders.js (판매관리 주문 데이터 수집 성공)
+- [x] Step 7: PM2 ecosystem config 생성
+- [x] Step 8: 테스트 + Git commit + push
+
 크몽 CPC 대시보드 결제전환율+ROI 추적 업그레이드 — 완료 (2026-04-02)
 
 ### LEX & PARTNERS 법률사무소 — 완료 (2026-03-30)
@@ -154,7 +166,7 @@
 - [x] Git commit + push
 
 ## 다음 단계
-크몽 대시보드 업그레이드 완료 — 다음 지시 대기
+크몽 자동 크롤러 Phase 1 완료 — PM2 등록 후 자동 실행 대기
 
 ## Git 상태 (자동)
 - **브랜치**: main
