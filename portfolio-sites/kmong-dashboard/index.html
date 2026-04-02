@@ -512,9 +512,14 @@ td .reply-preview:hover { color: var(--primary); }
   </nav>
   <div class="sidebar-summary" id="sidebarSummary">
     <div class="sidebar-summary-title">월간 매출 요약</div>
+    <div class="sidebar-summary-row"><span class="label">실매출</span><span class="value revenue" id="ssRealSales">-</span></div>
     <div class="sidebar-summary-row"><span class="label">총매출</span><span class="value revenue" id="ssSales">-</span></div>
     <div class="sidebar-summary-row"><span class="label">광고비</span><span class="value cost" id="ssCost">-</span></div>
     <div class="sidebar-summary-row"><span class="label">순이익</span><span class="value profit" id="ssProfit">-</span></div>
+    <div class="sidebar-summary-title" style="margin-top:8px;font-size:10px">수익금 현황</div>
+    <div class="sidebar-summary-row"><span class="label">출금가능</span><span class="value revenue" id="ssAvailable">-</span></div>
+    <div class="sidebar-summary-row"><span class="label">예상</span><span class="value" id="ssExpected">-</span></div>
+    <div class="sidebar-summary-row"><span class="label">출금완료</span><span class="value" id="ssWithdrawn">-</span></div>
   </div>
   <div class="sidebar-footer">온다마케팅 &copy; 2026</div>
 </aside>
@@ -534,10 +539,6 @@ td .reply-preview:hover { color: var(--primary); }
         <button data-days="90" onclick="setDateRange(90)">90일</button>
         <button data-days="0" onclick="setDateRange(0)">전체</button>
       </div>
-      <button class="btn-icon" onclick="seedData()" title="3월 실데이터 초기화" style="color:var(--warning);border-color:rgba(251,191,36,0.3)">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-        데이터 초기화
-      </button>
       <button class="btn-icon" onclick="refreshData()">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
         새로고침
@@ -1493,6 +1494,10 @@ async function loadRoiTab() {
   const avgCpa = totalOrders > 0 ? Math.round(totalAdCost / totalOrders) : 0;
   const bizMoney = 101300;
 
+  // 수익금 현황 (profits_summary 최신)
+  const { data: profitSummary } = await sb.from('kmong_profits_summary').select('*').order('crawled_at', { ascending: false }).limit(1);
+  const ps = profitSummary && profitSummary.length > 0 ? profitSummary[0] : {};
+
   // KPI
   document.getElementById('roiKpi').innerHTML = [
     { label: '총 광고비', value: fmtMoney(totalAdCost) },
@@ -1501,6 +1506,9 @@ async function loadRoiTab() {
     { label: 'ROI', value: fmtPct(roiPct) },
     { label: '평균 CPA', value: fmtMoney(avgCpa) },
     { label: '비즈머니 잔액', value: fmtMoney(bizMoney) },
+    { label: '출금가능 수익금', value: fmtMoney(ps.available_profit || 0) },
+    { label: '예상 수익금', value: fmtMoney(ps.expected_profit || 0) },
+    { label: '출금완료 수익금', value: fmtMoney(ps.withdrawn_profit || 0) },
   ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join('');
 
   // 서비스별 광고비 vs 매출 (Bar)
@@ -1569,129 +1577,6 @@ async function loadRoiTab() {
   ).join('') : '<tr><td colspan="7"><div class="empty-state"><p>데이터가 없습니다</p></div></td></tr>';
 }
 
-/* === 데이터 시딩 (3월 실데이터) === */
-async function seedData() {
-  if (!confirm('3월 실데이터를 초기화하시겠습니까?\n기존 데이터가 새로운 데이터로 교체됩니다.')) return;
-  showToast('데이터 초기화 중...', 'success');
-
-  try {
-    // 1. 상품 등록
-    const seedProducts = [
-      { product_id: 'insta-atoz', product_name: '인스타그램 A to Z', category: '마케팅', status: 'active' },
-      { product_id: 'insta-core', product_name: '인스타그램 핵심만 쏙쏙', category: '마케팅', status: 'active' },
-      { product_id: 'portal-map', product_name: '포털 지도 트래픽', category: '마케팅', status: 'active' },
-      { product_id: 'mobile-fix', product_name: '홈페이지 모바일 깨짐 24시간 해결', category: '홈페이지', status: 'active' },
-      { product_id: 'responsive', product_name: '홈페이지 반응형 전환', category: '홈페이지', status: 'active' },
-      { product_id: 'onepage', product_name: '소상공인 원페이지 랜딩', category: '홈페이지', status: 'active' },
-      { product_id: 'corp-seo', product_name: '기업 홈페이지 리뉴얼 SEO', category: '홈페이지', status: 'active' },
-      { product_id: 'imweb-html', product_name: '아임웹 홈페이지 HTML 이전', category: '홈페이지', status: 'active' },
-      { product_id: 'no-homepage', product_name: '홈페이지 없는 사장님 3일완성', category: '홈페이지', status: 'active' },
-      { product_id: 'design-html', product_name: '디자인 그대로 HTML 이전', category: '홈페이지', status: 'active' },
-      { product_id: 'pc-mobile', product_name: 'PC→모바일 반응형 48시간', category: '홈페이지', status: 'active' },
-      { product_id: 'corp-renew', product_name: '10년 기업 홈페이지 리뉴얼', category: '홈페이지', status: 'active' },
-      { product_id: 'cafe24', product_name: '카페24 수정 기능추가', category: '홈페이지', status: 'active' },
-      { product_id: 'maintenance', product_name: '홈페이지 월 유지보수', category: '유지보수', status: 'active' },
-    ];
-    const { error: prodErr } = await sb.from('kmong_products').upsert(seedProducts, { onConflict: 'product_id' });
-    if (prodErr) throw new Error('상품: ' + prodErr.message);
-
-    // 2. CPC 일별 데이터 (3월 전체 + 최근 7일)
-    const marchTotal = {
-      'insta-core': { imp: 420, clk: 12, cost: 9270 },
-      'mobile-fix': { imp: 407, clk: 2, cost: 1020 },
-      'responsive': { imp: 580, clk: 13, cost: 10960 },
-      'onepage': { imp: 42, clk: 3, cost: 2780 },
-      'corp-seo': { imp: 1043, clk: 7, cost: 3810 },
-      'imweb-html': { imp: 753, clk: 19, cost: 15760 },
-      'no-homepage': { imp: 882, clk: 27, cost: 26810 },
-      'design-html': { imp: 369, clk: 8, cost: 7420 },
-      'pc-mobile': { imp: 200, clk: 6, cost: 5110 },
-      'corp-renew': { imp: 544, clk: 3, cost: 2910 },
-      'cafe24': { imp: 153, clk: 4, cost: 3640 },
-      'maintenance': { imp: 363, clk: 9, cost: 9000 },
-    };
-    const weeklyTotal = {
-      'insta-core': { imp: 80, clk: 0, cost: 0 },
-      'mobile-fix': { imp: 34, clk: 1, cost: 510 },
-      'responsive': { imp: 52, clk: 5, cost: 4040 },
-      'onepage': { imp: 38, clk: 2, cost: 1810 },
-      'corp-seo': { imp: 39, clk: 1, cost: 1000 },
-      'imweb-html': { imp: 209, clk: 8, cost: 7080 },
-      'no-homepage': { imp: 1347, clk: 51, cost: 112900 },
-      'design-html': { imp: 377, clk: 8, cost: 7420 },
-      'pc-mobile': { imp: 199, clk: 6, cost: 5110 },
-      'corp-renew': { imp: 480, clk: 4, cost: 3320 },
-      'cafe24': { imp: 123, clk: 5, cost: 4150 },
-      'maintenance': { imp: 326, clk: 8, cost: 8000 },
-    };
-
-    const cpcRows = [];
-    // 3월 초중반 (주간 포인트 4개)
-    const earlyDates = ['2026-03-05', '2026-03-10', '2026-03-15', '2026-03-20'];
-    for (const [pid, m] of Object.entries(marchTotal)) {
-      const w = weeklyTotal[pid] || { imp: 0, clk: 0, cost: 0 };
-      const eImp = Math.max(m.imp - w.imp, 0);
-      const eClk = Math.max(m.clk - w.clk, 0);
-      const eCost = Math.max(m.cost - w.cost, 0);
-      if (eImp > 0 || eClk > 0) {
-        earlyDates.forEach(d => {
-          const imp = Math.round(eImp / 4);
-          const clk = Math.round(eClk / 4);
-          const cost = Math.round(eCost / 4);
-          if (imp > 0 || clk > 0) cpcRows.push({ product_id: pid, date: d, impressions: imp, clicks: clk, cpc_cost: cost, ctr: imp > 0 ? +(clk / imp * 100).toFixed(2) : 0 });
-        });
-      }
-    }
-    // 최근 7일 (일별)
-    const recentDates = ['2026-03-26', '2026-03-27', '2026-03-28', '2026-03-29', '2026-03-30', '2026-03-31', '2026-04-01'];
-    for (const [pid, w] of Object.entries(weeklyTotal)) {
-      if (w.imp === 0 && w.clk === 0) continue;
-      recentDates.forEach((d, i) => {
-        const imp = Math.round(w.imp / 7) + (i < (w.imp % 7) ? 1 : 0);
-        const clk = Math.round(w.clk / 7) + (i < (w.clk % 7) ? 1 : 0);
-        const cost = Math.round(w.cost / 7) + (i < (w.cost % 7) ? 1 : 0);
-        cpcRows.push({ product_id: pid, date: d, impressions: imp, clicks: clk, cpc_cost: cost, ctr: imp > 0 ? +(clk / imp * 100).toFixed(2) : 0 });
-      });
-    }
-    const { error: cpcErr } = await sb.from('kmong_cpc_daily').upsert(cpcRows, { onConflict: 'product_id,date' });
-    if (cpcErr) throw new Error('CPC: ' + cpcErr.message);
-
-    // 3. 문의 데이터
-    try { await sb.from('kmong_inquiries').delete().like('notes', '%[SEED]%'); } catch(e) { console.warn('기존 시드 문의 삭제 실패:', e); }
-    const inquiryRows = [
-      { product_id: 'mobile-fix', inquiry_date: '2026-03-30T10:00:00', customer_name: '시퍼런자두3235', inquiry_type: 'order_inquiry', status: 'paid', paid_amount: 50000, notes: '[SEED] 결제 진행' },
-      { product_id: 'no-homepage', inquiry_date: '2026-04-01T14:00:00', customer_name: 'K9970961409', inquiry_type: 'order_inquiry', status: 'pending', notes: '[SEED] 아임웹 이전 문의 중' },
-      { product_id: 'no-homepage', inquiry_date: '2026-03-25T09:00:00', customer_name: '반짝반짝당근8949', inquiry_type: 'order_inquiry', status: 'paid', paid_amount: 280000, converted_at: '2026-03-28T18:00:00', notes: '[SEED] 마르다누수탐지 결제완료' },
-      { product_id: 'no-homepage', inquiry_date: '2026-03-28T11:00:00', customer_name: '유명한악어4570', inquiry_type: 'order_inquiry', status: 'paid', paid_amount: 220000, converted_at: '2026-03-28T18:00:00', notes: '[SEED] 클린파트너 결제완료+리뷰' },
-      { product_id: 'no-homepage', inquiry_date: '2026-03-28T15:00:00', customer_name: '반짝반짝강아지7534', inquiry_type: 'message', status: 'pending', notes: '[SEED] 코딩방식 설명 문의' },
-      { product_id: 'no-homepage', inquiry_date: '2026-03-26T10:00:00', customer_name: '따사로운물티슈929', inquiry_type: 'message', status: 'pending', notes: '[SEED] 홈페이지 서비스 문의' },
-      { product_id: 'portal-map', inquiry_date: '2026-03-26T11:00:00', customer_name: '덤벼라세상아', inquiry_type: 'custom_request', status: 'quoted', notes: '[SEED] 플레이스 견적발송' },
-      { product_id: null, inquiry_date: '2026-03-26T09:00:00', customer_name: '슬기로운바나나1572', inquiry_type: 'message', status: 'cancelled', notes: '[SEED] 정책위반 삭제' },
-      { product_id: 'responsive', inquiry_date: '2026-03-25T14:00:00', customer_name: '상큼발랄코알라5648', inquiry_type: 'order_inquiry', status: 'pending', notes: '[SEED] 반응형 전환 문의' },
-      { product_id: 'no-homepage', inquiry_date: '2026-03-25T16:00:00', customer_name: '그의계절1350', inquiry_type: 'message', status: 'pending', notes: '[SEED] 홈페이지 서비스 문의' },
-      { product_id: 'no-homepage', inquiry_date: '2026-03-24T10:00:00', customer_name: '꿇어앉은은하수3368', inquiry_type: 'order_inquiry', status: 'paid', notes: '[SEED] 결제 진행' },
-      { product_id: null, inquiry_date: '2026-03-19T11:00:00', customer_name: '평화로운하마5284', inquiry_type: 'message', status: 'pending', notes: '[SEED] 서비스 문의' },
-    ];
-    const { error: inqErr } = await sb.from('kmong_inquiries').insert(inquiryRows);
-    if (inqErr) throw new Error('문의: ' + inqErr.message);
-
-    // 4. 주문 데이터 (거래완료 건)
-    try { await sb.from('kmong_orders').delete().gte('order_date', '2026-03-01').lte('order_date', '2026-04-30'); } catch(e) { console.warn('기존 주문 삭제 실패:', e); }
-    const orderRows = [
-      { product_id: 'no-homepage', order_date: '2026-03-28T17:00:00', amount: 280000, status: 'completed', package_type: 'standard' },
-      { product_id: 'no-homepage', order_date: '2026-03-28T18:00:00', amount: 220000, status: 'completed', package_type: 'standard' },
-      { product_id: 'mobile-fix', order_date: '2026-03-30T12:00:00', amount: 50000, status: 'completed', package_type: 'standard' },
-    ];
-    const { error: ordErr } = await sb.from('kmong_orders').insert(orderRows);
-    if (ordErr) throw new Error('주문: ' + ordErr.message);
-
-    showToast('데이터 초기화 완료! 14개 상품 + CPC/문의/주문 데이터 로드됨');
-    await refreshData();
-  } catch (err) {
-    showToast('초기화 실패: ' + err.message, 'error');
-    console.error(err);
-  }
-}
 
 /* === 탭 5: AI 콘텐츠 관리 === */
 async function loadContentTab() {
@@ -2052,17 +1937,30 @@ async function classifyInbox() {
 async function loadSidebarSummary() {
   const now = new Date();
   const monthStart = now.toISOString().slice(0, 7) + '-01';
-  const [{ data: ordData }, { data: cpcData }] = await Promise.all([
+  const currentTerm = now.toISOString().slice(0, 7); // "2026-04"
+  const [{ data: ordData }, { data: cpcData }, { data: monthlyData }, { data: summaryData }] = await Promise.all([
     sb.from('kmong_orders').select('amount,status').gte('order_date', monthStart),
-    sb.from('kmong_cpc_daily').select('cpc_cost').gte('date', monthStart)
+    sb.from('kmong_cpc_daily').select('cpc_cost').gte('date', monthStart),
+    sb.from('kmong_profits_monthly').select('*').eq('term', currentTerm).limit(1),
+    sb.from('kmong_profits_summary').select('*').order('crawled_at', { ascending: false }).limit(1)
   ]);
   const revenue = (ordData || []).filter(o => o.status === 'completed').reduce((s, o) => s + (o.amount || 0), 0);
   const adCost = (cpcData || []).reduce((s, r) => s + (r.cpc_cost || 0), 0);
   const profit = revenue - adCost;
+
+  // 실매출 (profits_monthly에서)
+  const realSales = monthlyData && monthlyData.length > 0 ? (monthlyData[0].completed_amount || 0) : 0;
+  document.getElementById('ssRealSales').textContent = fmtMoney(realSales);
   document.getElementById('ssSales').textContent = fmtMoney(revenue);
   document.getElementById('ssCost').textContent = fmtMoney(adCost);
   document.getElementById('ssProfit').textContent = fmtMoney(profit);
   document.getElementById('ssProfit').className = `value ${profit >= 0 ? 'profit' : 'cost'}`;
+
+  // 수익금 현황 (profits_summary 최신)
+  const sum = summaryData && summaryData.length > 0 ? summaryData[0] : {};
+  document.getElementById('ssAvailable').textContent = fmtMoney(sum.available_profit || 0);
+  document.getElementById('ssExpected').textContent = fmtMoney(sum.expected_profit || 0);
+  document.getElementById('ssWithdrawn').textContent = fmtMoney(sum.withdrawn_profit || 0);
 }
 
 /* === 데이터 새로고침 === */
