@@ -496,6 +496,10 @@ td .reply-preview:hover { color: var(--primary); }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
       ROI 분석
     </div>
+    <div class="nav-item" data-tab="sales" onclick="switchTab('sales')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      매출 분석
+    </div>
     <div style="padding:8px 12px;font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-top:8px">Phase 3-4</div>
     <div class="nav-item" data-tab="content" onclick="switchTab('content')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -717,6 +721,34 @@ td .reply-preview:hover { color: var(--primary); }
       <div class="table-wrap"><table id="tableInbox"><thead><tr><th>날짜</th><th>고객</th><th>서비스</th><th>우선순위</th><th>감정</th><th>의도</th><th>AI 답변</th><th>신뢰도</th></tr></thead><tbody></tbody></table></div>
     </div>
 
+    <!-- 탭 8: 매출 분석 -->
+    <div class="tab-panel" id="tab-sales">
+      <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+        <label style="font-size:12px;color:var(--text-2)">기간:</label>
+        <input type="date" id="salesDateFrom" class="form-input" style="width:140px;padding:4px 8px;font-size:12px">
+        <span style="color:var(--text-3)">~</span>
+        <input type="date" id="salesDateTo" class="form-input" style="width:140px;padding:4px 8px;font-size:12px">
+        <button class="btn-primary" onclick="loadSalesTab()" style="padding:4px 12px;font-size:12px">조회</button>
+      </div>
+      <div class="kpi-grid" id="salesKpi"></div>
+      <div class="chart-grid">
+        <div class="chart-card full">
+          <div class="chart-title"><span class="dot"></span>일자별 매출 추이</div>
+          <div class="chart-wrap"><canvas id="chartDailySales"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title"><span class="dot" style="background:var(--success)"></span>서비스별 매출 비중</div>
+          <div class="chart-wrap"><canvas id="chartServiceShare"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title"><span class="dot" style="background:var(--warning)"></span>서비스별 수익금</div>
+          <div class="chart-wrap"><canvas id="chartServiceProfit"></canvas></div>
+        </div>
+      </div>
+      <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>주문 내역</div>
+      <div class="table-wrap"><table id="tableSales"><thead><tr><th>날짜</th><th>주문번호</th><th>서비스명</th><th>금액</th><th>수익금</th><th>상태</th><th>고객명</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
   </div>
 </div>
 
@@ -934,7 +966,7 @@ function switchTab(tab) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   document.querySelector(`.nav-item[data-tab="${tab}"]`).classList.add('active');
-  const titles = { cpc: 'CPC 소재테스트', funnel: '전환 퍼널', inquiry: '서비스별 문의량', roi: 'ROI 분석', content: 'AI 콘텐츠 관리', abtest: 'A/B 테스트', inbox: '인박스 AI' };
+  const titles = { cpc: 'CPC 소재테스트', funnel: '전환 퍼널', inquiry: '서비스별 문의량', roi: 'ROI 분석', sales: '매출 분석', content: 'AI 콘텐츠 관리', abtest: 'A/B 테스트', inbox: '인박스 AI' };
   document.getElementById('pageTitle').textContent = titles[tab];
   if (window.innerWidth <= 1024) closeSidebar();
 }
@@ -1933,6 +1965,158 @@ async function classifyInbox() {
   loadInboxTab();
 }
 
+/* === 매출 분석 탭 === */
+async function loadSalesTab() {
+  // 날짜 범위 기본값 세팅
+  const fromInput = document.getElementById('salesDateFrom');
+  const toInput = document.getElementById('salesDateTo');
+  if (!fromInput.value) {
+    const d = new Date(); d.setDate(d.getDate() - 30);
+    fromInput.value = d.toISOString().split('T')[0];
+  }
+  if (!toInput.value) {
+    toInput.value = new Date().toISOString().split('T')[0];
+  }
+  const dateFrom = fromInput.value;
+  const dateTo = toInput.value;
+
+  // 주문 + 수익금 데이터 병렬 로드
+  const [{ data: ordData }, { data: profitData }] = await Promise.all([
+    sb.from('kmong_orders').select('*').gte('order_date', dateFrom).lte('order_date', dateTo).order('order_date', { ascending: false }),
+    sb.from('kmong_profits_transactions').select('*').gte('order_date', dateFrom).lte('order_date', dateTo)
+  ]);
+  const orders = ordData || [];
+  const profits = profitData || [];
+
+  // 수익금 매핑 (order_number → profit)
+  const profitMap = {};
+  profits.forEach(p => {
+    const key = (p.order_number || '').replace('#', '');
+    profitMap[key] = p;
+  });
+
+  // 주문에 수익금 조인
+  const joined = orders.map(o => {
+    const p = profitMap[o.order_id] || {};
+    return { ...o, profit_amount: p.profit_amount || 0, actual_amount: p.actual_amount || 0, profit_status: p.status || '' };
+  });
+
+  // KPI 계산
+  const totalRevenue = orders.reduce((s, o) => s + (o.amount || 0), 0);
+  const thisMonth = new Date().toISOString().slice(0, 7);
+  const monthOrders = orders.filter(o => (o.order_date || '').startsWith(thisMonth));
+  const monthRevenue = monthOrders.reduce((s, o) => s + (o.amount || 0), 0);
+  const avgOrderAmount = orders.length > 0 ? Math.round(totalRevenue / orders.length) : 0;
+  const totalProfit = joined.reduce((s, o) => s + (o.profit_amount || 0), 0);
+
+  document.getElementById('salesKpi').innerHTML = [
+    { label: '총매출', value: fmtMoney(totalRevenue), color: 'var(--primary)' },
+    { label: '이번달 매출', value: fmtMoney(monthRevenue), color: 'var(--success)' },
+    { label: '평균 주문금액', value: fmtMoney(avgOrderAmount), color: 'var(--warning)' },
+    { label: '주문 건수', value: fmt(orders.length) + '건', color: 'var(--danger)' },
+  ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value" style="color:${k.color}">${k.value}</div></div>`).join('');
+
+  // 일자별 매출 바 차트
+  const dailyMap = {};
+  orders.forEach(o => {
+    const d = o.order_date || 'unknown';
+    dailyMap[d] = (dailyMap[d] || 0) + (o.amount || 0);
+  });
+  const dailyDates = Object.keys(dailyMap).sort();
+  const dailyAmounts = dailyDates.map(d => dailyMap[d]);
+
+  makeChart('chartDailySales', {
+    type: 'bar',
+    data: {
+      labels: dailyDates.map(d => d.slice(5)),
+      datasets: [{
+        label: '매출 (원)',
+        data: dailyAmounts,
+        backgroundColor: '#0D99FF88',
+        borderColor: '#0D99FF',
+        borderWidth: 1,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { ticks: { callback: v => (v / 10000).toFixed(0) + '만' } },
+        x: { ticks: { maxRotation: 45 } }
+      }
+    }
+  });
+
+  // 서비스별 매출 비중 도넛
+  const serviceMap = {};
+  orders.forEach(o => {
+    const name = o.service_name || productName(o.product_id);
+    serviceMap[name] = (serviceMap[name] || 0) + (o.amount || 0);
+  });
+  const serviceNames = Object.keys(serviceMap).sort((a, b) => serviceMap[b] - serviceMap[a]);
+  const serviceAmounts = serviceNames.map(n => serviceMap[n]);
+
+  makeChart('chartServiceShare', {
+    type: 'doughnut',
+    data: {
+      labels: serviceNames.map(n => n.length > 15 ? n.substring(0, 15) + '…' : n),
+      datasets: [{ data: serviceAmounts, backgroundColor: chartColors }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { font: { size: 10 }, boxWidth: 10 } } }
+    }
+  });
+
+  // 서비스별 수익금 바 차트
+  const profitByService = {};
+  joined.forEach(o => {
+    const name = o.service_name || productName(o.product_id);
+    profitByService[name] = (profitByService[name] || 0) + (o.profit_amount || 0);
+  });
+  const profitNames = Object.keys(profitByService).sort((a, b) => profitByService[b] - profitByService[a]);
+
+  makeChart('chartServiceProfit', {
+    type: 'bar',
+    data: {
+      labels: profitNames.map(n => n.length > 12 ? n.substring(0, 12) + '…' : n),
+      datasets: [{
+        label: '수익금',
+        data: profitNames.map(n => profitByService[n]),
+        backgroundColor: chartColors,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: { x: { ticks: { callback: v => (v / 10000).toFixed(0) + '만' } } }
+    }
+  });
+
+  // 주문 내역 테이블
+  const tbody = document.querySelector('#tableSales tbody');
+  if (joined.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-3)">데이터 없음</td></tr>';
+  } else {
+    tbody.innerHTML = joined.map(o => {
+      const sName = o.service_name || productName(o.product_id);
+      const sBadge = o.status === '거래완료' ? 'badge-paid' : o.status === '취소' ? 'badge-cancelled' : 'badge-quoted';
+      return `<tr>
+        <td>${fmtDate(o.order_date)}</td>
+        <td>#${o.order_id || '-'}</td>
+        <td title="${sName}">${sName.length > 20 ? sName.substring(0, 20) + '…' : sName}</td>
+        <td>${fmtMoney(o.amount)}</td>
+        <td>${o.profit_amount ? fmtMoney(o.profit_amount) : '-'}</td>
+        <td><span class="badge ${sBadge}">${o.status || '-'}</span></td>
+        <td>${o.buyer_name || '-'}</td>
+      </tr>`;
+    }).join('');
+  }
+}
+
 /* === 사이드바 월간 매출 요약 === */
 async function loadSidebarSummary() {
   const now = new Date();
@@ -1966,7 +2150,7 @@ async function loadSidebarSummary() {
 /* === 데이터 새로고침 === */
 async function refreshData() {
   await loadProducts();
-  await Promise.all([loadCpcTab(), loadFunnelTab(), loadInquiryTab(), loadRoiTab(), loadContentTab(), loadAbTestTab(), loadInboxTab(), loadSidebarSummary()]);
+  await Promise.all([loadCpcTab(), loadFunnelTab(), loadInquiryTab(), loadRoiTab(), loadSalesTab(), loadContentTab(), loadAbTestTab(), loadInboxTab(), loadSidebarSummary()]);
 }
 
 /* === 폼 제출 === */

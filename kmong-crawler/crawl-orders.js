@@ -144,11 +144,33 @@ async function crawlOrders() {
         continue;
       }
 
+      // 고객 닉네임: "구매자" 관련 텍스트 또는 블록 마지막 줄에서 추출
+      let buyerName = '';
+      for (const line of blockLines) {
+        // "구매자: 닉네임" 또는 단독 닉네임 패턴
+        const buyerMatch = line.match(/구매자\s*[:：]?\s*(.+)/);
+        if (buyerMatch) {
+          buyerName = buyerMatch[1].trim();
+          break;
+        }
+      }
+      // 구매자 패턴 못 찾으면 블록에서 금액/날짜/상태가 아닌 짧은 텍스트 시도
+      if (!buyerName) {
+        for (const line of blockLines.slice(1)) {
+          if (line.length > 1 && line.length <= 20 && !line.match(/[\d,]+원/) && !line.match(/\d{2}\.\d{2}\.\d{2}/) && !line.includes('주문일시') && !line.includes('거래') && !line.includes('진행') && !line.includes('작업물') && !line.includes('취소') && !line.includes('수정') && !line.includes('패키지')) {
+            buyerName = line;
+            break;
+          }
+        }
+      }
+
       const productId = matchProductId(serviceName);
 
       orders.push({
         order_id: orderId,
         product_id: productId,
+        service_name: serviceName.trim(),
+        buyer_name: buyerName,
         order_date: orderDate || new Date().toISOString().split('T')[0],
         package_type: '',
         amount,
@@ -156,7 +178,7 @@ async function crawlOrders() {
         completed_at: completedAt,
       });
 
-      console.log(`[주문] #${orderId} | ${serviceName.substring(0, 40)} → ${productId || 'N/A'} | ${amount}원 | ${status} | ${orderDate}`);
+      console.log(`[주문] #${orderId} | ${serviceName.substring(0, 40)} → ${productId || 'N/A'} | ${amount}원 | ${status} | ${orderDate} | 구매자: ${buyerName || 'N/A'}`);
     }
 
     // 페이지네이션: 2페이지 확인
@@ -195,17 +217,33 @@ async function crawlOrders() {
           if (prevBlock.includes('거래 완료')) status = '거래완료';
           else if (prevBlock.includes('주문 취소')) status = '취소';
 
+          // 고객 닉네임 추출 (P2)
+          let buyerName = '';
+          for (const line of blockLines) {
+            const buyerMatch = line.match(/구매자\s*[:：]?\s*(.+)/);
+            if (buyerMatch) { buyerName = buyerMatch[1].trim(); break; }
+          }
+          if (!buyerName) {
+            for (const line of blockLines.slice(1)) {
+              if (line.length > 1 && line.length <= 20 && !line.match(/[\d,]+원/) && !line.match(/\d{2}\.\d{2}\.\d{2}/) && !line.includes('주문일시') && !line.includes('거래') && !line.includes('진행')) {
+                buyerName = line; break;
+              }
+            }
+          }
+
           const productId = matchProductId(serviceName);
           orders.push({
             order_id: orderId,
             product_id: productId,
+            service_name: serviceName.trim(),
+            buyer_name: buyerName,
             order_date: orderDate || new Date().toISOString().split('T')[0],
             package_type: '',
             amount,
             status,
           });
 
-          console.log(`[주문 P2] #${orderId} | ${serviceName.substring(0, 40)} → ${productId || 'N/A'} | ${amount}원`);
+          console.log(`[주문 P2] #${orderId} | ${serviceName.substring(0, 40)} → ${productId || 'N/A'} | ${amount}원 | 구매자: ${buyerName || 'N/A'}`);
         }
       }
     } catch {

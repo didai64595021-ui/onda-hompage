@@ -45,6 +45,17 @@ module.exports = {
         NODE_ENV: 'production',
       },
     },
+    {
+      name: 'kmong-crawl-gig-status',
+      script: './crawl-gig-status.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '0 */2 * * *',  // 2시간마다
+      autorestart: false,
+      watch: false,
+      env: {
+        NODE_ENV: 'production',
+      },
+    },
     // === Phase 2: 자동 분석 + 자동 답장 ===
     {
       name: 'kmong-analyze-daily',

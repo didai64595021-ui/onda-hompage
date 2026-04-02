@@ -3,6 +3,18 @@
 > 자동 업데이트: 2026-04-02 KST
 
 ## 현재 작업
+크몽 주문+광고토글+심사상태+일자별매출 통합 구현 — 완료 (2026-04-02)
+
+### 크몽 주문+광고토글+심사상태+매출분석 — 완료 (2026-04-02)
+- [x] Step 1: Supabase 스키마 변경 (buyer_name, service_name, ad_enabled 칼럼 + kmong_gig_status 테이블)
+- [x] Step 2: crawl-orders.js 개선 (buyer_name, service_name 추출 추가)
+- [x] Step 3: crawl-cpc.js 개선 (ad_enabled ON/OFF 상태 수집)
+- [x] Step 4: toggle-ad.js 신규 생성 (광고 ON/OFF 토글 제어, 모듈화)
+- [x] Step 5: crawl-gig-status.js 신규 생성 (서비스 심사 상태 크롤러 + 텔레그램 경고)
+- [x] Step 6: 대시보드 매출 분석 탭 추가 (일자별 바차트, 서비스별 도넛, 수익금 차트, 주문내역 테이블)
+- [x] Step 7: PM2 ecosystem + package.json 업데이트
+- [x] Step 8: 디버그 파일 정리 + Git commit + push
+
 크몽 Phase 3-4: AI 콘텐츠 생성 + A/B 테스트 + 학습 루프 + 인박스 AI — 완료 (2026-04-02)
 
 ### 크몽 Phase 3-4 — 완료 (2026-04-02)
@@ -192,7 +204,7 @@
 - [x] Git commit + push
 
 ## 다음 단계
-크몽 Phase 3-4 완료 — setup-phase3-db.js 실행 후 PM2 재등록 필요
+PM2 재등록 필요: `pm2 start kmong-cron-ecosystem.config.js`
 Phase 5 예정: 텔레그램 봇 webhook 수신 → 승인/수정/거부 자동처리 + 실시간 알림
 
 ## Git 상태 (자동)

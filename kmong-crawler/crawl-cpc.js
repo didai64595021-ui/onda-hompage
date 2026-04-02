@@ -82,6 +82,22 @@ async function crawlCpc() {
       const cellCount = await cells.count();
       if (cellCount < 8) continue;
 
+      // 광고 ON/OFF 토글 상태: td[0] 내부 토글 스위치
+      let adEnabled = true;
+      try {
+        const toggleInput = cells.nth(0).locator('input[type="checkbox"], input[role="switch"]').first();
+        if (await toggleInput.count() > 0) {
+          adEnabled = await toggleInput.isChecked();
+        } else {
+          // 토글 버튼의 class로 판단 (on/active 클래스)
+          const toggleEl = cells.nth(0).locator('[class*="toggle"], [class*="switch"]').first();
+          if (await toggleEl.count() > 0) {
+            const cls = await toggleEl.getAttribute('class') || '';
+            adEnabled = cls.includes('on') || cls.includes('active') || cls.includes('checked');
+          }
+        }
+      } catch { /* 토글 없으면 기본 true */ }
+
       // 서비스명: td[1] 내부 img의 alt 속성에서 추출
       const serviceName = await cells.nth(1).locator('img').first().getAttribute('alt').catch(() => '') || '';
       const productId = matchProductId(serviceName);
@@ -105,9 +121,10 @@ async function crawlCpc() {
         ctr,
         cpc_cost: totalCost,
         title_text: serviceName.trim(),
+        ad_enabled: adEnabled,
       };
       records.push(record);
-      console.log(`[매핑] ${serviceName.substring(0, 30)} → ${productId} | 노출:${impressions} 클릭:${clicks} 비용:${totalCost}원`);
+      console.log(`[매핑] ${serviceName.substring(0, 30)} → ${productId} | 노출:${impressions} 클릭:${clicks} 비용:${totalCost}원 | 광고:${adEnabled ? 'ON' : 'OFF'}`);
     }
 
     // Supabase upsert
