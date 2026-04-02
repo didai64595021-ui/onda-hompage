@@ -82,11 +82,14 @@ async function login(opts = {}) {
     await page.waitForTimeout(2000);
 
     const currentUrl = page.url();
-    if (!currentUrl.includes('/login')) {
+    // auth-refreshing 리다이렉트도 쿠키 만료로 간주
+    if (!currentUrl.includes('/login') && !currentUrl.includes('auth-refreshing')) {
       console.log('[로그인] 쿠키 유효 — 로그인 스킵');
       return { browser, context, page };
     }
-    console.log('[로그인] 쿠키 만료 — 재로그인 진행');
+    console.log(`[로그인] 쿠키 만료 — 재로그인 진행 (URL: ${currentUrl})`);
+    // 만료된 쿠키 파일 삭제
+    try { fs.unlinkSync(COOKIE_PATH); } catch {}
     await page.close();
   }
 

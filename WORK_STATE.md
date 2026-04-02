@@ -3,6 +3,16 @@
 > 자동 업데이트: 2026-04-02 KST
 
 ## 현재 작업
+월간 광고 지출 한도 + 독립 명령 처리기 + 전체 크롤러 통합 검증 — 완료 (2026-04-02)
+
+### Phase 6: 예산 모니터 + 명령 처리기 + 크롤러 검증 — 완료 (2026-04-02)
+- [x] Step 1: Supabase `kmong_settings` 테이블 생성 (monthly_budget, budget_alert_threshold, auto_stop_on_budget)
+- [x] Step 2: `budget-monitor.js` 신규 생성 (월간 지출 합산 → 90% 경고, 100% 자동정지)
+- [x] Step 3: `command-processor.js` 신규 생성 (대시보드 → kmong_ad_commands → toggle-ad.js 독립 실행)
+- [x] Step 4: 대시보드 광고 제어/설정 탭 추가 (예산 프로그레스바, 설정 UI, 광고 토글, 명령 이력)
+- [x] Step 5: PM2 ecosystem 업데이트 (budget-monitor 2시간, command-processor 5분)
+- [x] Step 6: 전체 크롤러 통합 테스트 (CPC 14건, 주문 2건, 매출 월별3+거래5건, 서비스상태 1건 — 전부 정상)
+
 크몽 텔레그램 광고제어봇 + 대시보드 UI토글 + AI 자동응답 강화 — 완료 (2026-04-02)
 
 ### Phase 5: 텔레그램 봇 + 광고제어 + 자동응답 강화 — 완료 (2026-04-02)

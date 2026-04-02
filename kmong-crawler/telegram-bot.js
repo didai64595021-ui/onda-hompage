@@ -24,7 +24,17 @@ if (!BOT_TOKEN) {
 
 const ALLOWED_CHAT_ID = -1003753252286; // ONDA 서버 그룹
 
-const bot = new TelegramBot(BOT_TOKEN, { polling: true });
+const bot = new TelegramBot(BOT_TOKEN, {
+  polling: {
+    params: { timeout: 30 },
+    interval: 2000,
+  },
+});
+
+// 기존 웹훅 제거 (폴링 충돌 방지)
+try {
+  bot.deleteWebHook().then(() => console.log('[웹훅] 기존 웹훅 제거 완료'));
+} catch {}
 
 // Playwright 동시 실행 방지 큐
 let isProcessing = false;

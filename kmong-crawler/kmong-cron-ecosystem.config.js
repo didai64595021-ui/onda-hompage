@@ -125,6 +125,29 @@ module.exports = {
         NODE_ENV: 'production',
       },
     },
+    // === Phase 6: 예산 모니터 + 명령 처리기 ===
+    {
+      name: 'kmong-budget-monitor',
+      script: './budget-monitor.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '0 */2 * * *',  // 2시간마다
+      autorestart: false,
+      watch: false,
+      env: {
+        NODE_ENV: 'production',
+      },
+    },
+    {
+      name: 'kmong-command-processor',
+      script: './command-processor.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '*/5 * * * *',  // 5분마다
+      autorestart: false,
+      watch: false,
+      env: {
+        NODE_ENV: 'production',
+      },
+    },
     // === Phase 5: 텔레그램 봇 (상시 구동) ===
     {
       name: 'kmong-telegram-bot',

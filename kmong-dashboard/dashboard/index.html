@@ -384,6 +384,25 @@ tr:hover td { background: rgba(13,153,255,0.04); }
 .toast.success { border-color: var(--success); }
 .toast.error { border-color: var(--danger); }
 
+/* === 광고 제어 토글 === */
+.ad-toggle-btn {
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s;
+  min-width: 60px;
+  text-align: center;
+}
+.ad-toggle-btn.on { background: rgba(52,211,153,0.15); color: var(--success); border: 1px solid rgba(52,211,153,0.3); }
+.ad-toggle-btn.off { background: rgba(248,113,113,0.15); color: var(--danger); border: 1px solid rgba(248,113,113,0.3); }
+.ad-toggle-btn:hover { opacity: 0.8; }
+.ad-status-on { color: var(--success); font-weight: 600; }
+.ad-status-off { color: var(--danger); font-weight: 600; }
+.badge-done { background: rgba(52,211,153,0.15); color: var(--success); }
+.badge-failed { background: rgba(248,113,113,0.15); color: var(--danger); }
+.badge-processing { background: rgba(13,153,255,0.15); color: var(--primary); }
+
 /* === 로딩 === */
 .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.6s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -439,6 +458,10 @@ tr:hover td { background: rgba(13,153,255,0.04); }
     <div class="nav-item" data-tab="inquiry" onclick="switchTab('inquiry')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
       서비스별 문의량
+    </div>
+    <div class="nav-item" data-tab="adcontrol" onclick="switchTab('adcontrol')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      광고 제어 / 설정
     </div>
   </nav>
   <div class="sidebar-footer">온다마케팅 &copy; 2026</div>
@@ -536,6 +559,73 @@ tr:hover td { background: rgba(13,153,255,0.04); }
       </div>
       <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>최근 문의 목록</div>
       <div class="table-wrap"><table id="tableInquiries"><thead><tr><th>날짜</th><th>고객</th><th>상품</th><th>상태</th><th>금액</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <!-- 탭 4: 광고 제어 / 설정 -->
+    <div class="tab-panel" id="tab-adcontrol">
+      <!-- 예산 프로그레스 -->
+      <div class="kpi-grid" id="budgetKpi"></div>
+      <div class="chart-card" style="margin-bottom:24px">
+        <div class="chart-title"><span class="dot"></span>이번 달 예산 소진율</div>
+        <div style="padding:8px 0">
+          <div style="background:var(--bg-input);border-radius:8px;height:32px;overflow:hidden;position:relative">
+            <div id="budgetBar" style="height:100%;border-radius:8px;transition:width 0.6s ease;display:flex;align-items:center;justify-content:flex-end;padding:0 12px;font-size:13px;font-weight:600;color:#fff;min-width:40px"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--text-3)">
+            <span id="budgetSpent">₩0</span>
+            <span id="budgetLimit">₩500,000</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 설정 패널 -->
+      <div class="chart-card" style="margin-bottom:24px">
+        <div class="chart-title"><span class="dot"></span>예산 설정</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;padding:8px 0">
+          <div class="form-group">
+            <label class="form-label">월간 예산 한도 (원)</label>
+            <input type="number" class="form-input" id="settingBudget" min="0" step="10000" value="500000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">경고 임계치 (%)</label>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input type="range" id="settingThreshold" min="50" max="99" value="90" style="flex:1;accent-color:var(--primary)">
+              <span id="thresholdDisplay" style="font-size:14px;font-weight:600;min-width:36px">90%</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">한도 초과 시 자동 정지</label>
+            <div style="margin-top:4px">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px">
+                <input type="checkbox" id="settingAutoStop" checked style="accent-color:var(--primary);width:18px;height:18px">
+                자동 전체 광고 OFF
+              </label>
+            </div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="saveSettings()" style="margin-top:8px">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          설정 저장
+        </button>
+      </div>
+
+      <!-- 광고 ON/OFF 제어 -->
+      <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>광고 ON/OFF 제어</div>
+      <div class="table-wrap">
+        <table id="tableAdControl">
+          <thead><tr><th>서비스</th><th>광고 상태</th><th>제어</th><th>마지막 명령</th><th>결과</th></tr></thead>
+          <tbody id="adControlBody"></tbody>
+        </table>
+      </div>
+
+      <!-- 명령 이력 -->
+      <div class="chart-title" style="margin-top:24px;margin-bottom:8px"><span class="dot"></span>명령 처리 이력</div>
+      <div class="table-wrap">
+        <table id="tableCommandHistory">
+          <thead><tr><th>시각</th><th>서비스</th><th>명령</th><th>상태</th><th>결과</th></tr></thead>
+          <tbody id="commandHistoryBody"></tbody>
+        </table>
+      </div>
     </div>
 
   </div>
@@ -755,7 +845,7 @@ function switchTab(tab) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   document.querySelector(`.nav-item[data-tab="${tab}"]`).classList.add('active');
-  const titles = { cpc: 'CPC 소재테스트', funnel: '전환 퍼널', inquiry: '서비스별 문의량' };
+  const titles = { cpc: 'CPC 소재테스트', funnel: '전환 퍼널', inquiry: '서비스별 문의량', adcontrol: '광고 제어 / 설정' };
   document.getElementById('pageTitle').textContent = titles[tab];
   if (window.innerWidth <= 1024) closeSidebar();
 }
@@ -1151,10 +1241,142 @@ async function loadInquiryTab() {
   ).join('') : '<tr><td colspan="5"><div class="empty-state"><p>데이터가 없습니다</p></div></td></tr>';
 }
 
+/* === 광고 제어 / 설정 탭 === */
+async function loadAdControlTab() {
+  // 설정 로드
+  const { data: settingsData } = await sb.from('kmong_settings').select('key, value');
+  const settings = {};
+  (settingsData || []).forEach(r => { settings[r.key] = r.value; });
+
+  const budget = parseInt(settings.monthly_budget || '500000', 10);
+  const threshold = parseFloat(settings.budget_alert_threshold || '0.9');
+  const autoStop = settings.auto_stop_on_budget === 'true';
+
+  document.getElementById('settingBudget').value = budget;
+  document.getElementById('settingThreshold').value = Math.round(threshold * 100);
+  document.getElementById('thresholdDisplay').textContent = Math.round(threshold * 100) + '%';
+  document.getElementById('settingAutoStop').checked = autoStop;
+
+  // 이번 달 지출 계산
+  const monthStart = new Date().toISOString().slice(0, 7) + '-01';
+  const { data: cpcData } = await sb.from('kmong_cpc_daily').select('cpc_cost').gte('date', monthStart);
+  const totalSpend = (cpcData || []).reduce((s, r) => s + (r.cpc_cost || 0), 0);
+  const ratio = budget > 0 ? totalSpend / budget : 0;
+  const pct = (ratio * 100).toFixed(1);
+  const remaining = Math.max(0, budget - totalSpend);
+
+  // KPI
+  document.getElementById('budgetKpi').innerHTML = [
+    { label: '이번 달 지출', value: fmtMoney(totalSpend) },
+    { label: '월간 한도', value: fmtMoney(budget) },
+    { label: '잔여 예산', value: fmtMoney(remaining) },
+    { label: '소진율', value: pct + '%' },
+  ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join('');
+
+  // 프로그레스바
+  const bar = document.getElementById('budgetBar');
+  const barPct = Math.min(ratio * 100, 100);
+  bar.style.width = Math.max(barPct, 3) + '%';
+  bar.textContent = pct + '%';
+  bar.style.background = ratio >= 1 ? 'var(--danger)' : ratio >= threshold ? 'var(--warning)' : 'var(--primary)';
+  document.getElementById('budgetSpent').textContent = fmtMoney(totalSpend);
+  document.getElementById('budgetLimit').textContent = fmtMoney(budget);
+
+  // 광고 상태 (최신 CPC 데이터에서)
+  const { data: latestCpc } = await sb.from('kmong_cpc_daily').select('product_id, ad_enabled').order('date', { ascending: false });
+  const adStatus = {};
+  (latestCpc || []).forEach(r => {
+    if (!adStatus[r.product_id]) adStatus[r.product_id] = r.ad_enabled;
+  });
+
+  // 명령 이력 (최근 20건)
+  const { data: cmdHistory } = await sb.from('kmong_ad_commands').select('*').order('created_at', { ascending: false }).limit(20);
+
+  // 마지막 명령 by product
+  const lastCmd = {};
+  (cmdHistory || []).forEach(c => {
+    if (!lastCmd[c.product_id]) lastCmd[c.product_id] = c;
+  });
+
+  // 광고 제어 테이블
+  const allProducts = [...new Set([...Object.keys(adStatus), ...(cmdHistory || []).map(c => c.product_id)])];
+  document.getElementById('adControlBody').innerHTML = allProducts.length ? allProducts.map(pid => {
+    const isOn = adStatus[pid] !== false;
+    const last = lastCmd[pid];
+    const cmdBadge = last ? `<span class="badge badge-${last.status === 'done' ? 'done' : last.status === 'failed' ? 'failed' : 'processing'}">${last.status}</span>` : '-';
+    return `<tr>
+      <td>${pid}</td>
+      <td><span class="${isOn ? 'ad-status-on' : 'ad-status-off'}">${isOn ? 'ON' : 'OFF'}</span></td>
+      <td>
+        <button class="ad-toggle-btn ${isOn ? 'off' : 'on'}" onclick="sendAdCommand('${pid}','${isOn ? 'off' : 'on'}')">${isOn ? 'OFF' : 'ON'}으로</button>
+      </td>
+      <td>${last ? fmtDateTime(last.created_at) : '-'}</td>
+      <td>${cmdBadge}</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="5"><div class="empty-state"><p>광고 데이터가 없습니다</p></div></td></tr>';
+
+  // 명령 이력 테이블
+  document.getElementById('commandHistoryBody').innerHTML = (cmdHistory && cmdHistory.length) ? cmdHistory.map(c => {
+    const statusBadgeClass = c.status === 'done' ? 'badge-done' : c.status === 'failed' ? 'badge-failed' : c.status === 'processing' ? 'badge-processing' : 'badge-pending';
+    return `<tr>
+      <td>${fmtDateTime(c.created_at)}</td>
+      <td>${c.product_id}</td>
+      <td>${c.action?.toUpperCase() || '-'}</td>
+      <td><span class="badge ${statusBadgeClass}">${c.status}</span></td>
+      <td>${c.result_message || '-'}</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="5"><div class="empty-state"><p>명령 이력이 없습니다</p></div></td></tr>';
+}
+
+// 슬라이더 실시간 반영
+document.getElementById('settingThreshold').addEventListener('input', function() {
+  document.getElementById('thresholdDisplay').textContent = this.value + '%';
+});
+
+// 설정 저장
+async function saveSettings() {
+  const budget = document.getElementById('settingBudget').value;
+  const threshold = (parseInt(document.getElementById('settingThreshold').value) / 100).toFixed(2);
+  const autoStop = document.getElementById('settingAutoStop').checked ? 'true' : 'false';
+
+  const updates = [
+    { key: 'monthly_budget', value: budget, updated_at: new Date().toISOString() },
+    { key: 'budget_alert_threshold', value: threshold, updated_at: new Date().toISOString() },
+    { key: 'auto_stop_on_budget', value: autoStop, updated_at: new Date().toISOString() },
+  ];
+
+  for (const u of updates) {
+    const { error } = await sb.from('kmong_settings').update({ value: u.value, updated_at: u.updated_at }).eq('key', u.key);
+    if (error) { showToast('설정 저장 실패: ' + error.message, 'error'); return; }
+  }
+
+  showToast('설정 저장 완료');
+  loadAdControlTab();
+}
+
+// 광고 명령 전송
+async function sendAdCommand(productId, action) {
+  const { error } = await sb.from('kmong_ad_commands').insert({
+    product_id: productId,
+    action: action,
+    status: 'pending',
+  });
+
+  if (error) {
+    showToast('명령 전송 실패: ' + error.message, 'error');
+    return;
+  }
+
+  showToast(`${productId} → ${action.toUpperCase()} 명령 전송 (대기 중)`);
+
+  // 5초 후 상태 갱신
+  setTimeout(loadAdControlTab, 5000);
+}
+
 /* === 데이터 새로고침 === */
 async function refreshData() {
   await loadProducts();
-  await Promise.all([loadCpcTab(), loadFunnelTab(), loadInquiryTab()]);
+  await Promise.all([loadCpcTab(), loadFunnelTab(), loadInquiryTab(), loadAdControlTab()]);
 }
 
 /* === 폼 제출 === */
