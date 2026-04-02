@@ -33,6 +33,16 @@ const COMMON_ENV = {
 
 module.exports = {
   apps: [
+    // === Phase 0: 세션 갱신 (크롤러보다 5분 먼저) ===
+    {
+      name: 'kmong-refresh-session',
+      script: './refresh-session.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '55 1,3,5,7,9,11,13,15,17,19,21,23 * * *',  // 크롤러 5분 전 (홀수시 55분)
+      autorestart: false,
+      watch: false,
+      env: { ...COMMON_ENV },
+    },
     // === Phase 1: 크롤러 ===
     {
       name: 'kmong-crawl-cpc',

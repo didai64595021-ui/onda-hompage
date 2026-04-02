@@ -96,16 +96,49 @@ async function login(opts = {}) {
 
   // 새 로그인 — 크몽은 메인에서 모달 로그인
   const page = await context.newPage();
-  console.log('[로그인] 크몽 메인 페이지 접속...');
-  await page.goto(MAIN_URL, { waitUntil: 'load', timeout: 30000 });
-  // React hydration 완료 대기 (네트워크 idle이 아닌 load + 고정 대기)
-  await page.waitForTimeout(5000);
-  console.log(`[로그인] 현재 URL: ${page.url()}`);
+
+  // 로그인 버튼을 찾을 때까지 최대 2회 재시도 (리다이렉트 대응)
+  let loginBtnFound = false;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const targetUrl = attempt === 0 ? MAIN_URL : MAIN_URL;  // 항상 메인
+    console.log(`[로그인] 크몽 메인 접속 시도 ${attempt + 1}/2...`);
+    await page.goto(targetUrl, { waitUntil: 'load', timeout: 30000 });
+    await page.waitForTimeout(5000);
+    const currentUrl = page.url();
+    console.log(`[로그인] 현재 URL: ${currentUrl}`);
+
+    // /biz 리다이렉트 시 메인으로 강제 이동
+    if (currentUrl.includes('/biz') && attempt === 0) {
+      console.log('[로그인] /biz 리다이렉트 감지 → 메인으로 재이동');
+      await page.goto(MAIN_URL, { waitUntil: 'load', timeout: 30000 });
+      await page.waitForTimeout(5000);
+      console.log(`[로그인] 재이동 후 URL: ${page.url()}`);
+    }
+
+    // 로그인 버튼 찾기
+    const btn = page.locator('a:has-text("로그인"), button:has-text("로그인")').first();
+    try {
+      await btn.waitFor({ state: 'visible', timeout: 15000 });
+      loginBtnFound = true;
+      break;
+    } catch (e) {
+      console.log(`[로그인] 로그인 버튼 미발견 (시도 ${attempt + 1}), 스크린샷 저장`);
+      await saveErrorScreenshot(page, `login-btn-not-found-${attempt}`);
+      if (attempt === 0) {
+        await page.waitForTimeout(3000);
+      }
+    }
+  }
+
+  if (!loginBtnFound) {
+    await saveErrorScreenshot(page, 'login-btn-final-fail');
+    await browser.close();
+    throw new Error('[로그인 실패] 로그인 버튼을 찾을 수 없음 (2회 시도)');
+  }
 
   try {
     // 헤더의 "로그인" 버튼 클릭 → 모달 오픈
     const headerLoginBtn = page.locator('a:has-text("로그인"), button:has-text("로그인")').first();
-    await headerLoginBtn.waitFor({ state: 'visible', timeout: 20000 });
     await headerLoginBtn.click();
     await page.waitForTimeout(2000);
     console.log('[로그인] 로그인 모달 오픈');
