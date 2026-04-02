@@ -4,7 +4,7 @@ module.exports = {
       name: 'kmong-crawl-cpc',
       script: './crawl-cpc.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '0 9 * * *',  // 매일 오전 9시
+      cron_restart: '0 */2 * * *',  // 2시간마다
       autorestart: false,
       watch: false,
       env: {
@@ -15,7 +15,7 @@ module.exports = {
       name: 'kmong-crawl-inbox',
       script: './crawl-inbox.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '0 */4 * * *',  // 4시간마다
+      cron_restart: '0 */2 * * *',  // 2시간마다
       autorestart: false,
       watch: false,
       env: {
@@ -26,7 +26,7 @@ module.exports = {
       name: 'kmong-crawl-orders',
       script: './crawl-orders.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '0 10 * * *',  // 매일 오전 10시
+      cron_restart: '0 */2 * * *',  // 2시간마다
       autorestart: false,
       watch: false,
       env: {
