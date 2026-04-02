@@ -103,7 +103,7 @@ async function login(opts = {}) {
   try {
     // 헤더의 "로그인" 버튼 클릭 → 모달 오픈
     const headerLoginBtn = page.locator('a:has-text("로그인"), button:has-text("로그인")').first();
-    await headerLoginBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await headerLoginBtn.waitFor({ state: 'visible', timeout: 20000 });
     await headerLoginBtn.click();
     await page.waitForTimeout(2000);
     console.log('[로그인] 로그인 모달 오픈');

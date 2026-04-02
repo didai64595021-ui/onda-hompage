@@ -38,7 +38,7 @@ module.exports = {
       name: 'kmong-crawl-cpc',
       script: './crawl-cpc.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '0 */2 * * *',  // 2시간마다
+      cron_restart: '0 */2 * * *',  // 2시간마다 (정시)
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },
@@ -47,7 +47,7 @@ module.exports = {
       name: 'kmong-crawl-inbox',
       script: './crawl-inbox.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '0 */2 * * *',  // 2시간마다
+      cron_restart: '2 */2 * * *',  // 2시간마다 (+2분, CPC 다음)
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },
@@ -56,7 +56,7 @@ module.exports = {
       name: 'kmong-crawl-orders',
       script: './crawl-orders.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '0 */2 * * *',  // 2시간마다
+      cron_restart: '4 */2 * * *',  // 2시간마다 (+4분, inbox 다음)
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },
@@ -74,7 +74,7 @@ module.exports = {
       name: 'kmong-crawl-gig-status',
       script: './crawl-gig-status.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '0 */2 * * *',  // 2시간마다
+      cron_restart: '6 */2 * * *',  // 2시간마다 (+6분, orders 다음)
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },
@@ -93,7 +93,7 @@ module.exports = {
       name: 'kmong-auto-reply',
       script: './auto-reply.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '0 */2 * * *',  // 2시간마다
+      cron_restart: '8 */2 * * *',  // 2시간마다 (+8분, inbox 크롤 후)
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },
@@ -141,7 +141,7 @@ module.exports = {
       name: 'kmong-budget-monitor',
       script: './budget-monitor.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '0 */2 * * *',  // 2시간마다
+      cron_restart: '10 */2 * * *',  // 2시간마다 (+10분, CPC 크롤 후)
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },
