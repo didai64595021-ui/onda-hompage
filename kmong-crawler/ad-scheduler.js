@@ -174,14 +174,32 @@ async function main() {
       return;
     }
 
-    // 6. 광고 ON/OFF 실행
-    if (slot.enabled) {
-      console.log('[실행] 광고 ON');
-      await setAllAds('on');
-      notify(`📢 스케줄러: ${dayNames[kst.day]} ${kst.hour}시 광고 ON (mode: ${slot.mode})`);
+    // 6. 이전 상태와 비교 → 변경 시에만 Playwright 실행 (리소스 절약)
+    const { data: prevState } = await supabase
+      .from('kmong_settings')
+      .select('value')
+      .eq('key', 'last_ad_state')
+      .single();
+
+    const currentAction = slot.enabled ? 'on' : 'off';
+    const prevAction = prevState?.value || 'unknown';
+
+    if (currentAction === prevAction) {
+      console.log(`[스킵] 상태 변경 없음 (${currentAction}) — 브라우저 미실행`);
     } else {
-      console.log('[실행] 광고 OFF');
-      await setAllAds('off');
+      console.log(`[실행] 광고 ${prevAction} → ${currentAction} (Playwright 실행)`);
+      await setAllAds(currentAction);
+
+      // 상태 저장
+      await supabase
+        .from('kmong_settings')
+        .upsert({ key: 'last_ad_state', value: currentAction, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+
+      if (currentAction === 'on') {
+        notify(`📢 스케줄러: ${dayNames[kst.day]} ${kst.hour}시 광고 ON (mode: ${slot.mode})`);
+      } else {
+        notify(`🔕 스케줄러: ${dayNames[kst.day]} ${kst.hour}시 광고 OFF`);
+      }
     }
 
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
