@@ -2972,6 +2972,7 @@ async function loadAutoControlPanel() {
   document.getElementById('autoModeLabel').style.color = masterAutoMode ? 'var(--primary)' : 'var(--text-2)';
 
   if (!masterAutoMode) return;
+  loadBudgetStatus();
 
   // 서비스별 모드 로드
   const { data: modeData } = await sb.from('kmong_settings').select('value').eq('key', 'ai_service_modes').single();
@@ -3175,6 +3176,8 @@ async function loadAutoReplyTab() {
     tbody.innerHTML = actionable.map(inq => {
       const msg = (inq.message_content || '').substring(0, 60);
       const reply = (inq.auto_reply_text || '').substring(0, 60);
+      const fullMsg = (inq.message_content || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      const fullReply = (inq.auto_reply_text || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
       const stMap = { pending: '미처리', generated: '생성완료', needs_review: '검수필요', approved: '승인대기' };
       const stClass = inq.auto_reply_status === 'needs_review' ? 'badge-cancelled' : inq.auto_reply_status === 'generated' ? 'badge-quoted' : inq.auto_reply_status === 'approved' ? 'badge-paid' : 'badge-pending';
       let actions = '';
@@ -3183,7 +3186,7 @@ async function loadAutoReplyTab() {
       } else if (inq.auto_reply_status === 'approved') {
         actions = `<button class="btn-primary" style="padding:2px 8px;font-size:11px;background:var(--success)" onclick="sendReplyCmd(${inq.id},'${inq.product_id}')">발송</button>`;
       }
-      return `<tr><td style="font-size:11px">${fmtDate(inq.inquiry_date)}</td><td>${inq.customer_name || '-'}</td><td>${productName(inq.product_id)}</td><td style="font-size:11px;max-width:150px;overflow:hidden;text-overflow:ellipsis" title="${(inq.message_content || '').replace(/"/g, '&quot;')}">${msg || '-'}</td><td style="font-size:11px;max-width:150px;overflow:hidden;text-overflow:ellipsis" title="${(inq.auto_reply_text || '').replace(/"/g, '&quot;')}">${reply || '-'}</td><td><span class="badge ${stClass}">${stMap[inq.auto_reply_status] || inq.auto_reply_status}</span></td><td style="white-space:nowrap">${actions}</td></tr>`;
+      return `<tr><td style="font-size:11px">${fmtDate(inq.inquiry_date)}</td><td>${inq.customer_name || '-'}</td><td>${productName(inq.product_id)}</td><td style="font-size:11px;max-width:150px;overflow:hidden;text-overflow:ellipsis;cursor:pointer;text-decoration:underline dotted" onclick="showTextModal('문의 내용','${fullMsg}')">${msg || '-'}</td><td style="font-size:11px;max-width:150px;overflow:hidden;text-overflow:ellipsis;cursor:pointer;text-decoration:underline dotted;color:var(--primary)" onclick="showTextModal('AI 답변','${fullReply}')">${reply || '-'}</td><td><span class="badge ${stClass}">${stMap[inq.auto_reply_status] || inq.auto_reply_status}</span></td><td style="white-space:nowrap">${actions}</td></tr>`;
     }).join('');
   }
 
@@ -3218,6 +3221,7 @@ async function approveReply(id) {
 function editReply(id, currentText) {
   document.getElementById('replyModalId').value = id;
   document.getElementById('replyModalText').value = currentText;
+  document.getElementById('replyModalText').readOnly = false;
   document.getElementById('replyModal').classList.add('open');
 }
 
@@ -3233,6 +3237,17 @@ async function saveReplyEdit() {
   showToast('답변 수정 완료');
   closeReplyModal();
   loadAutoReplyTab();
+}
+
+function showTextModal(title, text) {
+  const decoded = text.replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+  document.getElementById('replyModalId').value = '';
+  document.getElementById('replyModalText').value = decoded;
+  document.getElementById('replyModalText').readOnly = true;
+  document.getElementById('replyModal').classList.add('open');
+  // 모달 제목 변경
+  const titleEl = document.querySelector('#replyModal .modal-title, #replyModal h3');
+  if (titleEl) titleEl.textContent = title;
 }
 
 async function sendReplyCmd(id, productId) {
