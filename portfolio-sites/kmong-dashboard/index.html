@@ -86,6 +86,30 @@ input, select, textarea { font-size: 16px; font-family: inherit; color: inherit;
 .nav-item:hover { background: var(--primary-dim); color: var(--text-1); }
 .nav-item.active { background: var(--primary-dim); color: var(--primary); font-weight: 600; }
 .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+.sidebar-summary {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  background: rgba(13,153,255,0.04);
+}
+.sidebar-summary-title {
+  font-size: 10px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.sidebar-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  padding: 3px 0;
+}
+.sidebar-summary-row .label { color: var(--text-2); }
+.sidebar-summary-row .value { font-weight: 700; font-variant-numeric: tabular-nums; }
+.sidebar-summary-row .value.revenue { color: var(--success); }
+.sidebar-summary-row .value.cost { color: var(--danger); }
+.sidebar-summary-row .value.profit { color: var(--primary); }
 .sidebar-footer {
   padding: 12px 16px;
   border-top: 1px solid var(--border);
@@ -486,6 +510,12 @@ td .reply-preview:hover { color: var(--primary); }
       인박스 AI
     </div>
   </nav>
+  <div class="sidebar-summary" id="sidebarSummary">
+    <div class="sidebar-summary-title">월간 매출 요약</div>
+    <div class="sidebar-summary-row"><span class="label">총매출</span><span class="value revenue" id="ssSales">-</span></div>
+    <div class="sidebar-summary-row"><span class="label">광고비</span><span class="value cost" id="ssCost">-</span></div>
+    <div class="sidebar-summary-row"><span class="label">순이익</span><span class="value profit" id="ssProfit">-</span></div>
+  </div>
   <div class="sidebar-footer">온다마케팅 &copy; 2026</div>
 </aside>
 
@@ -527,7 +557,7 @@ td .reply-preview:hover { color: var(--primary); }
       <div class="kpi-grid" id="cpcKpi"></div>
       <div class="chart-grid">
         <div class="chart-card full">
-          <div class="chart-title"><span class="dot"></span>일별 클릭수 / 노출수 추이</div>
+          <div class="chart-title"><span class="dot"></span>일별 클릭수 / 노출수 / 매출 추이</div>
           <div class="chart-wrap"><canvas id="chartCpcDaily"></canvas></div>
         </div>
         <div class="chart-card">
@@ -540,7 +570,7 @@ td .reply-preview:hover { color: var(--primary); }
         </div>
       </div>
       <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>상품별 CPC 성과</div>
-      <div class="table-wrap"><table id="tableCpc"><thead><tr><th>상품명</th><th>노출</th><th>클릭</th><th>CTR</th><th>문의</th><th>클릭→문의%</th><th>결제</th><th>문의→결제%</th><th>CPA</th><th>ROI</th><th>CPC비용</th><th>소재변경</th></tr></thead><tbody></tbody></table></div>
+      <div class="table-wrap"><table id="tableCpc"><thead><tr><th>상품명</th><th>노출</th><th>클릭</th><th>CTR</th><th>문의</th><th>클릭→문의%</th><th>결제</th><th>문의→결제%</th><th>매출</th><th>CPA</th><th>ROI</th><th>ROAS</th><th>CPC비용</th><th>소재변경</th></tr></thead><tbody></tbody></table></div>
       <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>소재 변경 이력</div>
       <div class="table-wrap"><table id="tableCreative"><thead><tr><th>날짜</th><th>상품</th><th>변경유형</th><th>이전값</th><th>새값</th></tr></thead><tbody></tbody></table></div>
     </div>
@@ -556,6 +586,10 @@ td .reply-preview:hover { color: var(--primary); }
         <div class="chart-card">
           <div class="chart-title"><span class="dot"></span>평균 전환 소요일</div>
           <div class="chart-wrap"><canvas id="chartConvDays"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title"><span class="dot" style="background:var(--success)"></span>매출 기여도 (서비스별)</div>
+          <div class="chart-wrap"><canvas id="chartFunnelRevShare"></canvas></div>
         </div>
         <div class="chart-card full">
           <div class="chart-title"><span class="dot"></span>요일별 문의 히트맵</div>
@@ -577,6 +611,10 @@ td .reply-preview:hover { color: var(--primary); }
         <div class="chart-card">
           <div class="chart-title"><span class="dot"></span>월별 문의 추이</div>
           <div class="chart-wrap"><canvas id="chartMonthly"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title"><span class="dot" style="background:var(--success)"></span>서비스별 매출 기여도</div>
+          <div class="chart-wrap"><canvas id="chartInqRevShare"></canvas></div>
         </div>
         <div class="chart-card full">
           <div class="chart-title"><span class="dot"></span>상품별 문의 vs 결제</div>
@@ -614,7 +652,7 @@ td .reply-preview:hover { color: var(--primary); }
       <!-- 저성과 서비스 진단 -->
       <div class="chart-card full" style="margin-bottom:16px">
         <div class="chart-title"><span class="dot" style="background:var(--warning)"></span>저성과 서비스 진단</div>
-        <div class="table-wrap" style="border:0;margin:0"><table id="tableLowPerformers"><thead><tr><th>서비스명</th><th>노출</th><th>CTR</th><th>문의율</th><th>결제율</th><th>문제</th><th>AI 진단</th></tr></thead><tbody></tbody></table></div>
+        <div class="table-wrap" style="border:0;margin:0"><table id="tableLowPerformers"><thead><tr><th>서비스명</th><th>노출</th><th>CTR</th><th>문의율</th><th>결제율</th><th>매출</th><th>ROI</th><th>문제</th><th>AI 진단</th></tr></thead><tbody></tbody></table></div>
       </div>
       <!-- AI 생성 콘텐츠 목록 -->
       <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>AI 생성 콘텐츠</div>
@@ -978,6 +1016,8 @@ async function loadCpcTab() {
   const totalCost = rows.reduce((s, r) => s + (r.cpc_cost || 0), 0);
   const inquiryRate = totalClicks > 0 ? (totalInquiries / totalClicks * 100) : 0;
   const payRate = totalClicks > 0 ? (totalOrders / totalClicks * 100) : 0;
+  const totalRevCpc = completedOrders.reduce((s, o) => s + (o.amount || 0), 0);
+  const roas = totalCost > 0 ? (totalRevCpc / totalCost * 100) : 0;
 
   document.getElementById('cpcKpi').innerHTML = [
     { label: '총 클릭수', value: fmt(totalClicks) },
@@ -985,15 +1025,24 @@ async function loadCpcTab() {
     { label: '평균 CTR', value: fmtPct(avgCtr) },
     { label: '문의 전환율', value: fmtPct(inquiryRate) },
     { label: '결제 전환율', value: fmtPct(payRate) },
+    { label: '총 매출', value: fmtMoney(totalRevCpc) },
+    { label: 'ROAS', value: fmtPct(roas) },
     { label: '총 CPC 비용', value: fmtMoney(totalCost) },
   ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join('');
 
-  // 일별 차트
+  // 일별 차트 (매출 포함)
   const byDate = {};
   rows.forEach(r => {
-    if (!byDate[r.date]) byDate[r.date] = { clicks: 0, impressions: 0 };
+    if (!byDate[r.date]) byDate[r.date] = { clicks: 0, impressions: 0, revenue: 0 };
     byDate[r.date].clicks += r.clicks || 0;
     byDate[r.date].impressions += r.impressions || 0;
+  });
+  completedOrders.forEach(o => {
+    const d = (o.order_date || '').slice(0, 10);
+    if (d) {
+      if (!byDate[d]) byDate[d] = { clicks: 0, impressions: 0, revenue: 0 };
+      byDate[d].revenue += o.amount || 0;
+    }
   });
   const dates = Object.keys(byDate).sort();
   makeChart('chartCpcDaily', {
@@ -1002,15 +1051,17 @@ async function loadCpcTab() {
       labels: dates.map(d => d.slice(5)),
       datasets: [
         { label: '클릭수', data: dates.map(d => byDate[d].clicks), borderColor: '#0D99FF', backgroundColor: 'rgba(13,153,255,0.1)', fill: true, tension: 0.3 },
-        { label: '노출수', data: dates.map(d => byDate[d].impressions), borderColor: '#34d399', backgroundColor: 'rgba(52,211,153,0.1)', fill: true, tension: 0.3, yAxisID: 'y1' }
+        { label: '노출수', data: dates.map(d => byDate[d].impressions), borderColor: '#34d399', backgroundColor: 'rgba(52,211,153,0.1)', fill: true, tension: 0.3, yAxisID: 'y1' },
+        { label: '매출', data: dates.map(d => byDate[d].revenue), borderColor: '#fbbf24', backgroundColor: 'rgba(251,191,36,0.1)', fill: false, tension: 0.3, yAxisID: 'y2', borderDash: [5,3] }
       ]
     },
     options: {
       responsive: true,
       interaction: { mode: 'index', intersect: false },
       scales: {
-        y: { position: 'left', grid: { color: '#1e2130' } },
-        y1: { position: 'right', grid: { display: false } },
+        y: { position: 'left', grid: { color: '#1e2130' }, title: { display: true, text: '클릭수' } },
+        y1: { position: 'right', grid: { display: false }, title: { display: true, text: '노출수' } },
+        y2: { position: 'right', grid: { display: false }, title: { display: true, text: '매출(원)' }, display: false },
         x: { grid: { color: '#1e2130' } }
       },
       plugins: { legend: { position: 'top' } }
@@ -1043,8 +1094,9 @@ async function loadCpcTab() {
     const rev = revByProduct[pid] || 0;
     const cpa = ordCount > 0 ? Math.round(d.cost / ordCount) : 0;
     const roi = d.cost > 0 ? ((rev - d.cost) / d.cost * 100) : 0;
-    return `<tr><td>${productName(pid)}</td><td>${fmt(d.impressions)}</td><td>${fmt(d.clicks)}</td><td>${fmtPct(ctr)}</td><td>${inqCount}</td><td>${fmtPct(inqRate)}</td><td>${ordCount}</td><td>${fmtPct(ordRate)}</td><td>${ordCount > 0 ? fmtMoney(cpa) : '-'}</td><td style="color:${roi >= 0 ? 'var(--success)' : 'var(--danger)'}">${d.cost > 0 ? fmtPct(roi) : '-'}</td><td>${fmtMoney(d.cost)}</td><td>${changeCounts[pid] || 0}회</td></tr>`;
-  }).join('') : '<tr><td colspan="12"><div class="empty-state"><p>데이터가 없습니다</p></div></td></tr>';
+    const roasVal = d.cost > 0 ? (rev / d.cost * 100) : 0;
+    return `<tr><td>${productName(pid)}</td><td>${fmt(d.impressions)}</td><td>${fmt(d.clicks)}</td><td>${fmtPct(ctr)}</td><td>${inqCount}</td><td>${fmtPct(inqRate)}</td><td>${ordCount}</td><td>${fmtPct(ordRate)}</td><td style="color:var(--success)">${fmtMoney(rev)}</td><td>${ordCount > 0 ? fmtMoney(cpa) : '-'}</td><td style="color:${roi >= 0 ? 'var(--success)' : 'var(--danger)'}">${d.cost > 0 ? fmtPct(roi) : '-'}</td><td>${d.cost > 0 ? fmtPct(roasVal) : '-'}</td><td>${fmtMoney(d.cost)}</td><td>${changeCounts[pid] || 0}회</td></tr>`;
+  }).join('') : '<tr><td colspan="14"><div class="empty-state"><p>데이터가 없습니다</p></div></td></tr>';
 
   // CPC 비용 차트
   const topProducts = pids.sort((a, b) => byProduct[b].cost - byProduct[a].cost).slice(0, 8);
@@ -1128,6 +1180,8 @@ async function loadFunnelTab() {
   // KPI
   const clickToInqRate = totalClk > 0 ? (totalInq / totalClk * 100) : 0;
   const inqToPayRate = totalInq > 0 ? (totalPaid / totalInq * 100) : 0;
+  const funnelRoas = totalAdCost > 0 ? (totalRevenue / totalAdCost * 100) : 0;
+  const avgOrderValue = totalPaid > 0 ? Math.round(totalRevenue / totalPaid) : 0;
   document.getElementById('funnelKpi').innerHTML = [
     { label: '총 노출', value: fmt(totalImp) },
     { label: '총 클릭', value: fmt(totalClk) },
@@ -1136,6 +1190,8 @@ async function loadFunnelTab() {
     { label: '총 결제', value: fmt(totalPaid) },
     { label: '문의→결제율', value: fmtPct(inqToPayRate) },
     { label: '총 매출', value: fmtMoney(totalRevenue) },
+    { label: 'ROAS', value: fmtPct(funnelRoas) },
+    { label: '객단가', value: fmtMoney(avgOrderValue) },
     { label: '평균 CPA', value: fmtMoney(avgCpa) },
   ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join('');
 
@@ -1211,7 +1267,7 @@ async function loadFunnelTab() {
     if (!byProduct[pid]) byProduct[pid] = { inq: 0, quoted: 0, paid: 0 };
   });
   const pids = Object.keys(byProduct);
-  document.querySelector('#tableConversion tbody').innerHTML = pids.length ? pids.map(pid => {
+  const rowsHtml = pids.map(pid => {
     const d = byProduct[pid];
     const cpcClicks = cpcByProduct[pid] || 0;
     const clickToInq = cpcClicks > 0 ? (d.inq / cpcClicks * 100).toFixed(1) + '%' : '-';
@@ -1222,7 +1278,38 @@ async function loadFunnelTab() {
     const cpa = ordCount > 0 ? fmtMoney(Math.round(cost / ordCount)) : '-';
     const roi = cost > 0 ? ((rev - cost) / cost * 100).toFixed(1) + '%' : '-';
     return `<tr><td>${productName(pid)}</td><td>${fmt(cpcClicks)}</td><td>${d.inq}</td><td>${clickToInq}</td><td>${d.quoted}</td><td>${ordCount}</td><td>${inqToPay}</td><td>${fmtMoney(rev)}</td><td>${cpa}</td><td style="color:${parseFloat(roi) >= 0 ? 'var(--success)' : 'var(--danger)'}">${roi}</td></tr>`;
-  }).join('') : '<tr><td colspan="10"><div class="empty-state"><p>데이터가 없습니다</p></div></td></tr>';
+  });
+  // 누적 합계 행
+  if (pids.length) {
+    const sumClk = pids.reduce((s,p) => s + (cpcByProduct[p]||0), 0);
+    const sumInq = pids.reduce((s,p) => s + (byProduct[p]?.inq||0), 0);
+    const sumQuot = pids.reduce((s,p) => s + (byProduct[p]?.quoted||0), 0);
+    const sumOrd = pids.reduce((s,p) => s + (ordByProd2[p]||0), 0);
+    const sumRev = pids.reduce((s,p) => s + (revByProd2[p]||0), 0);
+    const sumCost = pids.reduce((s,p) => s + (costByProd2[p]||0), 0);
+    const sumCpa = sumOrd > 0 ? fmtMoney(Math.round(sumCost/sumOrd)) : '-';
+    const sumRoi = sumCost > 0 ? ((sumRev-sumCost)/sumCost*100).toFixed(1)+'%' : '-';
+    rowsHtml.push(`<tr style="background:var(--bg-input);font-weight:700"><td>합계</td><td>${fmt(sumClk)}</td><td>${sumInq}</td><td>-</td><td>${sumQuot}</td><td>${sumOrd}</td><td>${sumInq>0?((sumOrd/sumInq*100).toFixed(1)+'%'):'-'}</td><td style="color:var(--success)">${fmtMoney(sumRev)}</td><td>${sumCpa}</td><td style="color:${parseFloat(sumRoi)>=0?'var(--success)':'var(--danger)'}">${sumRoi}</td></tr>`);
+  }
+  document.querySelector('#tableConversion tbody').innerHTML = pids.length ? rowsHtml.join('') : '<tr><td colspan="10"><div class="empty-state"><p>데이터가 없습니다</p></div></td></tr>';
+
+  // 매출 기여도 파이 차트
+  const revPids = pids.filter(p => (revByProd2[p]||0) > 0);
+  makeChart('chartFunnelRevShare', {
+    type: 'doughnut',
+    data: {
+      labels: revPids.length ? revPids.map(p => productName(p).slice(0,12)) : ['매출 없음'],
+      datasets: [{ data: revPids.length ? revPids.map(p => revByProd2[p]) : [1], backgroundColor: revPids.length ? chartColors : ['#2a2d3a'] }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { padding: 12 } },
+        datalabels: { color: '#fff', font: { weight: 'bold', size: 12 }, formatter: (v, ctx) => { const total = ctx.dataset.data.reduce((a,b)=>a+b,0); return total > 0 ? (v/total*100).toFixed(0)+'%' : ''; } }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
 
   // 평균 전환 소요일 차트
   const convDays = {};
@@ -1263,8 +1350,11 @@ async function loadInquiryTab() {
 
   const totalInq = inquiries.length;
   const totalOrd = orders.length;
-  const totalRev = orders.reduce((s, r) => s + (r.amount || 0), 0);
-  const avgDeal = totalOrd > 0 ? Math.round(totalRev / totalOrd) : 0;
+  const completedOrdInq = orders.filter(o => o.status === 'completed');
+  const totalRev = completedOrdInq.reduce((s, r) => s + (r.amount || 0), 0);
+  const avgDeal = completedOrdInq.length > 0 ? Math.round(totalRev / completedOrdInq.length) : 0;
+  const inqToPayRateInq = totalInq > 0 ? (completedOrdInq.length / totalInq * 100) : 0;
+  const inqToRevRate = totalInq > 0 ? (totalRev / totalInq) : 0;
 
   // KPI
   document.getElementById('inquiryKpi').innerHTML = [
@@ -1272,6 +1362,8 @@ async function loadInquiryTab() {
     { label: '총 주문', value: fmt(totalOrd) },
     { label: '총 매출', value: fmtMoney(totalRev) },
     { label: '평균 객단가', value: fmtMoney(avgDeal) },
+    { label: '문의→결제율', value: fmtPct(inqToPayRateInq) },
+    { label: '문의당 매출', value: fmtMoney(Math.round(inqToRevRate)) },
   ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join('');
 
   // 카테고리별 문의 (Doughnut)
@@ -1337,6 +1429,26 @@ async function loadInquiryTab() {
       ]
     },
     options: { responsive: true, scales: { y: { grid: { color: '#1e2130' } }, x: { grid: { display: false } } } }
+  });
+
+  // 서비스별 매출 기여도 Doughnut
+  const revByProdInq = {};
+  completedOrdInq.forEach(o => { if (o.product_id) revByProdInq[o.product_id] = (revByProdInq[o.product_id]||0) + (o.amount||0); });
+  const revPidsInq = Object.keys(revByProdInq).filter(p => revByProdInq[p] > 0);
+  makeChart('chartInqRevShare', {
+    type: 'doughnut',
+    data: {
+      labels: revPidsInq.length ? revPidsInq.map(p => productName(p).slice(0,12)) : ['매출 없음'],
+      datasets: [{ data: revPidsInq.length ? revPidsInq.map(p => revByProdInq[p]) : [1], backgroundColor: revPidsInq.length ? chartColors : ['#2a2d3a'] }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { padding: 12 } },
+        datalabels: { color: '#fff', font: { weight: 'bold', size: 12 }, formatter: (v, ctx) => { const total = ctx.dataset.data.reduce((a,b)=>a+b,0); return total > 0 ? (v/total*100).toFixed(0)+'%' : ''; } }
+      }
+    },
+    plugins: [ChartDataLabels]
   });
 
   // 최근 문의 테이블
@@ -1606,9 +1718,9 @@ async function loadContentTab() {
   const { data: ordData2 } = await ordQ2;
 
   const byP = {};
-  (cpcData || []).forEach(r => { if (!r.product_id) return; if (!byP[r.product_id]) byP[r.product_id] = { imp:0,clk:0,cost:0,inq:0,ord:0 }; byP[r.product_id].imp += r.impressions||0; byP[r.product_id].clk += r.clicks||0; byP[r.product_id].cost += r.cpc_cost||0; });
-  (inqData2 || []).forEach(r => { if (!r.product_id) return; if (!byP[r.product_id]) byP[r.product_id] = { imp:0,clk:0,cost:0,inq:0,ord:0 }; byP[r.product_id].inq++; });
-  (ordData2 || []).forEach(r => { if (!r.product_id) return; if (!byP[r.product_id]) byP[r.product_id] = { imp:0,clk:0,cost:0,inq:0,ord:0 }; byP[r.product_id].ord++; });
+  (cpcData || []).forEach(r => { if (!r.product_id) return; if (!byP[r.product_id]) byP[r.product_id] = { imp:0,clk:0,cost:0,inq:0,ord:0,rev:0 }; byP[r.product_id].imp += r.impressions||0; byP[r.product_id].clk += r.clicks||0; byP[r.product_id].cost += r.cpc_cost||0; });
+  (inqData2 || []).forEach(r => { if (!r.product_id) return; if (!byP[r.product_id]) byP[r.product_id] = { imp:0,clk:0,cost:0,inq:0,ord:0,rev:0 }; byP[r.product_id].inq++; });
+  (ordData2 || []).forEach(r => { if (!r.product_id) return; if (!byP[r.product_id]) byP[r.product_id] = { imp:0,clk:0,cost:0,inq:0,ord:0,rev:0 }; byP[r.product_id].ord++; byP[r.product_id].rev += r.amount||0; });
 
   const lowPerf = [];
   for (const [pid, d] of Object.entries(byP)) {
@@ -1623,6 +1735,9 @@ async function loadContentTab() {
   }
   lowPerf.sort((a,b) => b.d.cost - a.d.cost);
 
+  // 잠재 매출 손실 추정 (저성과 서비스 광고비 합계 — 투자 대비 미회수)
+  const potentialLoss = lowPerf.reduce((s,lp) => s + lp.d.cost, 0);
+
   // KPI
   document.getElementById('contentKpi').innerHTML = [
     { label: '생성 콘텐츠', value: contents.length },
@@ -1630,6 +1745,7 @@ async function loadContentTab() {
     { label: '적용 완료', value: contents.filter(c=>c.status==='applied').length },
     { label: '활성 패턴', value: patterns.filter(p=>p.is_active).length },
     { label: '저성과 서비스', value: lowPerf.length },
+    { label: '잠재 매출 손실', value: fmtMoney(potentialLoss) },
     { label: '평균 패턴 신뢰도', value: patterns.length > 0 ? (patterns.reduce((s,p)=>s+parseFloat(p.confidence_score||0),0)/patterns.length).toFixed(0)+'%' : '-' },
   ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join('');
 
@@ -1640,9 +1756,11 @@ async function loadContentTab() {
     return '가격/신뢰 강화 필요';
   }).join(', ');
 
-  document.querySelector('#tableLowPerformers tbody').innerHTML = lowPerf.length ? lowPerf.map(lp =>
-    `<tr><td>${productName(lp.pid)}</td><td>${fmt(lp.d.imp)}</td><td style="color:${lp.ctr<1.5?'var(--danger)':'var(--text-1)'}">${fmtPct(lp.ctr)}</td><td style="color:${lp.ir<5?'var(--danger)':'var(--text-1)'}">${fmtPct(lp.ir)}</td><td style="color:${lp.pr<15?'var(--danger)':'var(--text-1)'}">${fmtPct(lp.pr)}</td><td>${lp.issues.join(', ')}</td><td>${diagnose(lp.issues)}</td></tr>`
-  ).join('') : '<tr><td colspan="7"><div class="empty-state"><p>모든 서비스 정상 운영 중</p></div></td></tr>';
+  document.querySelector('#tableLowPerformers tbody').innerHTML = lowPerf.length ? lowPerf.map(lp => {
+    const lpRev = lp.d.rev || 0;
+    const lpRoi = lp.d.cost > 0 ? ((lpRev - lp.d.cost) / lp.d.cost * 100) : 0;
+    return `<tr><td>${productName(lp.pid)}</td><td>${fmt(lp.d.imp)}</td><td style="color:${lp.ctr<1.5?'var(--danger)':'var(--text-1)'}">${fmtPct(lp.ctr)}</td><td style="color:${lp.ir<5?'var(--danger)':'var(--text-1)'}">${fmtPct(lp.ir)}</td><td style="color:${lp.pr<15?'var(--danger)':'var(--text-1)'}">${fmtPct(lp.pr)}</td><td style="color:var(--success)">${fmtMoney(lpRev)}</td><td style="color:${lpRoi>=0?'var(--success)':'var(--danger)'}">${lp.d.cost>0?fmtPct(lpRoi):'-'}</td><td>${lp.issues.join(', ')}</td><td>${diagnose(lp.issues)}</td></tr>`;
+  }).join('') : '<tr><td colspan="9"><div class="empty-state"><p>모든 서비스 정상 운영 중</p></div></td></tr>';
 
   // AI 생성 콘텐츠 테이블
   const statusLabel = s => { const m = { pending:'대기', approved:'승인', applied:'적용', rejected:'거부' }; return `<span class="badge badge-${s}">${m[s]||s}</span>`; };
@@ -1757,6 +1875,17 @@ async function loadInboxTab() {
     if (r.ai_suggested_reply) aiSuggested++;
   });
 
+  // 주문 데이터 (결제 전환율/예상 매출 계산용)
+  let inboxOrdQ = sb.from('kmong_orders').select('amount,status');
+  if (dateFrom) inboxOrdQ = inboxOrdQ.gte('order_date', dateFrom);
+  const { data: inboxOrdData } = await inboxOrdQ;
+  const inboxCompleted = (inboxOrdData || []).filter(o => o.status === 'completed');
+  const inboxPayRate = total > 0 ? (inboxCompleted.length / total * 100) : 0;
+  const inboxTotalRev = inboxCompleted.reduce((s, o) => s + (o.amount || 0), 0);
+  const inboxAvgOrder = inboxCompleted.length > 0 ? Math.round(inboxTotalRev / inboxCompleted.length) : 0;
+  const pendingInq = inquiries.filter(i => i.status === 'pending').length;
+  const expectedRev = Math.round(pendingInq * (inboxPayRate / 100) * inboxAvgOrder);
+
   // 분류 데이터 조회
   const { data: classData } = await sb.from('kmong_inbox_classification').select('intent').order('created_at', { ascending: false }).limit(100);
   (classData || []).forEach(c => { if (c.intent) byIntent[c.intent] = (byIntent[c.intent] || 0) + 1; });
@@ -1766,6 +1895,8 @@ async function loadInboxTab() {
     { label: '총 문의', value: total },
     { label: '긴급', value: byPriority.urgent, color: 'var(--danger)' },
     { label: '높음', value: byPriority.high, color: 'var(--warning)' },
+    { label: '문의→결제 전환율', value: fmtPct(inboxPayRate) },
+    { label: '예상 매출', value: fmtMoney(expectedRev) },
     { label: 'AI 답변 생성', value: aiSuggested },
     { label: 'AI 커버리지', value: total > 0 ? fmtPct(aiSuggested/total*100) : '-' },
     { label: '긍정 감정', value: bySentiment.positive },
@@ -1917,10 +2048,27 @@ async function classifyInbox() {
   loadInboxTab();
 }
 
+/* === 사이드바 월간 매출 요약 === */
+async function loadSidebarSummary() {
+  const now = new Date();
+  const monthStart = now.toISOString().slice(0, 7) + '-01';
+  const [{ data: ordData }, { data: cpcData }] = await Promise.all([
+    sb.from('kmong_orders').select('amount,status').gte('order_date', monthStart),
+    sb.from('kmong_cpc_daily').select('cpc_cost').gte('date', monthStart)
+  ]);
+  const revenue = (ordData || []).filter(o => o.status === 'completed').reduce((s, o) => s + (o.amount || 0), 0);
+  const adCost = (cpcData || []).reduce((s, r) => s + (r.cpc_cost || 0), 0);
+  const profit = revenue - adCost;
+  document.getElementById('ssSales').textContent = fmtMoney(revenue);
+  document.getElementById('ssCost').textContent = fmtMoney(adCost);
+  document.getElementById('ssProfit').textContent = fmtMoney(profit);
+  document.getElementById('ssProfit').className = `value ${profit >= 0 ? 'profit' : 'cost'}`;
+}
+
 /* === 데이터 새로고침 === */
 async function refreshData() {
   await loadProducts();
-  await Promise.all([loadCpcTab(), loadFunnelTab(), loadInquiryTab(), loadRoiTab(), loadContentTab(), loadAbTestTab(), loadInboxTab()]);
+  await Promise.all([loadCpcTab(), loadFunnelTab(), loadInquiryTab(), loadRoiTab(), loadContentTab(), loadAbTestTab(), loadInboxTab(), loadSidebarSummary()]);
 }
 
 /* === 폼 제출 === */
