@@ -49,50 +49,150 @@ const OPTIONS = [
 ];
 
 /**
- * 문의 내용에서 키워드 추출 및 자동 답변 생성
+ * 문의 내용에서 키워드 추출 및 자동 답변 생성 (강화 버전)
+ * - 여러 질문이 있으면 각각 답변
+ * - 서비스 유형을 더 정밀하게 감지
  * @param {string} messageContent - 고객 문의 내용
- * @returns {object} { answer, serviceType, detectedKeywords }
+ * @returns {object} { answer, answers, serviceType, detectedKeywords, questionCount }
  */
 function analyzeInquiry(messageContent) {
   if (!messageContent) {
     return {
       answer: '홈페이지 제작 문의 감사합니다 :)',
+      answers: [],
       serviceType: '홈페이지 제작',
       detectedKeywords: [],
+      questionCount: 0,
     };
   }
 
   const text = messageContent.toLowerCase();
   const detectedKeywords = [];
+  const answers = [];
 
-  // 답변 생성
-  let answer = '';
+  // 모든 매칭되는 답변 수집 (여러 질문 대응)
   for (const entry of ANSWER_MAP) {
     for (const kw of entry.keywords) {
       if (text.includes(kw.toLowerCase())) {
         detectedKeywords.push(kw);
-        if (!answer) answer = entry.answer;
+        // 중복 답변 방지
+        if (!answers.find(a => a.text === entry.answer)) {
+          answers.push({ keyword: kw, text: entry.answer });
+        }
         break;
       }
     }
   }
 
-  if (!answer) {
+  // 여러 답변을 하나로 조합
+  let answer;
+  if (answers.length === 0) {
     answer = '홈페이지 제작 문의 감사합니다 :)';
+  } else if (answers.length === 1) {
+    answer = answers[0].text;
+  } else {
+    // 여러 질문에 각각 답변
+    answer = answers.map((a, i) => `${i + 1}. ${a.text}`).join('\n');
   }
 
-  // 서비스 유형 판단
+  // 서비스 유형 판단 (점수 기반 정밀 감지)
   let serviceType = '홈페이지 제작';
+  let bestScore = 0;
+
   for (const sd of SERVICE_DETECTION) {
+    let score = 0;
     for (const kw of sd.keywords) {
       if (text.includes(kw.toLowerCase())) {
-        serviceType = sd.type;
-        break;
+        score += kw.length;
       }
+    }
+    if (score > bestScore) {
+      bestScore = score;
+      serviceType = sd.type;
     }
   }
 
-  return { answer, serviceType, detectedKeywords };
+  // 문장 수 / 질문 수 감지 (물음표 기준)
+  const questionCount = (messageContent.match(/\?|요\?|까요|나요|는지|할까|하나요/g) || []).length;
+
+  return { answer, answers, serviceType, detectedKeywords, questionCount };
+}
+
+/**
+ * 해당 서비스의 최근 거래 데이터 조회 (견적 범위 제시용)
+ * @param {string} productId - product_id
+ * @returns {object} { avgAmount, orderCount, minAmount, maxAmount }
+ */
+async function getServiceStats(productId) {
+  try {
+    const { data: orders } = await supabase
+      .from('kmong_orders')
+      .select('amount')
+      .eq('product_id', productId)
+      .eq('status', 'completed')
+      .order('order_date', { ascending: false })
+      .limit(20);
+
+    if (!orders || orders.length === 0) return null;
+
+    const amounts = orders.map(o => o.amount).filter(Boolean);
+    if (amounts.length === 0) return null;
+
+    return {
+      avgAmount: Math.round(amounts.reduce((s, a) => s + a, 0) / amounts.length),
+      orderCount: amounts.length,
+      minAmount: Math.min(...amounts),
+      maxAmount: Math.max(...amounts),
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 응답 품질 점수 산정 (0-100)
+ * @param {object} analysis - analyzeInquiry 결과
+ * @param {string} replyText - 생성된 답변 텍스트
+ * @returns {object} { score, reasons }
+ */
+function calculateReplyQuality(analysis, replyText) {
+  let score = 50; // 기본점수
+  const reasons = [];
+
+  // 키워드 매칭률
+  if (analysis.detectedKeywords.length >= 3) {
+    score += 20;
+    reasons.push('키워드 3개+ 매칭');
+  } else if (analysis.detectedKeywords.length >= 1) {
+    score += 10;
+    reasons.push(`키워드 ${analysis.detectedKeywords.length}개 매칭`);
+  } else {
+    score -= 15;
+    reasons.push('키워드 매칭 없음');
+  }
+
+  // 서비스 정확도 (기본 '홈페이지 제작'이 아닌 구체적 서비스 감지)
+  if (analysis.serviceType !== '홈페이지 제작') {
+    score += 15;
+    reasons.push(`서비스 감지: ${analysis.serviceType}`);
+  }
+
+  // 여러 질문 대응
+  if (analysis.questionCount > 1 && analysis.answers.length > 1) {
+    score += 10;
+    reasons.push('복수 질문 대응');
+  } else if (analysis.questionCount > 1 && analysis.answers.length <= 1) {
+    score -= 10;
+    reasons.push('복수 질문이나 단일 답변');
+  }
+
+  // 답변 길이 적정성
+  if (replyText && replyText.length > 50 && replyText.length < 500) {
+    score += 5;
+  }
+
+  score = Math.max(0, Math.min(100, score));
+  return { score, reasons };
 }
 
 /**
@@ -224,6 +324,8 @@ module.exports = {
   renderTemplate,
   parseQuoteInfo,
   generateQuoteMessage,
+  getServiceStats,
+  calculateReplyQuality,
   PACKAGES,
   OPTIONS,
   ANSWER_MAP,

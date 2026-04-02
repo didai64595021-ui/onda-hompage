@@ -12,7 +12,7 @@
 
 const { supabase } = require('./lib/supabase');
 const { notify } = require('./lib/telegram');
-const { analyzeInquiry, selectBestTemplate, renderTemplate } = require('./lib/reply-generator');
+const { analyzeInquiry, selectBestTemplate, renderTemplate, getServiceStats, calculateReplyQuality } = require('./lib/reply-generator');
 
 async function autoReply() {
   const startTime = Date.now();
@@ -49,6 +49,18 @@ async function autoReply() {
       const analysis = analyzeInquiry(inquiry.message_content);
       console.log(`  서비스: ${analysis.serviceType}`);
       console.log(`  키워드: ${analysis.detectedKeywords.join(', ') || '없음'}`);
+      console.log(`  질문 수: ${analysis.questionCount}`);
+
+      // 2-1. 해당 서비스 거래 데이터 참조
+      let statsText = '';
+      if (inquiry.product_id) {
+        const stats = await getServiceStats(inquiry.product_id);
+        if (stats) {
+          const fmtW = n => (n / 10000).toFixed(0);
+          statsText = `평균 ${fmtW(stats.avgAmount)}만원 (${fmtW(stats.minAmount)}~${fmtW(stats.maxAmount)}만원, ${stats.orderCount}건)`;
+          console.log(`  거래통계: ${statsText}`);
+        }
+      }
 
       // 3. 최적 템플릿 선택
       const template = await selectBestTemplate('first_contact', '신규제작');
@@ -61,16 +73,22 @@ async function autoReply() {
           '{answer_to_question}': analysis.answer,
         });
       } else {
-        // 템플릿 없으면 기본 답변
-        replyText = `안녕하세요! ${analysis.serviceType} 문의 감사합니다.\n\n${analysis.answer}\n\n딱 맞는 상품으로 안내드리려고 하는데요, 몇 가지만 여쭤볼게요.\n\n1. 한 페이지에 다 담을까요, 메뉴별로 나눌까요?\n2. 납품 후 사진이나 문구를 직접 바꿀 일이 있으실까요?\n3. 아래 추가 기능 중 필요한 게 있으시면 골라주세요\n   - 카카오채널 연동\n   - 네이버예약 연동\n   - 인스타그램 피드 연동\n   - SEO 심화 최적화\n\n말씀해주세요!`;
+        // 템플릿 없으면 기본 답변 (거래 데이터 반영)
+        const priceGuide = statsText ? `\n참고로 비슷한 구성의 최근 계약은 ${statsText} 범위였습니다.\n` : '';
+        replyText = `안녕하세요! ${analysis.serviceType} 문의 감사합니다.\n\n${analysis.answer}${priceGuide}\n딱 맞는 상품으로 안내드리려고 하는데요, 몇 가지만 여쭤볼게요.\n\n1. 한 페이지에 다 담을까요, 메뉴별로 나눌까요?\n2. 납품 후 사진이나 문구를 직접 바꿀 일이 있으실까요?\n3. 아래 추가 기능 중 필요한 게 있으시면 골라주세요\n   - 카카오채널 연동\n   - 네이버예약 연동\n   - 인스타그램 피드 연동\n   - SEO 심화 최적화\n\n말씀해주세요!`;
       }
+
+      // 3-1. 응답 품질 점수 산정
+      const quality = calculateReplyQuality(analysis, replyText);
+      console.log(`  품질점수: ${quality.score}/100 (${quality.reasons.join(', ')})`);
+      const needsManual = quality.score < 60;
 
       // 4. Supabase 업데이트
       const { error: updateErr } = await supabase
         .from('kmong_inquiries')
         .update({
           auto_reply_text: replyText,
-          auto_reply_status: 'generated',
+          auto_reply_status: needsManual ? 'needs_review' : 'generated',
         })
         .eq('id', inquiry.id);
 
@@ -89,13 +107,16 @@ async function autoReply() {
       }
 
       // 6. 텔레그램 미리보기 발송
+      const qualityLabel = needsManual ? '⚠️ 관리자 직접 작성 권장' : `✅ 품질 ${quality.score}점`;
       const preview = [
         `크몽 신규 문의 (자동 답변 생성)`,
         ``,
         `고객: ${inquiry.customer_name}`,
         `문의 내용: "${(inquiry.message_content || '(내용 없음)').substring(0, 100)}"`,
         `감지 서비스: ${analysis.serviceType}`,
+        statsText ? `거래 통계: ${statsText}` : '',
         template ? `사용 템플릿: ${template.template_name}` : '',
+        `품질: ${qualityLabel} (${quality.reasons.join(', ')})`,
         ``,
         `자동 생성 답변:`,
         `──────────────────`,
@@ -103,12 +124,14 @@ async function autoReply() {
         `──────────────────`,
         ``,
         `문의 ID: #${inquiry.id}`,
-        `크몽에서 위 답변을 복붙하거나 수정하여 발송해주세요.`,
+        needsManual
+          ? `⚠️ 품질 점수가 낮습니다. 관리자가 직접 작성해주세요.`
+          : `크몽에서 위 답변을 복붙하거나 수정하여 발송해주세요.`,
       ].filter(Boolean).join('\n');
 
       notify(preview);
       generatedCount++;
-      console.log(`  [완료] 답변 생성 + 텔레그램 발송`);
+      console.log(`  [완료] 답변 생성 + 텔레그램 발송 (품질: ${quality.score}점)`);
     }
 
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);

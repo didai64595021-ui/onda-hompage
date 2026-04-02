@@ -125,5 +125,19 @@ module.exports = {
         NODE_ENV: 'production',
       },
     },
+    // === Phase 5: 텔레그램 봇 (상시 구동) ===
+    {
+      name: 'kmong-telegram-bot',
+      script: './telegram-bot.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      autorestart: true,
+      watch: false,
+      max_restarts: 10,
+      restart_delay: 5000,
+      env: {
+        NODE_ENV: 'production',
+        TELEGRAM_BOT_TOKEN: '8574880668:AAHb75dmkFchbjBNj7VgPZuKrptFgIjQ_es',
+      },
+    },
   ],
 };
