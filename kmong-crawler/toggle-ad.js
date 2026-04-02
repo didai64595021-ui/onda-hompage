@@ -35,6 +35,34 @@ async function toggleAd(productId, action) {
     await page.goto(CLICK_UP_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(3000);
 
+    // 안내 모달이 떠 있으면 닫기 (kmong-modal-root)
+    try {
+      const modalClose = page.locator('.kmong-modal-root button[class*="close"], .kmong-modal-root [aria-label="close"], .kmong-modal-root [aria-label="닫기"], .kmong-modal-root button:has-text("닫기"), .kmong-modal-root button:has-text("확인")').first();
+      if (await modalClose.isVisible({ timeout: 2000 })) {
+        await modalClose.click();
+        await page.waitForTimeout(1000);
+        console.log('[모달] 안내 모달 닫김');
+      }
+    } catch {}
+
+    // 모달이 여전히 있으면 ESC로 닫기
+    try {
+      const modalRoot = page.locator('.kmong-modal-root');
+      if (await modalRoot.isVisible({ timeout: 1000 })) {
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(1000);
+        console.log('[모달] ESC로 닫김');
+      }
+    } catch {}
+
+    // 모달이 여전히 남아있으면 JS로 제거
+    try {
+      await page.evaluate(() => {
+        const modal = document.querySelector('.kmong-modal-root');
+        if (modal) modal.remove();
+      });
+    } catch {}
+
     // 테이블에서 해당 서비스 행 찾기
     const tableRows = page.locator('table tbody tr');
     const rowCount = await tableRows.count();
