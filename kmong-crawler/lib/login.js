@@ -48,6 +48,7 @@ function hasFreshCookies() {
  */
 async function saveErrorScreenshot(page, label) {
   try {
+    fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
     const filename = `error-${label}-${Date.now()}.png`;
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, filename), fullPage: true });
     console.log(`[스크린샷] ${filename}`);
@@ -102,25 +103,25 @@ async function login(opts = {}) {
     await headerLoginBtn.click();
     await page.waitForTimeout(2000);
     console.log('[로그인] 로그인 모달 오픈');
+    await saveErrorScreenshot(page, 'login-modal-opened');
 
     // 모달 내 이메일 입력
-    const emailInput = page.locator('input[type="email"], input[name="email"]').first();
-    await emailInput.waitFor({ state: 'visible', timeout: 10000 });
+    const emailInput = page.locator('div[role="dialog"] input[type="email"], div[role="dialog"] input[name="email"]').first();
+    await emailInput.waitFor({ state: 'visible', timeout: 15000 }); // Increase timeout
     await emailInput.fill(KMONG_EMAIL);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
+    await saveErrorScreenshot(page, 'login-email-filled');
 
     // 모달 내 비밀번호 입력
-    const pwInput = page.locator('input[type="password"], input[name="password"]').first();
-    await pwInput.waitFor({ state: 'visible', timeout: 5000 });
+    const pwInput = page.locator('div[role="dialog"] input[type="password"], div[role="dialog"] input[name="password"]').first();
+    await pwInput.waitFor({ state: 'visible', timeout: 15000 }); // Increase timeout
     await pwInput.fill(KMONG_PASSWORD);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
+    await saveErrorScreenshot(page, 'login-password-filled');
 
     // 모달 내 로그인 버튼 (submit or "로그인" 텍스트 버튼)
-    // 모달 내에서 두 번째 "로그인" 버튼 (첫 번째는 헤더)
-    const modalLoginBtns = page.locator('button:has-text("로그인")');
-    const btnCount = await modalLoginBtns.count();
-    // 마지막 "로그인" 버튼이 모달 내부 submit일 가능성 높음
-    const submitBtn = btnCount > 1 ? modalLoginBtns.nth(btnCount - 1) : modalLoginBtns.first();
+    const submitBtn = page.locator('div[role="dialog"] button[type="submit"], div[role="dialog"] button:has-text("로그인")').first();
+    await submitBtn.waitFor({ state: 'visible', timeout: 15000 });
     await submitBtn.click();
     console.log('[로그인] 로그인 버튼 클릭');
 

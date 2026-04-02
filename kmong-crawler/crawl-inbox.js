@@ -11,6 +11,7 @@ const { supabase } = require('./lib/supabase');
 const { matchProductId } = require('./lib/product-map');
 const { notify } = require('./lib/telegram');
 const path = require('path');
+const fs = require('fs'); // Keep fs import for other uses if any, but not for SCREENSHOT_DIR here
 
 const INBOX_URL = 'https://kmong.com/inboxes';
 
@@ -92,6 +93,9 @@ async function crawlInbox() {
     browser = result.browser;
     const page = result.page;
 
+    // 로그인 후 페이지가 안정될 때까지 대기
+    await page.waitForURL((url) => url.origin === 'https://kmong.com', { waitUntil: 'domcontentloaded' });
+
     // 메시지함 이동
     console.log('[이동] 메시지함...');
     await page.goto(INBOX_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -151,7 +155,8 @@ async function crawlInbox() {
           return '';
         });
         serviceName = extractedServiceName;
-      } catch {
+      } catch (e) {
+        console.warn(`[경고] 서비스명 추출 실패: ${e.message}`);
         // 대화 클릭 실패해도 문의 자체는 기록
       }
 
@@ -165,6 +170,10 @@ async function crawlInbox() {
         inquiry_type: '크몽 메시지',
         status: 'new',
       });
+
+      // 뒤로가기하여 목록으로 돌아옴
+      await page.goBack();
+      await page.waitForTimeout(1000); // 페이지 로드 대기
     }
 
     console.log(`[추출] 24시간 내 문의: ${inquiries.length}건`);
