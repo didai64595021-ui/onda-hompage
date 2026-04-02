@@ -93,8 +93,14 @@ async function crawlInbox() {
     browser = result.browser;
     const page = result.page;
 
-    // 로그인 후 kmong.com 에 안착될 때까지 안정 대기
-    await page.waitForTimeout(3000);
+    // 로그인 후 페이지 네비게이션 완전 종료 대기 (리다이렉트 완료 후 evaluate 가능)
+    try {
+      await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
+      await page.waitForLoadState('networkidle', { timeout: 10000 });
+    } catch (e) {
+      console.log(`[loadState 대기 타임아웃 - 계속 진행] ${e.message}`);
+    }
+    await page.waitForTimeout(2000);
     const currentUrl = page.url();
     console.log(`[현재 URL] ${currentUrl}`);
 
@@ -136,6 +142,7 @@ async function crawlInbox() {
       // 2단계: 각 대화의 상세 API 호출 → 연관 서비스(gig) 정보 가져오기
       let serviceName = '';
       let gigId = null;
+      let messageContent = '';
       try {
         const detailData = await page.evaluate(async (gId) => {
           const r = await fetch(`https://kmong.com/api/inbox/v1/inbox-groups/${gId}`, { credentials: 'include' });
@@ -160,7 +167,7 @@ async function crawlInbox() {
           return await r.json();
         }, inboxGroupId);
 
-        let messageContent = '';
+        messageContent = '';
         if (msgData?.messages) {
           // 가장 오래된 메시지 (마지막 페이지의 마지막 메시지가 첫 메시지)
           // 여기서는 현재 페이지의 첫 메시지(최신)를 마지막 메시지(최초)보다 먼저 처리
