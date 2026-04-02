@@ -118,9 +118,9 @@ async function toggleAd(productId, action) {
       return { success: true, message: msg };
     }
 
-    // 토글 클릭
-    const clickTarget = toggleCell.locator('input[type="checkbox"], input[role="switch"], [class*="toggle"], [class*="switch"], label').first();
-    await clickTarget.click();
+    // 토글 클릭 (react-switch-handle이 bg를 가리므로 force: true 사용)
+    const clickTarget = toggleCell.locator('.react-switch-handle, input[type="checkbox"], input[role="switch"], [class*="toggle"], [class*="switch"], label').first();
+    await clickTarget.click({ force: true });
     await page.waitForTimeout(2000);
 
     // 확인 모달이 뜨면 확인 클릭
