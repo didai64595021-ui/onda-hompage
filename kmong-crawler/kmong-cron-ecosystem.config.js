@@ -23,11 +23,11 @@ const envVars = loadEnv(path.join(__dirname, '..', '.env'));
 
 const COMMON_ENV = {
   NODE_ENV: 'production',
-  KMONG_EMAIL: envVars.KMONG_EMAIL || 'didai21@naver.com',
-  KMONG_PW: envVars.KMONG_PW || 'tmdgus19',
+  KMONG_EMAIL: envVars.KMONG_EMAIL || '',
+  KMONG_PW: envVars.KMONG_PW || '',
   SUPABASE_URL: envVars.SUPABASE_URL || '',
   SUPABASE_SERVICE_ROLE_KEY: envVars.SUPABASE_SERVICE_ROLE_KEY || '',
-  TELEGRAM_BOT_TOKEN: envVars.TELEGRAM_BOT_TOKEN || '8574880668:AAHb75dmkFchbjBNj7VgPZuKrptFgIjQ_es',
+  TELEGRAM_BOT_TOKEN: envVars.TELEGRAM_BOT_TOKEN || '',
   OPENAI_API_KEY: envVars.OPENAI_API_KEY || '',
 };
 

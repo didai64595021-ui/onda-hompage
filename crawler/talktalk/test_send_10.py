@@ -22,8 +22,8 @@ except ImportError:
 
 from captcha_solver import solve_naver_captcha
 
-NAVER_ID = "didai2121"
-NAVER_PW = "tmdtmxk123!"
+NAVER_ID = os.environ.get('NAVER_ID', '')
+NAVER_PW = os.environ.get('NAVER_PW', '')
 MESSAGE = "안녕하세요"
 MAX_SEND = 10
 SEND_INTERVAL = 30
