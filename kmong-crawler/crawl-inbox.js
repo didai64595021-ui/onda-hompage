@@ -189,6 +189,7 @@ async function crawlInbox() {
         inquiry_type: '크몽 메시지',
         status: 'new',
         service_name: serviceName || null,
+        message_content: messageContent || null,
         conversation_url: `https://kmong.com/inboxes?inbox_group_id=${inboxGroupId}&partner_id=${group.partner?.USERID || ''}`,
       });
     }
@@ -218,6 +219,7 @@ async function crawlInbox() {
           customer_name: inquiry.customer_name,
           inquiry_type: inquiry.inquiry_type,
           status: inquiry.status,
+          message_content: inquiry.message_content,
           conversation_url: inquiry.conversation_url,
         });
 
