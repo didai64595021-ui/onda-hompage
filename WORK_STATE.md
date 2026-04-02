@@ -3,6 +3,20 @@
 > 자동 업데이트: 2026-03-28 KST
 
 ## 현재 작업
+크몽 Phase 2: 자동 분석 엔진 + 자동 답장 시스템 — 완료 (2026-04-02)
+
+### 크몽 Phase 2 — 완료 (2026-04-02)
+- [x] Step 1: setup-db.js — Supabase 스키마 마이그레이션 (5테이블 + 시드 3건)
+- [x] Step 2: lib/analyzer.js — 퍼널분석, 병목진단, ROI, 이상감지, 비즈머니예측
+- [x] Step 3: analyze-daily.js — 매일 9시 일간 리포트 텔레그램 발송
+- [x] Step 4: lib/reply-generator.js — 문의분석, 템플릿선택, 견적생성
+- [x] Step 5: auto-reply.js — 신규문의 자동답변 + 텔레그램 미리보기
+- [x] Step 6: auto-quote.js — 고객답변 기반 자동견적 + 텔레그램 미리보기
+- [x] Step 7: send-reply.js — 승인된 답변 크몽 Playwright 자동발송
+- [x] Step 8: lib/reply-optimizer.js — 답변 학습엔진 (전환율 추적/랭킹)
+- [x] Step 9: PM2 ecosystem + package.json 업데이트
+- [x] Step 10: 구문검증 + Git commit + push
+
 크몽 Playwright 자동 크롤러 Phase 1 — 완료 (2026-04-02)
 
 ### 크몽 자동 크롤러 Phase 1 — 완료 (2026-04-02)
@@ -166,7 +180,8 @@
 - [x] Git commit + push
 
 ## 다음 단계
-크몽 자동 크롤러 Phase 1 완료 — PM2 등록 후 자동 실행 대기
+크몽 Phase 2 완료 — setup-db.js 실행 후 PM2 재등록 필요
+Phase 3 예정: 텔레그램 봇 webhook 수신 → 승인/수정/거부 자동처리
 
 ## Git 상태 (자동)
 - **브랜치**: main
