@@ -5,8 +5,9 @@ const path = require('path');
 const COOKIE_PATH = path.join(__dirname, '..', 'cookies', 'kmong-session.json');
 const SCREENSHOT_DIR = path.join(__dirname, '..', 'screenshots');
 
-const KMONG_EMAIL = 'didai21@naver.com';
-const KMONG_PASSWORD = 'tmdgus19';
+const KMONG_EMAIL = process.env.KMONG_EMAIL;
+const KMONG_PASSWORD = process.env.KMONG_PW;
+if (!KMONG_EMAIL || !KMONG_PASSWORD) throw new Error('KMONG_EMAIL, KMONG_PW 환경변수가 필요합니다');
 const MAIN_URL = 'https://kmong.com';
 
 const BROWSER_OPTIONS = {

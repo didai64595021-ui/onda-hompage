@@ -167,8 +167,8 @@ async function runMigrations() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'apikey': process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5YWlwZm13aWN1a3l6cnVxdHNqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDk1NzcyOCwiZXhwIjoyMDg2NTMzNzI4fQ.f9tfmHILnyx6ijQjmlS_tDuSBsy9EhN-4ea6h4Xpo8Y',
-            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5YWlwZm13aWN1a3l6cnVxdHNqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDk1NzcyOCwiZXhwIjoyMDg2NTMzNzI4fQ.f9tfmHILnyx6ijQjmlS_tDuSBsy9EhN-4ea6h4Xpo8Y'}`,
+            'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
+            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
           },
           body: JSON.stringify({ sql }),
         }

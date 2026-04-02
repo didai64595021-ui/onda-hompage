@@ -1,7 +1,7 @@
 # MEMORY.md — 장기 기억
 
 ## 크몽 셀러 계정 (영구)
-- **기본 계정**: didai21@naver.com / tmdgus19
+- **기본 계정**: 환경변수 KMONG_EMAIL / KMONG_PW 참조 (하드코딩 금지)
 - 크몽 사용 시 별도 아이디 지시 없으면 이 계정으로 로그인
 - 셀러 대시보드: https://kmong.com/seller/click-up
 

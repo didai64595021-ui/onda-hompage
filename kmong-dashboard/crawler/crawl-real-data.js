@@ -7,11 +7,13 @@ const fs = require('fs');
 const path = require('path');
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
-const KMONG_EMAIL = 'didai21@naver.com';
-const KMONG_PW = 'tmdgus19';
+const KMONG_EMAIL = process.env.KMONG_EMAIL;
+const KMONG_PW = process.env.KMONG_PW;
+if (!KMONG_EMAIL || !KMONG_PW) throw new Error('KMONG_EMAIL, KMONG_PW 환경변수가 필요합니다');
 
 const SUPABASE_URL = 'https://byaipfmwicukyzruqtsj.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5YWlwZm13aWN1a3l6cnVxdHNqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDk1NzcyOCwiZXhwIjoyMDg2NTMzNzI4fQ.f9tfmHILnyx6ijQjmlS_tDuSBsy9EhN-4ea6h4Xpo8Y';
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!SUPABASE_KEY) throw new Error('SUPABASE_SERVICE_ROLE_KEY 환경변수가 필요합니다');
 
 async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
