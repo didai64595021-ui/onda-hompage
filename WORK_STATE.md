@@ -1,8 +1,20 @@
 # onda-hompage 작업 상태
 
-> 자동 업데이트: 2026-03-28 KST
+> 자동 업데이트: 2026-04-02 KST
 
 ## 현재 작업
+크몽 Phase 3-4: AI 콘텐츠 생성 + A/B 테스트 + 학습 루프 + 인박스 AI — 완료 (2026-04-02)
+
+### 크몽 Phase 3-4 — 완료 (2026-04-02)
+- [x] Step 1: setup-phase3-db.js — Supabase 스키마 확장 (kmong_patterns, kmong_ab_tests, kmong_content_generated, kmong_inbox_classification + 시드 6건)
+- [x] Step 2: lib/content-generator.js — AI 콘텐츠 생성 엔진 (저성과 서비스 식별, 패턴 기반 타이틀/설명 생성)
+- [x] Step 3: lib/ab-test-manager.js — A/B 테스트 프레임워크 (생성, 지표 업데이트, Z-test 유의성 판정)
+- [x] Step 4: lib/learning-loop.js — Phase 4 학습 루프 (A/B 결과 → 패턴 DB 반영 + 답변 학습 + 저신뢰 패턴 정리)
+- [x] Step 5: lib/inbox-optimizer.js — 인박스 AI (메시지 분류/우선순위/감정분석/의도파악/AI 답변 생성)
+- [x] Step 6: 대시보드 v3.0 — 7탭 (기존 4탭 + AI 콘텐츠 관리 + A/B 테스트 + 인박스 AI)
+- [x] Step 7: PM2 ecosystem + package.json v3.0 업데이트 (크론 3개 추가)
+- [x] Step 8: 구문 검증 + Git commit + push
+
 크몽 Phase 2: 자동 분석 엔진 + 자동 답장 시스템 — 완료 (2026-04-02)
 
 ### 크몽 Phase 2 — 완료 (2026-04-02)
@@ -180,8 +192,8 @@
 - [x] Git commit + push
 
 ## 다음 단계
-크몽 Phase 2 완료 — setup-db.js 실행 후 PM2 재등록 필요
-Phase 3 예정: 텔레그램 봇 webhook 수신 → 승인/수정/거부 자동처리
+크몽 Phase 3-4 완료 — setup-phase3-db.js 실행 후 PM2 재등록 필요
+Phase 5 예정: 텔레그램 봇 webhook 수신 → 승인/수정/거부 자동처리 + 실시간 알림
 
 ## Git 상태 (자동)
 - **브랜치**: main

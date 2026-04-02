@@ -68,5 +68,40 @@ module.exports = {
         NODE_ENV: 'production',
       },
     },
+    // === Phase 3: AI 콘텐츠 생성 + A/B 테스트 ===
+    {
+      name: 'kmong-content-gen',
+      script: './run-content-gen.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '0 10 * * *',  // 매일 오전 10시
+      autorestart: false,
+      watch: false,
+      env: {
+        NODE_ENV: 'production',
+      },
+    },
+    {
+      name: 'kmong-ab-eval',
+      script: './run-ab-eval.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '0 21 * * *',  // 매일 오후 9시
+      autorestart: false,
+      watch: false,
+      env: {
+        NODE_ENV: 'production',
+      },
+    },
+    // === Phase 4: 학습 루프 ===
+    {
+      name: 'kmong-learning-loop',
+      script: './run-learning-loop.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '0 6 * * 1',  // 매주 월요일 오전 6시
+      autorestart: false,
+      watch: false,
+      env: {
+        NODE_ENV: 'production',
+      },
+    },
   ],
 };

@@ -388,6 +388,34 @@ tr:hover td { background: rgba(13,153,255,0.04); }
 .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.6s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* === Phase 3-4 추가 스타일 === */
+.badge-urgent { background: rgba(248,113,113,0.2); color: var(--danger); }
+.badge-high { background: rgba(251,191,36,0.2); color: var(--warning); }
+.badge-normal { background: rgba(13,153,255,0.15); color: var(--primary); }
+.badge-low { background: rgba(139,143,164,0.2); color: var(--text-2); }
+.badge-running { background: rgba(13,153,255,0.15); color: var(--primary); }
+.badge-completed { background: rgba(52,211,153,0.15); color: var(--success); }
+.badge-approved { background: rgba(52,211,153,0.15); color: var(--success); }
+.badge-applied { background: rgba(167,139,250,0.15); color: #a78bfa; }
+.badge-positive { background: rgba(52,211,153,0.15); color: var(--success); }
+.badge-negative { background: rgba(248,113,113,0.15); color: var(--danger); }
+.badge-neutral { background: rgba(139,143,164,0.15); color: var(--text-2); }
+.badge-anxious { background: rgba(251,191,36,0.15); color: var(--warning); }
+.btn-sm { padding: 4px 10px; font-size: 11px; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; transition: all 0.2s; }
+.btn-approve { background: rgba(52,211,153,0.15); color: var(--success); }
+.btn-approve:hover { background: rgba(52,211,153,0.3); }
+.btn-reject { background: rgba(248,113,113,0.15); color: var(--danger); }
+.btn-reject:hover { background: rgba(248,113,113,0.3); }
+.btn-apply { background: rgba(13,153,255,0.15); color: var(--primary); }
+.btn-apply:hover { background: rgba(13,153,255,0.3); }
+td .content-preview { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+td .reply-preview { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; cursor: pointer; }
+td .reply-preview:hover { color: var(--primary); }
+.learning-item { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.learning-item:last-child { border-bottom: none; }
+.learning-label { font-size: 11px; color: var(--text-3); margin-bottom: 2px; }
+.learning-value { font-size: 14px; font-weight: 600; }
+
 /* === 반응형 === */
 @media (max-width: 1024px) {
   :root { --sidebar-w: 0px; }
@@ -425,7 +453,7 @@ tr:hover td { background: rgba(13,153,255,0.04); }
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 3v18M3 9h18"/></svg>
-    크몽 대시보드 <span>v2.0</span>
+    크몽 대시보드 <span>v3.0</span>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-item active" data-tab="cpc" onclick="switchTab('cpc')">
@@ -443,6 +471,19 @@ tr:hover td { background: rgba(13,153,255,0.04); }
     <div class="nav-item" data-tab="roi" onclick="switchTab('roi')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
       ROI 분석
+    </div>
+    <div style="padding:8px 12px;font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-top:8px">Phase 3-4</div>
+    <div class="nav-item" data-tab="content" onclick="switchTab('content')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      AI 콘텐츠
+    </div>
+    <div class="nav-item" data-tab="abtest" onclick="switchTab('abtest')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+      A/B 테스트
+    </div>
+    <div class="nav-item" data-tab="inbox" onclick="switchTab('inbox')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      인박스 AI
     </div>
   </nav>
   <div class="sidebar-footer">온다마케팅 &copy; 2026</div>
@@ -565,6 +606,76 @@ tr:hover td { background: rgba(13,153,255,0.04); }
       </div>
       <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>CPA 랭킹 상세</div>
       <div class="table-wrap"><table id="tableRoi"><thead><tr><th>서비스명</th><th>광고비</th><th>매출</th><th>순이익</th><th>ROI%</th><th>결제수</th><th>CPA</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <!-- 탭 5: AI 콘텐츠 관리 (Phase 3) -->
+    <div class="tab-panel" id="tab-content">
+      <div class="kpi-grid" id="contentKpi"></div>
+      <!-- 저성과 서비스 진단 -->
+      <div class="chart-card full" style="margin-bottom:16px">
+        <div class="chart-title"><span class="dot" style="background:var(--warning)"></span>저성과 서비스 진단</div>
+        <div class="table-wrap" style="border:0;margin:0"><table id="tableLowPerformers"><thead><tr><th>서비스명</th><th>노출</th><th>CTR</th><th>문의율</th><th>결제율</th><th>문제</th><th>AI 진단</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <!-- AI 생성 콘텐츠 목록 -->
+      <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>AI 생성 콘텐츠</div>
+      <div style="margin-bottom:12px">
+        <button class="btn-primary" onclick="generateContent()" style="display:inline-flex">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          AI 콘텐츠 생성
+        </button>
+      </div>
+      <div class="table-wrap"><table id="tableContent"><thead><tr><th>ID</th><th>서비스</th><th>유형</th><th>생성 내용</th><th>이유</th><th>상태</th><th>액션</th></tr></thead><tbody></tbody></table></div>
+      <!-- 패턴 DB -->
+      <div class="chart-title" style="margin:16px 0 8px"><span class="dot" style="background:var(--success)"></span>성공 패턴 DB</div>
+      <div class="table-wrap"><table id="tablePatterns"><thead><tr><th>유형</th><th>패턴명</th><th>카테고리</th><th>성공</th><th>실패</th><th>신뢰도</th><th>상태</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <!-- 탭 6: A/B 테스트 (Phase 3) -->
+    <div class="tab-panel" id="tab-abtest">
+      <div class="kpi-grid" id="abtestKpi"></div>
+      <div class="chart-grid">
+        <div class="chart-card full">
+          <div class="chart-title"><span class="dot"></span>A/B 테스트 결과 비교</div>
+          <div class="chart-wrap"><canvas id="chartAbComparison"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title"><span class="dot"></span>테스트별 CTR Lift</div>
+          <div class="chart-wrap"><canvas id="chartAbLift"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title"><span class="dot" style="background:var(--success)"></span>학습 루프 상태</div>
+          <div id="learningStatus" style="padding:16px;font-size:13px;color:var(--text-2)">로딩 중...</div>
+        </div>
+      </div>
+      <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>테스트 목록</div>
+      <div class="table-wrap"><table id="tableAbTests"><thead><tr><th>테스트명</th><th>서비스</th><th>유형</th><th>A 지표</th><th>B 지표</th><th>Lift</th><th>승자</th><th>상태</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <!-- 탭 7: 인박스 AI (Phase 3-4) -->
+    <div class="tab-panel" id="tab-inbox">
+      <div class="kpi-grid" id="inboxKpi"></div>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-title"><span class="dot"></span>우선순위 분포</div>
+          <div class="chart-wrap"><canvas id="chartPriority"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title"><span class="dot"></span>감정 분석</div>
+          <div class="chart-wrap"><canvas id="chartSentiment"></canvas></div>
+        </div>
+        <div class="chart-card full">
+          <div class="chart-title"><span class="dot"></span>의도 분류 현황</div>
+          <div class="chart-wrap"><canvas id="chartIntent"></canvas></div>
+        </div>
+      </div>
+      <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>문의 목록 (AI 분류)</div>
+      <div style="margin-bottom:12px">
+        <button class="btn-primary" onclick="classifyInbox()" style="display:inline-flex">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          미분류 일괄 분류
+        </button>
+      </div>
+      <div class="table-wrap"><table id="tableInbox"><thead><tr><th>날짜</th><th>고객</th><th>서비스</th><th>우선순위</th><th>감정</th><th>의도</th><th>AI 답변</th><th>신뢰도</th></tr></thead><tbody></tbody></table></div>
     </div>
 
   </div>
@@ -784,7 +895,7 @@ function switchTab(tab) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   document.querySelector(`.nav-item[data-tab="${tab}"]`).classList.add('active');
-  const titles = { cpc: 'CPC 소재테스트', funnel: '전환 퍼널', inquiry: '서비스별 문의량', roi: 'ROI 분석' };
+  const titles = { cpc: 'CPC 소재테스트', funnel: '전환 퍼널', inquiry: '서비스별 문의량', roi: 'ROI 분석', content: 'AI 콘텐츠 관리', abtest: 'A/B 테스트', inbox: '인박스 AI' };
   document.getElementById('pageTitle').textContent = titles[tab];
   if (window.innerWidth <= 1024) closeSidebar();
 }
@@ -1470,10 +1581,346 @@ async function seedData() {
   }
 }
 
+/* === 탭 5: AI 콘텐츠 관리 === */
+async function loadContentTab() {
+  // 생성 콘텐츠 조회
+  const { data: contentData } = await sb.from('kmong_content_generated')
+    .select('*').order('created_at', { ascending: false }).limit(30);
+  const contents = contentData || [];
+
+  // 패턴 DB 조회
+  const { data: patternData } = await sb.from('kmong_patterns')
+    .select('*').order('confidence_score', { ascending: false }).limit(20);
+  const patterns = patternData || [];
+
+  // 저성과 서비스 조회 (CPC 30일)
+  const dateFrom = getDateFrom();
+  let cpcQ = sb.from('kmong_cpc_daily').select('product_id,impressions,clicks,cpc_cost');
+  if (dateFrom) cpcQ = cpcQ.gte('date', dateFrom);
+  const { data: cpcData } = await cpcQ;
+  let inqQ2 = sb.from('kmong_inquiries').select('product_id');
+  if (dateFrom) inqQ2 = inqQ2.gte('inquiry_date', dateFrom);
+  const { data: inqData2 } = await inqQ2;
+  let ordQ2 = sb.from('kmong_orders').select('product_id,amount').eq('status', 'completed');
+  if (dateFrom) ordQ2 = ordQ2.gte('order_date', dateFrom);
+  const { data: ordData2 } = await ordQ2;
+
+  const byP = {};
+  (cpcData || []).forEach(r => { if (!r.product_id) return; if (!byP[r.product_id]) byP[r.product_id] = { imp:0,clk:0,cost:0,inq:0,ord:0 }; byP[r.product_id].imp += r.impressions||0; byP[r.product_id].clk += r.clicks||0; byP[r.product_id].cost += r.cpc_cost||0; });
+  (inqData2 || []).forEach(r => { if (!r.product_id) return; if (!byP[r.product_id]) byP[r.product_id] = { imp:0,clk:0,cost:0,inq:0,ord:0 }; byP[r.product_id].inq++; });
+  (ordData2 || []).forEach(r => { if (!r.product_id) return; if (!byP[r.product_id]) byP[r.product_id] = { imp:0,clk:0,cost:0,inq:0,ord:0 }; byP[r.product_id].ord++; });
+
+  const lowPerf = [];
+  for (const [pid, d] of Object.entries(byP)) {
+    const ctr = d.imp > 0 ? (d.clk/d.imp*100) : 0;
+    const ir = d.clk > 0 ? (d.inq/d.clk*100) : 0;
+    const pr = d.inq > 0 ? (d.ord/d.inq*100) : 0;
+    const issues = [];
+    if (ctr < 1.5 && d.imp >= 50) issues.push('CTR '+ctr.toFixed(1)+'%');
+    if (ir < 5 && d.clk >= 5) issues.push('문의율 '+ir.toFixed(1)+'%');
+    if (pr < 15 && d.inq >= 3) issues.push('결제율 '+pr.toFixed(1)+'%');
+    if (issues.length > 0) lowPerf.push({ pid, ctr, ir, pr, d, issues });
+  }
+  lowPerf.sort((a,b) => b.d.cost - a.d.cost);
+
+  // KPI
+  document.getElementById('contentKpi').innerHTML = [
+    { label: '생성 콘텐츠', value: contents.length },
+    { label: '승인 대기', value: contents.filter(c=>c.status==='pending').length },
+    { label: '적용 완료', value: contents.filter(c=>c.status==='applied').length },
+    { label: '활성 패턴', value: patterns.filter(p=>p.is_active).length },
+    { label: '저성과 서비스', value: lowPerf.length },
+    { label: '평균 패턴 신뢰도', value: patterns.length > 0 ? (patterns.reduce((s,p)=>s+parseFloat(p.confidence_score||0),0)/patterns.length).toFixed(0)+'%' : '-' },
+  ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join('');
+
+  // 저성과 서비스 테이블
+  const diagnose = (issues) => issues.map(i => {
+    if (i.includes('CTR')) return '썸네일/타이틀 변경 필요';
+    if (i.includes('문의율')) return '상세페이지 개선 필요';
+    return '가격/신뢰 강화 필요';
+  }).join(', ');
+
+  document.querySelector('#tableLowPerformers tbody').innerHTML = lowPerf.length ? lowPerf.map(lp =>
+    `<tr><td>${productName(lp.pid)}</td><td>${fmt(lp.d.imp)}</td><td style="color:${lp.ctr<1.5?'var(--danger)':'var(--text-1)'}">${fmtPct(lp.ctr)}</td><td style="color:${lp.ir<5?'var(--danger)':'var(--text-1)'}">${fmtPct(lp.ir)}</td><td style="color:${lp.pr<15?'var(--danger)':'var(--text-1)'}">${fmtPct(lp.pr)}</td><td>${lp.issues.join(', ')}</td><td>${diagnose(lp.issues)}</td></tr>`
+  ).join('') : '<tr><td colspan="7"><div class="empty-state"><p>모든 서비스 정상 운영 중</p></div></td></tr>';
+
+  // AI 생성 콘텐츠 테이블
+  const statusLabel = s => { const m = { pending:'대기', approved:'승인', applied:'적용', rejected:'거부' }; return `<span class="badge badge-${s}">${m[s]||s}</span>`; };
+  document.querySelector('#tableContent tbody').innerHTML = contents.length ? contents.map(c =>
+    `<tr><td>${c.id}</td><td>${productName(c.product_id)}</td><td>${c.content_type}</td><td><div class="content-preview" title="${(c.generated_content||'').replace(/"/g,'&quot;')}">${(c.generated_content||'').slice(0,50)}...</div></td><td>${c.generation_reason||'-'}</td><td>${statusLabel(c.status)}</td><td>${c.status==='pending'?`<button class="btn-sm btn-approve" onclick="approveContent(${c.id})">승인</button> <button class="btn-sm btn-reject" onclick="rejectContent(${c.id})">거부</button>`:c.status==='approved'?`<button class="btn-sm btn-apply" onclick="applyContent(${c.id})">적용</button>`:'-'}</td></tr>`
+  ).join('') : '<tr><td colspan="7"><div class="empty-state"><p>AI 생성 콘텐츠가 없습니다. 상단 버튼으로 생성하세요.</p></div></td></tr>';
+
+  // 패턴 DB 테이블
+  document.querySelector('#tablePatterns tbody').innerHTML = patterns.length ? patterns.map(p =>
+    `<tr><td>${p.pattern_type}</td><td>${p.pattern_key}</td><td>${p.category||'-'}</td><td>${p.success_count}</td><td>${p.failure_count}</td><td><span style="color:${parseFloat(p.confidence_score)>=50?'var(--success)':'var(--warning)'}">${parseFloat(p.confidence_score).toFixed(0)}%</span></td><td>${p.is_active?'<span class="badge badge-approved">활성</span>':'<span class="badge badge-cancelled">비활성</span>'}</td></tr>`
+  ).join('') : '<tr><td colspan="7"><div class="empty-state"><p>패턴 데이터가 없습니다</p></div></td></tr>';
+}
+
+/* === 탭 6: A/B 테스트 === */
+async function loadAbTestTab() {
+  const { data: tests } = await sb.from('kmong_ab_tests')
+    .select('*').order('created_at', { ascending: false }).limit(20);
+  const testList = tests || [];
+
+  const running = testList.filter(t => t.status === 'running').length;
+  const completed = testList.filter(t => t.status === 'completed').length;
+  const wins = testList.filter(t => t.winner === 'B').length;
+
+  // 패턴 학습 상태
+  const { data: patterns } = await sb.from('kmong_patterns').select('pattern_type,confidence_score,success_count,failure_count,is_active').eq('is_active', true);
+  const activeP = patterns || [];
+
+  document.getElementById('abtestKpi').innerHTML = [
+    { label: '진행 중 테스트', value: running },
+    { label: '완료 테스트', value: completed },
+    { label: 'B안 승리 횟수', value: wins },
+    { label: '승률', value: completed > 0 ? fmtPct(wins/completed*100) : '-' },
+    { label: '활성 패턴 수', value: activeP.length },
+    { label: '평균 패턴 신뢰도', value: activeP.length > 0 ? (activeP.reduce((s,p)=>s+parseFloat(p.confidence_score||0),0)/activeP.length).toFixed(0)+'%' : '-' },
+  ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join('');
+
+  // A/B 비교 차트
+  const completedTests = testList.filter(t => t.status === 'completed').slice(0, 6);
+  makeChart('chartAbComparison', {
+    type: 'bar',
+    data: {
+      labels: completedTests.length ? completedTests.map(t => productName(t.product_id).slice(0,10)) : ['데이터 없음'],
+      datasets: [
+        { label: 'A안 CTR', data: completedTests.map(t => { const m = t.variant_a_metrics||{}; return m.impressions > 0 ? +(m.clicks/m.impressions*100).toFixed(2) : 0; }), backgroundColor: 'rgba(139,143,164,0.5)' },
+        { label: 'B안 CTR', data: completedTests.map(t => { const m = t.variant_b_metrics||{}; return m.impressions > 0 ? +(m.clicks/m.impressions*100).toFixed(2) : 0; }), backgroundColor: 'rgba(13,153,255,0.7)' }
+      ]
+    },
+    options: { responsive: true, scales: { y: { grid: { color: '#1e2130' }, title: { display: true, text: 'CTR %' } }, x: { grid: { display: false } } } }
+  });
+
+  // Lift 차트
+  const lifts = completedTests.map(t => {
+    const mA = t.variant_a_metrics || {};
+    const mB = t.variant_b_metrics || {};
+    const ctrA = mA.impressions > 0 ? mA.clicks / mA.impressions * 100 : 0;
+    const ctrB = mB.impressions > 0 ? mB.clicks / mB.impressions * 100 : 0;
+    return ctrA > 0 ? +((ctrB - ctrA) / ctrA * 100).toFixed(1) : 0;
+  });
+  makeChart('chartAbLift', {
+    type: 'bar',
+    data: {
+      labels: completedTests.length ? completedTests.map(t => productName(t.product_id).slice(0,10)) : ['데이터 없음'],
+      datasets: [{ label: 'CTR Lift %', data: lifts.length ? lifts : [0], backgroundColor: lifts.map(l => l >= 0 ? 'rgba(52,211,153,0.6)' : 'rgba(248,113,113,0.6)') }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#1e2130' } }, x: { grid: { display: false } } } }
+  });
+
+  // 학습 루프 상태
+  const titleP = activeP.filter(p => p.pattern_type === 'title');
+  const descP = activeP.filter(p => p.pattern_type === 'description');
+  const replyP = activeP.filter(p => p.pattern_type === 'reply');
+  document.getElementById('learningStatus').innerHTML = `
+    <div class="learning-item"><div class="learning-label">타이틀 패턴</div><div class="learning-value">${titleP.length}개 활성 (평균 신뢰도 ${titleP.length>0?(titleP.reduce((s,p)=>s+parseFloat(p.confidence_score),0)/titleP.length).toFixed(0):0}%)</div></div>
+    <div class="learning-item"><div class="learning-label">설명 패턴</div><div class="learning-value">${descP.length}개 활성 (평균 신뢰도 ${descP.length>0?(descP.reduce((s,p)=>s+parseFloat(p.confidence_score),0)/descP.length).toFixed(0):0}%)</div></div>
+    <div class="learning-item"><div class="learning-label">답변 패턴</div><div class="learning-value">${replyP.length}개 활성 (평균 신뢰도 ${replyP.length>0?(replyP.reduce((s,p)=>s+parseFloat(p.confidence_score),0)/replyP.length).toFixed(0):0}%)</div></div>
+    <div class="learning-item"><div class="learning-label">총 학습 데이터</div><div class="learning-value">성공 ${activeP.reduce((s,p)=>s+p.success_count,0)}건 / 실패 ${activeP.reduce((s,p)=>s+p.failure_count,0)}건</div></div>
+  `;
+
+  // 테스트 목록 테이블
+  const testStatus = s => `<span class="badge badge-${s}">${s==='running'?'진행중':s==='completed'?'완료':s}</span>`;
+  const winnerBadge = w => w === 'B' ? '<span class="badge badge-approved">B안</span>' : w === 'A' ? '<span class="badge badge-pending">A안</span>' : w === 'inconclusive' ? '<span class="badge badge-neutral">무승부</span>' : '-';
+  const metricsSum = m => { const d = m || {}; return `CTR ${d.impressions>0?(d.clicks/d.impressions*100).toFixed(1):0}% / 문의 ${d.inquiries||0}`; };
+
+  document.querySelector('#tableAbTests tbody').innerHTML = testList.length ? testList.map(t => {
+    const mA = t.variant_a_metrics || {};
+    const mB = t.variant_b_metrics || {};
+    const ctrA = mA.impressions > 0 ? mA.clicks / mA.impressions * 100 : 0;
+    const ctrB = mB.impressions > 0 ? mB.clicks / mB.impressions * 100 : 0;
+    const lift = ctrA > 0 ? ((ctrB - ctrA) / ctrA * 100).toFixed(1) + '%' : '-';
+    return `<tr><td>${t.test_name.slice(0,20)}</td><td>${productName(t.product_id)}</td><td>${t.test_type}</td><td>${metricsSum(mA)}</td><td>${metricsSum(mB)}</td><td style="color:${parseFloat(lift)>=0?'var(--success)':'var(--danger)'}">${lift}</td><td>${winnerBadge(t.winner)}</td><td>${testStatus(t.status)}</td></tr>`;
+  }).join('') : '<tr><td colspan="8"><div class="empty-state"><p>A/B 테스트가 없습니다</p></div></td></tr>';
+}
+
+/* === 탭 7: 인박스 AI === */
+async function loadInboxTab() {
+  const dateFrom = getDateFrom();
+
+  let inqQ = sb.from('kmong_inquiries').select('*').order('inquiry_date', { ascending: false });
+  if (dateFrom) inqQ = inqQ.gte('inquiry_date', dateFrom);
+  const { data: inqData } = await inqQ;
+  const inquiries = inqData || [];
+
+  const total = inquiries.length;
+  const byPriority = { urgent: 0, high: 0, normal: 0, low: 0 };
+  const bySentiment = { positive: 0, neutral: 0, negative: 0, anxious: 0 };
+  const byIntent = {};
+  let aiSuggested = 0;
+
+  inquiries.forEach(r => {
+    if (r.priority) byPriority[r.priority] = (byPriority[r.priority] || 0) + 1;
+    if (r.sentiment) bySentiment[r.sentiment] = (bySentiment[r.sentiment] || 0) + 1;
+    if (r.ai_suggested_reply) aiSuggested++;
+  });
+
+  // 분류 데이터 조회
+  const { data: classData } = await sb.from('kmong_inbox_classification').select('intent').order('created_at', { ascending: false }).limit(100);
+  (classData || []).forEach(c => { if (c.intent) byIntent[c.intent] = (byIntent[c.intent] || 0) + 1; });
+
+  // KPI
+  document.getElementById('inboxKpi').innerHTML = [
+    { label: '총 문의', value: total },
+    { label: '긴급', value: byPriority.urgent, color: 'var(--danger)' },
+    { label: '높음', value: byPriority.high, color: 'var(--warning)' },
+    { label: 'AI 답변 생성', value: aiSuggested },
+    { label: 'AI 커버리지', value: total > 0 ? fmtPct(aiSuggested/total*100) : '-' },
+    { label: '긍정 감정', value: bySentiment.positive },
+  ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value" ${k.color?`style="color:${k.color}"`:``}>${k.value}</div></div>`).join('');
+
+  // 우선순위 Doughnut
+  const priLabels = ['긴급','높음','보통','낮음'];
+  const priValues = [byPriority.urgent, byPriority.high, byPriority.normal, byPriority.low];
+  makeChart('chartPriority', {
+    type: 'doughnut',
+    data: {
+      labels: priLabels,
+      datasets: [{ data: priValues.some(v=>v>0) ? priValues : [0,0,1,0], backgroundColor: ['#f87171','#fbbf24','#0D99FF','#5a5e72'] }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+  });
+
+  // 감정 Doughnut
+  const senLabels = ['긍정','중립','부정','불안'];
+  const senValues = [bySentiment.positive, bySentiment.neutral, bySentiment.negative, bySentiment.anxious];
+  makeChart('chartSentiment', {
+    type: 'doughnut',
+    data: {
+      labels: senLabels,
+      datasets: [{ data: senValues.some(v=>v>0) ? senValues : [0,1,0,0], backgroundColor: ['#34d399','#8b8fa4','#f87171','#fbbf24'] }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+  });
+
+  // 의도 분류 Bar
+  const intentLabels = Object.keys(byIntent);
+  const intentMap = { new_order:'신규주문', renewal:'리뉴얼', modification:'수정', pricing:'가격문의', maintenance:'유지보수', ready_to_buy:'구매의향', responsive:'반응형', seo:'SEO', general_inquiry:'일반문의' };
+  makeChart('chartIntent', {
+    type: 'bar',
+    data: {
+      labels: intentLabels.length ? intentLabels.map(k => intentMap[k] || k) : ['데이터 없음'],
+      datasets: [{ label: '건수', data: intentLabels.length ? intentLabels.map(k => byIntent[k]) : [0], backgroundColor: chartColors }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#1e2130' } }, x: { grid: { display: false } } } }
+  });
+
+  // 인박스 테이블
+  const priBadge = p => { const m = { urgent:'긴급', high:'높음', normal:'보통', low:'낮음' }; return p ? `<span class="badge badge-${p}">${m[p]||p}</span>` : '-'; };
+  const senBadge = s => { const m = { positive:'긍정', neutral:'중립', negative:'부정', anxious:'불안' }; return s ? `<span class="badge badge-${s}">${m[s]||s}</span>` : '-'; };
+
+  document.querySelector('#tableInbox tbody').innerHTML = inquiries.length ? inquiries.slice(0, 30).map(i => {
+    const reply = i.ai_suggested_reply ? `<div class="reply-preview" title="${i.ai_suggested_reply.replace(/"/g,'&quot;')}">${i.ai_suggested_reply.slice(0,40)}...</div>` : '-';
+    return `<tr><td>${fmtDateTime(i.inquiry_date)}</td><td>${i.customer_name||'-'}</td><td>${productName(i.product_id)}</td><td>${priBadge(i.priority)}</td><td>${senBadge(i.sentiment)}</td><td>-</td><td>${reply}</td><td>${i.reply_confidence ? i.reply_confidence+'%' : '-'}</td></tr>`;
+  }).join('') : '<tr><td colspan="8"><div class="empty-state"><p>문의 데이터가 없습니다</p></div></td></tr>';
+}
+
+/* === Phase 3 액션 함수 === */
+async function generateContent() {
+  showToast('AI 콘텐츠 생성 중...', 'success');
+  // 저성과 서비스 식별 후 DB에 콘텐츠 생성
+  const dateFrom = getDateFrom();
+  let cpcQ = sb.from('kmong_cpc_daily').select('product_id,impressions,clicks,cpc_cost');
+  if (dateFrom) cpcQ = cpcQ.gte('date', dateFrom);
+  const { data: cpcData } = await cpcQ;
+  let inqQ = sb.from('kmong_inquiries').select('product_id');
+  if (dateFrom) inqQ = inqQ.gte('inquiry_date', dateFrom);
+  const { data: inqData } = await inqQ;
+
+  const byP = {};
+  (cpcData||[]).forEach(r => { if (!r.product_id) return; if (!byP[r.product_id]) byP[r.product_id]={imp:0,clk:0}; byP[r.product_id].imp+=r.impressions||0; byP[r.product_id].clk+=r.clicks||0; });
+  (inqData||[]).forEach(r => { if (!r.product_id || !byP[r.product_id]) return; if (!byP[r.product_id].inq) byP[r.product_id].inq=0; byP[r.product_id].inq++; });
+
+  let generated = 0;
+  for (const [pid, d] of Object.entries(byP)) {
+    const ctr = d.imp > 0 ? (d.clk/d.imp*100) : 0;
+    if (ctr < 1.5 && d.imp >= 50) {
+      // 패턴 기반 타이틀 생성
+      const { data: topPattern } = await sb.from('kmong_patterns').select('pattern_key,confidence_score').eq('pattern_type','title').eq('is_active',true).order('confidence_score',{ascending:false}).limit(1);
+      const reason = topPattern && topPattern[0] ? `패턴 "${topPattern[0].pattern_key}" 적용 (신뢰도 ${parseFloat(topPattern[0].confidence_score).toFixed(0)}%)` : 'CTR 개선 필요';
+      const prod = products.find(p=>p.product_id===pid);
+      const newTitle = `${prod?.product_name||pid} | 3일 완성 수정무제한`;
+      await sb.from('kmong_content_generated').insert({
+        product_id: pid, content_type: 'title',
+        original_content: prod?.product_name, generated_content: newTitle,
+        generation_reason: reason, status: 'pending'
+      });
+      generated++;
+    }
+  }
+  if (generated > 0) {
+    showToast(`${generated}건 AI 콘텐츠 생성 완료`);
+  } else {
+    showToast('저성과 서비스가 없거나 이미 생성됨');
+  }
+  loadContentTab();
+}
+
+async function approveContent(id) {
+  await sb.from('kmong_content_generated').update({ status: 'approved', updated_at: new Date().toISOString() }).eq('id', id);
+  showToast(`콘텐츠 #${id} 승인 완료`);
+  loadContentTab();
+}
+
+async function rejectContent(id) {
+  await sb.from('kmong_content_generated').update({ status: 'rejected', updated_at: new Date().toISOString() }).eq('id', id);
+  showToast(`콘텐츠 #${id} 거부 완료`);
+  loadContentTab();
+}
+
+async function applyContent(id) {
+  const { data: content } = await sb.from('kmong_content_generated').select('*').eq('id', id).single();
+  if (!content) { showToast('콘텐츠 없음', 'error'); return; }
+  await sb.from('kmong_content_generated').update({ status: 'applied', applied_at: new Date().toISOString() }).eq('id', id);
+  // 소재변경 이력 기록
+  await sb.from('kmong_creative_changes').insert({
+    product_id: content.product_id, change_date: new Date().toISOString().split('T')[0],
+    change_type: content.content_type, old_value: content.original_content || '(이전)', new_value: (content.generated_content||'').slice(0,200)
+  });
+  showToast(`콘텐츠 #${id} 적용 완료`);
+  loadContentTab();
+}
+
+async function classifyInbox() {
+  showToast('문의 일괄 분류 중...', 'success');
+  const PRIORITY_RULES = [
+    { keywords: ['급합니다','급해요','오늘','내일','바로','당장'], priority: 'urgent', score: 90 },
+    { keywords: ['결제','주문','구매','진행'], priority: 'high', score: 80 },
+    { keywords: ['견적','가격','비용','얼마'], priority: 'high', score: 75 },
+    { keywords: ['수정','변경','추가','리뉴얼'], priority: 'normal', score: 60 },
+    { keywords: ['문의','상담','궁금','질문'], priority: 'normal', score: 50 },
+  ];
+  const SENTIMENT_RULES = [
+    { keywords: ['감사','좋아요','만족','완벽','최고'], sentiment: 'positive' },
+    { keywords: ['불만','화가','실망','별로','나쁘','환불'], sentiment: 'negative' },
+    { keywords: ['급합니다','빨리','걱정','불안'], sentiment: 'anxious' },
+  ];
+
+  const { data: unclassified } = await sb.from('kmong_inquiries')
+    .select('id, notes, message_content')
+    .or('priority.is.null,sentiment.is.null')
+    .order('inquiry_date', { ascending: false }).limit(30);
+
+  let classified = 0;
+  for (const inq of (unclassified || [])) {
+    const text = (inq.message_content || inq.notes || '').toLowerCase();
+    let priority = 'normal', sentiment = 'neutral';
+    for (const rule of PRIORITY_RULES) { if (rule.keywords.some(kw => text.includes(kw))) { priority = rule.priority; break; } }
+    for (const rule of SENTIMENT_RULES) { if (rule.keywords.some(kw => text.includes(kw))) { sentiment = rule.sentiment; break; } }
+
+    await sb.from('kmong_inquiries').update({ priority, sentiment }).eq('id', inq.id);
+    classified++;
+  }
+  showToast(`${classified}건 분류 완료`);
+  loadInboxTab();
+}
+
 /* === 데이터 새로고침 === */
 async function refreshData() {
   await loadProducts();
-  await Promise.all([loadCpcTab(), loadFunnelTab(), loadInquiryTab(), loadRoiTab()]);
+  await Promise.all([loadCpcTab(), loadFunnelTab(), loadInquiryTab(), loadRoiTab(), loadContentTab(), loadAbTestTab(), loadInboxTab()]);
 }
 
 /* === 폼 제출 === */
