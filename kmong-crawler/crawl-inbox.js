@@ -1,19 +1,18 @@
 #!/usr/bin/env node
 /**
  * 크몽 메시지함(Inbox) 문의 데이터 크롤러
- * - 최근 24시간 문의 수집
- * - 각 대화를 열어 연결된 서비스명 확인
+ * - 크몽 내부 API 기반 (DOM 파싱 대신 API 사용)
+ * - /api/v5/inbox-groups → 대화 목록
+ * - /api/inbox/v1/inbox-groups/{id} → 대화 상세 (연관 서비스/gig 정보)
+ * - /api/v5/inbox-groups/{id}/messages → 메시지 내용
+ * - 최근 24시간 문의만 수집
  * - Supabase kmong_inquiries 테이블에 insert (중복 스킵)
  */
 
-const { login, saveErrorScreenshot } = require('./lib/login');
+const { login } = require('./lib/login');
 const { supabase } = require('./lib/supabase');
 const { matchProductId } = require('./lib/product-map');
 const { notify } = require('./lib/telegram');
-const path = require('path');
-const fs = require('fs'); // Keep fs import for other uses if any, but not for SCREENSHOT_DIR here
-
-const INBOX_URL = 'https://kmong.com/inboxes';
 
 /**
  * 시간 텍스트를 파싱해서 24시간 이내인지 확인
@@ -23,17 +22,14 @@ function isWithin24h(timeText) {
   if (!timeText) return false;
   const t = timeText.trim();
 
-  // "N분 전", "N시간 전", "방금"
   if (t.includes('분 전') || t.includes('시간 전') || t.includes('방금')) {
     return true;
   }
 
-  // "어제" — 24시간 이내로 간주
   if (t.includes('어제')) {
     return true;
   }
 
-  // "MM.DD" 형식 — 오늘/어제인지 확인
   const match = t.match(/(\d{1,2})\.(\d{1,2})/);
   if (match) {
     const now = new Date();
@@ -53,19 +49,16 @@ function parseTimeText(timeText) {
   const t = timeText.trim();
   const now = new Date();
 
-  // "N분 전"
   const minMatch = t.match(/(\d+)분 전/);
   if (minMatch) {
     return new Date(now - parseInt(minMatch[1]) * 60 * 1000).toISOString();
   }
 
-  // "N시간 전"
   const hourMatch = t.match(/(\d+)시간 전/);
   if (hourMatch) {
     return new Date(now - parseInt(hourMatch[1]) * 60 * 60 * 1000).toISOString();
   }
 
-  // "어제 HH:MM"
   const yesterdayMatch = t.match(/어제\s*(\d{1,2}):(\d{2})/);
   if (yesterdayMatch) {
     const d = new Date(now);
@@ -74,9 +67,16 @@ function parseTimeText(timeText) {
     return d.toISOString();
   }
 
-  // "방금"
   if (t.includes('방금')) {
     return now.toISOString();
+  }
+
+  // "YY.MM.DD HH:MM" 형식
+  const fullMatch = t.match(/(\d{2})\.(\d{1,2})\.(\d{1,2})\s+(\d{1,2}):(\d{2})/);
+  if (fullMatch) {
+    const d = new Date(2000 + parseInt(fullMatch[1]), parseInt(fullMatch[2]) - 1, parseInt(fullMatch[3]),
+      parseInt(fullMatch[4]), parseInt(fullMatch[5]));
+    return d.toISOString();
   }
 
   return now.toISOString();
@@ -87,81 +87,97 @@ async function crawlInbox() {
   let browser;
 
   try {
-    console.log('=== 크몽 문의(Inbox) 크롤러 시작 ===');
+    console.log('=== 크몽 문의(Inbox) 크롤러 시작 [API 기반] ===');
 
-    const result = await login({ slowMo: 100 });
+    const result = await login({ slowMo: 50 });
     browser = result.browser;
     const page = result.page;
 
-    // 로그인 후 페이지가 안정될 때까지 대기
+    // 로그인 후 안정 대기
     await page.waitForURL((url) => url.origin === 'https://kmong.com', { waitUntil: 'domcontentloaded' });
 
-    // 메시지함 이동
-    console.log('[이동] 메시지함...');
-    await page.goto(INBOX_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(3000);
+    // 1단계: inbox-groups API로 대화 목록 가져오기
+    console.log('[API] 대화 목록 조회...');
+    const inboxData = await page.evaluate(async () => {
+      const r = await fetch('https://kmong.com/api/v5/inbox-groups?page=1', { credentials: 'include' });
+      if (!r.ok) return null;
+      return await r.json();
+    });
 
-    console.log(`[페이지] URL: ${page.url()}`);
+    if (!inboxData || !inboxData.inbox_groups) {
+      throw new Error('inbox-groups API 응답 없음');
+    }
 
-    // 메시지 링크 목록 추출
-    const msgLinks = page.locator('a[href*="inbox_group_id"]');
-    const linkCount = await msgLinks.count();
-    console.log(`[추출] 메시지 링크: ${linkCount}개`);
+    const groups = inboxData.inbox_groups;
+    console.log(`[API] 전체 대화: ${inboxData.total}개, 이번 페이지: ${groups.length}개`);
 
     const inquiries = [];
 
-    for (let i = 0; i < Math.min(linkCount, 30); i++) {
-      const link = msgLinks.nth(i);
-      const text = await link.innerText().catch(() => '');
-      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    for (const group of groups) {
+      const customerName = group.partner?.username || '알 수 없음';
+      const timeText = group.sent_at || '';
+      const inboxGroupId = group.inbox_group_id;
 
-      if (lines.length < 2) continue;
-
-      // 첫 줄: 고객 닉네임, 둘째 줄: 시간
-      const customerName = lines[0];
-      const timeText = lines[1];
-
-      // 24시간 이내만
+      // 24시간 이내만 처리
       if (!isWithin24h(timeText)) {
         console.log(`[스킵] 24h 초과: ${customerName} (${timeText})`);
-        break; // 메시지가 시간순이므로 여기서 중단
+        continue;
       }
 
-      const inquiryDate = parseTimeText(timeText);
-      console.log(`[대화] ${customerName} — ${timeText}`);
+      // 상대방이 시작한 대화만 = 문의 (셀러가 먼저 보낸 건 제외)
+      const isCustomerStarted = group.group_started_userid !== group.USERID;
 
-      // 대화를 클릭해서 서비스명 확인
+      const inquiryDate = group.created_at || parseTimeText(timeText);
+      console.log(`[대화] ${customerName} — ${timeText} (group_id: ${inboxGroupId}, 고객시작: ${isCustomerStarted})`);
+
+      // 2단계: 각 대화의 상세 API 호출 → 연관 서비스(gig) 정보 가져오기
       let serviceName = '';
+      let gigId = null;
       try {
-        await link.click();
-        await page.waitForTimeout(2000);
+        const detailData = await page.evaluate(async (gId) => {
+          const r = await fetch(`https://kmong.com/api/inbox/v1/inbox-groups/${gId}`, { credentials: 'include' });
+          if (!r.ok) return null;
+          return await r.json();
+        }, inboxGroupId);
 
-        let extractedServiceName = await page.evaluate(() => {
-          const serviceLabelStrong = Array.from(document.querySelectorAll('strong')).find(el => el.textContent.includes('문의 서비스'));
+        if (detailData?.button?.gigs && detailData.button.gigs.length > 0) {
+          // 첫 번째 gig을 문의 서비스로 사용
+          const gig = detailData.button.gigs[0];
+          serviceName = gig.title || '';
+          gigId = gig.gigId;
+          console.log(`  → 서비스: ${serviceName} (gigId: ${gigId})`);
+        } else if (detailData?.label) {
+          console.log(`  → 라벨: ${JSON.stringify(detailData.label)}`);
+        }
 
-          if (serviceLabelStrong) {
-            let currentElement = serviceLabelStrong.nextElementSibling;
-            while (currentElement) {
-              if (currentElement.textContent.trim().length > 0) {
-                return currentElement.textContent.trim();
-              }
-              currentElement = currentElement.nextElementSibling;
-            }
+        // 3단계: 메시지 내용 가져오기 (첫 메시지 = 고객 문의 내용)
+        const msgData = await page.evaluate(async (gId) => {
+          const r = await fetch(`https://kmong.com/api/v5/inbox-groups/${gId}/messages?page=1`, { credentials: 'include' });
+          if (!r.ok) return null;
+          return await r.json();
+        }, inboxGroupId);
+
+        let messageContent = '';
+        if (msgData?.messages) {
+          // 가장 오래된 메시지 (마지막 페이지의 마지막 메시지가 첫 메시지)
+          // 여기서는 현재 페이지의 첫 메시지(최신)를 마지막 메시지(최초)보다 먼저 처리
+          // 고객이 보낸 첫 메시지 찾기
+          const customerMsgs = msgData.messages.filter(m => !m.is_mine && m.message);
+          if (customerMsgs.length > 0) {
+            messageContent = customerMsgs[customerMsgs.length - 1].message; // 가장 오래된 고객 메시지
           }
-          const cardEl = document.querySelector('[class*="message-card__content"] [class*="service-item__title"] strong');
-          if (cardEl) {
-            return cardEl.textContent.trim();
-          }
-          return '';
-        });
-        serviceName = extractedServiceName;
+        }
+
+        if (messageContent) {
+          console.log(`  → 고객 메시지: ${messageContent.substring(0, 80)}...`);
+        }
+
       } catch (e) {
-        console.warn(`[경고] 서비스명 추출 실패: ${e.message}`);
-        // 대화 클릭 실패해도 문의 자체는 기록
+        console.warn(`  → API 호출 실패: ${e.message}`);
       }
 
-      const productId = matchProductId(serviceName);
-      console.log(`  서비스: ${serviceName || '(미확인)'} → ${productId || 'N/A'}`);
+      const productId = matchProductId(serviceName) || (gigId ? String(gigId) : null);
+      console.log(`  → 매핑: ${serviceName || '(미확인)'} → productId: ${productId || 'N/A'}`);
 
       inquiries.push({
         product_id: productId,
@@ -169,14 +185,12 @@ async function crawlInbox() {
         customer_name: customerName,
         inquiry_type: '크몽 메시지',
         status: 'new',
+        service_name: serviceName || null,
+        conversation_url: `https://kmong.com/inboxes?inbox_group_id=${inboxGroupId}&partner_id=${group.partner?.USERID || ''}`,
       });
-
-      // 뒤로가기하여 목록으로 돌아옴
-      await page.goBack();
-      await page.waitForTimeout(1000); // 페이지 로드 대기
     }
 
-    console.log(`[추출] 24시간 내 문의: ${inquiries.length}건`);
+    console.log(`\n[결과] 24시간 내 문의: ${inquiries.length}건`);
 
     // 중복 체크 후 Supabase insert
     let insertedCount = 0;
@@ -195,7 +209,14 @@ async function crawlInbox() {
 
       const { error } = await supabase
         .from('kmong_inquiries')
-        .insert(inquiry);
+        .insert({
+          product_id: inquiry.product_id,
+          inquiry_date: inquiry.inquiry_date,
+          customer_name: inquiry.customer_name,
+          inquiry_type: inquiry.inquiry_type,
+          status: inquiry.status,
+          conversation_url: inquiry.conversation_url,
+        });
 
       if (error) {
         console.error(`[에러] insert 실패: ${error.message} — ${inquiry.customer_name}`);
