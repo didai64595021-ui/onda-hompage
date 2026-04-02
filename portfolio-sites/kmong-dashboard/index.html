@@ -1231,6 +1231,19 @@ const SUPABASE_URL = 'https://byaipfmwicukyzruqtsj.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5YWlwZm13aWN1a3l6cnVxdHNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTc3MjgsImV4cCI6MjA4NjUzMzcyOH0.GGm46X0W0joFXdYtdg-N9n8UQYiVHpbtZVZ__jfbY40';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// settings upsert 헬퍼 (anon RLS 차단 → localStorage + Supabase 읽기 전용)
+async function upsertSetting(key, value) {
+  // localStorage에 저장 (즉시 반영)
+  localStorage.setItem('kmong_setting_' + key, value);
+  // Supabase에도 시도 (성공하면 좋고 실패하면 localStorage로 폴백)
+  try {
+    await sb.from('kmong_settings').upsert({ key, value }, { onConflict: 'key' });
+  } catch(e) { /* RLS 차단 시 무시 — localStorage가 primary */ }
+}
+function getSetting(key, fallback) {
+  return localStorage.getItem('kmong_setting_' + key) || fallback;
+}
+
 /* === 상태 === */
 let products = [];
 let dateRangeDays = 30;
@@ -2840,6 +2853,19 @@ async function resetServiceSchedule() {
   loadScheduleGrid();
 }
 
+function compactHours(hours) {
+  if (!hours.length) return '-';
+  const sorted = [...hours].sort((a, b) => a - b);
+  const ranges = [];
+  let start = sorted[0], end = sorted[0];
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i] === end + 1) { end = sorted[i]; }
+    else { ranges.push(start === end ? `${start}시` : `${start}~${end}시`); start = end = sorted[i]; }
+  }
+  ranges.push(start === end ? `${start}시` : `${start}~${end}시`);
+  return ranges.join(', ');
+}
+
 function loadServiceSummary(allData, nowDay, nowHour) {
   const allSlots = allData.filter(s => s.product_id === 'all');
   const tbody = document.querySelector('#serviceSummaryTable tbody');
@@ -2861,7 +2887,7 @@ function loadServiceSummary(allData, nowDay, nowHour) {
     if (!nowSlot) nowSlot = allSlots.find(s => s.day_of_week === nowDay && s.hour === nowHour);
     const isOn = nowSlot?.enabled;
 
-    const onHoursStr = todayOnHours.length > 0 ? todayOnHours.map(h => `${h}시`).join(', ') : '-';
+    const onHoursStr = todayOnHours.length > 0 ? compactHours(todayOnHours) : '-';
     const statusBadge = isOn ? '<span class="badge badge-paid">ON</span>' : '<span class="badge badge-pending">OFF</span>';
     const customBadge = hasCustom ? '<span class="badge-custom yes">개별</span>' : '<span class="badge-custom no">전체</span>';
 
@@ -2943,7 +2969,7 @@ let serviceAutoStates = {}; // {productId: {auto: bool, bid: number, aiRecommend
 
 async function toggleMasterAuto(enabled) {
   masterAutoMode = enabled;
-  const { error } = await sb.from('kmong_settings').upsert({ key: 'ai_auto_manage', value: enabled ? 'true' : 'false' }, { onConflict: 'key' });
+  const { error } = await upsertSetting('ai_auto_manage', enabled ? 'true' : 'false');
   if (error) { showToast('설정 저장 실패', 'error'); return; }
 
   document.getElementById('autoModeDetail').style.display = enabled ? 'block' : 'none';
@@ -2956,7 +2982,7 @@ async function toggleMasterAuto(enabled) {
       if (!serviceAutoStates[p.id]) serviceAutoStates[p.id] = { auto: true };
       else serviceAutoStates[p.id].auto = true;
     }
-    await sb.from('kmong_settings').upsert({ key: 'ai_service_modes', value: JSON.stringify(serviceAutoStates) }, { onConflict: 'key' });
+    await upsertSetting('ai_service_modes', JSON.stringify(serviceAutoStates));
     await loadAutoControlPanel();
   }
   showToast(`AI 자동관리 ${enabled ? 'ON — 전 서비스 자동모드' : 'OFF'}`);
@@ -2964,8 +2990,13 @@ async function toggleMasterAuto(enabled) {
 
 async function loadAutoControlPanel() {
   // 설정 로드
-  const { data: setting } = await sb.from('kmong_settings').select('value').eq('key', 'ai_auto_manage').single();
-  masterAutoMode = setting?.value === 'true';
+  const localAuto = getSetting('ai_auto_manage', null);
+  if (localAuto !== null) {
+    masterAutoMode = localAuto === 'true';
+  } else {
+    const { data: setting } = await sb.from('kmong_settings').select('value').eq('key', 'ai_auto_manage').single();
+    masterAutoMode = setting?.value === 'true';
+  }
   document.getElementById('masterAutoToggle').checked = masterAutoMode;
   document.getElementById('autoModeDetail').style.display = masterAutoMode ? 'block' : 'none';
   document.getElementById('autoModeLabel').textContent = masterAutoMode ? 'ON' : 'OFF';
@@ -2975,8 +3006,13 @@ async function loadAutoControlPanel() {
   loadBudgetStatus();
 
   // 서비스별 모드 로드
-  const { data: modeData } = await sb.from('kmong_settings').select('value').eq('key', 'ai_service_modes').single();
-  serviceAutoStates = modeData?.value ? JSON.parse(modeData.value) : {};
+  const localModes = getSetting('ai_service_modes', null);
+  if (localModes) {
+    serviceAutoStates = JSON.parse(localModes);
+  } else {
+    const { data: modeData } = await sb.from('kmong_settings').select('value').eq('key', 'ai_service_modes').single();
+    serviceAutoStates = modeData?.value ? JSON.parse(modeData.value) : {};
+  }
 
   // CTR/ROI 데이터 로드 (최근 7일)
   const since7d = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString().split('T')[0];
@@ -3066,7 +3102,7 @@ async function loadAutoControlPanel() {
 async function toggleServiceAutoMode(productId, isAuto) {
   serviceAutoStates[productId] = serviceAutoStates[productId] || {};
   serviceAutoStates[productId].auto = isAuto;
-  await sb.from('kmong_settings').upsert({ key: 'ai_service_modes', value: JSON.stringify(serviceAutoStates) }, { onConflict: 'key' });
+  await upsertSetting('ai_service_modes', JSON.stringify(serviceAutoStates));
   showToast(`${productName(productId)}: ${isAuto ? '자동모드' : '수동모드'} 전환`);
   loadAutoControlPanel();
 }
@@ -3077,7 +3113,7 @@ async function toggleAdFromDashboardWrapped(productId, enable) {
   // 자동관리 ON이면 해당 서비스를 수동으로 전환
   if (masterAutoMode && serviceAutoStates[productId]?.auto) {
     serviceAutoStates[productId].auto = false;
-    await sb.from('kmong_settings').upsert({ key: 'ai_service_modes', value: JSON.stringify(serviceAutoStates) }, { onConflict: 'key' });
+    await upsertSetting('ai_service_modes', JSON.stringify(serviceAutoStates));
     showToast(`${productName(productId)}: 수동 변경 감지 → 수동모드로 전환`, 'warning');
   }
   await _origToggleAd(productId, enable);
@@ -3090,15 +3126,21 @@ async function saveBudgetSettings() {
   const weekly = document.getElementById('budgetWeekly').value || '0';
   const monthly = document.getElementById('budgetMonthly').value || '0';
   const budget = { daily: parseInt(daily), weekly: parseInt(weekly), monthly: parseInt(monthly) };
-  const { error } = await sb.from('kmong_settings').upsert({ key: 'ai_budget_limits', value: JSON.stringify(budget) }, { onConflict: 'key' });
+  const { error } = await upsertSetting('ai_budget_limits', JSON.stringify(budget));
   if (error) { showToast('예산 저장 실패', 'error'); return; }
   showToast(`예산 저장: 일 ₩${fmt(budget.daily)} / 주 ₩${fmt(budget.weekly)} / 월 ₩${fmt(budget.monthly)}`);
   loadBudgetStatus();
 }
 
 async function loadBudgetStatus() {
-  const { data: budgetSetting } = await sb.from('kmong_settings').select('value').eq('key', 'ai_budget_limits').single();
-  const budget = budgetSetting?.value ? JSON.parse(budgetSetting.value) : { daily: 0, weekly: 0, monthly: 0 };
+  const localBudget = getSetting('ai_budget_limits', null);
+  let budget;
+  if (localBudget) {
+    budget = JSON.parse(localBudget);
+  } else {
+    const { data: budgetSetting } = await sb.from('kmong_settings').select('value').eq('key', 'ai_budget_limits').single();
+    budget = budgetSetting?.value ? JSON.parse(budgetSetting.value) : { daily: 0, weekly: 0, monthly: 0 };
+  }
   document.getElementById('budgetDaily').value = budget.daily || '';
   document.getElementById('budgetWeekly').value = budget.weekly || '';
   document.getElementById('budgetMonthly').value = budget.monthly || '';
