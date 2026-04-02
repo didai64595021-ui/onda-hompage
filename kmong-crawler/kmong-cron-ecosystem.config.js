@@ -125,6 +125,18 @@ module.exports = {
         NODE_ENV: 'production',
       },
     },
+    // === Phase 7: 시간대별 광고 스케줄러 ===
+    {
+      name: 'kmong-ad-scheduler',
+      script: './ad-scheduler.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '*/30 * * * *',  // 30분마다
+      autorestart: false,
+      watch: false,
+      env: {
+        NODE_ENV: 'production',
+      },
+    },
     // === Phase 6: 예산 모니터 + 명령 처리기 ===
     {
       name: 'kmong-budget-monitor',

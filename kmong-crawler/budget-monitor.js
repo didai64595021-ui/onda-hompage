@@ -104,6 +104,22 @@ async function main() {
       console.log(`[정상] 예산 범위 내 (${pct}%)`);
     }
 
+    // 테스트 모드 자동 전환
+    const now = new Date();
+    const dayOfMonth = now.getDate();
+    const isSecondHalf = dayOfMonth >= 15;
+
+    if (ratio < 0.5 && isSecondHalf) {
+      // 잔여 > 50% + 월 하반기 → 테스트 모드 ON
+      await supabase.from('kmong_settings').upsert({ key: 'test_mode', value: 'true' }, { onConflict: 'key' });
+      console.log(`[테스트모드] ON — 예산 여유(${pct}%) + 월 하반기`);
+    } else if (ratio >= 0.9) {
+      // 잔여 < 10% → 테스트 모드 OFF + 테스트 시간대 전부 OFF
+      await supabase.from('kmong_settings').upsert({ key: 'test_mode', value: 'false' }, { onConflict: 'key' });
+      await supabase.from('kmong_ad_schedule').update({ enabled: false, mode: 'off' }).eq('mode', 'test');
+      console.log(`[테스트모드] OFF — 예산 부족(${pct}%), 테스트 슬롯 전부 OFF`);
+    }
+
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
     console.log(`\n=== 예산 모니터 완료 (${elapsed}초) ===`);
 

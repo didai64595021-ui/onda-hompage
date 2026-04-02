@@ -3,6 +3,15 @@
 > 자동 업데이트: 2026-04-02 KST
 
 ## 현재 작업
+시간대별 광고 스케줄러 + 예산 기반 테스트 모드 + 성과 히트맵 — 완료 (2026-04-02)
+
+### Phase 7: 시간대별 광고 스케줄러 — 완료 (2026-04-02)
+- [x] Step 1: Supabase 테이블 생성 (kmong_ad_schedule 168슬롯, kmong_hourly_performance)
+- [x] Step 2: ad-scheduler.js 신규 생성 (30분마다 시간대/요일별 광고 ON/OFF + 예산 연동 + 자동최적화)
+- [x] Step 3: budget-monitor.js 수정 (테스트 모드 자동 전환: 잔여>50%+하반기→ON, <10%→OFF)
+- [x] Step 4: 대시보드 시간대 스케줄 UI (7x24 그리드 토글, 프리셋 3종, CTR 히트맵, 자동최적화 토글)
+- [x] Step 5: PM2 ecosystem 업데이트 (kmong-ad-scheduler */30 추가)
+
 월간 광고 지출 한도 + 독립 명령 처리기 + 전체 크롤러 통합 검증 — 완료 (2026-04-02)
 
 ### Phase 6: 예산 모니터 + 명령 처리기 + 크롤러 검증 — 완료 (2026-04-02)
@@ -225,7 +234,7 @@
 
 ## 다음 단계
 PM2 재등록 필요: `pm2 start kmong-cron-ecosystem.config.js`
-Phase 5 예정: 텔레그램 봇 webhook 수신 → 승인/수정/거부 자동처리 + 실시간 알림
+시간대별 성과 데이터 축적 후 자동최적화 기능 효과 검증
 
 ## Git 상태 (자동)
 - **브랜치**: main

@@ -471,6 +471,51 @@ td .reply-preview:hover { color: var(--primary); }
 .learning-label { font-size: 11px; color: var(--text-3); margin-bottom: 2px; }
 .learning-value { font-size: 14px; font-weight: 600; }
 
+/* === 시간대 스케줄 그리드 === */
+.schedule-grid {
+  display: grid;
+  grid-template-columns: 40px repeat(24, 1fr);
+  gap: 2px;
+  font-size: 10px;
+  margin: 12px 0;
+}
+.schedule-grid .sh { text-align: center; color: var(--text-3); font-weight: 600; padding: 4px 0; }
+.schedule-grid .sd { display: flex; align-items: center; justify-content: center; color: var(--text-2); font-weight: 600; font-size: 11px; }
+.schedule-cell {
+  width: 100%; aspect-ratio: 1; border-radius: 3px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; border: 1px solid transparent; font-size: 9px; color: transparent;
+}
+.schedule-cell.off { background: var(--bg-input); }
+.schedule-cell.on { background: var(--success); color: #fff; }
+.schedule-cell.test { background: var(--warning); color: #1a1a2e; }
+.schedule-cell.now { border-color: var(--primary); box-shadow: 0 0 6px rgba(13,153,255,0.5); }
+.schedule-cell:hover { opacity: 0.8; transform: scale(1.15); z-index: 1; }
+.schedule-actions { display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap; }
+.schedule-actions button { padding: 6px 14px; font-size: 12px; border-radius: 6px; font-weight: 600; transition: all 0.2s; }
+.schedule-actions .btn-off { background: rgba(139,143,164,0.2); color: var(--text-2); }
+.schedule-actions .btn-weekday { background: rgba(52,211,153,0.15); color: var(--success); }
+.schedule-actions .btn-test { background: rgba(251,191,36,0.15); color: var(--warning); }
+.schedule-actions .btn-off:hover, .schedule-actions .btn-weekday:hover, .schedule-actions .btn-test:hover { opacity: 0.7; }
+.schedule-legend { display: flex; gap: 16px; font-size: 11px; color: var(--text-2); margin-top: 8px; }
+.schedule-legend span { display: flex; align-items: center; gap: 4px; }
+.schedule-legend .dot-sm { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: 40px repeat(24, 1fr);
+  gap: 2px;
+  font-size: 10px;
+  margin: 12px 0;
+}
+.heatmap-cell {
+  width: 100%; aspect-ratio: 1; border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; color: var(--text-2);
+}
+.auto-optimize-toggle { display: flex; align-items: center; gap: 12px; padding: 12px 0; }
+.auto-optimize-toggle .label { font-size: 13px; font-weight: 600; }
+.auto-optimize-toggle .desc { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
 /* === 반응형 === */
 @media (max-width: 1024px) {
   :root { --sidebar-w: 0px; }
@@ -803,6 +848,36 @@ td .reply-preview:hover { color: var(--primary); }
           </table>
         </div>
       </div>
+      <!-- 시간대 스케줄 그리드 -->
+      <div class="chart-card full" style="margin-bottom:16px">
+        <div class="chart-title"><span class="dot" style="background:var(--warning)"></span>시간대별 광고 스케줄 (클릭으로 ON/OFF 토글)</div>
+        <div class="schedule-actions">
+          <button class="btn-off" onclick="schedulePreset('allOff')">전체 OFF</button>
+          <button class="btn-weekday" onclick="schedulePreset('weekday')">평일 업무시간만</button>
+          <button class="btn-test" onclick="schedulePreset('test')">테스트 모드</button>
+        </div>
+        <div class="schedule-grid" id="scheduleGrid"></div>
+        <div class="schedule-legend">
+          <span><i class="dot-sm" style="background:var(--bg-input)"></i> OFF</span>
+          <span><i class="dot-sm" style="background:var(--success)"></i> ON</span>
+          <span><i class="dot-sm" style="background:var(--warning)"></i> TEST</span>
+          <span><i class="dot-sm" style="border:2px solid var(--primary)"></i> 현재</span>
+        </div>
+      </div>
+
+      <!-- 시간대별 성과 히트맵 -->
+      <div class="chart-card full" style="margin-bottom:16px">
+        <div class="chart-title"><span class="dot" style="background:var(--primary)"></span>시간대별 CTR 성과 히트맵</div>
+        <div class="heatmap-grid" id="ctrHeatmap"></div>
+        <div class="auto-optimize-toggle">
+          <div>
+            <div class="label">자동 최적화</div>
+            <div class="desc">CTR > 평균 1.5배 + 클릭 10회 이상 시간대 자동 ON</div>
+          </div>
+          <label class="toggle-switch"><input type="checkbox" id="autoOptimizeToggle" onchange="toggleAutoOptimize(this.checked)"><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+
       <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>명령 실행 이력</div>
       <div class="table-wrap"><table id="tableAdCommands"><thead><tr><th>시각</th><th>서비스</th><th>액션</th><th>상태</th><th>결과</th></tr></thead><tbody></tbody></table></div>
     </div>
@@ -2417,6 +2492,153 @@ async function loadAdControlTab() {
   } else {
     cmdBody.innerHTML = cmds.map(c => `<tr><td>${fmtDateTime(c.created_at)}</td><td>${productName(c.product_id)}</td><td>${c.action.toUpperCase()}</td><td>${statusBadge(c.status)}</td><td style="font-size:11px">${c.result_message || '-'}</td></tr>`).join('');
   }
+
+  // 스케줄 그리드 + CTR 히트맵 로드
+  await loadScheduleGrid();
+  await loadCtrHeatmap();
+}
+
+/* === 시간대 스케줄 그리드 === */
+let scheduleData = []; // [{day_of_week, hour, enabled, mode}]
+
+async function loadScheduleGrid() {
+  const { data } = await sb.from('kmong_ad_schedule').select('*').order('day_of_week').order('hour');
+  scheduleData = data || [];
+
+  const now = new Date();
+  const kstOffset = 9 * 60 * 60 * 1000;
+  const kst = new Date(now.getTime() + kstOffset);
+  const nowDay = kst.getUTCDay();
+  const nowHour = kst.getUTCHours();
+
+  const dayLabels = ['일', '월', '화', '수', '목', '금', '토'];
+  const grid = document.getElementById('scheduleGrid');
+
+  // 헤더 행: 빈칸 + 0~23시
+  let html = '<div class="sh"></div>';
+  for (let h = 0; h < 24; h++) html += `<div class="sh">${h}</div>`;
+
+  // 각 요일 행
+  for (let d = 0; d < 7; d++) {
+    html += `<div class="sd">${dayLabels[d]}</div>`;
+    for (let h = 0; h < 24; h++) {
+      const slot = scheduleData.find(s => s.day_of_week === d && s.hour === h) || { enabled: false, mode: 'off' };
+      const cls = slot.enabled ? slot.mode : 'off';
+      const isNow = d === nowDay && h === nowHour ? ' now' : '';
+      html += `<div class="schedule-cell ${cls}${isNow}" data-day="${d}" data-hour="${h}" onclick="toggleScheduleCell(${d},${h})" title="${dayLabels[d]} ${h}시 (${slot.mode})"></div>`;
+    }
+  }
+
+  grid.innerHTML = html;
+
+  // 자동 최적화 토글 상태
+  const { data: optSetting } = await sb.from('kmong_settings').select('value').eq('key', 'auto_optimize_schedule').single();
+  document.getElementById('autoOptimizeToggle').checked = optSetting?.value === 'true';
+}
+
+async function toggleScheduleCell(day, hour) {
+  const slot = scheduleData.find(s => s.day_of_week === day && s.hour === hour);
+  // off → on → test → off 순환
+  let newMode, newEnabled;
+  if (!slot || slot.mode === 'off') { newMode = 'on'; newEnabled = true; }
+  else if (slot.mode === 'on') { newMode = 'test'; newEnabled = true; }
+  else { newMode = 'off'; newEnabled = false; }
+
+  const { error } = await sb.from('kmong_ad_schedule')
+    .update({ enabled: newEnabled, mode: newMode, updated_at: new Date().toISOString() })
+    .eq('day_of_week', day)
+    .eq('hour', hour);
+
+  if (error) { showToast('스케줄 변경 실패: ' + error.message, 'error'); return; }
+
+  // 로컬 업데이트
+  const idx = scheduleData.findIndex(s => s.day_of_week === day && s.hour === hour);
+  if (idx >= 0) { scheduleData[idx].mode = newMode; scheduleData[idx].enabled = newEnabled; }
+  loadScheduleGrid();
+}
+
+async function schedulePreset(preset) {
+  let updates = [];
+  if (preset === 'allOff') {
+    updates = scheduleData.map(s => ({ day_of_week: s.day_of_week, hour: s.hour, enabled: false, mode: 'off' }));
+  } else if (preset === 'weekday') {
+    updates = scheduleData.map(s => {
+      const isWeekday = s.day_of_week >= 1 && s.day_of_week <= 5;
+      const isBusiness = s.hour >= 9 && s.hour <= 18;
+      return { day_of_week: s.day_of_week, hour: s.hour, enabled: isWeekday && isBusiness, mode: (isWeekday && isBusiness) ? 'on' : 'off' };
+    });
+  } else if (preset === 'test') {
+    // 랜덤 시간대 테스트: 각 요일에서 2~3개 랜덤 시간대 test로
+    updates = scheduleData.map(s => ({ day_of_week: s.day_of_week, hour: s.hour, enabled: false, mode: 'off' }));
+    for (let d = 0; d < 7; d++) {
+      const slots = [10, 14, 20]; // 오전, 오후, 저녁 각 1개
+      for (const h of slots) {
+        const u = updates.find(s => s.day_of_week === d && s.hour === h);
+        if (u) { u.enabled = true; u.mode = 'test'; }
+      }
+    }
+  }
+
+  for (const u of updates) {
+    await sb.from('kmong_ad_schedule')
+      .update({ enabled: u.enabled, mode: u.mode, updated_at: new Date().toISOString() })
+      .eq('day_of_week', u.day_of_week)
+      .eq('hour', u.hour);
+  }
+
+  showToast(`스케줄 프리셋 적용: ${preset === 'allOff' ? '전체 OFF' : preset === 'weekday' ? '평일 업무시간' : '테스트 모드'}`);
+  loadScheduleGrid();
+}
+
+async function loadCtrHeatmap() {
+  const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const { data } = await sb.from('kmong_hourly_performance').select('hour, day_of_week, ctr, clicks').gte('date', since);
+
+  const dayLabels = ['일', '월', '화', '수', '목', '금', '토'];
+  const heatmap = document.getElementById('ctrHeatmap');
+
+  // 시간대별 평균 CTR 계산
+  const stats = {};
+  for (const row of (data || [])) {
+    const key = `${row.day_of_week}-${row.hour}`;
+    if (!stats[key]) stats[key] = { ctrSum: 0, count: 0 };
+    stats[key].ctrSum += parseFloat(row.ctr || 0);
+    stats[key].count++;
+  }
+
+  let maxCtr = 0;
+  for (const s of Object.values(stats)) {
+    const avg = s.ctrSum / s.count;
+    if (avg > maxCtr) maxCtr = avg;
+  }
+
+  // 헤더
+  let html = '<div class="sh"></div>';
+  for (let h = 0; h < 24; h++) html += `<div class="sh">${h}</div>`;
+
+  for (let d = 0; d < 7; d++) {
+    html += `<div class="sd">${dayLabels[d]}</div>`;
+    for (let h = 0; h < 24; h++) {
+      const key = `${d}-${h}`;
+      const s = stats[key];
+      if (s && s.count > 0) {
+        const avg = (s.ctrSum / s.count);
+        const intensity = maxCtr > 0 ? avg / maxCtr : 0;
+        const bg = intensity > 0.7 ? `rgba(52,211,153,${0.3 + intensity * 0.6})` : intensity > 0.3 ? `rgba(251,191,36,${0.2 + intensity * 0.4})` : `rgba(248,113,113,${0.1 + intensity * 0.3})`;
+        html += `<div class="heatmap-cell" style="background:${bg}" title="${dayLabels[d]} ${h}시: CTR ${avg.toFixed(2)}%">${avg.toFixed(1)}</div>`;
+      } else {
+        html += `<div class="heatmap-cell" style="background:var(--bg-input)" title="${dayLabels[d]} ${h}시: 데이터 없음">-</div>`;
+      }
+    }
+  }
+
+  heatmap.innerHTML = html;
+}
+
+async function toggleAutoOptimize(enabled) {
+  const { error } = await sb.from('kmong_settings').upsert({ key: 'auto_optimize_schedule', value: enabled ? 'true' : 'false' }, { onConflict: 'key' });
+  if (error) { showToast('설정 저장 실패: ' + error.message, 'error'); return; }
+  showToast(`자동 최적화 ${enabled ? 'ON' : 'OFF'}`);
 }
 
 async function toggleAdFromDashboard(productId, enable) {
