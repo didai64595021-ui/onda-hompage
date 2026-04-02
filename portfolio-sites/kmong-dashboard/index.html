@@ -1297,8 +1297,9 @@ function switchTab(tab) {
   document.getElementById('tab-' + tab).classList.add('active');
   document.querySelector(`.nav-item[data-tab="${tab}"]`).classList.add('active');
   const titles = { cpc: 'CPC 소재테스트', funnel: '전환 퍼널', inquiry: '서비스별 문의량', roi: 'ROI 분석', sales: '매출 분석', content: 'AI 콘텐츠 관리', abtest: 'A/B 테스트', inbox: '인박스 AI', adcontrol: '광고 제어', autoreply: '자동응답' };
-  if (tab === 'adcontrol') loadAdControlTab();
-  if (tab === 'autoreply') loadAutoReplyTab();
+  // 탭 전환 시 데이터 새로고침
+  const tabLoaders = { sales: loadSalesTab, adcontrol: loadAdControlTab, autoreply: loadAutoReplyTab, roi: loadRoiTab, funnel: loadFunnelTab, inquiry: loadInquiryTab, content: loadContentTab, abtest: loadAbTestTab, inbox: loadInboxTab };
+  if (tabLoaders[tab]) tabLoaders[tab]();
   document.getElementById('pageTitle').textContent = titles[tab];
   if (window.innerWidth <= 1024) closeSidebar();
 }
