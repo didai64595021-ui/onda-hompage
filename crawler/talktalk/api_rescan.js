@@ -17,12 +17,12 @@ const https = require('https');
 const HISTORY_PATH = path.join(__dirname, '..', 'output', 'history.json');
 const PROXY_HOST = '49.247.137.28';
 const PROXY_PORT = 3100;
-const PROXY_API_KEY = 'onda-proxy-2026-secret';
+const PROXY_API_KEY = process.env.PROXY_API_KEY || '';
 
 // 네이버 검색 API 키 2개 (일 25,000 × 2 = 50,000건)
 const NAVER_API_KEYS = [
-  { id: 'Su_kCP4chZNUyLO5wZEQ', secret: 'I4fA34bv0e' },
-  { id: 'yoBUbNSW9MGSPH36zaHN', secret: 'wt0HPPOVKA' }
+  { id: process.env.NAVER_CLIENT_ID_2 || '', secret: process.env.NAVER_CLIENT_SECRET_2 || '' },
+  { id: process.env.NAVER_CLIENT_ID || '', secret: process.env.NAVER_CLIENT_SECRET || '' }
 ];
 let currentKeyIdx = 0;
 let keyUsage = [0, 0];

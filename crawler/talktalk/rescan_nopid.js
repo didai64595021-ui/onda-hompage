@@ -19,7 +19,7 @@ const http = require('http');
 const HISTORY_PATH = path.join(__dirname, '..', 'output', 'history.json');
 const PROXY_HOST = '49.247.137.28';
 const PROXY_PORT = 3100;
-const PROXY_API_KEY = 'onda-proxy-2026-secret';
+const PROXY_API_KEY = process.env.PROXY_API_KEY || '';
 const OCR_HOST = '49.247.137.28';
 const OCR_PORT = 3300;
 

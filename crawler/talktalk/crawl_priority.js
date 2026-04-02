@@ -14,7 +14,7 @@ const QUEUE_PATH = path.join(__dirname, 'crawl_queue.json');
 const PROGRESS_PATH = path.join(__dirname, 'crawl_progress.json');
 const PROXY_HOST = '49.247.137.28';
 const PROXY_PORT = 3100;
-const PROXY_API_KEY = 'onda-proxy-2026-secret';
+const PROXY_API_KEY = process.env.PROXY_API_KEY || '';
 
 const DELAY_MS = 2000; // 차단 방지
 const args = process.argv.slice(2);

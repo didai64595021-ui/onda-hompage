@@ -20,7 +20,7 @@ const SAVE_INTERVAL = 100;
 // iwinv 프록시(한국 IP) 경유로 place_id 추출 — 핀란드 직접 요청 시 CAPTCHA 차단됨
 const PROXY_HOST = '49.247.137.28';
 const PROXY_PORT = 3100;
-const PROXY_API_KEY = 'onda-proxy-2026-secret';
+const PROXY_API_KEY = process.env.PROXY_API_KEY || '';
 
 function searchPlaceId(name, address) {
   return new Promise((resolve) => {

@@ -23,7 +23,7 @@ const PORT = 3400;
 
 const PROXY_HOST = '49.247.137.28';
 const PROXY_PORT = 3100;
-const PROXY_API_KEY = 'onda-proxy-2026-secret';
+const PROXY_API_KEY = process.env.PROXY_API_KEY || '';
 const GRAPHQL_ENDPOINT = 'https://pcmap-api.place.naver.com/place/graphql';
 
 const HISTORY_PATH = path.join(__dirname, '..', 'output', 'history.json');

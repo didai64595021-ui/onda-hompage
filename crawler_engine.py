@@ -298,9 +298,9 @@ class CrawlerEngine:
         }
         self._consecutive_blocks = 0
 
-        # 네이버 API 키 (로테이션) — 기본 내장 키
+        # 네이버 API 키 (로테이션) — 환경변수에서 로드
         _default_keys = [
-            {"client_id": "yoBUbNSW9MGSPH36zaHN", "client_secret": "wt0HPPOVKA"},
+            {"client_id": os.environ.get('NAVER_CLIENT_ID', ''), "client_secret": os.environ.get('NAVER_CLIENT_SECRET', '')},
         ]
         self.api_keys = api_keys if api_keys else _default_keys
         self._api_key_idx = 0
@@ -590,7 +590,7 @@ class CrawlerEngine:
                 data=payload,
                 headers={
                     "Content-Type": "application/json",
-                    "x-api-key": "onda-proxy-2026-secret",
+                    "x-api-key": os.environ.get('PROXY_API_KEY', ''),
                 },
                 timeout=self.timeout + 5,
             )
@@ -2010,9 +2010,9 @@ class CrawlerEngine:
         url = "https://openapi.naver.com/v1/search/local.json"
         params = {"query": query, "display": display, "start": start}
 
-        # API 키 — 내장 키 사용
-        cid = getattr(self, "naver_client_id", "yoBUbNSW9MGSPH36zaHN")
-        csecret = getattr(self, "naver_client_secret", "wt0HPPOVKA")
+        # API 키 — 환경변수에서 로드
+        cid = getattr(self, "naver_client_id", os.environ.get('NAVER_CLIENT_ID', ''))
+        csecret = getattr(self, "naver_client_secret", os.environ.get('NAVER_CLIENT_SECRET', ''))
         headers = {
             "X-Naver-Client-Id": cid,
             "X-Naver-Client-Secret": csecret,
