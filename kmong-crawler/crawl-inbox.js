@@ -93,9 +93,12 @@ async function crawlInbox() {
     browser = result.browser;
     const page = result.page;
 
-    // 로그인 후 안정 대기
-    await page.waitForURL((url) => url.origin === 'https://kmong.com', { waitUntil: 'domcontentloaded' });
+    // 로그인 후 kmong.com 에 안착될 때까지 안정 대기
+    await page.waitForTimeout(3000);
+    const currentUrl = page.url();
+    console.log(`[현재 URL] ${currentUrl}`);
 
+    // 크몽 메인/대시보드 어디서든 API 호출 가능하도록 그대로 사용
     // 1단계: inbox-groups API로 대화 목록 가져오기
     console.log('[API] 대화 목록 조회...');
     const inboxData = await page.evaluate(async () => {
