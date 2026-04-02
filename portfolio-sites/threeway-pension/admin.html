@@ -676,7 +676,27 @@
     return dropZone;
   }
 
-  function handleFile(file, key, input, previewContainer, dropZone) {
+  function compressImage(file, maxWidth, quality) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let w = img.width, h = img.height;
+          if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handleFile(file, key, input, previewContainer, dropZone) {
     if (!ALLOWED_TYPES.includes(file.type)) {
       showToast('⚠️ 지원하지 않는 형식입니다. jpg, png, webp만 가능합니다.');
       return;
@@ -686,15 +706,13 @@
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const base64 = e.target.result;
-      input.value = base64;
-      updatePreview(previewContainer, base64, input, dropZone);
-      markFieldChanged(input);
-      showToast('✅ 이미지가 로드되었습니다. 저장을 눌러주세요.');
-    };
-    reader.readAsDataURL(file);
+    showToast('🔄 이미지 최적화 중...');
+    const compressed = await compressImage(file, 1200, 0.8);
+    input.value = compressed;
+    updatePreview(previewContainer, compressed, input, dropZone);
+    markFieldChanged(input);
+    const sizeKB = Math.round(compressed.length / 1024);
+    showToast('✅ 이미지 로드 완료 (' + sizeKB + 'KB). 저장을 눌러주세요.');
   }
 
   function updatePreview(container, src, input, dropZone) {
@@ -800,10 +818,11 @@
       }
     }, 1000);
 
-    autosaveTimeout = setTimeout(() => {
+    autosaveTimeout = setTimeout(async () => {
       if (hasUnsavedChanges) {
-        doSave();
-        showToast('💾 자동 저장됨');
+        if (await doSave()) {
+          showToast('💾 자동 저장됨');
+        }
       }
       timerEl.textContent = '';
     }, 30000);
@@ -1154,14 +1173,20 @@
   }
 
   // ============================================
-  // 저장
+  // 저장 (Supabase 비동기)
   // ============================================
-  function doSave() {
+  async function doSave() {
     document.querySelectorAll('[data-cms-key]').forEach(input => {
       const key = input.dataset.cmsKey;
       cmsData[key] = input.value;
     });
-    CMS.save(cmsData);
+
+    showToast('💾 저장 중...');
+    const success = await CMS.save(cmsData);
+    if (!success) {
+      showToast('❌ 저장 실패! 네트워크를 확인해주세요.');
+      return false;
+    }
 
     // 원본 데이터 갱신 & 변경 상태 초기화
     Object.assign(originalData, JSON.parse(JSON.stringify(cmsData)));
@@ -1175,11 +1200,13 @@
     if (previewPanel.classList.contains('open')) {
       previewFrame.contentWindow.location.reload();
     }
+    return true;
   }
 
-  document.getElementById('btnSave').addEventListener('click', () => {
-    doSave();
-    showToast('✅ 저장 완료! 사이트에 즉시 반영됩니다.');
+  document.getElementById('btnSave').addEventListener('click', async () => {
+    if (await doSave()) {
+      showToast('✅ 저장 완료! 모든 방문자에게 즉시 반영됩니다.');
+    }
   });
 
   // ============================================
@@ -1199,10 +1226,11 @@
   // ============================================
   // 초기화
   // ============================================
-  function doReset() {
+  async function doReset() {
     if (!confirm('⚠️ 모든 수정사항을 초기값으로 되돌립니다. 계속하시겠습니까?')) return;
     hasUnsavedChanges = false;
-    CMS.reset();
+    showToast('🔄 초기값 복원 중...');
+    await CMS.reset();
     showToast('🔄 초기값 복원 완료. 페이지를 새로고침합니다...');
     setTimeout(() => location.reload(), 1000);
   }
@@ -1212,9 +1240,10 @@
   // ============================================
   // 우측 고정 버튼 이벤트 연결
   // ============================================
-  document.getElementById('fixedSave').addEventListener('click', () => {
-    doSave();
-    showToast('✅ 저장 완료! 사이트에 즉시 반영됩니다.');
+  document.getElementById('fixedSave').addEventListener('click', async () => {
+    if (await doSave()) {
+      showToast('✅ 저장 완료! 모든 방문자에게 즉시 반영됩니다.');
+    }
   });
   document.getElementById('fixedExport').addEventListener('click', doExport);
   document.getElementById('fixedReset').addEventListener('click', doReset);
@@ -1253,8 +1282,7 @@
     // Ctrl+S / Cmd+S → 저장
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault();
-      doSave();
-      showToast('✅ 저장 완료! (Ctrl+S)');
+      doSave().then(ok => { if (ok) showToast('✅ 저장 완료! (Ctrl+S)'); });
     }
 
     // Ctrl+F → 검색 포커스
@@ -1277,3 +1305,4 @@
 </script>
 </body>
 </html>
+<!-- deployed 2026. 04. 02. (목) 15:59:37 KST -->

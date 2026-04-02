@@ -1,35 +1,49 @@
 /* ============================================
    쓰리웨이펜션 — CMS 엔진
-   localStorage 기반 JSON CMS
+   Supabase 기반 JSON CMS
    data-cms 속성으로 HTML 요소에 바인딩
    ============================================ */
 
 (function () {
   'use strict';
 
-  const CMS_KEY = 'threeway-cms-data';
+  const SUPABASE_URL = 'https://byaipfmwicukyzruqtsj.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5YWlwZm13aWN1a3l6cnVxdHNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTc3MjgsImV4cCI6MjA4NjUzMzcyOH0.GGm46X0W0joFXdYtdg-N9n8UQYiVHpbtZVZ__jfbY40';
+  const CMS_TABLE = 'threeway_cms';
+  const CMS_ROW_ID = 'main';
   const CMS_JSON = 'cms-data.json';
 
+  const headers = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+    'Content-Type': 'application/json'
+  };
+
   /**
-   * Load CMS data: localStorage first, fallback to cms-data.json
+   * Load CMS data: Supabase first, fallback to cms-data.json
    */
   async function loadCmsData() {
-    // 1. Try localStorage
-    const stored = localStorage.getItem(CMS_KEY);
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch (e) {
-        console.warn('[CMS] localStorage parse error, falling back to JSON file');
+    // 1. Try Supabase
+    try {
+      const resp = await fetch(
+        SUPABASE_URL + '/rest/v1/' + CMS_TABLE + '?id=eq.' + CMS_ROW_ID + '&select=data',
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
+      );
+      if (resp.ok) {
+        const rows = await resp.json();
+        if (rows.length > 0 && rows[0].data) {
+          return rows[0].data;
+        }
       }
+    } catch (e) {
+      console.warn('[CMS] Supabase load failed, falling back to JSON file:', e);
     }
 
-    // 2. Fetch cms-data.json
+    // 2. Fallback to cms-data.json
     try {
       const resp = await fetch(CMS_JSON + '?t=' + Date.now());
       if (resp.ok) {
-        const data = await resp.json();
-        return data;
+        return await resp.json();
       }
     } catch (e) {
       console.warn('[CMS] Could not load cms-data.json:', e);
@@ -50,24 +64,17 @@
 
       const value = data[key];
 
-      // Image elements: update src (and parent data-lightbox if applicable)
       if (el.tagName === 'IMG') {
         if (value && value !== el.src) {
           el.src = value;
-          // Update lightbox reference on parent
           const parent = el.closest('[data-lightbox]');
           if (parent) {
             parent.dataset.lightbox = value;
           }
         }
-      }
-      // Anchor elements with href that looks like a phone number or URL
-      else if (el.tagName === 'A' && el.href) {
+      } else if (el.tagName === 'A' && el.href) {
         el.textContent = value;
-      }
-      // General text/HTML content
-      else {
-        // If value contains HTML tags, use innerHTML; otherwise textContent
+      } else {
         if (/<[^>]+>/.test(value)) {
           el.innerHTML = value;
         } else {
@@ -78,11 +85,23 @@
   }
 
   /**
-   * Save CMS data to localStorage
+   * Save CMS data to Supabase (upsert)
    */
-  function saveCmsData(data) {
+  async function saveCmsData(data) {
     try {
-      localStorage.setItem(CMS_KEY, JSON.stringify(data));
+      const resp = await fetch(
+        SUPABASE_URL + '/rest/v1/' + CMS_TABLE + '?id=eq.' + CMS_ROW_ID,
+        {
+          method: 'PATCH',
+          headers: { ...headers, 'Prefer': 'return=representation' },
+          body: JSON.stringify({ data: data, updated_at: new Date().toISOString() })
+        }
+      );
+      if (!resp.ok) {
+        const err = await resp.json();
+        console.error('[CMS] Supabase save error:', err);
+        return false;
+      }
       return true;
     } catch (e) {
       console.error('[CMS] Save error:', e);
@@ -91,21 +110,18 @@
   }
 
   /**
-   * Get all CMS keys used on current page
+   * Reset CMS data (restore from cms-data.json → save to Supabase)
    */
-  function getPageKeys() {
-    const keys = new Set();
-    document.querySelectorAll('[data-cms]').forEach(el => {
-      keys.add(el.dataset.cms);
-    });
-    return Array.from(keys);
-  }
-
-  /**
-   * Reset CMS data (clear localStorage, reload from JSON)
-   */
-  function resetCmsData() {
-    localStorage.removeItem(CMS_KEY);
+  async function resetCmsData() {
+    try {
+      const resp = await fetch(CMS_JSON + '?t=' + Date.now());
+      if (resp.ok) {
+        const original = await resp.json();
+        await saveCmsData(original);
+      }
+    } catch (e) {
+      console.warn('[CMS] Reset error:', e);
+    }
   }
 
   /**
@@ -128,8 +144,7 @@
     save: saveCmsData,
     reset: resetCmsData,
     export: exportCmsData,
-    getPageKeys: getPageKeys,
-    STORAGE_KEY: CMS_KEY
+    SUPABASE_URL: SUPABASE_URL
   };
 
   // Auto-apply on page load (for non-admin pages)

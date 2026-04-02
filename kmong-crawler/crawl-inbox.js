@@ -132,32 +132,25 @@ async function crawlInbox() {
         await link.click();
         await page.waitForTimeout(2000);
 
-        // 대화 상세에서 서비스명 찾기 (상단 "문의 서비스: ..." 또는 서비스 카드)
-        const serviceEl = page.locator(
-          '[class*="service"], [class*="gig"], [class*="product"], ' +
-          'a[href*="/gig/"], a[href*="/service/"]'
-        );
-        const sCount = await serviceEl.count();
-        for (let s = 0; s < sCount; s++) {
-          const sText = await serviceEl.nth(s).innerText().catch(() => '');
-          if (sText.length > 5 && sText.length < 200) {
-            serviceName = sText.split('\n')[0].trim();
-            break;
-          }
-        }
+        let extractedServiceName = await page.evaluate(() => {
+          const serviceLabelStrong = Array.from(document.querySelectorAll('strong')).find(el => el.textContent.includes('문의 서비스'));
 
-        // img alt로도 시도
-        if (!serviceName) {
-          const serviceImg = page.locator('[class*="service"] img, [class*="gig"] img, [class*="product"] img');
-          const imgCount = await serviceImg.count();
-          for (let s = 0; s < imgCount; s++) {
-            const alt = await serviceImg.nth(s).getAttribute('alt').catch(() => '');
-            if (alt && alt.length > 5) {
-              serviceName = alt;
-              break;
+          if (serviceLabelStrong) {
+            let currentElement = serviceLabelStrong.nextElementSibling;
+            while (currentElement) {
+              if (currentElement.textContent.trim().length > 0) {
+                return currentElement.textContent.trim();
+              }
+              currentElement = currentElement.nextElementSibling;
             }
           }
-        }
+          const cardEl = document.querySelector('[class*="message-card__content"] [class*="service-item__title"] strong');
+          if (cardEl) {
+            return cardEl.textContent.trim();
+          }
+          return '';
+        });
+        serviceName = extractedServiceName;
       } catch {
         // 대화 클릭 실패해도 문의 자체는 기록
       }
