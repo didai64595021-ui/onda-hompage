@@ -692,6 +692,10 @@
     return key.endsWith('-img') || key.includes('-img-') || key.startsWith('pkg-gallery-');
   }
 
+  function isGalleryKey(key) {
+    return key.startsWith('pkg-gallery-') || (key.startsWith('fac-scroll-') && key.endsWith('-img')) || (key.startsWith('room-preview-') && key.endsWith('-img'));
+  }
+
   function isPriceKey(key) {
     return key.startsWith('rate-') || key.startsWith('price-') || key.includes('-price-');
   }
@@ -744,6 +748,122 @@
     });
 
     return dropZone;
+  }
+
+  // ============================================
+  // 멀티 갤러리 드롭존 (여러 장 한 번에 업로드)
+  // ============================================
+  function getGalleryKeyInfo(key) {
+    // pkg-gallery-1 → { prefix: 'pkg-gallery-', num: 1 }
+    // fac-scroll-3-img → { prefix: 'fac-scroll-', num: 3, suffix: '-img' }
+    // room-preview-2-img → { prefix: 'room-preview-', num: 2, suffix: '-img' }
+    let match;
+    if ((match = key.match(/^(pkg-gallery-)(\d+)$/))) {
+      return { prefix: match[1], num: parseInt(match[2]), suffix: '' };
+    }
+    if ((match = key.match(/^(fac-scroll-)(\d+)(-img)$/))) {
+      return { prefix: match[1], num: parseInt(match[2]), suffix: match[3] };
+    }
+    if ((match = key.match(/^(room-preview-)(\d+)(-img)$/))) {
+      return { prefix: match[1], num: parseInt(match[2]), suffix: match[3] };
+    }
+    return null;
+  }
+
+  function getGalleryMaxCount(prefix) {
+    if (prefix === 'pkg-gallery-') return 6;
+    if (prefix === 'fac-scroll-') return 5;
+    if (prefix === 'room-preview-') return 3;
+    return 6;
+  }
+
+  function createMultiDropZone(startKey, sectionBody) {
+    const info = getGalleryKeyInfo(startKey);
+    if (!info) return null;
+    const maxCount = getGalleryMaxCount(info.prefix);
+
+    const container = document.createElement('div');
+    container.className = 'multi-drop-container';
+    container.style.cssText = 'margin:8px 0 16px;padding:16px;border:2px dashed #4a6fa5;border-radius:12px;background:#f0f4f8;text-align:center;cursor:pointer;transition:all .2s';
+
+    const dropArea = document.createElement('div');
+    dropArea.className = 'multi-drop-zone';
+    dropArea.innerHTML = '<div style="font-size:2rem;margin-bottom:8px">📁</div>' +
+      '<p style="font-weight:600;color:#2d3748;margin:4px 0">여러 장 한번에 드래그 (최대 ' + maxCount + '장)</p>' +
+      '<p style="font-size:.85rem;color:#718096;margin:0">' + info.prefix.replace(/-$/, '') + ' 이미지를 한번에 올리면 순서대로 자동 배정됩니다</p>';
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.multiple = true;
+    fileInput.accept = 'image/jpeg,image/png,image/webp';
+    fileInput.style.display = 'none';
+    dropArea.appendChild(fileInput);
+
+    dropArea.addEventListener('click', (e) => {
+      if (e.target === fileInput) return;
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) handleMultiFiles(Array.from(fileInput.files), info, maxCount, sectionBody);
+      fileInput.value = '';
+    });
+
+    dropArea.addEventListener('dragenter', (e) => { e.preventDefault(); dropArea.style.borderColor = '#2b6cb0'; dropArea.style.background = '#e2e8f0'; });
+    dropArea.addEventListener('dragover', (e) => { e.preventDefault(); });
+    dropArea.addEventListener('dragleave', () => { dropArea.style.borderColor = '#4a6fa5'; dropArea.style.background = '#f0f4f8'; });
+    dropArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropArea.style.borderColor = '#4a6fa5';
+      dropArea.style.background = '#f0f4f8';
+      if (e.dataTransfer.files.length > 0) {
+        handleMultiFiles(Array.from(e.dataTransfer.files), info, maxCount, sectionBody);
+      }
+    });
+
+    container.appendChild(dropArea);
+
+    // 미리보기 썸네일 영역
+    const thumbRow = document.createElement('div');
+    thumbRow.className = 'multi-thumb-row';
+    thumbRow.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;justify-content:center';
+    container.appendChild(thumbRow);
+
+    return container;
+  }
+
+  async function handleMultiFiles(files, info, maxCount, sectionBody) {
+    const validFiles = files.filter(f => ALLOWED_TYPES.includes(f.type) && f.size <= MAX_FILE_SIZE);
+    if (validFiles.length === 0) {
+      showToast('⚠️ 유효한 이미지 파일이 없습니다.');
+      return;
+    }
+    const count = Math.min(validFiles.length, maxCount);
+    showToast('🔄 ' + count + '장 이미지 최적화 중...');
+
+    for (let i = 0; i < count; i++) {
+      const targetNum = info.num + i;
+      if (targetNum > info.num + maxCount - 1) break;
+      const targetKey = info.prefix + targetNum + info.suffix;
+
+      // 해당 키의 input 찾기
+      const input = sectionBody.querySelector('input[data-cms-key="' + targetKey + '"]');
+      if (!input) continue;
+
+      const compressed = await compressImage(validFiles[i], 1200, 0.8);
+      input.value = compressed;
+
+      // 해당 필드의 preview & dropZone 업데이트
+      const field = input.closest('.cms-field');
+      if (field) {
+        const preview = field.querySelector('.cms-img-preview');
+        const dropZone = field.querySelector('.cms-drop-zone');
+        if (preview) updatePreview(preview, compressed, input, dropZone);
+      }
+      markFieldChanged(input);
+    }
+
+    showToast('✅ ' + count + '장 이미지 로드 완료! 저장을 눌러주세요.');
   }
 
   function compressImage(file, maxWidth, quality) {
@@ -1142,6 +1262,17 @@
 
       sectionBody.appendChild(field);
     });
+
+    // 갤러리 섹션이면 멀티 드롭존 추가
+    const galleryKeys = keys.filter(k => isGalleryKey(k));
+    if (galleryKeys.length > 0) {
+      const firstGalleryKey = galleryKeys[0];
+      const multiDrop = createMultiDropZone(firstGalleryKey, sectionBody);
+      if (multiDrop) {
+        // 섹션 맨 위에 멀티 드롭존 삽입
+        sectionBody.insertBefore(multiDrop, sectionBody.firstChild);
+      }
+    }
 
     section.appendChild(sectionBody);
     formEl.appendChild(section);
