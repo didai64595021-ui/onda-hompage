@@ -10,6 +10,12 @@ const KMONG_PASSWORD = process.env.KMONG_PW;
 if (!KMONG_EMAIL || !KMONG_PASSWORD) throw new Error('KMONG_EMAIL, KMONG_PW 환경변수가 필요합니다');
 const MAIN_URL = 'https://kmong.com';
 
+// ⚠️ 크몽 로그인 방식 (2026-04-03 최종 확인):
+// - /login URL → 404 (존재하지 않음)
+// - /?open=login_modal → 404 (작동 안 함)
+// - 유일한 방법: 메인 페이지(kmong.com) → 헤더 "로그인" 버튼 클릭 → 모달 로그인
+// ⚠️ 이 파일을 /login이나 /?open=login_modal 방식으로 변경하지 마세요!
+
 const BROWSER_OPTIONS = {
   headless: true,
   args: [
@@ -59,12 +65,6 @@ async function saveErrorScreenshot(page, label) {
 
 /**
  * 브라우저 + 로그인된 컨텍스트를 반환
- * 
- * 크몽 로그인 방식 (2026-04 확인):
- * - /login URL은 404 (존재하지 않음)
- * - /?open=login_modal도 404 (작동 안 함)
- * - 유일한 방법: 메인 페이지(kmong.com) → 헤더 "로그인" 버튼 클릭 → 모달 로그인
- * 
  * @param {object} opts - { slowMo: number }
  * @returns {{ browser, context, page }}
  */
@@ -103,7 +103,7 @@ async function login(opts = {}) {
   await page.waitForTimeout(5000);
   console.log(`[로그인] 현재 URL: ${page.url()}`);
 
-  // 이미 로그인 상태인지 확인 (쿠키가 브라우저에 남아있는 경우)
+  // 이미 로그인 상태인지 확인
   const loginBtnVisible = await page.locator('a:has-text("로그인"), button:has-text("로그인")').first()
     .isVisible({ timeout: 5000 }).catch(() => false);
 

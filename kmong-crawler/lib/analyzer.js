@@ -60,7 +60,7 @@ async function analyzeFunnel(productId, days = 1) {
   const clicks = (cpcData || []).reduce((s, r) => s + (r.clicks || 0), 0);
   const adCost = (cpcData || []).reduce((s, r) => s + (r.cpc_cost || 0), 0);
   const inquiries = (inqData || []).length;
-  const orders = (ordData || []).filter(o => o.status === '거래완료' || o.status === '진행중').length;
+  const orders = (ordData || []).filter(o => o.status === '거래완료').length;
   const revenue = (ordData || []).reduce((s, r) => s + (r.amount || 0), 0);
 
   const ctr = impressions > 0 ? (clicks / impressions * 100) : 0;

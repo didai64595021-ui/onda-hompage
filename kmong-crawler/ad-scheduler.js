@@ -16,11 +16,11 @@ const { notify } = require('./lib/telegram');
 
 function getKST() {
   const now = new Date();
-  // KST = UTC + 9
-  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const kstStr = now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' });
+  const kst = new Date(kstStr);
   return {
-    hour: kst.getUTCHours(),
-    day: kst.getUTCDay(), // 0=일, 6=토
+    hour: kst.getHours(),
+    day: kst.getDay(), // 0=일, 6=토
     date: kst.toISOString().split('T')[0],
   };
 }

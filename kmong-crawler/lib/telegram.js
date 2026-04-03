@@ -6,12 +6,11 @@ const { execSync } = require('child_process');
  */
 function notify(message) {
   try {
-    const escaped = message.replace(/"/g, '\\"');
+    const escaped = message.replace(/"/g, '\\"').replace(/\n/g, '\\n');
     execSync(`openclaw system event --text "${escaped}" --mode now`, {
-      timeout: 15000,
+      timeout: 3000,
       stdio: 'pipe',
     });
-    console.log(`[텔레그램] ${message}`);
   } catch (err) {
     console.error(`[텔레그램 실패] ${err.message}`);
   }
