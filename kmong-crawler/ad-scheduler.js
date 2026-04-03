@@ -35,11 +35,21 @@ async function getSettings() {
   const settings = {};
   (data || []).forEach(row => { settings[row.key] = row.value; });
 
+  // ai_service_modes: 서비스별 자동/수동 + 전략 설정
+  let serviceModes = {};
+  try {
+    if (settings.ai_service_modes) serviceModes = JSON.parse(settings.ai_service_modes);
+  } catch(e) { /* 파싱 실패 시 빈 객체 */ }
+
   return {
     monthlyBudget: parseInt(settings.monthly_budget || '500000', 10),
+    dailyBudget: parseInt(settings.daily_budget || '0', 10),
+    weeklyBudget: parseInt(settings.weekly_budget || '0', 10),
     autoStop: settings.auto_stop_on_budget === 'true',
     testMode: settings.test_mode === 'true',
     autoOptimize: settings.auto_optimize_schedule === 'true',
+    aiAutoManage: settings.ai_auto_manage === 'true',
+    serviceModes,
   };
 }
 
@@ -171,17 +181,47 @@ async function main() {
       return;
     }
 
-    // 3. 자동 최적화 (설정 ON 시)
-    if (settings.autoOptimize) {
+    // 3. AI 자동관리 체크
+    console.log(`[AI] 자동관리: ${settings.aiAutoManage ? 'ON' : 'OFF'} | 자동최적화: ${settings.autoOptimize ? 'ON' : 'OFF'}`);
+
+    // 4. 자동 최적화 (자동관리 ON 또는 자동최적화 ON 시)
+    if (settings.aiAutoManage || settings.autoOptimize) {
       await autoOptimize();
     }
 
-    // 4. 서비스별 개별 스케줄 조회 + 상태 비교
+    // 5. 서비스별 개별 스케줄 조회 + 상태 비교
     const changedProducts = []; // 상태가 변경된 서비스만 수집
 
     for (const product of PRODUCT_MAP) {
+      // AI 자동관리가 ON이고 해당 서비스가 수동모드이면 스킵
+      const svcMode = settings.serviceModes[product.id];
+      if (settings.aiAutoManage && svcMode && svcMode.auto === false) {
+        console.log(`[스킵] ${product.id}: 수동모드 — AI 스케줄 제외`);
+        continue;
+      }
+
       const slot = await getScheduleSlot(kst.day, kst.hour, product.id);
-      const currentAction = (slot.enabled && (slot.mode !== 'test' || settings.testMode)) ? 'on' : 'off';
+      let currentAction = (slot.enabled && (slot.mode !== 'test' || settings.testMode)) ? 'on' : 'off';
+
+      // AI 자동관리 + 전략별 시간대 보정
+      if (settings.aiAutoManage && svcMode) {
+        const strategy = svcMode.strategy || 'balanced';
+        // 절약 모드: 비핵심 시간대(0-7시, 22-24시) 자동 OFF
+        if (strategy === 'saving' && (kst.hour < 8 || kst.hour >= 22)) {
+          currentAction = 'off';
+          console.log(`[전략] ${product.id}: 절약모드 → 비핵심시간 OFF`);
+        }
+        // 방어 모드: 새벽(0-6시) OFF
+        if (strategy === 'defense' && kst.hour < 6) {
+          currentAction = 'off';
+          console.log(`[전략] ${product.id}: 방어모드 → 새벽시간 OFF`);
+        }
+        // 공격 모드: 스케줄 OFF여도 피크시간(9-12, 14-18)에 강제 ON
+        if (strategy === 'attack' && ((kst.hour >= 9 && kst.hour <= 12) || (kst.hour >= 14 && kst.hour <= 18))) {
+          currentAction = 'on';
+          console.log(`[전략] ${product.id}: 공격모드 → 피크시간 강제 ON`);
+        }
+      }
 
       // 서비스별 이전 상태 조회
       const stateKey = `last_ad_state_${product.id}`;
@@ -192,8 +232,9 @@ async function main() {
         .single();
 
       const prevAction = prevState?.value || 'unknown';
+      const strategyLabel = (svcMode?.strategy || 'balanced').toUpperCase();
 
-      console.log(`[스케줄] ${product.id}: ${dayNames[kst.day]} ${kst.hour}시 → ${currentAction} (이전: ${prevAction}, source: ${slot.product_id})`);
+      console.log(`[스케줄] ${product.id}: ${dayNames[kst.day]} ${kst.hour}시 → ${currentAction} (이전: ${prevAction}, 전략: ${strategyLabel}, source: ${slot.product_id})`);
 
       if (currentAction !== prevAction) {
         changedProducts.push({ id: product.id, action: currentAction, mode: slot.mode, stateKey });

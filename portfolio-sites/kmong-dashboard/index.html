@@ -890,7 +890,7 @@ td .reply-preview:hover { color: var(--primary); }
           <!-- 서비스별 AI 제어 상태 -->
           <div class="table-wrap" style="border:0;margin:0">
             <table id="tableAutoControl">
-              <thead><tr><th>서비스명</th><th>모드</th><th>CTR</th><th>ROI</th><th>현재 입찰가</th><th>AI 추천가</th><th>AI 판단</th><th>자동/수동</th></tr></thead>
+              <thead><tr><th>서비스명</th><th>모드</th><th>전략</th><th>CTR</th><th>ROI</th><th>현재 입찰가</th><th>AI 추천가</th><th>AI 판단</th><th>자동/수동</th></tr></thead>
               <tbody></tbody>
             </table>
           </div>
@@ -1231,14 +1231,25 @@ const SUPABASE_URL = 'https://byaipfmwicukyzruqtsj.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5YWlwZm13aWN1a3l6cnVxdHNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTc3MjgsImV4cCI6MjA4NjUzMzcyOH0.GGm46X0W0joFXdYtdg-N9n8UQYiVHpbtZVZ__jfbY40';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// settings upsert 헬퍼 (anon RLS 차단 → localStorage + Supabase 읽기 전용)
+// settings upsert 헬퍼 (Supabase 우선, 실패 시 localStorage 폴백)
 async function upsertSetting(key, value) {
-  // localStorage에 저장 (즉시 반영)
+  // localStorage에도 저장 (오프라인/RLS 차단 시 폴백용)
   localStorage.setItem('kmong_setting_' + key, value);
-  // Supabase에도 시도 (성공하면 좋고 실패하면 localStorage로 폴백)
+  // Supabase에 저장 시도
   try {
-    await sb.from('kmong_settings').upsert({ key, value }, { onConflict: 'key' });
-  } catch(e) { /* RLS 차단 시 무시 — localStorage가 primary */ }
+    const { error } = await sb.from('kmong_settings').upsert(
+      { key, value, updated_at: new Date().toISOString() },
+      { onConflict: 'key' }
+    );
+    if (error) {
+      console.warn(`[upsert] ${key} Supabase 저장 실패 (RLS?): ${error.message} — localStorage 사용`);
+      return { error };
+    }
+    return { error: null };
+  } catch(e) {
+    console.warn(`[upsert] ${key} 네트워크 오류: ${e.message} — localStorage 사용`);
+    return { error: e };
+  }
 }
 function getSetting(key, fallback) {
   return localStorage.getItem('kmong_setting_' + key) || fallback;
@@ -2971,7 +2982,7 @@ let serviceAutoStates = {}; // {productId: {auto: bool, bid: number, aiRecommend
 async function toggleMasterAuto(enabled) {
   masterAutoMode = enabled;
   const { error } = await upsertSetting('ai_auto_manage', enabled ? 'true' : 'false');
-  if (error) { showToast('설정 저장 실패', 'error'); return; }
+  if (error) { showToast('Supabase 저장 실패 (로컬 저장됨)', 'warning'); }
 
   document.getElementById('autoModeDetail').style.display = enabled ? 'block' : 'none';
   document.getElementById('autoModeLabel').textContent = enabled ? 'ON' : 'OFF';
@@ -3033,16 +3044,32 @@ async function loadAutoControlPanel() {
     const currentBid = latestCpc.bid_amount || 300;
     const roi = pRoi?.roi_pct || 0;
 
-    // AI 입찰가 추천 로직
+    // 자동모드 상태 초기화
+    if (!serviceAutoStates[p.id]) serviceAutoStates[p.id] = { auto: true, strategy: 'balanced' };
+    const strategy = serviceAutoStates[p.id].strategy || 'balanced';
+
+    // AI 입찰가 추천 로직 (전략별 가중치 적용)
     let recommendBid = currentBid;
     let aiAction = '유지';
-    if (avgCtr > 5 && roi > 200) { recommendBid = Math.round(currentBid * 1.15); aiAction = '입찰↑ (고성과)'; }
-    else if (avgCtr > 3 && roi > 100) { recommendBid = Math.round(currentBid * 1.05); aiAction = '소폭↑'; }
-    else if (avgCtr < 1 || roi < 50) { recommendBid = Math.max(100, Math.round(currentBid * 0.8)); aiAction = '입찰↓ (저효율)'; }
-    else if (avgCtr < 2 && roi < 80) { recommendBid = Math.max(100, Math.round(currentBid * 0.9)); aiAction = '소폭↓'; }
+    const strategyMultiplier = { attack: 1.3, balanced: 1.0, defense: 0.8, saving: 0.6 };
+    const mult = strategyMultiplier[strategy] || 1.0;
 
-    // 자동모드 상태
-    if (!serviceAutoStates[p.id]) serviceAutoStates[p.id] = { auto: true };
+    if (avgCtr > 5 && roi > 200) {
+      recommendBid = Math.round(currentBid * (1 + 0.15 * mult));
+      aiAction = strategy === 'attack' ? '공격↑↑' : '입찰↑ (고성과)';
+    } else if (avgCtr > 3 && roi > 100) {
+      recommendBid = Math.round(currentBid * (1 + 0.05 * mult));
+      aiAction = strategy === 'attack' ? '공격↑' : '소폭↑';
+    } else if (avgCtr < 1 || roi < 50) {
+      const dropRate = strategy === 'saving' ? 0.3 : strategy === 'defense' ? 0.15 : 0.2;
+      recommendBid = Math.max(100, Math.round(currentBid * (1 - dropRate)));
+      aiAction = strategy === 'saving' ? '절약↓↓' : '입찰↓ (저효율)';
+    } else if (avgCtr < 2 && roi < 80) {
+      const dropRate = strategy === 'saving' ? 0.2 : 0.1;
+      recommendBid = Math.max(100, Math.round(currentBid * (1 - dropRate)));
+      aiAction = strategy === 'saving' ? '절약↓' : '소폭↓';
+    }
+
     serviceAutoStates[p.id].ctr = avgCtr;
     serviceAutoStates[p.id].roi = roi;
     serviceAutoStates[p.id].bid = currentBid;
@@ -3070,6 +3097,8 @@ async function loadAutoControlPanel() {
     const modeBadge = isAuto
       ? '<span class="badge badge-paid">자동</span>'
       : '<span class="badge badge-cancelled">수동</span>';
+    const strategy = s.strategy || 'balanced';
+    const strategyColors = { attack: 'var(--danger)', defense: 'var(--warning)', saving: 'var(--success)', balanced: 'var(--primary)' };
     const ctrColor = (s.ctr || 0) > 3 ? 'var(--success)' : (s.ctr || 0) > 1 ? 'var(--warning)' : 'var(--danger)';
     const roiColor = (s.roi || 0) > 150 ? 'var(--success)' : (s.roi || 0) > 80 ? 'var(--warning)' : 'var(--danger)';
     const bidDiff = (s.aiRecommendBid || 0) - (s.bid || 0);
@@ -3079,6 +3108,12 @@ async function loadAutoControlPanel() {
     return `<tr>
       <td>${p.name}</td>
       <td>${modeBadge}</td>
+      <td><select onchange="changeServiceStrategy('${p.id}', this.value)" style="background:var(--bg-input);border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-size:11px;color:${strategyColors[strategy]}">
+        <option value="attack" ${strategy === 'attack' ? 'selected' : ''} style="color:var(--danger)">공격</option>
+        <option value="balanced" ${strategy === 'balanced' ? 'selected' : ''} style="color:var(--primary)">균형</option>
+        <option value="defense" ${strategy === 'defense' ? 'selected' : ''} style="color:var(--warning)">방어</option>
+        <option value="saving" ${strategy === 'saving' ? 'selected' : ''} style="color:var(--success)">절약</option>
+      </select></td>
       <td style="color:${ctrColor};font-weight:600">${(s.ctr || 0).toFixed(2)}%</td>
       <td style="color:${roiColor};font-weight:600">${(s.roi || 0).toFixed(0)}%</td>
       <td>₩${fmt(s.bid || 0)}</td>
@@ -3108,6 +3143,15 @@ async function toggleServiceAutoMode(productId, isAuto) {
   loadAutoControlPanel();
 }
 
+async function changeServiceStrategy(productId, strategy) {
+  const strategyNames = { attack: '공격', defense: '방어', saving: '절약', balanced: '균형' };
+  serviceAutoStates[productId] = serviceAutoStates[productId] || {};
+  serviceAutoStates[productId].strategy = strategy;
+  await upsertSetting('ai_service_modes', JSON.stringify(serviceAutoStates));
+  showToast(`${productName(productId)}: ${strategyNames[strategy]} 모드로 전환`);
+  loadAutoControlPanel();
+}
+
 // 기존 toggleAdFromDashboard를 래핑 — 직원이 수동으로 ON/OFF하면 해당 서비스 수동모드 전환
 const _origToggleAd = toggleAdFromDashboard;
 async function toggleAdFromDashboardWrapped(productId, enable) {
@@ -3127,34 +3171,58 @@ async function saveBudgetSettings() {
   const weekly = document.getElementById('budgetWeekly').value || '0';
   const monthly = document.getElementById('budgetMonthly').value || '0';
   const budget = { daily: parseInt(daily), weekly: parseInt(weekly), monthly: parseInt(monthly) };
-  const { error } = await upsertSetting('ai_budget_limits', JSON.stringify(budget));
-  if (error) { showToast('예산 저장 실패', 'error'); return; }
-  showToast(`예산 저장: 일 ₩${fmt(budget.daily)} / 주 ₩${fmt(budget.weekly)} / 월 ₩${fmt(budget.monthly)}`);
+
+  // 1) ai_budget_limits에 JSON으로 저장 (대시보드용)
+  await upsertSetting('ai_budget_limits', JSON.stringify(budget));
+
+  // 2) 개별 키로도 저장 (백엔드 ad-scheduler/budget-monitor 호환)
+  await upsertSetting('daily_budget', String(budget.daily));
+  await upsertSetting('weekly_budget', String(budget.weekly));
+  await upsertSetting('monthly_budget', String(budget.monthly));
+
+  showToast(`예산 저장 완료: 일 ₩${fmt(budget.daily)} / 주 ₩${fmt(budget.weekly)} / 월 ₩${fmt(budget.monthly)}`);
   loadBudgetStatus();
 }
 
 async function loadBudgetStatus() {
-  const localBudget = getSetting('ai_budget_limits', null);
-  let budget;
-  if (localBudget) {
-    budget = JSON.parse(localBudget);
-  } else {
-    const { data: budgetSetting } = await sb.from('kmong_settings').select('value').eq('key', 'ai_budget_limits').single();
-    budget = budgetSetting?.value ? JSON.parse(budgetSetting.value) : { daily: 0, weekly: 0, monthly: 0 };
+  // Supabase에서 먼저 로드 시도, 실패 시 localStorage 폴백
+  let budget = { daily: 0, weekly: 0, monthly: 0 };
+  try {
+    const { data: allSettings } = await sb.from('kmong_settings').select('key, value').in('key', ['daily_budget', 'weekly_budget', 'monthly_budget', 'ai_budget_limits']);
+    if (allSettings && allSettings.length > 0) {
+      const map = {};
+      allSettings.forEach(r => { map[r.key] = r.value; });
+      // 개별 키 우선, 없으면 ai_budget_limits JSON 폴백
+      if (map.daily_budget || map.weekly_budget || map.monthly_budget) {
+        budget.daily = parseInt(map.daily_budget || '0', 10);
+        budget.weekly = parseInt(map.weekly_budget || '0', 10);
+        budget.monthly = parseInt(map.monthly_budget || '0', 10);
+      } else if (map.ai_budget_limits) {
+        budget = JSON.parse(map.ai_budget_limits);
+      }
+    }
+  } catch(e) {
+    // Supabase 실패 시 localStorage 폴백
+    const localBudget = getSetting('ai_budget_limits', null);
+    if (localBudget) budget = JSON.parse(localBudget);
   }
+
+  // localStorage에도 동기화
+  localStorage.setItem('kmong_setting_ai_budget_limits', JSON.stringify(budget));
+
   document.getElementById('budgetDaily').value = budget.daily || '';
   document.getElementById('budgetWeekly').value = budget.weekly || '';
   document.getElementById('budgetMonthly').value = budget.monthly || '';
 
-  // 현재 소진액 계산
+  // 현재 소진액 계산 (cpc_cost 컬럼 사용)
   const today = new Date().toISOString().split('T')[0];
   const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
   const monthStart = today.substring(0, 7) + '-01';
 
-  const { data: costs } = await sb.from('kmong_cpc_daily').select('date, cost').gte('date', monthStart);
-  const dailySpent = (costs || []).filter(c => c.date === today).reduce((s, c) => s + (c.cost || 0), 0);
-  const weeklySpent = (costs || []).filter(c => c.date >= weekAgo).reduce((s, c) => s + (c.cost || 0), 0);
-  const monthlySpent = (costs || []).reduce((s, c) => s + (c.cost || 0), 0);
+  const { data: costs } = await sb.from('kmong_cpc_daily').select('date, cpc_cost').gte('date', monthStart);
+  const dailySpent = (costs || []).filter(c => c.date === today).reduce((s, c) => s + (c.cpc_cost || 0), 0);
+  const weeklySpent = (costs || []).filter(c => c.date >= weekAgo).reduce((s, c) => s + (c.cpc_cost || 0), 0);
+  const monthlySpent = (costs || []).reduce((s, c) => s + (c.cpc_cost || 0), 0);
 
   const progress = document.getElementById('budgetProgress');
   progress.innerHTML = [
@@ -3171,7 +3239,7 @@ async function loadBudgetStatus() {
     </div>`;
   }).join('');
 
-  document.getElementById('budgetStatus').textContent = budget.daily > 0 ? '설정됨' : '미설정';
+  document.getElementById('budgetStatus').textContent = (budget.daily > 0 || budget.weekly > 0 || budget.monthly > 0) ? '설정됨' : '미설정';
 }
 
 /* === 수동 크롤링 === */
