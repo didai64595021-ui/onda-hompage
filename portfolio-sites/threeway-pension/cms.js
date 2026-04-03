@@ -89,17 +89,39 @@
    */
   async function saveCmsData(data) {
     try {
+      // Check payload size (base64 images can bloat JSON)
+      const payload = JSON.stringify({ data: data, updated_at: new Date().toISOString() });
+      const payloadSizeMB = new Blob([payload]).size / (1024 * 1024);
+
+      if (payloadSizeMB > 5) {
+        console.error('[CMS] Payload too large:', payloadSizeMB.toFixed(2) + 'MB');
+        alert('⚠️ 이미지가 너무 큽니다 (' + payloadSizeMB.toFixed(1) + 'MB).\n더 작은 이미지를 사용해주세요 (2MB 이하 권장).');
+        return false;
+      }
+
       const resp = await fetch(
         SUPABASE_URL + '/rest/v1/' + CMS_TABLE + '?id=eq.' + CMS_ROW_ID,
         {
           method: 'PATCH',
           headers: { ...headers, 'Prefer': 'return=representation' },
-          body: JSON.stringify({ data: data, updated_at: new Date().toISOString() })
+          body: payload
         }
       );
       if (!resp.ok) {
-        const err = await resp.json();
-        console.error('[CMS] Supabase save error:', err);
+        const errText = await resp.text();
+        let errMsg = '저장 실패';
+        try {
+          const errJson = JSON.parse(errText);
+          errMsg = errJson.message || errJson.error || errText;
+        } catch (_) {
+          errMsg = errText;
+        }
+        console.error('[CMS] Supabase save error:', errMsg);
+
+        // Detect payload size / row size errors
+        if (resp.status === 413 || errMsg.includes('too large') || errMsg.includes('payload') || errMsg.includes('size')) {
+          alert('⚠️ 데이터가 너무 큽니다.\n이미지 크기를 줄여주세요 (2MB 이하 권장).');
+        }
         return false;
       }
       return true;

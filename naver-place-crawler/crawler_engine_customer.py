@@ -317,9 +317,7 @@ class CrawlerEngine:
                         parts = line.split(":")
                         ip = parts[0].strip()
                         port = int(parts[1]) if len(parts) > 1 else 8080
-                        user = parts[2].strip() if len(parts) > 2 else None
-                        pw = parts[3].strip() if len(parts) > 3 else None
-                        proxy = {"ip": ip, "port": port, "user": user, "pw": pw, "blocked": False, "block_until": 0}
+                        proxy = {"ip": ip, "port": port, "blocked": False, "block_until": 0}
                         self._assign_fingerprint(proxy)
                         self.proxies.append(proxy)
             self.callback("log", f"프록시 {len(self.proxies)}개 로드됨")
@@ -372,10 +370,7 @@ class CrawlerEngine:
     def _get_proxy_dict(self, proxy):
         if not proxy:
             return None
-        if proxy.get("user") and proxy.get("pw"):
-            url = f"http://{proxy['user']}:{proxy['pw']}@{proxy['ip']}:{proxy['port']}"
-        else:
-            url = f"http://{proxy['ip']}:{proxy['port']}"
+        url = f"http://{proxy['ip']}:{proxy['port']}"
         return {"http": url, "https": url}
 
     def _get_next_proxy(self):
@@ -1485,99 +1480,70 @@ class CrawlerEngine:
         except ImportError:
             use_wdm = False
 
-        # ── 프록시 재시도 루프 (최대 3회) ──
-        max_proxy_retries = 3 if self.proxies else 1
-        proxy = self._get_next_proxy() if self.proxies else None
+        opts = Options()
+        # 최소화 모드 — 실제 렌더링하되 창은 숨김 (네이버 봇 감지 우회)
+        opts.add_argument("--window-position=-32000,-32000")
+        opts.add_argument("--disable-blink-features=AutomationControlled")
+        opts.add_argument("--no-sandbox")
+        opts.add_argument("--disable-dev-shm-usage")
+        opts.add_argument("--disable-gpu")
+        opts.add_argument("--window-size=1920,1080")
+        opts.add_experimental_option("excludeSwitches", ["enable-automation"])
+        opts.add_experimental_option("useAutomationExtension", False)
+        # Performance 로그 (GraphQL 쿼리 캡처용)
+        opts.set_capability("goog:loggingPrefs", {"performance": "ALL"})
+        fp = self._get_fingerprint()
+        opts.add_argument(f"user-agent={fp['ua']}")
 
-        for _proxy_attempt in range(max_proxy_retries):
-            opts = Options()
-            # 최소화 모드 — 실제 렌더링하되 창은 숨김 (네이버 봇 감지 우회)
-            opts.add_argument("--window-position=-32000,-32000")
-            opts.add_argument("--disable-blink-features=AutomationControlled")
-            opts.add_argument("--no-sandbox")
-            opts.add_argument("--disable-dev-shm-usage")
-            opts.add_argument("--disable-gpu")
-            opts.add_argument("--window-size=1920,1080")
-            opts.add_experimental_option("excludeSwitches", ["enable-automation"])
-            opts.add_experimental_option("useAutomationExtension", False)
-            # Performance 로그 (GraphQL 쿼리 캡처용)
-            opts.set_capability("goog:loggingPrefs", {"performance": "ALL"})
-            fp = self._get_fingerprint()
-            opts.add_argument(f"user-agent={fp['ua']}")
+        try:
+            if use_wdm:
+                service = Service(ChromeDriverManager().install())
+                driver = webdriver.Chrome(service=service, options=opts)
+            else:
+                driver = webdriver.Chrome(options=opts)
+        except Exception as e:
+            self.callback("log", f"  ⚠️ Chrome 드라이버 실패: {e}")
+            return None
 
-            # 프록시 적용
-            if proxy:
-                if proxy.get("user") and proxy.get("pw"):
-                    proxy_url = f"http://{proxy['user']}:{proxy['pw']}@{proxy['ip']}:{proxy['port']}"
-                else:
-                    proxy_url = f"http://{proxy['ip']}:{proxy['port']}"
-                opts.add_argument(f"--proxy-server={proxy_url}")
-                self.callback("log", f"  🔀 Selenium 프록시: {proxy['ip']}:{proxy['port']}")
+        results = []
+        page = 1
+        import re as _re
+        pid_pattern = _re.compile(r'/place/(\d+)')
 
-            try:
-                if use_wdm:
-                    service = Service(ChromeDriverManager().install())
-                    driver = webdriver.Chrome(service=service, options=opts)
-                else:
-                    driver = webdriver.Chrome(options=opts)
-            except Exception as e:
-                self.callback("log", f"  ⚠️ Chrome 드라이버 실패: {e}")
+        try:
+            search_url = f"https://map.naver.com/p/search/{quote(keyword)}"
+
+            # ── 1단계: 검색 URL 직접 접속 (쿠키 없이 — GraphQL 방식에서 쿠키 불필요) ──
+            driver.get(search_url)
+            time.sleep(5 + random.random() * 2)
+
+            # ── 2단계: iframe 로딩 대기 (최대 15초) ──
+            has_iframe = False
+            is_blocked = False
+            for _wait_iframe in range(15):
+                p_src = driver.page_source
+                has_iframe = "searchIframe" in p_src
+                is_blocked = ("서비스 이용이 제한" in p_src
+                              or "자동등록방지" in p_src)
+                if has_iframe or is_blocked:
+                    break
+                time.sleep(1)
+                # 팝업 닫기 시도
+                try:
+                    for btn in driver.find_elements(By.CSS_SELECTOR,
+                        "button.btn_close, button[aria-label='닫기'], .layer_popup button"):
+                        try:
+                            btn.click()
+                            time.sleep(0.3)
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
+
+            if not has_iframe:
+                self.callback("log", "  ⚠️ searchIframe 미발견 — Selenium 스킵")
+                driver.quit()
                 return None
-
-            results = []
-            page = 1
-            import re as _re
-            pid_pattern = _re.compile(r'/place/(\d+)')
-
-            try:
-                search_url = f"https://map.naver.com/p/search/{quote(keyword)}"
-
-                # ── 1단계: 검색 URL 직접 접속 (쿠키 없이 — GraphQL 방식에서 쿠키 불필요) ──
-                driver.get(search_url)
-                time.sleep(5 + random.random() * 2)
-
-                # ── 2단계: iframe 로딩 대기 (최대 15초) ──
-                has_iframe = False
-                is_blocked = False
-                for _wait_iframe in range(15):
-                    p_src = driver.page_source
-                    has_iframe = "searchIframe" in p_src
-                    is_blocked = ("서비스 이용이 제한" in p_src
-                                  or "자동등록방지" in p_src)
-                    # ncaptcha 오탐 방지: searchIframe 있으면 차단 아님
-                    if has_iframe:
-                        is_blocked = False
-                        break
-                    if is_blocked:
-                        break
-                    time.sleep(1)
-                    # 팝업 닫기 시도
-                    try:
-                        for btn in driver.find_elements(By.CSS_SELECTOR,
-                            "button.btn_close, button[aria-label='닫기'], .layer_popup button"):
-                            try:
-                                btn.click()
-                                time.sleep(0.3)
-                            except Exception:
-                                pass
-                    except Exception:
-                        pass
-
-                # 차단 감지 시 프록시 교체 재시도
-                if is_blocked and not has_iframe:
-                    self.callback("log", "  🚫 IP 차단 감지")
-                    driver.quit()
-                    if proxy and _proxy_attempt < max_proxy_retries - 1:
-                        self._mark_blocked(proxy)
-                        proxy = self._get_next_proxy()
-                        self.callback("log", f"  🔄 프록시 교체 후 재시도 ({_proxy_attempt + 2}/{max_proxy_retries})")
-                        continue
-                    return None
-
-                if not has_iframe:
-                    self.callback("log", "  ⚠️ searchIframe 미발견 — Selenium 스킵")
-                    driver.quit()
-                    return None
 
             # ── iframe 진입 ──
             driver.switch_to.default_content()
@@ -1807,18 +1773,15 @@ class CrawlerEngine:
                         except Exception:
                             pass
 
-            except Exception as e:
-                self.callback("log", f"  ⚠️ Selenium 오류: {e}")
-            finally:
-                try:
-                    driver.quit()
-                except Exception:
-                    pass
+        except Exception as e:
+            self.callback("log", f"  ⚠️ Selenium 오류: {e}")
+        finally:
+            try:
+                driver.quit()
+            except Exception:
+                pass
 
-            return results if results else None
-
-        # 모든 프록시 재시도 소진
-        return None
+        return results if results else None
 
     # ═══════════════════════════════════════════
     # Playwright 브라우저 크롤링 (map.naver.com)

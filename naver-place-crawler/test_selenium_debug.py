@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Selenium 디버그 테스트 — 네이버 지도 iframe 탐색 + CDP 네트워크 캡처
+Selenium 디버그 테스트 v2 — iframe 내부 HTML 덤프 + place 링크 구조 확인
 
 사용법: python test_selenium_debug.py "구리 피부과"
 """
@@ -29,189 +29,208 @@ except ImportError:
 
 keyword = sys.argv[1] if len(sys.argv) > 1 else "구리 피부과"
 print(f"키워드: [{keyword}]")
-print(f"URL 인코딩: {quote(keyword)}")
+print(f"URL: https://map.naver.com/p/search/{quote(keyword)}")
 print("=" * 60)
 
-# ── 드라이버 생성 ──
+# ── 드라이버 생성 (화면 보이게) ──
 opts = Options()
-# opts.add_argument("--headless=new")  # 디버그: 화면 보이게
+# headless 끔 — 화면 보면서 디버그
 opts.add_argument("--no-sandbox")
 opts.add_argument("--disable-dev-shm-usage")
 opts.add_argument("--disable-gpu")
 opts.add_argument("--window-size=1920,1080")
 opts.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
-
-# CDP 네트워크 로깅
 opts.set_capability("goog:loggingPrefs", {"performance": "ALL"})
 
-print("[1] Chrome 드라이버 시작...")
+print("[1] Chrome 시작...")
 if USE_WDM:
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=opts)
 else:
     driver = webdriver.Chrome(options=opts)
-print("    ✅ 드라이버 OK")
+print("    ✅ OK")
 
-# ── CDP Network 활성화 ──
-try:
-    driver.execute_cdp_cmd("Network.enable", {})
-    print("[1.5] CDP Network.enable ✅")
-except Exception as e:
-    print(f"[1.5] CDP Network.enable 실패: {e}")
-
-# ── 테스트 1: quote() 인코딩 URL ──
-url_encoded = f"https://map.naver.com/p/search/{quote(keyword)}"
-print(f"\n[2] 접속 (quote 인코딩): {url_encoded}")
-driver.get(url_encoded)
-time.sleep(5)
-
-# 차단 확인
-src = driver.page_source
-if "서비스 이용이 제한" in src or "ncaptcha" in src:
-    print("    ❌ IP 차단됨!")
-    print("    → VPN 켜거나 30분 후 재시도")
-    driver.quit()
-    sys.exit(1)
-else:
-    print("    ✅ 차단 아님")
-
-# 현재 URL 확인
+# ── 접속 ──
+url = f"https://map.naver.com/p/search/{quote(keyword)}"
+print(f"\n[2] 접속: {url}")
+driver.get(url)
+time.sleep(6)
 print(f"    현재 URL: {driver.current_url}")
 
-# ── 테스트 2: iframe 탐색 ──
-print("\n[3] iframe 탐색...")
-iframe_selectors = [
+# ── 모든 iframe 나열 ──
+print("\n[3] iframe 목록:")
+all_iframes = driver.find_elements(By.TAG_NAME, "iframe")
+print(f"    총 {len(all_iframes)}개")
+for i, f in enumerate(all_iframes):
+    fid = f.get_attribute("id") or ""
+    fname = f.get_attribute("name") or ""
+    fsrc = f.get_attribute("src") or ""
+    print(f"    [{i}] id='{fid}' name='{fname}' src='{fsrc[:100]}'")
+
+# ── iframe 진입 시도 ──
+print("\n[4] iframe 진입 시도...")
+selectors = [
     "iframe#searchIframe",
     "iframe[name='searchIframe']",
     "iframe[src*='search']",
 ]
-
-# 모든 iframe 나열
-all_iframes = driver.find_elements(By.TAG_NAME, "iframe")
-print(f"    전체 iframe 수: {len(all_iframes)}")
-for i, iframe in enumerate(all_iframes):
-    fid = iframe.get_attribute("id") or "(없음)"
-    fname = iframe.get_attribute("name") or "(없음)"
-    fsrc = iframe.get_attribute("src") or "(없음)"
-    print(f"    [{i}] id={fid}, name={fname}, src={fsrc[:80]}...")
-
-found_iframe = False
-for sel in iframe_selectors:
+entered = False
+for sel in selectors:
     try:
         iframe = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, sel))
         )
-        print(f"    ✅ 셀렉터 '{sel}' → iframe 발견!")
         driver.switch_to.frame(iframe)
-        found_iframe = True
+        entered = True
+        print(f"    ✅ '{sel}' 성공!")
         break
-    except Exception:
-        print(f"    ❌ 셀렉터 '{sel}' → 못 찾음")
+    except:
+        print(f"    ❌ '{sel}' 실패")
 
-if found_iframe:
-    # place 링크 수집
+if not entered:
+    # 아무 iframe이나 시도
+    if all_iframes:
+        print("    → 첫 번째 iframe으로 시도...")
+        try:
+            driver.switch_to.frame(all_iframes[0])
+            entered = True
+            print("    ✅ 첫 번째 iframe 진입 성공")
+        except:
+            print("    ❌ 실패")
+
+if entered:
+    # ── 스크롤 ──
+    print("\n[5] iframe 내부 스크롤 + 링크 탐색...")
     time.sleep(2)
-    links = driver.find_elements(By.CSS_SELECTOR, "a[href*='/place/']")
-    print(f"\n[4] iframe 내 place 링크: {len(links)}개")
-    pid_pattern = re.compile(r'/place/(\d+)')
-    for i, link in enumerate(links[:10]):
+    
+    body = driver.find_element(By.TAG_NAME, "body")
+    for i in range(5):
+        driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", body)
+        time.sleep(1)
+    
+    # ── 모든 <a> 태그 확인 ──
+    all_links = driver.find_elements(By.TAG_NAME, "a")
+    print(f"    전체 <a> 태그: {len(all_links)}개")
+    
+    # place 링크
+    place_links = driver.find_elements(By.CSS_SELECTOR, "a[href*='/place/']")
+    print(f"    a[href*='/place/'] : {len(place_links)}개")
+    
+    # 다른 패턴들도 확인
+    place_links2 = driver.find_elements(By.CSS_SELECTOR, "a[href*='place.naver']")
+    print(f"    a[href*='place.naver'] : {len(place_links2)}개")
+    
+    place_links3 = driver.find_elements(By.CSS_SELECTOR, "[data-id]")
+    print(f"    [data-id] 요소 : {len(place_links3)}개")
+    
+    place_links4 = driver.find_elements(By.CSS_SELECTOR, "li[data-id]")
+    print(f"    li[data-id] 요소 : {len(place_links4)}개")
+
+    # data-cid (네이버 place ID 다른 속성)
+    place_links5 = driver.find_elements(By.CSS_SELECTOR, "[data-cid]")
+    print(f"    [data-cid] 요소 : {len(place_links5)}개")
+
+    # ── href 패턴 분석 ──
+    print("\n[6] href 패턴 분석 (상위 20개 a 태그):")
+    href_patterns = {}
+    for link in all_links[:100]:
         href = link.get_attribute("href") or ""
-        text = link.text.strip()[:30]
-        m = pid_pattern.search(href)
-        pid = m.group(1) if m else "?"
-        print(f"    [{i+1}] pid={pid}, text={text}")
+        if href:
+            # 도메인+경로 앞부분만 추출
+            pattern = re.sub(r'\d+', '{N}', href)[:80]
+            href_patterns[pattern] = href_patterns.get(pattern, 0) + 1
+    
+    for pattern, count in sorted(href_patterns.items(), key=lambda x: -x[1])[:15]:
+        print(f"    [{count}x] {pattern}")
+
+    # ── 실제 링크 샘플 출력 ──
+    print("\n[7] place 관련 링크 샘플:")
+    pid_pattern = re.compile(r'/place/(\d+)')
+    found = 0
+    for link in all_links:
+        href = link.get_attribute("href") or ""
+        if "/place/" in href or "place.naver" in href:
+            text = link.text.strip()[:40] or "(텍스트없음)"
+            m = pid_pattern.search(href)
+            pid = m.group(1) if m else "?"
+            print(f"    pid={pid} | text={text} | href={href[:80]}")
+            found += 1
+            if found >= 10:
+                break
+    
+    if found == 0:
+        print("    → place 링크 0건!")
+    
+    # ── iframe 내부 HTML 일부 덤프 ──
+    print("\n[8] iframe body HTML (앞 3000자):")
+    body_html = driver.find_element(By.TAG_NAME, "body").get_attribute("innerHTML")
+    print(body_html[:3000])
+    
+    # HTML 파일로도 저장
+    with open("debug_iframe_html.html", "w", encoding="utf-8") as f:
+        f.write(body_html)
+    print(f"\n    → 전체 HTML 저장: debug_iframe_html.html ({len(body_html)}자)")
     
     driver.switch_to.default_content()
-else:
-    print("\n    ⚠️ 모든 iframe 셀렉터 실패!")
-    
-    # 페이지 새로고침 후 재시도
-    print("\n[3.5] 페이지 새로고침 후 재시도...")
-    driver.refresh()
-    time.sleep(6)
-    
-    all_iframes = driver.find_elements(By.TAG_NAME, "iframe")
-    print(f"    새로고침 후 iframe 수: {len(all_iframes)}")
-    for i, iframe in enumerate(all_iframes):
-        fid = iframe.get_attribute("id") or "(없음)"
-        fname = iframe.get_attribute("name") or "(없음)"
-        fsrc = iframe.get_attribute("src") or "(없음)"
-        print(f"    [{i}] id={fid}, name={fname}, src={fsrc[:80]}...")
 
-# ── 테스트 3: CDP 네트워크 로그에서 allSearch 찾기 ──
-print("\n[5] CDP 네트워크 로그 분석...")
+else:
+    print("\n    ⚠️ iframe 진입 불가!")
+    # 메인 페이지 HTML 덤프
+    print("\n[8] 메인 페이지 HTML (앞 3000자):")
+    print(driver.page_source[:3000])
+
+# ── CDP 네트워크: allSearch API ──
+print("\n\n[9] CDP 네트워크 로그 — allSearch API:")
 try:
     logs = driver.get_log("performance")
-    print(f"    로그 수: {len(logs)}")
-    
-    search_responses = []
     for entry in logs:
         try:
             msg = json.loads(entry["message"])["message"]
             if msg["method"] == "Network.responseReceived":
-                url = msg["params"]["response"]["url"]
-                if "allSearch" in url or "search" in url.lower():
-                    search_responses.append({
-                        "url": url[:100],
-                        "status": msg["params"]["response"]["status"],
-                        "requestId": msg["params"]["requestId"],
-                    })
-        except Exception:
+                resp_url = msg["params"]["response"]["url"]
+                if "allSearch" in resp_url:
+                    req_id = msg["params"]["requestId"]
+                    print(f"    URL: {resp_url[:120]}")
+                    try:
+                        body = driver.execute_cdp_cmd("Network.getResponseBody", {"requestId": req_id})
+                        data = json.loads(body.get("body", "{}"))
+                        place = data.get("result", {}).get("place", {})
+                        items = place.get("list", [])
+                        total = place.get("totalCount", 0)
+                        print(f"    → total={total}, items={len(items)}")
+                        for j, it in enumerate(items[:5]):
+                            print(f"      [{j+1}] id={it.get('id')}, name={it.get('name')}")
+                    except Exception as e:
+                        print(f"    → body 파싱 실패: {e}")
+        except:
             pass
-    
-    print(f"    검색 관련 응답: {len(search_responses)}개")
-    for i, resp in enumerate(search_responses):
-        print(f"    [{i}] status={resp['status']}, url={resp['url']}")
-        
-        # allSearch 응답 본문 가져오기
-        if "allSearch" in resp["url"]:
-            try:
-                body = driver.execute_cdp_cmd("Network.getResponseBody", {"requestId": resp["requestId"]})
-                data = json.loads(body.get("body", "{}"))
-                place = data.get("result", {}).get("place", {})
-                items = place.get("list", [])
-                total = place.get("totalCount", 0)
-                print(f"    → allSearch 파싱 성공! total={total}, items={len(items)}")
-                for j, it in enumerate(items[:5]):
-                    print(f"      [{j+1}] id={it.get('id')}, name={it.get('name')}")
-            except Exception as e:
-                print(f"    → 본문 파싱 실패: {e}")
-
 except Exception as e:
-    print(f"    ❌ 로그 조회 실패: {e}")
+    print(f"    ❌ {e}")
 
-# ── 테스트 4: 직접 API 호출 (Selenium 세션 쿠키 활용) ──
-print("\n[6] 직접 allSearch API 호출 테스트...")
+# ── 직접 API fetch ──
+print("\n[10] 직접 allSearch API fetch:")
 try:
     api_url = f"https://map.naver.com/p/api/search/allSearch?query={quote(keyword)}&type=all&searchCoord=&boundary="
-    driver.execute_script(f"""
-        fetch("{api_url}")
-            .then(r => r.json())
-            .then(d => {{
-                document.title = JSON.stringify({{
-                    total: d.result?.place?.totalCount || 0,
-                    count: d.result?.place?.list?.length || 0,
-                    first5: (d.result?.place?.list || []).slice(0, 5).map(x => ({{id: x.id, name: x.name}}))
-                }});
-            }})
-            .catch(e => {{ document.title = "FETCH_ERROR:" + e.message; }});
-    """)
-    time.sleep(3)
-    title = driver.title
-    if title.startswith("FETCH_ERROR"):
-        print(f"    ❌ API 호출 실패: {title}")
-    else:
-        try:
-            result = json.loads(title)
-            print(f"    ✅ API 응답: total={result['total']}, count={result['count']}")
-            for it in result.get("first5", []):
-                print(f"      id={it['id']}, name={it['name']}")
-        except Exception:
-            print(f"    ⚠️ title 파싱 실패: {title[:100]}")
+    script = f"""
+        var result = await fetch("{api_url}").then(r => r.json());
+        var place = result.result?.place || {{}};
+        return JSON.stringify({{
+            total: place.totalCount || 0,
+            count: (place.list || []).length,
+            first5: (place.list || []).slice(0, 5).map(x => ({{id: x.id, name: x.name}}))
+        }});
+    """
+    res = driver.execute_script(f"return (async () => {{ {script} }})()")
+    time.sleep(2)
+    res = driver.execute_script(f"return (async () => {{ {script} }})()")
+    data = json.loads(res)
+    print(f"    ✅ total={data['total']}, count={data['count']}")
+    for it in data.get("first5", []):
+        print(f"      id={it['id']}, name={it['name']}")
 except Exception as e:
-    print(f"    ❌ API 테스트 실패: {e}")
+    print(f"    ❌ {e}")
 
 print("\n" + "=" * 60)
-print("디버그 완료. 10초 후 브라우저 종료...")
-time.sleep(10)
+print("완료. 15초 후 종료 (브라우저 확인 가능)...")
+time.sleep(15)
 driver.quit()

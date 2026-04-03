@@ -490,7 +490,8 @@
       'rates-faq-q-1','rates-faq-a-1','rates-faq-q-2','rates-faq-a-2','rates-faq-q-3','rates-faq-a-3',
       'rates-faq-q-4','rates-faq-a-4','rates-faq-q-5','rates-faq-a-5'
     ],
-    '💰 할인 정책': ['rates-discount-over10','rates-discount-under10'],
+    '💰 할인 정책 (10인 이상)': ['discount-10plus-1','discount-10plus-2','discount-10plus-3','discount-10plus-4','discount-10plus-5'],
+    '💰 할인 정책 (10인 미만)': ['discount-10minus-1','discount-10minus-2','discount-10minus-3','discount-10minus-4','discount-10minus-5'],
 
     // 패키지 공통 - package.html
     '📦 패키지 공통 포함사항': [
@@ -514,7 +515,7 @@
     '전체': null,
     '메인(홈)': ['🎠 히어로 슬라이더','📺 방송 배지','🛏️ 객실 미리보기 (메인)','🥩 바비큐 하이라이트','🏊 시설 스크롤 (메인)'],
     '객실소개': ['🛏️ 객실소개 페이지','🛏️ 객실 상세 (소나무)','🛏️ 객실 상세 (단풍나무)','🛏️ 객실 상세 (튤립)','🛏️ 객실 상세 (스위트1)','🛏️ 객실 상세 (스위트2)','🛏️ 객실 상세 (디즈니)','🛏️ 객실 상세 (민트)'],
-    '요금안내': ['💰 요금 페이지 히어로','💰 요금 - 비수기','💰 요금 - 준성수기','💰 요금 - 성수기','💰 요금 FAQ (뽕뽑는법)','💰 할인 정책'],
+    '요금안내': ['💰 요금 페이지 히어로','💰 요금 - 비수기','💰 요금 - 준성수기','💰 요금 - 성수기','💰 요금 FAQ (뽕뽑는법)','💰 할인 정책 (10인 이상)','💰 할인 정책 (10인 미만)'],
     '패키지': ['📦 패키지 페이지 히어로','🐷 돼지고기나라 패키지','🦐 해산물나라 패키지','📸 패키지 갤러리','📦 패키지 공통 포함사항'],
     '시설안내': ['🏊 시설 페이지 히어로','🏊 시설 카드','🏊 시설 상세'],
     '주변관광': ['🗺️ 주변관광 히어로','🗺️ 관광명소','🤝 제휴할인'],
@@ -673,7 +674,8 @@
     'rates-faq-q-3': '요금FAQ 질문 3', 'rates-faq-a-3': '요금FAQ 답변 3',
     'rates-faq-q-4': '요금FAQ 질문 4', 'rates-faq-a-4': '요금FAQ 답변 4',
     'rates-faq-q-5': '요금FAQ 질문 5', 'rates-faq-a-5': '요금FAQ 답변 5',
-    'rates-discount-over10': '10인 이상 할인 정책', 'rates-discount-under10': '10인 미만 할인 정책',
+    'discount-10plus-1': '10인이상 할인 항목 1', 'discount-10plus-2': '10인이상 할인 항목 2', 'discount-10plus-3': '10인이상 할인 항목 3', 'discount-10plus-4': '10인이상 할인 항목 4', 'discount-10plus-5': '10인이상 할인 항목 5',
+    'discount-10minus-1': '10인미만 할인 항목 1', 'discount-10minus-2': '10인미만 할인 항목 2', 'discount-10minus-3': '10인미만 할인 항목 3', 'discount-10minus-4': '10인미만 할인 항목 4', 'discount-10minus-5': '10인미만 할인 항목 5',
 
     'pkg-common-1': '공통 포함 1', 'pkg-common-2': '공통 포함 2',
     'pkg-common-3': '공통 포함 3', 'pkg-common-4': '공통 포함 4',
@@ -1325,7 +1327,17 @@
   const previewFrame = document.getElementById('previewFrame');
   const previewTitle = document.getElementById('previewTitle');
 
-  function openPreview() {
+  async function openPreview() {
+    // Auto-save if there are unsaved changes before preview
+    if (hasUnsavedChanges) {
+      showToast('💾 변경사항 자동 저장 중...');
+      const saved = await doSave();
+      if (saved) {
+        showToast('✅ 저장 완료! 미리보기를 엽니다.');
+      } else {
+        showToast('❌ 저장 실패! 미리보기에 최신 데이터가 반영되지 않을 수 있습니다.');
+      }
+    }
     const page = tabPageMap[activeTab] || 'index.html';
     previewFrame.src = page;
     previewTitle.textContent = '미리보기 — ' + activeTab;
