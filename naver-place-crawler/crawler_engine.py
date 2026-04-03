@@ -1490,6 +1490,9 @@ class CrawlerEngine:
         opts.add_argument("--disable-gpu")
         opts.add_argument("--window-size=1920,1080")
 
+        # CDP 네트워크 로그 활성화 (iframe 실패 시 폴백용)
+        opts.set_capability("goog:loggingPrefs", {"performance": "ALL"})
+
         # 핑거프린트 (프록시별 고정 UA)
         fp = self._get_fingerprint(proxy)
         opts.add_argument(f"user-agent={fp['ua']}")
@@ -1513,6 +1516,116 @@ class CrawlerEngine:
         except Exception as e:
             self.callback("log", f"  ⚠️ Chrome 드라이버 실패: {e}")
             return None
+
+    def _selenium_cdp_fallback(self, driver, keyword, pid_pattern):
+        """CDP 네트워크 로그에서 allSearch API 응답을 파싱하여 place 목록 추출.
+
+        iframe 전환이 실패했을 때의 폴백 경로.
+        Returns:
+            list of {"id": str, "name": str} 또는 None
+        """
+        import re as _re
+        try:
+            # 페이지 재로드하여 네트워크 요청 캡처
+            driver.get(f"https://map.naver.com/p/search/{quote(keyword)}")
+            time.sleep(5 + random.random() * 2)
+
+            logs = driver.get_log("performance")
+            results = []
+            seen_ids = set()
+
+            for entry in logs:
+                try:
+                    log_msg = json.loads(entry["message"])
+                    msg = log_msg.get("message", {})
+
+                    # Network.responseReceived 이벤트에서 allSearch URL 찾기
+                    if msg.get("method") != "Network.responseReceived":
+                        continue
+
+                    resp_url = msg.get("params", {}).get("response", {}).get("url", "")
+                    if "allSearch" not in resp_url and "place" not in resp_url:
+                        continue
+
+                    request_id = msg.get("params", {}).get("requestId")
+                    if not request_id:
+                        continue
+
+                    # 응답 본문 가져오기
+                    try:
+                        body_resp = driver.execute_cdp_cmd(
+                            "Network.getResponseBody", {"requestId": request_id}
+                        )
+                        body_text = body_resp.get("body", "")
+                    except Exception:
+                        continue
+
+                    if not body_text:
+                        continue
+
+                    # JSON 파싱하여 place ID 추출
+                    try:
+                        data = json.loads(body_text)
+                    except (json.JSONDecodeError, ValueError):
+                        continue
+
+                    # 네이버 지도 allSearch 응답 구조에서 place 목록 추출
+                    place_list = self._extract_places_from_api(data, pid_pattern, _re)
+                    for item in place_list:
+                        if item["id"] not in seen_ids:
+                            seen_ids.add(item["id"])
+                            results.append(item)
+
+                except Exception:
+                    continue
+
+            return results if results else None
+
+        except Exception as e:
+            self.callback("log", f"  ⚠️ CDP 폴백 오류: {e}")
+            return None
+
+    def _extract_places_from_api(self, data, pid_pattern, _re):
+        """네이버 지도 API 응답 JSON에서 place 목록 추출.
+
+        다양한 응답 구조를 재귀적으로 탐색.
+        """
+        results = []
+
+        if isinstance(data, dict):
+            # "result" > "place" > "list" 패턴 (allSearch)
+            result = data.get("result", data)
+            place_section = result.get("place", result)
+
+            if isinstance(place_section, dict):
+                place_list = place_section.get("list", [])
+                if isinstance(place_list, list):
+                    for item in place_list:
+                        if isinstance(item, dict):
+                            pid = str(item.get("id", item.get("placeId", "")))
+                            name = item.get("name", item.get("title", ""))
+                            # HTML 태그 제거
+                            if name:
+                                name = _re.sub(r'<[^>]+>', '', str(name)).strip()
+                            if pid and name:
+                                results.append({"id": pid, "name": name})
+
+            # "searchResult" 패턴
+            search_result = data.get("searchResult", {})
+            if isinstance(search_result, dict):
+                for key in ("placeList", "list", "items"):
+                    items = search_result.get(key, [])
+                    if isinstance(items, list):
+                        for item in items:
+                            if isinstance(item, dict):
+                                pid = str(item.get("id", item.get("placeId", "")))
+                                name = item.get("name", item.get("title", ""))
+                                if name:
+                                    name = _re.sub(r'<[^>]+>', '', str(name)).strip()
+                                if pid and name:
+                                    results.append({"id": pid, "name": name})
+
+        return results
 
     def _selenium_rank_search(self, keyword, max_pages=0, naver_id=None, naver_pw=None):
         """Selenium으로 네이버 지도 검색 → 실제 순위 + place ID 수집.
@@ -1569,8 +1682,8 @@ class CrawlerEngine:
                 self.callback("log", "  ℹ️ 비로그인 모드로 진행")
 
             try:
-                # Selenium은 브라우저이므로 URL 인코딩 불필요 (띄어쓰기 키워드 호환)
-                driver.get(f"https://map.naver.com/p/search/{keyword}")
+                # 공백 포함 키워드는 URL 인코딩 필수 (Selenium driver.get은 자동 인코딩 안 함)
+                driver.get(f"https://map.naver.com/p/search/{quote(keyword)}")
                 time.sleep(4 + random.random() * 2)
 
                 # 차단 확인
@@ -1618,13 +1731,72 @@ class CrawlerEngine:
                     break
 
                 driver.switch_to.default_content()
-                try:
-                    iframe = WebDriverWait(driver, 10).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, "iframe#searchIframe"))
-                    )
-                    driver.switch_to.frame(iframe)
-                except Exception:
-                    self.callback("log", f"  ⚠️ iframe 전환 실패 (페이지 {page}) — 띄어쓰기 키워드일 경우 로딩 지연 가능")
+                iframe_switched = False
+
+                # iframe 셀렉터 우선순위
+                iframe_selectors = [
+                    "iframe#searchIframe",
+                    "iframe[name='searchIframe']",
+                    "iframe[src*='search']",
+                ]
+
+                # 시도 1: 여러 셀렉터로 iframe 탐색
+                for sel in iframe_selectors:
+                    try:
+                        iframe = WebDriverWait(driver, 5).until(
+                            EC.presence_of_element_located((By.CSS_SELECTOR, sel))
+                        )
+                        driver.switch_to.frame(iframe)
+                        iframe_switched = True
+                        break
+                    except Exception:
+                        driver.switch_to.default_content()
+                        continue
+
+                # 시도 2: 추가 대기 후 재시도
+                if not iframe_switched:
+                    time.sleep(3)
+                    for sel in iframe_selectors:
+                        try:
+                            iframe = WebDriverWait(driver, 5).until(
+                                EC.presence_of_element_located((By.CSS_SELECTOR, sel))
+                            )
+                            driver.switch_to.frame(iframe)
+                            iframe_switched = True
+                            break
+                        except Exception:
+                            driver.switch_to.default_content()
+                            continue
+
+                # 시도 3: 페이지 새로고침 후 재시도
+                if not iframe_switched:
+                    self.callback("log", f"  🔄 iframe 미발견 → 페이지 새로고침 후 재시도 (페이지 {page})")
+                    driver.refresh()
+                    time.sleep(4 + random.random() * 2)
+                    for sel in iframe_selectors:
+                        try:
+                            iframe = WebDriverWait(driver, 10).until(
+                                EC.presence_of_element_located((By.CSS_SELECTOR, sel))
+                            )
+                            driver.switch_to.frame(iframe)
+                            iframe_switched = True
+                            break
+                        except Exception:
+                            driver.switch_to.default_content()
+                            continue
+
+                # iframe 전환 모두 실패 → CDP 네트워크 로그 폴백
+                if not iframe_switched:
+                    self.callback("log", f"  ⚠️ iframe 전환 실패 (페이지 {page}) → CDP 네트워크 로그 폴백 시도")
+                    cdp_results = self._selenium_cdp_fallback(driver, keyword, pid_pattern)
+                    if cdp_results:
+                        for idx, item in enumerate(cdp_results):
+                            item["rank"] = len(results) + idx + 1
+                            item["page"] = page
+                        results.extend(cdp_results)
+                        self.callback("log", f"  📊 CDP 폴백: +{len(cdp_results)}건 수집")
+                    else:
+                        self.callback("log", f"  ❌ CDP 폴백도 실패 — 순위 수집 불가")
                     break
 
                 time.sleep(1.5 + random.random())
