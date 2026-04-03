@@ -317,10 +317,17 @@ class CrawlerEngine:
                         parts = line.split(":")
                         ip = parts[0].strip()
                         port = int(parts[1]) if len(parts) > 1 else 8080
-                        proxy = {"ip": ip, "port": port, "blocked": False, "block_until": 0}
+                        user = parts[2].strip() if len(parts) > 2 else None
+                        pw = parts[3].strip() if len(parts) > 3 else None
+                        proxy = {
+                            "ip": ip, "port": port,
+                            "user": user, "pw": pw,
+                            "blocked": False, "block_until": 0,
+                        }
                         self._assign_fingerprint(proxy)
                         self.proxies.append(proxy)
-            self.callback("log", f"프록시 {len(self.proxies)}개 로드됨")
+            auth_count = sum(1 for p in self.proxies if p.get("user"))
+            self.callback("log", f"프록시 {len(self.proxies)}개 로드됨 (인증: {auth_count}개)")
 
         # 직접연결용 fingerprint
         self._direct_fp_idx = random.randint(0, len(FINGERPRINTS) - 1)
@@ -370,7 +377,10 @@ class CrawlerEngine:
     def _get_proxy_dict(self, proxy):
         if not proxy:
             return None
-        url = f"http://{proxy['ip']}:{proxy['port']}"
+        if proxy.get("user") and proxy.get("pw"):
+            url = f"http://{proxy['user']}:{proxy['pw']}@{proxy['ip']}:{proxy['port']}"
+        else:
+            url = f"http://{proxy['ip']}:{proxy['port']}"
         return {"http": url, "https": url}
 
     def _get_next_proxy(self):
@@ -1457,22 +1467,15 @@ class CrawlerEngine:
                 continue
         return True
 
-    def _selenium_rank_search(self, keyword, max_pages=0, naver_id=None, naver_pw=None):
-        """Selenium으로 네이버 지도 검색 → 실제 순위 + place ID 수집.
-        
-        naver_id/naver_pw가 있으면 로그인 후 크롤링 (차단 위험 감소).
-        
+    def _selenium_build_driver(self, proxy=None):
+        """Selenium Chrome driver 생성 (프록시/핑거프린트 적용).
+
         Returns:
-            list of {"id": str, "name": str, "rank": int, "page": int} 또는 None (실패/차단 시)
+            (driver, use_wdm) 또는 None (실패 시)
         """
-        try:
-            from selenium import webdriver
-            from selenium.webdriver.chrome.options import Options
-            from selenium.webdriver.chrome.service import Service
-            from selenium.webdriver.common.by import By
-        except ImportError:
-            self.callback("log", "  ⚠️ selenium 미설치 — pip install selenium")
-            return None
+        from selenium import webdriver
+        from selenium.webdriver.chrome.options import Options
+        from selenium.webdriver.chrome.service import Service
 
         try:
             from webdriver_manager.chrome import ChromeDriverManager
@@ -1486,8 +1489,19 @@ class CrawlerEngine:
         opts.add_argument("--disable-dev-shm-usage")
         opts.add_argument("--disable-gpu")
         opts.add_argument("--window-size=1920,1080")
-        fp = self._get_fingerprint()
+
+        # 핑거프린트 (프록시별 고정 UA)
+        fp = self._get_fingerprint(proxy)
         opts.add_argument(f"user-agent={fp['ua']}")
+
+        # 프록시 적용
+        if proxy:
+            if proxy.get("user") and proxy.get("pw"):
+                proxy_url = f"http://{proxy['user']}:{proxy['pw']}@{proxy['ip']}:{proxy['port']}"
+            else:
+                proxy_url = f"http://{proxy['ip']}:{proxy['port']}"
+            opts.add_argument(f"--proxy-server={proxy_url}")
+            self.callback("log", f"  🔀 Selenium 프록시: {proxy['ip']}:{proxy['port']}")
 
         try:
             if use_wdm:
@@ -1495,24 +1509,99 @@ class CrawlerEngine:
                 driver = webdriver.Chrome(service=service, options=opts)
             else:
                 driver = webdriver.Chrome(options=opts)
+            return driver
         except Exception as e:
             self.callback("log", f"  ⚠️ Chrome 드라이버 실패: {e}")
             return None
 
-        # 네이버 로그인 (쿠키 우선 → ID/PW 폴백)
-        logged_in = False
-        if CrawlerEngine._naver_cookies or os.path.isfile(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "naver_cookies.json")
-        ):
-            logged_in = self._selenium_load_cookies(driver)
-            if logged_in:
-                self.callback("log", "  🍪 저장된 쿠키로 로그인")
-        
-        if not logged_in and naver_id and naver_pw:
-            logged_in = self._selenium_naver_login(driver, naver_id, naver_pw)
-        
-        if not logged_in:
-            self.callback("log", "  ℹ️ 비로그인 모드로 진행")
+    def _selenium_rank_search(self, keyword, max_pages=0, naver_id=None, naver_pw=None):
+        """Selenium으로 네이버 지도 검색 → 실제 순위 + place ID 수집.
+
+        naver_id/naver_pw가 있으면 로그인 후 크롤링 (차단 위험 감소).
+        프록시가 설정돼 있으면 자동 적용, 차단 시 최대 3회 프록시 교체 재시도.
+
+        Returns:
+            list of {"id": str, "name": str, "rank": int, "page": int} 또는 None (실패/차단 시)
+        """
+        try:
+            from selenium import webdriver
+            from selenium.webdriver.chrome.options import Options
+            from selenium.webdriver.chrome.service import Service
+            from selenium.webdriver.common.by import By
+        except ImportError:
+            self.callback("log", "  ⚠️ selenium 미설치 — pip install selenium")
+            return None
+
+        # 프록시 선택 (있으면)
+        proxy = self._get_next_proxy() if self.proxies else None
+
+        # 차단 시 프록시 교체 재시도 (최대 3회)
+        max_retries = 3 if self.proxies else 1
+        driver = None
+
+        for attempt in range(max_retries):
+            if driver:
+                try:
+                    driver.quit()
+                except Exception:
+                    pass
+
+            driver = self._selenium_build_driver(proxy)
+            if not driver:
+                return None
+
+            # 네이버 로그인 (쿠키 우선 → ID/PW 폴백)
+            logged_in = False
+            if CrawlerEngine._naver_cookies or os.path.isfile(
+                os.path.join(os.path.dirname(os.path.abspath(__file__)), "naver_cookies.json")
+            ):
+                logged_in = self._selenium_load_cookies(driver)
+                if logged_in:
+                    self.callback("log", "  🍪 저장된 쿠키로 로그인")
+
+            if not logged_in and naver_id and naver_pw:
+                logged_in = self._selenium_naver_login(driver, naver_id, naver_pw)
+
+            if not logged_in:
+                self.callback("log", "  ℹ️ 비로그인 모드로 진행")
+
+            try:
+                driver.get(f"https://map.naver.com/p/search/{quote(keyword)}")
+                time.sleep(4 + random.random() * 2)
+
+                # 차단 확인
+                src = driver.page_source
+                if "서비스 이용이 제한" in src or "ncaptcha" in src:
+                    if proxy:
+                        self._mark_blocked(proxy)
+                        self.callback("log", f"  ❌ 프록시 {proxy['ip']} 차단 → 교체 재시도 ({attempt + 1}/{max_retries})")
+                        proxy = self._get_next_proxy()
+                        continue
+                    else:
+                        self.callback("log", "  ❌ IP 차단됨 — Selenium 순위 수집 스킵")
+                        driver.quit()
+                        return None
+                # 차단 아님 → 정상 진행
+                break
+            except Exception as e:
+                self.callback("log", f"  ⚠️ Selenium 접속 오류: {e}")
+                if attempt < max_retries - 1 and proxy:
+                    self._mark_blocked(proxy)
+                    proxy = self._get_next_proxy()
+                    continue
+                try:
+                    driver.quit()
+                except Exception:
+                    pass
+                return None
+        else:
+            # 모든 재시도 실패
+            self.callback("log", "  ❌ 프록시 모두 차단 — Selenium 순위 수집 실패")
+            try:
+                driver.quit()
+            except Exception:
+                pass
+            return None
 
         results = []
         page = 1
@@ -1520,15 +1609,6 @@ class CrawlerEngine:
         pid_pattern = _re.compile(r'/place/(\d+)')
 
         try:
-            driver.get(f"https://map.naver.com/p/search/{quote(keyword)}")
-            time.sleep(4 + random.random() * 2)
-
-            # 차단 확인
-            if "서비스 이용이 제한" in driver.page_source or "ncaptcha" in driver.page_source:
-                self.callback("log", "  ❌ IP 차단됨 — Selenium 순위 수집 스킵")
-                driver.quit()
-                return None
-
             while max_pages == 0 or page <= max_pages:
                 if not self.running:
                     break

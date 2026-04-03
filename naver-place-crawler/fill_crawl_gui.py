@@ -345,7 +345,7 @@ class CrawlerGUI:
         )
         self.rank_mode_check.pack(side="left")
         self.rank_mode_note = tk.Label(
-            self.rank_mode_frame, text="Chrome 필요 · 느림",
+            self.rank_mode_frame, text="Chrome 필요 · 느림 · 프록시 자동 적용",
             font=("Pretendard", 9), fg=C_SUBTEXT, bg=C_CARD,
         )
         self.rank_mode_note.pack(side="left", padx=(8, 0))
