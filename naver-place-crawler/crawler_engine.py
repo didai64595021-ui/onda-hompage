@@ -1742,10 +1742,11 @@ class CrawlerEngine:
                         data = _json.loads(body_text)
                         if isinstance(data, list):
                             data = data[0]
-                        biz = data.get("data", {}).get("businesses", {})
-                        total = biz.get("total", 0)
-                        items = biz.get("items", [])
-                        if total > 0:
+                        biz = (data or {}).get("data", {}) or {}
+                        biz = biz.get("businesses", {}) or {}
+                        total = biz.get("total", 0) or 0
+                        items = biz.get("items", []) or []
+                        if total and total > 0:
                             last_total = total
 
                         if not items:
