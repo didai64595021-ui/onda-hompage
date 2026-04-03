@@ -1464,9 +1464,9 @@ class CrawlerEngine:
 
     def _selenium_rank_search(self, keyword, max_pages=0, naver_id=None, naver_pw=None):
         """Selenium으로 네이버 지도 검색 → 실제 순위 + place ID 수집.
-        
+
         naver_id/naver_pw가 있으면 로그인 후 크롤링 (차단 위험 감소).
-        
+
         Returns:
             list of {"id": str, "name": str, "rank": int, "page": int} 또는 None (실패/차단 시)
         """
@@ -1485,9 +1485,12 @@ class CrawlerEngine:
         except ImportError:
             use_wdm = False
 
+        import re as _re
+        pid_pattern = _re.compile(r'/place/(\d+)')
+
         # ── 프록시 재시도 루프 (최대 3회) ──
         max_proxy_retries = 3 if self.proxies else 1
-        proxy = self._get_next_proxy() if self.proxies else None
+        sel_proxy = self._get_next_proxy() if self.proxies else None
 
         for _proxy_attempt in range(max_proxy_retries):
             opts = Options()
@@ -1506,13 +1509,13 @@ class CrawlerEngine:
             opts.add_argument(f"user-agent={fp['ua']}")
 
             # 프록시 적용
-            if proxy:
-                if proxy.get("user") and proxy.get("pw"):
-                    proxy_url = f"http://{proxy['user']}:{proxy['pw']}@{proxy['ip']}:{proxy['port']}"
+            if sel_proxy:
+                if sel_proxy.get("user") and sel_proxy.get("pw"):
+                    _proxy_url = f"http://{sel_proxy['user']}:{sel_proxy['pw']}@{sel_proxy['ip']}:{sel_proxy['port']}"
                 else:
-                    proxy_url = f"http://{proxy['ip']}:{proxy['port']}"
-                opts.add_argument(f"--proxy-server={proxy_url}")
-                self.callback("log", f"  🔀 Selenium 프록시: {proxy['ip']}:{proxy['port']}")
+                    _proxy_url = f"http://{sel_proxy['ip']}:{sel_proxy['port']}"
+                opts.add_argument(f"--proxy-server={_proxy_url}")
+                self.callback("log", f"  🔀 Selenium 프록시: {sel_proxy['ip']}:{sel_proxy['port']}")
 
             try:
                 if use_wdm:
@@ -1526,8 +1529,6 @@ class CrawlerEngine:
 
             results = []
             page = 1
-            import re as _re
-            pid_pattern = _re.compile(r'/place/(\d+)')
 
             try:
                 search_url = f"https://map.naver.com/p/search/{quote(keyword)}"
@@ -1567,9 +1568,9 @@ class CrawlerEngine:
                 if is_blocked and not has_iframe:
                     self.callback("log", "  🚫 IP 차단 감지")
                     driver.quit()
-                    if proxy and _proxy_attempt < max_proxy_retries - 1:
-                        self._mark_blocked(proxy)
-                        proxy = self._get_next_proxy()
+                    if sel_proxy and _proxy_attempt < max_proxy_retries - 1:
+                        self._mark_blocked(sel_proxy)
+                        sel_proxy = self._get_next_proxy()
                         self.callback("log", f"  🔄 프록시 교체 후 재시도 ({_proxy_attempt + 2}/{max_proxy_retries})")
                         continue
                     return None
@@ -1579,233 +1580,233 @@ class CrawlerEngine:
                     driver.quit()
                     return None
 
-            # ── iframe 진입 ──
-            driver.switch_to.default_content()
-            iframe_found = False
-            for _retry in range(10):
-                try:
-                    iframe = driver.find_element(By.CSS_SELECTOR, "iframe#searchIframe")
-                    driver.switch_to.frame(iframe)
-                    iframe_found = True
-                    break
-                except Exception:
-                    time.sleep(1)
+                # ── iframe 진입 ──
+                driver.switch_to.default_content()
+                iframe_found = False
+                for _retry in range(10):
                     try:
-                        for btn in driver.find_elements(By.CSS_SELECTOR,
-                            "button.btn_close, button[aria-label='닫기'], .layer_popup button"):
-                            btn.click()
-                            time.sleep(0.3)
+                        iframe = driver.find_element(By.CSS_SELECTOR, "iframe#searchIframe")
+                        driver.switch_to.frame(iframe)
+                        iframe_found = True
+                        break
                     except Exception:
-                        pass
-
-            if not iframe_found:
-                self.callback("log", "  ⚠️ iframe 전환 실패")
-                driver.quit()
-                return None
-
-            time.sleep(1.5 + random.random())
-
-            # ── GraphQL 쿼리 캡처를 위해 2페이지 클릭 ──
-            from selenium.webdriver.common.action_chains import ActionChains
-            body = driver.find_element(By.TAG_NAME, "body")
-
-            # 스크롤 (페이지 버튼 로드)
-            for _s in range(10):
-                driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", body)
-                time.sleep(0.3)
-
-            # Performance 로그 비우기
-            try:
-                driver.get_log("performance")
-            except Exception:
-                pass
-
-            # 2페이지 클릭
-            driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", body)
-            time.sleep(1)
-            gql_clicked = False
-            for btn in driver.find_elements(By.CSS_SELECTOR, "a.mBN2s"):
-                try:
-                    if btn.text.strip() == "2":
-                        driver.execute_script("arguments[0].scrollIntoView({block:'center'})", btn)
-                        time.sleep(0.3)
-                        ActionChains(driver).move_to_element(btn).pause(0.2).click().perform()
-                        gql_clicked = True
-                        break
-                except Exception:
-                    continue
-            
-            if not gql_clicked:
-                self.callback("log", "  ℹ️ 1페이지만 존재 — HTML에서 PID 수집")
-                import json as _json
-
-                # HTML 소스에서 PID(7자리+ 숫자) 추출 — 이름은 PHASE 2에서 상세 크롤링으로 보정
-                src = driver.page_source
-                pids = []
-                seen_p = set()
-                for m in _re.finditer(r'"id"\s*:\s*"(\d{7,})"', src):
-                    pid = m.group(1)
-                    if pid not in seen_p:
-                        seen_p.add(pid)
-                        pids.append(pid)
-
-                seen_ids = {r["id"] for r in results}
-                for pid in pids:
-                    if pid not in seen_ids:
-                        seen_ids.add(pid)
-                        results.append({"id": pid, "name": "", "rank": len(results) + 1, "page": 1})
-
-                self.callback("log", f"  → HTML PID {len(results)}건 수집 (이름은 상세에서 보정)")
-                driver.quit()
-                return results if results else None
-
-            time.sleep(4)
-
-            # ── GraphQL 원본 쿼리 캡처 ──
-            import json as _json
-            logs = driver.get_log("performance")
-            gql_payload = None
-
-            for entry in logs:
-                try:
-                    log = _json.loads(entry["message"])
-                    msg = log.get("message", {})
-                    if msg.get("method") == "Network.requestWillBeSent":
-                        params = msg.get("params", {})
-                        req = params.get("request", {})
-                        url = req.get("url", "")
-                        if "graphql" in url and req.get("method") == "POST":
-                            post_data = req.get("postData", "")
-                            if "getNxList" in post_data:
-                                gql_payload = _json.loads(post_data)
-                                if isinstance(gql_payload, list):
-                                    gql_payload = gql_payload[0]
-                                break
-                except Exception:
-                    continue
-
-            if not gql_payload:
-                self.callback("log", "  ⚠️ GraphQL 쿼리 캡처 실패 — HTML 폴백")
-                src = driver.page_source
-                for m in _re.finditer(r'"id"\s*:\s*"(\d{5,})"', src):
-                    pid = m.group(1)
-                    if pid not in {r["id"] for r in results}:
-                        results.append({"id": pid, "name": "", "rank": len(results) + 1, "page": 1})
-                driver.quit()
-                return results if results else None
-
-            self.callback("log", "  ✅ GraphQL 쿼리 캡처 성공")
-
-            # ── 페이지 1~N GraphQL 병렬 호출 (Promise.all) ──
-            import base64 as _b64
-            max_gql_pages = max_pages if max_pages > 0 else 20
-
-            # 1차: 페이지 1~max를 display=70으로 병렬 호출
-            payloads_b64 = []
-            for pg in range(1, max_gql_pages + 1):
-                p = _json.loads(_json.dumps(gql_payload))
-                p["variables"]["input"]["start"] = 1 + (pg - 1) * 70
-                p["variables"]["input"]["display"] = 70
-                payloads_b64.append(_b64.b64encode(_json.dumps([p]).encode("utf-8")).decode("ascii"))
-
-            # JS: Promise.all로 병렬 fetch
-            fetches_js = ",\n".join([
-                f"fetch('https://pcmap-api.place.naver.com/graphql',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:atob('{b}'),credentials:'include'}}).then(r=>r.text().then(t=>r.status+'|||'+t)).catch(e=>'ERROR:'+e.message)"
-                for b in payloads_b64
-            ])
-            js = f"try{{ return await Promise.all([{fetches_js}]); }}catch(e){{ return ['ERROR:'+e.message]; }}"
-
-            try:
-                all_results = driver.execute_script(js)
-            except Exception as e:
-                self.callback("log", f"  ⚠️ 병렬 fetch 에러: {e}")
-                all_results = []
-
-            # 결과 파싱
-            last_total = 0
-            for pg_idx, result in enumerate(all_results or []):
-                pg = pg_idx + 1
-                if not self.running:
-                    break
-
-                if not result or result.startswith("ERROR"):
-                    self.callback("log", f"  ⚠️ 페이지 {pg} 에러: {str(result)[:100]}")
-                    break
-
-                status, body_text = result.split("|||", 1)
-                if status != "200":
-                    self.callback("log", f"  ⚠️ 페이지 {pg}: HTTP {status}")
-                    break
-
-                try:
-                    data = _json.loads(body_text)
-                    if isinstance(data, list):
-                        data = data[0]
-                    biz = data.get("data", {}).get("businesses", {})
-                    total = biz.get("total", 0)
-                    items = biz.get("items", [])
-                    if total > 0:
-                        last_total = total
-
-                    if not items:
-                        break
-
-                    page_items = 0
-                    for it in items:
-                        pid = str(it.get("id", ""))
-                        name = it.get("name", "")
-                        if pid and pid not in {r["id"] for r in results}:
-                            results.append({"id": pid, "name": name, "rank": len(results) + 1, "page": pg})
-                            page_items += 1
-
-                    self.callback("log", f"  📊 페이지 {pg}: +{page_items}건 (누적 {len(results)}건)")
-
-                except Exception as e:
-                    self.callback("log", f"  ⚠️ 페이지 {pg} 파싱 에러: {e}")
-                    break
-
-            # 2차: 마지막 페이지 0건이면 display 줄여서 보충
-            if last_total > 0 and len(results) < last_total:
-                remaining = last_total - len(results)
-                if remaining > 0 and remaining <= 70:
-                    start_补 = len(results) + 1
-                    for smaller_display in [remaining, 50, 30, 20, 10]:
-                        if smaller_display > remaining + 10:
-                            continue
-                        retry_p = _json.loads(_json.dumps(gql_payload))
-                        retry_p["variables"]["input"]["start"] = start_补
-                        retry_p["variables"]["input"]["display"] = smaller_display
-                        retry_b64 = _b64.b64encode(_json.dumps([retry_p]).encode("utf-8")).decode("ascii")
-                        retry_js = f"""
-                        try {{
-                            const resp = await fetch('https://pcmap-api.place.naver.com/graphql', {{
-                                method:'POST', headers:{{'Content-Type':'application/json'}},
-                                body: atob('{retry_b64}'), credentials:'include'
-                            }});
-                            const text = await resp.text();
-                            return resp.status + '|||' + text;
-                        }} catch(e) {{ return 'ERROR:'+e.message; }}
-                        """
+                        time.sleep(1)
                         try:
-                            retry_result = driver.execute_script(retry_js)
-                            if retry_result and "|||" in retry_result:
-                                r_status, r_body = retry_result.split("|||", 1)
-                                if r_status == "200":
-                                    r_data = _json.loads(r_body)
-                                    if isinstance(r_data, list):
-                                        r_data = r_data[0]
-                                    r_items = r_data.get("data", {}).get("businesses", {}).get("items", [])
-                                    if r_items:
-                                        extra_pg = len(results) // 70 + 1
-                                        for it in r_items:
-                                            pid = str(it.get("id", ""))
-                                            name = it.get("name", "")
-                                            if pid and pid not in {r["id"] for r in results}:
-                                                results.append({"id": pid, "name": name, "rank": len(results) + 1, "page": extra_pg})
-                                        self.callback("log", f"  🔄 보충: +{len(r_items)}건 (display={smaller_display}, 총 {len(results)}건)")
-                                        break
+                            for btn in driver.find_elements(By.CSS_SELECTOR,
+                                "button.btn_close, button[aria-label='닫기'], .layer_popup button"):
+                                btn.click()
+                                time.sleep(0.3)
                         except Exception:
                             pass
+
+                if not iframe_found:
+                    self.callback("log", "  ⚠️ iframe 전환 실패")
+                    driver.quit()
+                    return None
+
+                time.sleep(1.5 + random.random())
+
+                # ── GraphQL 쿼리 캡처를 위해 2페이지 클릭 ──
+                from selenium.webdriver.common.action_chains import ActionChains
+                body = driver.find_element(By.TAG_NAME, "body")
+
+                # 스크롤 (페이지 버튼 로드)
+                for _s in range(10):
+                    driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", body)
+                    time.sleep(0.3)
+
+                # Performance 로그 비우기
+                try:
+                    driver.get_log("performance")
+                except Exception:
+                    pass
+
+                # 2페이지 클릭
+                driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", body)
+                time.sleep(1)
+                gql_clicked = False
+                for btn in driver.find_elements(By.CSS_SELECTOR, "a.mBN2s"):
+                    try:
+                        if btn.text.strip() == "2":
+                            driver.execute_script("arguments[0].scrollIntoView({block:'center'})", btn)
+                            time.sleep(0.3)
+                            ActionChains(driver).move_to_element(btn).pause(0.2).click().perform()
+                            gql_clicked = True
+                            break
+                    except Exception:
+                        continue
+
+                if not gql_clicked:
+                    self.callback("log", "  ℹ️ 1페이지만 존재 — HTML에서 PID 수집")
+                    import json as _json
+
+                    # HTML 소스에서 PID(7자리+ 숫자) 추출 — 이름은 PHASE 2에서 상세 크롤링으로 보정
+                    src = driver.page_source
+                    pids = []
+                    seen_p = set()
+                    for m in _re.finditer(r'"id"\s*:\s*"(\d{7,})"', src):
+                        pid = m.group(1)
+                        if pid not in seen_p:
+                            seen_p.add(pid)
+                            pids.append(pid)
+
+                    seen_ids = {r["id"] for r in results}
+                    for pid in pids:
+                        if pid not in seen_ids:
+                            seen_ids.add(pid)
+                            results.append({"id": pid, "name": "", "rank": len(results) + 1, "page": 1})
+
+                    self.callback("log", f"  → HTML PID {len(results)}건 수집 (이름은 상세에서 보정)")
+                    driver.quit()
+                    return results if results else None
+
+                time.sleep(4)
+
+                # ── GraphQL 원본 쿼리 캡처 ──
+                import json as _json
+                logs = driver.get_log("performance")
+                gql_payload = None
+
+                for entry in logs:
+                    try:
+                        log = _json.loads(entry["message"])
+                        msg = log.get("message", {})
+                        if msg.get("method") == "Network.requestWillBeSent":
+                            params = msg.get("params", {})
+                            req = params.get("request", {})
+                            url = req.get("url", "")
+                            if "graphql" in url and req.get("method") == "POST":
+                                post_data = req.get("postData", "")
+                                if "getNxList" in post_data:
+                                    gql_payload = _json.loads(post_data)
+                                    if isinstance(gql_payload, list):
+                                        gql_payload = gql_payload[0]
+                                    break
+                    except Exception:
+                        continue
+
+                if not gql_payload:
+                    self.callback("log", "  ⚠️ GraphQL 쿼리 캡처 실패 — HTML 폴백")
+                    src = driver.page_source
+                    for m in _re.finditer(r'"id"\s*:\s*"(\d{5,})"', src):
+                        pid = m.group(1)
+                        if pid not in {r["id"] for r in results}:
+                            results.append({"id": pid, "name": "", "rank": len(results) + 1, "page": 1})
+                    driver.quit()
+                    return results if results else None
+
+                self.callback("log", "  ✅ GraphQL 쿼리 캡처 성공")
+
+                # ── 페이지 1~N GraphQL 병렬 호출 (Promise.all) ──
+                import base64 as _b64
+                max_gql_pages = max_pages if max_pages > 0 else 20
+
+                # 1차: 페이지 1~max를 display=70으로 병렬 호출
+                payloads_b64 = []
+                for pg in range(1, max_gql_pages + 1):
+                    p = _json.loads(_json.dumps(gql_payload))
+                    p["variables"]["input"]["start"] = 1 + (pg - 1) * 70
+                    p["variables"]["input"]["display"] = 70
+                    payloads_b64.append(_b64.b64encode(_json.dumps([p]).encode("utf-8")).decode("ascii"))
+
+                # JS: Promise.all로 병렬 fetch
+                fetches_js = ",\n".join([
+                    f"fetch('https://pcmap-api.place.naver.com/graphql',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:atob('{b}'),credentials:'include'}}).then(r=>r.text().then(t=>r.status+'|||'+t)).catch(e=>'ERROR:'+e.message)"
+                    for b in payloads_b64
+                ])
+                js = f"try{{ return await Promise.all([{fetches_js}]); }}catch(e){{ return ['ERROR:'+e.message]; }}"
+
+                try:
+                    all_results = driver.execute_script(js)
+                except Exception as e:
+                    self.callback("log", f"  ⚠️ 병렬 fetch 에러: {e}")
+                    all_results = []
+
+                # 결과 파싱
+                last_total = 0
+                for pg_idx, result in enumerate(all_results or []):
+                    pg = pg_idx + 1
+                    if not self.running:
+                        break
+
+                    if not result or result.startswith("ERROR"):
+                        self.callback("log", f"  ⚠️ 페이지 {pg} 에러: {str(result)[:100]}")
+                        break
+
+                    status, body_text = result.split("|||", 1)
+                    if status != "200":
+                        self.callback("log", f"  ⚠️ 페이지 {pg}: HTTP {status}")
+                        break
+
+                    try:
+                        data = _json.loads(body_text)
+                        if isinstance(data, list):
+                            data = data[0]
+                        biz = data.get("data", {}).get("businesses", {})
+                        total = biz.get("total", 0)
+                        items = biz.get("items", [])
+                        if total > 0:
+                            last_total = total
+
+                        if not items:
+                            break
+
+                        page_items = 0
+                        for it in items:
+                            pid = str(it.get("id", ""))
+                            name = it.get("name", "")
+                            if pid and pid not in {r["id"] for r in results}:
+                                results.append({"id": pid, "name": name, "rank": len(results) + 1, "page": pg})
+                                page_items += 1
+
+                        self.callback("log", f"  📊 페이지 {pg}: +{page_items}건 (누적 {len(results)}건)")
+
+                    except Exception as e:
+                        self.callback("log", f"  ⚠️ 페이지 {pg} 파싱 에러: {e}")
+                        break
+
+                # 2차: 마지막 페이지 0건이면 display 줄여서 보충
+                if last_total > 0 and len(results) < last_total:
+                    remaining = last_total - len(results)
+                    if remaining > 0 and remaining <= 70:
+                        start_补 = len(results) + 1
+                        for smaller_display in [remaining, 50, 30, 20, 10]:
+                            if smaller_display > remaining + 10:
+                                continue
+                            retry_p = _json.loads(_json.dumps(gql_payload))
+                            retry_p["variables"]["input"]["start"] = start_补
+                            retry_p["variables"]["input"]["display"] = smaller_display
+                            retry_b64 = _b64.b64encode(_json.dumps([retry_p]).encode("utf-8")).decode("ascii")
+                            retry_js = f"""
+                            try {{
+                                const resp = await fetch('https://pcmap-api.place.naver.com/graphql', {{
+                                    method:'POST', headers:{{'Content-Type':'application/json'}},
+                                    body: atob('{retry_b64}'), credentials:'include'
+                                }});
+                                const text = await resp.text();
+                                return resp.status + '|||' + text;
+                            }} catch(e) {{ return 'ERROR:'+e.message; }}
+                            """
+                            try:
+                                retry_result = driver.execute_script(retry_js)
+                                if retry_result and "|||" in retry_result:
+                                    r_status, r_body = retry_result.split("|||", 1)
+                                    if r_status == "200":
+                                        r_data = _json.loads(r_body)
+                                        if isinstance(r_data, list):
+                                            r_data = r_data[0]
+                                        r_items = r_data.get("data", {}).get("businesses", {}).get("items", [])
+                                        if r_items:
+                                            extra_pg = len(results) // 70 + 1
+                                            for it in r_items:
+                                                pid = str(it.get("id", ""))
+                                                name = it.get("name", "")
+                                                if pid and pid not in {r["id"] for r in results}:
+                                                    results.append({"id": pid, "name": name, "rank": len(results) + 1, "page": extra_pg})
+                                            self.callback("log", f"  🔄 보충: +{len(r_items)}건 (display={smaller_display}, 총 {len(results)}건)")
+                                            break
+                            except Exception:
+                                pass
 
             except Exception as e:
                 self.callback("log", f"  ⚠️ Selenium 오류: {e}")
