@@ -550,3 +550,30 @@
   - 기획 없이 바로 코딩 금지
   - 검수 100% 미달 시 수정→재검수 무한 루프
 - **적용 대상**: 모든 포트폴리오/사이트 신규 제작 또는 대규모 수정
+
+## 에이전트 바인딩 + 환경 분리 현황 (2026-04-03, 영구)
+
+### 로직모니터 테스트서버 (`-5134820548`) → `onda-logic-monitor-dev`
+- 디렉토리: `/home/onda/projects/onda-logic-monitor-dev`
+- 포트 3001 → nginx 8082 → PM2 `logic-monitor-dev`
+- 본서버 디렉토리 수정 금지 (읽기만 가능)
+- DB: 동일 Supabase 공유 (ALTER/DROP 주의)
+- 하드코딩 금지: process.env.NEXT_PUBLIC_APP_URL, process.env.TELEGRAM_CHAT_ID 사용
+
+### 로직모니터 본서버 (`-1003804670860`) → `onda-logic-monitor`
+- 디렉토리: `/home/onda/projects/onda-logic-monitor`
+- 포트 3000 → nginx 8080 → PM2 `logic-monitor`
+- 고객 안내 URL http://49.247.137.28:8080 → 포트/도메인 변경 절대 금지
+- 대규모 변경은 테스트서버에서 먼저 작업 안내
+
+### 트래픽 자동주문 봇 (`-5079107870`) → `onda-traffic-bot`
+- 디렉토리: `/home/onda/projects/onda-traffic-bot`
+- Playwright 기반 자동 주문
+- 로직모니터 연동 시 API 호출만 허용, 직접 코드 수정 금지
+
+### 동기화 규칙 (최중요)
+- **동기화 스크립트는 사용자가 명시적으로 지시할 때만 실행**
+- "동기화해", "본서버에 반영해", "sync" 등 직접 요청 없이 절대 실행 금지
+- 자체 판단으로 동기화 실행/제안 금지
+- 명령: `bash /home/onda/scripts/sync-logic-monitor.sh dev-to-prod` (테스트→본서버)
+- 명령: `bash /home/onda/scripts/sync-logic-monitor.sh prod-to-dev` (본서버→테스트)

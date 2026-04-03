@@ -336,7 +336,7 @@ class CrawlerGUI:
         # ── 순위 모드 체크박스 ──
         self.rank_mode_frame = tk.Frame(input_inner, bg=C_CARD)
         self.rank_mode_frame.pack(fill="x", pady=(4, 2))
-        self.rank_mode_var = tk.BooleanVar(value=False)
+        self.rank_mode_var = tk.BooleanVar(value=True)
         self.rank_mode_check = tk.Checkbutton(
             self.rank_mode_frame, text="📊 순위 모드 (Selenium — 실제 플레이스 순위대로 정렬)",
             variable=self.rank_mode_var, font=FONT_BODY, fg=C_POINT, bg=C_CARD,
