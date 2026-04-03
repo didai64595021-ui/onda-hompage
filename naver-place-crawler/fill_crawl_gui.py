@@ -334,7 +334,7 @@ class CrawlerGUI:
         self.max_pages_spin.pack(side="left", padx=(4, 0))
 
         # ── 순위 모드 체크박스 ──
-        self.rank_mode_frame = tk.Frame(self.kw_search_card.content, bg=C_CARD)
+        self.rank_mode_frame = tk.Frame(input_inner, bg=C_CARD)
         self.rank_mode_frame.pack(fill="x", pady=(4, 2))
         self.rank_mode_var = tk.BooleanVar(value=False)
         self.rank_mode_check = tk.Checkbutton(
@@ -351,7 +351,7 @@ class CrawlerGUI:
         self.rank_mode_note.pack(side="left", padx=(8, 0))
 
         # ── 네이버 로그인 (순위 모드용) ──
-        self.naver_login_frame = tk.Frame(self.kw_search_card.content, bg=C_CARD)
+        self.naver_login_frame = tk.Frame(input_inner, bg=C_CARD)
         self.naver_login_frame.pack(fill="x", pady=(2, 2))
 
         tk.Label(self.naver_login_frame, text="네이버 ID", font=FONT_BODY,

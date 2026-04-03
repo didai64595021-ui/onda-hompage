@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 /**
- * 크몽 텔레그램 봇 서버
- * - 광고 ON/OFF 제어 (/광고on, /광고off)
- * - 광고 상태 조회 (/광고상태)
- * - 매출 요약 (/매출)
- * - 서비스 심사 상태 (/서비스상태)
- * - 대시보드 명령 큐 처리 (kmong_ad_commands)
+ * 크몽 텔레그램 봇 서버 (통합 멀티그룹)
+ * - ONDA 서버 그룹: 크몽 광고/매출/서비스 관리
+ * - 로직모니터 본서버/테스트: 서버 상태, AI 분석
+ * - 트래픽 자동주문: 봇 상태 (기능 개발 예정)
  *
  * PM2 상시 구동: kmong-telegram-bot
  */
+
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 const TelegramBot = require('node-telegram-bot-api');
 const { toggleAd } = require('./toggle-ad');
@@ -22,7 +22,15 @@ if (!BOT_TOKEN) {
   process.exit(1);
 }
 
-const ALLOWED_CHAT_ID = -1003753252286; // ONDA 서버 그룹
+// === 그룹별 라우팅 ===
+const GROUPS = {
+  KMONG: -1003753252286,           // ONDA 서버 그룹 (크몽)
+  LOGIC_PROD: -1003804670860,      // 로직모니터 본서버
+  LOGIC_TEST: -5134820548,         // 로직모니터 테스트서버
+  TRAFFIC: -5079107870,            // 트래픽 자동주문
+};
+const ALL_CHAT_IDS = Object.values(GROUPS);
+const ALLOWED_CHAT_ID = GROUPS.KMONG; // 크몽 명령은 기존 그룹만
 
 const bot = new TelegramBot(BOT_TOKEN, {
   polling: {
@@ -62,6 +70,12 @@ function enqueue(fn) {
 function isAllowed(msg) {
   return msg.chat.id === ALLOWED_CHAT_ID;
 }
+function isAnyGroup(msg) {
+  return ALL_CHAT_IDS.includes(msg.chat.id);
+}
+function isLogicProd(msg) { return msg.chat.id === GROUPS.LOGIC_PROD; }
+function isLogicTest(msg) { return msg.chat.id === GROUPS.LOGIC_TEST; }
+function isTraffic(msg) { return msg.chat.id === GROUPS.TRAFFIC; }
 
 // 상품 ID 목록 텍스트
 function productListText() {
@@ -276,6 +290,110 @@ bot.onText(/\/도움말(?:@\w+)?|\/help(?:@\w+)?|\/start(?:@\w+)?/, (msg) => {
     productListText(),
   ].join('\n');
   bot.sendMessage(msg.chat.id, text);
+});
+
+// ============================================================
+// === 로직모니터 그룹 핸들러 (본서버 + 테스트서버) ===
+// ============================================================
+
+function getLogicMonitorUrl(msg) {
+  if (isLogicProd(msg)) return 'http://127.0.0.1:3000';
+  if (isLogicTest(msg)) return 'http://127.0.0.1:3001';
+  return null;
+}
+
+function getLogicMonitorLabel(msg) {
+  if (isLogicProd(msg)) return '본서버';
+  if (isLogicTest(msg)) return '테스트';
+  return '';
+}
+
+// /상태 — 로직모니터 서버 상태
+bot.onText(/\/상태(?:@\w+)?/, async (msg) => {
+  if (!isLogicProd(msg) && !isLogicTest(msg)) return;
+  const url = getLogicMonitorUrl(msg);
+  const label = getLogicMonitorLabel(msg);
+  try {
+    const res = await fetch(url);
+    bot.sendMessage(msg.chat.id, `✅ 로직모니터 [${label}] 정상 (HTTP ${res.status})`);
+  } catch (err) {
+    bot.sendMessage(msg.chat.id, `❌ 로직모니터 [${label}] 접속 실패: ${err.message}`);
+  }
+});
+
+// /분석 — AI 분석 트리거
+bot.onText(/\/분석(?:@\w+)?/, async (msg) => {
+  if (!isLogicProd(msg) && !isLogicTest(msg)) return;
+  const url = getLogicMonitorUrl(msg);
+  const label = getLogicMonitorLabel(msg);
+  bot.sendMessage(msg.chat.id, `🔄 [${label}] AI 분석 요청 중...`);
+  try {
+    const CRON_SECRET = 'onda-cron-secret-05dead3e00c8e1f4deb8c7d2ce894fec';
+    const res = await fetch(`${url}/api/cron/daily-analysis`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-cron-secret': CRON_SECRET },
+    });
+    const data = await res.json();
+    bot.sendMessage(msg.chat.id, `✅ [${label}] 분석 완료\n${JSON.stringify(data).slice(0, 500)}`);
+  } catch (err) {
+    bot.sendMessage(msg.chat.id, `❌ [${label}] 분석 실패: ${err.message}`);
+  }
+});
+
+// /도움말 — 로직모니터 그룹
+bot.onText(/\/도움말(?:@\w+)?|\/help(?:@\w+)?|\/start(?:@\w+)?/, (msg) => {
+  if (!isLogicProd(msg) && !isLogicTest(msg)) return;
+  const label = getLogicMonitorLabel(msg);
+  bot.sendMessage(msg.chat.id, [
+    `🤖 로직모니터 [${label}] 봇 명령어`,
+    '',
+    '/상태 — 서버 상태 확인',
+    '/분석 — AI 일일 분석 실행',
+    '/도움말 — 이 도움말',
+  ].join('\n'));
+});
+
+// ============================================================
+// === 트래픽 자동주문 그룹 핸들러 ===
+// ============================================================
+
+bot.onText(/\/상태(?:@\w+)?/, (msg) => {
+  if (!isTraffic(msg)) return;
+  const uptime = process.uptime();
+  const h = Math.floor(uptime / 3600);
+  const m = Math.floor((uptime % 3600) / 60);
+  bot.sendMessage(msg.chat.id, `✅ 트래픽 봇 정상\n⏱ 가동시간: ${h}시간 ${m}분`);
+});
+
+bot.onText(/\/도움말(?:@\w+)?|\/help(?:@\w+)?|\/start(?:@\w+)?/, (msg) => {
+  if (!isTraffic(msg)) return;
+  bot.sendMessage(msg.chat.id, [
+    '🤖 트래픽 자동주문 봇 명령어',
+    '',
+    '/상태 — 봇 상태 확인',
+    '/도움말 — 이 도움말',
+    '',
+    '※ 자동주문 기능 개발 예정',
+  ].join('\n'));
+});
+
+// ============================================================
+// === 전 그룹 공통: 인사/일반 메시지 응답 ===
+// ============================================================
+
+bot.on('message', (msg) => {
+  if (!isAnyGroup(msg)) return;
+  if (!msg.text || msg.text.startsWith('/')) return;
+
+  const text = msg.text.trim();
+  if (/^(ㅎㅇ|안녕|하이|hi|hello)$/i.test(text)) {
+    let greeting = '👋 안녕하세요!';
+    if (isLogicProd(msg)) greeting += ' 로직모니터 [본서버] 봇입니다. /도움말';
+    else if (isLogicTest(msg)) greeting += ' 로직모니터 [테스트] 봇입니다. /도움말';
+    else if (isTraffic(msg)) greeting += ' 트래픽 자동주문 봇입니다. /도움말';
+    else if (isAllowed(msg)) greeting += ' 크몽 관리 봇입니다. /도움말';
+    bot.sendMessage(msg.chat.id, greeting);
+  }
 });
 
 // === 대시보드 명령 큐 폴링 (30초마다) ===
