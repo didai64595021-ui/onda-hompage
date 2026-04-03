@@ -60,8 +60,10 @@ async function saveErrorScreenshot(page, label) {
 /**
  * 브라우저 + 로그인된 컨텍스트를 반환
  * 
- * 크몽 로그인 방식: 메인 페이지(kmong.com) 헤더 "로그인" 버튼 → 모달 → 이메일/비밀번호 입력
- * 주의: kmong.com/login 은 404이므로 절대 사용하지 않음
+ * 크몽 로그인 방식 (2026-04 확인):
+ * - /login URL은 404 (존재하지 않음)
+ * - /?open=login_modal도 404 (작동 안 함)
+ * - 유일한 방법: 메인 페이지(kmong.com) → 헤더 "로그인" 버튼 클릭 → 모달 로그인
  * 
  * @param {object} opts - { slowMo: number }
  * @returns {{ browser, context, page }}
@@ -85,7 +87,7 @@ async function login(opts = {}) {
     await page.waitForTimeout(3000);
 
     const currentUrl = page.url();
-    if (!currentUrl.includes('/login') && !currentUrl.includes('auth-refreshing')) {
+    if (!currentUrl.includes('/login') && !currentUrl.includes('auth-refreshing') && !currentUrl.includes('open=login_modal')) {
       console.log('[로그인] 쿠키 유효 — 로그인 스킵');
       return { browser, context, page };
     }
@@ -94,24 +96,25 @@ async function login(opts = {}) {
     await page.close();
   }
 
-  // === 2단계: 메인 페이지에서 모달 로그인 ===
+  // === 2단계: 메인 페이지 → 모달 로그인 ===
   const page = await context.newPage();
   console.log('[로그인] 크몽 메인 접속...');
   await page.goto(MAIN_URL, { waitUntil: 'load', timeout: 30000 });
   await page.waitForTimeout(5000);
   console.log(`[로그인] 현재 URL: ${page.url()}`);
 
-  // 이미 로그인 상태인지 확인
-  const loginBtnVisible = await page.locator('button:has-text("로그인")').first().isVisible({ timeout: 3000 }).catch(() => false);
+  // 이미 로그인 상태인지 확인 (쿠키가 브라우저에 남아있는 경우)
+  const loginBtnVisible = await page.locator('a:has-text("로그인"), button:has-text("로그인")').first()
+    .isVisible({ timeout: 5000 }).catch(() => false);
 
   if (!loginBtnVisible) {
-    // 로그인 버튼이 없으면 이미 로그인된 상태일 수 있음
+    // 프로필/셀러 링크 등 로그인 상태 표시 요소 확인
     const isAlreadyLoggedIn = await page.evaluate(() => {
-      const sels = [
+      const selectors = [
         'a[href*="seller"]', 'a[href*="mypage"]', 'a[href*="my-kmong"]',
-        '[class*="profile"]', '[class*="avatar"]', 'img[alt*="프로필"]',
+        '[class*="profile"]', '[class*="avatar"]', '[class*="user-menu"]',
       ];
-      for (const sel of sels) {
+      for (const sel of selectors) {
         const el = document.querySelector(sel);
         if (el && el.offsetParent !== null) return true;
       }
@@ -121,17 +124,17 @@ async function login(opts = {}) {
     if (isAlreadyLoggedIn) {
       console.log('[로그인] 이미 로그인 상태 — 쿠키 저장 후 진행');
       const cookies = await context.cookies();
-      fs.mkdirSync(path.dirname(COOKIE_PATH), { recursive: true });
       fs.writeFileSync(COOKIE_PATH, JSON.stringify(cookies, null, 2));
       return { browser, context, page };
     }
 
-    // 페이지 새로고침 후 재시도
+    // 페이지 새로고침 후 재확인
     console.log('[로그인] 로그인 버튼/프로필 미발견 → 새로고침');
     await page.reload({ waitUntil: 'load', timeout: 30000 });
     await page.waitForTimeout(5000);
 
-    const retryBtn = await page.locator('button:has-text("로그인")').first().isVisible({ timeout: 10000 }).catch(() => false);
+    const retryBtn = await page.locator('a:has-text("로그인"), button:has-text("로그인")').first()
+      .isVisible({ timeout: 10000 }).catch(() => false);
     if (!retryBtn) {
       const retryLoggedIn = await page.evaluate(() => {
         const sels = ['a[href*="seller"]', 'a[href*="mypage"]', '[class*="profile"]'];
@@ -144,7 +147,6 @@ async function login(opts = {}) {
       if (retryLoggedIn) {
         console.log('[로그인] 이미 로그인 상태 (재확인) — 쿠키 저장');
         const cookies = await context.cookies();
-        fs.mkdirSync(path.dirname(COOKIE_PATH), { recursive: true });
         fs.writeFileSync(COOKIE_PATH, JSON.stringify(cookies, null, 2));
         return { browser, context, page };
       }
@@ -154,51 +156,51 @@ async function login(opts = {}) {
     }
   }
 
-  // 로그인 모달 오픈
+  // === 3단계: 모달 로그인 실행 ===
   try {
-    const headerLoginBtn = page.locator('button:has-text("로그인")').first();
+    const headerLoginBtn = page.locator('a:has-text("로그인"), button:has-text("로그인")').first();
     await headerLoginBtn.click();
     await page.waitForTimeout(2000);
     console.log('[로그인] 로그인 모달 오픈');
 
     // 모달 내 이메일 입력
-    const emailInput = page.locator('div[role="dialog"] input[type="email"], div[role="dialog"] input[name="email"], input[type="email"]').first();
+    const emailInput = page.locator('div[role="dialog"] input[type="email"], div[role="dialog"] input[name="email"], input[type="email"], input[name="email"]').first();
     await emailInput.waitFor({ state: 'visible', timeout: 15000 });
     await emailInput.fill(KMONG_EMAIL);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(500);
+    console.log('[로그인] 이메일 입력 완료');
 
     // 모달 내 비밀번호 입력
-    const pwInput = page.locator('div[role="dialog"] input[type="password"], input[type="password"]').first();
+    const pwInput = page.locator('div[role="dialog"] input[type="password"], div[role="dialog"] input[name="password"], input[type="password"], input[name="password"]').first();
     await pwInput.waitFor({ state: 'visible', timeout: 15000 });
     await pwInput.fill(KMONG_PASSWORD);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(500);
+    console.log('[로그인] 비밀번호 입력 완료');
 
-    // 모달 내 로그인 제출
-    const submitBtn = page.locator('div[role="dialog"] button[type="submit"], div[role="dialog"] button:has-text("로그인")').first();
+    // 로그인 제출
+    const submitBtn = page.locator('div[role="dialog"] button[type="submit"], div[role="dialog"] button:has-text("로그인"), button[type="submit"]:has-text("로그인")').first();
     await submitBtn.waitFor({ state: 'visible', timeout: 15000 });
     await submitBtn.click();
     console.log('[로그인] 로그인 버튼 클릭');
 
     await page.waitForTimeout(5000);
 
-    // 로그인 성공 확인
-    const isLoggedIn = await page.locator('[class*="profile"], a[href*="mypage"], a[href*="seller"]').first().isVisible({ timeout: 5000 }).catch(() => false);
-    if (!isLoggedIn) {
-      const errorMsg = await page.locator('[class*="error"], [class*="alert"]').first().innerText().catch(() => '');
-      if (errorMsg) throw new Error(`로그인 오류: ${errorMsg}`);
+    // 에러 메시지 확인
+    const errorMsg = await page.locator('[class*="error"], [class*="alert"]').first().innerText({ timeout: 2000 }).catch(() => '');
+    if (errorMsg && (errorMsg.includes('비밀번호') || errorMsg.includes('이메일'))) {
+      throw new Error(`로그인 오류: ${errorMsg.substring(0, 100)}`);
     }
 
     console.log(`[로그인] 성공 — 현재 URL: ${page.url()}`);
 
     // 쿠키 저장
     const cookies = await context.cookies();
-    fs.mkdirSync(path.dirname(COOKIE_PATH), { recursive: true });
     fs.writeFileSync(COOKIE_PATH, JSON.stringify(cookies, null, 2));
     console.log('[로그인] 쿠키 저장 완료');
 
     return { browser, context, page };
   } catch (err) {
-    await saveErrorScreenshot(page, 'login');
+    await saveErrorScreenshot(page, 'login-modal-fail');
     await browser.close();
     throw new Error(`[로그인 실패] ${err.message}`);
   }
