@@ -1686,9 +1686,20 @@ class CrawlerEngine:
                 driver.get(f"https://map.naver.com/p/search/{quote(keyword)}")
                 time.sleep(4 + random.random() * 2)
 
-                # 차단 확인
+                # 차단 확인 — 실제 차단 페이지만 감지 (정상 페이지의 ncaptcha 스크립트 참조는 무시)
                 src = driver.page_source
-                if "서비스 이용이 제한" in src or "ncaptcha" in src:
+                is_blocked = False
+                if "서비스 이용이 제한" in src:
+                    is_blocked = True
+                elif "ncaptcha" in src:
+                    # ncaptcha가 포함되어 있어도, 실제 검색 결과(searchIframe 등)가 있으면 차단 아님
+                    has_search = "searchIframe" in src or "search-result" in src or "_pcmap_list" in src
+                    if not has_search:
+                        is_blocked = True
+                    else:
+                        self.callback("log", "  ℹ️ ncaptcha 스크립트 감지됐으나 검색 결과 존재 → 정상 진행")
+
+                if is_blocked:
                     if proxy:
                         self._mark_blocked(proxy)
                         self.callback("log", f"  ❌ 프록시 {proxy['ip']} 차단 → 교체 재시도 ({attempt + 1}/{max_retries})")
