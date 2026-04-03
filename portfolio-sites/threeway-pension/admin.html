@@ -1191,9 +1191,12 @@
     updateCatSelect();
 
     // 미리보기 iframe 업데이트
-    if (previewPanel.classList.contains('open')) {
-      previewFrame.src = tabPageMap[tabName] || 'index.html';
-      previewTitle.textContent = '미리보기 — ' + tabName;
+    const _pp = document.getElementById('previewPanel');
+    if (_pp && _pp.classList.contains('open')) {
+      const _pf = document.getElementById('previewFrame');
+      const _pt = document.getElementById('previewTitle');
+      if (_pf) _pf.src = tabPageMap[tabName] || 'index.html';
+      if (_pt) _pt.textContent = '미리보기 — ' + tabName;
     }
   }
 
@@ -1267,8 +1270,10 @@
     clearAutosaveTimer();
 
     // 미리보기 iframe 새로고침
-    if (previewPanel.classList.contains('open')) {
-      previewFrame.contentWindow.location.reload();
+    const _pp2 = document.getElementById('previewPanel');
+    if (_pp2 && _pp2.classList.contains('open')) {
+      const _pf2 = document.getElementById('previewFrame');
+      if (_pf2) _pf2.contentWindow.location.reload();
     }
     return true;
   }
@@ -1308,6 +1313,14 @@
   document.getElementById('btnReset').addEventListener('click', doReset);
 
   // ============================================
+  // 미리보기 패널 (개선 1)
+  // ============================================
+  const previewPanel = document.getElementById('previewPanel');
+  const previewOverlay = document.getElementById('previewOverlay');
+  const previewFrame = document.getElementById('previewFrame');
+  const previewTitle = document.getElementById('previewTitle');
+
+  // ============================================
   // 우측 고정 버튼 이벤트 연결
   // ============================================
   document.getElementById('fixedSave').addEventListener('click', async () => {
@@ -1318,14 +1331,6 @@
   document.getElementById('fixedExport').addEventListener('click', doExport);
   document.getElementById('fixedReset').addEventListener('click', doReset);
   document.getElementById('fixedPreview').addEventListener('click', openPreview);
-
-  // ============================================
-  // 미리보기 패널 (개선 1)
-  // ============================================
-  const previewPanel = document.getElementById('previewPanel');
-  const previewOverlay = document.getElementById('previewOverlay');
-  const previewFrame = document.getElementById('previewFrame');
-  const previewTitle = document.getElementById('previewTitle');
 
   async function openPreview() {
     // Auto-save if there are unsaved changes before preview
