@@ -10,6 +10,9 @@
 
 const { supabase } = require('./lib/supabase');
 const { toggleAd } = require('./toggle-ad');
+const { changeCreative } = require('./change-creative');
+const { editGig } = require('./edit-gig');
+const { addPortfolio } = require('./manage-portfolio');
 const { notify } = require('./lib/telegram');
 
 const TOGGLE_TIMEOUT_MS = 30000; // toggleAd 30초 타임아웃
@@ -137,6 +140,68 @@ async function processCommands() {
           console.error(`[실패] ${cmd.product_id}: ${err.message}`);
           notify(`❌ 대시보드 명령 실패: ${cmd.product_id} → ${cmd.action}\n${err.message}`);
         }
+      } else if (cmd.action === 'change_creative') {
+        // 소재 변경: product_id + result_message에 새 타이틀
+        try {
+          const result = await withTimeout(
+            changeCreative(cmd.product_id, cmd.result_message || ''),
+            60000, `changeCreative(${cmd.product_id})`
+          );
+          await supabase.from('kmong_ad_commands').update({
+            status: result.success ? 'done' : 'failed',
+            result_message: result.message,
+            completed_at: new Date().toISOString(),
+          }).eq('id', cmd.id);
+          notify(`🎨 소재 변경: ${cmd.product_id}\n${result.message}`);
+        } catch (err) {
+          await supabase.from('kmong_ad_commands').update({
+            status: 'failed', result_message: err.message,
+            completed_at: new Date().toISOString(),
+          }).eq('id', cmd.id);
+        }
+
+      } else if (cmd.action === 'edit_gig') {
+        // 서비스 수정: result_message에 JSON { title?, tags?, description? }
+        try {
+          const changes = JSON.parse(cmd.result_message || '{}');
+          const result = await withTimeout(
+            editGig(cmd.product_id, changes),
+            90000, `editGig(${cmd.product_id})`
+          );
+          await supabase.from('kmong_ad_commands').update({
+            status: result.success ? 'done' : 'failed',
+            result_message: result.message,
+            completed_at: new Date().toISOString(),
+          }).eq('id', cmd.id);
+          notify(`📝 서비스 수정: ${cmd.product_id}\n${result.message}`);
+        } catch (err) {
+          await supabase.from('kmong_ad_commands').update({
+            status: 'failed', result_message: err.message,
+            completed_at: new Date().toISOString(),
+          }).eq('id', cmd.id);
+        }
+
+      } else if (cmd.action === 'add_portfolio') {
+        // 포트폴리오 등록: result_message에 JSON { title, description? }
+        try {
+          const opts = JSON.parse(cmd.result_message || '{}');
+          const result = await withTimeout(
+            addPortfolio(opts),
+            60000, 'addPortfolio'
+          );
+          await supabase.from('kmong_ad_commands').update({
+            status: result.success ? 'done' : 'failed',
+            result_message: result.message,
+            completed_at: new Date().toISOString(),
+          }).eq('id', cmd.id);
+          notify(`📁 포트폴리오: ${result.message}`);
+        } catch (err) {
+          await supabase.from('kmong_ad_commands').update({
+            status: 'failed', result_message: err.message,
+            completed_at: new Date().toISOString(),
+          }).eq('id', cmd.id);
+        }
+
       } else {
         // 알 수 없는 action
         await supabase
