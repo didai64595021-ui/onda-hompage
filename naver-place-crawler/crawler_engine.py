@@ -1523,11 +1523,14 @@ class CrawlerEngine:
         Returns:
             list of {"id": str, "name": str, "rank": int, "page": int} 또는 None (실패/차단 시)
         """
+        keyword = keyword.strip()
         try:
             from selenium import webdriver
             from selenium.webdriver.chrome.options import Options
             from selenium.webdriver.chrome.service import Service
             from selenium.webdriver.common.by import By
+            from selenium.webdriver.support.ui import WebDriverWait
+            from selenium.webdriver.support import expected_conditions as EC
         except ImportError:
             self.callback("log", "  ⚠️ selenium 미설치 — pip install selenium")
             return None
@@ -1566,7 +1569,8 @@ class CrawlerEngine:
                 self.callback("log", "  ℹ️ 비로그인 모드로 진행")
 
             try:
-                driver.get(f"https://map.naver.com/p/search/{quote(keyword)}")
+                # Selenium은 브라우저이므로 URL 인코딩 불필요 (띄어쓰기 키워드 호환)
+                driver.get(f"https://map.naver.com/p/search/{keyword}")
                 time.sleep(4 + random.random() * 2)
 
                 # 차단 확인
@@ -1615,10 +1619,12 @@ class CrawlerEngine:
 
                 driver.switch_to.default_content()
                 try:
-                    iframe = driver.find_element(By.CSS_SELECTOR, "iframe#searchIframe")
+                    iframe = WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.CSS_SELECTOR, "iframe#searchIframe"))
+                    )
                     driver.switch_to.frame(iframe)
                 except Exception:
-                    self.callback("log", f"  ⚠️ iframe 전환 실패 (페이지 {page})")
+                    self.callback("log", f"  ⚠️ iframe 전환 실패 (페이지 {page}) — 띄어쓰기 키워드일 경우 로딩 지연 가능")
                     break
 
                 time.sleep(1.5 + random.random())
@@ -1850,7 +1856,8 @@ class CrawlerEngine:
 
             page.on("response", on_response)
 
-            url = f"https://map.naver.com/p/search/{quote(keyword)}"
+            # Playwright도 브라우저이므로 URL 인코딩 불필요 (띄어쓰기 키워드 호환)
+            url = f"https://map.naver.com/p/search/{keyword}"
             page.goto(url, wait_until="domcontentloaded", timeout=15000)
             page.wait_for_timeout(3000)
 
@@ -2601,7 +2608,7 @@ class CrawlerEngine:
                     selenium_ranks[str(r["id"])] = r["rank"]
                 self.callback("log", f"  → {len(selenium_ranks)}건 순위 확보")
             else:
-                self.callback("log", "  ⚠️ Selenium 순위 수집 실패 — 기존 방식으로 진행")
+                self.callback("log", "  ⚠️ Selenium 순위 수집 실패 — 순위 정보 없이 기존 방식으로 수집 진행 (결과에 순위 미반영)")
             self.callback("log", "")
 
         # ═══ PHASE 1: Place ID 수집 ═══
