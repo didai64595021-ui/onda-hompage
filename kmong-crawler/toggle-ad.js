@@ -78,6 +78,13 @@ async function toggleAd(productId, action) {
       const matched = matchProductId(serviceName);
 
       if (matched === productId) {
+        // 쟘액 부족 상태 확인
+        const statusText = await cells.nth(2).innerText().catch(() => '');
+        if (statusText.includes('잔액 부족') || statusText.includes('중지')) {
+          console.log(`[미지원] ${productId}: 쟨액 부족 상태 — 토글 스킵`);
+          await browser.close();
+          return { success: false, message: `광고 ${productId}: 쟨액 부족 (비즈머니 충전 필요)` };
+        }
         targetRow = row;
         console.log(`[찾음] ${serviceName} → ${productId}`);
         break;
@@ -85,6 +92,21 @@ async function toggleAd(productId, action) {
     }
 
     if (!targetRow) {
+      // 쟘액 부족으로 인한 테이블 구조 변화 가능성 없음
+      const allStatuses = [];
+      for (let i = 0; i < rowCount; i++) {
+        const cells2 = tableRows.nth(i).locator('td');
+        const statusText = await cells2.nth(2).innerText().catch(() => '');
+        if (statusText.includes('잔액 부족')) {
+          const svcName = await cells2.nth(1).locator('img').first().getAttribute('alt').catch(() => '');
+          const svcId = matchProductId(svcName);
+          if (svcId === productId) {
+            console.log(`[미지원] ${productId}: 쟨액 부족 상태 — 토글 스킵`);
+            await browser.close();
+            return { success: false, message: `광고 ${productId}: 쟨액 부족 (비즈머니 충전 필요)` };
+          }
+        }
+      }
       const msg = `광고 토글 실패: ${productId} 서비스를 찾을 수 없음`;
       notify(msg);
       await browser.close();
