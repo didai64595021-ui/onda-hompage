@@ -194,10 +194,11 @@ async function main() {
       await setAllAds('off');
       // 예산 초과 OFF 상태를 DB에 기록 → 다음 실행에서 재토글 방지
       for (const product of PRODUCT_MAP) {
-        await supabase
-          .from('kmong_settings')
-          .upsert({ key: `last_ad_state_${product.id}`, value: 'off', updated_at: new Date().toISOString() }, { onConflict: 'key' })
-          .catch(() => {});
+        try {
+          await supabase
+            .from('kmong_settings')
+            .upsert({ key: `last_ad_state_${product.id}`, value: 'off', updated_at: new Date().toISOString() }, { onConflict: 'key' });
+        } catch {}
       }
       console.log('[예산] 전체 서비스 상태 DB에 off 기록 완료');
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
@@ -279,9 +280,11 @@ async function main() {
         }
 
         // 서비스별 상태 저장
-        await supabase
-          .from('kmong_settings')
-          .upsert({ key: cp.stateKey, value: cp.action, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+        try {
+          await supabase
+            .from('kmong_settings')
+            .upsert({ key: cp.stateKey, value: cp.action, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+        } catch {}
       }
 
       const onList = changedProducts.filter(p => p.action === 'on').map(p => p.id);

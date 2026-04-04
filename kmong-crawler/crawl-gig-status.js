@@ -141,7 +141,7 @@ async function crawlGigStatus() {
         // insert 실패 시 (중복 등) 개별 upsert 시도
         console.log(`[Supabase] insert 실패 (${error.message}), 개별 처리...`);
         for (const gig of gigs) {
-          await supabase.from('kmong_gig_status').upsert(gig, { onConflict: 'product_id' }).catch(() => {});
+          try { await supabase.from('kmong_gig_status').upsert(gig, { onConflict: 'product_id' }); } catch {}
         }
       }
       console.log(`[Supabase] ${gigs.length}건 저장 완료`);
