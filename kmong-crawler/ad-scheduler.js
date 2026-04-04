@@ -182,9 +182,9 @@ async function main() {
       try {
         const flag = JSON.parse(fs.readFileSync(alertFlagFile, 'utf-8'));
         const sentAt = new Date(flag.sentAt);
-        if (Date.now() - sentAt.getTime() < 60 * 60 * 1000) {
+        if (Date.now() - sentAt.getTime() < 4 * 60 * 60 * 1000) {
           shouldAlert = false;
-          console.log('[예산] 최근 1시간 내 이미 알림 전송 — 중복 스킵');
+          console.log('[예산] 최근 4시간 내 이미 알림 전송 — 중복 스킵');
         }
       } catch {}
       if (shouldAlert) {
