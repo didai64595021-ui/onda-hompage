@@ -283,25 +283,10 @@ async function main() {
       }
     }
 
-    // === 월간 예산 체크 (기존 로직) ===
+    // === 월간 예산 체크 ===
+    // 월간 초과 알림은 ad-scheduler에서 전담 (budget-monitor는 자동정지만 실행)
     if (monthlyRatio >= 1.0) {
-      // 중복 알림 방지: 파일 기반 1시간 쿨다운 체크
-      const alertFlagFile = path.join(__dirname, 'cookies', 'budget-alert-sent.json');
-      let shouldAlertMonthly = true;
-      try {
-        const flag = JSON.parse(fs.readFileSync(alertFlagFile, 'utf-8'));
-        const sentAt = new Date(flag.sentAt);
-        if (Date.now() - sentAt.getTime() < 60 * 60 * 1000) {
-          shouldAlertMonthly = false;
-          console.log('[예산] 최근 1시간 내 이미 알림 전송 — 중복 스킵');
-        }
-      } catch {}
-      if (shouldAlertMonthly) {
-        const msg = `🚨 월간 광고비 한도 초과!\n지출: ₩${fmt(monthlySpend)} / 한도: ₩${fmt(settings.monthlyBudget)} (${monthlyPct}%)`;
-        notify(msg);
-        fs.writeFileSync(alertFlagFile, JSON.stringify({ sentAt: new Date().toISOString() }));
-      }
-
+      console.log(`[예산] 월간 ${monthlyPct}% 소진 — 알림은 ad-scheduler에서 처리`);
       if (settings.autoStop) {
         console.log('[자동정지] 전체 광고 OFF 실행...');
         await stopAllAds();
