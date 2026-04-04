@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>대시보드 — 온다 애드</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="dashboard-layout">
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">온다 <span>애드</span></div>
+      <nav class="sidebar-menu">
+        <a href="#" class="sidebar-menu-item active" data-page="dashboard">
+          <span class="menu-icon">📊</span> 대시보드
+        </a>
+        <a href="#" class="sidebar-menu-item" data-page="fraud">
+          <span class="menu-icon">🛡️</span> 부정클릭
+        </a>
+        <a href="#" class="sidebar-menu-item" data-page="soojae">
+          <span class="menu-icon">🤖</span> 소재관리
+        </a>
+        <a href="#" class="sidebar-menu-item" data-page="keywords">
+          <span class="menu-icon">🔍</span> 키워드
+        </a>
+        <a href="#" class="sidebar-menu-item" data-page="bid">
+          <span class="menu-icon">⚙️</span> 입찰관리
+        </a>
+        <a href="#" class="sidebar-menu-item" data-page="report">
+          <span class="menu-icon">📄</span> 리포트
+        </a>
+        <a href="#" class="sidebar-menu-item" data-page="point">
+          <span class="menu-icon">🎁</span> 포인트
+        </a>
+        <a href="#" class="sidebar-menu-item" data-page="settings">
+          <span class="menu-icon">⚙️</span> 설정
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="sidebar-api-btn" id="apiKeyBtn">🔑 API 키 입력</button>
+      </div>
+    </aside>
+
+    <!-- ============ MAIN ============ -->
+    <div class="dashboard-main">
+      <!-- Demo Banner -->
+      <div class="demo-banner">
+        🔔 데모 모드 — 실제 데이터를 보려면 API 키를 입력하세요
+      </div>
+
+      <!-- Topbar -->
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+          <h1 class="topbar-title">대시보드</h1>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn-generate" id="aiGenerateBtn">🤖 AI 소재 생성</button>
+          <button class="topbar-bell" id="fraudBell">
+            🔔
+            <span class="topbar-bell-badge">3</span>
+          </button>
+          <div class="topbar-avatar">김</div>
+        </div>
+      </div>
+
+      <!-- Dashboard Content -->
+      <div class="dashboard-content">
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label"><span class="kpi-icon">📈</span> 총 클릭</div>
+            <div class="kpi-value" id="kpiClicks">12,847</div>
+            <div class="kpi-delta positive">↑ 12% vs 전주</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label"><span class="kpi-icon">💰</span> 총 소진액</div>
+            <div class="kpi-value" id="kpiSpend">4,280,000원</div>
+            <div class="kpi-delta negative">↓ 5% vs 전주</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label"><span class="kpi-icon">📉</span> 평균 CPC</div>
+            <div class="kpi-value" id="kpiCPC">333원</div>
+            <div class="kpi-delta positive">↓ 8% 절감</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label"><span class="kpi-icon">🛡️</span> 부정클릭</div>
+            <div class="kpi-value" id="kpiFraud" style="color:var(--danger)">47건</div>
+            <div class="kpi-sub" style="color:var(--warning)">환불: 156,000원</div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <span class="chart-card-title">일별 클릭 / 소진 추이</span>
+              <span class="chart-card-period">최근 7일</span>
+            </div>
+            <div class="chart-area" id="lineChartArea">
+              <svg class="chart-svg" id="lineChart" viewBox="0 0 600 240" preserveAspectRatio="none"></svg>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <span class="chart-card-title">CTR / CPC 비교</span>
+              <span class="chart-card-period">키워드별</span>
+            </div>
+            <div class="chart-area">
+              <div class="bar-chart" id="barChart"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Keyword Table -->
+        <div class="table-card">
+          <div class="table-header">
+            <span class="table-title">키워드 성과</span>
+            <button class="btn-generate" id="aiGenerateBtn2">🤖 AI 소재 생성</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>키워드</th>
+                  <th class="right">클릭</th>
+                  <th class="right">CPC</th>
+                  <th class="right">CTR</th>
+                  <th>품질</th>
+                  <th>상태</th>
+                </tr>
+              </thead>
+              <tbody id="keywordTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ AI Modal ============ -->
+  <div class="modal-overlay" id="aiModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>🤖 AI 소재 생성</h3>
+        <button class="modal-close" id="aiModalClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-keyword-select">
+          <label>키워드 선택</label>
+          <select id="aiKeywordSelect">
+            <option>강남 정형외과</option>
+            <option>어깨 통증 치료</option>
+            <option>무릎 수술 잘하는 곳</option>
+            <option>관절 전문병원</option>
+            <option>척추 디스크 치료</option>
+          </select>
+        </div>
+        <div class="ai-results" id="aiResults">
+          <div class="ai-result-card" data-idx="0">
+            <div class="ai-label">소재 A</div>
+            <h4>강남 정형외과 베스트 — 비수술 치료 전문</h4>
+            <p>20년 경력 전문의 직접 진료. 당일 MRI 촬영 가능. 비수술 관절·척추 치료 만족도 98%.</p>
+          </div>
+          <div class="ai-result-card" data-idx="1">
+            <div class="ai-label">소재 B</div>
+            <h4>관절·척추 비수술 1위 — 강남역 3분 거리</h4>
+            <p>수술 없이 통증 해결. 도수치료+체외충격파 병행. 강남역 2번 출구 도보 3분.</p>
+          </div>
+          <div class="ai-result-card" data-idx="2">
+            <div class="ai-label">소재 C</div>
+            <h4>어깨·무릎 통증? 비수술 전문 정형외과</h4>
+            <p>1:1 맞춤 재활 프로그램. 건강보험 적용 가능. 야간·주말 진료 가능한 강남 정형외과.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="aiModalCancel">취소</button>
+        <button class="btn btn-naver" id="aiModalApply">적용하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Fraud Panel ============ -->
+  <div class="fraud-panel-overlay" id="fraudOverlay"></div>
+  <div class="fraud-panel" id="fraudPanel">
+    <div class="fraud-panel-header">
+      <h3>🛡️ 부정클릭 알림</h3>
+      <button class="modal-close" id="fraudClose">✕</button>
+    </div>
+    <div class="fraud-panel-list" id="fraudList"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
