@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>관심고객등록 — 한강 르셀</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23C8A97D'/%3E%3Crect x='8' y='10' width='7' height='16' rx='1' fill='%23fff'/%3E%3Crect x='17' y='6' width='7' height='20' rx='1' fill='%23fff'/%3E%3Crect x='10' y='13' width='3' height='3' fill='%23C8A97D'/%3E%3Crect x='10' y='18' width='3' height='3' fill='%23C8A97D'/%3E%3Crect x='19' y='9' width='3' height='3' fill='%23C8A97D'/%3E%3Crect x='19' y='14' width='3' height='3' fill='%23C8A97D'/%3E%3Crect x='19' y='19' width='3' height='3' fill='%23C8A97D'/%3E%3C/svg%3E">
+<meta name="description" content="한강 르셀 관심고객 등록. 156세대 한정, 전문 상담사가 48시간 이내 연락드립니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+/* =============================================
+   CSS CUSTOM PROPERTIES
+   ============================================= */
+:root {
+  --bg-primary: #0C0C0C;
+  --bg-surface: #161614;
+  --bg-light: #F7F4F0;
+  --accent: #C8A97D;
+  --accent-light: #E2D1B5;
+  --text-primary: #E8E4DF;
+  --text-secondary: #8A8580;
+  --text-dark: #2A2A2A;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Pretendard Variable', -apple-system, sans-serif;
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* =============================================
+   RESET & BASE
+   ============================================= */
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  word-break: keep-all;
+  line-height: 1.7;
+  cursor: none;
+}
+
+img { display: block; max-width: 100%; }
+a { text-decoration: none; color: inherit; }
+button { border: none; background: none; cursor: none; font-family: inherit; }
+
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+@media (min-width: 768px) { .container { padding: 0 48px; } }
+@media (min-width: 1440px) { .container { padding: 0 80px; } }
+
+/* =============================================
+   SCROLL PROGRESS BAR
+   ============================================= */
+#scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 0%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  z-index: 99998;
+  transition: width 0.1s linear;
+}
+
+/* =============================================
+   CUSTOM CURSOR
+   ============================================= */
+#cursor-dot {
+  position: fixed;
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s var(--ease-expo), opacity 0.3s;
+}
+
+#cursor-ring {
+  position: fixed;
+  width: 36px; height: 36px;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s var(--ease-expo), height 0.4s var(--ease-expo), border-color 0.3s, opacity 0.3s;
+}
+
+#cursor-ring.expanded {
+  width: 64px; height: 64px;
+  border-color: var(--accent-light);
+}
+
+@media (pointer: coarse) {
+  #cursor-dot, #cursor-ring { display: none; }
+  body { cursor: auto; }
+  button { cursor: pointer; }
+}
+
+/* =============================================
+   GRAIN OVERLAY
+   ============================================= */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 99990;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
+}
+
+/* =============================================
+   NAVIGATION
+   ============================================= */
+#nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 24px 0;
+  transition: background 0.4s var(--ease-expo), padding 0.4s var(--ease-expo);
+}
+
+#nav.scrolled {
+  background: rgba(12, 12, 12, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(200, 169, 125, 0.12);
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  position: relative;
+  z-index: 1001;
+}
+
+.nav-links {
+  display: flex;
+  gap: 40px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  transition: color 0.3s;
+  position: relative;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 0; height: 1px;
+  background: var(--accent);
+  transition: width 0.4s var(--ease-expo);
+}
+
+.nav-links a:hover { color: var(--accent); }
+.nav-links a:hover::after { width: 100%; }
+.nav-links a.active { color: var(--accent); }
+.nav-links a.active::after { width: 100%; }
+
+.nav-cta {
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 10px 24px;
+  transition: background 0.3s, color 0.3s;
+}
+
+.nav-cta:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 1001;
+  position: relative;
+  padding: 8px;
+}
+
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 1.5px;
+  background: var(--text-primary);
+  transition: transform 0.4s var(--ease-expo), opacity 0.3s;
+  transform-origin: center;
+}
+
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(4.5px, 4.5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(4.5px, -4.5px); }
+
+/* Mobile Nav Overlay */
+#mobile-nav {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 12, 12, 0.97);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s var(--ease-expo), visibility 0.5s;
+}
+
+#mobile-nav.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.mobile-nav-links {
+  list-style: none;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.mobile-nav-links li {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.5s var(--ease-expo), transform 0.5s var(--ease-expo);
+}
+
+#mobile-nav.open .mobile-nav-links li:nth-child(1) { opacity:1; transform:translateY(0); transition-delay:0.1s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(2) { opacity:1; transform:translateY(0); transition-delay:0.15s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(3) { opacity:1; transform:translateY(0); transition-delay:0.2s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(4) { opacity:1; transform:translateY(0); transition-delay:0.25s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(5) { opacity:1; transform:translateY(0); transition-delay:0.3s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(6) { opacity:1; transform:translateY(0); transition-delay:0.35s; }
+
+.mobile-nav-links a {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 6vw, 48px);
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+  transition: color 0.3s;
+}
+
+.mobile-nav-links a:hover { color: var(--accent); }
+.mobile-nav-links a.active { color: var(--accent); }
+
+@media (max-width: 900px) {
+  .nav-links, .nav-cta { display: none; }
+  .hamburger { display: flex; }
+}
+
+/* =============================================
+   HERO SECTION (50vh)
+   ============================================= */
+#hero {
+  position: relative;
+  height: 50vh;
+  min-height: 380px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero-bg img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  animation: kenBurns 18s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+@keyframes kenBurns {
+  0%   { transform: scale(1) translate(0, 0); }
+  100% { transform: scale(1.08) translate(-1%, -1%); }
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(12,12,12,0.4) 0%,
+    rgba(12,12,12,0.6) 40%,
+    rgba(12,12,12,0.85) 100%
+  );
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  padding-top: 40px;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 5vw, 64px);
+  line-height: 1.2;
+  color: #fff;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin-bottom: 20px;
+  text-shadow: 0 2px 40px rgba(200,169,125,0.25);
+  opacity: 0;
+  transform: translateY(24px);
+  animation: heroFadeUp 0.8s var(--ease-expo) 0.3s forwards;
+}
+
+.hero-subtitle {
+  font-size: clamp(14px, 1.6vw, 18px);
+  color: var(--text-secondary);
+  font-weight: 300;
+  line-height: 1.7;
+  letter-spacing: 0.04em;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: heroFadeUp 0.8s var(--ease-expo) 0.6s forwards;
+}
+
+@keyframes heroFadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* =============================================
+   MAIN CONTENT — 2 Column Layout
+   ============================================= */
+#contact-section {
+  background: var(--bg-primary);
+  padding: 100px 0 120px;
+}
+
+.contact-layout {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 80px;
+  align-items: flex-start;
+}
+
+@media (max-width: 900px) {
+  .contact-layout {
+    grid-template-columns: 1fr;
+    gap: 64px;
+  }
+}
+
+/* =============================================
+   LEFT COLUMN — FORM
+   ============================================= */
+.section-tag {
+  font-size: 11px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+}
+
+.form-section-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+
+.form-section-subtitle {
+  font-size: clamp(14px, 1.4vw, 16px);
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 48px;
+  max-width: 480px;
+}
+
+.form-group {
+  margin-bottom: 28px;
+  position: relative;
+}
+
+.form-label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.form-label .required {
+  color: var(--accent);
+  margin-left: 4px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 14px 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-bottom-color: var(--accent);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+.form-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  cursor: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A8580' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  padding-right: 24px;
+}
+
+.form-select option {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.6;
+}
+
+.form-submit {
+  width: 100%;
+  padding: 20px;
+  background: var(--accent);
+  color: var(--bg-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top: 40px;
+  transition: background 0.3s, color 0.3s, transform 0.3s var(--ease-expo);
+  cursor: none;
+}
+
+.form-submit:hover {
+  background: var(--accent-light);
+  transform: translateY(-2px);
+}
+
+.form-submit.success {
+  background: #4a9d6f;
+  color: #fff;
+}
+
+/* =============================================
+   RIGHT COLUMN — CONTACT INFO
+   ============================================= */
+.contact-info {
+  position: sticky;
+  top: 120px;
+}
+
+.info-block {
+  padding: 32px 0;
+  border-left: 2px solid rgba(200,169,125,0.25);
+  padding-left: 28px;
+  margin-bottom: 8px;
+  transition: border-color 0.3s;
+}
+
+.info-block:hover {
+  border-left-color: var(--accent);
+}
+
+.info-block:first-child {
+  padding-top: 0;
+}
+
+.info-block-title {
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.info-block-content {
+  font-size: 15px;
+  line-height: 2;
+  color: var(--text-secondary);
+}
+
+.info-block-content .phone {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 4px;
+  letter-spacing: 0.02em;
+}
+
+.info-block-content .email {
+  color: var(--accent);
+  transition: color 0.3s;
+}
+
+.info-block-content .email:hover {
+  color: var(--accent-light);
+}
+
+/* Map Placeholder */
+.map-placeholder {
+  margin-top: 40px;
+  background: var(--bg-surface);
+  border: 1px solid rgba(200,169,125,0.2);
+  aspect-ratio: 16 / 9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.map-placeholder-label {
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  position: relative;
+  z-index: 1;
+}
+
+.map-svg {
+  width: 120px;
+  height: 80px;
+  opacity: 0.3;
+  position: relative;
+  z-index: 1;
+}
+
+.map-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(200,169,125,0.06) 0%, transparent 70%);
+}
+
+/* =============================================
+   SUCCESS MODAL
+   ============================================= */
+#success-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s var(--ease-expo), visibility 0.4s;
+}
+
+#success-modal.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(12,12,12,0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.modal-box {
+  position: relative;
+  z-index: 1;
+  background: var(--bg-surface);
+  border: 1px solid rgba(200,169,125,0.2);
+  padding: 64px;
+  width: min(480px, 90vw);
+  text-align: center;
+  transform: translateY(32px) scale(0.96);
+  transition: transform 0.5s var(--ease-expo);
+}
+
+#success-modal.open .modal-box {
+  transform: translateY(0) scale(1);
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px; right: 20px;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary);
+  font-size: 20px;
+  transition: color 0.3s;
+  cursor: none;
+}
+.modal-close:hover { color: var(--accent); }
+
+/* Checkmark Animation */
+.checkmark-circle {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 32px;
+}
+
+.checkmark-svg {
+  width: 80px;
+  height: 80px;
+}
+
+.checkmark-svg .circle {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: 226;
+  stroke-dashoffset: 226;
+  stroke-linecap: round;
+  transform-origin: center;
+}
+
+.checkmark-svg .check {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#success-modal.open .checkmark-svg .circle {
+  animation: drawCircle 0.6s var(--ease-expo) 0.15s forwards;
+}
+
+#success-modal.open .checkmark-svg .check {
+  animation: drawCheck 0.4s var(--ease-expo) 0.6s forwards;
+}
+
+@keyframes drawCircle {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes drawCheck {
+  to { stroke-dashoffset: 0; }
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.modal-sub {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* =============================================
+   PRIVACY NOTICE
+   ============================================= */
+#privacy-notice {
+  background: var(--bg-surface);
+  padding: 48px 0;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+
+.privacy-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  line-height: 1.8;
+  max-width: 720px;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.privacy-text::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: rgba(200,169,125,0.3);
+  margin: 0 auto 20px;
+}
+
+/* =============================================
+   FOOTER
+   ============================================= */
+#footer {
+  background: var(--bg-primary);
+  padding: 120px 0 64px;
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.footer-mega {
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: clamp(80px, 15vw, 200px);
+  font-weight: 700;
+  color: var(--text-primary);
+  opacity: 0.05;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  line-height: 0.85;
+}
+
+.footer-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 64px;
+  margin-bottom: 64px;
+}
+
+@media (max-width: 768px) {
+  .footer-inner { grid-template-columns: 1fr; gap: 40px; }
+}
+
+.footer-brand {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.footer-tagline {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.footer-col-title {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+}
+
+.footer-info {
+  font-size: 13px;
+  line-height: 2;
+  color: var(--text-secondary);
+}
+
+.footer-bottom {
+  position: relative;
+  z-index: 1;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-legal {
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.5;
+  line-height: 1.7;
+  max-width: 600px;
+}
+
+.footer-copy {
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.4;
+  letter-spacing: 0.1em;
+}
+
+/* =============================================
+   REVEAL ANIMATIONS
+   ============================================= */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s var(--ease-expo), transform 0.8s var(--ease-expo);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.stagger > * {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s var(--ease-expo), transform 0.7s var(--ease-expo);
+}
+
+.stagger.visible > *:nth-child(1) { opacity:1; transform:translateY(0); transition-delay:0s; }
+.stagger.visible > *:nth-child(2) { opacity:1; transform:translateY(0); transition-delay:0.1s; }
+.stagger.visible > *:nth-child(3) { opacity:1; transform:translateY(0); transition-delay:0.15s; }
+.stagger.visible > *:nth-child(4) { opacity:1; transform:translateY(0); transition-delay:0.2s; }
+.stagger.visible > *:nth-child(5) { opacity:1; transform:translateY(0); transition-delay:0.25s; }
+.stagger.visible > *:nth-child(6) { opacity:1; transform:translateY(0); transition-delay:0.3s; }
+.stagger.visible > *:nth-child(7) { opacity:1; transform:translateY(0); transition-delay:0.35s; }
+.stagger.visible > *:nth-child(8) { opacity:1; transform:translateY(0); transition-delay:0.4s; }
+
+/* Safety net */
+.revealed, .reveal.revealed, .stagger.revealed {
+  opacity: 1 !important;
+  transform: none !important;
+}
+.revealed > *, .stagger.revealed > * {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* =============================================
+   MAGNETIC BUTTON
+   ============================================= */
+.magnetic { transition: transform 0.5s var(--ease-expo); }
+
+/* =============================================
+   FORM VALIDATION FEEDBACK
+   ============================================= */
+.form-group.error .form-input,
+.form-group.error .form-select,
+.form-group.error .form-textarea {
+  border-bottom-color: #e05252;
+}
+
+.form-error {
+  font-size: 11px;
+  color: #e05252;
+  margin-top: 6px;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.form-group.error .form-error {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+@media (max-width: 768px) {
+  #contact-section { padding: 64px 0 80px; }
+  .contact-layout { gap: 48px; }
+  .contact-info { position: static; }
+  .info-block { padding-left: 20px; }
+  .modal-box { padding: 48px 32px; }
+}
+
+@media (max-width: 375px) {
+  .form-section-title { font-size: 28px; }
+  .info-block-content .phone { font-size: 20px; }
+}
+
+#back-to-top {
+  position: fixed;
+  bottom: 32px; right: 32px;
+  width: 48px; height: 48px;
+  border: 1px solid rgba(200,169,125,0.3);
+  background: rgba(12,12,12,0.8);
+  backdrop-filter: blur(8px);
+  color: var(--accent);
+  font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 990;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.4s var(--ease-expo), visibility 0.4s, transform 0.4s var(--ease-expo), border-color 0.3s;
+  cursor: none;
+}
+#back-to-top.visible { opacity: 1; visibility: visible; }
+#back-to-top:hover { border-color: var(--accent); transform: translateY(-4px); }
+
+</style>
+</head>
+<body>
+
+<!-- Scroll Progress Bar -->
+<div id="scroll-progress"></div>
+
+<!-- Custom Cursor -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- ============================================================
+     NAVIGATION
+     ============================================================ -->
+<nav id="nav">
+  <div class="container">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo magnetic">한강 르셀</a>
+      <ul class="nav-links">
+        <li><a href="overview.html">사업개요</a></li>
+        <li><a href="units.html">세대안내</a></li>
+        <li><a href="location.html">입지환경</a></li>
+        <li><a href="amenities.html">커뮤니티</a></li>
+        <li><a href="contact.html" class="active">관심고객등록</a></li>
+      </ul>
+      <a href="contact.html" class="nav-cta magnetic">상담 예약</a>
+      <button class="hamburger magnetic" id="hamburger" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Nav Overlay -->
+<div id="mobile-nav">
+  <ul class="mobile-nav-links">
+    <li><a href="overview.html" onclick="closeMobileNav()">사업개요</a></li>
+    <li><a href="units.html" onclick="closeMobileNav()">세대안내</a></li>
+    <li><a href="location.html" onclick="closeMobileNav()">입지환경</a></li>
+    <li><a href="amenities.html" onclick="closeMobileNav()">커뮤니티</a></li>
+    <li><a href="contact.html" class="active" onclick="closeMobileNav()">관심고객등록</a></li>
+    <li><a href="contact.html" onclick="closeMobileNav()">상담 예약</a></li>
+  </ul>
+</div>
+
+<!-- ============================================================
+     HERO (50vh)
+     ============================================================ -->
+<section id="hero">
+  <div class="hero-bg">
+    <img
+      src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1920&q=80"
+      alt="한강 르셀 관심고객등록"
+      fetchpriority="high"
+    >
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1 class="hero-title">당신의 한강을 예약하세요</h1>
+    <p class="hero-subtitle">156세대 한정, 지금 바로 관심고객 등록</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     MAIN CONTENT — Form + Info
+     ============================================================ -->
+<section id="contact-section">
+  <div class="container">
+    <div class="contact-layout">
+
+      <!-- Left Column — Registration Form -->
+      <div class="form-column">
+        <div class="section-tag reveal">Registration</div>
+        <h2 class="form-section-title reveal">관심고객 등록</h2>
+        <p class="form-section-subtitle reveal">전문 상담사가 48시간 이내 연락드립니다. 모든 정보는 안전하게 보호됩니다.</p>
+
+        <form id="registration-form" novalidate>
+          <div class="stagger">
+            <div class="form-group">
+              <label class="form-label" for="f-name">성함 <span class="required">*</span></label>
+              <input class="form-input" id="f-name" name="name" type="text" placeholder="홍길동" required autocomplete="name">
+              <p class="form-error">성함을 입력해 주세요.</p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="f-phone">연락처 <span class="required">*</span></label>
+              <input class="form-input" id="f-phone" name="phone" type="tel" placeholder="010-0000-0000" required autocomplete="tel">
+              <p class="form-error">연락처를 입력해 주세요.</p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="f-email">이메일</label>
+              <input class="form-input" id="f-email" name="email" type="email" placeholder="email@example.com" autocomplete="email">
+              <p class="form-error">올바른 이메일 형식을 입력해 주세요.</p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="f-type">관심 타입</label>
+              <select class="form-select" id="f-type" name="type">
+                <option value="">선택해 주세요</option>
+                <option value="59a">59A — 전용 59㎡</option>
+                <option value="84a">84A — 전용 84㎡</option>
+                <option value="115p">115P — 전용 115㎡</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="f-message">문의사항</label>
+              <textarea class="form-textarea" id="f-message" name="message" rows="4" placeholder="궁금하신 점을 자유롭게 작성해 주세요"></textarea>
+            </div>
+
+            <button type="submit" class="form-submit magnetic" id="submit-btn">관심고객 등록하기</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Right Column — Contact Info -->
+      <div class="contact-info reveal">
+        <div class="info-block">
+          <p class="info-block-title">분양 문의</p>
+          <div class="info-block-content">
+            <span class="phone">02-1234-5678</span>
+            <a href="mailto:info@hangang-leciel.kr" class="email">info@hangang-leciel.kr</a>
+          </div>
+        </div>
+
+        <div class="info-block">
+          <p class="info-block-title">모델하우스</p>
+          <div class="info-block-content">
+            <p>서울특별시 영등포구 한강변로 123</p>
+            <p>한강 르셀 분양사무소 1층</p>
+          </div>
+        </div>
+
+        <div class="info-block">
+          <p class="info-block-title">운영시간</p>
+          <div class="info-block-content">
+            <p>월–토: 10:00 – 18:00</p>
+            <p>일·공휴일: 예약제 운영</p>
+          </div>
+        </div>
+
+        <!-- Map Placeholder -->
+        <div class="map-placeholder">
+          <svg class="map-svg" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Abstract road grid -->
+            <line x1="10" y1="20" x2="110" y2="20" stroke="#C8A97D" stroke-width="0.5" opacity="0.4"/>
+            <line x1="10" y1="40" x2="110" y2="40" stroke="#C8A97D" stroke-width="0.5" opacity="0.3"/>
+            <line x1="10" y1="60" x2="110" y2="60" stroke="#C8A97D" stroke-width="0.5" opacity="0.4"/>
+            <line x1="30" y1="5" x2="30" y2="75" stroke="#C8A97D" stroke-width="0.5" opacity="0.3"/>
+            <line x1="60" y1="5" x2="60" y2="75" stroke="#C8A97D" stroke-width="0.5" opacity="0.3"/>
+            <line x1="90" y1="5" x2="90" y2="75" stroke="#C8A97D" stroke-width="0.5" opacity="0.3"/>
+            <!-- River -->
+            <path d="M0 50 Q30 45 60 50 Q90 55 120 50" stroke="#C8A97D" stroke-width="1" opacity="0.5" fill="none"/>
+            <path d="M0 54 Q30 49 60 54 Q90 59 120 54" stroke="#C8A97D" stroke-width="0.5" opacity="0.3" fill="none"/>
+            <!-- Pin -->
+            <circle cx="60" cy="30" r="6" fill="none" stroke="#C8A97D" stroke-width="1.5"/>
+            <circle cx="60" cy="30" r="2" fill="#C8A97D"/>
+            <path d="M60 36 L60 44" stroke="#C8A97D" stroke-width="1" stroke-linecap="round"/>
+          </svg>
+          <p class="map-placeholder-label">모델하우스 위치</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PRIVACY NOTICE
+     ============================================================ -->
+<section id="privacy-notice">
+  <div class="container">
+    <p class="privacy-text">
+      귀하의 개인정보는 분양 상담 목적으로만 사용되며, 개인정보보호법에 따라 안전하게 관리됩니다.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer id="footer">
+  <div class="footer-mega" aria-hidden="true">한강 르셀</div>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">한강 르셀</div>
+        <p class="footer-tagline">서울의 마지막 한강변<br>프라이빗 레지던스.</p>
+      </div>
+      <div>
+        <p class="footer-col-title">Contact</p>
+        <div class="footer-info">
+          <p>02-1234-5678</p>
+          <p>info@hangang-leciel.kr</p>
+          <p>월–토 10:00–18:00</p>
+        </div>
+      </div>
+      <div>
+        <p class="footer-col-title">Location</p>
+        <div class="footer-info">
+          <p>서울특별시 영등포구</p>
+          <p>한강변로 123</p>
+          <p>한강 르셀 분양사무소</p>
+        </div>
+      </div>
+      <div>
+        <p class="footer-col-title">Navigation</p>
+        <div class="footer-info">
+          <p><a href="overview.html">사업개요</a></p>
+          <p><a href="units.html">세대안내</a></p>
+          <p><a href="location.html">입지환경</a></p>
+          <p><a href="amenities.html">커뮤니티</a></p>
+          <p><a href="contact.html">관심고객등록</a></p>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-legal">본 홈페이지의 이미지, 조감도, 배치도 등은 이해를 돕기 위한 것으로 실제와 다를 수 있습니다.<br>분양문의: 02-1234-5678</p>
+      <p class="footer-copy">&copy; 2027 한강 르셀. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================================
+     SUCCESS MODAL
+     ============================================================ -->
+<div id="success-modal" role="dialog" aria-modal="true" aria-label="등록 완료">
+  <div class="modal-backdrop" onclick="closeSuccessModal()"></div>
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeSuccessModal()" aria-label="닫기">&times;</button>
+    <div class="checkmark-circle">
+      <svg class="checkmark-svg" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+        <circle class="circle" cx="40" cy="40" r="36"/>
+        <path class="check" d="M24 42 L34 52 L56 30"/>
+      </svg>
+    </div>
+    <h3 class="modal-title">관심고객 등록이 완료되었습니다</h3>
+    <p class="modal-sub">빠른 시일 내 연락드리겠습니다.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+(function () {
+  'use strict';
+
+  /* ──────────────────────────────────────────
+     SCROLL PROGRESS BAR
+  ────────────────────────────────────────── */
+  var progressBar = document.getElementById('scroll-progress');
+  function updateProgress() {
+    var scrollTop = window.pageYOffset;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    progressBar.style.width = pct + '%';
+  }
+
+  /* ──────────────────────────────────────────
+     CUSTOM CURSOR
+  ────────────────────────────────────────── */
+  var cursorDot = document.getElementById('cursor-dot');
+  var cursorRing = document.getElementById('cursor-ring');
+  var mouseX = 0, mouseY = 0;
+  var ringX = 0, ringY = 0;
+
+  document.addEventListener('mousemove', function (e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    cursorDot.style.left = mouseX + 'px';
+    cursorDot.style.top = mouseY + 'px';
+  });
+
+  function animateCursor() {
+    ringX += (mouseX - ringX) * 0.12;
+    ringY += (mouseY - ringY) * 0.12;
+    cursorRing.style.left = ringX + 'px';
+    cursorRing.style.top = ringY + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+
+  // Expand ring on interactive elements
+  document.querySelectorAll('a, button, input, select, textarea, .form-submit').forEach(function (el) {
+    el.addEventListener('mouseenter', function () { cursorRing.classList.add('expanded'); });
+    el.addEventListener('mouseleave', function () { cursorRing.classList.remove('expanded'); });
+  });
+
+  /* ──────────────────────────────────────────
+     NAV SCROLL
+  ────────────────────────────────────────── */
+  var nav = document.getElementById('nav');
+  function updateNav() {
+    if (window.pageYOffset > 80) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
+    }
+  }
+
+  /* ──────────────────────────────────────────
+     MOBILE NAV
+  ────────────────────────────────────────── */
+  var hamburger = document.getElementById('hamburger');
+  var mobileNav = document.getElementById('mobile-nav');
+  var isNavOpen = false;
+
+  hamburger.addEventListener('click', function () {
+    isNavOpen = !isNavOpen;
+    hamburger.classList.toggle('open', isNavOpen);
+    mobileNav.classList.toggle('open', isNavOpen);
+    document.body.style.overflow = isNavOpen ? 'hidden' : '';
+  });
+
+  window.closeMobileNav = function () {
+    isNavOpen = false;
+    hamburger.classList.remove('open');
+    mobileNav.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  /* ──────────────────────────────────────────
+     SUCCESS MODAL
+  ────────────────────────────────────────── */
+  var successModal = document.getElementById('success-modal');
+  var autoCloseTimer = null;
+
+  function openSuccessModal() {
+    successModal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    // Auto-close after 3 seconds
+    autoCloseTimer = setTimeout(function () {
+      closeSuccessModal();
+    }, 3000);
+  }
+
+  window.closeSuccessModal = function () {
+    if (autoCloseTimer) {
+      clearTimeout(autoCloseTimer);
+      autoCloseTimer = null;
+    }
+    successModal.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeSuccessModal();
+  });
+
+  /* ──────────────────────────────────────────
+     FORM VALIDATION & SUBMIT
+  ────────────────────────────────────────── */
+  var form = document.getElementById('registration-form');
+  var submitBtn = document.getElementById('submit-btn');
+
+  function validateField(field) {
+    var group = field.closest('.form-group');
+    if (!group) return true;
+
+    var isValid = true;
+
+    if (field.required && !field.value.trim()) {
+      isValid = false;
+    }
+
+    if (field.type === 'email' && field.value.trim()) {
+      var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRe.test(field.value.trim())) {
+        isValid = false;
+      }
+    }
+
+    if (field.type === 'tel' && field.value.trim()) {
+      var phoneRe = /^[\d\-\+\s\(\)]{8,}$/;
+      if (!phoneRe.test(field.value.trim())) {
+        isValid = false;
+      }
+    }
+
+    if (!isValid) {
+      group.classList.add('error');
+    } else {
+      group.classList.remove('error');
+    }
+
+    return isValid;
+  }
+
+  // Real-time validation on blur
+  form.querySelectorAll('.form-input, .form-select, .form-textarea').forEach(function (field) {
+    field.addEventListener('blur', function () {
+      validateField(field);
+    });
+    field.addEventListener('input', function () {
+      var group = field.closest('.form-group');
+      if (group && group.classList.contains('error')) {
+        validateField(field);
+      }
+    });
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    var fields = form.querySelectorAll('[required]');
+    var allValid = true;
+
+    fields.forEach(function (field) {
+      if (!validateField(field)) {
+        allValid = false;
+      }
+    });
+
+    // Also validate email if filled
+    var emailField = document.getElementById('f-email');
+    if (emailField.value.trim() && !validateField(emailField)) {
+      allValid = false;
+    }
+
+    if (!allValid) {
+      // Focus first error field
+      var firstError = form.querySelector('.form-group.error .form-input, .form-group.error .form-select, .form-group.error .form-textarea');
+      if (firstError) firstError.focus();
+      return;
+    }
+
+    // Success
+    submitBtn.textContent = '등록 완료!';
+    submitBtn.classList.add('success');
+
+    // Show success modal
+    openSuccessModal();
+
+    // Reset form after delay
+    setTimeout(function () {
+      submitBtn.textContent = '관심고객 등록하기';
+      submitBtn.classList.remove('success');
+      form.reset();
+      form.querySelectorAll('.form-group').forEach(function (g) {
+        g.classList.remove('error');
+      });
+    }, 3500);
+  });
+
+  /* ──────────────────────────────────────────
+     INTERSECTION OBSERVER — REVEAL
+  ────────────────────────────────────────── */
+  var revealObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.reveal, .stagger').forEach(function (el) {
+    revealObserver.observe(el);
+  });
+
+  /* ──────────────────────────────────────────
+     MAGNETIC BUTTONS
+  ────────────────────────────────────────── */
+  var magneticBtns = document.querySelectorAll('.magnetic');
+
+  magneticBtns.forEach(function (btn) {
+    btn.addEventListener('mousemove', function (e) {
+      var rect = btn.getBoundingClientRect();
+      var bx = rect.left + rect.width / 2;
+      var by = rect.top + rect.height / 2;
+      var dx = e.clientX - bx;
+      var dy = e.clientY - by;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+      var radius = 80;
+      if (dist < radius) {
+        var strength = (1 - dist / radius) * 0.4;
+        btn.style.transform = 'translate(' + dx * strength + 'px, ' + dy * strength + 'px)';
+      }
+    });
+    btn.addEventListener('mouseleave', function () {
+      btn.style.transform = 'translate(0, 0)';
+      btn.style.transition = 'transform 0.6s cubic-bezier(0.16,1,0.3,1)';
+    });
+    btn.addEventListener('mouseenter', function () {
+      btn.style.transition = 'transform 0.2s cubic-bezier(0.16,1,0.3,1)';
+    });
+  });
+
+  /* ──────────────────────────────────────────
+     MAIN SCROLL HANDLER
+  ────────────────────────────────────────── */
+  var ticking = false;
+
+  function onScroll() {
+    if (!ticking) {
+      requestAnimationFrame(function () {
+        updateProgress();
+        updateNav();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // Initial call
+  updateProgress();
+  updateNav();
+
+  /* ──────────────────────────────────────────
+     BACK TO TOP
+  ────────────────────────────────────────── */
+  var backToTop = document.getElementById('back-to-top');
+  window.addEventListener('scroll', function() {
+    if (window.pageYOffset > 500) { backToTop.classList.add('visible'); }
+    else { backToTop.classList.remove('visible'); }
+  }, { passive: true });
+  backToTop.addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  /* ──────────────────────────────────────────
+     SAFETY NET — Force all reveals visible
+  ────────────────────────────────────────── */
+  setTimeout(function () {
+    document.querySelectorAll('.reveal, .stagger, [class*="reveal"]').forEach(function (el) {
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+      el.classList.add('visible');
+      el.classList.add('revealed');
+    });
+    document.querySelectorAll('.stagger > *').forEach(function (el) {
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+    });
+  }, 2000);
+
+  var safetyTriggered = false;
+  window.addEventListener('scroll', function () {
+    if (!safetyTriggered) {
+      safetyTriggered = true;
+      document.querySelectorAll('.reveal:not(.visible), .stagger:not(.visible)').forEach(function (el) {
+        el.classList.add('visible');
+        el.classList.add('revealed');
+      });
+    }
+  }, { once: true });
+
+})();
+</script>
+
+<button id="back-to-top" aria-label="맨 위로">&#8593;</button>
+</body>
+</html>

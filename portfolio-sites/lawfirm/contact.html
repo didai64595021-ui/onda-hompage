@@ -1,0 +1,2100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>상담예약 | 법무법인 정의 JUNGUI LAW</title>
+  <meta name="description" content="법무법인 정의의 무료 법률 상담을 예약하세요. 전문 변호사가 직접 상담해 드립니다." />
+
+  <!-- Google Fonts: Montserrat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet" />
+
+  <!-- Pretendard CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+  <!-- Global Stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="sidebar.css" />
+
+  <style>
+    /* ===== QA RESET (styles.css 보완) ===== */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { overflow-x: hidden; scroll-behavior: smooth; }
+    body { font-family: 'Pretendard', 'Montserrat', sans-serif; word-break: keep-all; overflow-wrap: break-word; overflow-x: hidden; }
+    img { max-width: 100%; height: auto; object-fit: cover; }
+
+    /* ============================================================
+       contact.html — Page-specific Styles
+       상담예약 페이지 전용 스타일
+       ============================================================ */
+
+    /* ---------- Main Content ---------- */
+    .main-content {
+      background: var(--color-bg);
+    }
+
+    /* ---------- Back to Top ---------- */
+    .back-to-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 48px;
+      height: 48px;
+      background: var(--color-indigo);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      cursor: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 500;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: all var(--transition-base);
+      box-shadow: var(--shadow-md);
+    }
+    .back-to-top.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .back-to-top:hover { background: var(--color-indigo-dark); }
+
+    /* ---------- Section Base Styles ---------- */
+    .section {
+      padding: var(--space-3xl) var(--space-xl);
+    }
+    .section-alt {
+      background: var(--color-bg-alt);
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: var(--space-2xl);
+    }
+    .section-tag {
+      display: inline-block;
+      font-family: var(--font-heading);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--color-burgundy);
+      padding: 0.35rem 1rem;
+      border: 1px solid var(--color-burgundy);
+      border-radius: 100px;
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+      font-weight: 800;
+      color: var(--color-text);
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+    .section-title em {
+      font-style: normal;
+      color: var(--color-indigo);
+    }
+    .section-subtitle {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      color: var(--color-text-muted);
+      line-height: 1.7;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .section-divider {
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-indigo), var(--color-burgundy));
+      margin: 1rem auto 0;
+      border-radius: 2px;
+    }
+
+    /* ---------- Scroll Reveal ---------- */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-left {
+      opacity: 0;
+      transform: translateX(-30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal-left.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .reveal-right {
+      opacity: 0;
+      transform: translateX(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal-right.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* ============================================================
+       A. PAGE HERO — Split Screen (S3 Diagonal + IMG3 Duotone)
+       ============================================================ */
+    .contact-hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+    .contact-hero::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-8%) skewX(-4deg);
+      width: 20%;
+      height: 100%;
+      background: var(--color-bg);
+      z-index: 2;
+    }
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 6rem 4rem 6rem 3rem;
+      position: relative;
+      z-index: 3;
+    }
+    .hero-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .hero-eyebrow-line {
+      width: 40px;
+      height: 2px;
+      background: var(--color-burgundy);
+    }
+    .hero-eyebrow-text {
+      font-family: var(--font-heading);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--color-burgundy);
+    }
+    .hero-title {
+      font-family: var(--font-heading);
+      font-size: clamp(2rem, 3.5vw, 3.2rem);
+      font-weight: 900;
+      color: var(--color-text);
+      line-height: 1.15;
+      margin-bottom: 1.5rem;
+    }
+    .hero-title .typing-text {
+      color: var(--color-indigo);
+    }
+    .hero-title .cursor-blink {
+      display: inline-block;
+      width: 3px;
+      height: 1em;
+      background: var(--color-indigo);
+      margin-left: 2px;
+      vertical-align: middle;
+      animation: blink 0.9s step-end infinite;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+    .hero-subtitle {
+      font-family: var(--font-body);
+      font-size: 1.05rem;
+      color: var(--color-text-secondary);
+      line-height: 1.75;
+      margin-bottom: 2.5rem;
+      max-width: 440px;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--color-burgundy-light);
+      color: var(--color-burgundy);
+      font-family: var(--font-heading);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 0.5rem 1rem;
+      border-radius: 100px;
+      margin-bottom: 2rem;
+    }
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.9rem 2rem;
+      border: 2px solid var(--color-indigo);
+      border-radius: 4px;
+      color: var(--color-indigo);
+      font-family: var(--font-heading);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      text-transform: uppercase;
+      cursor: none;
+      transition: all var(--transition-base);
+      background: transparent;
+    }
+    .btn-ghost:hover {
+      background: var(--color-indigo);
+      color: #fff;
+    }
+    .btn-ghost-burgundy {
+      border-color: var(--color-burgundy);
+      color: var(--color-burgundy);
+    }
+    .btn-ghost-burgundy:hover {
+      background: var(--color-burgundy);
+      color: #fff;
+    }
+    .hero-right {
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+    .hero-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    /* IMG3 Duotone overlay */
+    .hero-duotone {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(63, 81, 181, 0.65) 0%,
+        rgba(136, 19, 55, 0.5) 100%
+      );
+      mix-blend-mode: multiply;
+      z-index: 1;
+    }
+    .hero-right::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, var(--color-bg) 0%, transparent 18%);
+      z-index: 2;
+    }
+    .hero-scroll-hint {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 2.5rem;
+      font-family: var(--font-heading);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+    }
+    .hero-scroll-line {
+      width: 30px;
+      height: 1px;
+      background: var(--color-text-muted);
+    }
+
+    /* ============================================================
+       B. CONTACT INFO CARDS
+       ============================================================ */
+    .contact-cards-section {
+      padding: var(--space-3xl) var(--space-xl);
+      background: var(--color-bg);
+    }
+    .contact-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      max-width: var(--content-max);
+      margin: 0 auto;
+    }
+    .contact-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+      transition: all var(--transition-base);
+      position: relative;
+      overflow: hidden;
+    }
+    .contact-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-indigo), var(--color-burgundy));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--transition-base);
+    }
+    .contact-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); }
+    .contact-card:hover::before { transform: scaleX(1); }
+    .card-icon-wrap {
+      width: 56px;
+      height: 56px;
+      background: var(--color-indigo-light);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    .card-icon-wrap svg {
+      width: 26px;
+      height: 26px;
+      stroke: var(--color-indigo);
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .card-title {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 1rem;
+    }
+    .card-detail {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .card-detail-primary {
+      font-family: var(--font-heading);
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--color-indigo);
+      letter-spacing: -0.01em;
+    }
+    .card-detail-line {
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+    .card-detail-line.muted {
+      color: var(--color-text-muted);
+      font-size: 0.8rem;
+    }
+
+    /* ============================================================
+       C. CONSULTATION FORM SECTION
+       ============================================================ */
+    .form-section {
+      padding: var(--space-3xl) var(--space-xl);
+      background: var(--color-bg-alt);
+    }
+    /* S3 Diagonal separator */
+    .diagonal-top {
+      clip-path: polygon(0 5%, 100% 0, 100% 100%, 0 100%);
+      margin-top: -4rem;
+      padding-top: calc(var(--space-3xl) + 4rem);
+    }
+    .form-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      max-width: var(--content-max);
+      margin: 0 auto;
+      align-items: start;
+    }
+    /* --- Form Styles --- */
+    .form-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      padding: 2.5rem;
+    }
+    .form-title {
+      font-family: var(--font-heading);
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--color-text);
+      margin-bottom: 0.5rem;
+    }
+    .form-subtitle {
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      margin-bottom: 2rem;
+    }
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-label {
+      display: block;
+      font-family: var(--font-heading);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--color-text);
+      margin-bottom: 0.5rem;
+    }
+    .form-label .required {
+      color: var(--color-burgundy);
+      margin-left: 2px;
+    }
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--color-bg);
+      border: 1.5px solid var(--color-border);
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      color: var(--color-text);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+      outline: none;
+      box-sizing: border-box;
+    }
+    .form-control:focus {
+      border-color: var(--color-indigo);
+      box-shadow: 0 0 0 3px rgba(63,81,181,0.1);
+    }
+    .form-control::placeholder { color: var(--color-text-muted); }
+    select.form-control {
+      cursor: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23666' stroke-width='1.5' d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 16px;
+      padding-right: 2.5rem;
+    }
+    textarea.form-control {
+      resize: vertical;
+      min-height: 120px;
+      line-height: 1.6;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    /* Radio Buttons */
+    .radio-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: none;
+    }
+    .radio-item input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--color-indigo);
+      cursor: none;
+    }
+    .radio-item label {
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      cursor: none;
+    }
+    /* Checkbox */
+    .checkbox-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+    }
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      accent-color: var(--color-indigo);
+      cursor: none;
+      flex-shrink: 0;
+    }
+    .checkbox-group label {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      line-height: 1.6;
+      cursor: none;
+    }
+    .form-error {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      color: var(--color-burgundy);
+      margin-top: 0.3rem;
+      display: none;
+    }
+    .form-control.invalid {
+      border-color: var(--color-burgundy);
+      box-shadow: 0 0 0 3px rgba(136,19,55,0.1);
+    }
+    .form-control.invalid + .form-error { display: block; }
+    .btn-submit {
+      width: 100%;
+      padding: 1rem 2rem;
+      background: transparent;
+      border: 2px solid var(--color-indigo);
+      border-radius: 8px;
+      color: var(--color-indigo);
+      font-family: var(--font-heading);
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      cursor: none;
+      transition: all var(--transition-base);
+      margin-top: 0.5rem;
+    }
+    .btn-submit:hover {
+      background: var(--color-indigo);
+      color: #fff;
+    }
+    /* Success message */
+    .form-success {
+      display: none;
+      text-align: center;
+      padding: 3rem 2rem;
+    }
+    .form-success.visible { display: block; }
+    .success-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--color-indigo-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+    }
+    .success-icon svg {
+      width: 32px;
+      height: 32px;
+      stroke: var(--color-indigo);
+      fill: none;
+      stroke-width: 2;
+    }
+    .success-title {
+      font-family: var(--font-heading);
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--color-text);
+      margin-bottom: 0.75rem;
+    }
+    .success-text {
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+      line-height: 1.7;
+    }
+
+    /* --- Right side: Map + Info --- */
+    .map-info-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .map-container {
+      width: 100%;
+      height: 240px;
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .map-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(0deg, var(--color-border-light) 0px, var(--color-border-light) 1px, transparent 1px, transparent 40px),
+        repeating-linear-gradient(90deg, var(--color-border-light) 0px, var(--color-border-light) 1px, transparent 1px, transparent 40px);
+      background-color: var(--color-bg-alt);
+    }
+    .map-road-h {
+      position: absolute;
+      left: 0; right: 0;
+      height: 28px;
+      background: var(--color-border);
+    }
+    .map-road-h.r1 { top: 45%; }
+    .map-road-v {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 20px;
+      background: var(--color-border);
+    }
+    .map-road-v.v1 { left: 40%; }
+    .map-pin-wrap {
+      position: absolute;
+      top: 50%;
+      left: 42%;
+      transform: translate(-50%, -100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 3;
+    }
+    .map-pin-wrap svg {
+      width: 36px;
+      height: 36px;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25));
+    }
+    .map-label {
+      background: var(--color-indigo);
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      white-space: nowrap;
+      margin-top: 4px;
+    }
+    .address-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .address-card-title {
+      font-family: var(--font-heading);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-indigo);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .address-detail-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      color: var(--color-text-secondary);
+    }
+    .address-detail-row svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--color-indigo);
+      fill: none;
+      stroke-width: 2;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .hours-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      margin-top: 0.5rem;
+    }
+    .hours-table td {
+      padding: 0.35rem 0;
+      color: var(--color-text-secondary);
+      border-bottom: 1px solid var(--color-border-light);
+    }
+    .hours-table td:first-child {
+      color: var(--color-text-muted);
+      width: 100px;
+    }
+    .hours-table tr:last-child td { border-bottom: none; }
+    .parking-note {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--color-indigo-light);
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      color: var(--color-indigo-dark, var(--color-indigo));
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* ============================================================
+       D. PROCESS SECTION (4 Steps)
+       ============================================================ */
+    .process-section {
+      padding: var(--space-3xl) var(--space-xl);
+      background: var(--color-bg);
+    }
+    .process-flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      max-width: var(--content-max);
+      margin: 0 auto;
+      position: relative;
+    }
+    .process-flow::before {
+      content: '';
+      position: absolute;
+      top: 60px;
+      left: calc(12.5% + 28px);
+      right: calc(12.5% + 28px);
+      height: 2px;
+      background: linear-gradient(90deg, var(--color-indigo), var(--color-burgundy));
+      z-index: 0;
+    }
+    .process-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 1rem;
+      position: relative;
+      z-index: 1;
+    }
+    .process-num-wrap {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+    .process-num {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--color-bg);
+      border: 2px solid var(--color-indigo);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-heading);
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: var(--color-indigo);
+      position: relative;
+      z-index: 1;
+      transition: all var(--transition-base);
+    }
+    .process-step:hover .process-num {
+      background: var(--color-indigo);
+      color: #fff;
+    }
+    .process-num-label {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 20px;
+      height: 20px;
+      background: var(--color-burgundy);
+      border-radius: 50%;
+      font-family: var(--font-heading);
+      font-size: 0.6rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .process-icon-box {
+      width: 44px;
+      height: 44px;
+      background: var(--color-indigo-light);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .process-icon-box svg {
+      width: 22px;
+      height: 22px;
+      stroke: var(--color-indigo);
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .process-step-title {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 0.5rem;
+    }
+    .process-step-desc {
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      line-height: 1.6;
+    }
+    .process-arrow {
+      position: absolute;
+      top: 50px;
+      right: -12px;
+      z-index: 2;
+      color: var(--color-indigo);
+    }
+    .process-step:last-child .process-arrow { display: none; }
+
+    /* ============================================================
+       E. FAQ SECTION
+       ============================================================ */
+    .faq-section {
+      padding: var(--space-3xl) var(--space-xl);
+      background: var(--color-bg-alt);
+    }
+    .faq-list {
+      max-width: 820px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .faq-item {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: box-shadow var(--transition-fast);
+    }
+    .faq-item:hover { box-shadow: var(--shadow-sm); }
+    .faq-item.open { border-color: var(--color-indigo); }
+    .faq-question {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      cursor: none;
+      gap: 1rem;
+    }
+    .faq-q-text {
+      font-family: var(--font-heading);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--color-text);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .faq-q-badge {
+      font-family: var(--font-heading);
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: var(--color-indigo);
+      background: var(--color-indigo-light);
+      padding: 0.1rem 0.45rem;
+      border-radius: 4px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .faq-toggle-icon {
+      width: 28px;
+      height: 28px;
+      border: 1.5px solid var(--color-border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all var(--transition-fast);
+    }
+    .faq-toggle-icon svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--color-text-muted);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      transition: transform var(--transition-fast);
+    }
+    .faq-item.open .faq-toggle-icon {
+      border-color: var(--color-indigo);
+      background: var(--color-indigo);
+    }
+    .faq-item.open .faq-toggle-icon svg {
+      stroke: #fff;
+      transform: rotate(180deg);
+    }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.3s ease;
+    }
+    .faq-item.open .faq-answer {
+      max-height: 300px;
+    }
+    .faq-answer-inner {
+      padding: 0 1.5rem 1.5rem;
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      line-height: 1.8;
+      display: flex;
+      gap: 0.75rem;
+    }
+    .faq-a-badge {
+      font-family: var(--font-heading);
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: var(--color-burgundy);
+      background: var(--color-burgundy-light);
+      padding: 0.1rem 0.45rem;
+      border-radius: 4px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      height: fit-content;
+    }
+
+    /* ============================================================
+       F. CTA PARALLAX SECTION
+       ============================================================ */
+    .cta-parallax {
+      position: relative;
+      min-height: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .cta-parallax-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1200&q=80');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      filter: grayscale(0.3);
+      transform: scale(1.1);
+    }
+    .cta-parallax-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(10,10,10,0.85) 0%,
+        rgba(63,81,181,0.7) 50%,
+        rgba(136,19,55,0.75) 100%
+      );
+    }
+    .cta-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 4rem 2rem;
+      max-width: 700px;
+    }
+    .cta-eyebrow {
+      font-family: var(--font-heading);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 1rem;
+    }
+    .cta-title {
+      font-family: var(--font-heading);
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+    }
+    .cta-phone {
+      font-family: var(--font-heading);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -0.02em;
+      margin-bottom: 2rem;
+      display: block;
+    }
+    .cta-phone span { color: rgba(255,255,255,0.6); font-size: 0.6em; font-weight: 400; }
+    .cta-sub {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 2.5rem;
+    }
+    .btn-ghost-white {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.9rem 2.5rem;
+      border: 2px solid rgba(255,255,255,0.7);
+      border-radius: 4px;
+      color: #fff;
+      font-family: var(--font-heading);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      text-transform: uppercase;
+      cursor: none;
+      transition: all var(--transition-base);
+      background: transparent;
+    }
+    .btn-ghost-white:hover {
+      background: rgba(255,255,255,0.15);
+      border-color: #fff;
+    }
+
+    /* ============================================================
+       G. FOOTER
+       ============================================================ */
+    .site-footer {
+      background: var(--color-bg);
+      border-top: 1px solid var(--color-border);
+      padding: 3rem var(--space-xl) 2rem;
+    }
+    .footer-inner {
+      max-width: var(--content-max);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr;
+      gap: 3rem;
+      margin-bottom: 2.5rem;
+    }
+    .footer-brand-name {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--color-text);
+      margin-bottom: 0.25rem;
+    }
+    .footer-brand-name span { color: var(--color-indigo); }
+    .footer-brand-sub {
+      font-family: var(--font-heading);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--color-burgundy);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .footer-desc {
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      line-height: 1.7;
+      margin-bottom: 1.25rem;
+    }
+    .footer-contact-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .footer-contact-item {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .footer-col-title {
+      font-family: var(--font-heading);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--color-text);
+      margin-bottom: 1rem;
+    }
+    .footer-links {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .footer-links a {
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+    }
+    .footer-links a:hover { color: var(--color-indigo); }
+    .footer-bottom {
+      max-width: var(--content-max);
+      margin: 0 auto;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .footer-copy {
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+    }
+    .footer-legal {
+      display: flex;
+      gap: 1.5rem;
+    }
+    .footer-legal a {
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      text-decoration: none;
+    }
+    .footer-legal a:hover { color: var(--color-indigo); }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 1100px) {
+      .contact-hero { grid-template-columns: 1fr; min-height: auto; }
+      .contact-hero::after { display: none; }
+      .hero-left { padding: 8rem 2.5rem 4rem; }
+      .hero-right { height: 360px; }
+      .contact-cards-grid { grid-template-columns: 1fr; }
+      .form-layout { grid-template-columns: 1fr; }
+      .process-flow { grid-template-columns: 1fr 1fr; gap: 2rem; }
+      .process-flow::before { display: none; }
+      .footer-inner { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      :root {
+        --space-xl: 1.5rem;
+        --space-3xl: 4rem;
+      }
+      .contact-hero { min-height: 70vh; }
+      .info-section,
+      .form-section,
+      .map-section,
+      .cta-section { padding-top: 3rem !important; padding-bottom: 3rem !important; }
+      .hero-left { padding: 7rem 1.5rem 3rem; }
+      .contact-hero::after { display: none; }
+      .form-row { grid-template-columns: 1fr; }
+      .radio-group { flex-direction: column; gap: 0.5rem; }
+      .process-flow { grid-template-columns: 1fr; gap: 1.5rem; }
+      .cta-parallax-bg { background-attachment: scroll; }
+      .footer-inner { grid-template-columns: 1fr; gap: 2rem; }
+      .footer-bottom { flex-direction: column; text-align: center; }
+      .contact-cards-grid { grid-template-columns: 1fr; }
+      /* 연락처 아이콘-텍스트 정렬 */
+      .card-icon-wrap {
+        width: 24px;
+        height: 24px;
+        min-width: 24px;
+        flex-shrink: 0;
+      }
+      .card-icon-wrap svg {
+        width: 16px;
+        height: 16px;
+      }
+      .contact-card {
+        gap: 12px;
+        padding: 20px;
+      }
+      /* 폼 라벨-input 간격 균일 */
+      .form-label {
+        margin-bottom: 6px;
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+      /* 폼 컨테이너 좌우 여백 균일 */
+      .form-card {
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .form-section {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+      /* 상담 안내 텍스트 줄간격 */
+      .card-detail-line,
+      .card-detail-primary {
+        line-height: 1.6;
+      }
+      /* FAQ 아코디언 항목 간 간격 */
+      .faq-item {
+        padding: 16px 0;
+        margin-bottom: 12px;
+      }
+      .faq-answer-inner {
+        line-height: 1.6;
+      }
+      /* FAQ → CTA 섹션 경계 여백 */
+      .cta-parallax {
+        margin-top: 40px;
+        padding-top: 48px;
+      }
+      /* 모바일 CTA 버튼 중앙 정렬 */
+      .hero-left .btn-ghost {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        text-align: center;
+      }
+      .cta-content {
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Page Loader -->
+  <div id="page-loader" role="status" aria-label="페이지 로딩 중">
+    <div class="loader-logo">JUNGUI <span>LAW</span></div>
+    <div class="loader-bar-wrap">
+      <div class="loader-bar"></div>
+    </div>
+    <div class="loader-percent" id="loader-percent">0%</div>
+  </div>
+
+  <!-- Custom Cursor (I6) -->
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- ===== N2 SIDEBAR NAVIGATION ===== -->
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="주요 내비게이션">
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-en">JUNGUI LAW</div>
+      <div class="sidebar-logo-kr" data-kr="법무법인 정의" data-en="JUNGUI LAW FIRM">법무법인 정의</div>
+      <div class="sidebar-logo-tagline" data-kr="정의와 신뢰로 당신의 권리를 지킵니다" data-en="Protecting Your Rights with Justice and Trust">정의와 신뢰로 당신의 권리를 지킵니다</div>
+    </div>
+
+    <!-- Nav Links -->
+    <nav class="sidebar-nav" aria-label="페이지 내비게이션">
+      <div class="sidebar-nav-label">Navigation</div>
+      <ul role="menubar">
+        <li class="sidebar-nav-item" role="none">
+          <a href="index.html" role="menuitem">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            <span data-kr="홈" data-en="Home">홈</span>
+            <span class="sidebar-nav-num">01</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item" role="none">
+          <a href="about.html" role="menuitem">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <line x1="8" y1="8" x2="16" y2="8"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+              <line x1="8" y1="16" x2="12" y2="16"/>
+            </svg>
+            <span data-kr="법인소개" data-en="About">법인소개</span>
+            <span class="sidebar-nav-num">02</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item" role="none">
+          <a href="practice.html" role="menuitem">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+            </svg>
+            <span data-kr="업무분야" data-en="Practice Areas">업무분야</span>
+            <span class="sidebar-nav-num">03</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item" role="none">
+          <a href="cases.html" role="menuitem">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M6 20v-2a4 4 0 014-4h4a4 4 0 014 4v2"/>
+              <polyline points="16 12 17 21 12 19 7 21 8 12"/>
+            </svg>
+            <span data-kr="성공사례" data-en="Case Results">성공사례</span>
+            <span class="sidebar-nav-num">04</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item active" role="none">
+          <a href="contact.html" role="menuitem" aria-current="page">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.02 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92v2z"/>
+            </svg>
+            <span data-kr="상담예약" data-en="Contact">상담예약</span>
+            <span class="sidebar-nav-num">05</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-divider"></div>
+    </nav>
+
+    <!-- Contact Info -->
+    <div class="sidebar-contact">
+      <div class="sidebar-contact-label">Contact</div>
+      <div class="sidebar-contact-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.02 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92v2z"/>
+        </svg>
+        <span>02-1234-5678</span>
+      </div>
+      <div class="sidebar-contact-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        <span>info@junguilaw.kr</span>
+      </div>
+      <div class="sidebar-contact-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        <span data-kr="서울특별시 서초구 서초대로 123, 정의빌딩 12층" data-en="123 Seocho-daero, Seocho-gu, Seoul, Jungui Bldg. 12F">서울특별시 서초구<br/>서초대로 123, 정의빌딩 12층</span>
+      </div>
+    </div>
+
+    <!-- EN/KR Language Toggle -->
+    <div class="lang-toggle">
+      <button class="lang-btn" id="lang-toggle" aria-label="영문/한국어 전환"><span class="lang-current">KR</span> / <span class="lang-other">EN</span></button>
+    </div>
+  </aside>
+
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- Sidebar Toggle Button (mobile) -->
+  <button
+    class="sidebar-toggle"
+    id="sidebar-toggle"
+    aria-label="메뉴 열기/닫기"
+    aria-expanded="false"
+    aria-controls="sidebar"
+  >
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="main-content" id="mainContent">
+
+    <!-- ============================================================
+         A. PAGE HERO — Split Screen (I2 Parallax + IMG3 Duotone + S3 Diagonal)
+         ============================================================ -->
+    <section class="contact-hero" aria-labelledby="heroTitle">
+      <!-- Left: Text -->
+      <div class="hero-left">
+        <div class="hero-eyebrow">
+          <span class="hero-eyebrow-line"></span>
+          <span class="hero-eyebrow-text" data-kr="무료 상담" data-en="Free Consultation">무료 상담</span>
+        </div>
+
+        <div class="hero-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          <span data-kr="첫 상담 30분 무료" data-en="First 30-Minute Consultation Free">첫 상담 30분 무료</span>
+        </div>
+
+        <h1 class="hero-title" id="heroTitle">
+          <span data-kr="법률 문제, 지금 상담하세요" data-en="Legal Issues? Consult Now">법률 문제, 지금 상담하세요</span>
+        </h1>
+
+        <p class="hero-subtitle" data-kr="전문 변호사가 직접 상담해 드립니다. 첫 상담은 무료입니다." data-en="Our expert attorneys provide direct consultations. The first consultation is free of charge.">
+          전문 변호사가 직접 상담해 드립니다.<br />
+          첫 상담은 무료입니다.
+        </p>
+
+        <a href="#contactForm" class="btn-ghost" aria-label="상담 신청 폼으로 이동">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.1 1.22 2 2 0 012.08 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          <span data-kr="상담 신청하기" data-en="Submit Consultation Request">상담 신청하기</span>
+        </a>
+
+        <div class="hero-scroll-hint">
+          <span class="hero-scroll-line"></span>
+          <span data-kr="아래로 스크롤하여 상담하기" data-en="Scroll down to consult">아래로 스크롤하여 상담하기</span>
+        </div>
+      </div>
+
+      <!-- Right: Duotone Image -->
+      <div class="hero-right" aria-hidden="true">
+        <img
+          class="hero-img"
+          src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80"
+          alt="법률 상담 이미지"
+          loading="eager"
+        />
+        <div class="hero-duotone"></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         B. CONTACT INFO CARDS
+         ============================================================ -->
+    <section class="contact-cards-section" aria-labelledby="contactInfoTitle">
+      <div class="section-header reveal">
+        <div class="section-tag" data-kr="연락하기" data-en="Contact Us">연락하기</div>
+        <h2 class="section-title" id="contactInfoTitle" data-kr="다양한 방법으로 연락하세요" data-en="Reach Us in Multiple Ways">다양한 방법으로 <em>연락</em>하세요</h2>
+        <div class="section-divider"></div>
+        <p class="section-subtitle" data-kr="전화, 방문, 온라인 상담 모두 가능합니다." data-en="Phone, in-person, and online consultations are all available.">전화, 방문, 온라인 상담 모두 가능합니다.</p>
+      </div>
+
+      <div class="contact-cards-grid">
+        <!-- Card 1: 전화 상담 -->
+        <div class="contact-card reveal" style="transition-delay:0.1s">
+          <div class="card-icon-wrap">
+            <svg viewBox="0 0 24 24">
+              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.1 1.22 2 2 0 012.08 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+            </svg>
+          </div>
+          <h3 class="card-title" data-kr="전화 상담" data-en="Phone Consultation">전화 상담</h3>
+          <div class="card-detail">
+            <div class="card-detail-primary">02-555-1234</div>
+            <div class="card-detail-line" data-kr="평일 09:00 - 18:00" data-en="Weekdays 09:00 - 18:00">평일 09:00 - 18:00</div>
+            <div class="card-detail-line muted" data-kr="긴급 상담: 010-9876-5432" data-en="Emergency: 010-9876-5432">긴급 상담: 010-9876-5432</div>
+            <div class="card-detail-line muted" data-kr="24시간 긴급 접수 가능" data-en="24-hour emergency intake available">24시간 긴급 접수 가능</div>
+          </div>
+        </div>
+
+        <!-- Card 2: 방문 상담 -->
+        <div class="contact-card reveal" style="transition-delay:0.2s">
+          <div class="card-icon-wrap">
+            <svg viewBox="0 0 24 24">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <h3 class="card-title" data-kr="방문 상담" data-en="In-Person Consultation">방문 상담</h3>
+          <div class="card-detail">
+            <div class="card-detail-primary" data-kr="서울시 서초구" data-en="Seocho-gu, Seoul">서울시 서초구</div>
+            <div class="card-detail-line" data-kr="서초대로 256, 정의빌딩 12층" data-en="256 Seocho-daero, Jungui Bldg. 12F">서초대로 256, 정의빌딩 12층</div>
+            <div class="card-detail-line muted" data-kr="서초역 3번 출구 도보 5분" data-en="5-min walk from Seocho Station Exit 3">서초역 3번 출구 도보 5분</div>
+            <div class="card-detail-line muted" data-kr="주차 2시간 무료 지원" data-en="Free parking for 2 hours">주차 2시간 무료 지원</div>
+          </div>
+        </div>
+
+        <!-- Card 3: 온라인 상담 -->
+        <div class="contact-card reveal" style="transition-delay:0.3s">
+          <div class="card-icon-wrap">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+          <h3 class="card-title" data-kr="온라인 상담" data-en="Online Consultation">온라인 상담</h3>
+          <div class="card-detail">
+            <div class="card-detail-primary" style="font-size:1rem;">consult@junguilaw.co.kr</div>
+            <div class="card-detail-line" data-kr="24시간 접수 가능" data-en="Available 24 hours a day">24시간 접수 가능</div>
+            <div class="card-detail-line muted" data-kr="영업일 기준 24시간 내 회신" data-en="Response within 24 business hours">영업일 기준 24시간 내 회신</div>
+            <div class="card-detail-line muted" data-kr="화상 상담 (Zoom/Google Meet)" data-en="Video Consultation (Zoom/Google Meet)">화상 상담 (Zoom/Google Meet)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         C. CONSULTATION FORM SECTION
+         ============================================================ -->
+    <section class="form-section diagonal-top" id="contactForm" aria-labelledby="formTitle">
+      <div class="section-header reveal">
+        <div class="section-tag" data-kr="상담 예약" data-en="Book a Consultation">상담 예약</div>
+        <h2 class="section-title" id="formTitle" data-kr="상담 예약하기" data-en="Schedule a Consultation">상담 <em>예약</em>하기</h2>
+        <div class="section-divider"></div>
+        <p class="section-subtitle" data-kr="아래 양식을 작성하시면 담당 변호사가 직접 연락드립니다." data-en="Complete the form below and your assigned attorney will contact you directly.">아래 양식을 작성하시면 담당 변호사가 직접 연락드립니다.</p>
+      </div>
+
+      <div class="form-layout">
+        <!-- Left: Form -->
+        <div class="reveal-left">
+          <div class="form-card">
+            <h3 class="form-title" data-kr="상담 신청서" data-en="Consultation Request Form">상담 신청서</h3>
+            <p class="form-subtitle" data-kr="* 표시는 필수 입력 항목입니다." data-en="* Fields marked with an asterisk are required.">* 표시는 필수 입력 항목입니다.</p>
+
+            <form id="consultForm" novalidate autocomplete="off">
+              <!-- 성함 / 연락처 -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="nameInput" data-kr="성함" data-en="Name">성함 <span class="required">*</span></label>
+                  <input
+                    class="form-control"
+                    type="text"
+                    id="nameInput"
+                    name="name"
+                    placeholder="홍길동"
+                    data-kr="홍길동"
+                    data-en="Full Name"
+                    required
+                    autocomplete="off"
+                  />
+                  <p class="form-error" id="nameError" data-kr="성함을 입력해 주세요." data-en="Please enter your name.">성함을 입력해 주세요.</p>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="phoneInput" data-kr="연락처" data-en="Contact">연락처<span class="required">*</span></label>
+                  <input
+                    class="form-control"
+                    type="tel"
+                    id="phoneInput"
+                    name="phone"
+                    placeholder="010-0000-0000"
+                    required
+                    autocomplete="off"
+                  />
+                  <p class="form-error" id="phoneError">연락처를 입력해 주세요.</p>
+                </div>
+              </div>
+
+              <!-- 이메일 -->
+              <div class="form-group">
+                <label class="form-label" for="emailInput" data-kr="이메일" data-en="Email">이메일<span class="required">*</span></label>
+                <input
+                  class="form-control"
+                  type="email"
+                  id="emailInput"
+                  name="email"
+                  placeholder="example@email.com"
+                  required
+                  autocomplete="off"
+                />
+                <p class="form-error" id="emailError">올바른 이메일을 입력해 주세요.</p>
+              </div>
+
+              <!-- 상담 분야 -->
+              <div class="form-group">
+                <label class="form-label" for="categorySelect">상담 분야</label>
+                <select class="form-control" id="categorySelect" name="category">
+                  <option value="" disabled selected>상담 분야를 선택하세요</option>
+                  <option value="criminal">형사법</option>
+                  <option value="civil">민사소송</option>
+                  <option value="corporate">기업법무</option>
+                  <option value="realestate">부동산/건설</option>
+                  <option value="family">가사/상속</option>
+                  <option value="admin">행정소송</option>
+                  <option value="other">기타</option>
+                </select>
+              </div>
+
+              <!-- 상담 유형 -->
+              <div class="form-group">
+                <label class="form-label" data-kr="상담 유형" data-en="Consultation Type">상담 유형</label>
+                <div class="radio-group" role="group" aria-label="상담 유형 선택">
+                  <label class="radio-item">
+                    <input type="radio" name="consultType" value="phone" checked />
+                    <span>전화 상담</span>
+                  </label>
+                  <label class="radio-item">
+                    <input type="radio" name="consultType" value="visit" />
+                    <span>방문 상담</span>
+                  </label>
+                  <label class="radio-item">
+                    <input type="radio" name="consultType" value="video" />
+                    <span>화상 상담</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- 희망 상담일 / 시간 -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="dateInput">희망 상담일</label>
+                  <input
+                    class="form-control"
+                    type="date"
+                    id="dateInput"
+                    name="date"
+                    autocomplete="off"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="timeSelect">희망 상담 시간</label>
+                  <select class="form-control" id="timeSelect" name="time">
+                    <option value="" disabled selected>시간 선택</option>
+                    <option value="09:00">09:00</option>
+                    <option value="10:00">10:00</option>
+                    <option value="11:00">11:00</option>
+                    <option value="13:00">13:00</option>
+                    <option value="14:00">14:00</option>
+                    <option value="15:00">15:00</option>
+                    <option value="16:00">16:00</option>
+                    <option value="17:00">17:00</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- 사건 개요 -->
+              <div class="form-group">
+                <label class="form-label" for="descInput">사건 개요 <span class="required">*</span></label>
+                <textarea
+                  class="form-control"
+                  id="descInput"
+                  name="description"
+                  placeholder="상담하실 내용을 간략히 작성해 주세요. 관련 자료(계약서, 판결문 등)가 있으시면 상담 시 지참해 주시면 도움이 됩니다."
+                  required
+                  rows="5"
+                ></textarea>
+                <p class="form-error" id="descError">사건 개요를 입력해 주세요.</p>
+              </div>
+
+              <!-- 개인정보 수집 동의 -->
+              <div class="form-group">
+                <div class="checkbox-group">
+                  <input type="checkbox" id="privacyAgree" name="privacy" required />
+                  <label for="privacyAgree">
+                    개인정보 수집 및 이용에 동의합니다. (상담 목적으로만 사용되며, 상담 종료 후 즉시 파기합니다.)
+                  </label>
+                </div>
+                <p class="form-error" id="privacyError" style="margin-top:0.4rem;">개인정보 수집 동의가 필요합니다.</p>
+              </div>
+
+              <button type="submit" class="btn-submit" aria-label="상담 신청 제출" data-kr="상담 신청하기" data-en="Request Consultation">상담 신청하기</button>
+            </form>
+
+            <!-- Success Message -->
+            <div class="form-success" id="formSuccess" aria-live="polite">
+              <div class="success-icon">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <h3 class="success-title">상담 신청이 완료되었습니다!</h3>
+              <p class="success-text">
+                담당 변호사가 영업일 기준 24시간 내에 연락드립니다.<br />
+                긴급한 경우 <strong>02-555-1234</strong>로 직접 연락 주세요.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Map + Info -->
+        <div class="reveal-right">
+          <div class="map-info-wrap">
+            <!-- Map Placeholder -->
+            <div class="map-container" role="img" aria-label="법무법인 정의 위치 지도">
+              <div class="map-bg"></div>
+              <div class="map-road-h r1"></div>
+              <div class="map-road-v v1"></div>
+              <div class="map-pin-wrap">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#3F51B5" stroke="#fff" stroke-width="1"/>
+                  <circle cx="12" cy="9" r="2.5" fill="#fff"/>
+                </svg>
+                <span class="map-label" data-kr="법무법인 정의" data-en="JUNGUI LAW FIRM">법무법인 정의</span>
+              </div>
+            </div>
+
+            <!-- Address Card -->
+            <div class="address-card">
+              <div class="address-card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                오시는 길
+              </div>
+              <div class="address-detail-row">
+                <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>서울시 서초구 서초대로 256, 정의빌딩 12층</span>
+              </div>
+              <div class="address-detail-row">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>서초역 3번 출구 도보 5분</span>
+              </div>
+              <div class="address-detail-row">
+                <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                <span>2호선 교대역 11번 출구 도보 8분</span>
+              </div>
+
+              <!-- 업무 시간 테이블 -->
+              <div class="address-card-title" style="margin-top:1.25rem;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                업무 시간
+              </div>
+              <table class="hours-table" aria-label="업무 시간 안내">
+                <tbody>
+                  <tr>
+                    <td>월요일 – 금요일</td>
+                    <td>09:00 – 18:00</td>
+                  </tr>
+                  <tr>
+                    <td>토요일</td>
+                    <td>10:00 – 13:00 (예약제)</td>
+                  </tr>
+                  <tr>
+                    <td>일요일 / 공휴일</td>
+                    <td>휴무</td>
+                  </tr>
+                  <tr>
+                    <td>긴급 상담</td>
+                    <td>24시간 접수</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- Parking -->
+              <div class="parking-note">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 17V7h4a3 3 0 010 6H9"/></svg>
+                건물 내 주차 2시간 무료 (방문 상담 시 주차권 제공)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         D. PROCESS SECTION (4 Steps)
+         ============================================================ -->
+    <section class="process-section" aria-labelledby="processTitle">
+      <div class="section-header reveal">
+        <div class="section-tag">상담 절차</div>
+        <h2 class="section-title" id="processTitle">상담 <em>절차</em>안내</h2>
+        <div class="section-divider"></div>
+        <p class="section-subtitle">간단한 4단계로 전문 법률 서비스를 받으세요.</p>
+      </div>
+
+      <div class="process-flow" role="list">
+        <!-- Step 1 -->
+        <div class="process-step reveal" style="transition-delay:0.1s" role="listitem">
+          <div class="process-num-wrap">
+            <div class="process-num">1<span class="process-num-label">ST</span></div>
+          </div>
+          <div class="process-icon-box">
+            <svg viewBox="0 0 24 24">
+              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.1 1.22 2 2 0 012.08 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+            </svg>
+          </div>
+          <h3 class="process-step-title">상담 신청</h3>
+          <p class="process-step-desc">온라인 양식 또는 전화로 상담을 신청합니다.</p>
+          <div class="process-arrow" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="process-step reveal" style="transition-delay:0.2s" role="listitem">
+          <div class="process-num-wrap">
+            <div class="process-num">2<span class="process-num-label">ND</span></div>
+          </div>
+          <div class="process-icon-box">
+            <svg viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <h3 class="process-step-title">사건 검토</h3>
+          <p class="process-step-desc">전문 변호사가 사건 내용을 면밀히 검토합니다.</p>
+          <div class="process-arrow" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="process-step reveal" style="transition-delay:0.3s" role="listitem">
+          <div class="process-num-wrap">
+            <div class="process-num">3<span class="process-num-label">RD</span></div>
+          </div>
+          <div class="process-icon-box">
+            <svg viewBox="0 0 24 24">
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+            </svg>
+          </div>
+          <h3 class="process-step-title">1:1 상담</h3>
+          <p class="process-step-desc">맞춤형 법률 자문 및 전략을 상담합니다.</p>
+          <div class="process-arrow" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="process-step reveal" style="transition-delay:0.4s" role="listitem">
+          <div class="process-num-wrap">
+            <div class="process-num">4<span class="process-num-label">TH</span></div>
+          </div>
+          <div class="process-icon-box">
+            <svg viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <h3 class="process-step-title">수임 진행</h3>
+          <p class="process-step-desc">수임 계약 체결 후 사건을 본격 착수합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         E. FAQ SECTION (6 Questions)
+         ============================================================ -->
+    <section class="faq-section" aria-labelledby="faqTitle">
+      <div class="section-header reveal">
+        <div class="section-tag">FAQ</div>
+        <h2 class="section-title" id="faqTitle">자주 묻는 <em>질문</em></h2>
+        <div class="section-divider"></div>
+        <p class="section-subtitle">상담 전 궁금하신 점을 확인하세요.</p>
+      </div>
+
+      <div class="faq-list" role="list">
+
+        <!-- Q1 -->
+        <div class="faq-item reveal" style="transition-delay:0.05s" role="listitem">
+          <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-1" type="button">
+            <span class="faq-q-text">
+              <span class="faq-q-badge">Q1</span>
+              첫 상담은 정말 무료인가요?
+            </span>
+            <span class="faq-toggle-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </button>
+          <div class="faq-answer" id="faq-answer-1" role="region" aria-labelledby="faq-q1-label">
+            <div class="faq-answer-inner">
+              <span class="faq-a-badge">A1</span>
+              <p>네, 법무법인 정의의 첫 법률 상담은 30분간 무료로 제공됩니다. 사건의 개요를 파악하고, 법적 쟁점을 분석하여 향후 진행 방향을 안내해 드립니다.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="faq-item reveal" style="transition-delay:0.1s" role="listitem">
+          <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-2" type="button">
+            <span class="faq-q-text">
+              <span class="faq-q-badge">Q2</span>
+              상담 후 반드시 수임해야 하나요?
+            </span>
+            <span class="faq-toggle-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </button>
+          <div class="faq-answer" id="faq-answer-2" role="region">
+            <div class="faq-answer-inner">
+              <span class="faq-a-badge">A2</span>
+              <p>아닙니다. 상담은 의뢰인의 법률적 상황을 파악하기 위한 것이며, 수임 여부는 의뢰인이 자유롭게 결정하실 수 있습니다.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="faq-item reveal" style="transition-delay:0.15s" role="listitem">
+          <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-3" type="button">
+            <span class="faq-q-text">
+              <span class="faq-q-badge">Q3</span>
+              수임료는 어떻게 산정되나요?
+            </span>
+            <span class="faq-toggle-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </button>
+          <div class="faq-answer" id="faq-answer-3" role="region">
+            <div class="faq-answer-inner">
+              <span class="faq-a-badge">A3</span>
+              <p>사건의 유형, 난이도, 소요 기간 등을 종합적으로 고려하여 산정합니다. 상담 시 예상 비용을 투명하게 안내해 드리며, 착수금과 성공보수 체계를 적용합니다.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="faq-item reveal" style="transition-delay:0.2s" role="listitem">
+          <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-4" type="button">
+            <span class="faq-q-text">
+              <span class="faq-q-badge">Q4</span>
+              긴급한 법률 문제는 어떻게 해야 하나요?
+            </span>
+            <span class="faq-toggle-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </button>
+          <div class="faq-answer" id="faq-answer-4" role="region">
+            <div class="faq-answer-inner">
+              <span class="faq-a-badge">A4</span>
+              <p>긴급 법률 상담이 필요한 경우, 긴급 상담 전화번호(010-9876-5432)로 연락 주시면 24시간 내에 변호사가 연락드립니다.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="faq-item reveal" style="transition-delay:0.25s" role="listitem">
+          <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-5" type="button">
+            <span class="faq-q-text">
+              <span class="faq-q-badge">Q5</span>
+              다른 지역에서도 상담 가능한가요?
+            </span>
+            <span class="faq-toggle-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </button>
+          <div class="faq-answer" id="faq-answer-5" role="region">
+            <div class="faq-answer-inner">
+              <span class="faq-a-badge">A5</span>
+              <p>네, 화상 상담(Zoom, Google Meet)을 통해 전국 어디서든 상담이 가능합니다. 또한 필요시 전국 법원 출석도 가능합니다.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Q6 -->
+        <div class="faq-item reveal" style="transition-delay:0.3s" role="listitem">
+          <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-6" type="button">
+            <span class="faq-q-text">
+              <span class="faq-q-badge">Q6</span>
+              상담 시 어떤 자료를 준비해야 하나요?
+            </span>
+            <span class="faq-toggle-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </button>
+          <div class="faq-answer" id="faq-answer-6" role="region">
+            <div class="faq-answer-inner">
+              <span class="faq-a-badge">A6</span>
+              <p>사건과 관련된 계약서, 내용증명, 판결문, 통화/문자 기록 등 관련 자료를 가능한 한 많이 준비해 주시면 보다 정확한 법률 자문이 가능합니다.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================
+         F. CTA PARALLAX SECTION (I2 Parallax)
+         ============================================================ -->
+    <section class="cta-parallax" aria-labelledby="ctaTitle">
+      <div class="cta-parallax-bg" id="parallaxBg" aria-hidden="true"></div>
+      <div class="cta-parallax-overlay" aria-hidden="true"></div>
+      <div class="cta-content">
+        <p class="cta-eyebrow">법률 상담</p>
+        <h2 class="cta-title" id="ctaTitle">지금 바로 전문 변호사와<br/>상담하세요</h2>
+        <p class="cta-sub">법률 문제로 혼자 고민하지 마세요. 첫 상담은 무료입니다.</p>
+        <a class="cta-phone" href="tel:025551234" aria-label="전화 02-555-1234">
+          <span data-kr="전화" data-en="Phone">전화</span>02-555-1234
+        </a>
+        <a href="#contactForm" class="btn-ghost-white" aria-label="전화 상담 예약 폼으로 이동">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.1 1.22 2 2 0 012.08 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          전화 상담 예약
+        </a>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         G. FOOTER
+         ============================================================ -->
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <!-- Brand -->
+        <div>
+          <div class="footer-brand-name">법무법인 <span>정의</span></div>
+          <div class="footer-brand-sub">JUNGUI LAW FIRM</div>
+          <p class="footer-desc">
+            20년 이상의 법조 경험을 바탕으로 형사법, 민사소송, 기업법무, 부동산, 가사/상속 등 다양한 분야에서 의뢰인의 권익을 최우선으로 보호합니다.
+          </p>
+          <div class="footer-contact-list">
+            <div class="footer-contact-item">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.1 1.22 2 2 0 012.08 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+              대표 전화: 02-555-1234
+            </div>
+            <div class="footer-contact-item">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              consult@junguilaw.co.kr
+            </div>
+            <div class="footer-contact-item">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              서울시 서초구 서초대로 256, 정의빌딩 12층
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div>
+          <h3 class="footer-col-title">메뉴</h3>
+          <ul class="footer-links">
+            <li><a href="index.html" data-kr="홈" data-en="Home">홈</a></li>
+            <li><a href="about.html" data-kr="법인소개" data-en="About">법인소개</a></li>
+            <li><a href="practice.html" data-kr="업무분야" data-en="Practice">업무분야</a></li>
+            <li><a href="cases.html" data-kr="성공사례" data-en="Cases">성공사례</a></li>
+            <li><a href="contact.html">상담예약</a></li>
+          </ul>
+        </div>
+
+        <!-- Practice Areas -->
+        <div>
+          <h3 class="footer-col-title" data-kr="업무분야" data-en="Practice">업무분야</h3>
+          <ul class="footer-links">
+            <li><a href="practice.html#criminal">형사법</a></li>
+            <li><a href="practice.html#civil">민사소송</a></li>
+            <li><a href="practice.html#corporate" data-kr="기업법무" data-en="Corporate">기업법무</a></li>
+            <li><a href="practice.html#realestate">부동산/건설</a></li>
+            <li><a href="practice.html#family">가사/상속</a></li>
+            <li><a href="practice.html#admin">행정소송</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p class="footer-copy">
+          &copy; 2024 법무법인 정의 (JUNGUI LAW FIRM). All rights reserved.
+        </p>
+        <nav class="footer-legal" aria-label="법적 문서 링크">
+          <a href="#" data-kr="개인정보처리방침" data-en="Privacy Policy">개인정보처리방침</a>
+          <a href="#" data-kr="이용약관" data-en="Terms of Use">이용약관</a>
+          <a href="#">법인 소개</a>
+        </nav>
+      </div>
+    </footer>
+
+  </main><!-- /.main-content -->
+
+  <!-- Back to Top Button -->
+  <button class="back-to-top" id="backToTop" aria-label="맨 위로 이동">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <polyline points="18 15 12 9 6 15"/>
+    </svg>
+  </button>
+
+  <!-- Global Script -->
+  <script src="script.js"></script>
+
+<script>
+  (function() {
+    var btn = document.getElementById("lang-toggle");
+    if (!btn) return;
+    var lang = localStorage.getItem("jungui-lang") || "kr";
+    var cur = btn.querySelector(".lang-current");
+    var oth = btn.querySelector(".lang-other");
+    function update(l) {
+      if (l === "kr") { cur.textContent = "KR"; oth.textContent = "EN"; }
+      else { cur.textContent = "EN"; oth.textContent = "KR"; }
+    }
+    function switchLang(l) {
+      document.querySelectorAll("[data-kr]").forEach(function(el) {
+        var val = l === "kr" ? el.getAttribute("data-kr") : el.getAttribute("data-en"); if (!val) return; if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") { el.placeholder = val; } else { el.textContent = val; }
+      });
+    }
+    update(lang);
+    if (lang === "en") switchLang("en");
+    btn.addEventListener("click", function() {
+      lang = lang === "kr" ? "en" : "kr";
+      localStorage.setItem("jungui-lang", lang);
+      update(lang);
+      switchLang(lang);
+    });
+  })();
+  </script>
+
+  <!-- Page-specific Script -->
+
+</body>
+</html>

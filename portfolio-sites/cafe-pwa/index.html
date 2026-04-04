@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>블루밍 커피 - Blooming Coffee</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="application-name" content="블루밍 커피">
+    <meta name="apple-mobile-web-app-title" content="블루밍 커피">
+    <meta name="description" content="신선한 커피와 따뜻한 서비스가 만나는 블루밍 커피">
+    <meta name="theme-color" content="#1B4332">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- PWA Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9IiMxQjQzMzIiLz4KPHN2ZyB4PSI0NSIgeT0iNDUiIHdpZHRoPSI5MCIgaGVpZ2h0PSI5MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjRjVGMEU4Ij4KPHA+CjxwYXRoIGQ9Ik0yIDE3aDIwdjJIMnptMS4xNS0zaDEzLjY5Yy4yNiAwIC40OC0uMTEuNjQtLjMzbC45LTEuMjVjLjI3LS4zNy4yNy0uODggMC0xLjI1bC0uOS0xLjI1Yy0uMTYtLjIyLS4zOC0uMzMtLjY0LS4zM0gzLjE1Yy0uNDQgMC0uOTMuMzEtMS4wNy43bC0uNjIgMS42M2MtLjEzLjM1LS4xMy43NyAwIDEuMTJsLjYyIDEuNjNjLjE0LjM5LjYzLjcgMS4wNy43eiIvPgo8Y2lyY2xlIGN4PSIxMiIgY3k9IjguNSIgcj0iMi41Ii8+CjwvcD4KPC9zdmc+Cjwvc3ZnPgo=">
+    <link rel="icon" type="image/png" sizes="32x32" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzFCNDMzMiIvPgo8cGF0aCBkPSJNOCAyMGgxNnYySDhWMjB6bTEtNWgxMGwxLTFWMTJsLTEtMUg5bC0xIDFWMTVsMS0xeiIgZmlsbD0iI0Y1RjBFOCIvPgo8Y2lyY2xlIGN4PSIxNCIgY3k9IjEwIiByPSIyIiBmaWxsPSIjRjVGMEU4Ii8+Cjwvc3ZnPgo=">
+    <link rel="manifest" href="manifest.json">
+    <script src="./shared.js"></script>
+    
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Georgia:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --deep-green: #1B4332;
+            --cream: #F5F0E8;
+            --accent-gold: #D4A76A;
+            --light-green: rgba(27, 67, 50, 0.1);
+            --shadow-light: 0 4px 20px rgba(0,0,0,0.08);
+            --shadow-medium: 0 8px 32px rgba(0,0,0,0.12);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+            --safe-left: env(safe-area-inset-left);
+            --safe-right: env(safe-area-inset-right);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            word-break: keep-all;
+        }
+
+        html {
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--cream) 0%, #fff 100%);
+            color: var(--deep-green);
+            overflow-x: hidden;
+            padding-top: var(--safe-top);
+            padding-left: var(--safe-left);
+            padding-right: var(--safe-right);
+            padding-bottom: calc(var(--safe-bottom) + 80px);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .english {
+            font-family: 'Georgia', serif;
+        }
+
+        /* Splash Screen */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(45deg, var(--deep-green), #2D5F3F);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.8s ease-out;
+        }
+
+        .splash-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .splash-logo {
+            width: 100px;
+            height: 100px;
+            background: var(--cream);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            animation: logoFloat 2s ease-in-out infinite alternate;
+        }
+
+        .splash-logo svg {
+            width: 50px;
+            height: 50px;
+            fill: var(--deep-green);
+        }
+
+        .splash-title {
+            color: var(--cream);
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            animation: fadeInUp 1s ease-out 0.5s both;
+        }
+
+        .splash-subtitle {
+            color: var(--accent-gold);
+            font-size: 16px;
+            font-weight: 400;
+            animation: fadeInUp 1s ease-out 0.8s both;
+        }
+
+        @keyframes logoFloat {
+            0% { transform: translateY(-10px); }
+            100% { transform: translateY(10px); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Loading Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Top Bar */
+        .top-bar {
+            position: fixed;
+            top: var(--safe-top);
+            left: var(--safe-left);
+            right: var(--safe-right);
+            height: 60px;
+            background: rgba(245, 240, 232, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(27, 67, 50, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+            transition: var(--transition);
+        }
+
+        .location-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(27, 67, 50, 0.1);
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .location-selector:active {
+            transform: scale(0.95);
+        }
+
+        .location-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--deep-green);
+        }
+
+        .right-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .notification-bell:active {
+            transform: scale(0.9);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 18px;
+            height: 18px;
+            background: #ff4757;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+            border: 2px solid var(--cream);
+        }
+
+        .profile-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-gold), #E5B575);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-light);
+        }
+
+        .profile-avatar:active {
+            transform: scale(0.9);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 80px 20px 100px;
+            max-width: 768px;
+            margin: 0 auto;
+        }
+
+        /* Greeting Section */
+        .greeting-section {
+            margin-bottom: 24px;
+            padding: 24px 20px;
+            background: linear-gradient(135deg, var(--deep-green), #2D5F3F);
+            border-radius: var(--border-radius);
+            color: var(--cream);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .greeting-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 100px;
+            height: 100px;
+            background: rgba(212, 167, 106, 0.1);
+            border-radius: 50%;
+            animation: floatBubble 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatBubble {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-20px, -20px) rotate(360deg); }
+        }
+
+        .greeting-text {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .points-display {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .points-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .points-badge {
+            background: var(--accent-gold);
+            color: var(--deep-green);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        /* Promo Banner Carousel */
+        .promo-section {
+            margin-bottom: 32px;
+        }
+
+        .carousel-container {
+            position: relative;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+        }
+
+        .carousel-wrapper {
+            display: flex;
+            transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+            width: 300%;
+        }
+
+        .promo-banner {
+            width: 33.333%;
+            height: 160px;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: end;
+            padding: 20px;
+            cursor: pointer;
+        }
+
+        .banner-1 { background-image: linear-gradient(45deg, rgba(27, 67, 50, 0.3), transparent), url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800'); }
+        .banner-2 { background-image: linear-gradient(45deg, rgba(27, 67, 50, 0.3), transparent), url('https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800'); }
+        .banner-3 { background-image: linear-gradient(45deg, rgba(27, 67, 50, 0.3), transparent), url('https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=800'); }
+
+        .banner-content {
+            color: white;
+            z-index: 2;
+        }
+
+        .banner-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .banner-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(27, 67, 50, 0.3);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background: var(--deep-green);
+            transform: scale(1.2);
+        }
+
+        /* Quick Order Section */
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--deep-green);
+        }
+
+        .quick-order {
+            margin-bottom: 32px;
+        }
+
+        .quick-order-scroll {
+            display: flex;
+            justify-content: space-evenly;
+            padding: 4px 0 16px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .quick-order-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .quick-item {
+            flex-shrink: 0;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .quick-item:active {
+            transform: scale(0.95);
+        }
+
+        .quick-item-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-gold), #E5B575);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quick-item-name {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--deep-green);
+            white-space: nowrap;
+        }
+
+        /* Recommended Menu Section */
+        .recommended-menu {
+            margin-bottom: 32px;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .menu-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            overflow: hidden;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .menu-card:active {
+            transform: scale(0.98);
+        }
+
+        .menu-card-image {
+            width: 100%;
+            height: 140px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .heart-button {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .heart-button.active {
+            background: #ff4757;
+            color: white;
+        }
+
+        .heart-button:active {
+            transform: scale(0.9);
+        }
+
+        .menu-card-content {
+            padding: 16px;
+        }
+
+        .menu-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--deep-green);
+        }
+
+        .menu-card-description {
+            font-size: 14px;
+            color: rgba(27, 67, 50, 0.7);
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .menu-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .menu-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+
+        .add-button {
+            width: 36px;
+            height: 36px;
+            background: var(--deep-green);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 18px;
+        }
+
+        .add-button:active {
+            transform: scale(0.9);
+            background: #2D5F3F;
+        }
+
+        /* Seasonal Special */
+        .seasonal-special {
+            margin-bottom: 32px;
+        }
+
+        .special-card {
+            background: linear-gradient(135deg, var(--deep-green), #2D5F3F);
+            border-radius: var(--border-radius);
+            color: white;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: var(--transition);
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            padding: 24px;
+        }
+
+        .special-card:active {
+            transform: scale(0.98);
+        }
+
+        .new-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: var(--accent-gold);
+            color: var(--deep-green);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .special-content {
+            flex: 1;
+        }
+
+        .special-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .special-description {
+            font-size: 14px;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+
+        .special-price {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--accent-gold);
+            margin-top: 8px;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: var(--safe-bottom);
+            left: var(--safe-left);
+            right: var(--safe-right);
+            height: 80px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(27, 67, 50, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 20px;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 8px;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .nav-item:active {
+            transform: scale(0.9);
+        }
+
+        .nav-item.active {
+            background: var(--light-green);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            fill: rgba(27, 67, 50, 0.6);
+            transition: var(--transition);
+        }
+
+        .nav-item.active .nav-icon {
+            fill: var(--deep-green);
+        }
+
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: rgba(27, 67, 50, 0.6);
+            transition: var(--transition);
+        }
+
+        .nav-item.active .nav-label {
+            color: var(--deep-green);
+            font-weight: 600;
+        }
+
+        .nav-badge {
+            position: absolute;
+            top: 0;
+            right: 8px;
+            width: 18px;
+            height: 18px;
+            background: #ff4757;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+            border: 2px solid white;
+        }
+
+        /* Floating Cart Button */
+        .floating-cart {
+            position: fixed;
+            bottom: calc(var(--safe-bottom) + 100px);
+            right: calc(var(--safe-right) + 20px);
+            width: 56px;
+            height: 56px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-medium);
+            z-index: 99;
+        }
+
+        .floating-cart:active {
+            transform: scale(0.9);
+        }
+
+        .floating-cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background: #ff4757;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+            border: 2px solid white;
+        }
+
+        /* Pull to Refresh */
+        .pull-to-refresh {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--deep-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+            opacity: 0;
+        }
+
+        .pull-to-refresh.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .pull-to-refresh.active {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: translateX(-50%) rotate(0deg); }
+            to { transform: translateX(-50%) rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (min-width: 768px) {
+            .main-content {
+                padding: 80px 40px 100px;
+            }
+
+            .menu-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+
+            .carousel-container {
+                height: 200px;
+            }
+
+            .promo-banner {
+                height: 200px;
+            }
+
+            .section-title {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+        }
+
+        /* Animations and Transitions */
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .fade-in-delay-1 { animation-delay: 0.1s; }
+        .fade-in-delay-2 { animation-delay: 0.2s; }
+        .fade-in-delay-3 { animation-delay: 0.3s; }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .slide-up {
+            transform: translateY(30px);
+            opacity: 0;
+            animation: slideUp 0.6s ease-out forwards;
+        }
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Touch Feedback */
+        .touch-feedback:active {
+            background-color: rgba(27, 67, 50, 0.1);
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div class="splash-screen" id="splashScreen">
+        <div class="splash-logo">
+            <svg viewBox="0 0 24 24">
+                <path d="M18.5 3H6c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h12.5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM16 13H8v-2h8v2zm0-4H8V7h8v2z"/>
+                <circle cx="12" cy="8" r="1"/>
+            </svg>
+        </div>
+        <h1 class="splash-title">블루밍 커피</h1>
+        <p class="splash-subtitle english">Blooming Coffee</p>
+    </div>
+
+    <!-- Pull to Refresh Indicator -->
+    <div class="pull-to-refresh" id="pullToRefresh">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#F5F0E8">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l-4.5 4.5L5 10.5 12 3.5l7 7-1.5 1.5L13 7.5v9h-2z"/>
+        </svg>
+    </div>
+
+    <!-- Top Bar -->
+    <div class="top-bar" id="topBar">
+        <div class="location-selector" id="locationSelector">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+            <span class="location-text">강남구 역삼동</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M7 10l5 5 5-5z"/>
+            </svg>
+        </div>
+        
+        <div class="right-actions">
+            <div class="notification-bell" id="notificationBell">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+                </svg>
+                <div class="notification-badge">3</div>
+            </div>
+            
+            <div class="profile-avatar" id="profileAvatar">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#1B4332">
+                    <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1L9 7V9C9 11.66 11.34 14 14 14V22H18V14C20.66 14 23 11.66 23 9H21Z"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Greeting Section -->
+        <section class="greeting-section fade-in">
+            <h2 class="greeting-text" id="greetingText">좋은 아침이에요, 고객님 ☀️</h2>
+            <div class="points-display">
+                <div class="points-info">
+                    <span>보유 포인트</span>
+                    <div class="points-badge">2,580P</div>
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" opacity="0.7">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Promo Banner Carousel -->
+        <section class="promo-section fade-in fade-in-delay-1">
+            <div class="carousel-container">
+                <div class="carousel-wrapper" id="carouselWrapper">
+                    <a href="menu.html" class="promo-banner banner-1" style="text-decoration:none;color:inherit;display:block;">
+                        <div class="banner-content">
+                            <h3 class="banner-title">신메뉴 출시</h3>
+                            <p class="banner-subtitle">시즌 한정 블렌드 커피</p>
+                        </div>
+                    </a>
+                    <a href="menu.html" class="promo-banner banner-2" style="text-decoration:none;color:inherit;display:block;">
+                        <div class="banner-content">
+                            <h3 class="banner-title">할인 이벤트</h3>
+                            <p class="banner-subtitle">아메리카노 20% 할인</p>
+                        </div>
+                    </a>
+                    <a href="mypage.html" class="promo-banner banner-3" style="text-decoration:none;color:inherit;display:block;">
+                        <div class="banner-content">
+                            <h3 class="banner-title">멤버십 혜택</h3>
+                            <p class="banner-subtitle">포인트 2배 적립</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="carousel-dots" id="carouselDots">
+                <div class="dot active" data-slide="0"></div>
+                <div class="dot" data-slide="1"></div>
+                <div class="dot" data-slide="2"></div>
+            </div>
+        </section>
+
+        <!-- Quick Order Section -->
+        <section class="quick-order fade-in fade-in-delay-2">
+            <h3 class="section-title">빠른 주문</h3>
+            <div class="quick-order-scroll" id="quickOrderScroll">
+                <!-- Populated by JS from favorites or defaults -->
+            </div>
+        </section>
+
+        <!-- Recommended Menu Section -->
+        <section class="recommended-menu fade-in fade-in-delay-3">
+            <h3 class="section-title">오늘의 추천</h3>
+            <div class="menu-grid">
+                <div class="menu-card touch-feedback" data-menu="signature-blend">
+                    <div class="menu-card-image" style="background-image: url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400')">
+                        <div class="heart-button" data-heart="signature">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="menu-card-content">
+                        <h4 class="menu-card-title">시그니처 블렌드</h4>
+                        <p class="menu-card-description">깊은 풍미와 부드러운 목넘김의 하우스 블렌드</p>
+                        <div class="menu-card-footer">
+                            <span class="menu-price">4,500원</span>
+                            <button class="add-button" data-add="signature-blend">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="menu-card touch-feedback" data-menu="vanilla-latte">
+                    <div class="menu-card-image" style="background-image: url('https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400')">
+                        <div class="heart-button" data-heart="vanilla">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="menu-card-content">
+                        <h4 class="menu-card-title">바닐라 라떼</h4>
+                        <p class="menu-card-description">진한 에스프레소와 달콤한 바닐라의 만남</p>
+                        <div class="menu-card-footer">
+                            <span class="menu-price">5,200원</span>
+                            <button class="add-button" data-add="vanilla-latte">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="menu-card touch-feedback" data-menu="green-tea">
+                    <div class="menu-card-image" style="background-image: url('https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400')">
+                        <div class="heart-button" data-heart="green-tea">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="menu-card-content">
+                        <h4 class="menu-card-title">말차 라떼</h4>
+                        <p class="menu-card-description">진짜 일본 말차로 만든 프리미엄 라떼</p>
+                        <div class="menu-card-footer">
+                            <span class="menu-price">5,800원</span>
+                            <button class="add-button" data-add="green-tea">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seasonal Special -->
+        <section class="seasonal-special slide-up">
+            <h3 class="section-title">시즌 스페셜</h3>
+            <div class="special-card touch-feedback">
+                <div class="new-badge">NEW</div>
+                <div class="special-content">
+                    <h4 class="special-title">체리 블라썸 라떼</h4>
+                    <p class="special-description">봄을 담은 벚꽃 향이 가득한 한정판 라떼. 연분홍 크림과 함께 제공됩니다.</p>
+                    <p class="special-price">6,800원</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 전체 메뉴 보기 -->
+        <section style="padding:0 20px 20px;">
+            <a href="menu.html" style="display:block;text-align:center;padding:14px;background:var(--deep-green);color:var(--cream);border-radius:12px;font-weight:600;font-size:15px;text-decoration:none;">전체 메뉴 보기 →</a>
+        </section>
+    </main>
+
+    <!-- Floating Cart Button -->
+    <div class="floating-cart" id="floatingCart">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#1B4332">
+            <path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03L21.7 4H5.21l-.94-2H1zm16 16c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+        </svg>
+        <div class="floating-cart-badge">3</div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item active" style="text-decoration:none;color:inherit;">
+            <svg class="nav-icon" viewBox="0 0 24 24">
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+            <span class="nav-label">홈</span>
+        </a>
+        
+        <a href="menu.html" class="nav-item" style="text-decoration:none;color:inherit;">
+            <svg class="nav-icon" viewBox="0 0 24 24">
+                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+            </svg>
+            <span class="nav-label">메뉴</span>
+        </a>
+        
+        <a href="cart.html" class="nav-item" style="text-decoration:none;color:inherit;">
+            <svg class="nav-icon" viewBox="0 0 24 24">
+                <path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03L21.7 4H5.21l-.94-2H1zm16 16c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+            </svg>
+            <span class="nav-label">장바구니</span>
+            <div class="nav-badge">3</div>
+        </a>
+        
+        <a href="mypage.html" class="nav-item" style="text-decoration:none;color:inherit;">
+            <svg class="nav-icon" viewBox="0 0 24 24">
+                <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1L9 7V9C9 11.66 11.34 14 14 14V22H18V14C20.66 14 23 11.66 23 9H21Z"/>
+            </svg>
+            <span class="nav-label">마이</span>
+        </a>
+    </nav>
+
+    <script>
+        // Global variables
+        let currentSlide = 0;
+        let autoSlideInterval;
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let pullStartY = 0;
+        let isPulling = false;
+        let cart = [];
+        let favorites = new Set();
+
+        // DOM Elements
+        const splashScreen = document.getElementById('splashScreen');
+        const carouselWrapper = document.getElementById('carouselWrapper');
+        const carouselDots = document.getElementById('carouselDots');
+        const greetingText = document.getElementById('greetingText');
+        const topBar = document.getElementById('topBar');
+        const pullToRefresh = document.getElementById('pullToRefresh');
+        const floatingCart = document.getElementById('floatingCart');
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hide splash screen after animation
+            setTimeout(() => {
+                splashScreen.classList.add('fade-out');
+                setTimeout(() => {
+                    splashScreen.style.display = 'none';
+                    initializeApp();
+                }, 800);
+            }, 2500);
+        });
+
+        function initializeApp() {
+            setupGreeting();
+            setupCarousel();
+            setupTouchHandlers();
+            setupPullToRefresh();
+            setupInteractions();
+            registerServiceWorker();
+            updateCartBadge();
+            // Update points display from BC
+            const ptsBadge = document.querySelector('.points-badge');
+            if (ptsBadge) ptsBadge.textContent = BC.getPoints().toLocaleString('ko-KR') + 'P';
+            
+            // Add skeleton loading removal
+            setTimeout(() => {
+                document.querySelectorAll('.skeleton').forEach(el => {
+                    el.classList.remove('skeleton');
+                });
+            }, 1000);
+        }
+
+        // Setup time-based greeting
+        function setupGreeting() {
+            const hour = new Date().getHours();
+            let greeting = '';
+            let emoji = '';
+            
+            if (hour < 12) {
+                greeting = '좋은 아침이에요, 고객님';
+                emoji = '☀️';
+            } else if (hour < 18) {
+                greeting = '좋은 오후에요, 고객님';
+                emoji = '🌤️';
+            } else {
+                greeting = '좋은 저녁이에요, 고객님';
+                emoji = '🌙';
+            }
+            
+            greetingText.textContent = `${greeting} ${emoji}`;
+        }
+
+        // Setup carousel functionality
+        function setupCarousel() {
+            const dots = document.querySelectorAll('.dot');
+            
+            // Auto-slide every 3 seconds
+            autoSlideInterval = setInterval(() => {
+                nextSlide();
+            }, 3000);
+            
+            // Dot navigation
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    currentSlide = index;
+                    updateCarousel();
+                    resetAutoSlide();
+                });
+            });
+            
+            // Touch/swipe support
+            carouselWrapper.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+                clearInterval(autoSlideInterval);
+            });
+            
+            carouselWrapper.addEventListener('touchend', (e) => {
+                const touchEndX = e.changedTouches[0].clientX;
+                const diff = touchStartX - touchEndX;
+                
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0) {
+                        nextSlide();
+                    } else {
+                        prevSlide();
+                    }
+                }
+                resetAutoSlide();
+            });
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % 3;
+            updateCarousel();
+        }
+
+        function prevSlide() {
+            currentSlide = currentSlide === 0 ? 2 : currentSlide - 1;
+            updateCarousel();
+        }
+
+        function updateCarousel() {
+            const translateX = -currentSlide * (100/3);
+            carouselWrapper.style.transform = `translateX(${translateX}%)`;
+            
+            document.querySelectorAll('.dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+        }
+
+        function resetAutoSlide() {
+            clearInterval(autoSlideInterval);
+            autoSlideInterval = setInterval(() => {
+                nextSlide();
+            }, 3000);
+        }
+
+        // Setup pull-to-refresh
+        function setupPullToRefresh() {
+            let startY = 0;
+            let isRefreshing = false;
+            
+            document.addEventListener('touchstart', (e) => {
+                if (window.scrollY === 0 && !isRefreshing) {
+                    startY = e.touches[0].clientY;
+                    pullStartY = startY;
+                    isPulling = true;
+                }
+            });
+            
+            document.addEventListener('touchmove', (e) => {
+                if (isPulling && window.scrollY === 0) {
+                    const currentY = e.touches[0].clientY;
+                    const diff = currentY - startY;
+                    
+                    if (diff > 0 && diff < 150) {
+                        e.preventDefault();
+                        const opacity = Math.min(diff / 100, 1);
+                        pullToRefresh.style.opacity = opacity;
+                        
+                        if (diff > 60) {
+                            pullToRefresh.classList.add('visible');
+                        }
+                    }
+                }
+            });
+            
+            document.addEventListener('touchend', (e) => {
+                if (isPulling) {
+                    const currentY = e.changedTouches[0].clientY;
+                    const diff = currentY - startY;
+                    
+                    if (diff > 80 && !isRefreshing) {
+                        isRefreshing = true;
+                        pullToRefresh.classList.add('active');
+                        
+                        // Simulate refresh
+                        setTimeout(() => {
+                            isRefreshing = false;
+                            pullToRefresh.classList.remove('active', 'visible');
+                            pullToRefresh.style.opacity = '0';
+                            
+                            // Refresh greeting
+                            setupGreeting();
+                        }, 1500);
+                    } else {
+                        pullToRefresh.classList.remove('visible');
+                        pullToRefresh.style.opacity = '0';
+                    }
+                    
+                    isPulling = false;
+                }
+            });
+        }
+
+        // Setup touch handlers and interactions
+        function setupTouchHandlers() {
+            // Heart button toggles
+            document.querySelectorAll('.heart-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const card = button.closest('.menu-card');
+                    const name = card?.querySelector('.menu-card-title')?.textContent || '';
+                    const price = parseInt(card?.querySelector('.menu-price')?.textContent?.replace(/[^0-9]/g,'')) || 5000;
+                    const imgStyle = card?.querySelector('.menu-card-image')?.style.backgroundImage || '';
+                    const img = imgStyle.replace(/url\(['"]?|['"]?\)/g, '');
+                    const added = BC.toggleFavorite({ name, price, img });
+                    button.classList.toggle('active', added);
+                    animateHeart(button);
+                    showToast(added ? '❤️ 즐겨찾기에 추가했어요' : '즐겨찾기에서 제거했어요');
+                });
+            });
+            
+            // Add to cart buttons
+            document.querySelectorAll('.add-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const itemId = button.dataset.add;
+                    addToCart(itemId);
+                    animateAddToCart(button);
+                });
+            });
+            
+            // Navigation items
+            document.querySelectorAll('.nav-item[data-nav]').forEach(item => {
+                item.addEventListener('click', () => {
+                    const page = item.dataset.nav;
+                    navigateToPage(page);
+                });
+            });
+            
+            // Location selector
+            document.getElementById('locationSelector').addEventListener('click', () => {
+                showLocationModal();
+            });
+            
+            // Profile avatar
+            document.getElementById('profileAvatar').addEventListener('click', () => {
+                navigateToPage('mypage');
+            });
+            
+            // Notification bell
+            document.getElementById('notificationBell').addEventListener('click', () => {
+                showNotifications();
+            });
+            
+            // Floating cart
+            floatingCart.addEventListener('click', () => {
+                window.location.href = 'cart.html';
+            });
+        }
+
+        function setupInteractions() {
+            // Menu card interactions
+            document.querySelectorAll('.menu-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (e.target.closest('.heart-button') || e.target.closest('.add-button')) return;
+                    const menuId = card.dataset.menu;
+                    showMenuDetail(menuId);
+                });
+            });
+            
+            // Build quick order section from favorites (or defaults)
+            buildQuickOrder();
+            
+            // Special card
+            document.querySelector('.special-card').addEventListener('click', () => {
+                showMenuDetail('cherry-blossom-latte');
+            });
+            
+            // Restore heart states
+            document.querySelectorAll('.heart-button').forEach(btn => {
+                const card = btn.closest('.menu-card');
+                if (card) {
+                    const name = card.querySelector('.menu-card-title')?.textContent;
+                    if (name && BC.isFavorite(name)) btn.classList.add('active');
+                }
+            });
+        }
+        
+        function buildQuickOrder() {
+            const container = document.getElementById('quickOrderScroll');
+            const favs = BC.getFavorites();
+            const defaultItems = [
+                { name: '아메리카노', emoji: '☕', id: 'americano' },
+                { name: '카페라떼', emoji: '🥛', id: 'cafe-latte' },
+                { name: '콜드브루', emoji: '🧊', id: 'cold-brew' },
+                { name: '크루아상', emoji: '🥐', id: 'croissant' },
+                { name: '바닐라라떼', emoji: '🍦', id: 'vanilla-latte' }
+            ];
+            
+            let items = [];
+            if (favs.length > 0) {
+                items = favs.slice(0, 5).map(f => {
+                    const match = BC.findMenuByName(f.name);
+                    return { name: f.name, emoji: '❤️', id: match ? match[0] : '' };
+                });
+            }
+            // Fill remaining with defaults
+            while (items.length < 5) {
+                const def = defaultItems[items.length];
+                if (!items.find(i => i.name === def.name)) items.push(def);
+                else items.push(defaultItems[Math.min(items.length, defaultItems.length - 1)]);
+                if (items.length >= 5) break;
+            }
+            
+            container.innerHTML = items.map(item => `
+                <div class="quick-item touch-feedback" data-quick-id="${item.id}">
+                    <div class="quick-item-image">${item.emoji}</div>
+                    <p class="quick-item-name">${item.name}</p>
+                </div>
+            `).join('');
+            
+            container.querySelectorAll('.quick-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    const id = el.dataset.quickId;
+                    if (id) {
+                        window.location.href = 'detail.html?id=' + encodeURIComponent(id);
+                    } else {
+                        const name = el.querySelector('.quick-item-name').textContent;
+                        quickOrder(name);
+                    }
+                });
+            });
+        }
+
+        // Animation functions
+        function animateHeart(button) {
+            button.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                button.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        function animateAddToCart(button) {
+            button.style.transform = 'scale(0.8)';
+            button.style.background = '#2D5F3F';
+            
+            setTimeout(() => {
+                button.style.transform = 'scale(1.2)';
+            }, 100);
+            
+            setTimeout(() => {
+                button.style.transform = 'scale(1)';
+                button.style.background = 'var(--deep-green)';
+            }, 300);
+        }
+
+        // Cart management via shared BC layer
+        function addToCart(itemId) {
+            const menuMap = {
+              'signature-blend': { name: '시그니처 블렌드', price: 4500, img: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80' },
+              'vanilla-latte':   { name: '바닐라 라떼',   price: 5500, img: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=200&q=80' },
+              'green-tea':       { name: '말차 라떼',     price: 5800, img: 'https://images.unsplash.com/photo-1534778101976-62847782c213?w=200&q=80' },
+              'cherry-blossom-latte': { name: '체리 블라썸 라떼', price: 6800, img: 'https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=200&q=80' },
+            };
+            // Also try matching from BC.menuDB
+            let data = menuMap[itemId];
+            if (!data) {
+              const dbItem = BC.getMenuItem(itemId);
+              if (dbItem) data = { name: dbItem.name, price: dbItem.basePrice, img: dbItem.img };
+              else data = { name: itemId, price: 5000, img: '' };
+            }
+            BC.addToCart({ name: data.name, price: data.price, img: data.img, options: '', qty: 1 });
+            showToast('장바구니에 추가되었습니다');
+        }
+
+        function updateCartBadge() {
+            BC.updateAllBadges();
+        }
+
+        // Navigation
+        function navigateToPage(page) {
+            // Remove active state from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active state to current nav item
+            const navItem = document.querySelector(`[data-nav="${page}"]`);
+            if (navItem) {
+                navItem.classList.add('active');
+            }
+            
+            window.location.href = `${page}.html`;
+        }
+
+        // Modal and toast functions
+        function showLocationModal() {
+            showToast('위치 선택 기능을 준비 중입니다');
+        }
+
+        function showNotifications() {
+            showToast('새로운 알림이 3개 있습니다');
+        }
+
+        function showMenuDetail(menuId) {
+            window.location.href = 'detail.html?id=' + encodeURIComponent(menuId);
+        }
+
+        function quickOrder(itemName) {
+            // Try to find in menuDB by name for detail page
+            const match = BC.findMenuByName(itemName);
+            if (match) {
+                window.location.href = 'detail.html?id=' + match[0];
+            } else {
+                addToCart(itemName.toLowerCase().replace(' ', '-'));
+                showToast(`${itemName} 장바구니에 담았어요!`);
+            }
+        }
+
+        function showToast(message) {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                bottom: calc(var(--safe-bottom) + 100px);
+                left: 50%;
+                transform: translateX(-50%);
+                background: var(--deep-green);
+                color: var(--cream);
+                padding: 12px 24px;
+                border-radius: 24px;
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 1000;
+                animation: toastSlideUp 0.3s ease-out;
+                box-shadow: var(--shadow-medium);
+            `;
+            toast.textContent = message;
+            
+            // Add to body
+            document.body.appendChild(toast);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'toastSlideDown 0.3s ease-out';
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // Add toast animations to CSS
+        const toastStyles = document.createElement('style');
+        toastStyles.textContent = `
+            @keyframes toastSlideUp {
+                from {
+                    transform: translateX(-50%) translateY(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(-50%) translateY(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes toastSlideDown {
+                from {
+                    transform: translateX(-50%) translateY(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(-50%) translateY(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(toastStyles);
+
+        // Service Worker Registration
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./service-worker.js')
+                        .then(registration => {
+                            console.log('SW registered: ', registration);
+                        })
+                        .catch(registrationError => {
+                            console.log('SW registration failed: ', registrationError);
+                        });
+                });
+            }
+        }
+
+        // PWA Install Prompt
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show custom install button if desired
+            showInstallPrompt();
+        });
+
+        function showInstallPrompt() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the A2HS prompt');
+                    } else {
+                        console.log('User dismissed the A2HS prompt');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        // Handle app install
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('App was installed');
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements for animation
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.querySelectorAll('.menu-card, .special-card').forEach(el => {
+                    observer.observe(el);
+                });
+            }, 1000);
+        });
+
+        // Performance optimization
+        function throttle(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Optimized scroll handler
+        const optimizedScroll = throttle(() => {
+            const scrolled = window.pageYOffset;
+            const rate = scrolled * -0.5;
+            
+            // Parallax effect for greeting section
+            const greetingSection = document.querySelector('.greeting-section');
+            if (greetingSection) {
+                greetingSection.style.transform = `translateY(${rate}px)`;
+            }
+        }, 16);
+
+        window.addEventListener('scroll', optimizedScroll);
+
+        // Cleanup on unload
+        window.addEventListener('beforeunload', () => {
+            clearInterval(autoSlideInterval);
+            observer.disconnect();
+            window.removeEventListener('scroll', optimizedScroll);
+        });
+
+        // Error handling
+        window.addEventListener('error', (e) => {
+            console.error('Application error:', e.error);
+            // In production, send error to monitoring service
+        });
+
+        // Network status
+        window.addEventListener('online', () => {
+            showToast('인터넷 연결이 복구되었습니다');
+        });
+
+        window.addEventListener('offline', () => {
+            showToast('오프라인 모드로 전환되었습니다');
+        });
+
+        // Back button handling
+        window.addEventListener('popstate', (e) => {
+            // Handle back navigation
+            console.log('Back button pressed');
+        });
+
+        // Focus management for accessibility
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                document.body.classList.add('keyboard-nav');
+            }
+        });
+
+        document.addEventListener('mousedown', () => {
+            document.body.classList.remove('keyboard-nav');
+        });
+    </script>
+</body>
+</html>

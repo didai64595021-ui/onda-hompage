@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마음카드 - 두 사람의 이야기를 담는 가장 아름다운 방법</title>
+    <link rel="stylesheet" href="common.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&family=Noto+Serif+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    
+    <style>html{overflow-x:hidden;scroll-behavior:smooth}body{word-break:keep-all;overflow-wrap:break-word}@media(prefers-reduced-motion:reduce){*{animation-duration:0.01ms!important;transition-duration:0.01ms!important}}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --cream: #FFFDF7;
+            --rose-gold: #B76E79;
+            --deep-navy: #1B2A4A;
+            --gold-foil: #C9A96E;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            line-height: 1.6;
+            color: var(--deep-navy);
+            background-color: var(--cream);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Noto Serif KR', serif;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            background: linear-gradient(
+                rgba(27, 42, 74, 0.4),
+                rgba(183, 110, 121, 0.3)
+            ), url('https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            padding: 0 20px;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.95;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero .btn {
+            padding: 18px 40px;
+            font-size: 1.1rem;
+            background: linear-gradient(45deg, var(--rose-gold), var(--gold-foil));
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(183, 110, 121, 0.3);
+        }
+
+        .hero .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(183, 110, 121, 0.4);
+        }
+
+        /* Popular Templates Section */
+        .templates {
+            padding: 100px 0;
+            background-color: var(--cream);
+        }
+
+        .templates-carousel {
+            position: relative;
+            margin-top: 60px;
+        }
+
+        .templates-container {
+            overflow: hidden;
+            position: relative;
+        }
+
+        .templates-track {
+            display: flex;
+            transition: transform 0.5s ease;
+            gap: 30px;
+        }
+
+        .template-card {
+            min-width: 300px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(27, 42, 74, 0.08);
+            transition: all 0.4s ease;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .template-card:hover {
+            transform: rotateX(5deg) rotateY(10deg) scale(1.05);
+            box-shadow: 0 20px 60px rgba(27, 42, 74, 0.15);
+        }
+
+        .template-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .template-tag {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--rose-gold);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .template-info {
+            padding: 25px;
+            text-align: center;
+        }
+
+        .template-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--deep-navy);
+            margin-bottom: 8px;
+        }
+
+        .template-description {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--deep-navy);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .carousel-nav:hover {
+            background: white;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .carousel-prev { left: -25px; }
+        .carousel-next { right: -25px; }
+
+        /* How It Works */
+        .how-it-works {
+            padding: 100px 0;
+            background: linear-gradient(135deg, #f8f9fa 0%, var(--cream) 100%);
+        }
+
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 60px;
+            position: relative;
+        }
+
+        .steps::before {
+            content: '';
+            position: absolute;
+            top: 50px;
+            left: 16.66%;
+            right: 16.66%;
+            height: 2px;
+            background: linear-gradient(to right, var(--rose-gold), var(--gold-foil));
+            z-index: 1;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step-number {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--rose-gold), var(--gold-foil));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 auto 30px;
+            box-shadow: 0 10px 30px rgba(183, 110, 121, 0.3);
+        }
+
+        .step h3 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: var(--deep-navy);
+        }
+
+        .step p {
+            color: #666;
+            line-height: 1.6;
+            max-width: 250px;
+            margin: 0 auto;
+        }
+
+        /* Stats Counter */
+        .stats {
+            padding: 80px 0;
+            background: var(--deep-navy);
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--gold-foil);
+            margin-bottom: 10px;
+            font-family: 'Noto Serif KR', serif;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Customer Reviews */
+        .reviews {
+            padding: 100px 0;
+            background-color: var(--cream);
+        }
+
+        .reviews-slider {
+            position: relative;
+            margin-top: 60px;
+            overflow: hidden;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .reviews-track {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .review-card {
+            min-width: 100%;
+            padding: 0 20px;
+        }
+
+        .review-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(27, 42, 74, 0.08);
+            position: relative;
+        }
+
+        .review-stars {
+            color: var(--gold-foil);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .review-text {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            margin-bottom: 25px;
+            color: var(--deep-navy);
+        }
+
+        .review-author {
+            font-weight: 600;
+            color: var(--rose-gold);
+            margin-bottom: 5px;
+        }
+
+        .review-date {
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .reviews-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ddd;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: var(--rose-gold);
+            transform: scale(1.2);
+        }
+
+        /* CTA Section */
+        .cta {
+            padding: 100px 0;
+            background: linear-gradient(135deg, var(--rose-gold), var(--gold-foil));
+            text-align: center;
+            color: white;
+        }
+
+        .cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .cta p {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            opacity: 0.95;
+        }
+
+        .cta .btn {
+            padding: 18px 40px;
+            background: white;
+            color: var(--deep-navy);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .cta .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.2);
+        }
+
+        /* Section Headers */
+        .section-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            color: var(--deep-navy);
+            margin-bottom: 15px;
+        }
+
+        .section-header p {
+            font-size: 1.2rem;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Fade Up Animation */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+            }
+
+            .template-card {
+                min-width: 280px;
+            }
+
+            .steps {
+                flex-direction: column;
+                gap: 40px;
+            }
+
+            .steps::before {
+                display: none;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+            }
+
+            .stat-number {
+                font-size: 2.5rem;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .cta h2 {
+                font-size: 2rem;
+            }
+
+            .carousel-nav {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .template-card {
+                min-width: 250px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- GNB Navigation -->
+    <nav class="gnb">
+        <div class="gnb-inner">
+            <a href="index.html" class="gnb-logo">
+                <span class="logo-icon">💌</span> 마음카드
+            </a>
+            <div class="gnb-menu">
+                <a href="index.html" class="active">웨딩</a>
+                <a href="baby.html">돌잔치</a>
+                <a href="create.html">제작하기</a>
+                <a href="history.html">내 청첩장</a>
+                <a href="#" class="btn-login">로그인</a>
+            </div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu">
+        <div class="mobile-menu-inner">
+            <a href="index.html" class="active">웨딩</a>
+            <a href="baby.html">돌잔치</a>
+            <a href="create.html">제작하기</a>
+            <a href="history.html">내 청첩장</a>
+            <a href="#" class="btn-login">로그인</a>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content fade-up">
+            <h1>두 사람의 이야기를 담는<br>가장 아름다운 방법</h1>
+            <p>마음카드와 함께 특별한 순간을 더욱 특별하게 만들어보세요.<br>간편하고 아름다운 디지털 청첩장으로 사랑을 전하세요.</p>
+            <a href="create.html" class="btn">무료로 시작하기</a>
+        </div>
+    </section>
+
+    <!-- Popular Templates Section -->
+    <section class="templates section fade-up">
+        <div class="container">
+            <div class="section-header">
+                <h2>인기 템플릿</h2>
+                <p>다양한 스타일의 아름다운 템플릿 중에서 선택하세요</p>
+            </div>
+            <div class="templates-carousel">
+                <div class="templates-container">
+                    <div class="templates-track" id="templatesTrack">
+                        <div class="template-card">
+                            <div class="template-image" style="background-image: url('https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=600&q=80');">
+                                <div class="template-tag">클래식</div>
+                            </div>
+                            <div class="template-info">
+                                <div class="template-name">로즈 가든</div>
+                                <div class="template-description">우아하고 고급스러운 클래식 스타일</div>
+                            </div>
+                        </div>
+                        <div class="template-card">
+                            <div class="template-image" style="background-image: url('https://images.unsplash.com/photo-1465495976277-4387d4b0e4a6?w=600&q=80');">
+                                <div class="template-tag">모던</div>
+                            </div>
+                            <div class="template-info">
+                                <div class="template-name">미니멀 화이트</div>
+                                <div class="template-description">깔끔하고 세련된 모던 디자인</div>
+                            </div>
+                        </div>
+                        <div class="template-card">
+                            <div class="template-image" style="background-image: url('https://images.unsplash.com/photo-1606800052052-a08af7148866?w=600&q=80');">
+                                <div class="template-tag">빈티지</div>
+                            </div>
+                            <div class="template-info">
+                                <div class="template-name">골든 타임</div>
+                                <div class="template-description">따뜻한 감성의 빈티지 스타일</div>
+                            </div>
+                        </div>
+                        <div class="template-card">
+                            <div class="template-image" style="background-image: url('https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=600&q=80');">
+                                <div class="template-tag">미니멀</div>
+                            </div>
+                            <div class="template-info">
+                                <div class="template-name">심플 블루</div>
+                                <div class="template-description">단순하고 깔끔한 미니멀 디자인</div>
+                            </div>
+                        </div>
+                        <div class="template-card">
+                            <div class="template-image" style="background-image: url('https://images.unsplash.com/photo-1549417229-aa67b3c3c4e8?w=600&q=80');">
+                                <div class="template-tag">로맨틱</div>
+                            </div>
+                            <div class="template-info">
+                                <div class="template-name">핑크 블라썸</div>
+                                <div class="template-description">사랑스럽고 로맨틱한 분위기</div>
+                            </div>
+                        </div>
+                        <div class="template-card">
+                            <div class="template-image" style="background-image: url('https://images.unsplash.com/photo-1520854221256-17451cc331bf?w=600&q=80');">
+                                <div class="template-tag">자연</div>
+                            </div>
+                            <div class="template-info">
+                                <div class="template-name">포레스트 그린</div>
+                                <div class="template-description">자연스럽고 평온한 그린 톤</div>
+                            </div>
+                        </div>
+                        <div class="template-card">
+                            <div class="template-image" style="background-image: url('https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=600&q=80');">
+                                <div class="template-tag">우아</div>
+                            </div>
+                            <div class="template-info">
+                                <div class="template-name">퍼플 엘레강스</div>
+                                <div class="template-description">고급스럽고 우아한 퍼플 톤</div>
+                            </div>
+                        </div>
+                        <div class="template-card">
+                            <div class="template-image" style="background-image: url('https://images.unsplash.com/photo-1616627547584-bf28cfeea1b5?w=600&q=80');">
+                                <div class="template-tag">트렌디</div>
+                            </div>
+                            <div class="template-info">
+                                <div class="template-name">모던 골드</div>
+                                <div class="template-description">트렌디하고 세련된 골드 액센트</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="carousel-nav carousel-prev">‹</button>
+                <button class="carousel-nav carousel-next">›</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works section fade-up">
+        <div class="container">
+            <div class="section-header">
+                <h2>간단한 3단계로 완성</h2>
+                <p>누구나 쉽게 만들 수 있는 디지털 청첩장</p>
+            </div>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>템플릿 선택</h3>
+                    <p>다양한 스타일 중에서<br>마음에 드는 템플릿을<br>선택하세요</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>정보 입력</h3>
+                    <p>결혼식 정보와 사진을<br>간편하게 입력하고<br>커스터마이징 하세요</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>공유하기</h3>
+                    <p>완성된 청첩장을<br>모바일로 간편하게<br>공유하세요</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Counter Section -->
+    <section class="stats section fade-up">
+        <div class="container">
+            <div class="section-header">
+                <h2 style="color: white;">믿을 수 있는 서비스</h2>
+                <p style="color: rgba(255,255,255,0.9);">많은 분들이 선택한 마음카드</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number" data-count="100000">0</div>
+                    <div class="stat-label">누적 제작 수</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" data-count="98">0</div>
+                    <div class="stat-label">고객 만족도 (%)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" data-count="200">0</div>
+                    <div class="stat-label">다양한 템플릿</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" data-count="5">0</div>
+                    <div class="stat-label">평균 제작 시간 (분)</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Customer Reviews Section -->
+    <section class="reviews section fade-up">
+        <div class="container">
+            <div class="section-header">
+                <h2>고객 후기</h2>
+                <p>마음카드를 사용한 고객들의 생생한 후기</p>
+            </div>
+            <div class="reviews-slider">
+                <div class="reviews-track" id="reviewsTrack">
+                    <div class="review-card">
+                        <div class="review-content">
+                            <div class="review-stars">★★★★★</div>
+                            <div class="review-text">"정말 예쁘고 간편해서 놀랐어요! 하객들 반응도 너무 좋았고, 무엇보다 제작 과정이 쉬워서 부담없이 만들 수 있었어요."</div>
+                            <div class="review-author">김미영</div>
+                            <div class="review-date">2024.02.15</div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-content">
+                            <div class="review-stars">★★★★★</div>
+                            <div class="review-text">"템플릿이 정말 다양하고 예뻐요. 우리만의 스타일로 커스터마이징도 할 수 있어서 만족스럽습니다. 추천해요!"</div>
+                            <div class="review-author">박지훈</div>
+                            <div class="review-date">2024.02.10</div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-content">
+                            <div class="review-stars">★★★★★</div>
+                            <div class="review-text">"모바일로도 잘 보이고 공유하기도 편해요. 환경도 생각하고 비용도 절약할 수 있어서 일석이조였습니다."</div>
+                            <div class="review-author">이수진</div>
+                            <div class="review-date">2024.02.08</div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-content">
+                            <div class="review-stars">★★★★★</div>
+                            <div class="review-text">"5분만에 완성할 수 있다니! 정말 간단하고 결과물도 예뻐서 너무 만족해요. 친구들에게도 추천했어요."</div>
+                            <div class="review-author">최민호</div>
+                            <div class="review-date">2024.02.05</div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-content">
+                            <div class="review-stars">★★★★★</div>
+                            <div class="review-text">"디자인이 정말 세련되고 고급스러워요. 하객분들이 청첩장이 너무 예쁘다고 칭찬을 많이 해주셨어요."</div>
+                            <div class="review-author">정예린</div>
+                            <div class="review-date">2024.02.02</div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-content">
+                            <div class="review-stars">★★★★★</div>
+                            <div class="review-text">"고객서비스도 친절하고 빠르게 응답해 주세요. 전체적으로 서비스 품질이 정말 좋아서 추천합니다!"</div>
+                            <div class="review-author">홍성민</div>
+                            <div class="review-date">2024.01.30</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="reviews-dots" id="reviewsDots">
+                    <span class="dot active" data-slide="0"></span>
+                    <span class="dot" data-slide="1"></span>
+                    <span class="dot" data-slide="2"></span>
+                    <span class="dot" data-slide="3"></span>
+                    <span class="dot" data-slide="4"></span>
+                    <span class="dot" data-slide="5"></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta section fade-up">
+        <div class="container">
+            <h2>지금 바로 시작하세요</h2>
+            <p>무료로 아름다운 디지털 청첩장을 만들어보세요</p>
+            <a href="create.html" class="btn">무료 제작하기</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>마음카드</h3>
+                    <p>두 사람의 이야기를 담는 가장 아름다운 방법</p>
+                </div>
+                <div class="footer-section">
+                    <h4>서비스</h4>
+                    <ul>
+                        <li><a href="index.html">웨딩 청첩장</a></li>
+                        <li><a href="baby.html">돌잔치 초대장</a></li>
+                        <li><a href="create.html">제작하기</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>고객지원</h4>
+                    <ul>
+                        <li><a href="faq.html">자주 묻는 질문</a></li>
+                        <li><a href="contact.html">문의하기</a></li>
+                        <li><a href="guide.html">이용가이드</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>회사정보</h4>
+                    <ul>
+                        <li><a href="about.html">회사소개</a></li>
+                        <li><a href="privacy.html">개인정보처리방침</a></li>
+                        <li><a href="terms.html">이용약관</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 마음카드. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="common.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Template Carousel
+            let currentTemplateIndex = 0;
+            const templateCards = $('.template-card').length;
+            const visibleCards = window.innerWidth > 768 ? 3 : 1;
+            const maxIndex = templateCards - visibleCards;
+
+            function updateTemplateCarousel() {
+                const translateX = -currentTemplateIndex * (100 / visibleCards);
+                $('#templatesTrack').css('transform', `translateX(${translateX}%)`);
+            }
+
+            function nextTemplate() {
+                if (currentTemplateIndex < maxIndex) {
+                    currentTemplateIndex++;
+                } else {
+                    currentTemplateIndex = 0;
+                }
+                updateTemplateCarousel();
+            }
+
+            function prevTemplate() {
+                if (currentTemplateIndex > 0) {
+                    currentTemplateIndex--;
+                } else {
+                    currentTemplateIndex = maxIndex;
+                }
+                updateTemplateCarousel();
+            }
+
+            $('.carousel-next').click(nextTemplate);
+            $('.carousel-prev').click(prevTemplate);
+
+            // Auto-slide templates every 4 seconds
+            setInterval(nextTemplate, 4000);
+
+            // Touch/Swipe support for templates
+            let startX, endX;
+            $('.templates-container').on('touchstart', function(e) {
+                startX = e.originalEvent.touches[0].clientX;
+            });
+
+            $('.templates-container').on('touchmove', function(e) {
+                e.preventDefault();
+            });
+
+            $('.templates-container').on('touchend', function(e) {
+                endX = e.originalEvent.changedTouches[0].clientX;
+                const diffX = startX - endX;
+                
+                if (Math.abs(diffX) > 50) {
+                    if (diffX > 0) {
+                        nextTemplate();
+                    } else {
+                        prevTemplate();
+                    }
+                }
+            });
+
+            // Reviews Slider
+            let currentReviewIndex = 0;
+            const reviewCards = $('.review-card').length;
+
+            function updateReviewsSlider() {
+                const translateX = -currentReviewIndex * 100;
+                $('#reviewsTrack').css('transform', `translateX(${translateX}%)`);
+                
+                $('.dot').removeClass('active');
+                $(`.dot[data-slide="${currentReviewIndex}"]`).addClass('active');
+            }
+
+            function nextReview() {
+                currentReviewIndex = (currentReviewIndex + 1) % reviewCards;
+                updateReviewsSlider();
+            }
+
+            // Auto-slide reviews every 5 seconds
+            setInterval(nextReview, 5000);
+
+            // Dots navigation for reviews
+            $('.dot').click(function() {
+                currentReviewIndex = parseInt($(this).data('slide'));
+                updateReviewsSlider();
+            });
+
+            // Stats Counter Animation
+            function animateStats() {
+                $('[data-count]').each(function() {
+                    const $this = $(this);
+                    const target = parseInt($this.data('count'));
+                    const current = parseInt($this.text()) || 0;
+                    
+                    if (current < target) {
+                        const increment = target / 100;
+                        const timer = setInterval(function() {
+                            const newValue = Math.min(current + increment * ((Date.now() - startTime) / 20), target);
+                            if (target >= 1000) {
+                                $this.text(Math.floor(newValue).toLocaleString() + '+');
+                            } else {
+                                $this.text(Math.floor(newValue) + (target === 98 ? '%' : ''));
+                            }
+                            
+                            if (newValue >= target) {
+                                clearInterval(timer);
+                                if (target >= 1000) {
+                                    $this.text(target.toLocaleString() + '+');
+                                } else {
+                                    $this.text(target + (target === 98 ? '%' : ''));
+                                }
+                            }
+                        }, 20);
+                        const startTime = Date.now();
+                    }
+                });
+            }
+
+            // Intersection Observer for animations
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        
+                        // Trigger stats animation when stats section becomes visible
+                        if (entry.target.classList.contains('stats')) {
+                            animateStats();
+                        }
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            $('.fade-up').each(function() {
+                observer.observe(this);
+            });
+
+            // Template card 3D tilt effect
+            $('.template-card').hover(
+                function() {
+                    $(this).css('transform', 'perspective(1000px) rotateX(5deg) rotateY(10deg) scale(1.05)');
+                },
+                function() {
+                    $(this).css('transform', 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)');
+                }
+            );
+
+            // Error handling for images
+            $('img, [style*="background-image"]').each(function() {
+                if (this.tagName === 'IMG') {
+                    $(this).on('error', function() {
+                        $(this).attr('src', 'https://via.placeholder.com/600x400/B76E79/FFFFFF?text=Image');
+                    });
+                }
+            });
+
+            // Mobile menu toggle
+            $('.hamburger').click(function() {
+                $('.mobile-menu').toggleClass('active');
+                $(this).toggleClass('active');
+            });
+
+            // Close mobile menu when clicking on a link
+            $('.mobile-menu a').click(function() {
+                $('.mobile-menu').removeClass('active');
+                $('.hamburger').removeClass('active');
+            });
+
+            // Smooth scrolling for anchor links
+            $('a[href^="#"]').on('click', function(event) {
+                var target = $(this.getAttribute('href'));
+                if (target.length) {
+                    event.preventDefault();
+                    $('html, body').stop().animate({
+                        scrollTop: target.offset().top - 80
+                    }, 1000);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

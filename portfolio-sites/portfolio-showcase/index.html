@@ -1,0 +1,2395 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STUDIO PORTFOLIO — UI/UX 포트폴리오 컬렉션</title>
+<meta name="description" content="UI/UX 포트폴리오 쇼케이스. 프리미엄 웹사이트 디자인 & 개발.">
+<style>
+/* ============================================
+   RESET & BASE
+   ============================================ */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  background: #0a0a0a;
+  color: #e8e8e8;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  overflow-x: hidden;
+  cursor: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* ============================================
+   CUSTOM CURSOR
+   ============================================ */
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transition: transform 0.1s ease;
+  /* blend removed */
+}
+
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease, transform 0.15s ease;
+  /* blend removed */
+}
+
+.cursor-ring.hover {
+  width: 80px;
+  height: 80px;
+  border-color: rgba(255, 255, 255, 0.8);
+}
+
+/* ============================================
+   SCROLL PROGRESS BAR
+   ============================================ */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, #ff6b35, #f7c948, #ff6b35);
+  z-index: 10000;
+  transition: width 0.05s linear;
+}
+
+/* ============================================
+   LOADING SCREEN
+   ============================================ */
+.loader {
+  position: fixed;
+  inset: 0;
+  background: #0a0a0a;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+.loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-text {
+  font-size: clamp(1.5rem, 4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: 0.5em;
+  color: #fff;
+  animation: loaderPulse 1.5s ease-in-out infinite;
+}
+
+.loader-bar {
+  width: 200px;
+  height: 2px;
+  background: #222;
+  margin-top: 2rem;
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.loader-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, #fff, transparent);
+  animation: loaderSlide 1.2s ease-in-out infinite;
+}
+
+@keyframes loaderPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+@keyframes loaderSlide {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* ============================================
+   NAVIGATION
+   ============================================ */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  padding: 1.5rem 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* blend removed */
+  pointer-events: none;
+}
+
+.nav * {
+  pointer-events: auto;
+}
+
+.nav-logo {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.nav-info {
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+}
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* hero-bg-grain 제거 — 렉 원인 */
+
+/* hero-grid 제거 — 렉 원인 */
+
+.hero-gradient {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  opacity: 0.07;
+  z-index: 1;
+  will-change: transform;
+}
+
+.hero-gradient-1 {
+  top: -200px;
+  right: -100px;
+  background: radial-gradient(circle, #ff6b35 0%, transparent 70%);
+}
+
+.hero-gradient-2 {
+  bottom: -200px;
+  left: -100px;
+  background: radial-gradient(circle, #4a90d9 0%, transparent 70%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 1200px;
+}
+
+.hero-eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 2rem;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: heroFadeUp 1s ease 0.5s forwards;
+}
+
+.hero-title {
+  font-size: clamp(3rem, 12vw, 10rem);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.9);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  transform: translateY(60px);
+  animation: heroFadeUp 1.2s ease 0.7s forwards;
+}
+
+.hero-title span.filled {
+  color: #fff;
+  -webkit-text-stroke: 0;
+}
+
+.hero-subtitle {
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.1em;
+  margin-bottom: 3rem;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: heroFadeUp 1s ease 0.9s forwards;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 3rem;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: heroFadeUp 1s ease 1.1s forwards;
+}
+
+.hero-meta-item {
+  text-align: center;
+}
+
+.hero-meta-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  display: block;
+}
+
+.hero-meta-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.hero-scroll-indicator {
+  position: absolute;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  opacity: 0;
+  animation: heroFadeUp 1s ease 1.5s forwards;
+}
+
+.hero-scroll-text {
+  font-size: 0.6rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+  writing-mode: vertical-rl;
+}
+
+.hero-scroll-line {
+  width: 1px;
+  height: 60px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);
+  animation: scrollLineAnim 2s ease-in-out infinite;
+}
+
+@keyframes heroFadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scrollLineAnim {
+  0% { transform: scaleY(0); transform-origin: top; }
+  50% { transform: scaleY(1); transform-origin: top; }
+  51% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+/* ============================================
+   SECTION COMMON
+   ============================================ */
+.section {
+  position: relative;
+  padding: 8rem 2rem;
+}
+
+.section-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.25);
+  margin-bottom: 1rem;
+}
+
+/* ============================================
+   MARQUEE / TICKER
+   ============================================ */
+.marquee-section {
+  padding: 2rem 0;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  overflow: hidden;
+}
+
+.marquee-track {
+  display: flex;
+  gap: 4rem;
+  animation: marqueeScroll 20s linear infinite;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.marquee-item {
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.15);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.marquee-item .dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  margin: 0 2rem;
+  vertical-align: middle;
+}
+
+@keyframes marqueeScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ============================================
+   INTRO SECTION
+   ============================================ */
+.intro {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.intro-left {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.intro-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.intro-heading {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 1.5rem;
+}
+
+.intro-heading .accent {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255,255,255,0.6);
+}
+
+.intro-right {
+  opacity: 0;
+  transform: translateX(60px);
+  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+}
+
+.intro-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.intro-text {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 2rem;
+}
+
+.intro-stats {
+  display: flex;
+  gap: 3rem;
+}
+
+.intro-stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  display: block;
+}
+
+.intro-stat-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================
+   PROJECT SHOWCASE
+   ============================================ */
+.projects-section {
+  position: relative;
+  padding: 10rem 0;
+}
+
+.projects-header {
+  max-width: 1400px;
+  margin: 0 auto 6rem;
+  padding: 0 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.projects-title {
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.projects-count {
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+}
+
+/* ============================================
+   INDIVIDUAL PROJECT CARD — FULL WIDTH STRIP
+   ============================================ */
+.project-item {
+  position: relative;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  transition: background 0.5s ease;
+}
+
+.project-item:last-child {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.project-item:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.project-link {
+  display: block;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 4rem 3rem;
+  display: grid;
+  grid-template-columns: 100px 1fr auto;
+  gap: 3rem;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.project-number {
+  font-size: clamp(3rem, 5vw, 5rem);
+  font-weight: 800;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.15);
+  line-height: 1;
+  transition: all 0.5s ease;
+}
+
+.project-item:hover .project-number {
+  -webkit-text-stroke-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
+}
+
+.project-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.project-category {
+  font-size: 0.65rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.project-name {
+  font-size: clamp(1.5rem, 4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project-item:hover .project-name {
+  transform: translateX(20px);
+}
+
+.project-desc {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.4);
+  max-width: 500px;
+  line-height: 1.6;
+}
+
+.project-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+
+.project-tag {
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 100px;
+  color: rgba(255, 255, 255, 0.4);
+  transition: all 0.3s ease;
+}
+
+.project-item:hover .project-tag {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.project-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.project-arrow {
+  width: 60px;
+  height: 60px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project-arrow svg {
+  width: 20px;
+  height: 20px;
+  stroke: rgba(255, 255, 255, 0.5);
+  transition: all 0.5s ease;
+}
+
+.project-item:hover .project-arrow {
+  background: #fff;
+  border-color: #fff;
+  transform: scale(1.1);
+}
+
+.project-item:hover .project-arrow svg {
+  stroke: #0a0a0a;
+  transform: rotate(-45deg);
+}
+
+.project-view-text {
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+  transition: color 0.3s ease;
+}
+
+.project-item:hover .project-view-text {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Background image on hover */
+.project-bg-image {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+  overflow: hidden;
+}
+
+.project-bg-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.85);
+}
+
+.project-item:hover .project-bg-image {
+  opacity: 1;
+}
+
+.project-bg-image .bg-pattern {
+  position: absolute;
+  inset: -20%;
+  opacity: 0.15;
+  transition: transform 0.7s ease;
+}
+
+.project-item:hover .project-bg-image .bg-pattern {
+  transform: scale(1.05);
+}
+
+/* Project 01 bg — warm gradient */
+.project-01 .bg-pattern {
+  background: radial-gradient(ellipse at 30% 50%, #ff6b35 0%, transparent 70%);
+}
+
+/* Project 02 bg — cool gradient */
+.project-02 .bg-pattern {
+  background: radial-gradient(ellipse at 70% 50%, #4a90d9 0%, transparent 70%);
+}
+
+/* Project 03 bg — electric gradient */
+.project-03 .bg-pattern {
+  background: radial-gradient(ellipse at 50% 30%, #00ff88 0%, transparent 70%);
+}
+
+/* Project 04 bg — warm beige gradient */
+.project-04 .bg-pattern {
+  background: radial-gradient(ellipse at 40% 60%, #d4a574 0%, transparent 70%);
+}
+
+/* Project 05 bg — deep indigo gradient */
+.project-05 .bg-pattern {
+  background: radial-gradient(ellipse at 60% 40%, #1e3a5f 0%, transparent 70%);
+}
+
+/* Project 06 bg — teal gradient */
+.project-06 .bg-pattern {
+  background: radial-gradient(ellipse at 60% 45%, #00c9a7 0%, transparent 70%);
+}
+
+/* Project 07 bg — gold gradient */
+.project-07 .bg-pattern {
+  background: radial-gradient(ellipse at 40% 50%, #c8a96e 0%, transparent 70%);
+}
+
+/* Project 08 bg — amber/whiskey gradient */
+.project-08 .bg-pattern {
+  background: radial-gradient(ellipse at 65% 45%, #8b4513 0%, transparent 70%);
+}
+
+/* ============================================
+   REVEAL ANIMATIONS
+   ============================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(80px);
+  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+/* ============================================
+   PHILOSOPHY / APPROACH SECTION
+   ============================================ */
+.philosophy {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 3rem;
+}
+
+.philosophy-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  margin-top: 4rem;
+}
+
+.philosophy-card {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 3rem 2.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.5s ease;
+}
+
+.philosophy-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.philosophy-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+}
+
+.philosophy-icon {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  display: block;
+  opacity: 0.8;
+}
+
+.philosophy-card-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.philosophy-card-text {
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ============================================
+   HORIZONTAL SCROLL TEXT
+   ============================================ */
+.horizontal-text {
+  padding: 6rem 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.horizontal-text-track {
+  display: flex;
+  gap: 2rem;
+  animation: horizontalScroll 30s linear infinite;
+  will-change: transform;
+}
+
+.horizontal-text-item {
+  font-size: clamp(4rem, 10vw, 8rem);
+  font-weight: 800;
+  white-space: nowrap;
+  flex-shrink: 0;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.06);
+  letter-spacing: -0.02em;
+}
+
+.horizontal-text-item .filled-word {
+  -webkit-text-stroke: 0;
+  color: rgba(255, 255, 255, 0.06);
+}
+
+@keyframes horizontalScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ============================================
+   PROCESS SECTION — TIMELINE
+   ============================================ */
+.process-section {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 3rem;
+}
+
+.process-timeline {
+  position: relative;
+  margin-top: 5rem;
+}
+
+.process-timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 30px;
+  width: 1px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.process-step {
+  position: relative;
+  padding-left: 100px;
+  padding-bottom: 5rem;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.process-step.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.process-step-dot {
+  position: absolute;
+  left: 22px;
+  top: 8px;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  background: #0a0a0a;
+  transition: all 0.5s ease;
+}
+
+.process-step.visible .process-step-dot {
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.process-step-number {
+  font-size: 0.65rem;
+  letter-spacing: 0.4em;
+  color: rgba(255, 255, 255, 0.2);
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+}
+
+.process-step-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.process-step-desc {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1.7;
+  max-width: 500px;
+}
+
+/* ============================================
+   TESTIMONIAL / QUOTE
+   ============================================ */
+.quote-section {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 0 3rem;
+}
+
+.quote-mark {
+  font-size: 6rem;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.06);
+  font-family: Georgia, serif;
+  margin-bottom: -1rem;
+}
+
+.quote-text {
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  font-weight: 300;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: -0.01em;
+}
+
+.quote-author {
+  margin-top: 2rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+/* ============================================
+   CONTACT / CTA
+   ============================================ */
+.cta-section {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 3rem;
+}
+
+.cta-title {
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin-bottom: 2rem;
+}
+
+.cta-title .outline {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.5);
+}
+
+.cta-subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 3rem;
+  line-height: 1.7;
+}
+
+.cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem 3rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 100px;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #fff;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 100px;
+}
+
+.cta-button:hover::before {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.cta-button:hover {
+  color: #0a0a0a;
+  border-color: #fff;
+}
+
+.cta-button span {
+  position: relative;
+  z-index: 1;
+}
+
+.cta-button svg {
+  position: relative;
+  z-index: 1;
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  transition: transform 0.3s ease;
+}
+
+.cta-button:hover svg {
+  transform: translateX(4px);
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 4rem 3rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 4rem;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.footer-brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.footer-brand-sub {
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  margin-top: 0.5rem;
+}
+
+.footer-links {
+  display: flex;
+  gap: 3rem;
+}
+
+.footer-link-group h4 {
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.25);
+  margin-bottom: 1rem;
+}
+
+.footer-link-group a {
+  display: block;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 0.5rem;
+  transition: color 0.3s ease;
+}
+
+.footer-link-group a:hover {
+  color: #fff;
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer-copy {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.2);
+  letter-spacing: 0.1em;
+}
+
+.footer-contact {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.2);
+  letter-spacing: 0.1em;
+}
+
+/* ============================================
+   FLOATING PARTICLES
+   ============================================ */
+.particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  animation: particleFloat linear infinite;
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   RESPONSIVE — 1024px
+   ============================================ */
+@media (max-width: 1024px) {
+  .intro {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .project-link {
+    grid-template-columns: 60px 1fr;
+    gap: 2rem;
+  }
+
+  .project-cta {
+    display: none;
+  }
+
+  .philosophy-grid {
+    grid-template-columns: 1fr;
+    gap: 1px;
+  }
+
+  .projects-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+}
+
+/* ============================================
+   RESPONSIVE — 768px
+   ============================================ */
+@media (max-width: 768px) {
+  .nav {
+    padding: 1rem 1.5rem;
+  }
+
+  .section {
+    padding: 5rem 1.5rem;
+  }
+
+  .hero-meta {
+    gap: 2rem;
+  }
+
+  .project-link {
+    padding: 3rem 1.5rem;
+    grid-template-columns: 50px 1fr;
+    gap: 1.5rem;
+  }
+
+  .project-number {
+    font-size: 2.5rem;
+  }
+
+  .project-name {
+    font-size: 1.3rem;
+  }
+
+  .philosophy {
+    padding: 0 1.5rem;
+  }
+
+  .philosophy-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .process-section {
+    padding: 0 1.5rem;
+  }
+
+  .process-step {
+    padding-left: 70px;
+    padding-bottom: 3rem;
+  }
+
+  .quote-section {
+    padding: 0 1.5rem;
+  }
+
+  .cta-section {
+    padding: 0 1.5rem;
+  }
+
+  .footer {
+    padding: 3rem 1.5rem;
+  }
+
+  .footer-top {
+    flex-direction: column;
+  }
+
+  .footer-links {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .projects-header {
+    padding: 0 1.5rem;
+  }
+}
+
+/* ============================================
+   RESPONSIVE — 375px
+   ============================================ */
+@media (max-width: 375px) {
+  html {
+    font-size: 14px;
+  }
+
+  .hero-meta {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .intro-stats {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .project-link {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .project-number {
+    font-size: 2rem;
+  }
+
+  .project-tags {
+    gap: 0.3rem;
+  }
+
+  .project-tag {
+    font-size: 0.55rem;
+    padding: 0.2rem 0.6rem;
+  }
+}
+
+/* ============================================
+   SELECTION
+   ============================================ */
+::selection {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+/* ============================================
+   SMOOTH PARALLAX HELPER
+   ============================================ */
+.parallax-element {
+  will-change: transform;
+  transition: transform 0.1s linear;
+}
+
+/* ============================================
+   GLITCH TEXT EFFECT
+   ============================================ */
+.glitch-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.glitch-text {
+  position: relative;
+}
+
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.glitch-wrapper:hover .glitch-text::before {
+  opacity: 0.8;
+  color: #ff0040;
+  animation: glitch1 0.3s infinite;
+  clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+}
+
+.glitch-wrapper:hover .glitch-text::after {
+  opacity: 0.8;
+  color: #0ff;
+  animation: glitch2 0.3s infinite;
+  clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+}
+
+@keyframes glitch1 {
+  0% { transform: translate(0); }
+  20% { transform: translate(-3px, 3px); }
+  40% { transform: translate(-3px, -3px); }
+  60% { transform: translate(3px, 3px); }
+  80% { transform: translate(3px, -3px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes glitch2 {
+  0% { transform: translate(0); }
+  20% { transform: translate(3px, -3px); }
+  40% { transform: translate(3px, 3px); }
+  60% { transform: translate(-3px, -3px); }
+  80% { transform: translate(-3px, 3px); }
+  100% { transform: translate(0); }
+}
+
+/* ============================================
+   MAGNETIC BUTTON
+   ============================================ */
+.magnetic-btn {
+  position: relative;
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ============================================
+   IMAGE REVEAL HOVER
+   ============================================ */
+/* hover-reveal 제거됨 */
+
+/* ============================================
+   NOISE OVERLAY
+   ============================================ */
+/* noise-overlay 제거 — GPU 부하 */
+
+/* ============================================
+   DIVIDER LINE
+   ============================================ */
+.divider {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 3rem;
+}
+
+.divider-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+}
+
+/* ============================================
+   ADDITIONAL SPACING & UTILITIES
+   ============================================ */
+.mt-xl { margin-top: 8rem; }
+.mb-xl { margin-bottom: 8rem; }
+.text-center { text-align: center; }
+
+/* ============================================
+   ANIMATED COUNTER
+   ============================================ */
+.counter {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================
+   STAGGER CHILDREN
+   ============================================ */
+.stagger-children > * {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stagger-children.visible > *:nth-child(1) { transition-delay: 0s; opacity: 1; transform: translateY(0); }
+.stagger-children.visible > *:nth-child(2) { transition-delay: 0.1s; opacity: 1; transform: translateY(0); }
+.stagger-children.visible > *:nth-child(3) { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
+.stagger-children.visible > *:nth-child(4) { transition-delay: 0.3s; opacity: 1; transform: translateY(0); }
+.stagger-children.visible > *:nth-child(5) { transition-delay: 0.4s; opacity: 1; transform: translateY(0); }
+.stagger-children.visible > *:nth-child(6) { transition-delay: 0.5s; opacity: 1; transform: translateY(0); }
+
+/* ============================================
+   TECH STACK BADGES
+   ============================================ */
+.tech-badges {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 3rem;
+}
+
+.tech-badge {
+  padding: 0.5rem 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.tech-badge:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.6);
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   YEAR DISPLAY
+   ============================================ */
+.year-display {
+  position: fixed;
+  bottom: 2rem;
+  right: 3rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.4em;
+  color: rgba(255, 255, 255, 0.15);
+  writing-mode: vertical-rl;
+  z-index: 9999;
+  /* blend removed */
+}
+
+/* mobile hide cursor */
+@media (max-width: 768px) {
+  body { cursor: auto; }
+  .cursor-dot, .cursor-ring { display: none; }
+  .year-display { display: none; }
+}
+
+/* ============================================
+   EXTRA PADDING / DECORATIVE
+   ============================================ */
+.spacer-lg {
+  height: 8rem;
+}
+
+.spacer-md {
+  height: 4rem;
+}
+
+.gradient-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,107,53,0.3) 30%, rgba(247,201,72,0.3) 50%, rgba(74,144,217,0.3) 70%, transparent 100%);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div class="loader" id="loader">
+  <div class="loader-text">STUDIO</div>
+  <div class="loader-bar"></div>
+</div>
+
+<!-- NOISE OVERLAY -->
+
+
+<!-- CUSTOM CURSOR -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- SCROLL PROGRESS -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- PARTICLES -->
+<div class="particles" id="particles"></div>
+
+<!-- HOVER REVEAL IMAGES -->
+
+
+<!-- YEAR DISPLAY -->
+<div class="year-display">© 2026</div>
+
+<!-- NAVIGATION -->
+<nav class="nav">
+  <div class="nav-logo">STUDIO</div>
+  <div class="nav-info">Portfolio Collection</div>
+</nav>
+
+<!-- ==========================================
+     HERO SECTION
+     ========================================== -->
+<section class="hero">
+  <div class="hero-bg">
+
+    <div class="hero-gradient hero-gradient-1"></div>
+    <div class="hero-gradient hero-gradient-2"></div>
+  </div>
+
+  <div class="hero-content">
+    <p class="hero-eyebrow">UI/UX Design Studio</p>
+    <h1 class="hero-title">
+      <span class="filled">DESIGN</span><br>
+      PORTFOLIO
+    </h1>
+    <p class="hero-subtitle">UI/UX 포트폴리오 컬렉션</p>
+
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-number counter" data-target="8">0</span>
+        <span class="hero-meta-label">Projects</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-number counter" data-target="100">0</span>
+        <span class="hero-meta-label">Satisfaction %</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-number counter" data-target="2026">0</span>
+        <span class="hero-meta-label">Year</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-scroll-indicator">
+    <span class="hero-scroll-text">Scroll</span>
+    <div class="hero-scroll-line"></div>
+  </div>
+</section>
+
+<!-- ==========================================
+     MARQUEE TICKER
+     ========================================== -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <span class="marquee-item">Web Design <span class="dot"></span> UI/UX <span class="dot"></span> Branding <span class="dot"></span> Development <span class="dot"></span> Strategy</span>
+    <span class="marquee-item">Web Design <span class="dot"></span> UI/UX <span class="dot"></span> Branding <span class="dot"></span> Development <span class="dot"></span> Strategy</span>
+    <span class="marquee-item">Web Design <span class="dot"></span> UI/UX <span class="dot"></span> Branding <span class="dot"></span> Development <span class="dot"></span> Strategy</span>
+    <span class="marquee-item">Web Design <span class="dot"></span> UI/UX <span class="dot"></span> Branding <span class="dot"></span> Development <span class="dot"></span> Strategy</span>
+  </div>
+</div>
+
+<!-- ==========================================
+     INTRO SECTION
+     ========================================== -->
+<section class="section">
+  <div class="intro">
+    <div class="intro-left" id="introLeft">
+      <span class="section-label">About Us</span>
+      <h2 class="intro-heading">
+        디자인으로<br>
+        <span class="accent">비즈니스를</span><br>
+        성장시킵니다
+      </h2>
+    </div>
+    <div class="intro-right" id="introRight">
+      <p class="intro-text">
+        실행사 출신의 마케팅 에이전시입니다.
+        단순한 디자인을 넘어, 비즈니스 목표에 맞춘 전략적 UI/UX 설계로
+        고객의 성장을 이끌어냅니다. 각 프로젝트는 브랜드의 본질을
+        담아 유저의 경험을 극대화합니다.
+      </p>
+      <div class="intro-stats stagger-children" id="introStats">
+        <div>
+          <span class="intro-stat-value">98%</span>
+          <span class="intro-stat-label">Client Retention</span>
+        </div>
+        <div>
+          <span class="intro-stat-value">50+</span>
+          <span class="intro-stat-label">Projects Done</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     DIVIDER
+     ========================================== -->
+<div class="divider">
+  <div class="divider-line"></div>
+</div>
+
+<!-- ==========================================
+     PROJECTS SECTION
+     ========================================== -->
+<section class="projects-section section" id="projects">
+  <div class="projects-header reveal" id="projectsHeader">
+    <div>
+      <span class="section-label">Selected Works</span>
+      <h2 class="projects-title">
+        <span class="glitch-wrapper">
+          <span class="glitch-text" data-text="Projects">Projects</span>
+        </span>
+      </h2>
+    </div>
+    <span class="projects-count">08 Projects</span>
+  </div>
+
+  <!-- PROJECT 01 — RIVERSIDE PARK -->
+  <div class="project-item reveal" data-project="01" id="project01">
+    <div class="project-bg-image project-01">
+      <div class="bg-pattern"></div>
+    </div>
+    <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/showcase-apartment/" target="_blank" rel="noopener noreferrer" class="project-link">
+      <div class="project-number">01</div>
+      <div class="project-info">
+        <span class="project-category">Apartment / Real Estate</span>
+        <h3 class="project-name">리버사이드 파크</h3>
+        <p class="project-desc">프리미엄 아파트 분양 사이트. 풀스크린 히어로, 인터랙티브 평면도, 커스텀 커서로 몰입감 있는 경험을 제공합니다.</p>
+        <div class="project-tags">
+          <span class="project-tag">부동산</span>
+          <span class="project-tag">분양</span>
+          <span class="project-tag">프리미엄</span>
+        </div>
+      </div>
+      <div class="project-cta">
+        <div class="project-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </div>
+        <span class="project-view-text">View Project →</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- PROJECT 02 — NEXABOT -->
+  <div class="project-item reveal" data-project="02" id="project02">
+    <div class="project-bg-image project-03">
+      <div class="bg-pattern"></div>
+    </div>
+    <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/premium-robot/" target="_blank" rel="noopener noreferrer" class="project-link">
+      <div class="project-number">02</div>
+      <div class="project-info">
+        <span class="project-category">B2B / Robotics</span>
+        <h3 class="project-name">NEXABOT</h3>
+        <p class="project-desc">산업용 로봇 솔루션 기업. CSS 글리치 효과, 테크 감성 디자인으로 혁신적인 브랜드 아이덴티티를 구축합니다.</p>
+        <div class="project-tags">
+          <span class="project-tag">B2B</span>
+          <span class="project-tag">로봇</span>
+          <span class="project-tag">테크놀로지</span>
+        </div>
+      </div>
+      <div class="project-cta">
+        <div class="project-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </div>
+        <span class="project-view-text">View Project →</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- PROJECT 04 — SIGNATURE PUPS -->
+  <div class="project-item reveal" data-project="03" id="project03">
+    <div class="project-bg-image project-04">
+      <div class="bg-pattern"></div>
+    </div>
+    <a href="https://beamish-crisp-2621e0.netlify.app/" target="_blank" rel="noopener noreferrer" class="project-link">
+      <div class="project-number">03</div>
+      <div class="project-info">
+        <span class="project-category">Pet / Breeding</span>
+        <h3 class="project-name">시그니처펍스</h3>
+        <p class="project-desc">프리미엄 강아지 분양 전문점. 위례 신도시 기반, 건강한 반려견과의 만남을 설계하는 감성 브랜딩 사이트.</p>
+        <div class="project-tags">
+          <span class="project-tag">반려동물</span>
+          <span class="project-tag">분양</span>
+          <span class="project-tag">프리미엄</span>
+        </div>
+      </div>
+      <div class="project-cta">
+        <div class="project-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </div>
+        <span class="project-view-text">View Project →</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="project-item reveal" data-project="04" id="project04">
+    <div class="project-bg-image project-05">
+      <div class="bg-pattern"></div>
+    </div>
+    <a href="https://didai64595021-ui.github.io/onda-hompage/lawfirm/" target="_blank" rel="noopener noreferrer" class="project-link">
+      <div class="project-number">04</div>
+      <div class="project-info">
+        <span class="project-category">Law / Corporate</span>
+        <h3 class="project-name">법무법인 정의</h3>
+        <p class="project-desc">20년 경력 전문 변호사팀의 법무법인. 형사·민사·기업법무·부동산·가사·행정소송 전문. KR/EN 이중언어 지원, 5개 페이지 멀티페이지 구성.</p>
+        <div class="project-tags">
+          <span class="project-tag">법무법인</span>
+          <span class="project-tag">이중언어</span>
+          <span class="project-tag">멀티페이지</span>
+        </div>
+      </div>
+      <div class="project-cta">
+        <div class="project-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </div>
+        <span class="project-view-text">View Project →</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- PROJECT 05 — CAFE PWA APP -->
+  <div class="project-item reveal" data-project="05" id="project05">
+    <div class="project-bg-image project-05">
+      <div class="bg-pattern" style="background: radial-gradient(ellipse at 35% 55%, #c8956c 0%, transparent 70%);"></div>
+    </div>
+    <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/cafe-pwa/" target="_blank" rel="noopener noreferrer" class="project-link">
+      <div class="project-number">05</div>
+      <div class="project-info">
+        <span class="project-category">Cafe / Mobile App</span>
+        <h3 class="project-name">카페 PWA 앱</h3>
+        <p class="project-desc">모바일 최적화 카페 프로그레시브 웹 앱. 메뉴 주문, 매장 안내, 멤버십 기능을 앱 수준의 UX로 제공하는 PWA 기반 서비스입니다.</p>
+        <div class="project-tags">
+          <span class="project-tag">앱</span>
+          <span class="project-tag">PWA</span>
+          <span class="project-tag">카페</span>
+          <span class="project-tag">모바일</span>
+        </div>
+      </div>
+      <div class="project-cta">
+        <div class="project-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </div>
+        <span class="project-view-text">View Project →</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- PROJECT 06 — FITNESS HEALTHCARE APP -->
+  <div class="project-item reveal" data-project="06" id="project06">
+    <div class="project-bg-image project-05">
+      <div class="bg-pattern" style="background: radial-gradient(ellipse at 60% 45%, #00c9a7 0%, transparent 70%);"></div>
+    </div>
+    <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/fitness-app/" target="_blank" rel="noopener noreferrer" class="project-link">
+      <div class="project-number">06</div>
+      <div class="project-info">
+        <span class="project-category">Healthcare / Mobile App</span>
+        <h3 class="project-name">헬스케어 피트니스 앱</h3>
+        <p class="project-desc">건강 관리 및 피트니스 트래킹 모바일 앱. 운동 루틴, 식단 관리, 헬스 데이터 대시보드를 제공하는 헬스케어 앱 서비스입니다.</p>
+        <div class="project-tags">
+          <span class="project-tag">앱</span>
+          <span class="project-tag">헬스케어</span>
+          <span class="project-tag">피트니스</span>
+          <span class="project-tag">모바일</span>
+        </div>
+      </div>
+      <div class="project-cta">
+        <div class="project-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </div>
+        <span class="project-view-text">View Project →</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- PROJECT 07 — KURO 오마카세 -->
+  <div class="project-item reveal" data-project="07" id="project07">
+    <div class="project-bg-image project-07">
+      <div class="bg-pattern"></div>
+    </div>
+    <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/premium-dining/" target="_blank" rel="noopener noreferrer" class="project-link">
+      <div class="project-number">07</div>
+      <div class="project-info">
+        <span class="project-category">Restaurant / Fine Dining</span>
+        <h3 class="project-name">KURO 오마카세</h3>
+        <p class="project-desc">일본식 프리미엄 오마카세 레스토랑. 다크 감성의 풀스크린 레이아웃, 스크롤 시차 효과, 예약 플로우로 고급스러운 다이닝 경험을 전달합니다.</p>
+        <div class="project-tags">
+          <span class="project-tag">레스토랑</span>
+          <span class="project-tag">오마카세</span>
+          <span class="project-tag">프리미엄</span>
+        </div>
+      </div>
+      <div class="project-cta">
+        <div class="project-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </div>
+        <span class="project-view-text">View Project →</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- PROJECT 08 — NOIR 위스키바 -->
+  <div class="project-item reveal" data-project="08" id="project08">
+    <div class="project-bg-image project-08">
+      <div class="bg-pattern"></div>
+    </div>
+    <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/cocktail-bar/" target="_blank" rel="noopener noreferrer" class="project-link">
+      <div class="project-number">08</div>
+      <div class="project-info">
+        <span class="project-category">Bar / Cocktail Lounge</span>
+        <h3 class="project-name">NOIR 위스키바</h3>
+        <p class="project-desc">프리미엄 위스키 & 칵테일 바. 딥다크 무드, 앰버 컬러 인터랙션, 시그니처 칵테일 메뉴 쇼케이스와 예약 시스템을 갖춘 감성 바 사이트.</p>
+        <div class="project-tags">
+          <span class="project-tag">바</span>
+          <span class="project-tag">위스키</span>
+          <span class="project-tag">칵테일</span>
+          <span class="project-tag">나이트라이프</span>
+        </div>
+      </div>
+      <div class="project-cta">
+        <div class="project-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </div>
+        <span class="project-view-text">View Project →</span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- ==========================================
+     GRADIENT LINE
+     ========================================== -->
+<div class="gradient-line"></div>
+
+<!-- ==========================================
+     HORIZONTAL SCROLLING TEXT
+     ========================================== -->
+<div class="horizontal-text">
+  <div class="horizontal-text-track">
+    <span class="horizontal-text-item">DESIGN — <span class="filled-word">DEVELOP</span> — DELIVER — DESIGN — <span class="filled-word">DEVELOP</span> — DELIVER — </span>
+    <span class="horizontal-text-item">DESIGN — <span class="filled-word">DEVELOP</span> — DELIVER — DESIGN — <span class="filled-word">DEVELOP</span> — DELIVER — </span>
+  </div>
+</div>
+
+<!-- ==========================================
+     PHILOSOPHY SECTION
+     ========================================== -->
+<section class="section">
+  <div class="philosophy">
+    <span class="section-label reveal">Our Approach</span>
+    <h2 class="intro-heading reveal" style="margin-bottom: 0;">
+      우리의 <span class="accent">철학</span>
+    </h2>
+    <div class="philosophy-grid stagger-children" id="philosophyGrid">
+      <div class="philosophy-card">
+        <span class="philosophy-icon">◎</span>
+        <h3 class="philosophy-card-title">Strategy First</h3>
+        <p class="philosophy-card-text">
+          디자인 전에 전략을 세웁니다. 비즈니스 목표와 사용자 니즈를
+          분석하여 최적의 UX 전략을 수립합니다.
+        </p>
+      </div>
+      <div class="philosophy-card">
+        <span class="philosophy-icon">△</span>
+        <h3 class="philosophy-card-title">Pixel Perfect</h3>
+        <p class="philosophy-card-text">
+          1px의 차이가 전체 경험을 바꿉니다. 모든 요소를
+          정밀하게 배치하여 완벽한 인터페이스를 구현합니다.
+        </p>
+      </div>
+      <div class="philosophy-card">
+        <span class="philosophy-icon">◇</span>
+        <h3 class="philosophy-card-title">Performance</h3>
+        <p class="philosophy-card-text">
+          아름다움과 속도 사이에서 타협하지 않습니다.
+          최적화된 코드로 빠르고 매끄러운 경험을 보장합니다.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     DIVIDER
+     ========================================== -->
+<div class="divider">
+  <div class="divider-line"></div>
+</div>
+
+<!-- ==========================================
+     PROCESS SECTION
+     ========================================== -->
+<section class="section">
+  <div class="process-section">
+    <span class="section-label reveal">How We Work</span>
+    <h2 class="intro-heading reveal">
+      프로세스
+    </h2>
+    <div class="process-timeline">
+      <div class="process-step" id="step1">
+        <div class="process-step-dot"></div>
+        <span class="process-step-number">Step 01</span>
+        <h3 class="process-step-title">Discovery & Research</h3>
+        <p class="process-step-desc">
+          브랜드 분석, 경쟁사 벤치마킹, 타겟 유저 리서치를 통해
+          프로젝트의 방향성을 설정합니다.
+        </p>
+      </div>
+      <div class="process-step" id="step2">
+        <div class="process-step-dot"></div>
+        <span class="process-step-number">Step 02</span>
+        <h3 class="process-step-title">Design & Prototype</h3>
+        <p class="process-step-desc">
+          와이어프레임부터 하이파이 목업까지, 반복적인 디자인 프로세스를 통해
+          최적의 UI/UX를 도출합니다.
+        </p>
+      </div>
+      <div class="process-step" id="step3">
+        <div class="process-step-dot"></div>
+        <span class="process-step-number">Step 03</span>
+        <h3 class="process-step-title">Development & Launch</h3>
+        <p class="process-step-desc">
+          클린 코드, 반응형 구현, 성능 최적화를 거쳐
+          완성된 제품을 세상에 내놓습니다.
+        </p>
+      </div>
+      <div class="process-step" id="step4">
+        <div class="process-step-dot"></div>
+        <span class="process-step-number">Step 04</span>
+        <h3 class="process-step-title">Growth & Iterate</h3>
+        <p class="process-step-desc">
+          런칭 후에도 데이터 기반으로 지속적인 개선과 최적화를 진행합니다.
+          성장은 멈추지 않습니다.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     QUOTE
+     ========================================== -->
+<section class="section">
+  <div class="quote-section reveal" id="quoteSection">
+    <div class="quote-mark">"</div>
+    <p class="quote-text">
+      좋은 디자인은 비즈니스를 말하고,<br>
+      위대한 디자인은 비즈니스를 <em>움직인다.</em>
+    </p>
+    <span class="quote-author">— DESIGN STUDIO</span>
+  </div>
+</section>
+
+<!-- ==========================================
+     TECH BADGES
+     ========================================== -->
+<section class="section">
+  <div class="text-center">
+    <span class="section-label reveal">Tech Stack</span>
+    <div class="tech-badges stagger-children" id="techBadges">
+      <span class="tech-badge">HTML5</span>
+      <span class="tech-badge">CSS3</span>
+      <span class="tech-badge">JavaScript</span>
+      <span class="tech-badge">React</span>
+      <span class="tech-badge">Next.js</span>
+      <span class="tech-badge">Figma</span>
+      <span class="tech-badge">GSAP</span>
+      <span class="tech-badge">Three.js</span>
+      <span class="tech-badge">Tailwind</span>
+      <span class="tech-badge">Node.js</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     SPACER
+     ========================================== -->
+<div class="spacer-lg"></div>
+
+<!-- ==========================================
+     CTA SECTION
+     ========================================== -->
+<section class="section">
+  <div class="cta-section reveal" id="ctaSection">
+    <h2 class="cta-title">
+      프로젝트를<br>
+      <span class="outline">시작하세요</span>
+    </h2>
+    <p class="cta-subtitle">
+      함께 브랜드의 디지털 경험을 새롭게 디자인하세요.<br>
+      무료 상담을 통해 최적의 솔루션을 제안드립니다.
+    </p>
+    <a href="mailto:contact@designstudio.com" class="cta-button magnetic-btn">
+      <span>Get in Touch</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </a>
+  </div>
+</section>
+
+<!-- ==========================================
+     SPACER
+     ========================================== -->
+<div class="spacer-lg"></div>
+
+<!-- ==========================================
+     FOOTER
+     ========================================== -->
+<footer class="footer">
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand">STUDIO</div>
+      <div class="footer-brand-sub">Marketing & Design Studio</div>
+    </div>
+    <div class="footer-links">
+      <div class="footer-link-group">
+        <h4>Portfolio</h4>
+        <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/showcase-apartment/" target="_blank">리버사이드 파크</a>
+        <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/marketing-agency/" target="_blank">마케팅 에이전시</a>
+        <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/premium-robot/" target="_blank">NEXABOT</a>
+        <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/cafe-pwa/" target="_blank">카페 PWA 앱</a>
+        <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/fitness-app/" target="_blank">헬스케어 피트니스 앱</a>
+        <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/premium-dining/" target="_blank">KURO 오마카세</a>
+        <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/cocktail-bar/" target="_blank">NOIR 위스키바</a>
+      </div>
+      <div class="footer-link-group">
+        <h4>Services</h4>
+        <a href="#">웹 디자인</a>
+        <a href="#">UI/UX 설계</a>
+        <a href="#">브랜딩</a>
+        <a href="#">마케팅 전략</a>
+      </div>
+      <div class="footer-link-group">
+        <h4>Contact</h4>
+        <a href="#">프로젝트 문의</a>
+        <a href="#">협업 제안</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2026 Design Studio. All rights reserved.</span>
+    <span class="footer-contact">Seoul, South Korea</span>
+  </div>
+</footer>
+
+<!-- ============================================
+     JAVASCRIPT
+     ============================================ -->
+<script>
+/* ============================================
+   LOADER
+   ============================================ */
+(function() {
+  const loader = document.getElementById('loader');
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      loader.classList.add('hidden');
+      startCounters();
+    }, 1500);
+  });
+})();
+
+/* ============================================
+   CUSTOM CURSOR
+   ============================================ */
+(function() {
+  const dot = document.getElementById('cursorDot');
+  const ring = document.getElementById('cursorRing');
+  if (!dot || !ring) return;
+
+  let mouseX = 0, mouseY = 0;
+  let ringX = 0, ringY = 0;
+
+  ring.style.transition = 'transform 0.15s ease-out';
+  document.addEventListener('mousemove', function(e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    dot.style.transform = 'translate(' + (mouseX - 4) + 'px, ' + (mouseY - 4) + 'px)';
+    ring.style.transform = 'translate(' + (mouseX - 20) + 'px, ' + (mouseY - 20) + 'px)';
+  });
+
+  // Hover state for interactive elements
+  const hoverTargets = document.querySelectorAll('a, button, .project-item, .cta-button, .magnetic-btn');
+  hoverTargets.forEach(function(el) {
+    el.addEventListener('mouseenter', function() {
+      ring.classList.add('hover');
+    });
+    el.addEventListener('mouseleave', function() {
+      ring.classList.remove('hover');
+    });
+  });
+})();
+
+/* ============================================
+   SCROLL PROGRESS BAR
+   ============================================ */
+(function() {
+  const progressBar = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', function() {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollPercent = (scrollTop / docHeight) * 100;
+    progressBar.style.width = scrollPercent + '%';
+  });
+})();
+
+/* ============================================
+   INTERSECTION OBSERVER — REVEAL ANIMATIONS
+   ============================================ */
+(function() {
+  const revealElements = document.querySelectorAll('.reveal, .intro-left, .intro-right, .process-step, .stagger-children');
+
+  const observerOptions = {
+    threshold: 0.15,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, observerOptions);
+
+  revealElements.forEach(function(el) {
+    observer.observe(el);
+  });
+})();
+
+/* ============================================
+   COUNTER ANIMATION
+   ============================================ */
+function startCounters() {
+  const counters = document.querySelectorAll('.counter');
+  counters.forEach(function(counter) {
+    const target = parseInt(counter.getAttribute('data-target'));
+    const duration = 2000;
+    const startTime = performance.now();
+
+    function updateCounter(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(eased * target);
+
+      counter.textContent = current;
+
+      if (progress < 1) {
+        requestAnimationFrame(updateCounter);
+      }
+    }
+
+    requestAnimationFrame(updateCounter);
+  });
+}
+
+/* ============================================
+   PARTICLES
+   ============================================ */
+(function() {
+  const container = document.getElementById('particles');
+  const particleCount = 8;
+
+  for (let i = 0; i < particleCount; i++) {
+    const particle = document.createElement('div');
+    particle.classList.add('particle');
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.width = (Math.random() * 2 + 1) + 'px';
+    particle.style.height = particle.style.width;
+    particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
+    particle.style.animationDelay = (Math.random() * 10) + 's';
+    particle.style.opacity = Math.random() * 0.3;
+    container.appendChild(particle);
+  }
+})();
+
+/* hover reveal 제거됨 — 렉 원인 */
+
+/* ============================================
+   MAGNETIC BUTTON EFFECT
+   ============================================ */
+(function() {
+  const magneticBtns = document.querySelectorAll('.magnetic-btn');
+
+  magneticBtns.forEach(function(btn) {
+    btn.addEventListener('mousemove', function(e) {
+      const rect = btn.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      btn.style.transform = 'translate(' + (x * 0.2) + 'px, ' + (y * 0.2) + 'px)';
+    });
+
+    btn.addEventListener('mouseleave', function() {
+      btn.style.transform = 'translate(0, 0)';
+    });
+  });
+})();
+
+/* ============================================
+   PARALLAX ON SCROLL
+   ============================================ */
+(function() {
+  const heroTitle = document.querySelector('.hero-title');
+  const heroSubtitle = document.querySelector('.hero-subtitle');
+  const heroGradient1 = document.querySelector('.hero-gradient-1');
+  const heroGradient2 = document.querySelector('.hero-gradient-2');
+
+  /* 패럴랙스 제거 — 히어로 렉 원인 */
+})();
+
+/* ============================================
+   SMOOTH SCROLL ANCHOR (if any)
+   ============================================ */
+(function() {
+  document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+})();
+
+/* ============================================
+   TEXT SPLIT ANIMATION UTILITY
+   ============================================ */
+(function() {
+  // Add subtle letter animation to hero title on load
+  const heroTitle = document.querySelector('.hero-title');
+  if (!heroTitle) return;
+
+  // Already animated via CSS, but add interactivity
+  heroTitle.addEventListener('mouseenter', function() {
+    this.style.transition = 'letter-spacing 0.5s ease';
+    this.style.letterSpacing = '0.02em';
+  });
+
+  heroTitle.addEventListener('mouseleave', function() {
+    this.style.letterSpacing = '-0.03em';
+  });
+})();
+
+/* ============================================
+   RESIZE HANDLER — HIDE CURSOR ON MOBILE
+   ============================================ */
+(function() {
+  function checkMobile() {
+    const dot = document.getElementById('cursorDot');
+    const ring = document.getElementById('cursorRing');
+    if (window.innerWidth <= 768) {
+      if (dot) dot.style.display = 'none';
+      if (ring) ring.style.display = 'none';
+    } else {
+      if (dot) dot.style.display = 'block';
+      if (ring) ring.style.display = 'block';
+    }
+  }
+  checkMobile();
+  window.addEventListener('resize', checkMobile);
+})();
+
+/* ============================================
+   KONAMI-STYLE EASTER EGG (just for fun)
+   ============================================ */
+(function() {
+  const code = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
+  let index = 0;
+
+  document.addEventListener('keydown', function(e) {
+    if (e.keyCode === code[index]) {
+      index++;
+      if (index === code.length) {
+        document.body.style.filter = 'hue-rotate(180deg)';
+        setTimeout(function() {
+          document.body.style.filter = 'none';
+        }, 3000);
+        index = 0;
+      }
+    } else {
+      index = 0;
+    }
+  });
+})();
+
+/* ============================================
+   PERFORMANCE: REDUCE MOTION
+   ============================================ */
+(function() {
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (prefersReducedMotion.matches) {
+    document.querySelectorAll('.marquee-track, .horizontal-text-track').forEach(function(el) {
+      el.style.animationPlayState = 'paused';
+    });
+    document.querySelectorAll('.particle').forEach(function(el) {
+      el.style.animationPlayState = 'paused';
+    });
+  }
+})();
+
+/* ============================================
+   PAGE VISIBILITY — PAUSE ANIMATIONS WHEN HIDDEN
+   ============================================ */
+(function() {
+  document.addEventListener('visibilitychange', function() {
+    const tracks = document.querySelectorAll('.marquee-track, .horizontal-text-track');
+    if (document.hidden) {
+      tracks.forEach(function(t) { t.style.animationPlayState = 'paused'; });
+    } else {
+      tracks.forEach(function(t) { t.style.animationPlayState = 'running'; });
+    }
+  });
+})();
+
+/* ============================================
+   CONSOLE BRANDING
+   ============================================ */
+(function() {
+  console.log(
+    '%c DESIGN PORTFOLIO ',
+    'background: #0a0a0a; color: #fff; font-size: 20px; padding: 10px 20px; font-weight: bold; border-radius: 4px;'
+  );
+  console.log(
+    '%c Designed & Developed by Design Studio ',
+    'color: #888; font-size: 12px;'
+  );
+})();
+</script>
+
+</body>
+</html>

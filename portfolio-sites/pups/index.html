@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signature Pups Wirye - Home</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23f5e6d3'/%3E%3Cellipse cx='16' cy='18' rx='7' ry='6' fill='%238B6914'/%3E%3Cellipse cx='16' cy='14' rx='6' ry='5' fill='%238B6914'/%3E%3Ccircle cx='13' cy='13' r='1.2' fill='%23333'/%3E%3Ccircle cx='19' cy='13' r='1.2' fill='%23333'/%3E%3Cellipse cx='16' cy='16' rx='2' ry='1.2' fill='%23333'/%3E%3Cpath d='M8 10q-3-1-4-5' fill='none' stroke='%238B6914' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M24 10q3-1 4-5' fill='none' stroke='%238B6914' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="https://cdn.imweb.me/thumbnail/20220623/24f5c0589a531.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        html, body { overflow-x: hidden; max-width: 100vw; font-family: 'Pretendard Variable', -apple-system, sans-serif; }
+        * { word-break: keep-all; overflow-wrap: break-word; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-sans { font-family: 'Pretendard Variable', -apple-system, sans-serif; }
+        .break-keep { word-break: keep-all; }
+
+        /* Scroll animations */
+        .reveal, .reveal-up { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.5, 0, 0, 1); }
+        .reveal-left { opacity: 0; transform: translateX(-40px); transition: all 0.8s cubic-bezier(0.5, 0, 0, 1); }
+        .reveal-right { opacity: 0; transform: translateX(40px); transition: all 0.8s cubic-bezier(0.5, 0, 0, 1); }
+        .reveal-scale { opacity: 0; transform: scale(0.92); transition: all 0.8s cubic-bezier(0.5, 0, 0, 1); }
+        .reveal.active, .reveal-up.active, .reveal-left.active, .reveal-right.active, .reveal-scale.active {
+            opacity: 1; transform: translateY(0) translateX(0) scale(1);
+        }
+
+        @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in-up { animation: fade-in-up 1s ease-out forwards; }
+
+        /* Premium breed cards - pedestal shelf + pop-out dog */
+        .breed-pop-card-wrapper {
+            padding-top: 60px;
+        }
+        @media (min-width: 768px) {
+            .breed-pop-card-wrapper { padding-top: 90px; }
+        }
+        .breed-pop-card {
+            position: relative;
+            background: transparent;
+            overflow: visible;
+            text-align: center;
+            width: 100%;
+            transition: transform 0.4s;
+        }
+        .breed-pop-card:hover {
+            transform: translateY(-5px);
+        }
+        .breed-pop-img-wrap {
+            width: 72%;
+            margin: -60px auto 0;
+            aspect-ratio: 3/4;
+            position: relative;
+            z-index: 2;
+            pointer-events: none;
+            filter: drop-shadow(0 6px 16px rgba(0,0,0,0.35));
+            transition: transform 0.4s, filter 0.4s;
+        }
+        @media (min-width: 768px) {
+            .breed-pop-img-wrap {
+                width: 68%;
+                margin-top: -90px;
+            }
+        }
+        .breed-pop-card:hover .breed-pop-img-wrap {
+            transform: translateY(-6px) scale(1.04);
+            filter: drop-shadow(0 14px 30px rgba(0,0,0,0.45));
+        }
+        .breed-pop-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top center;
+            mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
+        }
+        .breed-pop-label {
+            padding: 0.7rem 0.5rem 0.9rem;
+            background: #3a3a3c;
+            border-radius: 0 0 0.75rem 0.75rem;
+            color: #e8e6e3;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            line-height: 1.5;
+        }
+        @media (min-width: 768px) {
+            .breed-pop-label { font-size: 0.875rem; padding: 0.9rem 0.5rem 1.1rem; }
+        }
+
+        /* Marquee - seamless infinite scroll */
+        @keyframes marquee-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .marquee-container { overflow: hidden; }
+        .marquee-track {
+            display: flex; gap: 0.75rem;
+            width: max-content;
+            animation: marquee-scroll 30s linear infinite;
+        }
+        .marquee-track.reverse { animation-direction: reverse; }
+        .marquee-track:hover { animation-play-state: paused; }
+
+        /* ── Mobile overflow prevention ── */
+        img { max-width: 100%; }
+        @media (max-width: 768px) {
+            section, footer { overflow-x: hidden; }
+        }
+
+        /* Bento menu grid */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto auto;
+            gap: 0.75rem;
+        }
+        .bento-tall { grid-row: span 2; }
+        @media (min-width: 768px) {
+            .bento-grid {
+                grid-template-columns: 2fr 1fr 1fr;
+                grid-template-rows: 1fr 1fr;
+                gap: 1rem;
+            }
+        }
+
+        /* Loading / Curtain animation - Cross-device responsive */
+        .loading-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+            background: #1c1917; color: white;
+            pointer-events: all;
+        }
+        .loading-content {
+            display: flex; flex-direction: column; align-items: center;
+            z-index: 10; padding: 0 1.5rem; width: 100%; max-width: 90vw;
+        }
+        .loading-text {
+            font-size: clamp(1.3rem, 5vw, 3.2rem);
+            letter-spacing: clamp(0.1em, 2vw, 0.3em);
+            white-space: nowrap;
+        }
+        .loading-text span {
+            display: inline-block; opacity: 0; transform: translateY(30px);
+            animation: letter-pop 0.5s ease forwards;
+        }
+        @keyframes letter-pop {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .loading-subtitle {
+            font-size: clamp(0.55rem, 1.2vw, 0.8rem);
+            letter-spacing: 0.25em;
+            color: rgba(255,255,255,0.35);
+            margin-top: clamp(8px, 1.5vh, 16px);
+            opacity: 0;
+            animation: subtitle-fade 0.8s 1s ease forwards;
+        }
+        @keyframes subtitle-fade { to { opacity: 1; } }
+        .loading-bar-track {
+            width: clamp(100px, 35vw, 280px);
+            height: 2px; background: rgba(255,255,255,0.12);
+            margin-top: clamp(16px, 3vh, 28px);
+            border-radius: 2px; overflow: hidden;
+        }
+        .loading-bar-fill { height: 100%; width: 0; background: #C9A96E; animation: bar-fill 1.6s 0.5s ease-in-out forwards; }
+        @keyframes bar-fill { to { width: 100%; } }
+
+        .curtain-left, .curtain-right {
+            position: absolute; top: 0; width: 50%; height: 100%; background: #1c1917;
+        }
+        .curtain-left { left: 0; }
+        .curtain-right { right: 0; }
+        .loading-overlay.open .curtain-left { animation: curtain-slide-left 0.8s cubic-bezier(0.76,0,0.24,1) forwards; }
+        .loading-overlay.open .curtain-right { animation: curtain-slide-right 0.8s cubic-bezier(0.76,0,0.24,1) forwards; }
+        .loading-overlay.open .loading-content { animation: content-fade 0.3s ease forwards; }
+        @keyframes curtain-slide-left { to { transform: translateX(-100%); } }
+        @keyframes curtain-slide-right { to { transform: translateX(100%); } }
+        @keyframes content-fade { to { opacity: 0; } }
+    </style>
+</head>
+<body class="bg-[#FDFBF7] text-stone-800 font-sans overflow-x-hidden">
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-content">
+            <h1 class="loading-text font-serif font-bold" id="loading-title"></h1>
+            <p class="loading-subtitle font-sans">PREMIUM PET BOUTIQUE</p>
+            <div class="loading-bar-track"><div class="loading-bar-fill"></div></div>
+        </div>
+        <div class="curtain-left"></div>
+        <div class="curtain-right"></div>
+    </div>
+
+    <script>
+        // Loading animation - letter stagger
+        const titleText = 'SIGNATURE PUPS';
+        const titleEl = document.getElementById('loading-title');
+        titleText.split('').forEach((char, i) => {
+            const span = document.createElement('span');
+            span.textContent = char === ' ' ? '\u00A0' : char;
+            span.style.animationDelay = `${i * 0.08}s`;
+            titleEl.appendChild(span);
+        });
+        // Open curtain after loading
+        setTimeout(() => {
+            document.getElementById('loading-overlay').classList.add('open');
+            setTimeout(() => {
+                document.getElementById('loading-overlay').style.display = 'none';
+                document.body.style.overflow = '';
+            }, 900);
+        }, 2400);
+        document.body.style.overflow = 'hidden';
+    </script>
+
+    <script>
+        const initialDogs = [
+            { id: 8, name: '몽이', breed: 'Maltipoo', gender: '공주님', age: '2개월', status: '분양중', imgs: ['https://images.unsplash.com/photo-1614179621890-66654bae62e0?q=80&w=600'] },
+            { id: 7, name: '솜이', breed: 'Pomeranian', gender: '왕자님', age: '2개월', status: '예약중', imgs: ['https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=600'] },
+            { id: 6, name: '구름', breed: 'Mini Bichon', gender: '왕자님', age: '3개월', status: '분양완료', imgs: ['https://images.unsplash.com/photo-1598133894008-61f7fdb8cc3a?q=80&w=600'] },
+            { id: 5, name: '마루', breed: 'Retriever', gender: '왕자님', age: '2개월', status: '분양중', imgs: ['https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=600'] },
+            { id: 4, name: '두부', breed: 'Coton de Tulear', gender: '공주님', age: '2개월', status: '분양중', imgs: ['https://images.unsplash.com/photo-1555934716-071cf997c143?q=80&w=600'] },
+            { id: 3, name: '루나', breed: 'Pomsky', gender: '공주님', age: '2개월', status: '분양중', imgs: ['https://images.unsplash.com/photo-1588023271850-1d1df380a6e0?q=80&w=600'] },
+            { id: 2, name: '초코', breed: 'Poodle', gender: '왕자님', age: '2개월', status: '분양중', imgs: ['https://images.unsplash.com/photo-1594149929911-78975a43d4f5?q=80&w=600'] },
+            { id: 1, name: '만두', breed: 'Yorkshire', gender: '왕자님', age: '2개월', status: '분양중', imgs: ['https://images.unsplash.com/photo-1611170078485-6c1c9ca31936?q=80&w=600'] }
+        ];
+        const initialReviews = [
+            { id: 6, title: '산책할 때마다 인기 폭발이에요!', breed: 'Pomeranian', date: '2024-12-15', content: '동네 산책할 때마다 다들 예쁘다고 난리예요. 시그니처펍스에서 건강하게 분양받아서 정말 감사합니다. 매일매일이 행복해요!', imgs: ['https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=600'] },
+            { id: 5, title: '우리 가족이 된 지 벌써 6개월!', breed: 'Retriever', date: '2024-11-20', content: '처음 데려왔을 때 작았던 아이가 벌써 이렇게 컸어요. 건강검진도 이상 없고 성격도 너무 좋아서 온 가족의 사랑을 독차지하고 있답니다.', imgs: ['https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=600'] },
+            { id: 4, title: '배변훈련 완벽하게 되어서 왔어요', breed: 'Mini Bichon', date: '2024-10-08', content: '집에 오자마자 패드에 배변을 하더라구요! 기초 훈련이 잘 되어 있어서 정말 편했어요. 사후관리도 꼼꼼하게 해주셔서 감동이었습니다.', imgs: ['https://images.unsplash.com/photo-1598133894008-61f7fdb8cc3a?q=80&w=600'] },
+            { id: 3, title: '해변에서 첫 나들이 다녀왔어요', breed: 'Maltipoo', date: '2024-09-12', content: '처음으로 해변에 데려갔는데 너무 좋아하더라구요! 건강하게 잘 자라줘서 고맙고, 좋은 아이 만나게 해주신 시그니처펍스 감사합니다.', imgs: ['https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?q=80&w=600'] },
+            { id: 2, title: '세상에서 제일 귀여운 막내예요', breed: 'Bulldog', date: '2024-08-25', content: '표정이 정말 사람 같아요ㅋㅋ 아이들이 너무 좋아하고, 성격이 순해서 아기랑도 잘 지내요. 최고의 선택이었습니다!', imgs: ['https://images.unsplash.com/photo-1517849845537-4d257902454a?q=80&w=600'] },
+            { id: 1, title: '콩이 데려온지 벌써 1년이네요!', breed: 'Poodle', date: '2024-07-03', content: '시그니처펍스에서 만난 콩이가 우리 가족이 된 지 1년. 건강검진 결과도 완벽하고 매일 행복을 주는 천사 같은 아이예요.', imgs: ['https://images.unsplash.com/photo-1544568100-847a948585b9?q=80&w=600'] }
+        ];
+        const DATA_VERSION = 'v3';
+        if (localStorage.getItem('pups_version') !== DATA_VERSION) {
+            localStorage.setItem('pups_data', JSON.stringify(initialDogs));
+            localStorage.setItem('reviews_data', JSON.stringify(initialReviews));
+            localStorage.setItem('pups_version', DATA_VERSION);
+        }
+    </script>
+
+    <!-- Header -->
+    <header id="main-header" class="fixed w-full z-50 transition-all duration-500 bg-transparent text-white top-0">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between relative z-50">
+            <a class='text-2xl font-serif font-bold tracking-widest cursor-pointer hover:opacity-80 transition' href='#home'>SIGNATURE PUPS</a>
+            <nav class="hidden lg:flex gap-8 text-sm font-medium">
+                <a class='hover:opacity-70 transition' href='#about'>시그니처펍스 소개</a>
+                <a class='hover:opacity-70 transition' href='#services'>분양 절차</a>
+                <a class='hover:opacity-70 transition' href='#dogs'>실시간 분양</a>
+                <a class='hover:opacity-70 transition' href='#reviews'>분양 후기</a>
+                <a class='hover:opacity-70 transition' href='#breeds'>해외 분양</a>
+                <a class='hover:opacity-70 transition' href='#breeds'>메디컬 서비스</a>
+                <a class='hover:opacity-70 transition' href='#contact'>찾아오시는 길</a>
+            </nav>
+            <button id="menu-btn" class="lg:hidden focus:outline-none min-h-[44px] min-w-[44px] flex items-center justify-center"><i data-lucide="menu" class="w-6 h-6"></i></button>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="fixed inset-0 bg-white text-stone-900 z-[60] transform translate-x-full transition-transform duration-300 flex flex-col justify-center items-center gap-8 lg:hidden">
+        <button id="close-menu-btn" class="absolute top-6 right-6 p-2"><i data-lucide="x" class="w-8 h-8"></i></button>
+        <a class='text-2xl font-bold hover:text-yellow-600 transition' href='#about'>소개</a>
+        <a class='text-2xl font-bold hover:text-yellow-600 transition' href='#services'>분양 절차</a>
+        <a class='text-2xl font-bold hover:text-yellow-600 transition' href='#dogs'>실시간 분양</a>
+        <a class='text-2xl font-bold hover:text-yellow-600 transition' href='#reviews'>분양 후기</a>
+        <a class='text-2xl font-bold hover:text-yellow-600 transition' href='#breeds'>해외 분양</a>
+        <a class='text-2xl font-bold hover:text-yellow-600 transition' href='#breeds'>메디컬</a>
+        <a class='text-2xl font-bold hover:text-yellow-600 transition' href='#contact'>오시는 길</a>
+    </div>
+
+    <!-- Hero -->
+    <section id="home" class="relative h-[100vh] flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1541364983171-a8ba01e95cfc?q=80&w=2688&auto=format&fit=crop')] bg-cover bg-center">
+            <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60"></div>
+        </div>
+        <div class="relative z-10 text-center text-white px-6">
+            <p class="text-sm md:text-base tracking-[0.4em] mb-4 opacity-0 animate-fade-in-up text-white/90" style="animation-delay: 0.2s;">LUXURY FASHION FOR PETS</p>
+            <h2 class="text-5xl md:text-7xl lg:text-8xl font-serif mb-8 leading-tight opacity-0 animate-fade-in-up break-keep" style="animation-delay: 0.5s;">Premium Life<br><span class="italic font-light text-stone-200">with Signature</span></h2>
+        </div>
+    </section>
+
+    <!-- Intro -->
+    <section id="about" class="max-w-6xl mx-auto px-6 py-12 md:py-16 lg:py-20 border-b border-stone-200">
+        <div class="flex flex-col md:flex-row gap-12 md:gap-16 items-center">
+            <div class="w-full md:w-1/2 relative h-[350px] md:h-[500px] reveal-left">
+                <div class="absolute inset-0 bg-stone-200 rounded-t-full overflow-hidden shadow-2xl border-4 border-white">
+                    <img src="https://images.unsplash.com/photo-1591946614720-90a587da4a36?q=80&w=1000&auto=format&fit=crop" class="w-full h-full object-cover object-center hover:scale-105 transition duration-1000" alt="Intro">
+                </div>
+            </div>
+            <div class="w-full md:w-1/2 space-y-6 md:space-y-8 reveal-right delay-200 text-center md:text-left">
+                <h3 class="text-4xl md:text-5xl font-serif text-stone-900 leading-snug">Premium Care<br><span class="italic text-stone-600">& Health System</span></h3>
+                <div class="w-16 h-[2px] bg-stone-900 mx-auto md:mx-0"></div>
+                <p class="text-stone-600 leading-loose text-base md:text-lg font-light break-keep">시그니처펍스는 단순한 분양을 넘어, 아이들의 평생 건강과 행복을 위한 <strong>프리미엄 케어 서비스</strong>를 제공합니다. 전문 켄넬과 연계된 상위 1% 명품 강아지들을 만나보세요.</p>
+                <div class="mt-4">
+                    <a class='group inline-flex items-center gap-2 bg-stone-900 text-white px-8 py-3 md:px-10 md:py-4 overflow-hidden rounded-full hover:bg-stone-700 transition duration-500 text-xs md:text-sm tracking-widest uppercase shadow-xl' href='#dogs'>
+                        <span>View Collection</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Real-time Adoption - 2 Row Crossing Marquee -->
+    <section id="dogs" class="py-12 md:py-16 lg:py-20 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-12 reveal-up">
+                <h3 class="text-3xl md:text-4xl font-serif mb-4 uppercase tracking-widest">Real-time Adoption</h3>
+                <p class="text-stone-600 font-light text-base md:text-lg break-keep leading-relaxed">위례점 아이들의 실시간 분양 상태를 확인하세요.</p>
+            </div>
+        </div>
+        <!-- Row 1: scrolls LEFT (default) -->
+        <div class="marquee-container mb-3">
+            <div id="marquee-row-top" class="marquee-track"></div>
+        </div>
+        <!-- Row 2: scrolls RIGHT (reverse) -->
+        <div class="marquee-container">
+            <div id="marquee-row-bottom" class="marquee-track reverse"></div>
+        </div>
+        <div class="mt-14 text-center reveal-up">
+            <a class='inline-block bg-stone-900 text-white px-12 py-4 text-xs md:text-sm font-bold tracking-[0.2em] hover:bg-stone-700 transition rounded-sm shadow-xl' href='#breeds'>VIEW MORE PUPPIES</a>
+        </div>
+    </section>
+
+    <!-- Bento Menu Grid (Tetris style) -->
+    <section id="services" class="py-12 md:py-16 lg:py-20 bg-stone-50 border-y border-stone-200 reveal-scale">
+        <div class="max-w-4xl mx-auto px-4 md:px-6">
+            <div class="bento-grid">
+                <!-- 소개 - Tall (spans 2 rows) -->
+                <a class='bento-tall group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition duration-500 block min-h-[260px] md:min-h-[320px]' href='#about'>
+                    <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?q=80&w=600&h=800&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition duration-700 absolute inset-0" alt="소개">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 p-5 md:p-6">
+                        <span class="text-white/80 text-xs tracking-widest uppercase block mb-1">About Us</span>
+                        <h4 class="text-white text-xl md:text-2xl font-serif font-bold">시그니처펍스<br>소개</h4>
+                    </div>
+                </a>
+                <!-- 분양절차 -->
+                <a class='group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition duration-500 block min-h-[120px] md:min-h-[150px]' href='#services'>
+                    <img src="https://images.unsplash.com/photo-1587402092301-725e37c70fd8?q=80&w=400&h=300&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition duration-700 absolute inset-0" alt="분양절차">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 p-4 md:p-5">
+                        <span class="text-white/80 text-xs tracking-widest uppercase block mb-0.5">Process</span>
+                        <h4 class="text-white text-base md:text-lg font-serif font-bold">분양절차</h4>
+                    </div>
+                </a>
+                <!-- 분양후기 -->
+                <a class='group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition duration-500 block min-h-[120px] md:min-h-[150px]' href='#reviews'>
+                    <img src="https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?q=80&w=400&h=300&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition duration-700 absolute inset-0" alt="분양후기">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 p-4 md:p-5">
+                        <span class="text-white/80 text-xs tracking-widest uppercase block mb-0.5">Reviews</span>
+                        <h4 class="text-white text-base md:text-lg font-serif font-bold">분양후기</h4>
+                    </div>
+                </a>
+                <!-- 해외분양 -->
+                <a class='group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition duration-500 block min-h-[120px] md:min-h-[150px]' href='#breeds'>
+                    <img src="https://images.unsplash.com/photo-1568572933382-74d440642117?q=80&w=400&h=300&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition duration-700 absolute inset-0" alt="해외분양">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 p-4 md:p-5">
+                        <span class="text-white/80 text-xs tracking-widest uppercase block mb-0.5">Overseas</span>
+                        <h4 class="text-white text-base md:text-lg font-serif font-bold">해외분양</h4>
+                    </div>
+                </a>
+                <!-- 메디컬 -->
+                <a class='group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition duration-500 block min-h-[120px] md:min-h-[150px]' href='#contact'>
+                    <img src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&h=300&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition duration-700 absolute inset-0" alt="메디컬">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 p-4 md:p-5">
+                        <span class="text-white/80 text-xs tracking-widest uppercase block mb-0.5">Medical</span>
+                        <h4 class="text-white text-base md:text-lg font-serif font-bold">메디컬</h4>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Premium Breeds (Pop-out 3D Cards) -->
+    <section id="breeds" class="bg-[#FDFBF7] py-12 md:py-16 lg:py-20">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <div class="mb-10 md:mb-14 reveal-up">
+                <span class="text-xs font-bold tracking-widest text-stone-600 uppercase mb-2 block">Our Collections</span>
+                <h3 class="text-3xl md:text-4xl font-serif text-stone-900">Premium Breeds</h3>
+            </div>
+            <div id="breed-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6"></div>
+            <div class="mt-10 md:mt-14 text-center reveal-up">
+                <a class='inline-block bg-stone-900 text-white px-12 py-4 text-xs md:text-sm font-bold tracking-[0.2em] hover:bg-stone-700 transition rounded-sm shadow-xl' href='#dogs'>VIEW MORE BREEDS</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reviews -->
+    <section id="reviews" class="bg-white py-12 md:py-16 lg:py-20 border-t border-stone-100 reveal-up">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h3 class="text-3xl font-serif mb-3 italic">Happy Families</h3>
+                <p class="text-stone-600 font-light break-keep leading-relaxed">가족이 된 아이들의 행복한 일상</p>
+            </div>
+            <div id="main-reviews-grid" class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8"></div>
+            <div id="review-pagination" class="mt-8 flex justify-center items-center gap-4 md:hidden">
+                <button id="review-prev" class="px-4 py-2 bg-stone-200 text-stone-700 rounded-md text-sm font-bold hover:bg-stone-300 transition disabled:opacity-40 disabled:cursor-not-allowed">&laquo; 이전</button>
+                <span id="review-page-info" class="text-sm text-stone-500"></span>
+                <button id="review-next" class="px-4 py-2 bg-stone-200 text-stone-700 rounded-md text-sm font-bold hover:bg-stone-300 transition disabled:opacity-40 disabled:cursor-not-allowed">다음 &raquo;</button>
+            </div>
+            <div class="mt-16 text-center">
+                <a class='inline-block bg-stone-900 text-white px-12 py-4 text-xs md:text-sm font-bold tracking-[0.2em] hover:bg-stone-700 transition rounded-sm shadow-xl' href='#reviews'>MORE REVIEWS</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Instagram Feed -->
+    <section id="instagram" class="py-12 md:py-16 lg:py-20 bg-[#FDFBF7] border-t border-stone-100 reveal-up">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <div class="mb-10 md:mb-14">
+                <span class="text-xs font-bold tracking-widest text-stone-600 uppercase mb-2 block">Follow Us on Instagram</span>
+                <h3 class="text-3xl md:text-4xl font-serif text-stone-900 mb-3">@signaturepups</h3>
+                <p class="text-stone-600 text-sm leading-relaxed">시그니처펍스의 일상을 인스타그램에서 만나보세요</p>
+            </div>
+
+            <!-- Instagram 자동 최신화 그리드 (3행×6열 데스크톱 / 모바일 반응형) -->
+            <div id="insta-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 md:gap-1.5 max-w-5xl mx-auto">
+                <!-- 로딩 플레이스홀더 -->
+                <div class="col-span-full flex items-center justify-center py-16">
+                    <div class="flex flex-col items-center gap-3">
+                        <div class="w-8 h-8 border-2 border-stone-300 border-t-stone-600 rounded-full animate-spin"></div>
+                        <span class="text-xs text-stone-600">인스타그램 피드 로딩중...</span>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+            (function(){
+                // ===== 인스타그램 자동 최신화 피드 시스템 =====
+                var CACHE_KEY = 'sig_insta_feed';
+                var CACHE_TTL = 6 * 60 * 60 * 1000; // 6시간
+                var GRID_COUNT = 18; // 3행 × 6열
+                var DEBUG = true;
+
+                // 최근 확인된 폴백 숏코드 (크롤링 실패시 사용)
+                var FALLBACK_CODES = [
+                    'DVBH2r7E-7Y','DU21ZSvE3EG','DUvEtShE-_4','DUkw1IGk6fP','DUiPseeEwJu','DUadnK7E1lI',
+                    'DUSxjXLk0BY','DUQM_fQE3iA','DULDnU-EyyD','DUIfgrmkzw7','DUDZf1GE9TD','DT2a9M-Ex3s',
+                    'DT0Cq6DEpW-','DTzJ7-mEN2I','DTuGsPnkA6B','DTrCyMREswk','DTobEZ3EVvy','DTlYz68k0Vu'
+                ];
+
+                // Unsplash fallback images for broken instagram images
+                var UNSPLASH_FALLBACKS = [
+                    'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80',
+                    'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&q=80',
+                    'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&q=80',
+                    'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&q=80',
+                    'https://images.unsplash.com/photo-1588943211346-0908a1fb0b01?w=400&q=80',
+                    'https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=400&q=80'
+                ];
+
+                // 다중 CORS 프록시 (자동 페일오버)
+                var PROXIES = [
+                    function(u){ return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u); },
+                    function(u){ return 'https://corsproxy.io/?' + encodeURIComponent(u); },
+                    function(u){ return 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u); }
+                ];
+
+                var grid = document.getElementById('insta-grid');
+                var debugLog = [];
+
+                function log(msg) {
+                    if(DEBUG) console.log('[InstaFeed] ' + msg);
+                    debugLog.push({ t: new Date().toISOString(), m: msg });
+                }
+
+                // ── 캐시 관리 ──
+                function getCache() {
+                    try {
+                        var c = JSON.parse(localStorage.getItem(CACHE_KEY));
+                        if(c && c.codes && c.codes.length >= 6 && (Date.now() - c.ts) < CACHE_TTL) {
+                            log('캐시 히트 (' + c.codes.length + '개, ' + Math.round((Date.now()-c.ts)/60000) + '분 전)');
+                            return c.codes;
+                        }
+                    } catch(e){}
+                    return null;
+                }
+                function setCache(codes) {
+                    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ codes: codes, ts: Date.now() })); } catch(e){}
+                }
+
+                // ── HTML에서 인스타 숏코드 추출 ──
+                function extractCodes(html) {
+                    var re = /instagram\.com\/p\/([A-Za-z0-9_-]{8,})/g;
+                    var codes = [], seen = {}, m;
+                    while((m = re.exec(html)) !== null) {
+                        if(!seen[m[1]]) { seen[m[1]] = true; codes.push(m[1]); }
+                    }
+                    return codes;
+                }
+
+                // ── CORS 프록시 체인으로 크롤링 시도 ──
+                function fetchWithProxy(url, proxyIdx) {
+                    if(proxyIdx >= PROXIES.length) return Promise.reject(new Error('모든 프록시 실패'));
+                    var proxyUrl = PROXIES[proxyIdx](url);
+                    log('프록시 #' + proxyIdx + ' 시도: ' + proxyUrl.substring(0,60) + '...');
+
+                    return new Promise(function(resolve, reject) {
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('GET', proxyUrl, true);
+                        xhr.timeout = 10000;
+                        xhr.onload = function() {
+                            if(xhr.status >= 200 && xhr.status < 300) {
+                                resolve(xhr.responseText);
+                            } else {
+                                log('프록시 #' + proxyIdx + ' HTTP ' + xhr.status);
+                                fetchWithProxy(url, proxyIdx + 1).then(resolve).catch(reject);
+                            }
+                        };
+                        xhr.onerror = function() {
+                            log('프록시 #' + proxyIdx + ' 네트워크 에러');
+                            fetchWithProxy(url, proxyIdx + 1).then(resolve).catch(reject);
+                        };
+                        xhr.ontimeout = function() {
+                            log('프록시 #' + proxyIdx + ' 타임아웃');
+                            fetchWithProxy(url, proxyIdx + 1).then(resolve).catch(reject);
+                        };
+                        xhr.send();
+                    });
+                }
+
+                // ── 개별 이미지 자체 디버깅 (실패시 재시도) ──
+                function createImgWithRetry(code, idx) {
+                    var img = document.createElement('img');
+                    img.loading = 'lazy';
+                    img.alt = 'Instagram Post';
+                    img.className = 'w-full h-full object-cover group-hover:scale-110 transition duration-500';
+                    img.setAttribute('data-code', code);
+
+                    var sizes = ['m','l','t'];
+                    var attempt = 0;
+
+                    function tryNext() {
+                        attempt++;
+                        if(attempt <= sizes.length) {
+                            // 사이즈 변경 재시도
+                            var newSrc = 'https://www.instagram.com/p/' + code + '/media/?size=' + sizes[attempt-1];
+                            log('이미지 #' + idx + ' 재시도 (size=' + sizes[attempt-1] + ')');
+                            img.src = newSrc;
+                        } else {
+                            // CORS 프록시 경유 이미지 시도
+                            log('이미지 #' + idx + ' 프록시 경유 시도');
+                            tryProxyFetch(0);
+                        }
+                    }
+
+                    function tryProxyFetch(pi) {
+                        if(pi >= PROXIES.length) {
+                            // 모든 시도 실패 → Unsplash 폴백
+                            log('이미지 #' + idx + ' 최종 폴백 (Unsplash)');
+                            img.onerror = null;
+                            img.src = UNSPLASH_FALLBACKS[idx % UNSPLASH_FALLBACKS.length];
+                            return;
+                        }
+                        var pUrl = PROXIES[pi]('https://www.instagram.com/p/' + code + '/media/?size=m');
+                        img.onerror = function(){ tryProxyFetch(pi + 1); };
+                        img.src = pUrl;
+                    }
+
+                    img.onerror = tryNext;
+                    img.src = 'https://www.instagram.com/p/' + code + '/media/?size=m';
+                    return img;
+                }
+
+                // ── 그리드 렌더링 ──
+                function renderGrid(codes) {
+                    grid.innerHTML = '';
+                    var count = Math.min(codes.length, GRID_COUNT);
+                    log('그리드 렌더링: ' + count + '개 셀');
+
+                    for(var i = 0; i < count; i++) {
+                        var code = codes[i];
+                        var a = document.createElement('a');
+                        a.href = 'https://www.instagram.com/p/' + code + '/';
+                        a.target = '_blank';
+                        a.rel = 'noopener';
+                        a.className = 'group relative aspect-square overflow-hidden bg-stone-100 rounded-sm';
+
+                        a.appendChild(createImgWithRetry(code, i));
+
+                        var overlay = document.createElement('div');
+                        overlay.className = 'absolute inset-0 bg-black/0 group-hover:bg-black/40 transition duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100';
+                        overlay.innerHTML = '<i data-lucide="instagram" class="w-6 h-6 md:w-8 md:h-8 text-white"></i>';
+                        a.appendChild(overlay);
+
+                        grid.appendChild(a);
+                    }
+
+                    // 모바일(2열)일 때 18개가 9행으로 너무 길면 12개로 제한
+                    adjustMobileCount();
+
+                    if(typeof lucide !== 'undefined') lucide.createIcons();
+                    log('렌더링 완료');
+                }
+
+                // ── 모바일 셀 수 자동 조정 ──
+                function adjustMobileCount() {
+                    var w = window.innerWidth;
+                    var cells = grid.children;
+                    // sm 미만(640px): 2열이므로 12개만 표시(6행)
+                    // sm~md(640~768): 3열이므로 18개 전부(6행)
+                    // md+(768+): 6열이므로 18개(3행)
+                    if(w < 640 && cells.length > 12) {
+                        for(var i = 12; i < cells.length; i++) {
+                            cells[i].style.display = 'none';
+                        }
+                    } else {
+                        for(var j = 0; j < cells.length; j++) {
+                            cells[j].style.display = '';
+                        }
+                    }
+                }
+                window.addEventListener('resize', function() { adjustMobileCount(); });
+
+                // ── 메인 초기화 (자체 디버깅 포함) ──
+                function init() {
+                    log('=== 인스타그램 피드 초기화 시작 ===');
+
+                    // 1단계: 캐시 확인 → 즉시 렌더
+                    var cached = getCache();
+                    if(cached) {
+                        renderGrid(cached);
+                        // 백그라운드에서 최신 데이터 갱신 시도
+                        refreshInBackground();
+                        return;
+                    }
+
+                    // 2단계: 폴백 코드로 즉시 렌더 (로딩 표시 대체)
+                    log('캐시 미스 → 폴백 코드로 즉시 렌더');
+                    renderGrid(FALLBACK_CODES);
+
+                    // 3단계: 크롤링으로 최신 코드 가져오기
+                    crawlAndUpdate();
+                }
+
+                function crawlAndUpdate() {
+                    log('signaturepups.kr 크롤링 시작...');
+                    fetchWithProxy('https://signaturepups.kr', 0)
+                        .then(function(html) {
+                            var codes = extractCodes(html);
+                            log('크롤링 성공! ' + codes.length + '개 숏코드 발견');
+                            if(codes.length >= 6) {
+                                setCache(codes);
+                                renderGrid(codes);
+                                log('최신 피드로 업데이트 완료');
+                            } else {
+                                log('숏코드 부족 (' + codes.length + '개) → 폴백 유지');
+                                tryAlternativeCrawl();
+                            }
+                        })
+                        .catch(function(err) {
+                            log('크롤링 실패: ' + err.message);
+                            tryAlternativeCrawl();
+                        });
+                }
+
+                // ── 대안 크롤링 (자체 디버깅 로직) ──
+                function tryAlternativeCrawl() {
+                    log('=== 자체 디버깅: 대안 크롤링 시도 ===');
+
+                    // 대안 1: signaturepups.kr 서브페이지 시도
+                    var altUrls = [
+                        'https://signaturepups.kr/',
+                        'https://www.signaturepups.kr'
+                    ];
+                    var altIdx = 0;
+
+                    function tryAlt() {
+                        if(altIdx >= altUrls.length) {
+                            log('모든 대안 크롤링 실패 → 폴백 숏코드 + 직접 이미지 검증');
+                            verifyAndRepairFallback();
+                            return;
+                        }
+                        log('대안 URL #' + altIdx + ': ' + altUrls[altIdx]);
+                        fetchWithProxy(altUrls[altIdx], 0)
+                            .then(function(html) {
+                                var codes = extractCodes(html);
+                                if(codes.length >= 6) {
+                                    log('대안 크롤링 성공! ' + codes.length + '개 코드');
+                                    setCache(codes);
+                                    renderGrid(codes);
+                                } else {
+                                    altIdx++;
+                                    tryAlt();
+                                }
+                            })
+                            .catch(function() {
+                                altIdx++;
+                                tryAlt();
+                            });
+                    }
+                    tryAlt();
+                }
+
+                // ── 폴백 이미지 검증 & 자동 복구 ──
+                function verifyAndRepairFallback() {
+                    log('=== 폴백 이미지 무결성 검증 시작 ===');
+                    var imgs = grid.querySelectorAll('img');
+                    var failCount = 0;
+                    var totalChecked = 0;
+
+                    imgs.forEach(function(img, i) {
+                        if(img.complete && img.naturalWidth === 0) {
+                            failCount++;
+                            log('이미지 #' + i + ' 깨짐 감지 → Unsplash 폴백 교체');
+                            img.onerror = null;
+                            img.src = UNSPLASH_FALLBACKS[i % UNSPLASH_FALLBACKS.length];
+                        }
+                        totalChecked++;
+                    });
+
+                    // 3초 후 재검증 (느린 로딩 대비)
+                    setTimeout(function() {
+                        var imgs2 = grid.querySelectorAll('img');
+                        imgs2.forEach(function(img, i) {
+                            if(img.complete && img.naturalWidth === 0) {
+                                log('지연 검증: 이미지 #' + i + ' 교체');
+                                img.onerror = null;
+                                img.src = UNSPLASH_FALLBACKS[i % UNSPLASH_FALLBACKS.length];
+                            }
+                        });
+                        log('=== 디버깅 완료 (실패: ' + failCount + '/' + totalChecked + ') ===');
+                    }, 3000);
+                }
+
+                // ── 백그라운드 갱신 ──
+                function refreshInBackground() {
+                    log('백그라운드 갱신 시작...');
+                    fetchWithProxy('https://signaturepups.kr', 0)
+                        .then(function(html) {
+                            var codes = extractCodes(html);
+                            if(codes.length >= 6) {
+                                var cached = getCache();
+                                // 새 코드가 다르면 갱신
+                                if(!cached || codes[0] !== (JSON.parse(localStorage.getItem(CACHE_KEY))||{}).codes?.[0]) {
+                                    log('새 게시물 감지! 피드 갱신');
+                                    setCache(codes);
+                                    renderGrid(codes);
+                                } else {
+                                    log('변경 없음, 캐시 타임스탬프 갱신');
+                                    setCache(codes);
+                                }
+                            }
+                        })
+                        .catch(function(err) {
+                            log('백그라운드 갱신 실패 (캐시 유지): ' + err.message);
+                        });
+                }
+
+                // 시작!
+                init();
+            })();
+            </script>
+
+            <a href="https://www.instagram.com/signaturepups/" target="_blank" class="inline-flex items-center gap-2 mt-10 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 text-white px-8 py-3 rounded-full font-bold hover:shadow-lg hover:scale-105 transition duration-300">
+                <i data-lucide="instagram" class="w-5 h-5"></i> 인스타그램 바로가기
+            </a>
+        </div>
+    </section>
+
+    <!-- Location / Contact -->
+    <section id="contact" class="py-12 md:py-16 lg:py-20 bg-stone-100 reveal-left">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row bg-stone-900 text-white shadow-2xl overflow-hidden rounded-2xl">
+                <div class="w-full md:w-1/3 p-10 md:p-12 flex flex-col justify-center space-y-8">
+                    <h3 class="text-3xl font-serif">VISIT US</h3>
+                    <div class="w-12 h-0.5 bg-white/30"></div>
+                    <div class="space-y-6 text-sm text-white/80 font-light leading-relaxed">
+                        <p><strong>ADDRESS</strong><br>경기도 성남시 수정구 위례광장로 300<br>위례중앙타워 1층</p>
+                        <p><strong>CONTACT</strong><br>010-2395-7347</p>
+                        <p><strong>HOURS</strong><br>매일 10:00 - 22:00</p>
+                    </div>
+                </div>
+                <div class="w-full md:w-2/3 h-[300px] md:h-[450px] bg-stone-300 relative">
+                    <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1000')] bg-cover bg-center">
+                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                            <a class='bg-[#03C75A] text-white px-8 py-3 rounded-full font-bold shadow-2xl hover:bg-[#02b351] transition' href='https://map.naver.com/v5/search/%EC%9C%84%EB%A1%80%EC%A4%91%EC%95%99%ED%83%80%EC%9B%8C' target='_blank'>네이버 지도로 보기</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Puppy Detail Modal -->
+    <div id="puppy-modal" class="fixed inset-0 z-[200] hidden flex items-start justify-center">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal('puppy-modal')"></div>
+        <div class="relative z-10 max-w-lg w-full mx-auto mt-16 bg-white rounded-2xl overflow-hidden m-4 shadow-2xl max-h-[85vh] overflow-y-auto">
+            <div id="puppy-modal-image" class="w-full h-72 bg-cover bg-center bg-gray-100"></div>
+            <div class="p-6">
+                <h3 id="puppy-modal-name" class="text-2xl font-bold text-gray-900 mb-1"></h3>
+                <p id="puppy-modal-breed" class="text-pink-600 font-medium mb-2"></p>
+                <div id="puppy-modal-info" class="flex gap-4 text-sm text-gray-600 mb-4"></div>
+                <p id="puppy-modal-desc" class="text-gray-600 mb-6"></p>
+                <div class="flex gap-3">
+                    <a href="https://pf.kakao.com/_khxcYb/chat" target="_blank" class="flex-1 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 py-3 rounded-lg font-bold text-center transition-colors">카카오톡 문의</a>
+                    <button type="button" class="flex-1 bg-pink-500 hover:bg-pink-600 text-white py-3 rounded-lg font-bold transition-colors" onclick="alert('입양 상담 신청이 접수되었습니다. 빠른 시일 내에 연락드리겠습니다.')">입양 문의하기</button>
+                </div>
+            </div>
+            <button class="absolute top-4 right-4 bg-white/80 rounded-full w-8 h-8 flex items-center justify-center text-xl text-gray-600 hover:text-gray-900" onclick="closeModal('puppy-modal')">&times;</button>
+        </div>
+    </div>
+
+    <!-- Review Detail Modal -->
+    <div id="review-modal" class="fixed inset-0 z-[200] hidden flex items-start justify-center">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal('review-modal')"></div>
+        <div class="relative z-10 max-w-lg w-full mx-auto mt-16 bg-white rounded-2xl overflow-hidden m-4 shadow-2xl max-h-[85vh] overflow-y-auto">
+            <div id="review-modal-image" class="w-full h-64 bg-cover bg-center bg-gray-100"></div>
+            <div class="p-6">
+                <span id="review-modal-breed" class="text-xs font-bold text-yellow-600 mb-2 block uppercase"></span>
+                <h3 id="review-modal-title" class="text-xl font-bold text-gray-900 mb-2"></h3>
+                <p id="review-modal-date" class="text-sm text-gray-600 mb-4"></p>
+                <p id="review-modal-content" class="text-gray-600 leading-relaxed"></p>
+            </div>
+            <button class="absolute top-4 right-4 bg-white/80 rounded-full w-8 h-8 flex items-center justify-center text-xl text-gray-600 hover:text-gray-900" onclick="closeModal('review-modal')">&times;</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-stone-900 text-stone-400 py-12 md:py-16 text-xs">
+        <div class="max-w-5xl mx-auto px-6 text-center space-y-8">
+            <h2 class="text-white text-2xl font-serif tracking-[0.4em]">SIGNATURE PUPS</h2>
+            <div class="flex justify-center gap-10">
+                <a href="https://www.instagram.com/signaturepups/" target="_blank" class="hover:text-[#E1306C] transition min-h-[44px] min-w-[44px] flex items-center justify-center"><i data-lucide="instagram"></i></a>
+                <a href="https://talk.naver.com/ct/w495yh" target="_blank" class="hover:text-[#03C75A] transition min-h-[44px] min-w-[44px] flex items-center justify-center"><i data-lucide="message-square"></i></a>
+                <a href="https://pf.kakao.com/_khxcYb/chat" target="_blank" class="hover:text-yellow-400 transition min-h-[44px] min-w-[44px] flex items-center justify-center"><i data-lucide="message-circle"></i></a>
+            </div>
+            <p class="leading-relaxed border-t border-stone-800 pt-8 break-keep text-stone-400">
+                <strong>시그니처펍스 (Signature Pups)</strong> | 대표: 정재원<br>
+                사업자등록번호: 216-96-11916 | 동물판매업 등록번호: 3280000-045-2022-0012<br>
+                주소: 경기도 성남시 수정구 위례광장로 300, 위례중앙타워 1층 | 가맹문의: 010-2395-7347
+            </p>
+        </div>
+    </footer>
+
+    <!-- Floating buttons -->
+    <div class="fixed bottom-8 right-8 flex flex-col gap-4 z-50">
+        <a href="https://www.instagram.com/signaturepups/" target="_blank" class="bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition duration-300" title="인스타그램"><i data-lucide="instagram" class="w-7 h-7"></i></a>
+        <a href="https://pf.kakao.com/_khxcYb/chat" target="_blank" class="bg-[#FEE500] text-[#3C1E1E] w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition duration-300" title="카카오톡 상담"><i data-lucide="message-circle" class="w-7 h-7 fill-current"></i></a>
+        <a href="tel:01023957347" class="bg-stone-900 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition duration-300" title="전화 상담"><i data-lucide="phone" class="w-6 h-6"></i></a>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        const dogs = JSON.parse(localStorage.getItem('pups_data')) || [];
+        const reviews = JSON.parse(localStorage.getItem('reviews_data')) || [];
+
+        // ========== Premium Breeds (3D) ==========
+        const breedsContainer = document.getElementById('breed-grid');
+        const breedsList = [
+            { name: 'Coton de Tulear', key: 'Coton de Tulear', defaultImg: 'https://images.unsplash.com/photo-1555934716-071cf997c143?q=80&w=500' },
+            { name: 'Maltipoo', key: 'Maltipoo', defaultImg: 'https://images.unsplash.com/photo-1614179621890-66654bae62e0?q=80&w=500' },
+            { name: 'Poodle', key: 'Poodle', defaultImg: 'https://images.unsplash.com/photo-1594149929911-78975a43d4f5?q=80&w=500' },
+            { name: 'Maltese', key: 'Maltese', defaultImg: 'https://images.unsplash.com/photo-1561905887-3461f30ee843?q=80&w=500' },
+            { name: 'Pomeranian', key: 'Pomeranian', defaultImg: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=500' },
+            { name: 'Mini Bichon', key: 'Mini Bichon', defaultImg: 'https://images.unsplash.com/photo-1598133894008-61f7fdb8cc3a?q=80&w=500' },
+            { name: 'Pomsky', key: 'Pomsky', defaultImg: 'https://images.unsplash.com/photo-1588023271850-1d1df380a6e0?q=80&w=500' },
+            { name: 'Yorkshire', key: 'Yorkshire', defaultImg: 'https://images.unsplash.com/photo-1611170078485-6c1c9ca31936?q=80&w=500' }
+        ];
+        breedsList.forEach(breed => {
+            const latestDog = dogs.find(d => d.breed === breed.key);
+            let displayImg = breed.defaultImg;
+            if (latestDog && latestDog.imgs && latestDog.imgs.length > 0) displayImg = latestDog.imgs[0];
+            else if (latestDog && latestDog.img) displayImg = latestDog.img;
+            breedsContainer.innerHTML += `
+                <div class="group cursor-pointer reveal-scale block" onclick="openPuppyModal('${breed.name}', '${breed.name}', '', '', '${displayImg}', '프리미엄 ${breed.name} 품종을 만나보세요.')">
+                    <div class="breed-pop-card-wrapper">
+                        <div class="breed-pop-card">
+                            <div class="breed-pop-img-wrap">
+                                <img src="${displayImg}" alt="${breed.name}">
+                            </div>
+                            <div class="breed-pop-label">${breed.name}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        // ========== Marquee - 2 Row Crossing ==========
+        const topTrack = document.getElementById('marquee-row-top');
+        const bottomTrack = document.getElementById('marquee-row-bottom');
+
+        function buildSmallDogCard(dog) {
+            const isSold = dog.status === '분양완료';
+            const isReserved = dog.status === '예약중';
+            const thumb = (dog.imgs && dog.imgs.length > 0) ? dog.imgs[0] : (dog.img || 'https://via.placeholder.com/300');
+            let badgeHTML = '';
+            let overlayHTML = '';
+            if (isSold) {
+                badgeHTML = `<span class="absolute top-2 left-2 bg-emerald-600/90 text-white text-xs font-bold px-2 py-1 rounded-full shadow z-10">분양완료</span>`;
+                overlayHTML = `<div class="absolute inset-0 bg-white/50 backdrop-blur-[1px] flex items-center justify-center z-10"><span class="text-stone-800 font-bold text-xs tracking-wider">FOUND FAMILY</span></div>`;
+            } else {
+                badgeHTML = `<span class="absolute top-2 left-2 text-white text-xs font-bold px-2 py-1 rounded-full shadow z-10 ${isReserved ? 'bg-blue-600/90' : 'bg-red-600/90 animate-pulse'}">${dog.status}</span>`;
+            }
+            return `
+                <div class="group cursor-pointer block flex-shrink-0 w-[130px] md:w-[160px]" onclick="openPuppyModal('${dog.name}', '${dog.breed}', '${dog.age}', '${dog.gender}', '${thumb}', '')">
+                    <div class="relative aspect-square overflow-hidden rounded-xl bg-stone-200 shadow-md">
+                        <img src="${thumb}" class="w-full h-full object-cover object-center group-hover:scale-110 transition duration-500">
+                        ${badgeHTML}${overlayHTML}
+                    </div>
+                    <div class="text-center mt-2">
+                        <h4 class="text-xs md:text-sm font-bold font-serif truncate">${dog.breed}</h4>
+                        <p class="text-xs text-stone-600 leading-relaxed">'${dog.name}'</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        const allDogs = dogs.slice(0, 8);
+        let allCardsHTML = '';
+        allDogs.forEach(dog => { allCardsHTML += buildSmallDogCard(dog); });
+        // 2x 복제로 seamless infinite loop (translateX(-50%)과 매칭)
+        topTrack.innerHTML = allCardsHTML + allCardsHTML;
+        bottomTrack.innerHTML = allCardsHTML + allCardsHTML;
+
+        // ========== Reviews ==========
+        const reviewGrid = document.getElementById('main-reviews-grid');
+        let currentReviewPage = 0;
+        const reviewsPerPage = 6;
+
+        function buildReviewCard(rev) {
+            const thumb = (rev.imgs && rev.imgs.length > 0) ? rev.imgs[0] : 'https://via.placeholder.com/400';
+            return `
+                <div class="group cursor-pointer border border-stone-200 shadow-sm rounded-xl overflow-hidden hover:shadow-2xl transition duration-500 reveal-up block" onclick="openReviewModal('${rev.title.replace(/'/g, "\\'")}', '${rev.breed}', '${rev.date}', '${rev.content.replace(/'/g, "\\'")}', '${thumb}')">
+                    <div class="aspect-video overflow-hidden"><img src="${thumb}" class="w-full h-full object-cover object-center group-hover:scale-105 transition duration-700"></div>
+                    <div class="p-4 md:p-8">
+                        <span class="text-xs font-bold text-yellow-600 mb-2 block uppercase">${rev.breed}</span>
+                        <h4 class="font-bold text-sm md:text-lg mb-2 md:mb-3 line-clamp-1 break-keep">${rev.title}</h4>
+                        <p class="text-sm text-stone-600 line-clamp-2 leading-relaxed break-keep">${rev.content}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderReviews() {
+            reviewGrid.innerHTML = '';
+            const isMobile = window.innerWidth < 768;
+            if (isMobile) {
+                const totalPages = Math.max(1, Math.ceil(reviews.length / reviewsPerPage));
+                if (currentReviewPage >= totalPages) currentReviewPage = totalPages - 1;
+                const start = currentReviewPage * reviewsPerPage;
+                reviews.slice(start, start + reviewsPerPage).forEach(rev => { reviewGrid.innerHTML += buildReviewCard(rev); });
+                const pagDiv = document.getElementById('review-pagination');
+                if (totalPages <= 1) { pagDiv.style.display = 'none'; }
+                else {
+                    pagDiv.style.display = 'flex';
+                    document.getElementById('review-page-info').textContent = `${currentReviewPage + 1} / ${totalPages}`;
+                    document.getElementById('review-prev').disabled = currentReviewPage === 0;
+                    document.getElementById('review-next').disabled = currentReviewPage >= totalPages - 1;
+                }
+            } else {
+                reviews.forEach(rev => { reviewGrid.innerHTML += buildReviewCard(rev); });
+                document.getElementById('review-pagination').style.display = 'none';
+            }
+            reveal();
+        }
+
+        document.getElementById('review-prev').addEventListener('click', () => { if (currentReviewPage > 0) { currentReviewPage--; renderReviews(); } });
+        document.getElementById('review-next').addEventListener('click', () => { const tp = Math.ceil(reviews.length / reviewsPerPage); if (currentReviewPage < tp - 1) { currentReviewPage++; renderReviews(); } });
+        let resizeTimer;
+        window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { currentReviewPage = 0; renderReviews(); }, 250); });
+        renderReviews();
+
+        // ========== Scroll & Menu ==========
+        const header = document.getElementById('main-header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 80) {
+                header.classList.add('bg-white/95', 'text-stone-900', 'shadow-sm', 'backdrop-blur-sm');
+                header.classList.remove('bg-transparent', 'text-white');
+            } else {
+                header.classList.add('bg-transparent', 'text-white');
+                header.classList.remove('bg-white/95', 'text-stone-900', 'shadow-sm', 'backdrop-blur-sm');
+            }
+        });
+        document.getElementById('menu-btn').addEventListener('click', () => document.getElementById('mobile-menu').classList.remove('translate-x-full'));
+        document.getElementById('close-menu-btn').addEventListener('click', () => document.getElementById('mobile-menu').classList.add('translate-x-full'));
+
+        window.addEventListener('scroll', reveal);
+        function reveal() {
+            var els = document.querySelectorAll('.reveal, .reveal-up, .reveal-left, .reveal-right, .reveal-scale');
+            for (var i = 0; i < els.length; i++) {
+                if (els[i].getBoundingClientRect().top < window.innerHeight - 150) els[i].classList.add('active');
+            }
+        }
+        reveal();
+    </script>
+
+    <!-- Enhanced Interactivity -->
+    <script>
+    (function() {
+        'use strict';
+
+        // ========== 1. Mobile Menu Enhancements ==========
+        var mobileMenu = document.getElementById('mobile-menu');
+        var menuBtn = document.getElementById('menu-btn');
+        var closeMenuBtn = document.getElementById('close-menu-btn');
+
+        function openMenu() {
+            mobileMenu.classList.remove('translate-x-full');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeMenu() {
+            mobileMenu.classList.add('translate-x-full');
+            document.body.style.overflow = '';
+        }
+
+        // Override existing listeners with enhanced versions
+        menuBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openMenu();
+        });
+        closeMenuBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            closeMenu();
+        });
+
+        // Close menu when clicking a nav link inside mobile menu
+        var menuLinks = mobileMenu.querySelectorAll('a');
+        menuLinks.forEach(function(link) {
+            link.addEventListener('click', function() {
+                closeMenu();
+            });
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !mobileMenu.classList.contains('translate-x-full')) {
+                closeMenu();
+            }
+        });
+
+        // ========== 2. Scroll-to-Top Button ==========
+        var scrollBtn = document.createElement('button');
+        scrollBtn.setAttribute('aria-label', '맨 위로');
+        scrollBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>';
+        scrollBtn.style.cssText = 'position:fixed;bottom:100px;left:24px;width:48px;height:48px;border-radius:50%;background:#1c1917;color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:50;opacity:0;transform:translateY(16px);transition:all 0.4s cubic-bezier(0.4,0,0.2,1);box-shadow:0 4px 16px rgba(0,0,0,0.2);pointer-events:none;';
+        document.body.appendChild(scrollBtn);
+
+        scrollBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        scrollBtn.addEventListener('mouseenter', function() {
+            scrollBtn.style.background = '#44403c';
+            scrollBtn.style.transform = 'translateY(-2px)';
+        });
+        scrollBtn.addEventListener('mouseleave', function() {
+            scrollBtn.style.background = '#1c1917';
+            if (window.scrollY > 400) scrollBtn.style.transform = 'translateY(0)';
+        });
+
+        var scrollBtnVisible = false;
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 400 && !scrollBtnVisible) {
+                scrollBtnVisible = true;
+                scrollBtn.style.opacity = '1';
+                scrollBtn.style.transform = 'translateY(0)';
+                scrollBtn.style.pointerEvents = 'auto';
+            } else if (window.scrollY <= 400 && scrollBtnVisible) {
+                scrollBtnVisible = false;
+                scrollBtn.style.opacity = '0';
+                scrollBtn.style.transform = 'translateY(16px)';
+                scrollBtn.style.pointerEvents = 'none';
+            }
+        });
+
+        // ========== 4. IntersectionObserver for .reveal elements ==========
+        // Replace the scroll-based reveal with IntersectionObserver for better performance
+        // (The existing scroll listener still works as a fallback)
+        if ('IntersectionObserver' in window) {
+            var observerOptions = {
+                root: null,
+                rootMargin: '0px 0px -100px 0px',
+                threshold: 0.1
+            };
+            var revealObserver = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all reveal elements (including dynamically added ones)
+            function observeRevealElements() {
+                var els = document.querySelectorAll('.reveal:not(.active), .reveal-up:not(.active), .reveal-left:not(.active), .reveal-right:not(.active), .reveal-scale:not(.active)');
+                els.forEach(function(el) {
+                    revealObserver.observe(el);
+                });
+            }
+            // Run after a short delay to catch dynamically rendered elements
+            setTimeout(observeRevealElements, 500);
+            // Also re-observe after dynamic content might be added (reviews re-render, etc.)
+            var origRenderReviews = window.renderReviews;
+            if (typeof origRenderReviews === 'function') {
+                window.renderReviews = function() {
+                    origRenderReviews();
+                    setTimeout(observeRevealElements, 100);
+                };
+            }
+        }
+
+    })();
+    </script>
+
+    <!-- Modal & Smooth Scroll Functions -->
+    <script>
+    function openModal(id) {
+        document.getElementById(id).classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal(id) {
+        document.getElementById(id).classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+    function openPuppyModal(name, breed, age, gender, imageUrl, desc) {
+        document.getElementById('puppy-modal-image').style.backgroundImage = 'url(' + imageUrl + ')';
+        document.getElementById('puppy-modal-name').textContent = name;
+        document.getElementById('puppy-modal-breed').textContent = breed;
+        var infoHTML = '';
+        if (age) infoHTML += '<span>🎂 ' + age + '</span>';
+        if (gender) infoHTML += '<span>⚥ ' + gender + '</span>';
+        document.getElementById('puppy-modal-info').innerHTML = infoHTML;
+        document.getElementById('puppy-modal-desc').textContent = desc || '사랑스러운 아이가 새 가족을 기다리고 있습니다.';
+        openModal('puppy-modal');
+    }
+    function openReviewModal(title, breed, date, content, imageUrl) {
+        document.getElementById('review-modal-image').style.backgroundImage = 'url(' + imageUrl + ')';
+        document.getElementById('review-modal-title').textContent = title;
+        document.getElementById('review-modal-breed').textContent = breed;
+        document.getElementById('review-modal-date').textContent = date;
+        document.getElementById('review-modal-content').textContent = content;
+        openModal('review-modal');
+    }
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+        a.addEventListener('click', function(e) {
+            e.preventDefault();
+            var target = document.querySelector(a.getAttribute('href'));
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Close mobile menu if open
+            var mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu && !mobileMenu.classList.contains('translate-x-full')) {
+                mobileMenu.classList.add('translate-x-full');
+                document.body.style.overflow = '';
+            }
+        });
+    });
+
+    // Close modals on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.fixed.inset-0:not(.hidden)').forEach(function(modal) {
+                if (modal.id && modal.id.indexOf('modal') !== -1) {
+                    closeModal(modal.id);
+                }
+            });
+        }
+    });
+    </script>
+</body>
+</html>

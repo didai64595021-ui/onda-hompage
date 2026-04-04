@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>VITALITY — 프로필</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --dark:#0D0D0D;--dark-surface:#1A1A1A;--dark-card:#1E1E1E;--dark-border:#2A2A2A;
+  --lime:#CCFF00;--lime-dim:rgba(204,255,0,0.15);--lime-glow:rgba(204,255,0,0.3);
+  --white:#F5F5F5;--gray:#8A8A8A;--gray-light:#B0B0B0;
+  --red:#FF4757;--blue:#3B82F6;--orange:#FF6B35;--purple:#A855F7;
+  --gold:#FFD700;--silver:#C0C0C0;--bronze:#CD7F32;
+  --safe-top:44px;--safe-bottom:34px;--nav-height:72px;
+  --radius:16px;--radius-sm:10px;
+  --font-body:'Pretendard',-apple-system,sans-serif;
+  --font-display:'Sora',sans-serif;
+  --transition:cubic-bezier(0.4,0,0.2,1)
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{
+  font-family:var(--font-body);background:var(--dark);color:var(--white);
+  min-height:100dvh;overflow-x:hidden;word-break:keep-all;
+  padding-top:var(--safe-top);padding-bottom:calc(var(--nav-height)+var(--safe-bottom));
+  -webkit-font-smoothing:antialiased
+}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
+input{font-family:inherit}
+::-webkit-scrollbar{width:0;height:0}
+
+@keyframes fadeInUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}
+@keyframes badgePop{0%{transform:scale(0)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+
+/* HEADER */
+.app-header{
+  position:fixed;top:0;left:0;right:0;height:var(--safe-top);
+  background:rgba(13,13,13,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;z-index:100;border-bottom:1px solid var(--dark-border)
+}
+.app-header__logo{font-family:var(--font-display);font-size:18px;font-weight:800;letter-spacing:2px;color:var(--lime)}
+.app-header__logo span{color:var(--white);font-weight:300}
+
+.main-content{padding:16px 20px;max-width:480px;margin:0 auto}
+.section-label{
+  font-size:13px;color:var(--gray);text-transform:uppercase;
+  letter-spacing:1.5px;font-family:var(--font-display);margin-bottom:14px
+}
+
+/* PROFILE HEADER */
+.profile-header{text-align:center;margin-bottom:28px;animation:fadeInUp 0.5s var(--transition)}
+.profile-avatar{
+  width:96px;height:96px;border-radius:50%;
+  background:linear-gradient(135deg,var(--lime),#A8E600);
+  display:flex;align-items:center;justify-content:center;
+  font-size:44px;margin:0 auto 14px;position:relative;
+  box-shadow:0 0 20px var(--lime-glow)
+}
+.profile-avatar__edit{
+  position:absolute;bottom:0;right:0;width:30px;height:30px;border-radius:50%;
+  background:var(--dark-card);border:2px solid var(--dark);
+  display:flex;align-items:center;justify-content:center;cursor:pointer
+}
+.profile-avatar__edit svg{width:14px;height:14px;stroke:var(--white);fill:none;stroke-width:2}
+.profile-name{font-size:22px;font-weight:700;margin-bottom:2px}
+.profile-name input{
+  background:none;border:none;color:var(--white);font-size:22px;
+  font-weight:700;text-align:center;width:100%;outline:none;
+  border-bottom:2px solid transparent;transition:border-color 0.2s
+}
+.profile-name input:focus{border-bottom-color:var(--lime)}
+.profile-since{font-size:13px;color:var(--gray);margin-bottom:8px}
+.profile-level{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--lime-dim);color:var(--lime);
+  padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600;
+  font-family:var(--font-display)
+}
+
+/* STATS SUMMARY */
+.stats-summary{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+  margin-bottom:24px;animation:fadeInUp 0.5s 0.05s var(--transition) both
+}
+.stat-mini{
+  background:var(--dark-card);border:1px solid var(--dark-border);
+  border-radius:var(--radius-sm);padding:14px 8px;text-align:center
+}
+.stat-mini__value{
+  font-family:var(--font-display);font-size:18px;font-weight:700;
+  line-height:1;margin-bottom:3px
+}
+.stat-mini__label{font-size:10px;color:var(--gray)}
+
+/* BMI SECTION */
+.bmi-section{
+  background:var(--dark-card);border:1px solid var(--dark-border);
+  border-radius:var(--radius);padding:24px 20px;margin-bottom:20px;
+  animation:fadeInUp 0.5s 0.1s var(--transition) both
+}
+.bmi-section__title{font-size:15px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.bmi-inputs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.bmi-input{position:relative}
+.bmi-input label{
+  display:block;font-size:11px;color:var(--gray);text-transform:uppercase;
+  letter-spacing:1px;margin-bottom:6px;font-family:var(--font-display)
+}
+.bmi-input input{
+  width:100%;background:var(--dark-surface);border:1px solid var(--dark-border);
+  border-radius:var(--radius-sm);padding:12px 40px 12px 14px;
+  color:var(--white);font-size:16px;font-family:var(--font-display);
+  font-weight:600;outline:none;transition:border-color 0.2s
+}
+.bmi-input input:focus{border-color:var(--lime)}
+.bmi-input__unit{position:absolute;right:14px;bottom:13px;font-size:13px;color:var(--gray)}
+.bmi-result{background:var(--dark-surface);border-radius:var(--radius-sm);padding:16px;text-align:center}
+.bmi-result__value{
+  font-family:var(--font-display);font-size:36px;font-weight:800;
+  line-height:1;margin-bottom:4px;transition:color 0.3s
+}
+.bmi-result__label{font-size:12px;color:var(--gray);margin-bottom:8px}
+.bmi-result__status{font-size:13px;font-weight:600;padding:4px 12px;border-radius:20px;display:inline-block}
+.bmi-underweight{color:#3B82F6;background:rgba(59,130,246,0.12)}
+.bmi-normal{color:#22C55E;background:rgba(34,197,94,0.12)}
+.bmi-overweight{color:var(--orange);background:rgba(255,107,53,0.12)}
+.bmi-obese{color:var(--red);background:rgba(255,71,87,0.12)}
+.bmi-bar{
+  height:6px;border-radius:3px;margin-top:12px;display:flex;overflow:hidden
+}
+.bmi-bar__seg{height:100%;transition:width 0.3s}
+
+/* GOAL WEIGHT */
+.goal-section{
+  background:var(--dark-card);border:1px solid var(--dark-border);
+  border-radius:var(--radius);padding:24px 20px;margin-bottom:20px;
+  animation:fadeInUp 0.5s 0.15s var(--transition) both
+}
+.goal-section__title{font-size:15px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.goal-input-row{display:flex;gap:12px;align-items:flex-end;margin-bottom:16px}
+.goal-input-row .bmi-input{flex:1}
+.goal-remaining{
+  background:var(--dark-surface);border-radius:var(--radius-sm);padding:14px;
+  display:flex;align-items:center;justify-content:space-between
+}
+.goal-remaining__text{font-size:13px;color:var(--gray-light)}
+.goal-remaining__value{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--lime)}
+.goal-progress{margin-top:12px}
+.goal-progress__bar{height:8px;background:var(--dark-border);border-radius:4px;overflow:hidden}
+.goal-progress__fill{height:100%;background:linear-gradient(90deg,var(--lime),#22C55E);border-radius:4px;transition:width 0.6s}
+.goal-progress__labels{display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--gray)}
+
+/* WEIGHT GRAPH */
+.weight-graph{margin-bottom:20px;animation:fadeInUp 0.5s 0.2s var(--transition) both}
+.weight-graph__card{
+  background:var(--dark-card);border:1px solid var(--dark-border);
+  border-radius:var(--radius);padding:20px
+}
+.weight-graph__title{font-size:15px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.graph-container{height:120px;display:flex;align-items:flex-end;gap:4px;position:relative;padding-bottom:24px}
+.graph-line{position:absolute;bottom:24px;left:0;right:0;height:1px;border-bottom:1px dashed var(--dark-border)}
+.graph-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
+.graph-col__point{
+  width:10px;height:10px;border-radius:50%;background:var(--lime);
+  border:2px solid var(--dark-card);position:relative;z-index:2;transition:all 0.3s
+}
+.graph-col__bar{
+  width:3px;border-radius:2px;background:linear-gradient(to top,transparent,var(--lime-dim));
+  transition:height 0.6s var(--transition)
+}
+.graph-col__label{font-size:10px;color:var(--gray);font-family:var(--font-display);position:absolute;bottom:0}
+.graph-col__value{
+  font-size:10px;color:var(--lime);font-family:var(--font-display);
+  font-weight:600;position:absolute;top:-18px
+}
+
+/* BADGES */
+.badges-section{margin-bottom:20px;animation:fadeInUp 0.5s 0.25s var(--transition) both}
+.badges-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.badge-card{
+  background:var(--dark-card);border:1px solid var(--dark-border);
+  border-radius:var(--radius);padding:20px 12px;text-align:center;
+  cursor:pointer;transition:all 0.2s var(--transition);
+  -webkit-tap-highlight-color:transparent;position:relative;overflow:hidden
+}
+.badge-card:active{transform:scale(0.95)}
+.badge-card--locked{opacity:0.4}
+.badge-card--locked::after{
+  content:'🔒';position:absolute;top:8px;right:8px;font-size:12px
+}
+.badge-icon{font-size:36px;margin-bottom:8px;display:block}
+.badge-name{font-size:12px;font-weight:600;margin-bottom:4px}
+.badge-tier{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;display:inline-block}
+.badge-tier--gold{color:var(--gold);background:rgba(255,215,0,0.12)}
+.badge-tier--silver{color:var(--silver);background:rgba(192,192,192,0.12)}
+.badge-tier--bronze{color:var(--bronze);background:rgba(205,127,50,0.12)}
+.badge-date{font-size:9px;color:var(--gray);margin-top:4px}
+
+/* BADGE POPUP */
+.badge-popup{
+  position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);
+  z-index:300;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity 0.3s
+}
+.badge-popup.active{opacity:1;pointer-events:all}
+.badge-popup__content{
+  background:var(--dark-card);border:1px solid var(--dark-border);
+  border-radius:var(--radius);padding:32px 24px;text-align:center;
+  width:85%;max-width:320px;transform:scale(0.9);transition:transform 0.3s var(--transition)
+}
+.badge-popup.active .badge-popup__content{transform:scale(1)}
+.badge-popup__icon{font-size:64px;margin-bottom:12px;display:block}
+.badge-popup__name{font-size:20px;font-weight:700;margin-bottom:4px}
+.badge-popup__tier{margin-bottom:8px}
+.badge-popup__desc{font-size:14px;color:var(--gray-light);margin-bottom:12px;line-height:1.5}
+.badge-popup__date{font-size:12px;color:var(--gray);margin-bottom:16px}
+.badge-popup__close{
+  padding:12px 32px;background:var(--lime);color:var(--dark);
+  border-radius:var(--radius-sm);font-size:14px;font-weight:600;transition:all 0.2s
+}
+.badge-popup__close:active{transform:scale(0.95)}
+
+/* INVITE BANNER */
+.invite-banner{
+  background:linear-gradient(135deg,rgba(204,255,0,0.1),rgba(59,130,246,0.05));
+  border:1px solid rgba(204,255,0,0.2);border-radius:var(--radius);
+  padding:20px;margin-bottom:20px;display:flex;align-items:center;gap:16px;
+  animation:fadeInUp 0.5s 0.28s var(--transition) both;cursor:pointer
+}
+.invite-banner:active{transform:scale(0.98)}
+.invite-banner__icon{font-size:36px;animation:float 3s ease-in-out infinite}
+.invite-banner__text{flex:1}
+.invite-banner__title{font-size:14px;font-weight:700;margin-bottom:4px}
+.invite-banner__desc{font-size:12px;color:var(--gray-light);margin-bottom:8px}
+.invite-banner__code{
+  display:inline-block;background:var(--dark-surface);border:1px solid var(--dark-border);
+  padding:4px 12px;border-radius:6px;font-family:var(--font-display);
+  font-size:13px;font-weight:700;color:var(--lime);letter-spacing:2px
+}
+.invite-banner__btn{
+  padding:10px 16px;background:var(--lime);color:var(--dark);
+  border-radius:var(--radius-sm);font-size:12px;font-weight:700;
+  flex-shrink:0;transition:all 0.2s
+}
+
+/* SETTINGS */
+.settings-section{animation:fadeInUp 0.5s 0.3s var(--transition) both;margin-bottom:20px}
+.setting-item{
+  background:var(--dark-card);border:1px solid var(--dark-border);
+  border-radius:var(--radius-sm);padding:16px;margin-bottom:8px;
+  display:flex;align-items:center;justify-content:space-between
+}
+.setting-item__left{display:flex;align-items:center;gap:12px}
+.setting-item__icon{font-size:20px}
+.setting-item__name{font-size:14px;font-weight:500}
+.setting-item__desc{font-size:11px;color:var(--gray);margin-top:2px}
+
+/* TOGGLE SWITCH */
+.toggle{
+  width:48px;height:28px;border-radius:14px;background:var(--dark-border);
+  position:relative;cursor:pointer;transition:background 0.3s;
+  -webkit-tap-highlight-color:transparent;flex-shrink:0
+}
+.toggle.on{background:var(--lime)}
+.toggle__knob{
+  width:22px;height:22px;border-radius:50%;background:var(--white);
+  position:absolute;top:3px;left:3px;transition:transform 0.3s var(--transition);
+  box-shadow:0 2px 4px rgba(0,0,0,0.2)
+}
+.toggle.on .toggle__knob{transform:translateX(20px)}
+
+/* LANGUAGE SELECT */
+.lang-select{
+  background:var(--dark-surface);border:1px solid var(--dark-border);
+  border-radius:8px;padding:6px 10px;color:var(--white);
+  font-size:13px;font-weight:500;outline:none;cursor:pointer;
+  -webkit-appearance:none;appearance:none
+}
+
+/* LOGOUT BTN */
+.logout-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:14px;background:rgba(255,71,87,0.1);
+  border:1px solid rgba(255,71,87,0.2);color:var(--red);
+  border-radius:var(--radius-sm);font-size:14px;font-weight:600;
+  margin-bottom:20px;transition:all 0.2s
+}
+.logout-btn:active{transform:scale(0.97);background:rgba(255,71,87,0.15)}
+
+/* FOOTER */
+.app-footer{
+  text-align:center;padding:20px 0 10px;
+  animation:fadeInUp 0.5s 0.35s var(--transition) both
+}
+.app-footer__version{font-size:12px;color:var(--gray);margin-bottom:4px}
+.app-footer__tagline{font-size:11px;color:var(--gray)}
+.app-footer__links{display:flex;justify-content:center;gap:16px;margin-top:10px}
+.app-footer__link{font-size:11px;color:var(--gray-light);text-decoration:underline}
+
+/* BOTTOM NAV */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  height:calc(var(--nav-height)+var(--safe-bottom));padding-bottom:var(--safe-bottom);
+  background:rgba(13,13,13,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-top:1px solid var(--dark-border);
+  display:flex;align-items:center;justify-content:space-around;z-index:100
+}
+.nav-item{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:8px 16px;border-radius:12px;transition:all 0.2s;
+  position:relative;-webkit-tap-highlight-color:transparent
+}
+.nav-item:active{transform:scale(0.9)}
+.nav-item--active{color:var(--lime)}
+.nav-item--active::before{
+  content:'';position:absolute;top:-1px;left:50%;transform:translateX(-50%);
+  width:20px;height:3px;background:var(--lime);border-radius:0 0 3px 3px
+}
+.nav-item__icon svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav-item__label{font-size:10px;font-weight:500}
+
+@media(min-width:768px){
+  .main-content{max-width:600px}
+  .badges-grid{grid-template-columns:repeat(4,1fr)}
+  .stats-summary{grid-template-columns:repeat(4,1fr)}
+  .bottom-nav{max-width:480px;left:50%;transform:translateX(-50%);border-radius:20px 20px 0 0}
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header__logo">VITAL<span>ITY</span></div>
+</header>
+
+<main class="main-content">
+
+  <!-- Profile Header -->
+  <div class="profile-header">
+    <div class="profile-avatar">
+      🏋️
+      <div class="profile-avatar__edit">
+        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </div>
+    </div>
+    <div class="profile-name"><input type="text" id="userName" value="사용자" placeholder="이름 입력"></div>
+    <div class="profile-since">VITALITY 멤버 · 2024.01부터</div>
+    <div class="profile-level">⚡ Lv.12 피트니스 파이터</div>
+  </div>
+
+  <!-- Stats Summary -->
+  <div class="stats-summary" id="statsSummary">
+    <div class="stat-mini">
+      <div class="stat-mini__value" style="color:var(--lime)" id="totalWorkoutsStat">0</div>
+      <div class="stat-mini__label">총 운동</div>
+    </div>
+    <div class="stat-mini">
+      <div class="stat-mini__value" style="color:var(--blue)" id="totalHoursStat">0h</div>
+      <div class="stat-mini__label">총 시간</div>
+    </div>
+    <div class="stat-mini">
+      <div class="stat-mini__value" style="color:var(--orange)" id="totalCalStat">0</div>
+      <div class="stat-mini__label">총 칼로리</div>
+    </div>
+    <div class="stat-mini">
+      <div class="stat-mini__value" style="color:var(--red)" id="avgHRStat">--</div>
+      <div class="stat-mini__label">평균 심박</div>
+    </div>
+  </div>
+
+  <!-- BMI Section -->
+  <div class="bmi-section">
+    <div class="bmi-section__title">📊 BMI 계산기</div>
+    <div class="bmi-inputs">
+      <div class="bmi-input">
+        <label>키</label>
+        <input type="number" id="heightInput" placeholder="170" value="">
+        <span class="bmi-input__unit">cm</span>
+      </div>
+      <div class="bmi-input">
+        <label>체중</label>
+        <input type="number" id="weightInput" placeholder="70" value="">
+        <span class="bmi-input__unit">kg</span>
+      </div>
+    </div>
+    <div class="bmi-result">
+      <div class="bmi-result__value" id="bmiValue">--</div>
+      <div class="bmi-result__label">BMI</div>
+      <span class="bmi-result__status" id="bmiStatus" style="display:none"></span>
+    </div>
+    <div class="bmi-bar">
+      <div class="bmi-bar__seg" style="width:18.5%;background:#3B82F6"></div>
+      <div class="bmi-bar__seg" style="width:6.5%;background:#22C55E"></div>
+      <div class="bmi-bar__seg" style="width:5%;background:var(--orange)"></div>
+      <div class="bmi-bar__seg" style="width:70%;background:var(--red)"></div>
+    </div>
+  </div>
+
+  <!-- Goal Weight -->
+  <div class="goal-section">
+    <div class="goal-section__title">🎯 목표 체중</div>
+    <div class="goal-input-row">
+      <div class="bmi-input">
+        <label>현재 체중</label>
+        <input type="number" id="currentWeight" placeholder="70" value="">
+        <span class="bmi-input__unit">kg</span>
+      </div>
+      <div class="bmi-input">
+        <label>목표 체중</label>
+        <input type="number" id="goalWeight" placeholder="65" value="">
+        <span class="bmi-input__unit">kg</span>
+      </div>
+    </div>
+    <div class="goal-remaining">
+      <span class="goal-remaining__text">남은 감량</span>
+      <span class="goal-remaining__value" id="remainingWeight">-- kg</span>
+    </div>
+    <div class="goal-progress" id="goalProgressContainer" style="display:none">
+      <div class="goal-progress__bar">
+        <div class="goal-progress__fill" id="goalProgressFill" style="width:0%"></div>
+      </div>
+      <div class="goal-progress__labels">
+        <span id="goalStart"></span>
+        <span id="goalEnd"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weight Graph -->
+  <div class="weight-graph">
+    <div class="weight-graph__card">
+      <div class="weight-graph__title">📈 주간 체중 변화</div>
+      <div class="graph-container" id="weightGraph"></div>
+    </div>
+  </div>
+
+  <!-- Badges -->
+  <div class="badges-section">
+    <p class="section-label">Achievement Badges</p>
+    <div class="badges-grid" id="badgesGrid"></div>
+  </div>
+
+  <!-- Invite Banner -->
+  <div class="invite-banner" onclick="copyInviteCode()">
+    <div class="invite-banner__icon">🎁</div>
+    <div class="invite-banner__text">
+      <div class="invite-banner__title">친구 초대하기</div>
+      <div class="invite-banner__desc">친구를 초대하면 특별 배지를 받을 수 있어요!</div>
+      <span class="invite-banner__code" id="inviteCode">VITAL-2024</span>
+    </div>
+    <span class="invite-banner__btn">복사</span>
+  </div>
+
+  <!-- Settings -->
+  <div class="settings-section">
+    <p class="section-label">Settings</p>
+
+    <div class="setting-item">
+      <div class="setting-item__left">
+        <span class="setting-item__icon">🔔</span>
+        <div>
+          <div class="setting-item__name">운동 알림</div>
+          <div class="setting-item__desc">매일 오전 7시 알림</div>
+        </div>
+      </div>
+      <div class="toggle on" onclick="toggleSetting(this,'notif')"><div class="toggle__knob"></div></div>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-item__left">
+        <span class="setting-item__icon">📏</span>
+        <div>
+          <div class="setting-item__name">단위 설정</div>
+          <div class="setting-item__desc">kg / km</div>
+        </div>
+      </div>
+      <div class="toggle on" onclick="toggleSetting(this,'unit')"><div class="toggle__knob"></div></div>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-item__left">
+        <span class="setting-item__icon">🌙</span>
+        <div>
+          <div class="setting-item__name">다크 모드</div>
+          <div class="setting-item__desc">항상 다크</div>
+        </div>
+      </div>
+      <div class="toggle on" onclick="toggleSetting(this,'dark')"><div class="toggle__knob"></div></div>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-item__left">
+        <span class="setting-item__icon">🌐</span>
+        <div>
+          <div class="setting-item__name">언어</div>
+          <div class="setting-item__desc">앱 표시 언어</div>
+        </div>
+      </div>
+      <select class="lang-select" onchange="changeLang(this.value)">
+        <option value="ko" selected>한국어</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-item__left">
+        <span class="setting-item__icon">📊</span>
+        <div>
+          <div class="setting-item__name">주간 리포트</div>
+          <div class="setting-item__desc">매주 월요일 요약</div>
+        </div>
+      </div>
+      <div class="toggle" onclick="toggleSetting(this,'report')"><div class="toggle__knob"></div></div>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-item__left">
+        <span class="setting-item__icon">❤️</span>
+        <div>
+          <div class="setting-item__name">심박수 모니터링</div>
+          <div class="setting-item__desc">연동된 기기 사용</div>
+        </div>
+      </div>
+      <div class="toggle on" onclick="toggleSetting(this,'hr')"><div class="toggle__knob"></div></div>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-item__left">
+        <span class="setting-item__icon">🔒</span>
+        <div>
+          <div class="setting-item__name">개인정보 보호</div>
+          <div class="setting-item__desc">프로필 비공개</div>
+        </div>
+      </div>
+      <div class="toggle" onclick="toggleSetting(this,'privacy')"><div class="toggle__knob"></div></div>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-item__left">
+        <span class="setting-item__icon">🔄</span>
+        <div>
+          <div class="setting-item__name">데이터 동기화</div>
+          <div class="setting-item__desc">클라우드 자동 동기화</div>
+        </div>
+      </div>
+      <div class="toggle on" onclick="toggleSetting(this,'sync')"><div class="toggle__knob"></div></div>
+    </div>
+  </div>
+
+  <!-- Logout -->
+  <button class="logout-btn" onclick="confirmLogout()">
+    🚪 로그아웃
+  </button>
+
+  <!-- Footer -->
+  <div class="app-footer">
+    <p class="app-footer__version">VITALITY v1.0.0</p>
+    <p class="app-footer__tagline">Move. Track. Transform.</p>
+    <div class="app-footer__links">
+      <a href="#" class="app-footer__link">이용약관</a>
+      <a href="#" class="app-footer__link">개인정보처리방침</a>
+      <a href="#" class="app-footer__link">고객지원</a>
+    </div>
+    <p style="font-size:10px;color:var(--gray);margin-top:8px">© 2024 VITALITY. All rights reserved.</p>
+  </div>
+
+</main>
+
+<!-- Badge Popup -->
+<div class="badge-popup" id="badgePopup" onclick="closeBadgePopup()">
+  <div class="badge-popup__content" onclick="event.stopPropagation()">
+    <span class="badge-popup__icon" id="popupIcon"></span>
+    <div class="badge-popup__name" id="popupName"></div>
+    <div class="badge-popup__tier" id="popupTier"></div>
+    <div class="badge-popup__desc" id="popupDesc"></div>
+    <div class="badge-popup__date" id="popupDate"></div>
+    <button class="badge-popup__close" onclick="closeBadgePopup()">확인</button>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item"><div class="nav-item__icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><span class="nav-item__label">홈</span></a>
+  <a href="workout.html" class="nav-item"><div class="nav-item__icon"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div><span class="nav-item__label">운동</span></a>
+  <a href="history.html" class="nav-item"><div class="nav-item__icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><span class="nav-item__label">기록</span></a>
+  <a href="profile.html" class="nav-item nav-item--active"><div class="nav-item__icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><span class="nav-item__label">프로필</span></a>
+</nav>
+
+<script>
+/* ============================================
+   VITALITY — Profile (Upgraded)
+   ============================================ */
+
+const KEYS = {
+  height: 'vitality_height',
+  weight: 'vitality_weight',
+  goalWeight: 'vitality_goalWeight',
+  userName: 'vitality_userName',
+  weightHistory: 'vitality_weightHistory',
+  settings: 'vitality_settings',
+  startWeight: 'vitality_startWeight'
+};
+
+// ─── Load saved values ───
+const heightInput = document.getElementById('heightInput');
+const weightInput = document.getElementById('weightInput');
+const currentWeightInput = document.getElementById('currentWeight');
+const goalWeightInput = document.getElementById('goalWeight');
+const userNameInput = document.getElementById('userName');
+
+heightInput.value = localStorage.getItem(KEYS.height) || '';
+weightInput.value = localStorage.getItem(KEYS.weight) || '';
+currentWeightInput.value = localStorage.getItem(KEYS.weight) || '';
+goalWeightInput.value = localStorage.getItem(KEYS.goalWeight) || '';
+userNameInput.value = localStorage.getItem(KEYS.userName) || '사용자';
+
+// ─── Load Workout Stats ───
+function loadWorkoutStats() {
+  const history = JSON.parse(localStorage.getItem('vitality_history') || '[]');
+  const totalWorkouts = history.length;
+  const totalSeconds = history.reduce((a, h) => a + (h.duration || 0), 0);
+  const totalCal = history.reduce((a, h) => a + (h.calories || 0), 0);
+  let avgHR = 0;
+  const hrs = history.filter(h => h.heartRate).map(h => h.heartRate);
+  if (hrs.length > 0) avgHR = Math.round(hrs.reduce((a, b) => a + b, 0) / hrs.length);
+
+  document.getElementById('totalWorkoutsStat').textContent = totalWorkouts;
+  document.getElementById('totalHoursStat').textContent = Math.round(totalSeconds / 3600) + 'h';
+  document.getElementById('totalCalStat').textContent = totalCal > 9999 ? (totalCal / 1000).toFixed(1) + 'K' : totalCal;
+  document.getElementById('avgHRStat').textContent = avgHR > 0 ? avgHR : '--';
+}
+loadWorkoutStats();
+
+// ─── BMI Calculation ───
+function calcBMI() {
+  const h = parseFloat(heightInput.value);
+  const w = parseFloat(weightInput.value);
+
+  localStorage.setItem(KEYS.height, heightInput.value);
+  localStorage.setItem(KEYS.weight, weightInput.value);
+  currentWeightInput.value = weightInput.value;
+
+  if (!h || !w || h <= 0) {
+    document.getElementById('bmiValue').textContent = '--';
+    document.getElementById('bmiStatus').style.display = 'none';
+    return;
+  }
+
+  const hm = h / 100;
+  const bmi = (w / (hm * hm)).toFixed(1);
+
+  const bmiEl = document.getElementById('bmiValue');
+  const statusEl = document.getElementById('bmiStatus');
+  bmiEl.textContent = bmi;
+  statusEl.style.display = 'inline-block';
+
+  if (bmi < 18.5) {
+    bmiEl.style.color = '#3B82F6';
+    statusEl.textContent = '저체중';
+    statusEl.className = 'bmi-result__status bmi-underweight';
+  } else if (bmi < 25) {
+    bmiEl.style.color = '#22C55E';
+    statusEl.textContent = '정상';
+    statusEl.className = 'bmi-result__status bmi-normal';
+  } else if (bmi < 30) {
+    bmiEl.style.color = 'var(--orange)';
+    statusEl.textContent = '과체중';
+    statusEl.className = 'bmi-result__status bmi-overweight';
+  } else {
+    bmiEl.style.color = 'var(--red)';
+    statusEl.textContent = '비만';
+    statusEl.className = 'bmi-result__status bmi-obese';
+  }
+
+  calcGoal();
+}
+
+heightInput.addEventListener('input', calcBMI);
+weightInput.addEventListener('input', calcBMI);
+
+// ─── Goal Weight ───
+function calcGoal() {
+  const current = parseFloat(currentWeightInput.value);
+  const goal = parseFloat(goalWeightInput.value);
+  localStorage.setItem(KEYS.goalWeight, goalWeightInput.value);
+
+  if (current && goal) {
+    const diff = (current - goal).toFixed(1);
+    const remainEl = document.getElementById('remainingWeight');
+    remainEl.textContent = diff > 0 ? `-${diff} kg` : diff < 0 ? `+${Math.abs(diff)} kg` : '달성! 🎉';
+    remainEl.style.color = diff <= 0 ? '#22C55E' : 'var(--lime)';
+
+    // Show progress bar
+    const startWeight = parseFloat(localStorage.getItem(KEYS.startWeight) || current);
+    if (!localStorage.getItem(KEYS.startWeight)) {
+      localStorage.setItem(KEYS.startWeight, current);
+    }
+
+    const container = document.getElementById('goalProgressContainer');
+    if (diff > 0) {
+      container.style.display = 'block';
+      const totalToLose = startWeight - goal;
+      const lost = startWeight - current;
+      const pct = totalToLose > 0 ? Math.min(100, Math.max(0, (lost / totalToLose * 100))) : 0;
+      document.getElementById('goalProgressFill').style.width = pct + '%';
+      document.getElementById('goalStart').textContent = startWeight + 'kg';
+      document.getElementById('goalEnd').textContent = goal + 'kg';
+    } else {
+      container.style.display = 'none';
+    }
+  }
+}
+
+currentWeightInput.addEventListener('input', function () {
+  weightInput.value = this.value;
+  calcBMI();
+});
+goalWeightInput.addEventListener('input', calcGoal);
+
+// ─── Username ───
+userNameInput.addEventListener('change', function () {
+  localStorage.setItem(KEYS.userName, this.value);
+});
+
+// ─── Weight Graph ───
+function renderWeightGraph() {
+  let wh = JSON.parse(localStorage.getItem(KEYS.weightHistory) || '[]');
+  if (wh.length === 0) {
+    const base = parseFloat(weightInput.value) || 72;
+    const days = ['월', '화', '수', '목', '금', '토', '일'];
+    wh = days.map((d, i) => ({
+      day: d,
+      weight: +(base - i * 0.15 + (Math.random() - 0.5) * 0.8).toFixed(1)
+    }));
+    localStorage.setItem(KEYS.weightHistory, JSON.stringify(wh));
+  }
+
+  const container = document.getElementById('weightGraph');
+  const min = Math.min(...wh.map(w => w.weight)) - 1;
+  const max = Math.max(...wh.map(w => w.weight)) + 1;
+  const range = max - min;
+
+  container.innerHTML = '<div class="graph-line" style="bottom:50%"></div>' +
+    wh.map((w, i) => {
+      const pct = ((w.weight - min) / range * 80) + 10;
+      return `
+        <div class="graph-col" style="animation:fadeInUp 0.4s ${i * 0.05}s var(--transition) both">
+          <span class="graph-col__value" style="bottom:${pct}%">${w.weight}</span>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;width:100%;position:relative">
+            <div class="graph-col__point" style="position:absolute;bottom:${pct}%"></div>
+            <div class="graph-col__bar" style="height:${pct}%"></div>
+          </div>
+          <span class="graph-col__label">${w.day}</span>
+        </div>
+      `;
+    }).join('');
+}
+renderWeightGraph();
+
+// ─── Badges ───
+const badges = [
+  { icon: '🏆', name: '첫 운동', desc: 'VITALITY에서 첫 운동을 완료했습니다!', tier: 'gold', unlocked: true, date: '2024.01.15' },
+  { icon: '🔥', name: '7일 연속', desc: '7일 연속 운동 달성! 습관이 되고 있어요.', tier: 'gold', unlocked: true, date: '2024.02.01' },
+  { icon: '💪', name: '100회 운동', desc: '총 100회 운동을 완료했습니다.', tier: 'silver', unlocked: false, date: '' },
+  { icon: '🏃', name: '마라토너', desc: '총 42.195km 달리기 달성!', tier: 'gold', unlocked: true, date: '2024.03.10' },
+  { icon: '⚡', name: '칼로리 버너', desc: '한 번에 500kcal 이상 소모!', tier: 'silver', unlocked: true, date: '2024.02.14' },
+  { icon: '🧘', name: '밸런스 마스터', desc: '요가 30회 이상 완료', tier: 'bronze', unlocked: false, date: '' },
+  { icon: '🌅', name: '얼리버드', desc: '오전 6시 이전 운동 10회 달성', tier: 'silver', unlocked: true, date: '2024.04.01' },
+  { icon: '🎯', name: '목표 달성자', desc: '주간 목표 4주 연속 달성', tier: 'gold', unlocked: false, date: '' },
+  { icon: '💎', name: '프로 트레이너', desc: '프로그램 1개 완주', tier: 'bronze', unlocked: false, date: '' }
+];
+
+function renderBadges() {
+  const grid = document.getElementById('badgesGrid');
+  grid.innerHTML = badges.map((b, i) => `
+    <div class="badge-card ${b.unlocked ? '' : 'badge-card--locked'}"
+         onclick="${b.unlocked ? `openBadgePopup(${i})` : ''}"
+         style="animation:fadeInUp 0.4s ${i * 0.06}s var(--transition) both">
+      <span class="badge-icon">${b.unlocked ? b.icon : '🔒'}</span>
+      <div class="badge-name">${b.name}</div>
+      <span class="badge-tier badge-tier--${b.tier}">${b.tier.toUpperCase()}</span>
+      ${b.unlocked && b.date ? `<div class="badge-date">${b.date}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function openBadgePopup(i) {
+  const b = badges[i];
+  document.getElementById('popupIcon').textContent = b.icon;
+  document.getElementById('popupName').textContent = b.name;
+  document.getElementById('popupTier').innerHTML = `<span class="badge-tier badge-tier--${b.tier}">${b.tier.toUpperCase()}</span>`;
+  document.getElementById('popupDesc').textContent = b.desc;
+  document.getElementById('popupDate').textContent = b.date ? `달성일: ${b.date}` : '';
+  document.getElementById('badgePopup').classList.add('active');
+}
+
+function closeBadgePopup() {
+  document.getElementById('badgePopup').classList.remove('active');
+}
+
+renderBadges();
+
+// ─── Settings ───
+function toggleSetting(el, key) {
+  el.classList.toggle('on');
+  const settings = JSON.parse(localStorage.getItem(KEYS.settings) || '{}');
+  settings[key] = el.classList.contains('on');
+  localStorage.setItem(KEYS.settings, JSON.stringify(settings));
+}
+
+function changeLang(lang) {
+  const settings = JSON.parse(localStorage.getItem(KEYS.settings) || '{}');
+  settings.lang = lang;
+  localStorage.setItem(KEYS.settings, JSON.stringify(settings));
+}
+
+// ─── Invite Code ───
+function copyInviteCode() {
+  const code = document.getElementById('inviteCode').textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = document.querySelector('.invite-banner__btn');
+      btn.textContent = '복사됨!';
+      setTimeout(() => { btn.textContent = '복사'; }, 2000);
+    });
+  }
+}
+
+// ─── Logout ───
+function confirmLogout() {
+  if (confirm('정말 로그아웃하시겠습니까?')) {
+    alert('로그아웃되었습니다.');
+  }
+}
+
+// ─── Init BMI ───
+if (heightInput.value && weightInput.value) calcBMI();
+if (goalWeightInput.value) calcGoal();
+
+// ─── Level Calculation ───
+function calculateLevel() {
+  const history = JSON.parse(localStorage.getItem('vitality_history') || '[]');
+  const xp = history.length * 50 + history.reduce((a, h) => a + Math.round((h.calories || 0) / 10), 0);
+  const level = Math.floor(xp / 500) + 1;
+  const levelNames = [
+    '운동 새싹', '피트니스 초보', '운동 입문자', '체력 빌더',
+    '근성 전사', '칼로리 파이터', '피트니스 러너', '운동 매니아',
+    '바디 트레이너', '근육 조각가', '피트니스 파이터', '마스터 트레이너',
+    '레전드 파이터', '피트니스 킹', '갓 오브 핏'
+  ];
+  const name = levelNames[Math.min(level - 1, levelNames.length - 1)];
+  const levelEl = document.querySelector('.profile-level');
+  if (levelEl) levelEl.textContent = `⚡ Lv.${level} ${name}`;
+  return { level, xp, name };
+}
+calculateLevel();
+
+// ─── Data Management ───
+function exportAllData() {
+  const data = {
+    profile: {
+      name: localStorage.getItem(KEYS.userName),
+      height: localStorage.getItem(KEYS.height),
+      weight: localStorage.getItem(KEYS.weight),
+      goalWeight: localStorage.getItem(KEYS.goalWeight)
+    },
+    weightHistory: JSON.parse(localStorage.getItem(KEYS.weightHistory) || '[]'),
+    workoutHistory: JSON.parse(localStorage.getItem('vitality_history') || '[]'),
+    programChecks: JSON.parse(localStorage.getItem('vitality_program_checks') || '{}'),
+    settings: JSON.parse(localStorage.getItem(KEYS.settings) || '{}'),
+    exportDate: new Date().toISOString()
+  };
+  return data;
+}
+
+function clearAllData() {
+  if (confirm('모든 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+    Object.values(KEYS).forEach(key => localStorage.removeItem(key));
+    localStorage.removeItem('vitality_history');
+    localStorage.removeItem('vitality_program_checks');
+    localStorage.removeItem('vitality_events');
+    location.reload();
+  }
+}
+
+// ─── Notification Schedule Helper ───
+function getNotificationSchedule() {
+  const settings = JSON.parse(localStorage.getItem(KEYS.settings) || '{}');
+  return {
+    enabled: settings.notif !== false,
+    time: '07:00',
+    days: ['월', '화', '수', '목', '금'],
+    weekendReminder: true
+  };
+}
+
+// ─── Profile Completion ───
+function getProfileCompletion() {
+  let score = 0;
+  let total = 5;
+  if (localStorage.getItem(KEYS.userName) && localStorage.getItem(KEYS.userName) !== '사용자') score++;
+  if (localStorage.getItem(KEYS.height)) score++;
+  if (localStorage.getItem(KEYS.weight)) score++;
+  if (localStorage.getItem(KEYS.goalWeight)) score++;
+  const history = JSON.parse(localStorage.getItem('vitality_history') || '[]');
+  if (history.length > 0) score++;
+  return Math.round(score / total * 100);
+}
+
+console.log('Profile completion:', getProfileCompletion() + '%');
+console.log('Level:', calculateLevel());
+
+// ─── Body Composition Tracker ───
+function getBodyComposition() {
+  const height = parseFloat(localStorage.getItem(KEYS.height) || '170');
+  const weight = parseFloat(localStorage.getItem(KEYS.weight) || '70');
+  const bmi = weight / Math.pow(height / 100, 2);
+
+  // Estimate body fat percentage using BMI method (rough estimate)
+  const age = 25; // default
+  const gender = 'male'; // default
+  let bodyFat;
+  if (gender === 'male') {
+    bodyFat = (1.20 * bmi) + (0.23 * age) - 16.2;
+  } else {
+    bodyFat = (1.20 * bmi) + (0.23 * age) - 5.4;
+  }
+  bodyFat = Math.max(5, Math.min(50, bodyFat));
+
+  const leanMass = weight * (1 - bodyFat / 100);
+  const fatMass = weight * (bodyFat / 100);
+
+  // TDEE estimation (Mifflin-St Jeor)
+  const bmr = 10 * weight + 6.25 * height - 5 * age + 5; // male
+  const activityMultiplier = 1.55; // moderate activity
+  const tdee = Math.round(bmr * activityMultiplier);
+
+  return {
+    weight,
+    height,
+    bmi: bmi.toFixed(1),
+    bodyFat: bodyFat.toFixed(1),
+    leanMass: leanMass.toFixed(1),
+    fatMass: fatMass.toFixed(1),
+    bmr: Math.round(bmr),
+    tdee,
+    waterIntake: Math.round(weight * 0.033 * 10) / 10, // L per day
+    proteinTarget: Math.round(weight * 1.6), // g per day for active person
+    idealWeight: {
+      min: Math.round(18.5 * Math.pow(height / 100, 2)),
+      max: Math.round(24.9 * Math.pow(height / 100, 2))
+    }
+  };
+}
+
+// ─── Workout Preferences Analysis ───
+function analyzePreferences() {
+  const history = JSON.parse(localStorage.getItem('vitality_history') || '[]');
+  if (history.length === 0) return null;
+
+  // Time preference
+  const hours = history.map(h => new Date(h.date).getHours());
+  const avgHour = Math.round(hours.reduce((a, b) => a + b, 0) / hours.length);
+  let timePreference = '아침';
+  if (avgHour >= 12 && avgHour < 17) timePreference = '오후';
+  else if (avgHour >= 17 && avgHour < 21) timePreference = '저녁';
+  else if (avgHour >= 21 || avgHour < 6) timePreference = '밤';
+
+  // Duration preference
+  const avgDuration = Math.round(
+    history.reduce((a, h) => a + h.duration, 0) / history.length / 60
+  );
+  let durationPref = '짧은 운동 (20분 이하)';
+  if (avgDuration > 20 && avgDuration <= 40) durationPref = '보통 (20-40분)';
+  else if (avgDuration > 40) durationPref = '긴 운동 (40분+)';
+
+  // Intensity preference
+  const avgCal = Math.round(
+    history.reduce((a, h) => a + h.calories, 0) / history.length
+  );
+  let intensityPref = '저강도';
+  if (avgCal > 200 && avgCal <= 350) intensityPref = '중강도';
+  else if (avgCal > 350) intensityPref = '고강도';
+
+  // Day preference
+  const dayCounts = new Array(7).fill(0);
+  history.forEach(h => dayCounts[new Date(h.date).getDay()]++);
+  const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+  const favDay = dayNames[dayCounts.indexOf(Math.max(...dayCounts))];
+
+  return {
+    timePreference,
+    avgHour,
+    durationPreference: durationPref,
+    avgDuration,
+    intensityPreference: intensityPref,
+    avgCalories: avgCal,
+    favoriteDay: favDay + '요일',
+    workoutsPerWeek: (history.length / Math.max(1,
+      Math.ceil((Date.now() - new Date(history[history.length - 1].date).getTime()) / (7 * 86400000))
+    )).toFixed(1)
+  };
+}
+
+// ─── Health Score Calculator ───
+function calculateHealthScore() {
+  const history = JSON.parse(localStorage.getItem('vitality_history') || '[]');
+  let score = 50; // Base score
+
+  // Workout frequency (max +20)
+  const weekMs = 7 * 86400000;
+  const recentCount = history.filter(h => (Date.now() - new Date(h.date).getTime()) < weekMs).length;
+  score += Math.min(20, recentCount * 4);
+
+  // Workout variety (max +10)
+  const recentTypes = new Set(
+    history.filter(h => (Date.now() - new Date(h.date).getTime()) < weekMs * 2)
+      .map(h => h.type)
+  );
+  score += recentTypes.size * 2.5;
+
+  // BMI score (max +10)
+  const bmi = parseFloat(document.getElementById('bmiValue')?.textContent || '0');
+  if (bmi >= 18.5 && bmi <= 24.9) score += 10;
+  else if (bmi > 0) score += 5;
+
+  // Consistency (max +10)
+  const dates = history
+    .map(h => new Date(h.date).toISOString().slice(0, 10))
+    .filter((v, i, a) => a.indexOf(v) === i);
+
+  let streak = 0;
+  const sortedDates = dates.sort().reverse();
+  for (let i = 0; i < sortedDates.length - 1; i++) {
+    if ((new Date(sortedDates[i]) - new Date(sortedDates[i + 1])) / 86400000 <= 2) {
+      streak++;
+    } else break;
+  }
+  score += Math.min(10, streak);
+
+  return {
+    score: Math.min(100, Math.round(score)),
+    grade: score >= 90 ? 'A+' : score >= 80 ? 'A' : score >= 70 ? 'B+' :
+      score >= 60 ? 'B' : score >= 50 ? 'C' : 'D',
+    factors: {
+      frequency: Math.min(20, recentCount * 4),
+      variety: recentTypes.size * 2.5,
+      bmi: bmi >= 18.5 && bmi <= 24.9 ? 10 : bmi > 0 ? 5 : 0,
+      consistency: Math.min(10, streak)
+    }
+  };
+}
+
+// ─── Nutrition Recommendations ───
+function getNutritionRecommendations() {
+  const comp = getBodyComposition();
+  const prefs = analyzePreferences();
+
+  const recommendations = {
+    calories: {
+      maintenance: comp.tdee,
+      cutting: Math.round(comp.tdee * 0.8),
+      bulking: Math.round(comp.tdee * 1.15)
+    },
+    macros: {
+      protein: comp.proteinTarget,
+      carbs: Math.round(comp.tdee * 0.45 / 4),
+      fat: Math.round(comp.tdee * 0.25 / 9)
+    },
+    water: comp.waterIntake,
+    preworkout: [
+      '바나나 1개 (운동 30분 전)',
+      '오트밀 + 꿀 (운동 1시간 전)',
+      '프로틴바 (운동 45분 전)'
+    ],
+    postworkout: [
+      '프로틴 쉐이크 + 바나나',
+      '닭가슴살 + 고구마',
+      '그릭 요거트 + 베리류'
+    ],
+    supplements: [
+      { name: '크레아틴', dose: '5g/일', benefit: '근력 향상' },
+      { name: '비타민D', dose: '2000IU/일', benefit: '면역력, 뼈 건강' },
+      { name: '오메가3', dose: '1-2g/일', benefit: '염증 감소, 회복' },
+      { name: '마그네슘', dose: '400mg/일', benefit: '근육 이완, 수면' }
+    ]
+  };
+
+  return recommendations;
+}
+
+// ─── Sleep & Recovery Tracker ───
+function getSleepRecommendation() {
+  const prefs = analyzePreferences();
+  const baseHours = 7.5;
+
+  // Adjust based on workout intensity
+  let recommendedHours = baseHours;
+  if (prefs && prefs.intensityPreference === '고강도') {
+    recommendedHours = 8.5;
+  } else if (prefs && prefs.intensityPreference === '중강도') {
+    recommendedHours = 8;
+  }
+
+  // Recommended bedtime based on workout time
+  let bedtime = '23:00';
+  let wakeTime = '06:30';
+  if (prefs && prefs.avgHour < 8) {
+    bedtime = '22:00';
+    wakeTime = '05:30';
+  } else if (prefs && prefs.avgHour > 18) {
+    bedtime = '23:30';
+    wakeTime = '07:00';
+  }
+
+  return {
+    recommendedHours,
+    bedtime,
+    wakeTime,
+    tips: [
+      '운동 후 2시간 이내에는 취침을 피하세요',
+      '카페인은 오후 2시 이후 삼가세요',
+      '취침 전 스마트폰 사용을 줄이세요',
+      '침실 온도를 18-20°C로 유지하세요'
+    ]
+  };
+}
+
+// ─── Progress Photo Tracker ───
+function getProgressPhotoSchedule() {
+  const startDate = new Date('2024-01-15');
+  const now = new Date();
+  const daysSinceStart = Math.floor((now - startDate) / 86400000);
+  const weeksSinceStart = Math.floor(daysSinceStart / 7);
+
+  // Recommend photo every 2 weeks
+  const nextPhotoDate = new Date(startDate);
+  nextPhotoDate.setDate(startDate.getDate() + (Math.ceil(weeksSinceStart / 2) * 14));
+
+  if (nextPhotoDate < now) {
+    nextPhotoDate.setDate(now.getDate() + (14 - (daysSinceStart % 14)));
+  }
+
+  return {
+    daysSinceStart,
+    weeksSinceStart,
+    nextPhotoDate: `${nextPhotoDate.getMonth() + 1}/${nextPhotoDate.getDate()}`,
+    daysUntilNextPhoto: Math.ceil((nextPhotoDate - now) / 86400000),
+    totalPhotos: Math.floor(weeksSinceStart / 2),
+    tips: [
+      '같은 조명, 같은 각도로 촬영하세요',
+      '아침 공복 상태가 가장 정확합니다',
+      '정면, 측면, 후면 3장을 찍으세요'
+    ]
+  };
+}
+
+// ─── Social Features ───
+function generateShareCard() {
+  const history = JSON.parse(localStorage.getItem('vitality_history') || '[]');
+  const totalWorkouts = history.length;
+  const totalCal = history.reduce((a, h) => a + h.calories, 0);
+  const level = calculateLevel();
+
+  return {
+    title: `${localStorage.getItem(KEYS.userName) || '사용자'}의 VITALITY`,
+    stats: [
+      { label: '총 운동', value: totalWorkouts + '회' },
+      { label: '소모 칼로리', value: totalCal.toLocaleString() + ' kcal' },
+      { label: '레벨', value: 'Lv.' + level.level },
+      { label: '건강점수', value: calculateHealthScore().score + '점' }
+    ],
+    badges: badges.filter(b => b.unlocked).length + '/' + badges.length,
+    shareText: `💪 VITALITY에서 ${totalWorkouts}회 운동, ${totalCal.toLocaleString()} kcal 소모! Lv.${level.level} ${level.name} #VITALITY`
+  };
+}
+
+// ─── Accessibility ───
+function setupAccessibility() {
+  // Add aria labels to toggles
+  document.querySelectorAll('.toggle').forEach(toggle => {
+    toggle.setAttribute('role', 'switch');
+    toggle.setAttribute('aria-checked', toggle.classList.contains('on'));
+    toggle.setAttribute('tabindex', '0');
+
+    toggle.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.click();
+        this.setAttribute('aria-checked', this.classList.contains('on'));
+      }
+    });
+  });
+
+  // Add aria labels to badge cards
+  document.querySelectorAll('.badge-card').forEach(card => {
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') this.click();
+    });
+  });
+}
+
+setupAccessibility();
+
+// ─── Theme Manager ───
+function getThemeSettings() {
+  const settings = JSON.parse(localStorage.getItem(KEYS.settings) || '{}');
+  return {
+    darkMode: settings.dark !== false,
+    accentColor: settings.accentColor || 'lime',
+    fontSize: settings.fontSize || 'normal',
+    animations: settings.animations !== false,
+    hapticFeedback: settings.haptic !== false
+  };
+}
+
+// ─── App Info ───
+function getAppInfo() {
+  return {
+    version: '1.0.0',
+    build: '2024.03.01',
+    platform: navigator.userAgent.includes('iPhone') ? 'iOS' :
+      navigator.userAgent.includes('Android') ? 'Android' : 'Web',
+    storage: {
+      used: new Blob(Object.values(localStorage)).size,
+      limit: 5 * 1024 * 1024 // 5MB
+    },
+    features: [
+      'BMI 계산기',
+      '목표 체중 추적',
+      '운동 기록 & 통계',
+      '프로그램 관리',
+      '배지 시스템',
+      '체중 그래프',
+      '건강 점수'
+    ]
+  };
+}
+
+// ─── Final Stats ───
+const bodyComp = getBodyComposition();
+const healthScore = calculateHealthScore();
+const preferences = analyzePreferences();
+const nutrition = getNutritionRecommendations();
+const sleep = getSleepRecommendation();
+const photoSchedule = getProgressPhotoSchedule();
+const shareCard = generateShareCard();
+
+console.log('Body Composition:', bodyComp);
+console.log('Health Score:', healthScore);
+console.log('Preferences:', preferences);
+console.log('Nutrition:', nutrition);
+console.log('Sleep:', sleep);
+console.log('Share Card:', shareCard);
+
+// ─── Goal Setting System ───
+function getGoals() {
+  const savedGoals = JSON.parse(localStorage.getItem('vitality_goals') || '[]');
+  if (savedGoals.length > 0) return savedGoals;
+
+  // Default goals
+  return [
+    {
+      id: 'weekly_workouts',
+      name: '주간 운동 횟수',
+      target: 5,
+      unit: '회/주',
+      current: 0,
+      emoji: '💪',
+      category: 'fitness'
+    },
+    {
+      id: 'monthly_calories',
+      name: '월간 칼로리 소모',
+      target: 10000,
+      unit: 'kcal',
+      current: 0,
+      emoji: '🔥',
+      category: 'fitness'
+    },
+    {
+      id: 'weight_loss',
+      name: '목표 체중 달성',
+      target: parseFloat(localStorage.getItem(KEYS.goalWeight) || '65'),
+      unit: 'kg',
+      current: parseFloat(localStorage.getItem(KEYS.weight) || '70'),
+      emoji: '⚖️',
+      category: 'body'
+    },
+    {
+      id: 'streak_goal',
+      name: '연속 운동 기록',
+      target: 30,
+      unit: '일',
+      current: 0,
+      emoji: '🔥',
+      category: 'consistency'
+    },
+    {
+      id: 'running_distance',
+      name: '월간 러닝 거리',
+      target: 50,
+      unit: 'km',
+      current: 0,
+      emoji: '🏃',
+      category: 'fitness'
+    }
+  ];
+}
+
+function updateGoalProgress() {
+  const goals = getGoals();
+  const history = JSON.parse(localStorage.getItem('vitality_history') || '[]');
+  const now = Date.now();
+  const weekMs = 7 * 86400000;
+  const monthMs = 30 * 86400000;
+
+  goals.forEach(goal => {
+    switch (goal.id) {
+      case 'weekly_workouts':
+        goal.current = history.filter(h => (now - new Date(h.date).getTime()) < weekMs).length;
+        break;
+      case 'monthly_calories':
+        goal.current = history
+          .filter(h => (now - new Date(h.date).getTime()) < monthMs)
+          .reduce((a, h) => a + h.calories, 0);
+        break;
+      case 'weight_loss':
+        goal.current = parseFloat(localStorage.getItem(KEYS.weight) || '70');
+        break;
+      case 'streak_goal': {
+        const dates = history
+          .map(h => new Date(h.date).toISOString().slice(0, 10))
+          .filter((v, i, a) => a.indexOf(v) === i).sort().reverse();
+        let streak = 0;
+        const today = new Date().toISOString().slice(0, 10);
+        const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+        if (dates[0] === today || dates[0] === yesterday) {
+          streak = 1;
+          for (let i = 1; i < dates.length; i++) {
+            if ((new Date(dates[i - 1]) - new Date(dates[i])) / 86400000 === 1) streak++;
+            else break;
+          }
+        }
+        goal.current = streak;
+        break;
+      }
+      case 'running_distance':
+        goal.current = parseFloat(
+          history
+            .filter(h => h.type === 'running' && (now - new Date(h.date).getTime()) < monthMs)
+            .reduce((a, h) => a + (h.distance || 0), 0)
+            .toFixed(1)
+        );
+        break;
+    }
+
+    goal.progress = goal.id === 'weight_loss'
+      ? Math.round(Math.max(0, Math.min(100,
+        (parseFloat(localStorage.getItem(KEYS.startWeight) || goal.current) - goal.current) /
+        (parseFloat(localStorage.getItem(KEYS.startWeight) || goal.current) - goal.target) * 100
+      )))
+      : Math.min(100, Math.round(goal.current / goal.target * 100));
+  });
+
+  return goals;
+}
+
+// ─── Workout Calendar Heatmap ───
+function getCalendarHeatmap() {
+  const history = JSON.parse(localStorage.getItem('vitality_history') || '[]');
+  const heatmap = {};
+  const now = new Date();
+
+  // Last 90 days
+  for (let i = 0; i < 90; i++) {
+    const date = new Date(now);
+    date.setDate(date.getDate() - i);
+    const key = date.toISOString().slice(0, 10);
+    heatmap[key] = { count: 0, calories: 0, types: [] };
+  }
+
+  history.forEach(h => {
+    const key = new Date(h.date).toISOString().slice(0, 10);
+    if (heatmap[key]) {
+      heatmap[key].count++;
+      heatmap[key].calories += h.calories;
+      if (!heatmap[key].types.includes(h.type)) {
+        heatmap[key].types.push(h.type);
+      }
+    }
+  });
+
+  return heatmap;
+}
+
+// ─── Fitness Age Calculator ───
+function calculateFitnessAge() {
+  const history = JSON.parse(localStorage.getItem('vitality_history') || '[]');
+  const chronologicalAge = 25; // default
+  let adjustedAge = chronologicalAge;
+
+  // Workout frequency bonus
+  const weekMs = 7 * 86400000;
+  const weeklyWorkouts = history.filter(h =>
+    (Date.now() - new Date(h.date).getTime()) < weekMs
+  ).length;
+
+  if (weeklyWorkouts >= 5) adjustedAge -= 3;
+  else if (weeklyWorkouts >= 3) adjustedAge -= 2;
+  else if (weeklyWorkouts >= 1) adjustedAge -= 1;
+  else adjustedAge += 2;
+
+  // Variety bonus
+  const types = new Set(history.slice(0, 20).map(h => h.type));
+  if (types.size >= 4) adjustedAge -= 1;
+  else if (types.size >= 3) adjustedAge -= 0.5;
+
+  // BMI factor
+  const bmi = parseFloat(document.getElementById('bmiValue')?.textContent || '0');
+  if (bmi >= 18.5 && bmi <= 24.9) adjustedAge -= 1;
+  else if (bmi > 30) adjustedAge += 2;
+  else if (bmi > 25) adjustedAge += 1;
+
+  // Consistency factor
+  const totalWorkouts = history.length;
+  if (totalWorkouts > 100) adjustedAge -= 2;
+  else if (totalWorkouts > 50) adjustedAge -= 1;
+
+  return {
+    chronologicalAge,
+    fitnessAge: Math.max(15, Math.round(adjustedAge)),
+    difference: chronologicalAge - Math.round(adjustedAge),
+    message: adjustedAge < chronologicalAge
+      ? `실제 나이보다 ${Math.round(chronologicalAge - adjustedAge)}살 젊어요! 🎉`
+      : adjustedAge === chronologicalAge
+        ? '실제 나이와 비슷해요. 꾸준히 운동하세요! 💪'
+        : `운동으로 더 젊어질 수 있어요! 🏃`
+  };
+}
+
+// ─── Personalized Recommendations ───
+function getPersonalizedRecommendations() {
+  const prefs = analyzePreferences();
+  const healthSc = calculateHealthScore();
+  const recommendations = [];
+
+  if (healthSc.score < 60) {
+    recommendations.push({
+      emoji: '🏃',
+      title: '운동 빈도 높이기',
+      desc: '주 3회 이상 운동을 목표로 해보세요.',
+      priority: 'high'
+    });
+  }
+
+  if (prefs && prefs.durationPreference === '짧은 운동 (20분 이하)') {
+    recommendations.push({
+      emoji: '⏱',
+      title: '운동 시간 늘리기',
+      desc: '점차 30-40분까지 늘려보세요.',
+      priority: 'medium'
+    });
+  }
+
+  const types = new Set(
+    JSON.parse(localStorage.getItem('vitality_history') || '[]')
+      .slice(0, 20).map(h => h.type)
+  );
+  if (types.size < 3) {
+    recommendations.push({
+      emoji: '🌈',
+      title: '운동 종류 다양화',
+      desc: '러닝, 근력, HIIT, 요가를 번갈아 해보세요.',
+      priority: 'medium'
+    });
+  }
+
+  if (!types.has('yoga')) {
+    recommendations.push({
+      emoji: '🧘',
+      title: '요가 추가하기',
+      desc: '유연성과 회복을 위해 요가를 시작해보세요.',
+      priority: 'low'
+    });
+  }
+
+  recommendations.push({
+    emoji: '💧',
+    title: '수분 섭취',
+    desc: `하루 ${getBodyComposition().waterIntake}L의 물을 마시세요.`,
+    priority: 'always'
+  });
+
+  return recommendations;
+}
+
+// ─── Weekly Challenge ───
+function getWeeklyChallenge() {
+  const challenges = [
+    { name: '만보 챌린지', desc: '이번 주 매일 1만보 걷기', emoji: '👟', goal: '7일', reward: '50 XP' },
+    { name: '플랭크 챌린지', desc: '매일 플랭크 시간 10초씩 늘리기', emoji: '🧱', goal: '1분→1분 70초', reward: '30 XP' },
+    { name: '다양성 챌린지', desc: '이번 주 4가지 운동 종류 모두 해보기', emoji: '🌈', goal: '4종류', reward: '40 XP' },
+    { name: '얼리버드', desc: '오전 7시 전 운동 3회', emoji: '🌅', goal: '3회', reward: '35 XP' },
+    { name: '칼로리 파이어', desc: '이번 주 총 2000kcal 소모', emoji: '🔥', goal: '2000 kcal', reward: '45 XP' }
+  ];
+
+  const weekNum = Math.floor(Date.now() / (7 * 86400000));
+  return challenges[weekNum % challenges.length];
+}
+
+// ─── Init Final ───
+const goals = updateGoalProgress();
+const heatmap = getCalendarHeatmap();
+const fitnessAge = calculateFitnessAge();
+const personalRecs = getPersonalizedRecommendations();
+const weeklyChallenge = getWeeklyChallenge();
+
+console.log('Goals:', goals);
+console.log('Heatmap:', Object.keys(heatmap).length + ' days');
+console.log('Fitness Age:', fitnessAge);
+console.log('Recommendations:', personalRecs);
+console.log('Weekly Challenge:', weeklyChallenge);
+</script>
+</body>
+</html>

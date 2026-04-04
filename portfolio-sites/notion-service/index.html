@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>서비스 안내 페이지</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;-webkit-text-size-adjust:100%;scroll-behavior:smooth;overflow-x:hidden}
+body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:#37352f;line-height:1.5;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-x:hidden}
+img{max-width:100%;height:auto}
+.notion-cover{width:100%;height:20vh;min-height:120px;overflow:hidden}
+.notion-cover img{width:100%;height:100%;object-fit:cover}
+@media(max-width:768px){.notion-cover{height:15vh;min-height:90px}}
+.sticky-nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid #e9e9e7;transition:box-shadow .2s}
+.sticky-nav.scrolled{box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.sticky-nav-inner{max-width:900px;margin:0 auto;padding:0 96px;display:flex;align-items:center;justify-content:space-between;height:52px}
+.sticky-nav-title{font-weight:700;font-size:1em;color:#37352f;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;text-decoration:none;transition:color .15s}
+.sticky-nav-title:hover{color:#2eaadc}
+.sticky-nav-tabs{display:flex;gap:4px}
+.sticky-nav-tab{padding:6px 14px;border-radius:6px;font-size:.85em;font-weight:500;cursor:pointer;color:rgba(55,53,47,.65);transition:all .15s;border:none;background:none;white-space:nowrap;min-height:36px}
+.sticky-nav-tab:hover{background:#f1f1ef;color:#37352f}
+.sticky-nav-tab.active{background:#37352f;color:#fff}
+@media(max-width:768px){.sticky-nav-inner{padding:0 16px;height:46px}.sticky-nav-tab{padding:5px 10px;font-size:.78em}.sticky-nav-title{font-size:.9em}}
+.sub-nav{position:sticky;top:52px;z-index:90;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid #f0f0ee;display:none}
+.sub-nav.visible{display:block}
+.sub-nav-inner{max-width:900px;margin:0 auto;padding:8px 96px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sub-nav-breadcrumb{display:flex;align-items:center;gap:4px;font-size:.875em;min-width:0;flex:1;overflow:hidden}
+.sub-nav-breadcrumb a{color:rgba(55,53,47,.65);text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:4px;transition:all .12s;white-space:nowrap;min-height:36px;flex-shrink:0}
+.sub-nav-breadcrumb a:hover{background:#f1f1ef;color:#37352f}
+.sub-nav-breadcrumb .sep{color:rgba(55,53,47,.3);flex-shrink:0}
+.sub-nav-breadcrumb .current{color:#37352f;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sub-nav-arrows{display:flex;gap:4px;flex-shrink:0}
+.sub-nav-arrows button{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid #e9e9e7;border-radius:6px;background:#fff;cursor:pointer;color:#37352f;font-size:1em;transition:all .12s}
+.sub-nav-arrows button:hover:not(:disabled){background:#f1f1ef;border-color:#d6d6d4}
+.sub-nav-arrows button:disabled{opacity:.3;cursor:default}
+@media(max-width:768px){.sub-nav-inner{padding:6px 16px}.sub-nav-breadcrumb{font-size:.8em}.sub-nav-arrows button{width:32px;height:32px;font-size:.85em}}
+.notion-page{max-width:900px;margin:0 auto;padding:0 96px 120px;overflow-x:hidden;overflow-wrap:break-word}
+*{box-sizing:border-box}
+@media(max-width:1200px){.notion-page{padding:0 60px 100px}}
+@media(max-width:768px){.notion-page{padding:0 24px 80px}}
+@media(max-width:375px){.notion-page{padding:0 16px 60px}}
+.notion-page-title{font-size:2.5em;font-weight:700;margin-top:40px;margin-bottom:4px;line-height:1.2}
+h1{font-size:1.875em;font-weight:700;margin-top:1.4em;margin-bottom:4px;line-height:1.3}
+h2{font-size:1.5em;font-weight:600;margin-top:1.2em;margin-bottom:4px;line-height:1.3}
+h3{font-size:1.25em;font-weight:600;margin-top:.8em;margin-bottom:4px;line-height:1.3}
+p{margin-top:2px;margin-bottom:2px;white-space:pre-wrap}
+.notion-divider{border:none;border-top:1px solid #e9e9e7;margin:8px 0}
+.notion-callout{background:#f1f1ef;border-radius:3px;padding:16px 16px 16px 12px;margin:6px 0;display:flex;gap:8px;align-items:flex-start;width:100%;box-sizing:border-box}
+.notion-callout-icon{font-size:1.2em;flex-shrink:0;line-height:1.5}
+.notion-callout-content{flex:1;min-width:0}
+.notion-callout-content h1,.notion-callout-content h2,.notion-callout-content h3{margin-top:.3em}
+.notion-callout-content h1:first-child,.notion-callout-content h2:first-child,.notion-callout-content h3:first-child,.notion-callout-content p:first-child{margin-top:0}
+.notion-table-wrap{overflow-x:auto;margin:8px 0;-webkit-overflow-scrolling:touch;max-width:100%}
+.notion-table{width:100%;border-collapse:collapse;font-size:.875em;table-layout:auto}
+.notion-table th,.notion-table td{border:1px solid #e9e9e7;padding:8px 10px;text-align:left;vertical-align:top;line-height:1.5}
+.notion-table thead th{background:#f7f6f3;font-weight:600}
+.notion-quote{border-left:3px solid currentColor;padding-left:14px;margin:6px 0}
+.notion-bookmark{display:block;border:1px solid #e9e9e7;border-radius:3px;padding:12px 14px;margin:6px 0;color:#37352f;text-decoration:none;font-size:.875em;transition:background 120ms}
+.notion-bookmark:hover{background:#f7f6f3}
+.notion-page-link{display:flex;align-items:center;gap:6px;padding:8px 10px;margin:2px 0;border-radius:6px;cursor:pointer;text-decoration:none;color:#37352f;transition:all 120ms;min-height:48px;font-size:.95em}
+.notion-page-link:hover{background:#f1f1ef;transform:translateX(4px)}
+.notion-page-link:active{background:#e8e8e5}
+ul.notion-list{list-style:disc;padding-left:1.5em;margin:2px 0}
+ul.notion-list li{margin:2px 0;padding-left:.2em}
+ul.notion-list ul{list-style:circle;padding-left:1.5em}
+ol.notion-list-numbered{list-style:decimal;padding-left:1.5em;margin:2px 0}
+ol.notion-list-numbered li{margin:2px 0}
+.notion-image{margin:8px 0;text-align:center;overflow:hidden;max-width:100%}
+.notion-image img{display:block;margin:0 auto;max-width:100%!important;height:auto;border-radius:2px}
+.notion-video-placeholder{background:#f7f6f3;border:1px solid #e9e9e7;border-radius:3px;padding:40px 20px;text-align:center;color:#9b9a97;margin:8px 0;font-size:.9em}
+.notion-columns{display:flex;gap:16px;margin:8px 0;align-items:flex-start;width:100%;max-width:100%}
+.notion-column{flex:1;min-width:0;overflow:hidden}
+.notion-column .notion-image img{max-width:100%!important}
+.notion-column img{max-width:100%!important}
+@media(max-width:768px){.notion-columns{flex-direction:column;gap:8px}}
+.notion-toggle{margin:4px 0}
+.notion-toggle summary{cursor:pointer;padding:4px 0;user-select:none}
+.notion-toggle summary:hover{background:#f7f6f3;border-radius:3px}
+.notion-section{display:none}
+.notion-section.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.text-gray{color:rgba(55,53,47,.65)}
+.notion-notice{color:rgba(55,53,47,.65);font-size:.875em;margin:4px 0}
+a.notion-link{color:#37352f;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(55,53,47,.4)}
+a.notion-link:hover{text-decoration-color:#37352f}
+.notion-callout .notion-table-wrap{margin-top:8px}
+.notion-breadcrumb{margin-top:16px;margin-bottom:8px}
+.notion-breadcrumb a{color:rgba(55,53,47,.65);text-decoration:none;font-size:.875em;display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border-radius:3px;transition:background 120ms}
+.notion-breadcrumb a:hover{background:#f7f6f3}
+.category-toggle{margin:10px 0;border:none}
+.category-toggle summary{display:flex;align-items:center;gap:8px;padding:14px 16px;font-size:1.1em;font-weight:700;cursor:pointer;list-style:none;background:#f7f6f3;border-radius:8px;transition:all .15s;user-select:none;min-height:52px}
+.category-toggle summary::-webkit-details-marker{display:none}
+.category-toggle summary::before{content:'▶';font-size:.65em;transition:transform .2s;flex-shrink:0;color:rgba(55,53,47,.45);width:16px;text-align:center}
+.category-toggle[open] summary::before{transform:rotate(90deg)}
+.category-toggle summary:hover{background:#ededeb}
+.category-toggle-content{padding:4px 0 8px 20px;border-left:2px solid #e9e9e7;margin-left:20px;margin-top:4px}
+.category-toggle-content .notion-page-link{padding-left:14px}
+.category-toggle-content .cat-subtitle{color:rgba(55,53,47,.5);font-size:.82em;padding:6px 14px 2px;margin:0}
+.toc-sidebar{position:fixed;left:calc(50% + 470px);top:120px;width:220px;max-height:calc(100vh - 160px);overflow-y:auto;font-size:.8em;padding:12px 0;z-index:80;display:none}
+.toc-sidebar.visible{display:block}
+.toc-sidebar-title{font-weight:700;font-size:.85em;color:rgba(55,53,47,.5);text-transform:uppercase;letter-spacing:.05em;padding:0 12px 8px;border-bottom:1px solid #f0f0ee;margin-bottom:6px}
+.toc-sidebar a{display:block;padding:4px 12px;color:rgba(55,53,47,.6);text-decoration:none;border-radius:4px;line-height:1.4;transition:all .12s;border-left:2px solid transparent;margin:1px 0}
+.toc-sidebar a:hover{color:#37352f;background:#f7f6f3}
+.toc-sidebar a.active{color:#37352f;font-weight:600;border-left-color:#37352f}
+.toc-sidebar a.toc-h2{padding-left:24px;font-size:.92em}
+@media(max-width:1340px){.toc-sidebar{display:none!important}}
+.toc-mobile{display:none;margin:12px 0}
+.toc-mobile summary{display:flex;align-items:center;gap:6px;padding:10px 14px;background:#f7f6f3;border-radius:6px;font-size:.85em;font-weight:600;cursor:pointer;list-style:none;min-height:44px}
+.toc-mobile summary::-webkit-details-marker{display:none}
+.toc-mobile summary::before{content:'📑';margin-right:2px}
+.toc-mobile-content{padding:8px 0;max-height:50vh;overflow-y:auto}
+.toc-mobile-content a{display:flex;align-items:center;padding:8px 14px;color:rgba(55,53,47,.7);text-decoration:none;font-size:.85em;border-radius:4px;min-height:40px}
+.toc-mobile-content a:hover{background:#f1f1ef;color:#37352f}
+.toc-mobile-content a.toc-h2{padding-left:28px}
+@media(max-width:1340px){.toc-mobile.has-items{display:block}}
+@media(min-width:1341px){.toc-mobile{display:none!important}}
+</style>
+</head>
+<body>
+<div class="notion-cover"><img src="images/logo.png" alt="커버" loading="lazy"></div>
+
+<nav class="sticky-nav" id="stickyNav">
+<div class="sticky-nav-inner">
+  <a class="sticky-nav-title" href="#" onclick="showSection('main-content');return false;">📋 서비스 안내</a>
+  <div class="sticky-nav-tabs" id="navTabs">
+    <button class="sticky-nav-tab active" data-cat="all" onclick="filterCategory('all')">전체</button>
+    <button class="sticky-nav-tab" data-cat="naver" onclick="filterCategory('naver')">Naver</button>
+    <button class="sticky-nav-tab" data-cat="instagram" onclick="filterCategory('instagram')">Instagram</button>
+    <button class="sticky-nav-tab" data-cat="etc" onclick="filterCategory('etc')">기타</button>
+  </div>
+</div>
+</nav>
+
+<div class="sub-nav" id="subNav">
+<div class="sub-nav-inner">
+  <div class="sub-nav-breadcrumb">
+    <a href="#" onclick="showSection('main-content');return false;">🏠 서비스 안내</a>
+    <span class="sep">›</span>
+    <span class="current" id="subNavTitle"></span>
+  </div>
+  <div class="sub-nav-arrows">
+    <button id="prevBtn" title="이전 페이지" onclick="goPrev()">←</button>
+    <button id="nextBtn" title="다음 페이지" onclick="goNext()">→</button>
+  </div>
+</div>
+</div>
+
+<div class="toc-sidebar" id="tocSidebar">
+<div class="toc-sidebar-title">목차</div>
+</div>
+
+<div class="notion-page">
+
+<div id="main-content" class="notion-section active">
+<div class="notion-page-title">서비스 안내 페이지</div>
+<p class="notion-notice">※ PC보기를 권장드립니다.</p>
+
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p>상담 및 견적문의 : <a class="notion-link" href="https://pf.kakao.com/_xdbJnn/chat" target="_blank">카카오톡 채널 바로가기</a></p><ul class="notion-list"><li>평일 10:00~19:00</li><li>주말 · 공휴일 휴무</li></ul></div></div>
+
+<hr class="notion-divider">
+
+<!-- Naver 콜아웃 -->
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content">
+<h1 style="margin-top:0">‣ Naver</h1>
+<a class="notion-page-link" href="#" onclick="showSection('nplace-seo-guide');return false;">📕 N플레이스 최적화 SEO 가이드북</a>
+<a class="notion-page-link" href="#" onclick="showSection('nplace-delegation');return false;">📄 네이버 플레이스 권한 위임</a>
+<a class="notion-page-link" href="#" onclick="showSection('ad-center-delegation');return false;">📄 네이버 광고주센터 권한 위임</a>
+</div></div>
+
+<!-- Instagram 콜아웃 -->
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content">
+<h1 style="margin-top:0">‣ Instagram</h1>
+<a class="notion-page-link" href="#" onclick="showSection('instagram-guide');return false;">📕 인스타그램 가이드북</a>
+<h3 style="color:#d9730d;margin-top:12px">상위 노출 서비스</h3>
+<div style="padding-left:8px">
+<a class="notion-page-link" href="#" onclick="showSection('repost');return false;">🔲 [추천탭] 리그램 배포 작업</a>
+<a class="notion-page-link" href="#" onclick="showSection('mypost');return false;">✨ [추천탭] 내 게시물 노출 작업</a>
+<a class="notion-page-link" href="#" onclick="showSection('account');return false;">🎯 [계정탭] 계정 상위 노출 · 자동완성</a>
+<a class="notion-page-link" href="#" onclick="showSection('optimization-auto');return false;">📊 [계정 최적화] 자동 활동 &amp; 지수 관리</a>
+<a class="notion-page-link" href="#" onclick="showSection('optimized-account');return false;">🔄 최적화 계정 구매</a>
+</div>
+<h3 style="color:#d9730d;margin-top:12px">릴스 알고리즘 확산</h3>
+<div style="padding-left:8px">
+<a class="notion-page-link" href="#" onclick="showSection('boosting');return false;">🎵 릴스 알고리즘 부스팅 작업</a>
+</div>
+<h3 style="color:#d9730d;margin-top:12px">프로모션 패키지</h3>
+<div style="padding-left:8px">
+<a class="notion-page-link" href="#" onclick="showSection('step-package');return false;">🏢 스탭 - 자사 계정 중심의 노출 전략 패키지</a>
+</div>
+</div></div>
+
+<hr class="notion-divider">
+<a class="notion-page-link" href="#" onclick="showSection('pricing');return false;">📋 상품 가격표</a>
+<a class="notion-page-link" href="#" onclick="showSection('capture');return false;">🌐 노출 캡쳐 사이트</a>
+<a class="notion-page-link" href="#" onclick="showSection('banned');return false;">✖ 금지 업종</a>
+<hr class="notion-divider">
+</div>
+
+<div id="nplace-seo-guide" class="notion-section" data-cat="naver" data-title="N플레이스 최적화 SEO 가이드북">
+<div class="notion-page-title">N플레이스 최적화 SEO 가이드북</div>
+<hr class="notion-divider">
+<div class="notion-quote"><p>기초가 부실하다면 모래성처럼 금방 무너지기 마련입니다.</p></div>
+<hr class="notion-divider">
+
+<h2>네이버 알고리즘이 점수를 매기는 9가지 핵심 지표</h2>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>그룹</th><th>기대 효과</th><th>항목 및 핵심 포인트</th></tr></thead>
+<tbody>
+<tr><td>STEP 1. 기초 탄탄</td><td>정확도 점수<br>(검색 신뢰도 상승)</td><td>• 주소 풀 세팅: 도로명+지번 모두 기재<br>• 영업시간 디테일: 휴무/브레이크 타임 상세화<br>• 찾아오시는 길: 지명 키워드 기반 텍스트 최적화</td></tr>
+<tr><td>STEP 2. 점수 가점</td><td>활동성 점수<br>(지수 최적화)</td><td>• 스마트콜(0507): 통화 데이터 기록 및 지수화<br>• 네이버 톡톡: 1:1 상담을 통한 체류 시간 증대<br>• 소개글 SEO: 2,000자 내 타겟 키워드 전략 배치</td></tr>
+<tr><td>STEP 3. 매출 직결</td><td>전환 점수<br>(순위 상승 지름길)</td><td>• 예약/주문(N페이): 네이버가 선호하는 결제 데이터 확보<br>• 소식/쿠폰: 알림받기 유도로 '저장' 및 '재방문' 트리거<br>• 최신성 유지: 월 1~2회 소식 발행으로 활성화 증명</td></tr>
+</tbody></table></div>
+<hr class="notion-divider">
+
+<h2>📋 우리 매장 N플레이스 건강검진 시트</h2>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>자가 진단</th><th>분류</th><th>최적화 체크리스트</th></tr></thead>
+<tbody>
+<tr><td>□</td><td>기초</td><td>구주소(지번)와 신주소(도로명)를 모두 정확히 입력했는가?</td></tr>
+<tr><td>□</td><td>기초</td><td>휴무일과 브레이크 타임을 분 단위까지 상세히 기재했는가?</td></tr>
+<tr><td>□</td><td>기초</td><td>'찾아오시는 길'에 주변 지명과 역 이름 등 키워드가 포함되었는가?</td></tr>
+<tr><td>□</td><td>정보</td><td>소개글(상세설명)이 타겟 키워드를 포함해 1,000자 이상인가?</td></tr>
+<tr><td>□</td><td>연결</td><td>스마트콜(0507) 번호를 발급받아 연결해두었는가?</td></tr>
+<tr><td>□</td><td>연결</td><td>네이버 톡톡이 활성화되어 있으며 응대율이 높은가?</td></tr>
+<tr><td>□</td><td>확산</td><td>네이버 예약 또는 주문(N페이) 기능을 실제 사용 중인가?</td></tr>
+<tr><td>□</td><td>확산</td><td>최근 2주 이내에 새로운 '소식'을 업로드했는가?</td></tr>
+<tr><td>□</td><td>유인</td><td>'알림받기' 등 고객의 '저장'을 유도하는 쿠폰이 발행되어 있는가?</td></tr>
+</tbody></table></div>
+<hr class="notion-divider">
+
+<h1>💡 전문가가 알려주는 상위 노출 '치트키' 3가지</h1>
+<h3>1. 소개글 : 네이버 AI가 좋아하는 '텍스트 마이닝'</h3>
+<p>네이버 AI는 이미지보다 텍스트로 업체 정보를 파악합니다. 단순한 "맛집"이 아니라 고객이 검색할 법한 구체적인 상황을 녹여내야 합니다.</p>
+<ul class="notion-list">
+<li>전략 : "신내동 회식 장소", "봉화산역 데이트 코스", "주차 편한 고기집" 등 지역명과 상황 키워드 배치.</li>
+<li>효과 : 체류 시간이 늘어나며 네이버로부터 "매력적인 매장"으로 인식되어 가산점을 받습니다.</li>
+</ul>
+
+<h3>2. 찾아오시는 길 : 로컬 타겟팅의 핵심</h3>
+<p>"OO빌딩 1층"처럼 간단히 작성하는 것 보단 주변 랜드마크를 활용해보세요.</p>
+<ul class="notion-list">
+<li>전략 : "봉화산역 3번 출구 도보 1분", "중랑구청 인근","신내동 우체국 맞은편" 등 주변 지명 명시.</li>
+<li>효과 : '길찾기/네비게이션' 클릭을 유도합니다. 네이버는 이 클릭을 강력한 방문 의사로 판단하여 순위를 올립니다.</li>
+</ul>
+
+<h3>3. 스마트 블록 &amp; 테마 검색 대비</h3>
+<p>네이버 AI는 소개글과 찾아오시는 길의 내용을 분석해 업체를 #분위기좋은, #가성비 같은 테마로 자동 분류합니다. 작성한 글에 전략 키워드가 포함되어 있는지 꼭 확인해보세요!</p>
+<hr class="notion-divider">
+
+<h1>⚠️ [필독] 사장님만 모르는 '대표 키워드'의 낭비</h1>
+<p>네이버 플레이스 설정의 '대표 키워드 5자리'는 상위 노출의 운명을 결정합니다. 하지만 대부분의 사장님은 이곳에 [강남 미용실], [강남 준오헤어] 같은 단어를 넣습니다.</p>
+<ul class="notion-list">
+<li><strong>1️⃣ 네이버 AI는 이미 다 알고 있습니다</strong><br>우리 매장 주소지가 '강남역'이고 업종이 '미용실'로 등록되어 있다면, 네이버 알고리즘은 이미 우리를 [강남 미용실] 후보군에 자동 분류합니다. 굳이 키워드 칸에 다시 쓸 필요가 없습니다. 이미 확보한 점수를 또 따려고 애쓰는 꼴입니다.</li>
+<li><strong>2️⃣ '레드오션'보다는 '수익 키워드'를 노리세요</strong><br>예시로 [강남 미용실]은 경쟁이 너무 치열해 노출이 어렵습니다. 하지만 고객은 [강남 레이어드컷], [강남 복구펌], [강남 히피펌 성지]처럼 구체적인 목적을 가지고 검색합니다. 이 세부 키워드가 바로 실제 예약과 매출로 직결되는 알짜배기 키워드입니다.</li>
+</ul>
+<hr class="notion-divider">
+
+<h3>✅ 전문가의 추천: 이렇게 수정해보세요!</h3>
+<p>귀중한 5자리의 슬롯에는 '지역명 + 주력 메뉴(시술명)'를 조합해 넣는 것이 상위 노출의 핵심 전략입니다.</p>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>구분</th><th>잘못된 예시 (중복 낭비)</th><th>올바른 예시 (노출 극대화)</th></tr></thead>
+<tbody>
+<tr><td>키워드 1</td><td>강남 미용실</td><td>강남 레이어드컷</td></tr>
+<tr><td>키워드 2</td><td>역삼역 미용실</td><td>강남 복구펌</td></tr>
+<tr><td>키워드 3</td><td>준오헤어 강남</td><td>강남 가일컷</td></tr>
+<tr><td>키워드 4</td><td>강남역 헤어샵</td><td>강남 톤다운염색</td></tr>
+</tbody></table></div>
+
+<h3>💡 핵심 요약</h3>
+<div class="notion-quote"><p>"당연히 노출될 키워드에 자리를 낭비하지 마세요. 네이버가 자동으로 잡아주는 기본 키워드 대신, 고객의 지갑이 열리는 '구체적인 시술명과 메뉴명'으로 5자리를 꽉 채우는 것이 상위 노출과 매출 상승의 지름길입니다."</p></div>
+<hr class="notion-divider">
+
+<h1>🛠️ [실전] SEO 최적화 설정</h1>
+<a class="notion-bookmark" href="https://new.smartplace.naver.com/" target="_blank">네이버 스마트플레이스 → new.smartplace.naver.com</a>
+
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content">
+<p><strong>⚠️ 기본정보 수정 횟수 제한</strong></p>
+<p>업체 기본정보는 일주일 기준 최대 5회까지만 수정 가능합니다.</p>
+<p>빠진 정보가 없는지 한번 더 살펴보신 후 '저장' 버튼을 눌러주세요.</p>
+</div></div>
+
+<h3>💡 한 줄 팁</h3>
+<ul class="notion-list">
+<li>소개글에 들어간 핵심 키워드(지역명+메뉴명)는 네이버 AI가 우리 매장을 어떤 '스마트 블록'에 넣을지 결정하는 재료가 됩니다.</li>
+<li>찾아오시는 길에 '스타벅스', '영동시장', '먹자골목' 같은 랜드마크를 넣었기 때문에, 해당 장소 근처를 검색하는 유저에게도 노출될 확률이 높아졌습니다.</li>
+<li>네이버 예약과 톡톡을 활성화해 두셨다면, 소개글 중간에 "톡톡으로 문의주시면 빠른 상담이 가능합니다"라는 문구를 한 줄 더 추가하시는 것도 체류 시간을 늘리는 좋은 방법입니다.</li>
+</ul>
+<hr class="notion-divider">
+
+<h2>플레이스 로그인 후 ➜ 업체정보 ➜ 기본정보</h2>
+
+<h3>1️⃣ *상세설명 (매장 소개글)</h3>
+<div class="notion-image" style="max-width:314px"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_162411.png" alt="상세설명" loading="lazy"></div>
+<p>예시) (OO헤어 논현점 / 미용실 기준)</p>
+<p>안녕하세요, 당신의 인생 스타일을 찾아드리는 프리미엄 헤어살롱 [OO헤어 논현점]입니다.</p>
+<p>논현역과 영동시장 인근에서 가장 트렌디하고 감각적인 디자인을 제안하는 저희 매장은, 단순한 시술을 넘어 고객님의 라이프스타일까지 고려한 맞춤형 뷰티 솔루션을 제공합니다.</p>
+<p>[전문 디자이너의 1:1 퍼스널 컨설팅]</p>
+<p>논현동 미용실 중에서도 저희 [OO헤어]는 디테일의 차이를 지향합니다. 얼굴형을 보완하는 논현역 레이어드 펌, 손상된 모발에 생명력을 불어넣는 논현동 복구 염색, 그리고 남성분들의 두상과 모질에 딱 맞춘 논현역 맨즈 컨설팅 커트까지 각 분야의 전문가들이 상주하고 있습니다. 고객님의 모발 상태를 정밀 진단하여 손상을 최소화하는 프리미엄 약제만을 사용합니다.</p>
+<p>[고객님을 위한 특별한 혜택]</p>
+<p>처음 방문하시는 고객님들께는 감사의 마음을 담아 전 시술 20% 할인 이벤트를 진행 중입니다. 또한, 스마트한 소비를 위해 네이버 페이(N Pay) 결제 시 최대 포인트 적립 혜택을 드리고 있어 합리적인 가격으로 하이엔드 서비스를 경험하실 수 있습니다.</p>
+<p>[머무는 시간이 즐거운 공간]</p>
+<p>논현동 먹자골목 인근에 위치하여 접근성이 뛰어나며, 바쁜 일상 속에서도 편안하게 쉴 수 있는 프라이빗하고 세련된 인테리어를 갖추었습니다. 논현동 주차 가능 미용실을 찾으시는 분들을 위해 무료 주차 공간을 완비하고 있어 자차 이용 시에도 불편함 없이 방문하실 수 있습니다.</p>
+<p>[이런 고민을 하시는 분들께 추천합니다]</p>
+<ul class="notion-list">
+<li>나에게 어울리는 스타일을 찾지 못한 '유목민' 고객님</li>
+<li>잦은 시술로 머릿결이 상해 염색이나 펌이 망설여지는 분</li>
+<li>아침마다 손질이 편한 디자인 커트를 원하시는 분</li>
+</ul>
+<p>스타일의 변화는 작은 차이에서 시작됩니다. 지금 바로 네이버 예약을 통해 논현동에서 가장 사랑받는 [OO헤어]의 감각을 만나보세요.</p>
+<p>#논현동미용실 #논현역미용실 #논현역레이어드펌 #논현동복구염색 #논현역맨즈컷 #논현동주차미용실</p>
+<hr class="notion-divider">
+
+<h3>2️⃣ 대표키워드</h3>
+<div class="notion-image" style="max-width:314px"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_162454.png" alt="대표키워드" loading="lazy"></div>
+<hr class="notion-divider">
+
+<h3>3️⃣ 주소</h3>
+<div class="notion-image" style="max-width:314px"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_162621.png" alt="주소" loading="lazy"></div>
+<hr class="notion-divider">
+
+<h3>4️⃣ *찾아오는 길</h3>
+<div class="notion-image" style="max-width:314px"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_162724.png" alt="찾아오는 길" loading="lazy"></div>
+<p>예시) (OO헤어 논현점 / 미용실 기준)</p>
+<p>[지하철 및 도보 이용 시]</p>
+<p>지하철 7호선/신분당선 논현역 3번 출구에서 나오셔서 약 100m 정도 직진하시면 됩니다. 스타벅스 논현역점을 지나 바로 보이는 OO빌딩 2층에 위치하고 있습니다. 논현역에서 도보 2분 거리로 매우 가깝습니다.</p>
+<p>[버스 이용 시]</p>
+<p>'논현역' 혹은 '영동시장' 버스 정류장에서 하차하시면 편리합니다. 강남대로를 지나는 대부분의 간선/지선 버스가 정차하는 교통의 요지에 위치해 있어 대중교통 이용이 매우 용이합니다.</p>
+<p>[자차 이용 및 주차 안내]</p>
+<p>네비게이션에 '논현동 OO빌딩' 혹은 <strong>'OO헤어 논현점'</strong>을 검색해 주세요.</p>
+<p>건물 1층 및 지하에 전용 주차 공간이 마련되어 있어 주차 걱정 없이 방문하실 수 있습니다. (논현동 먹자골목 초입 부근이며, 강남 영동시장과도 인접해 있어 찾기 쉽습니다.)</p>
+<p>[길찾기 팁]</p>
+<p>찾기 어려우시다면 네이버 지도에서 [길찾기] 버튼을 눌러주세요! 현재 위치에서 매장까지 가장 빠른 경로를 안내해 드립니다. 매장 방문이 설렘으로 가득 차도록 친절히 모시겠습니다.</p>
+<hr class="notion-divider">
+
+<h3>5️⃣ 부가정보</h3>
+<div class="notion-image"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_162948.png" alt="부가정보" style="max-width:710px" loading="lazy"></div>
+<hr class="notion-divider">
+
+<h3>6️⃣ 영업시간 상세 등록</h3>
+<div class="notion-image" style="max-width:407px"><img src="images/nplace-seo-guide/03829d01-0208-47d9-aa04-b4491757a422.png" alt="영업시간" loading="lazy"></div>
+<p>영업시간은 단순히 "평일 10:00~20:00"만 기재하는 것이 아니라, 요일별 세부 시간, 브레이크 타임, 정기 휴무일까지 모두 입력해야 합니다.</p>
+<p>네이버 알고리즘은 이 정보의 완성도를 체크하여 정확도 점수에 반영하며, 특히 "지금 영업 중" 배지가 노출되려면 필수입니다.</p>
+<hr class="notion-divider">
+
+<h3>7️⃣ 전화번호 (스마트콜 0507 권장)</h3>
+<div class="notion-image"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_161918.png" alt="전화번호" style="max-width:710px" loading="lazy"></div>
+<p>일반 전화번호도 등록할 수 있지만, 네이버 스마트콜(0507)을 사용하면 통화 데이터가 네이버에 기록되어 활동성 지표로 반영됩니다. 통화량이 많을수록 "실제로 운영 중인 매장"으로 판단되어 상위 노출에 유리합니다.</p>
+<hr class="notion-divider">
+
+<h3>8️⃣ 홈페이지 / SNS 링크</h3>
+<div class="notion-image" style="max-width:314px"><img src="images/nplace-seo-guide/스크린샷_2025-12-24_163437.png" alt="SNS 링크" loading="lazy"></div>
+<p>공식 홈페이지, 인스타그램, 블로그 등을 모두 연결하면 신뢰도가 올라갑니다.</p>
+<p>특히 인스타그램은 시각 자료와 함께 최신 트렌드를 보여줄 수 있어 고객 유입에 효과적입니다.</p>
+<hr class="notion-divider">
+
+<h3>9️⃣ 예약 / 주문 (N페이 연동)</h3>
+<div class="notion-image" style="max-width:583px"><img src="images/nplace-seo-guide/34f51e8f-878c-49c0-8139-3c01fd204990.png" alt="예약 주문" loading="lazy"></div>
+<p>네이버 예약 또는 주문하기 기능을 활성화하면 네이버가 가장 선호하는 전환 데이터를 확보할 수 있습니다.</p>
+<p>예약/주문 건수가 쌓일수록 알고리즘이 "고객이 선택하는 매장"으로 인식하여 순위 상승에 직접적인 영향을 미칩니다.</p>
+<hr class="notion-divider">
+
+<h3>🔟 네이버 톡톡 활성화</h3>
+<div class="notion-image"><img src="images/nplace-seo-guide/495594a4-a49e-4483-95b2-22885f2808bc.png" alt="네이버 톡톡" style="max-width:710px" loading="lazy"></div>
+<p>네이버 톡톡은 1:1 상담 채널로, 고객이 매장 페이지에 머무는 시간을 늘려주고 체류 시간 지표를 높입니다.</p>
+<p>빠른 응대는 곧 고객 만족도로 이어지며, 톡톡을 통한 문의 → 예약 전환율이 높을수록 네이버는 해당 매장을 더 자주 노출시킵니다.</p>
+<hr class="notion-divider">
+
+<h3>1️⃣1️⃣ 쿠폰 / 소식</h3>
+<div class="notion-image" style="max-width:428px"><img src="images/nplace-seo-guide/9b37dd26-c1c3-4926-92e8-f958a8ec4ca8.png" alt="쿠폰 소식" loading="lazy"></div>
+</div>
+
+<div id="nplace-delegation" class="notion-section" data-cat="naver" data-title="네이버 플레이스 권한 위임">
+<div class="notion-page-title">네이버 플레이스 권한 위임</div>
+<hr class="notion-divider">
+<div class="notion-quote"><p>담당 직원 혹은 관리 대행사에게 권한 위임하는 방법</p></div>
+
+<h3>주인</h3>
+<p>플레이스의 모든 설정 및 수정을 할 수 있습니다. 한 명만 위임이 가능합니다.</p>
+
+<h3>운영자</h3>
+<p>리뷰 및 통계, 예약 및 주문, 관리가 가능하며 업체 정보 또한 수정이 가능한 권한을 가지게 됩니다.</p>
+<p>단, 스마트콜 쿠폰 소식 마케팅 메시지 플레이스 광고 소사공인 광고 등은 설정 및 수정할 수 없습니다.</p>
+<p>스마트 플레이스의 운영자 권한을 위임하는 방법은 다음과 같습니다.</p>
+
+<h2>1. '네이버 스마트 플레이스' 검색 후 선택</h2>
+<div class="notion-image" style="max-width:355px"><img src="images/nplace-delegation/872d1a60-dd5b-4420-9d0a-040cc7408817.png" alt="스마트플레이스 검색" loading="lazy"></div>
+<ul class="notion-list"><li>사업장 플레이스 아이디로 로그인 되어있어야 합니다.</li></ul>
+
+<h2>2. 해당 사업장을 선택합니다.</h2>
+<div class="notion-image"><img src="images/nplace-delegation/f57bd27a-5a30-4bc3-8579-41134cc11a4e.png" alt="사업장 선택" style="max-width:710px" loading="lazy"></div>
+<ul class="notion-list"><li>운영자 권한을 원하는 사업장을 클릭합니다.</li></ul>
+
+<h2>3. 전체 설정을 선택합니다.</h2>
+<div class="notion-image" style="max-width:376px"><img src="images/nplace-delegation/cf3b6c9d-e783-418f-9001-4ef0da981695.png" alt="전체 설정" loading="lazy"></div>
+<ul class="notion-list"><li>업체 정보 왼쪽 하단의 '전체 설정'을 클릭 합니다.</li></ul>
+
+<h2>4. 전체 설정을 클릭 후 권한 관리를 선택합니다.</h2>
+<div class="notion-image" style="max-width:451px"><img src="images/nplace-delegation/be455a95-55ed-4703-b628-bc09168e9ed5.png" alt="권한 관리" loading="lazy"></div>
+
+<h2>5. 권한 관리 하단에 운영자 추가를 선택합니다.</h2>
+<div class="notion-image" style="max-width:317px"><img src="images/nplace-delegation/e58cd883-1467-4426-ba24-f7a0b27c25f1.png" alt="운영자 추가" loading="lazy"></div>
+<ul class="notion-list"><li>운영자 추가 클릭</li></ul>
+
+<h2>6. 운영자로 추가할 네이버 ID를 입력합니다.</h2>
+<div class="notion-image" style="max-width:331px"><img src="images/nplace-delegation/ecb43e25-29c5-4eff-9799-c5f66678309d.png" alt="네이버 ID 입력" loading="lazy"></div>
+<ul class="notion-list">
+<li>아이디 입력 → 동의 및 추가 → 동의하기</li>
+<li>유의사항 : 추가할 네이버 아이디는 스마트 플레이스에 가입이 되어있어야 합니다.</li>
+</ul>
+
+<h2>7. 해당 위임자의 최종 동의 확인</h2>
+<div class="notion-image"><img src="images/nplace-delegation/ed8889d9-66e9-4f12-ba11-ca6c80e25ad8.png" alt="최종 동의" style="max-width:710px" loading="lazy"></div>
+<div class="notion-image" style="max-width:429px"><img src="images/nplace-delegation/0281a7b1-e396-46ab-b20a-633a120d85ed.png" alt="동의하기" loading="lazy"></div>
+<ul class="notion-list"><li>해당 권한을 받을 네이버 로그인 후 '알림' 클릭→ '동의하기' 클릭</li></ul>
+<hr class="notion-divider">
+</div>
+
+<div id="ad-center-delegation" class="notion-section" data-cat="naver" data-title="네이버 광고주센터 권한 위임">
+<div class="notion-page-title">네이버 광고주센터 권한 위임</div>
+<div class="notion-quote"><p>담당 직원 혹은 관리 대행사에게 권한 위임하는 방법</p></div>
+
+<h1>1. 네이버 광고주센터 접속</h1>
+<p>바로가기 URL : <a class="notion-link" href="https://ads.naver.com/" target="_blank">https://ads.naver.com/</a></p>
+<div class="notion-image" style="max-width:489px"><img src="images/ad-center-delegation/dfc33ab3-3376-4434-a9bc-d7ff13a10a26.png" alt="광고주센터 접속" loading="lazy"></div>
+
+<h1>2. 로그인 후 우측상단 ID 클릭</h1>
+<div class="notion-image"><img src="images/ad-center-delegation/c1585e69-c3d0-41c1-a43f-c4d1c0208b32.png" alt="ID 클릭" style="max-width:710px" loading="lazy"></div>
+
+<h1>3. 계정 책임자 선택</h1>
+<div class="notion-image" style="max-width:427px"><img src="images/ad-center-delegation/46f47502-0020-45e3-b424-c943c46b95e7.png" alt="계정 책임자" loading="lazy"></div>
+
+<h1>4. 좌측하단 설정 → 권한 관리 → 맴버초대</h1>
+<div class="notion-image"><img src="images/ad-center-delegation/3ed275be-7747-4e77-81b0-973bafd4c99e.png" alt="권한 관리" style="max-width:710px" loading="lazy"></div>
+
+<h1>5. 동의 → ID입력 → 가입 여부 조회 → 확인</h1>
+<div class="notion-image" style="max-width:600px"><img src="images/ad-center-delegation/5937dc0e-5ded-4294-9bfd-ea326b409d6b.png" alt="ID 입력" loading="lazy"></div>
+<p>✔️ 운영 관리 : 광고 계정 수정, 소재 등록 및 집행가능</p>
+<p>✔️ 운영 조회 : 결과 분석만 가능, 수정 불가</p>
+
+<h1>6. 초대한 계정의 수락</h1>
+<div class="notion-image" style="max-width:584px"><img src="images/ad-center-delegation/0c723be2-e7d5-4544-b367-d334b8c17ae8.png" alt="수락" loading="lazy"></div>
+<ul class="notion-list">
+<li>정상적으로 초대가 되었다면 하단에 초대한 계정이 보여집니다.</li>
+<li>초대한 계정의 수락 후 최종 완료됩니다.</li>
+</ul>
+<hr class="notion-divider">
+</div>
+
+<div id="pricing" class="notion-section" data-cat="instagram" data-title="상품 가격표">
+<div class="notion-page-title">상품 가격표</div>
+<hr class="notion-divider">
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content">
+<p><strong>🔔 현재 인스타그램 계정 필터링 강화에 따른 공지</strong></p>
+<p>현재 인스타그램 시스템 내 계정 필터 강화가 지속됨에 따라, 안정적인 품질 유지 및 계정 보호를 위해 일부 서비스의 가격이 부득이하게 인상되었습니다. 인스타그램 환경이 안정화되는 시점에 맞춰 다시 가격을 완화할 계획입니다.</p>
+<p>또한, 계정 안전을 위해 보안 로직을 준수하여 작업함에 따라 작업 속도가 평소보다 다소 유동적(지연)일 수 있는 점 너그러운 양해 부탁드립니다.</p>
+<p>[가격 인상 및 속도 영향 서비스]</p>
+<p>한국인 팔로워 • 부스팅 전용 팔로워 • 한국인 좋아요</p>
+</div></div>
+<hr class="notion-divider">
+
+<h3>01. 리그램 배포 작업</h3>
+<p>다계정 배포를 통한 검색 결과의 상위 영역을 선점</p>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>구분</th><th>특징 및 제공 내역</th><th>가격 (Vat 별도)</th></tr></thead>
+<tbody>
+<tr><td>⚡️ 단건 작업 (1회)</td><td>• 사진/릴스 무관, 1회 배포<br>• 작업 완료 후 노출 결과 1회 제공</td><td>12,000원</td></tr>
+<tr><td>📆 월간 관리 (보장형)</td><td>• 매일(Daily) 노출 현황 보고<br>• 키워드 경쟁도에 따라 견적 상이 (상담 필수)</td><td>100,000원 부터~</td></tr>
+</tbody></table></div>
+<a class="notion-bookmark" href="https://onda01.notion.site/repost" target="_blank">자세히 보기 → onda01.notion.site/repost</a>
+<hr class="notion-divider">
+
+<h3>02. 내 게시물 노출 작업</h3>
+<p>내 게시물을 추천탭 상단에 노출시켜 직접적인 계정 유입 유도</p>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>구분</th><th>특징 및 제공 내역</th><th>가격 (VAT 별도)</th></tr></thead>
+<tbody>
+<tr><td>⚡️단건 작업</td><td>• 게시물 1회 상위 노출 작업 진행</td><td>12,000원</td></tr>
+<tr><td>📆 월간 관리</td><td>• 주 3회 업로드 기준 (총 월 12회 제공)<br>• 📉 단건 대비 회당 2,000원 할인 ↓</td><td>120,000원</td></tr>
+</tbody></table></div>
+<a class="notion-bookmark" href="https://onda01.notion.site/mypost" target="_blank">자세히 보기 → onda01.notion.site/mypost</a>
+<hr class="notion-divider">
+
+<h3>03. 계정 상위 노출 &amp; 자동완성</h3>
+<p>계정탭, 자동완성어, 추천탭을 동시에 공략하여 계정의 검색 경쟁력을 확보</p>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>구분</th><th>1슬롯당 단가 (VAT 별도)</th><th>혜택 및 할인</th></tr></thead>
+<tbody>
+<tr><td>1개월 진행 시 (30일)</td><td>150,000원</td><td>• 기본 순위 관리</td></tr>
+<tr><td>3개월 진행 시 (90일)</td><td>120,000원</td><td>• 📉 총 9만원 할인 (월 3만원 ↓)</td></tr>
+</tbody></table></div>
+<a class="notion-bookmark" href="https://onda01.notion.site/account" target="_blank">자세히 보기 → onda01.notion.site/account</a>
+<hr class="notion-divider">
+
+<h3>04. 계정 최적화 &amp; 자동활동</h3>
+<p>계정 지수를 높여 노출 확률을 극대화하고 자동 활동을 통해 잠재 고객을 확보</p>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>구분</th><th>최적화 슬롯 (Standard)</th><th>최적화 라이트 슬롯 (Lite)</th></tr></thead>
+<tbody>
+<tr><td>핵심 목적</td><td>활동량 증가 + 신규 유입 + 인지도 상승</td><td>활동량 유지 + 지수 저하 방지</td></tr>
+<tr><td>주요 대상</td><td>공격적인 확장과 팔로워 성장이 필요한 계정</td><td>기존 팔로워 관리와 안정적인 운영이 필요한 계정</td></tr>
+<tr><td>작업 범위</td><td>관심사 기반 잠재고객 탐색 및 소통 활동</td><td>현재 팔로잉 중인 사용자 위주의 소통 활동</td></tr>
+<tr><td>판매가</td><td>150,000원</td><td>60,000원</td></tr>
+</tbody></table></div>
+<a class="notion-bookmark" href="https://onda01.notion.site/optimization-auto" target="_blank">자세히 보기 → onda01.notion.site/optimization-auto</a>
+<hr class="notion-divider">
+
+<h3>릴스 알고리즘 부스팅</h3>
+<p>인스타그램 AI 추천 알고리즘을 태워 릴스의 자연 확산과 임계점 돌파 유도</p>
+<p><strong>Step 1. 부스팅 전용 팔로워 세팅 (기반 구축)</strong></p>
+<p>부스팅 작업의 주체가 되는 '전용 팔로워'를 계정에 세팅하는 필수 단계입니다. (최초 1회)</p>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>팔로워 수</th><th>가격</th><th>특징</th></tr></thead>
+<tbody>
+<tr><td>1,000명</td><td>240,000원</td><td>부스팅 서비스의 기본 시작 단계</td></tr>
+<tr><td>3,000명</td><td>720,000원</td><td>안정적인 초기 반응 지표 확보 (권장)</td></tr>
+<tr><td>5,000명</td><td>1,200,000원</td><td>강력한 퍼포먼스 및 광범위한 확산 유도</td></tr>
+</tbody></table></div>
+<p><strong>Step 2. 릴스 알고리즘 부스팅 작업 (회당 비용)</strong></p>
+<p>릴스 업로드 시마다 알고리즘을 태우는 실질적인 부스팅 작업 비용입니다.</p>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>구분</th><th>가격 (1회 기준)</th><th>비고</th></tr></thead>
+<tbody>
+<tr><td>1,000명 전용</td><td>20,000원</td><td>1,000명 세팅 계정 전용</td></tr>
+<tr><td>3,000명 전용</td><td>60,000원</td><td>3,000명 세팅 계정 전용</td></tr>
+<tr><td>5,000명 전용</td><td>100,000원</td><td>5,000명 세팅 계정 전용</td></tr>
+</tbody></table></div>
+<a class="notion-bookmark" href="https://onda01.notion.site/boosting" target="_blank">자세히 보기 → onda01.notion.site/boosting</a>
+<hr class="notion-divider">
+
+<h2>📊 인사이트 트래픽</h2>
+<p>계정의 지표를 보완하기 위한 세부 트래픽</p>
+<h3>팔로워</h3>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>항목</th><th>최소 수량</th><th>최대 수량</th><th>판매가</th></tr></thead>
+<tbody>
+<tr><td>한국인 팔로워</td><td>100</td><td>50,000</td><td>100원</td></tr>
+<tr><td>한국인 여성 팔로워</td><td>100</td><td>50,000</td><td>임시 판매 중단</td></tr>
+<tr><td>한국인 20대 여성 팔로워</td><td>100</td><td>50,000</td><td>-</td></tr>
+<tr><td>한국인 30대 여성 팔로워</td><td>100</td><td>50,000</td><td>-</td></tr>
+<tr><td>한국인 남성 팔로워</td><td>100</td><td>50,000</td><td>-</td></tr>
+<tr><td>한국인 20대 남성 팔로워</td><td>100</td><td>50,000</td><td>-</td></tr>
+<tr><td>한국인 30대 남성 팔로워</td><td>100</td><td>50,000</td><td>-</td></tr>
+<tr><td>외국인 팔로워</td><td>100</td><td>100,000</td><td>4원</td></tr>
+</tbody></table></div>
+
+<h3>좋아요 &amp; 댓글</h3>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>항목</th><th>최소 수량</th><th>최대 수량</th><th>판매가</th></tr></thead>
+<tbody>
+<tr><td>한국인 좋아요</td><td>100</td><td>10,000</td><td>10원</td></tr>
+<tr><td>외국인 좋아요</td><td>100</td><td>100,000</td><td>1원</td></tr>
+<tr><td>한국인 커스텀 댓글</td><td>1</td><td>1,000</td><td>140원</td></tr>
+<tr><td>한국인 AI 댓글</td><td>10</td><td>50</td><td>140원</td></tr>
+</tbody></table></div>
+
+<h3>기타</h3>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>항목</th><th>최소 수량</th><th>최대 수량</th><th>판매가</th></tr></thead>
+<tbody>
+<tr><td>노출+도달 (홈, 탐색, 태그, 기타)</td><td>100</td><td>1,000,000</td><td>임시 판매 중단</td></tr>
+<tr><td>게시물 저장</td><td>100</td><td>100,000</td><td>-</td></tr>
+<tr><td>게시물 공유</td><td>100</td><td>500,000</td><td>-</td></tr>
+<tr><td>릴스 조회수</td><td>100</td><td>250,000</td><td>-</td></tr>
+</tbody></table></div>
+<hr class="notion-divider">
+</div>
+
+<div id="instagram-guide" class="notion-section" data-cat="instagram" data-title="인스타그램 가이드북">
+<div class="notion-page-title">인스타그램 가이드북</div>
+<p class="notion-notice">※ 해당 문서의 외부 공유 및 유출을 금지합니다.</p>
+<hr class="notion-divider">
+<div class="notion-quote"><p>"상위 노출은 운이 아니라 철저한 설계의 결과입니다."</p></div>
+
+<h2>인스타그램 주요 탭별 노출 메커니즘</h2>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>구분</th><th>주요 노출 대상</th><th>마케팅 활용 포인트</th><th>핵심 가치</th></tr></thead>
+<tbody>
+<tr><td>홈 탭</td><td>팔로워 + 관심 콘텐츠</td><td>팔로워와의 소통 및 충성도 강화</td><td>기존 팬 관리</td></tr>
+<tr><td>탐색 탭</td><td>비팔로워(전체 사용자)</td><td>반응도 높은 릴스/이미지로 대중 공략</td><td>바이럴 및 확산</td></tr>
+<tr><td>추천 탭</td><td>검색 키워드 타겟</td><td>특정 목적(맛집, 정보 등)을 가진 유입 확보</td><td>가장 높은 전환율</td></tr>
+<tr><td>계정 탭</td><td>키워드 연관 계정</td><td>검색 시 브랜드/계정 우선 노출 (인지도)</td><td>브랜드 신뢰도</td></tr>
+</tbody></table></div>
+
+<h2>쉽고 빠르게 알고리즘 이해하기</h2>
+<div class="notion-columns">
+<div class="notion-column"><div class="notion-video-placeholder">🎬 영상 준비 중<br><small>상이한 검색결과의 원인</small></div></div>
+<div class="notion-column"><div class="notion-video-placeholder">🎬 영상 준비 중<br><small>시기별 노출 알고리즘</small></div></div>
+<div class="notion-column"><div class="notion-video-placeholder">🎬 영상 준비 중<br><small>콘텐츠 로테이션 알고리즘</small></div></div>
+</div>
+
+<h2>알고리즘이 사랑하는 '반응 지표'</h2>
+<p>단순히 '좋아요'만 많다고 좋은 것이 아닙니다. 알고리즘은 사용자들이 해당 콘텐츠에 얼마나 깊게 관여 했는지를 중요하게 봅니다.</p>
+<ul class="notion-list">
+<li>우선순위: 저장 > 공유 > 프로필 방문 > 댓글 > 좋아요</li>
+<li>체류 시간: 영상(릴스) 시청 시간 및 이미지 슬라이드 머무는 시간이 길수록 가산점 부여</li>
+</ul>
+
+<h1>🛠️ [실전] 상위 노출 핵심 전략</h1>
+<p>인스타그램 마케팅은 이제 단순한 '포스팅'이 아니라 '데이터 설계'의 영역입니다. 키워드별 상위 콘텐츠를 벤치마킹(이미지 유형, 사진 개수, 메인 키워드 전략 등)하고, 부족한 지표를 인위적/자연적으로 보완하는 전략적 접근이 필요합니다.</p>
+
+<h2>1️⃣ 업로드 직후 '골든타임 1시간' 공략</h2>
+<p>신규 게시물이 업로드 되면 AI는 비팔로워에게 소량 테스트 노출을 진행합니다.</p>
+<p>이때 초기 1시간 안에 충분한 반응이 있어야 더 큰 확산이 일어납니다.</p>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>항목</th><th>권장 수치</th></tr></thead>
+<tbody>
+<tr><td>좋아요</td><td>200+</td></tr>
+<tr><td>댓글</td><td>3+</td></tr>
+<tr><td>저장</td><td>1,000+</td></tr>
+<tr><td>공유</td><td>150+</td></tr>
+<tr><td>도달</td><td>500+</td></tr>
+</tbody></table></div>
+<p>💡 경쟁도가 높은 키워드(예: 맛집 관련)일수록 더 많은 트래픽이 필요합니다.</p>
+
+<h2>2️⃣ 상위 노출을 위한 콘텐츠 '벤치마킹'</h2>
+<p>무작정 잘 만든 콘텐츠를 업로드 한다고 해서 노출에 성공하는 것은 아닙니다. 노출되고 싶은 키워드를 먼저 검색해본 뒤 현재 상단에 노출되고 있는 콘텐츠 유형을 따라 업로드 해보세요.</p>
+<ul class="notion-list">
+<li>릴스 vs 사진 : 첫 페이지에 영상이 많은지 사진이 많은지 확인해보세요.</li>
+<li>이미지 성격 : 단일 컷 vs 여러 장, 음식 위주 vs 인물/공간 위주 비교</li>
+<li>키워드 전략 : 다양한 해시태그보다는 메인 키워드 1개만 사용했을 때 노출 효과가 가장 좋습니다.</li>
+</ul>
+
+<h2>3️⃣ '최적화 계정' 만드는 30일 루틴</h2>
+<p>인스타그램이 [지속적으로 활동하는 신뢰할 수 있는 계정]으로 인식하는 것이 중요합니다.</p>
+<ul class="notion-list">
+<li>팔로워 3,000명 이상, 게시물 30개 이상 유지 : 최소한의 충족 조건(공신력)을 갖추세요.
+  <ul><li>팔로워는 천천히 분할 유입하시는 것을 권장드립니다.</li></ul>
+</li>
+<li>매일 1회 업로드 : 꾸준함이 생명입니다.</li>
+<li>상호작용 : 다른 사용자의 게시물을 시청하고 좋아요 누르고 댓글을 다는 등의 활동은 필수입니다.</li>
+<li>테스트 : 경쟁이 적은 키워드부터 내 게시물이 노출되는지 확인해보세요.</li>
+</ul>
+<hr class="notion-divider">
+
+<h3>💡 전문가의 한 마디</h3>
+<p>사업 운영만으로도 바쁘신 대표님들께서 매일 변화하는 알고리즘을 분석하고 직접 실행하기는 현실적으로 어렵습니다. '시간은 돈'이라는 관점에서, 이미 최적화된 계정을 활용하거나 전문적인 자동화 솔루션/대행사를 이용하는 것이 오히려 마케팅 비용 대비 수익(ROAS)을 높이는 지름길이 될 수 있습니다.</p>
+<hr class="notion-divider">
+
+<h1>✅ 계정 체크 리스트</h1>
+<div class="notion-quote"><p>아래 체크 리스트를 바탕으로, 내 계정이 잘 운영되고 있는지, 부족한 점은 없는지 경쟁사 계정과 비교·분석 해보시기 바랍니다. 이를 통해 현재 운영 중인 계정의 강점과 개선 포인트를 보다 명확히 파악하실 수 있습니다.</p></div>
+
+<h2>계정 언급 및 태그 ON</h2>
+<p>참고 : 언급 및 태그 ON OFF 변경방법</p>
+<ul class="notion-list"><li>설정(≡) → 공개범위 → 태그 및 언급 → 허용 대상 변경 → 모든 사람</li></ul>
+
+<h2>검토를 위해 플래그 지정 OFF</h2>
+<p>인스타그램에서 본인의 계정과 연관이 없는 계정이 팔로우 하는 것에 대한 분류 기능이 업데이트 되었습니다. 원활한 팔로워 상승을 위해 해당 설정을 권장드립니다.</p>
+<ul class="notion-list"><li>설정(≡) → 친구 팔로우 및 초대 → 검토를 위해 플래그 지정 → OFF</li></ul>
+
+<h2>* 프로패셔널 계정 전환</h2>
+<p>프로페셔널 계정은 일반 계정과 달리 인사이트(통계), 광고, 피드 연동 등의 추가 기능을 제공합니다.</p>
+<ul class="notion-list"><li>설정(≡) → 계정 유형 및 도구 → 프로패셔널 계정으로 전환</li></ul>
+
+<h2>* 계정 프로필 체크 리스트</h2>
+
+<h3>1️⃣ 프로필 사진</h3>
+<ul class="notion-list">
+<li>브랜드/개인의 정체성이 보이는지? 점검합니다.</li>
+<li>흐릿하거나, 어둡거나, 힘없거나, 메시지 없는 사진 ❌</li>
+<li>눈에 띄고 기억 남는 썸네일형이 좋습니다.</li>
+<li>로고 vs 인물: 어떤 브랜딩하느냐에 따라 선택 하시면 됩니다.</li>
+</ul>
+<p>✅ 예:</p>
+<p>1인 브랜딩: 밝은 배경에 정면 얼굴, 시선 잡히는 표정</p>
+<p>브랜드형: 간결한 로고, 컬러 통일</p>
+<hr class="notion-divider">
+
+<h3>2️⃣ 이름 (Name 필드)</h3>
+<ul class="notion-list">
+<li>tip : 인스타 검색은 이름 필드를 먼저 탐색합니다.</li>
+<li>직무/전문성 + 검색되는 키워드를 포함되는 것이 좋습니다.</li>
+<li>고객이 찾을 키워드를 활용하여, 전문성과 검색 타깃층을 확보합니다.</li>
+</ul>
+<p>✅ 예:</p>
+<p>마케팅 전문가 – SNS 매출상승 + 타깃 키워드 사용</p>
+<p>김OO | 온라인 클래스 코치 + 타깃 키워드 사용</p>
+<p>뷰티샵 컨설턴트 | 인스타 브랜딩 + 타깃 키워드 사용</p>
+<hr class="notion-divider">
+
+<h3>3️⃣ 소개글(Bio) – 첫인상 한 줄 컷</h3>
+<ul class="notion-list">
+<li>내가 누군지 + 뭘 해주는지 + 왜 믿어야 하는지 한 줄로 고객들에게 딱 보여주고 있나? 점검합니다.</li>
+<li>감성 말고, 직업/기능/결과/능력/전문성을 강조합니다.</li>
+<li>고객이 "내가 처한 상황을 해결해 줄 거야" 싶은 한 줄 카피는 필수!</li>
+<li>이모지, 줄바꿈 활용해서 가독성 살려야 합니다.</li>
+</ul>
+<p>✅ 예:</p>
+<p>매출 안 나는 계정, 7일 만에 바꿔드립니다.</p>
+<p>SNS 브랜딩 · 콘텐츠 전략</p>
+
+<h3>4️⃣ 링크 – 클릭 유도 동선</h3>
+<ul class="notion-list">
+<li>계정에 유입된 소비자는 문의·구매·신청이 복잡하거나 없으면 피로감에 이탈할 수 있습니다.</li>
+<li>1개 이상의 링크를 사용할 경우, 인포크 링크를 활용하여 명확히 안내합니다.</li>
+</ul>
+
+<h3>5️⃣ 하이라이트 - 포트폴리오</h3>
+<ul class="notion-list">
+<li>하이라이트가 곧 포트폴리오 + 후기 + 신뢰로 이어집니다.</li>
+<li>'정보성·후기·비포애프터·고객Q&amp;A' 등으로 신뢰 패턴 만들어야 합니다.</li>
+</ul>
+<hr class="notion-divider">
+
+<h3>6️⃣ 게시글 (Feed)</h3>
+<ul class="notion-list">
+<li>첫 단 썸네일: 눈멈춤 포인트 있어야 함</li>
+<li>콘텐츠 목적: 저장 유도, 팔로우 유도, 문의 유도</li>
+<li>게시물 포맷 다양화: 정보/후기/비하인드/꿀팁 혼합</li>
+<li>텍스트 많으면 가독성 떨어짐 → 카드뉴스형 추천</li>
+</ul>
+<p>✅ 예:</p>
+<p>팔리는 계정 = 프로필 5초 법칙</p>
+<p>DM 안 오는 계정, 3가지 특징</p>
+<p>이 소개글 하나로 매출 터졌어요</p>
+<p>좋아요 10개 → 매출 100만원 된 이유</p>
+<hr class="notion-divider">
+</div>
+
+<div id="repost" class="notion-section" data-cat="instagram" data-title="리그램 배포 작업">
+<div class="notion-page-title">리그램 배포 작업</div>
+<hr class="notion-divider">
+
+<h1>01. Intro: 최적화 SEO</h1>
+<p>"네이버엔 '최적화 블로그', 인스타엔 '리그램 배포'가 있습니다."</p>
+<p>'리그램 배포 작업'이란? 네이버 마케팅에서 상위 노출을 위해 '최적화 블로그'를 대여하여 배포하듯, 인스타그램 로직에 최적화된 고지수 계정을 활용하여 콘텐츠를 업로드하고 노출시키는 서비스입니다.</p>
+<p>"아무리 잘 만든 콘텐츠라도 노출되지 않으면 의미 없습니다."</p>
+<p>광고주님이 제공한 이미지와 본문을 기반으로, 노출이 잘 이루어지는 계정들을 활용하여 검색 결과 영역(추천탭)에 확실하게 노출시킵니다.</p>
+<hr class="notion-divider">
+
+<h1>02. Why This Service?</h1>
+<h3>서비스 핵심 요소</h3>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>⚡️접근성: "계정이 없어도 OK"</strong></p><p>콘텐츠 자료(사진/영상)만 준비되었다면, 누구나 쉽고 빠르게 이용 가능합니다.</p></div></div>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>📉 현실: "열에 아홉은 노출 실패"</strong></p><p>노출 조건(최적화)을 충족하지 못해 아무리 잘 만든 콘텐츠를 업로드 해도 노출에 제한적입니다. '리그램 배포 작업'은 노출 로직에 최적화된 계정을 활용합니다.</p></div></div>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>⚓️ 안정성: "견고한 상위 안착"</strong></p><p>경쟁이 치열한 키워드에서도 검색 결과(추천탭) 상위 영역을 견고하게 점유합니다.</p></div></div>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>📈 누적 효과: "시간이 지날수록 강해지는 도배력"</strong></p><p>발행된 게시물이 누적될수록 검색 결과 내 도배력(점유율)이 점진적으로 증가합니다.</p></div></div>
+<hr class="notion-divider">
+
+<h3>🎯 상위 노출의 본질: 관심사 기반의 정밀 타겟팅</h3>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content">
+<p>"검색 고객은 이미 지갑을 열 준비가 되어 있습니다."</p>
+<p>'강남강아지분양', '말티푸분양'을 검색한 사용자는 단순 구경꾼이 아닌,</p>
+<p>당장 분양받을 곳을 찾고 있는 구매전환율이 매우 높은 잠재 고객임을 의미합니다.</p>
+</div></div>
+<p>"어떤 전략을 선택하시겠습니까?"</p>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>구분</th><th>A (단일 계정 운영)</th><th>B (다계정 배포)</th></tr></thead>
+<tbody>
+<tr><td>목표</td><td>1개의 게시물이 1만 명에게 도달하기</td><td>100개의 게시물이 1만 명에게 도달하기</td></tr>
+<tr><td>난이도</td><td>🔺 상 (어려움)</td><td>🔵 하 (쉬움)</td></tr>
+<tr><td>전략</td><td>"불확실한 알고리즘에 의존"</td><td>"노출 확률 극대화를 통한 도달 범위 확장"</td></tr>
+</tbody></table></div>
+<p>💡 핵심: 단일 계정 대비 '압도적인 도달률'</p>
+<p>수많은 최적화 계정을 활용하여 노출 성공 확률을 물리적으로 극대화합니다.</p>
+<p>이를 통해 단일 계정 대비 보다 넓은 도달력(Coverage)으로 효과적인 신규 유입을 만들어냅니다.</p>
+
+<h3>📊 References: 실제 노출 사례</h3>
+<p>▼ 아래 토글을 클릭하여 실제 사례를 확인해보세요.</p>
+<details class="notion-toggle"><summary>▶ [맛집/카페]</summary><div class="notion-toggle-content"><p>(사례 내용)</p></div></details>
+<details class="notion-toggle"><summary>▶ [뷰티]</summary><div class="notion-toggle-content"><p>(사례 내용)</p></div></details>
+
+<h3>📺 노출 알고리즘, 이해를 돕는 영상</h3>
+<p>▼ 아래 토글을 클릭하여 원리를 확인해보세요.</p>
+<p>"사용자의 평소 관심사에 따라 노출되는 게시물이 달라집니다."</p>
+<details class="notion-toggle"><summary>▶ 인스타그램 검색 결과가 다른 이유</summary><div class="notion-toggle-content"><div class="notion-video-placeholder">🎬 영상 준비 중</div></div></details>
+<hr class="notion-divider">
+<p>"시간의 흐름과 최신성 점수에 따라 순위가 변동됩니다."</p>
+<details class="notion-toggle"><summary>▶ 시기별 노출 검색 결과</summary><div class="notion-toggle-content"><div class="notion-video-placeholder">🎬 영상 준비 중</div></div></details>
+<hr class="notion-divider">
+<p>"다양한 콘텐츠의 반응을 테스트하기 위해 로테이션(순환)됩니다."</p>
+<details class="notion-toggle"><summary>▶ 콘텐츠별 로테이션 검색 결과</summary><div class="notion-toggle-content"><div class="notion-video-placeholder">🎬 영상 준비 중</div></div></details>
+
+<h1>03. Process &amp; Pricing</h1>
+<h2>💰 서비스 가격</h2>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>구분</th><th>특징 및 제공 내역</th><th>가격 (Vat 별도)</th></tr></thead>
+<tbody>
+<tr><td>⚡️ 단건 작업 (1회)</td><td>• 사진/릴스 무관, 1회 배포<br>• 작업 완료 후 노출 결과 1회 제공</td><td>12,000원</td></tr>
+<tr><td>📆 월간 관리 (보장형)</td><td>• 매일(Daily) 노출 현황 보고<br>• 키워드 경쟁도에 따른 1:1 맞춤 견적 (필수)</td><td>100,000원 부터~</td></tr>
+</tbody></table></div>
+<hr class="notion-divider">
+
+<h2>⚙️ 진행 프로세스</h2>
+<p><strong>1️⃣ 상담 및 분석</strong></p>
+<div class="notion-quote"><p>타겟 키워드 선정 및 경쟁도 분석</p></div>
+<p><strong>2️⃣ 자료 전달</strong></p>
+<div class="notion-quote"><p>가이드라인에 맞춘 자료 전달</p></div>
+<p><strong>3️⃣ 작업 착수</strong></p>
+<div class="notion-quote"><p>최적화 계정을 통한 배포 및 노출 작업 시작</p></div>
+<p><strong>4️⃣ 결과 보고</strong></p>
+<div class="notion-quote"><p>(단건) 작업 완료 링크 리스트 전달<br>(월간) 매일(Daily) 노출 현황 보고</p></div>
+<hr class="notion-divider">
+
+<h2>🗂 자료 전달 가이드</h2>
+<p>원활한 작업 착수를 위해 아래 가이드에 맞춰 자료를 전달해 주세요.</p>
+
+<h3>✅ 필수 전달 사항</h3>
+<p>이미지 및 영상 자료입니다.</p>
+<ul class="notion-list">
+<li>수량: 사진 or 영상</li>
+<li>권장 규격:
+  <ul>
+    <li>1:1 정방형 (1080 x 1080 px)</li>
+    <li>4:5 세로형 (1080 x 1350 px)</li>
+  </ul>
+</li>
+<li>제출 형식: 모든 파일은 하나의 폴더에 담아 압축(ZIP)하여 전달해 주세요.</li>
+</ul>
+
+<h3>☑️ 선택 전달 사항</h3>
+<p>게시물 본문 및 태그 정보입니다.</p>
+<ul class="notion-list">
+<li>본문 원고: 띄어쓰기와 공백 포함 최대 2,000자 이내</li>
+<li>태그 ID: 게시물 이미지 내에 태그할 계정 아이디 (@example)</li>
+<li>제출 형식: 줄바꿈(엔터) 등이 유지되도록 '메모장(.txt)' 파일로 전달해 주세요.</li>
+</ul>
+
+<h3>⚠️ 자료 수정 및 유의사항</h3>
+<p>⭕️ 자료 교체 (가능)</p>
+<p>진행 기간 중에는 언제든 자료(사진/원고)의 수정 및 교체가 가능합니다.</p>
+<p>❌ 발행 후 수정 (불가능)</p>
+<p>이미 발행(업로드)이 완료된 게시물은 수정이 불가능합니다.</p>
+<p>최종 전달 전, 꼼꼼히 체크 부탁드립니다!</p>
+<hr class="notion-divider">
+</div>
+
+<div id="mypost" class="notion-section" data-cat="instagram" data-title="내 게시물 노출 작업">
+<div class="notion-page-title">내 게시물 노출 작업</div>
+
+<h1>01. Service Overview</h1>
+<h3>서비스 개요</h3>
+<p>'내 게시물 상위 노출' 작업은 인스타그램 내 특정 키워드 검색 시, 광고주님 계정에 업로드된 게시물이 추천탭(인기 게시물) 상위 영역에 노출될 수 있도록 유도하는 프리미엄 서비스입니다.</p>
+
+<h3>🎯 서비스 목표</h3>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content">
+<p>"고객의 시선이 닿는 가장 첫 번째 자리, 우리의 콘텐츠가 있어야 합니다."</p>
+<p>단순한 노출을 넘어 검색 결과의 상위 영역을 선점함으로써, 경쟁사보다 먼저 잠재 고객의 클릭을 이끌어내는 것이 우리의 목표입니다.</p>
+</div></div>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>구분</th><th>일반 게시물</th><th>상위 노출 (Golden Zone)</th></tr></thead>
+<tbody>
+<tr><td>위치</td><td>스크롤을 한참 내려야 발견됨</td><td>검색 즉시 최상단 노출</td></tr>
+<tr><td>도달</td><td>기존 팔로워에게만 제한적 노출</td><td>관심사 기반 잠재 고객에게 도달</td></tr>
+<tr><td>결과</td><td>낮은 유입, 저조한 문의</td><td>폭발적인 유입, 높은 전환율</td></tr>
+</tbody></table></div>
+
+<h3>📢 Logic &amp; Algorithm</h3>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content">
+<p><strong>💡 "외부 트래픽과 실제 반응의 시너지"</strong></p>
+<p>다양한 콘텐츠를 꾸준히 업로드하며 본 작업을 병행할 때, 인위적인 트래픽과 실제 사용자들의 반응이 만나 폭발적인 시너지가 발생합니다.</p>
+<p>이 과정에서 인게이지먼트가 누적되어 계정 지수가 상승하며, 변화하는 알고리즘 속에서도 안정적인 노출 환경을 구축하게 됩니다.</p>
+</div></div>
+
+<p>[알고리즘, 이해를 돕는 영상]</p>
+<div class="notion-columns">
+<div class="notion-column"><div class="notion-video-placeholder">🎬 영상 준비 중<br><small>상이한 검색결과의 원인</small></div></div>
+<div class="notion-column"><div class="notion-video-placeholder">🎬 영상 준비 중<br><small>시기별 노출 알고리즘</small></div></div>
+<div class="notion-column"><div class="notion-video-placeholder">🎬 영상 준비 중<br><small>콘텐츠 로테이션 알고리즘</small></div></div>
+</div>
+<hr class="notion-divider">
+
+<h1>02. Why This Service?</h1>
+<h3>👤 이런 분들께 강력 추천합니다!</h3>
+<div class="notion-quote">
+<p>✅ [확실한 경쟁우위] 내 콘텐츠를 눈에 띄는 위치에 선점하고 싶으신 분</p>
+<p>✅ [핵심 고객 확보] 구매 전환율 높은 타겟이 필요하신 분</p>
+<p>✅ [브랜드 자산화] 시간이 지날수록 마케팅 효과가 자산처럼 누적되길 원하시는 분</p>
+<p>✅ [압도적 편의성] 복잡한 과정 없이, 빠르고 간편한 홍보 방법을 찾으시는 분</p>
+</div>
+<hr class="notion-divider">
+
+<h3>서비스 핵심 요소</h3>
+<div class="notion-columns">
+<div class="notion-column"><div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>🎯 정밀 타겟팅</strong></p><p>구매전환율이 매우 높은 관심사 기반의 타겟에게 효과적으로 도달합니다.</p></div></div></div>
+<div class="notion-column"><div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>👀 높은 주목도</strong></p><p>검색 결과 상위 영역에서 사용자의 시선을 가장 먼저 사로잡습니다.</p></div></div></div>
+</div>
+<div class="notion-columns">
+<div class="notion-column"><div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>💎 신뢰도 상승</strong></p><p>'공식 브랜드'로서의 전문적인 이미지를 구축합니다.</p></div></div></div>
+<div class="notion-column"><div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>📈 장기적 성장</strong></p><p>단발성 광고가 아닌, 지속적인 노출을 통해 브랜드 자산을 쌓아갑니다.</p></div></div></div>
+</div>
+<hr class="notion-divider">
+
+<h3>📌 노출 원리</h3>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>STEP 1. 골든타임(24시간) 공략</strong></p><p>게시물 업로드 직후, 외부에서 인위적인 트래픽(좋아요, 저장, 공유 등)을 유입합니다.</p></div></div>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>STEP 2. AI 인식 유도</strong></p><p>초기 반응 데이터를 바탕으로 인스타그램 AI가 해당 콘텐츠를 '확산할 가치가 있는 인기 콘텐츠'로 인식하게 만듭니다.</p></div></div>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>STEP 3. 자연 확산 가속화</strong></p><p>키워드 검색 결과 첫페이지 상위 영역에 자연스럽게 노출되어 실제 관심사를 기반으로한 잠재 고객에게 도달합니다.</p></div></div>
+<hr class="notion-divider">
+
+<h3>📸 레퍼런스: 실제 노출 사례</h3>
+<details class="notion-toggle"><summary>▶ 토글을 클릭하여 [실제 사례]를 확인해보세요.</summary><div class="notion-toggle-content"><p>(사례 내용)</p></div></details>
+<hr class="notion-divider">
+
+<h1>03. Process &amp; Pricing</h1>
+<h3>💰 서비스 가격 안내</h3>
+<ul class="notion-list">
+<li>사진 / 릴스 모두 작업 가능합니다.</li>
+<li>※ 누적 게시물 수 50만 개 이상의 고경쟁 키워드는 1개 게시물에 2회 이상 중복 작업을 권장합니다.</li>
+</ul>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>구분</th><th>특징 및 제공 내역</th><th>가격 (VAT 별도)</th></tr></thead>
+<tbody>
+<tr><td>⚡️단건 작업</td><td>• 게시물 1회 상위 노출 작업 진행</td><td>12,000원</td></tr>
+<tr><td>📆 월간 관리</td><td>• 주 3회 업로드 기준 (총 월 12회 제공)<br>• 📉 단건 대비 회당 2,000원 할인 ↓</td><td>120,000원</td></tr>
+</tbody></table></div>
+<hr class="notion-divider">
+
+<h3>⚙️ 진행 프로세스</h3>
+<p><strong>1️⃣ 상담</strong></p>
+<div class="notion-quote"><p>[중요] 계정 진단 및 노출 적합 상태(최적화 여부) 확인</p></div>
+<p><strong>2️⃣ 결제</strong></p>
+<div class="notion-quote"><p>서비스 비용 결제 진행</p></div>
+<p><strong>3️⃣ 작업 세팅</strong></p>
+<div class="notion-quote"><p>진행 방식 선택: 링크 전달 혹은 업로드 시 자동 진행 중 선택</p></div>
+<p><strong>4️⃣ 작업 완료</strong></p>
+<div class="notion-quote">
+<p>작업 종료: 세팅된 조건에 따라 작업이 진행되며 완료 시 자동 종료됩니다.</p>
+<p>성과 확인: 인위적인 수치 리포트 대신, 인스타그램 공식 [인사이트]를 통해 유입 경로와 도달률의 실질적인 변화를 직접 확인하실 수 있습니다. (별도 리포트 미제공)</p>
+</div>
+<hr class="notion-divider">
+
+<h3>❓ 자주 묻는 질문 (FAQ)</h3>
+<p>서비스 이용 전 아래 내용을 반드시 확인해주세요.</p>
+<details class="notion-toggle"><summary>▶ Q. 작업을 진행하면 100% 상위 노출이 보장되나요?</summary><div class="notion-toggle-content"><p>(답변 내용)</p></div></details>
+<details class="notion-toggle"><summary>▶ Q. 작업 완료 후 노출 결과가 제공되지 않는 이유는 무엇인가요?</summary><div class="notion-toggle-content"><p>(답변 내용)</p></div></details>
+<details class="notion-toggle"><summary>▶ Q. 최적화 계정이 아니더라도 작업을 해도 되나요?</summary><div class="notion-toggle-content"><p>(답변 내용)</p></div></details>
+<hr class="notion-divider">
+
+<h3>📝 본문 최적화 (SEO) 가이드</h3>
+<p>인스타그램 AI가 콘텐츠의 주제를 명확히 학습할 수 있도록 작성하는 것이 핵심입니다.</p>
+<details class="notion-toggle"><summary>▶ 토글을 클릭하여 [작성 예시]를 확인해보세요.</summary><div class="notion-toggle-content">
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p>(작성 예시 내용)</p></div></div>
+</div></details>
+<hr class="notion-divider">
+</div>
+
+<div id="account" class="notion-section" data-cat="instagram" data-title="계정 상위 노출">
+<div class="notion-page-title">계정 상위 노출</div>
+<hr class="notion-divider">
+
+<h1>01. Service Overview</h1>
+<h3>✅ 브랜드의 공식성과 신뢰도를 높이는 핵심 수단</h3>
+<p>계정탭은 검색 결과 첫 페이지 최상단에 위치하여 사용자의 시선을 자연스럽게 사로잡는 공간입니다.</p>
+<p>이곳은 자사의 공식 계정을 효과적으로 알릴 수 있을 뿐만 아니라, 단순한 노출 이상의 가치를 제공합니다.</p>
+<p>검색 결과 상단에 공식 계정이 노출될 경우 브랜드의 신뢰성과 전문성을 입증하며, 이는 곧 브랜드의 장기적인 성장과 구매 전환으로 이어집니다.</p>
+
+<h3>✅ 고객이 직접 검색하고 찾아오는 구조 (Inbound)</h3>
+<p>특정 키워드를 검색한 사용자는 이미 구매 의사가 있는 잠재 고객입니다. 이때 경쟁사보다 앞서 노출되는 계정은 더 많은 유입량 확보를 통해 문의량과 구매 전환으로 이어질 가능성이 크게 증가합니다.</p>
+<p>[자동완성어, N사와 비교 화면]</p>
+<div class="notion-image"><img src="images/account/내_계정_상위_노출_2.png" alt="계정 상위 노출" style="max-width:710px" loading="lazy"></div>
+<hr class="notion-divider">
+
+<h1>02. Why This Service?</h1>
+<h3>📢 Trend, 변화하는 UI에 대한 대응</h3>
+<div class="notion-columns">
+<div class="notion-column">
+<p>[과거]</p>
+<div class="notion-image"><img src="images/account/f4f16ffc-b725-4829-a476-a99c13004e04.png" alt="과거 UI" style="max-width:483px" loading="lazy"></div>
+</div>
+<div class="notion-column">
+<p>[현재]</p>
+<div class="notion-image"><img src="images/account/709867bf-7edb-4cf2-b10c-6e525d52fa54.png" alt="현재 UI" style="max-width:489px" loading="lazy"></div>
+</div>
+</div>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content">
+<p><strong>"계정 노출의 중요성이 더욱 커지고 있습니다."</strong></p>
+<p>과거에는 계정탭과 추천탭이 독립적으로 분리되어 있었으나, 2025년 이후 현재 추천탭에서도 계정과 게시물을 한눈에 확인할 수 있도록 UI가 개편되었습니다.</p>
+<p>이는 브랜드 계정을 더 효과적으로 홍보할 수 있는 기회가 늘어났음을 의미하며, 마케팅 효율과 계정의 가치 또한 지속적으로 상승하고 있습니다.</p>
+</div></div>
+<hr class="notion-divider">
+
+<h3>📌 서비스 핵심 가치</h3>
+<div class="notion-columns">
+<div class="notion-column"><div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>🎯 타겟 선점</strong></p><p>특정 키워드를 직접 검색한 잠재 고객을 경쟁사보다 먼저 선점</p></div></div></div>
+<div class="notion-column"><div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>🥇 높은 주목도</strong></p><p>검색 결과 상위 영역에서 사용자의 시선을 가장 먼저 사로잡아 브랜드 신뢰도 급상승</p></div></div></div>
+</div>
+<div class="notion-columns">
+<div class="notion-column"><div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>⌨️ 자동완성 효과</strong></p><p>키워드 입력 시 브랜드 계정이 즉시 제안되어 압도적인 클릭 유도</p></div></div></div>
+<div class="notion-column"><div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>🔄 UI 변화 최적화</strong></p><p>추천탭과 계정탭이 통합되는 최신 UI 트렌드에 맞춰, 검색 유입(Search SEO)을 극대화</p></div></div></div>
+</div>
+<hr class="notion-divider">
+
+<h3>📈 기대 효과</h3>
+<p><strong>1️⃣ 경쟁사 대비 우위 선점 (Interception)</strong></p>
+<div class="notion-quote"><p>"네이버에서 맛집을 검색할 때 스크롤을 끝까지 내리지 않듯, 인스타그램도 마찬가지입니다.<br>최상단 영역을 선점하여 경쟁사에게 갈 고객의 발길을 우리 브랜드로 돌립니다.</p></div>
+<p><strong>2️⃣ 자동완성 효과 (Branding)</strong></p>
+<div class="notion-quote"><p>검색창에 키워드 입력 시 귀사의 계정이 자동 추천됩니다. 이는 네이버 자동완성 이상의 유입 효과를 발생시키며, 고객에게 '해당 분야의 대표 브랜드'라는 확실한 공신력을 심어줍니다.</p></div>
+<p><strong>3️⃣ 안정적인 DB 확보 (Stability)</strong></p>
+<div class="notion-quote"><p>상위 순위를 유지하는 것은 마케팅 수도꼭지를 틀어놓는 것과 같습니다.<br>검색 기반의 관심사 고객이 꾸준히 유입되어, 실제 문의로 이어지는 탄탄한 연결고리가 만들어집니다.</p></div>
+<p><strong>4️⃣ 마케팅 피로도 감소 (Inbound System)</strong></p>
+<div class="notion-quote"><p>고객을 힘들게 찾아다니는 아웃바운드(Outbound) 방식이 아닙니다. 고객이 제 발로 찾아와 "상담받고 싶어요" 라고 먼저 말을 거는 가장 이상적인 인바운드(Inbound) 영업 구조가 완성됩니다.</p></div>
+<hr class="notion-divider">
+
+<h3>📸 참고 자료: 레퍼런스</h3>
+<details class="notion-toggle"><summary>▶ 아래 토글을 클릭하여 실제 적용 사례를 확인해보세요.</summary><div class="notion-toggle-content"><p>(사례 내용)</p></div></details>
+<hr class="notion-divider">
+
+<h1>03. Process &amp; Pricing</h1>
+<h3>💰 서비스 가격 안내</h3>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>구분</th><th>1슬롯당 단가 (VAT 별도)</th><th>혜택 및 할인</th><th>월 예상 비용 (2슬롯 기준)</th></tr></thead>
+<tbody>
+<tr><td>1개월 (30일)</td><td>150,000원</td><td>• 기본 순위 관리</td><td>300,000원</td></tr>
+<tr><td>3개월 (90일)</td><td>120,000원</td><td>• 📉 총 18만원 할인 (월 6만원 ↓)</td><td>240,000원</td></tr>
+</tbody></table></div>
+
+<h3>🏆 5위 이내 순위 보장</h3>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content">
+<p><strong>"권장 슬롯으로 진행 시, 검색 결과 5위 이내 진입을 보장합니다."</strong></p>
+<p>키워드 경쟁도에 따라 권장 슬롯 개수가 상이할 수 있습니다. 원활한 순위 상승과 방어를 위해, 상담을 통해 제안드린 '권장 슬롯' 개수로 진행하시는 것을 추천합니다.</p>
+</div></div>
+<hr class="notion-divider">
+
+<h3>⚙️ 진행 프로세스</h3>
+<p><strong>1️⃣ 견적 상담</strong></p>
+<div class="notion-quote"><p>타겟 키워드 및 경쟁도 분석 (슬롯 수 산정)</p></div>
+<p><strong>2️⃣ 세팅 최적화</strong></p>
+<div class="notion-quote"><p>[필수] 노출을 위한 최적화 프로필 세팅 (하단 가이드 참조)</p></div>
+<p><strong>3️⃣ 결제</strong></p>
+<div class="notion-quote"><p>서비스 비용 결제 진행</p></div>
+<p><strong>4️⃣ 작업 착수</strong></p>
+<div class="notion-quote"><p>세팅 완료 후 순위 진입 작업 진행</p></div>
+<p><strong>5️⃣ 보고 및 관리</strong></p>
+<div class="notion-quote"><p>📊 매주 월, 목요일 노출 현황 및 순위 변동 보고</p></div>
+<hr class="notion-divider">
+
+<h3>🛠️ [필수] 계정 이름 세팅 가이드</h3>
+<p>※ 작업을 진행할 키워드가 계정 이름(Name)에 반드시 포함되어야 작업 및 노출이 가능합니다.</p>
+<ul class="notion-list">
+<li>변경 경로: 설정(≡) → 계정 센터 → 프로필 → 계정 선택 → 이름</li>
+<li>입력 제한: 최대 64자까지 입력 가능</li>
+<li>띄어쓰기 주의! 키워드는 띄어쓰기 없이 붙여서 작성해야 합니다.
+  <ul>
+    <li>💡 '왕십리맛집' [가능] / '왕십리 맛집' [불가]</li>
+    <li>[변경 예시] 입술문신(메인키워드) · 강남입술문신 · 홍대입술문신 · 잠실입술문신</li>
+  </ul>
+</li>
+</ul>
+<hr class="notion-divider">
+
+<h3>⏳ 예상 소요 기간</h3>
+<ul class="notion-list">
+<li>⏰ 순위 진입 기간: 첫 페이지 노출까지 평균 14일 소요</li>
+<li>진행 슬롯 개수가 많을수록, 더 짧은 기간 내 높은 순위로 진입이 가능합니다.</li>
+<li>계정의 활동량·팔로워·게시물 수 등 계정 지수에 따라 상승 속도가 상이할 수 있습니다.</li>
+</ul>
+<hr class="notion-divider">
+
+<h3>⚠️ 유의 사항</h3>
+<p>※ 서비스 이용 전 아래 내용을 반드시 확인해주세요.</p>
+<p><strong>신규/휴면 계정:</strong> 생성한 지 3개월 미만의 신규 계정 혹은 장기간 활동이 없었던 계정일 경우, 순위 진입에 통상적인 기간보다 2배 이상의 시간이 소요될 수 있습니다. 계정 지수를 높이는 '최적화 작업'을 선행하시는 것을 권장드립니다.</p>
+<a class="notion-bookmark" href="https://onda01.notion.site/optimization-auto" target="_blank">계정 최적화 자동활동 → onda01.notion.site/optimization-auto</a>
+<hr class="notion-divider">
+</div>
+
+<div id="optimization-auto" class="notion-section" data-cat="instagram" data-title="계정 최적화 자동활동">
+<div class="notion-page-title">계정 최적화 자동활동</div>
+
+<h1>01. Service Overview</h1>
+<h3>✅ 콘텐츠가 좋아도 노출이 안 되는 이유, '활동량'에 있습니다.</h3>
+<p>인스타그램 알고리즘이 계정을 평가하고 노출을 결정하는 가장 중요한 척도는 <strong>'활동량'</strong>입니다. 꾸준한 소통 활동으로 계정의 인게이지먼트를 높여야만 게시물의 도달 범위가 자연스럽게 확장됩니다.</p>
+<p>하지만 본업과 계정 관리를 병행하며 24시간 소통 활동을 유지하기란 현실적으로 매우 어렵습니다. '계정 최적화' 서비스는 광고주님이 본업에 집중하시는 동안, 타겟 고객과의 실시간 소통을 통해 계정을 가장 노출되기 적합한 상태로 만들어드립니다.</p>
+<hr class="notion-divider">
+
+<h1>02. Why This Service?</h1>
+<h3>👤 이런 분들께 적극 추천합니다!</h3>
+<p>✅ 활동량 부족으로 인한 저조한 노출 문제를 근본적으로 해결하고 싶은 분</p>
+<p>✅ 상위 노출 및 추천탭 진입을 위해 계정의 체급(지수)을 키우고 싶은 분</p>
+<p>✅ 매장 운영 및 고객 응대 등 본업으로 인해 계정 관리할 여력이 없는 분</p>
+<p>✅ 계정 성장 정체기를 극복하고 빠르게 타겟 팔로워를 확보하고 싶은 분</p>
+
+<h3>💎 서비스 핵심 가치</h3>
+<p>"24시간 쉬지 않고 일하는 스마트한 디지털 영업사원을 고용하세요."</p>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>✨ 노출 최적화: 전방위적 노출 확대</strong></p><p>활동량 증가로 인한 계정 지수 상승에 따라, 인스타그램 내 모든 영역(추천탭·인기 게시물 등)의 노출도를 전방위적으로 증대시킵니다.</p></div></div>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>🔄 지속성: 인바운드 유입 구조 형성</strong></p><p>타겟층에 대한 선제적인 소통으로 자연스러운 유입을 유도하여, 잠재 고객이 스스로 찾아오는 지속 가능한 '인바운드' 영업 시스템을 완성합니다.</p></div></div>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>🛡️ 안정성: 알고리즘 대응력 강화</strong></p><p>로직 변화에도 흔들리지 않는 튼튼한 계정 지수를 구축합니다. 과거 콘텐츠까지 재조명받을 기회를 창출하여 마케팅 자산의 효율을 극대화합니다.</p></div></div>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>⏰ 시간 효율성: 본업 집중 환경 조성</strong></p><p>계정은 24시간 실시간 활동 상태를 유지합니다. 번거로운 소통 작업은 시스템에 맡기시고, 광고주님은 본업에만 집중하세요.</p></div></div>
+
+<div class="notion-columns">
+<div class="notion-column"><p>[작업 레포트]</p></div>
+<div class="notion-column"><p>[인사이트 유입량의 변화]</p></div>
+</div>
+<div class="notion-columns">
+<div class="notion-column"><div class="notion-image" style="max-width:373px"><img src="images/optimization-auto/ab9516b0-55ac-4f8f-a2ec-d0d921b529c0.png" alt="작업 레포트" loading="lazy"></div></div>
+<div class="notion-column"><div class="notion-image"><img src="images/optimization-auto/3f316af1-7750-4ec9-80ce-8120130ba4e0.png" alt="인사이트 유입량" style="max-width:672px" loading="lazy"></div></div>
+</div>
+<hr class="notion-divider">
+
+<h1>03. Process &amp; Pricing</h1>
+<h3>💰 서비스 가격 안내</h3>
+<div class="notion-quote"><p>광고주님의 운영 목적에 맞는 슬롯을 선택하세요.</p></div>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>구분</th><th>최적화 슬롯 (Standard)</th><th>최적화 라이트 슬롯 (Lite)</th></tr></thead>
+<tbody>
+<tr><td>핵심 목적</td><td>활동량 증가 + 신규 유입 + 인지도 상승</td><td>활동량 유지 + 지수 저하 방지</td></tr>
+<tr><td>주요 대상</td><td>공격적인 확장과 팔로워 성장이 필요한 계정</td><td>기존 팔로워 관리와 안정적인 운영이 필요한 계정</td></tr>
+<tr><td>작업 범위</td><td>관심사 기반 잠재고객 탐색 및 소통 활동</td><td>현재 팔로잉 중인 사용자 위주의 소통 활동</td></tr>
+<tr><td>판매가</td><td>150,000원</td><td>60,000원</td></tr>
+</tbody></table></div>
+
+<h3>🔍 상세 항목 비교</h3>
+<div class="notion-quote"><p>두 상품의 핵심 차이는 '외부 타겟 발굴(신규 유입)' 여부에 있습니다.</p></div>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>작업 항목</th><th>최적화 슬롯 (Standard)</th><th>라이트 슬롯 (Lite)</th></tr></thead>
+<tbody>
+<tr><td>해시태그 / 계정 탐색</td><td>O</td><td>X</td></tr>
+<tr><td>신규 타겟 방문 및 소통</td><td>O</td><td>X</td></tr>
+<tr><td>신규 팔로우 / 언팔로우</td><td>O</td><td>X</td></tr>
+<tr><td>기존 팔로워 소통</td><td>O</td><td>O</td></tr>
+<tr><td>품앗이 활동</td><td>O</td><td>O</td></tr>
+</tbody></table></div>
+<hr class="notion-divider">
+
+<h3>⚙️ 진행 프로세스</h3>
+<p>1️⃣ 상담 → 2️⃣ 신청서 작성 → 3️⃣ 결제 → 4️⃣ 작업 진행 → 5️⃣ 레포트 보고 → 6️⃣ 노출 테스트</p>
+<ul class="notion-list">
+<li>📊 작업 레포트: 시작일 기준 2주차/4주차에 상세 리포트를 제공합니다.</li>
+<li>📝 신청서 작성: ➡️ 최적화 작업 신청서(구글폼)
+  <ul><li>수집된 정보는 효과적인 타깃 선정을 위해 활용되며, 계정 아이디와 비밀번호 등 보안에 민감한 정보는 계약 종료 시 안전하게 폐기됩니다.</li></ul>
+</li>
+</ul>
+<hr class="notion-divider">
+
+<h1>📝 가이드 및 유의 사항</h1>
+<h3>🛠️ 필수 계정 세팅 (작업 전 확인)</h3>
+<p><strong>Step 1. 2단계 인증 비활성화 (필수)</strong></p>
+<ul class="notion-list"><li>자동화 연동을 위해 반드시 꺼두어야 합니다.
+  <ul><li>(설정(≡) > 보안 > 2단계 인증 > 비활성화)</li></ul>
+</li></ul>
+<p><strong>Step 2. 프로페셔널 계정 전환</strong></p>
+<ul class="notion-list"><li>인사이트의 정밀한 분석을 위해 필요합니다.
+  <ul><li>(설정(≡) > 계정 유형 및 도구 > 프로페셔널 계정으로 전환)</li></ul>
+</li></ul>
+<p><strong>Step 3. 검토를 위해 플래그 지정 OFF</strong></p>
+<ul class="notion-list"><li>인스타그램의 자체 필터링을 해제하여, 신규 잠재 고객의 팔로우 유입을 원활하게 만듭니다.
+  <ul><li>(설정(≡) > 친구 팔로우 및 초대 > 검토를 위해 플래그 지정 > OFF)</li></ul>
+</li></ul>
+
+<h3>⚠️ 안전한 서비스를 위한 준수 사항</h3>
+<ul class="notion-list">
+<li>직접 활동 최소화: 작업 중 직접 '좋아요, 팔로우' 활동을 과도하게 할 경우 계정 보호 조치가 취해질 수 있습니다. (단, 게시물 업로드 및 DM 답변은 자유롭게 가능합니다.)</li>
+<li>단일 기기 접속 권장: 여러 기기에서 동시 접속 시 차단될 위험이 있으니 주의 바라며, 접속 환경 관리를 위해 단일 기기 사용을 권장합니다.</li>
+<li>정보 유지: ID/PW 변경 시 반드시 사전에 공유해 주셔야 작업이 중단되지 않습니다.</li>
+</ul>
+<hr class="notion-divider">
+
+<h3>📋 종료 시점 준비 사항</h3>
+<p>계정의 노출 적합 여부를 최종 검증하기 위해 아래 두 가지를 미리 준비해 주세요.</p>
+<ul class="notion-list">
+<li>테스트 키워드: 누적 게시물 수 50만 개 미만의 메인 해시태그 1개</li>
+<li>테스트 콘텐츠: 업로드할 이미지 혹은 영상 1개</li>
+</ul>
+</div>
+
+<div id="optimized-account" class="notion-section" data-cat="instagram" data-title="최적화 계정 구매">
+<div class="notion-page-title">최적화 계정 구매</div>
+<hr class="notion-divider">
+<div class="notion-quote"><p>"육성 기간 0일, 노출에 최적화된 계정으로 인스타그램 마케팅을 바로 시작해보세요."</p></div>
+<p>인스타그램 내 게시물이 빠른 노출과 확산이 되길 원하는 경우, 이미 추천탭 로직에 최적화된 계정을 활용하는 것이 가장 효과적인 방법입니다. 판매 중인 최적화 계정을 이용하여 계정을 빠르게 노출이 가능한 계정으로 활성화 시킬 수 있습니다.</p>
+
+<h2>👤 이런 분들께 적극 추천합니다</h2>
+<p>✅ 시간 단축: 수개월의 계정 육성 기간을 아끼고, 즉시 상단 노출 효과를 원하시는 분</p>
+<p>✅ 낮은 지수 탈출: 현재 계정 지수가 낮아 아무리 올려도 노출이 안 되는 분</p>
+<p>✅ 브랜딩 효과: 탄탄한 팔로워를 보유하고 시작하여 고객 신뢰도 조기 확보</p>
+
+<h1>Process &amp; Pricing</h1>
+<h3>💰 서비스 가격(VAT 별도)</h3>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>팔로워 수</th><th>일반 한국인 최적화 계정</th><th>릴스 부스팅 전용 계정</th><th>비고</th></tr></thead>
+<tbody>
+<tr><td>3,000명</td><td>300,000원</td><td>720,000원</td><td>입문용 및 테스트 최적화</td></tr>
+<tr><td>5,000명</td><td>500,000원</td><td>1,200,000원</td><td>안정적인 노출 지수 확보</td></tr>
+<tr><td>7,000명</td><td>700,000원</td><td>1,680,000원</td><td>강력한 상위 노출 경쟁력</td></tr>
+<tr><td>10,000명</td><td>1,000,000원</td><td>2,400,000원</td><td>[Premium] 압도적 신뢰도</td></tr>
+</tbody></table></div>
+<ul class="notion-list">
+<li>일반 팔로워 최적화 계정: 활동성 있는 한국인 계정으로 구성되어 인기게시물 노출에 최적화된 계정입니다.</li>
+<li>알고리즘 부스팅 전용 계정: 릴스 알고리즘 부스팅 작업에 최적화된 특수 팔로워로 구성되어 폭발적인 확산 구조를 만드는 계정입니다.</li>
+</ul>
+<hr class="notion-divider">
+
+<h3>⚙️ 진행 프로세스</h3>
+<p>1️⃣ 필수 정보 전달 → 2️⃣ 결제 → 3️⃣ 노출 테스트 → 4️⃣ 계정 인도</p>
+<hr class="notion-divider">
+
+<h3>🗒️ 계정 구매 시 전달 정보</h3>
+<p>원활한 세팅을 위해 아래 내용을 전달해 주세요.</p>
+<ul class="notion-list">
+<li>팔로워 수: 3,000명 / 5,000명 / 7,000명 / 10,000명 중 선택</li>
+<li>팔로워 종류: 일반 한국인 팔로워 / 알고리즘 부스팅 팔로워 중 선택</li>
+<li>노출 테스트용 해시태그 (※ 누적 게시물 50만 개 미만)</li>
+<li>노출 테스트용 이미지 혹은 영상</li>
+</ul>
+<hr class="notion-divider">
+
+<h3>🚫 계정 수령 후 유의 사항 (보안 및 안전)</h3>
+<p>※ 안전한 운영을 위해 다음 사항을 반드시 엄수해 주세요.</p>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>📱 로그인 환경</strong></p><p>계정 첫 로그인은 반드시 광고주님의 실제 사용할 휴대폰에서 진행해주세요.</p></div></div>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>⏳ 안정화 기간</strong></p><p>첫 로그인 후 최소 2주(14일) 동안은 로그아웃을 하지 마세요. 빈번한 로그인/아웃은 이상 활동으로 감지될 수 있습니다.</p></div></div>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content">
+<p><strong>⚠️ 정보 변경 시점</strong></p>
+<p>이메일 및 연락처 등 개인정보 변경은 인도일로부터 15일 이후에 변경해주세요.</p>
+<ul class="notion-list">
+<li>15일 이내 변경 시 시스템이 소유권 탈취로 오인하여 계정이 정지될 수 있습니다.</li>
+<li>인스타그램은 계정 정보 변경 이력을 바탕으로 소유권을 판단하므로 이 기간을 반드시 지켜주셔야 합니다.</li>
+</ul>
+</div></div>
+<hr class="notion-divider">
+</div>
+
+<div id="boosting" class="notion-section" data-cat="instagram" data-title="릴스 알고리즘 부스팅">
+<div class="notion-page-title">릴스 알고리즘 부스팅</div>
+<hr class="notion-divider">
+<div class="notion-quote"><p>"인스타그램이 우리의 영상을 선택하게 만드세요"</p></div>
+
+<h1>01. Service Overview</h1>
+<p>인스타그램의 AI는 사용자의 행동 데이터를 분석해 노출을 결정합니다. 특히 릴스는 특정 키워드를 검색해서 보는 방식이 아닌, '알고리즘 추천'에 의한 소비가 압도적으로 높습니다. 본 서비스는 인스타그램 AI가 광고주님의 영상을 '확산할 가치가 있는 인기 콘텐츠'로 인식하도록 초기 반응 지표를 전략적으로 만들어드립니다.</p>
+
+<h3>📌 서비스 확산 원리</h3>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>STEP 1. 골든타임(24시간) 공략:</strong></p><p>릴스 업로드 직후, 전용 팔로워들 즉각적인 반응 활동(시청시간, 좋아요, 저장, 공유)을 통해 확산의 불씨를 지핍니다.</p></div></div>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>STEP 2. AI 인식 유도</strong></p><p>초기 반응 데이터를 바탕으로 인스타그램 AI가 해당 콘텐츠를 '확산할 가치가 있는 인기 콘텐츠'로 인식하게 만듭니다.</p></div></div>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>STEP 3. 자연 확산 가속화</strong></p><p>탐색탭, 릴스탭, 추천 피드에 자연스럽게 노출되어 단순 조회수 증가가 아닌, 실제 관심사를 기반으로 한 잠재 고객에게 도달합니다.</p></div></div>
+
+<h1>02. Why This Service?</h1>
+<div class="notion-quote"><p>아무리 잘 만든 영상이라도 초기에 반응이 없으면 알고리즘에 의해 묻히게 됩니다.<br>인위적인 노출이 아닌, 알고리즘이 선택할 수밖에 없는 환경을 만듭니다.</p></div>
+<div class="notion-image" style="max-width:524px"><img src="images/boosting/4bd3ebf2-5b60-48e8-9330-bffd8b21f627.png" alt="부스팅 원리" loading="lazy"></div>
+
+<h3>🎯 월간 목표 퍼포먼스 (KPI)</h3>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>구분</th><th>목표 수치</th><th>전략적 의미</th></tr></thead>
+<tbody>
+<tr><td>월 업로드 수</td><td>월 8회 (주 2회 업로드 기준)</td><td>꾸준한 업로드로 계정 활성화 및 지수 상승</td></tr>
+<tr><td>건당 목표 조회수</td><td>10,000회 이상 (최소 보장 타겟)</td><td>초기 부스팅을 통한 알고리즘 자연 확산</td></tr>
+<tr><td>월 총 도달 목표</td><td>80,000명+ 도달</td><td>매월 전단지 80,000장 이상을 배포하는 홍보 효과</td></tr>
+</tbody></table></div>
+<p>[ Why 10,000 Views? ]</p>
+<p>"조회수 1만 회는 단순한 숫자가 아닌, 알고리즘이 '인기 콘텐츠'로 인식하게 만드는 강력한 신호가 됩니다. 이 임계점(Tipping Point)을 넘겨 10만, 100만 뷰의 2차 확산이 일어날 수 있도록, 가장 확실한 기회를 제공합니다."</p>
+
+<h3>📊 기대 효과 시뮬레이션</h3>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>구분</th><th>Before (현재)</th><th>After (1개월 뒤 목표)</th></tr></thead>
+<tbody>
+<tr><td>검색 노출</td><td>주요 키워드 검색 시 노출 안 됨</td><td>핵심 키워드 검색 시 상위 노출</td></tr>
+<tr><td>릴스 반응</td><td>평균 조회수 500회 미만</td><td>평균 조회수 1만 뷰 안착 (임계점 돌파)</td></tr>
+<tr><td>성과</td><td>간헐적인 단순 문의</td><td>평균 문의량 300% 이상 증가</td></tr>
+</tbody></table></div>
+
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>🎯 정밀 타겟팅</strong></p><p>구매전환율이 매우 높은 관심사 기반의 타겟에게 효과적으로 도달합니다.</p></div></div>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>📈 영상의 폭발적 조회수</strong></p><p>반응 지표가 좋은 릴스는 공유와 저장 비율이 압도적입니다. 초기 부스팅이 뒷받침되면 수만~수백만 조회수 달성이 용이해집니다.</p></div></div>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>🏆 계정 최적화 지수 상승</strong></p><p>주기적인 업로드와 부스팅 작업을 꾸준히 병행하면 인스타그램은 해당 계정을 '인기 계정'으로 학습하여, 추후에는 별다른 작업 없이도 자연 노출 도달률이 평소 대비 상승하게 됩니다.</p></div></div>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>📈 장기적 성장</strong></p><p>단발성 광고로 끝나는 것이 아니라, 지속적인 알고리즘 확산을 통해 브랜드의 디지털 자산을 쌓아갑니다.</p></div></div>
+
+<h3>📸 레퍼런스: 실제 사례</h3>
+<details class="notion-toggle"><summary>▶ 토글을 클릭하여 실제 사례를 확인해보세요.</summary><div class="notion-toggle-content"><p>(사례 내용)</p></div></details>
+<hr class="notion-divider">
+
+<h1>03. Process &amp; Pricing</h1>
+<h3>💰 서비스 구성 및 가격 안내</h3>
+<p><strong>Step 1. 부스팅 전용 팔로워 세팅 (기반 구축)</strong></p>
+<p>부스팅 작업의 주체가 되는 '전용 팔로워'를 계정에 세팅하는 필수 단계입니다. (최초 1회)</p>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>팔로워 수</th><th>가격</th><th>특징</th></tr></thead>
+<tbody>
+<tr><td>1,000명</td><td>120,000원</td><td>부스팅 서비스의 기본 시작 단계</td></tr>
+<tr><td>3,000명</td><td>360,000원</td><td>안정적인 초기 반응 지표 확보 (권장)</td></tr>
+<tr><td>5,000명</td><td>600,000원</td><td>강력한 퍼포먼스 및 광범위한 확산 유도</td></tr>
+</tbody></table></div>
+
+<p><strong>Step 2. 릴스 알고리즘 부스팅 작업 (회당 비용)</strong></p>
+<p>릴스 업로드 시마다 알고리즘을 태우는 실질적인 부스팅 작업 비용입니다.</p>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>구분</th><th>가격 (1회 기준)</th><th>비고</th></tr></thead>
+<tbody>
+<tr><td>1,000명 전용</td><td>20,000원</td><td>1,000명 세팅 계정 전용</td></tr>
+<tr><td>3,000명 전용</td><td>60,000원</td><td>3,000명 세팅 계정 전용</td></tr>
+<tr><td>5,000명 전용</td><td>100,000원</td><td>5,000명 세팅 계정 전용</td></tr>
+</tbody></table></div>
+<hr class="notion-divider">
+
+<h3>⚙️ 진행 프로세스</h3>
+<p><strong>1️⃣ 상담</strong></p>
+<div class="notion-quote"><p>현재 계정 상태 정밀 분석 및 부스팅 단계 설정</p></div>
+<p><strong>2️⃣ 결제</strong></p>
+<div class="notion-quote"><p>서비스 비용 결제 진행</p></div>
+<p><strong>3️⃣ 세팅 최적화</strong></p>
+<div class="notion-quote"><p>• 부스팅 전용 팔로워 세팅: 초기 확산을 위한 기반 구축<br>• 진행 방식 선택: 링크 전달 혹은 업로드 시 자동 진행 중 선택<br>• 팔로워 세팅 소요 시간: 진행 후 4시간 이내 완료</p></div>
+<p><strong>4️⃣ 작업 착수 및 결과 확인</strong></p>
+<div class="notion-quote"><p>• 작업 진행 및 소요시간: 세팅된 조건에 따라 작업이 진행되며 3시간 이내 완료됩니다.<br>• 결과 확인: 인위적인 수치 조작 리포트가 아닌, 인스타그램 공식 [인사이트]를 통해 실제 알고리즘 유입량과 도달률 변화를 직접 확인하실 수 있습니다. (작업 완료 후 별도 리포트 미제공)</p></div>
+<hr class="notion-divider">
+
+<h3>❓ 꼭 확인해 주세요! (FAQ)</h3>
+<p>아래 토글을 클릭하여 확인해보세요.</p>
+<details class="notion-toggle"><summary>▶ Q. 작업 후 별도의 리포트가 제공되지 않는 이유는 무엇인가요?</summary><div class="notion-toggle-content"><p>(답변 내용)</p></div></details>
+<details class="notion-toggle"><summary>▶ Q. 최종 조회수나 성과 수치를 보장해주나요?</summary><div class="notion-toggle-content"><p>(답변 내용)</p></div></details>
+<details class="notion-toggle"><summary>▶ Q. 부스팅 작업을 할 경우 상위 노출이 되나요?</summary><div class="notion-toggle-content"><p>(답변 내용)</p></div></details>
+<details class="notion-toggle"><summary>▶ Q. 평균 어느정도의 조회수가 나오나요?</summary><div class="notion-toggle-content"><p>(답변 내용)</p></div></details>
+<details class="notion-toggle"><summary>▶ Q. 최적화 계정이 아니더라도 작업을 해도 되나요?</summary><div class="notion-toggle-content"><p>(답변 내용)</p></div></details>
+<hr class="notion-divider">
+
+<h3>📝 본문 최적화 (SEO) 가이드</h3>
+<p>인스타그램 AI가 콘텐츠의 주제를 명확히 학습할 수 있도록 작성하는 것이 핵심입니다.</p>
+<details class="notion-toggle"><summary>▶ 토글을 클릭하여 [작성 예시]를 확인해보세요.</summary><div class="notion-toggle-content">
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>✍️ 구체적인 본문 작성</strong></p><p>어떤 콘텐츠인지 텍스트로 구체적으로 작성하여, AI가 관심사 기반의 잠재 고객에게 해당 영상을 정확히 도달하도록 유도하세요.</p></div></div>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content"><p><strong>#️⃣ 전략적 해시태그 구성</strong></p><p>더 다양한 사용자에게 도달할 수 있도록 업종과 주제에 맞는 핵심 키워드 위주로 최소 5개 이상, 작성을 권장드립니다.</p></div></div>
+</div></details>
+<hr class="notion-divider">
+</div>
+
+<div id="step-package" class="notion-section" data-cat="instagram" data-title="스탭 패키지">
+<div class="notion-page-title">스탭 패키지</div>
+<p class="notion-notice">※ PC보기를 권장드립니다.</p>
+<hr class="notion-divider">
+
+<h1>서비스 개요</h1>
+<p>2025 현재 인스타그램 노출 구조는 추천탭 기반의 로테이션(롤링) 노출 방식으로 전환되었습니다. 이 변화로 인해 광고주 계정에서의 주기적인 업로드와 노출 작업 병행을 통한 누적 노출이 훨씬 더 중요해졌습니다.</p>
+<p>특히 광고주 계정으로 직접 노출이 이루어지는 경우, 실제 문의 발생률 및 매출 전환률이 높게 나타나고 있어, 자사 계정 중심의 노출 전략의 필요성이 더욱 높아지고 있습니다.</p>
+
+<h2>노출 원리 이해를 돕는 영상</h2>
+<div class="notion-columns">
+<div class="notion-column"><div class="notion-video-placeholder">🎬 영상 준비 중<br><small>상이한 검색결과의 원인</small></div></div>
+<div class="notion-column"><div class="notion-video-placeholder">🎬 영상 준비 중<br><small>시기별 노출 알고리즘</small></div></div>
+<div class="notion-column"><div class="notion-video-placeholder">🎬 영상 준비 중<br><small>콘텐츠 로테이션 알고리즘</small></div></div>
+</div>
+
+<h1>서비스 안내</h1>
+<h2>자사 계정 중심의 노출 전략</h2>
+<p>해당 서비스는 정해진 예산 내에서 최대한 다양한 방식으로 계정 세팅 + 릴스 확산 + 게시물의 추천탭 노출이 유기적으로 연결되어, 중.장기적으로 최대 성과를 낼 수 있도록 설계된 3개월 패키지입니다.</p>
+<p>1개월차에는 계정의 최적화 세팅 및 기반 노출을 위한 구조를 구축하고, 2~3개월차부터는 릴스 콘텐츠와 계정 자체가 추천탭 및 검색 노출에 본격적으로 등장할 수 있도록 설계된 구성입니다.</p>
+
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content">
+
+<h3>Step 1 - 1개월차</h3>
+<p><strong>활동량 충족 및 릴스 확산 기회 확보</strong></p>
+<p>추천탭 및 계정탭에서 계정의 원활한 노출을 위한 활동량 충족을 목표로 최적화 작업을 진행합니다.</p>
+<p>또한 계정에 세팅된 알고리즘 전용 팔로워는 팔로워 충족과 더불어 릴스 부스팅 작업 시 반응활동을 통한 내부 인게지먼트가 상승하여, 노출에 필요한 활동량을 보다 빠르게 충족할 수 있도록 돕습니다.</p>
+<ul class="notion-list">
+<li>좋은 반응을 얻어 검색 결과에서 상단 노출되고 있는 경쟁사의 콘텐츠를 참고하며, 주 1회 릴스 업로드 후 인사이트 반응 지표를 통해 콘텐츠의 개선점을 파악해가는 시기입니다.</li>
+<li>노출 테스트는 최적화 작업 종료 후 '내 게시물 노출 작업'과 동일한 작업으로 진행되며, 누적 게시물 수 50만 이하의 다양한 키워드를 사용하여 해당 계정의 노출 적합 여부를 체크합니다.</li>
+</ul>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>항목</th><th>작업 일/수</th><th>판매가</th></tr></thead>
+<tbody>
+<tr><td>최적화 작업 · 자동활동</td><td>30일</td><td>150,000</td></tr>
+<tr><td>릴스 알고리즘 부스팅 팔로워 세팅</td><td>1,000명</td><td>120,000</td></tr>
+<tr><td>릴스 알고리즘 부스팅 작업</td><td>4회</td><td>80,000</td></tr>
+<tr><td>노출 테스트</td><td>1회</td><td>12,000</td></tr>
+<tr><td>합계</td><td></td><td>362,000</td></tr>
+<tr><td><strong>할인 적용 금액 (Vat 별도)</strong></td><td></td><td><strong>300,000</strong></td></tr>
+</tbody></table></div>
+<hr class="notion-divider">
+
+<h3>Step 2 - 2개월차</h3>
+<p><strong>주기적인 업로드와 작업 병행</strong></p>
+<p>주 2회 이상의 게시물 업로드를 목표로 릴스 부스팅 작업과 노출 작업을 병행합니다. 이는 내외부 모두에서 인게지먼트가 상승하여 계정 지수에도 좋은 영향을 미치며, 릴스의 확산과 추천탭에서의 노출 기회를 확보합니다.</p>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>항목</th><th>작업 일/수</th><th>판매가</th></tr></thead>
+<tbody>
+<tr><td>최적화 작업 · 자동활동</td><td>30일</td><td>150,000</td></tr>
+<tr><td>릴스 알고리즘 부스팅 작업</td><td>8회</td><td>160,000</td></tr>
+<tr><td>내 게시물 상위 노출 작업</td><td>4회</td><td>48,000</td></tr>
+<tr><td>노출 테스트</td><td>1회</td><td>12,000</td></tr>
+<tr><td>합계</td><td></td><td>370,000</td></tr>
+<tr><td><strong>할인 적용 금액 (Vat 별도)</strong></td><td></td><td><strong>300,000</strong></td></tr>
+</tbody></table></div>
+<hr class="notion-divider">
+
+<h3>Step 3 - 3개월차</h3>
+<p><strong>인스타그램 내 모든 영역에서의 노출 기회 확보</strong></p>
+<p>2개월차 종료 시점 노출 테스트를 통해 노출 적합 여부 판단 후 3개월차 작업을 진행합니다. 이 시점부터는 최적화 작업 · 라이트 슬롯을 통해 일정 활동량을 유지 시켜며 활동량 저하로 인한 노출도 저하를 방지할 수 있습니다.</p>
+<p>또한, 릴스 확산 + 추천탭 + 계정탭 까지 정해진 예산 내에서 인스타그램의 모든 영역에서 노출 기회를 확보할 수 있습니다.</p>
+<ul class="notion-list">
+<li>'계정탭 상위 노출 · 자동완성어' 작업은 해당 키워드가 과경쟁 상태일 경우 5위권 이내 진입에 필요한 최소 슬롯 갯수가 증가할 수 있으며, 안내드린 권장 슬롯 갯수 미만으로 진행하시게 될 경우 순위 상승이 원활하지 않을 수 있으니 꼭 확인 후 진행 부탁드립니다.</li>
+</ul>
+<p>과경쟁 키워드의 권장 슬롯 예시</p>
+<p>#입술문신 - 7개의 업체에서 평균 4슬롯 이상 사용중, 권장슬롯 = 5슬롯</p>
+<p>#강남맛집 - 8개의 업체에서 평균 5슬롯 이상 사용중, 권장슬롯 = 6슬롯</p>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>항목</th><th>작업 일/수</th><th>판매가</th></tr></thead>
+<tbody>
+<tr><td>최적화 작업 · 자동활동 (라이트)</td><td>30일</td><td>60,000</td></tr>
+<tr><td>계정탭 상위 노출 · 자동완성어</td><td>30일 / 1슬롯</td><td>150,000</td></tr>
+<tr><td>릴스 알고리즘 부스팅 작업</td><td>8회</td><td>160,000</td></tr>
+<tr><td>내 게시물 상위 노출 작업</td><td>4회</td><td>48,000</td></tr>
+<tr><td>합계</td><td></td><td>418,000</td></tr>
+<tr><td><strong>할인 적용 금액 (Vat 별도)</strong></td><td></td><td><strong>330,000</strong></td></tr>
+</tbody></table></div>
+
+<p>참고) 최적화 슬롯과 라이트 슬롯의 차이</p>
+<ul class="notion-list">
+<li><strong>최적화 슬롯의 일부 기능만 제공되는 '라이트 슬롯'</strong></li>
+<li>최적화 슬롯 : 관심사 기반의 잠재고객 탐색 및 소통활동을 통한 유입 유도 + 인지도 상승 + 활동량 증가</li>
+<li>라이트 슬롯 : 기존 팔로잉 중인 사용자들과의 소통활동을 통한 활동량 증가 및 저하 방지</li>
+</ul>
+<div class="notion-table-wrap"><table class="notion-table">
+<thead><tr><th>작업 항목</th><th>최적화 슬롯</th><th>라이트 슬롯</th></tr></thead>
+<tbody>
+<tr><td>해시태그 탐색</td><td>O</td><td>X</td></tr>
+<tr><td>계정 탐색</td><td>O</td><td>X</td></tr>
+<tr><td>계정 방문</td><td>O</td><td>X</td></tr>
+<tr><td>팔로우</td><td>O</td><td>X</td></tr>
+<tr><td>언팔로우</td><td>O</td><td>X</td></tr>
+<tr><td>게시물 보기 + 좋아요 누르기</td><td>O</td><td>O</td></tr>
+<tr><td>스토리 보기 + 좋아요 누르기</td><td>O</td><td>O</td></tr>
+<tr><td>품앗이</td><td>O</td><td>O</td></tr>
+</tbody></table></div>
+
+</div></div>
+
+<h1>작업 프로세스</h1>
+<h3>1️⃣ 계정의 전반적인 상태 진단</h3>
+<div class="notion-image" style="max-width:306px"><img src="images/step-package/76e42158-f04d-4a1d-a24c-b44e03bc601e.png" alt="계정 진단" loading="lazy"></div>
+
+<h3>2️⃣ 키워드 수립</h3>
+<ul class="notion-list">
+<li>업종과 판매 상품에 적합한 키워드 탐색</li>
+<li>목표 키워드의 경쟁도 파악</li>
+</ul>
+
+<h3>3️⃣ 작업 진행 전 필수 설정</h3>
+<ol class="notion-list-numbered">
+<li><strong>2차인증 해제</strong><br>프로그램과 연동되어 작업이 진행되기 때문에 2차인증이 걸려 있을 경우 작업이 불가합니다.<ul class="notion-list"><li>설정 → 보안 → 2단계 인증 → 비활성화</li></ul></li>
+<li><strong>프로패셔널 계정 전환</strong><br>프로페셔널 계정은 일반 계정과 달리 인사이트(통계), 광고, 피드 연동 등의 추가 기능을 제공합니다.<ul class="notion-list"><li>설정(≡) → 계정 유형 및 도구 → 프로패셔널 계정으로 전환</li></ul></li>
+<li><strong>검토를 위해 플래그 지정 OFF</strong><br>인스타그램에서 본인의 계정과 연관이 없는 계정이 팔로우 하는 것에 대한 분류 기능이 업데이트 되었습니다. 원활한 팔로워 상승을 위해 해당 설정을 권장드립니다.<ul class="notion-list"><li>설정(≡) → 친구 팔로우 및 초대 → 검토를 위해 플래그 지정 → OFF</li></ul></li>
+<li><strong>계정 언급 및 태그 ON</strong><br>참고 문서 : 언급 및 태그 ON OFF 변경방법<ul class="notion-list"><li>설정(≡) → 공개범위 → 태그 및 언급 → 허용 대상 변경 → 모든 사람</li></ul></li>
+</ol>
+
+<h3>4️⃣ 최적화 작업에 필요한 필수 정보 전달</h3>
+<p>(구글폼) 최적화 작업 신청서 ← 클릭시 이동합니다.</p>
+
+<h3>5️⃣ 결제 및 작업 진행</h3>
+
+<h1>작업 방식</h1>
+<h3>자동 작업 진행</h3>
+<p>인스타그램의 알고리즘은 초기 반응이 활발한 게시물을 더 많은 사람에게 확산시키는 구조입니다. 따라서, 모든 작업은 광고주님의 계정에서 새로운 게시물이 업로드 되면 자동으로 작업이 진행되며, 별도의 링크 전달없이 편리하게 이용하실 수 있습니다.</p>
+<ul class="notion-list"><li>특정 게시물에만 작업을 원하실 경우 업로드 예정 날짜, 요일 등 세부적인 조율이 가능합니다.</li></ul>
+
+<h3>작업 소요 시간 ⏰</h3>
+<ul class="notion-list"><li>모든 작업은 최대 3시간 이내로 완료됩니다.</li></ul>
+
+<h1>⚠️ 유의 사항</h1>
+<div class="notion-callout"><span class="notion-callout-icon">💡</span><div class="notion-callout-content">
+<ul class="notion-list">
+<li>본 서비스는 인스타그램 상위 노출 및 확산 가능성을 높이기 위한 작업으로, 실시간 노출이나 일정 수치의 결과를 보장하지 않습니다.</li>
+<li>생성한지 3개월 미만의 신규 계정 혹은 장기간 활동이 없었던 일반 계정일 경우 아무리 퀄리티 높은 콘텐츠라도 노출과 확산이 원활하지 않을 수 있습니다. 지속적인 업로드와 작업 병행을 권장드립니다.</li>
+<li>알고리즘 부스팅 전용 팔로워는 알고리즘 최적화를 목적으로 구성된 한국인 계정들로 세팅되어 있습니다. 따라서 해당 팔로워를 구매하더라도 계정에 불이익이 전혀 발생하지 않으며, 인스타그램 인사이트에도 자연스럽고 안정적으로 반영됩니다.</li>
+<li>알고리즘 부스팅 작업을 통해 인위적으로 증가되는 조회수는 최대 1,000회까지이며, 팔로워의 초기 반응을 기반으로 인스타그램 알고리즘이 콘텐츠를 '확산 대상'으로 판단하게 됩니다. 이후에는 자연 확산이 시작되며 평균적으로 약 5,000 ~ 15,000 조회수까지 도달하는 경우가 많습니다.</li>
+</ul>
+</div></div>
+<hr class="notion-divider">
+</div>
+
+<div id="capture" class="notion-section" data-cat="etc" data-title="노출 캡쳐 사이트">
+<div class="notion-page-title">노출 캡쳐 사이트</div>
+<hr class="notion-divider">
+<h1>서비스 개요</h1>
+<p>현재 인스타그램 검색 결과는 계정 상태, 사용자의 접속 기기, 접속 시점에 따라 모두 다르게 표시됩니다. 이로 인해 사람이 직접 상위 노출 여부를 확인하고 캡쳐하는 것은 매우 어렵고 비효율적입니다.</p>
+<p>이러한 불편함을 해소하기 위해, 지정한 키워드에 대해 상위에 노출되었을 때 자동으로 화면을 캡쳐해주는 "상위 노출 캡쳐 슬롯"을 도입하였습니다.</p>
+<p>노출 캡쳐 슬롯은 광고주 계정 또는 리그램 계정에서 업로드된 콘텐츠가 추천탭 상단 노출된 경우, 해당 노출 화면을 자동으로 캡쳐하여 저장하는 서비스 입니다.</p>
+<p>매번 수동으로 캡쳐하던 작업을 자동화함으로써 리소스를 절감하고, 광고주는 별도의 요청 없이도 노출 내역을 실시간으로 확인하실 수 있습니다.</p>
+
+<h1>주요 기능</h1>
+<h3>자동 캡쳐</h3>
+<p>인스타그램 내 키워드 검색 시 상위 노출된 광고주 및 리그램 계정을 시스템이 자동 인식하여 노출 화면을 캡쳐합니다.</p>
+<h3>다수의 계정 확인 가능</h3>
+<p>광고주가 다수의 계정을 진행중이신 경우, 최대 5개 계정까지 순위 체크할 수 있습니다.</p>
+<h3>최대 20개 키워드 확인 가능</h3>
+<p>주요 타겟 키워드 외에도 메인 키워드 + 서브 키워드 조합으로 노출 영역을 다양하게 모니터링할 수 있습니다.</p>
+<h3>전용 확인 페이지 제공</h3>
+<p>광고주는 별도의 리포트를 기다리지 않아도, 제공되는 전용 페이지를 통해 비밀번호를 입력 후 캡쳐된 노출 내역을 실시간 확인할 수 있습니다.</p>
+
+<h1>광고주님만을 위한 노출 캡쳐 사이트</h1>
+<ul class="notion-list">
+<li>페이지 샘플
+  <ul>
+    <li>링크：<a class="notion-link" href="https://officialmarketing.co.kr/marketing-report/71dei" target="_blank">https://officialmarketing.co.kr/marketing-report/71dei</a></li>
+    <li>비밀번호：3590</li>
+  </ul>
+</li>
+<li>파란색 동그라미 = 광고주님의 계정으로 업로드 되어 노출된 게시물</li>
+<li>빨간색 동그라미 = 리그램 계정으로 업로드 되어 노출된 게시물</li>
+</ul>
+<div class="notion-image"><img src="images/capture1.png" alt="노출 캡쳐 예시 1" loading="lazy"></div>
+<div class="notion-image"><img src="images/capture2.png" alt="노출 캡쳐 예시 2" loading="lazy"></div>
+<div class="notion-image"><img src="images/capture3.png" alt="노출 캡쳐 예시 3" loading="lazy"></div>
+<hr class="notion-divider">
+</div>
+
+<div id="banned" class="notion-section" data-cat="etc" data-title="금지 업종">
+<div class="notion-page-title">금지 업종</div>
+<hr class="notion-divider">
+<div class="notion-quote"><p>인스타그램에서는 특정 업종 및 콘텐츠의 배포를 제한하거나 금지하고 있습니다. 주로 불법적이거나 유해한 콘텐츠, 오해를 일으킬 수 있는 정보, 미성년자 보호와 관련된 업종이 포함됩니다.</p></div>
+
+<h1>광고 및 게시물 모두 금지</h1>
+<h2>1. 불법 상품 및 서비스</h2>
+<ul class="notion-list"><li>마약, 대마초 및 관련 제품</li><li>위조품 및 불법 복제품</li><li>불법 무기 및 폭발물</li></ul>
+<h2>2. 도박 및 사행성 관련 업종</h2>
+<ul class="notion-list"><li>온라인 도박(토토, 바카라, 슬롯머신 등)</li><li>카지노 및 복권 (일부 국가에서 제한적 허용)</li></ul>
+<h2>3. 19금 및 성인 콘텐츠</h2>
+<ul class="notion-list"><li>성인용 제품 및 서비스 (성인 웹사이트, 성인용품, 유흥업소 등)</li><li>성적 암시가 강한 콘텐츠</li></ul>
+<h2>4. 불법 금융 및 사기성 서비스</h2>
+<ul class="notion-list"><li>다단계 및 피라미드 금융사기</li><li>고위험 투자 유도 (불법 주식 리딩방, 선물 옵션 거래 유도)</li><li>가상자산 사기 (펌프앤덤프, 불법 코인 투자 유도)</li></ul>
+<h2>5. 정치 및 사회적 논란이 있는 콘텐츠</h2>
+<ul class="notion-list"><li>선거 관련 조작된 정보</li><li>정치적 극단주의 콘텐츠</li></ul>
+
+<h1>광고에 제한되는 업종</h1>
+<h2>1. 담배 및 전자담배 관련 제품</h2>
+<ul class="notion-list"><li>일반 게시물은 가능하지만, 광고는 금지됨</li></ul>
+<h2>2. 알코올 관련 제품</h2>
+<ul class="notion-list"><li>일부 국가에서는 광고 제한 또는 금지</li><li>연령 제한 적용 필요</li></ul>
+<h2>3. 의료 및 건강 관련 제품</h2>
+<ul class="notion-list"><li>허위 과장 광고 금지 (다이어트 약, 미승인 건강기능식품 등)</li><li>의료 시술 광고 (일부 국가에서 성형수술은 제한됨)</li></ul>
+<h2>4. 파괴적이거나 폭력적인 콘텐츠</h2>
+<ul class="notion-list"><li>폭력 미화, 혐오 발언, 극단주의 콘텐츠</li></ul>
+<hr class="notion-divider">
+<p>※ 위 사항을 포함한 규정에 위반되는 행위일 경우 일체 진행이 불가합니다.</p>
+</div>
+
+</div><!-- /.notion-page -->
+
+<script>
+var PAGE_ORDER=["nplace-seo-guide","nplace-delegation","ad-center-delegation","pricing","instagram-guide","repost","mypost","account","optimization-auto","optimized-account","boosting","step-package","capture","banned"];
+var PAGE_TITLES={"nplace-seo-guide":"N플레이스 최적화 SEO 가이드북","nplace-delegation":"네이버 플레이스 권한 위임","ad-center-delegation":"네이버 광고주센터 권한 위임","pricing":"상품 가격표","instagram-guide":"인스타그램 가이드북","repost":"리그램 배포 작업","mypost":"내 게시물 노출 작업","account":"계정 상위 노출","optimization-auto":"계정 최적화 자동활동","optimized-account":"최적화 계정 구매","boosting":"릴스 알고리즘 부스팅","step-package":"스탭 패키지","capture":"노출 캡쳐 사이트","banned":"금지 업종"};
+var currentSection='main-content';
+
+function showSection(id){
+  document.querySelectorAll('.notion-section').forEach(function(s){s.classList.remove('active')});
+  var el=document.getElementById(id);
+  if(el)el.classList.add('active');
+  currentSection=id;
+  window.scrollTo(0,0);
+  history.pushState(null,null,'#'+id);
+  var subNav=document.getElementById('subNav');
+  var navTabs=document.getElementById('navTabs');
+  if(id==='main-content'){
+    subNav.classList.remove('visible');
+    navTabs.style.display='';
+  }else{
+    subNav.classList.add('visible');
+    navTabs.style.display='none';
+    document.getElementById('subNavTitle').textContent=PAGE_TITLES[id]||id;
+    updatePrevNext(id);
+  }
+  buildTOC(id);
+}
+
+function updatePrevNext(id){
+  var idx=PAGE_ORDER.indexOf(id);
+  document.getElementById('prevBtn').disabled=(idx<=0);
+  document.getElementById('nextBtn').disabled=(idx<0||idx>=PAGE_ORDER.length-1);
+}
+function goPrev(){var i=PAGE_ORDER.indexOf(currentSection);if(i>0)showSection(PAGE_ORDER[i-1])}
+function goNext(){var i=PAGE_ORDER.indexOf(currentSection);if(i>=0&&i<PAGE_ORDER.length-1)showSection(PAGE_ORDER[i+1])}
+
+function buildTOC(sectionId){
+  var sidebar=document.getElementById('tocSidebar');
+  var section=document.getElementById(sectionId);
+  var titleEl=sidebar.querySelector('.toc-sidebar-title');
+  sidebar.innerHTML='';sidebar.appendChild(titleEl);
+  var old=document.querySelector('.toc-mobile');if(old)old.remove();
+  if(sectionId==='main-content'||!section){sidebar.classList.remove('visible');return}
+  var headings=section.querySelectorAll('h1,h2');
+  if(headings.length<2){sidebar.classList.remove('visible');return}
+  headings.forEach(function(h,i){
+    var aid=sectionId+'-toc-'+i;h.id=aid;
+    var a=document.createElement('a');a.href='#'+aid;a.textContent=h.textContent;
+    if(h.tagName==='H2')a.className='toc-h2';
+    a.onclick=function(e){e.preventDefault();document.getElementById(aid).scrollIntoView({behavior:'smooth',block:'start'})};
+    sidebar.appendChild(a);
+  });
+  sidebar.classList.add('visible');
+  // Mobile TOC
+  var mt=document.createElement('details');mt.className='toc-mobile has-items';
+  var ms=document.createElement('summary');ms.textContent='목차 ('+headings.length+'개 항목)';mt.appendChild(ms);
+  var mc=document.createElement('div');mc.className='toc-mobile-content';
+  headings.forEach(function(h,i){
+    var aid=sectionId+'-toc-'+i;
+    var a=document.createElement('a');a.href='#'+aid;a.textContent=h.textContent;
+    if(h.tagName==='H2')a.className='toc-h2';
+    a.onclick=function(e){e.preventDefault();mt.open=false;document.getElementById(aid).scrollIntoView({behavior:'smooth',block:'start'})};
+    mc.appendChild(a);
+  });
+  mt.appendChild(mc);
+  var pt=section.querySelector('.notion-page-title');
+  if(pt&&pt.nextSibling)pt.parentNode.insertBefore(mt,pt.nextSibling);
+  else section.insertBefore(mt,section.firstChild);
+}
+
+function filterCategory(cat){
+  document.querySelectorAll('.sticky-nav-tab').forEach(function(t){t.classList.remove('active')});
+  document.querySelector('[data-cat="'+cat+'"]').classList.add('active');
+  if(currentSection!=='main-content')showSection('main-content');
+  document.querySelectorAll('.category-toggle').forEach(function(t){
+    if(cat==='all'){t.style.display='';t.open=true}
+    else{
+      var show=t.classList.contains('cat-'+cat);
+      t.style.display=show?'':'none';
+      if(show)t.open=true;
+    }
+  });
+}
+
+// Sticky nav shadow on scroll
+window.addEventListener('scroll',function(){
+  var nav=document.getElementById('stickyNav');
+  if(window.scrollY>10)nav.classList.add('scrolled');
+  else nav.classList.remove('scrolled');
+  // Highlight active TOC item
+  if(currentSection!=='main-content'){
+    var links=document.querySelectorAll('#tocSidebar a');
+    var scrollPos=window.scrollY+130;
+    var active=null;
+    links.forEach(function(a){
+      var target=document.getElementById(a.getAttribute('href').slice(1));
+      if(target&&target.offsetTop<=scrollPos)active=a;
+    });
+    links.forEach(function(a){a.classList.remove('active')});
+    if(active)active.classList.add('active');
+  }
+});
+
+// Hash routing
+window.addEventListener('hashchange',function(){
+  var h=location.hash.replace('#','');
+  if(h&&document.getElementById(h))showSection(h);
+  else showSection('main-content');
+});
+window.addEventListener('DOMContentLoaded',function(){
+  var h=location.hash.replace('#','');
+  if(h&&document.getElementById(h))showSection(h);
+});
+</script>
+</body>
+</html>

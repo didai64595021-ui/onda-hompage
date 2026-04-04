@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>솔루션 — NEXABOT</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23111'/%3E%3Crect x='8' y='10' width='16' height='14' rx='3' fill='%2300d4ff'/%3E%3Crect x='11' y='14' width='4' height='3' rx='1' fill='%23111'/%3E%3Crect x='17' y='14' width='4' height='3' rx='1' fill='%23111'/%3E%3Crect x='13' y='20' width='6' height='2' rx='1' fill='%23111'/%3E%3Crect x='14' y='6' width='4' height='4' rx='2' fill='%2300d4ff'/%3E%3C/svg%3E">
+<meta name="description" content="NEXABOT의 산업용 로봇 암, AI 비전 검사 시스템, 스마트 물류 시스템으로 제조 공정을 혁신합니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===== CSS VARIABLES ===== */
+:root {
+  --bg-primary: #0A0A0F;
+  --bg-surface: #12121A;
+  --bg-card: #1A1A24;
+  --accent: #00D4FF;
+  --accent-glow: rgba(0, 212, 255, 0.15);
+  --text-primary: #E0E0E8;
+  --text-secondary: #6B6B80;
+  --text-dark: #1A1A2E;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ===== RESET ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  word-break: keep-all;
+  overflow-x: hidden;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+img { max-width: 100%; display: block; }
+ul { list-style: none; }
+
+/* ===== GRAIN TEXTURE OVERLAY ===== */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99990;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* ===== SCROLL PROGRESS BAR ===== */
+#scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 0%;
+  height: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent), 0 0 16px rgba(0,212,255,0.5);
+  z-index: 99998;
+  transition: none;
+}
+
+/* ===== HIDE DEFAULT CURSOR ===== */
+@media (pointer: fine) {
+  *, *::before, *::after { cursor: none !important; }
+}
+
+/* ===== CUSTOM CURSOR ===== */
+#cursor-dot {
+  position: fixed;
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99997;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s;
+  box-shadow: 0 0 8px var(--accent);
+}
+#cursor-ring {
+  position: fixed;
+  width: 36px; height: 36px;
+  border: 1.5px solid rgba(0, 212, 255, 0.6);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99996;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s var(--ease-expo), height 0.4s var(--ease-expo), border-color 0.3s;
+}
+#cursor-ring.expanded {
+  width: 56px; height: 56px;
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(0,212,255,0.3);
+}
+@media (pointer: coarse) {
+  #cursor-dot, #cursor-ring { display: none; }
+  body { cursor: auto; }
+}
+
+/* ===== HEADER / NAV ===== */
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 24px 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.4s, backdrop-filter 0.4s, padding 0.4s;
+}
+header.scrolled {
+  background: rgba(10,10,15,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 16px 80px;
+  border-bottom: 1px solid rgba(0,212,255,0.08);
+}
+.logo {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: var(--text-primary);
+}
+.logo span { color: var(--accent); }
+nav ul {
+  display: flex;
+  gap: 40px;
+}
+nav a {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  transition: color 0.3s;
+  position: relative;
+}
+nav a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 0; height: 1px;
+  background: var(--accent);
+  transition: width 0.4s var(--ease-expo);
+}
+nav a:hover { color: var(--text-primary); }
+nav a:hover::after { width: 100%; }
+nav a.active { color: var(--accent); }
+nav a.active::after { width: 100%; }
+.nav-cta {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  padding: 10px 24px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  border-radius: 2px;
+  transition: all 0.3s;
+  display: inline-block;
+}
+.nav-cta:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
+  box-shadow: 0 0 24px rgba(0,212,255,0.4);
+}
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 10001;
+}
+.hamburger span {
+  display: block;
+  width: 24px; height: 2px;
+  background: var(--text-primary);
+  transition: all 0.4s var(--ease-expo);
+  transform-origin: center;
+}
+.hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.active span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ===== MOBILE NAV OVERLAY ===== */
+#mobile-nav {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,10,15,0.97);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s var(--ease-expo);
+}
+#mobile-nav.active {
+  opacity: 1;
+  pointer-events: all;
+}
+.mobile-nav-links {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.mobile-nav-links a {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 2px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: color 0.3s, opacity 0.5s var(--ease-expo), transform 0.5s var(--ease-expo);
+}
+#mobile-nav.active .mobile-nav-links a {
+  opacity: 1;
+  transform: translateY(0);
+}
+#mobile-nav.active .mobile-nav-links a:nth-child(1) { transition-delay: 0.05s; }
+#mobile-nav.active .mobile-nav-links a:nth-child(2) { transition-delay: 0.1s; }
+#mobile-nav.active .mobile-nav-links a:nth-child(3) { transition-delay: 0.15s; }
+#mobile-nav.active .mobile-nav-links a:nth-child(4) { transition-delay: 0.2s; }
+#mobile-nav.active .mobile-nav-links a:nth-child(5) { transition-delay: 0.25s; }
+#mobile-nav.active .mobile-nav-links a:nth-child(6) { transition-delay: 0.3s; }
+.mobile-nav-links a:hover { color: var(--accent); }
+
+/* ===== HERO ===== */
+#hero {
+  position: relative;
+  height: 100vh;
+  min-height: 700px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 80px;
+  overflow: hidden;
+}
+.hero-dot-bg {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, #1A1A24 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: 0.6;
+  pointer-events: none;
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 1280px;
+  width: 100%;
+}
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  margin-bottom: 24px;
+  opacity: 0;
+  animation: fade-up 0.8s var(--ease-expo) 0.3s forwards;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 8vw, 120px);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 32px;
+  position: relative;
+  opacity: 0;
+  animation: fade-up 0.9s var(--ease-expo) 0.6s forwards;
+}
+.hero-title.glitch-active::before,
+.hero-title.glitch-active::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  font-size: inherit; font-weight: inherit; line-height: inherit; letter-spacing: inherit;
+  white-space: pre-line;
+}
+.hero-title.glitch-active::before {
+  color: var(--accent);
+  clip-path: inset(30% 0 50% 0);
+  animation: glitch-title-a 0.4s steps(3) forwards;
+}
+.hero-title.glitch-active::after {
+  color: #FF0040;
+  clip-path: inset(55% 0 20% 0);
+  animation: glitch-title-b 0.4s steps(3) forwards;
+}
+@keyframes glitch-title-a {
+  0% { transform: translateX(0); }
+  33% { transform: translateX(-3px); }
+  66% { transform: translateX(3px); }
+  100% { transform: translateX(0); }
+}
+@keyframes glitch-title-b {
+  0% { transform: translateX(0); }
+  33% { transform: translateX(3px); }
+  66% { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
+.hero-sub {
+  font-family: var(--font-body);
+  font-size: clamp(16px, 2vw, 22px);
+  font-weight: 300;
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.7;
+  opacity: 0;
+  animation: fade-up 0.8s var(--ease-expo) 0.7s forwards;
+}
+.hero-scroll {
+  position: absolute;
+  bottom: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  animation: fade-in 1s ease 1.2s forwards;
+}
+.hero-scroll span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--text-secondary);
+}
+.scroll-line {
+  width: 1px;
+  height: 48px;
+  background: linear-gradient(to bottom, var(--text-secondary), transparent);
+  animation: scroll-pulse 2s ease-in-out infinite;
+}
+@keyframes scroll-pulse {
+  0%, 100% { transform: scaleY(1); opacity: 0.5; }
+  50% { transform: scaleY(1.3); opacity: 1; }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ===== COMMON ===== */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 80px;
+}
+section { position: relative; overflow: hidden; }
+
+/* ===== REVEAL ANIMATIONS ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.9s var(--ease-expo), transform 0.9s var(--ease-expo);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.clip-reveal {
+  clip-path: inset(100% 0 0 0);
+  transition: clip-path 1s var(--ease-expo);
+}
+.clip-reveal.visible {
+  clip-path: inset(0% 0 0 0);
+}
+.revealed, .reveal.revealed, .clip-reveal.revealed, .stagger-parent.revealed {
+  opacity: 1 !important;
+  transform: none !important;
+  clip-path: none !important;
+}
+.revealed > *, .stagger-parent.revealed .stagger-child {
+  opacity: 1 !important;
+  transform: none !important;
+}
+.stagger-parent .stagger-child {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s var(--ease-expo), transform 0.7s var(--ease-expo);
+}
+.stagger-parent.visible .stagger-child:nth-child(1) { opacity:1; transform:translateY(0); transition-delay: 0s; }
+.stagger-parent.visible .stagger-child:nth-child(2) { opacity:1; transform:translateY(0); transition-delay: 0.1s; }
+.stagger-parent.visible .stagger-child:nth-child(3) { opacity:1; transform:translateY(0); transition-delay: 0.15s; }
+.stagger-parent.visible .stagger-child:nth-child(4) { opacity:1; transform:translateY(0); transition-delay: 0.2s; }
+.stagger-parent.visible .stagger-child:nth-child(5) { opacity:1; transform:translateY(0); transition-delay: 0.25s; }
+.stagger-parent.visible .stagger-child:nth-child(6) { opacity:1; transform:translateY(0); transition-delay: 0.3s; }
+
+/* ===== SOLUTION DETAIL SECTIONS ===== */
+.solution-section {
+  padding: 120px 0;
+  position: relative;
+}
+.solution-section:nth-child(odd) {
+  background: var(--bg-primary);
+}
+.solution-section:nth-child(even) {
+  background: var(--bg-surface);
+}
+.solution-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 80px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+.solution-section:nth-child(even) .solution-inner {
+  direction: rtl;
+}
+.solution-section:nth-child(even) .solution-inner > * {
+  direction: ltr;
+}
+.solution-image-wrap {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.solution-image-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 3px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  z-index: 2;
+}
+.solution-image-wrap img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s var(--ease-expo);
+}
+.solution-image-wrap:hover img {
+  transform: scale(1.05);
+}
+.solution-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,212,255,0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+.solution-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.solution-tag {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  display: inline-block;
+}
+.solution-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+.solution-subtitle {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  opacity: 0.7;
+}
+.solution-desc {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+
+/* ===== SPECS TABLE ===== */
+.specs-table {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  overflow: hidden;
+}
+.spec-item {
+  padding: 20px 24px;
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.spec-item:hover {
+  background: rgba(26,26,36,0.8);
+}
+.spec-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--text-secondary);
+}
+.spec-value {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* ===== APPLICATION TAGS ===== */
+.app-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.app-tag {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  padding: 8px 16px;
+  border: 1px solid rgba(0,212,255,0.2);
+  color: var(--text-secondary);
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+.app-tag:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-glow);
+}
+
+/* ===== PROCESS DIAGRAM ===== */
+.process-diagram {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 24px 0;
+}
+.process-step {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  padding: 24px 12px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.process-step:hover {
+  border-color: rgba(0,212,255,0.3);
+  box-shadow: 0 0 20px rgba(0,212,255,0.08);
+}
+.process-step-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.process-step-label {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.process-arrow {
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.process-arrow svg {
+  width: 24px;
+  height: 24px;
+}
+.process-arrow svg line,
+.process-arrow svg polyline {
+  stroke: var(--accent);
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ===== DETECTION STATS ===== */
+.detection-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.detection-stat {
+  padding: 24px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-top: 2px solid var(--accent);
+  text-align: center;
+}
+.detection-stat-value {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.detection-stat-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+}
+
+/* ===== THROUGHPUT COUNTERS ===== */
+.throughput-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.throughput-card {
+  padding: 32px 24px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.06);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.throughput-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,212,255,0.04) 0%, transparent 60%);
+}
+.throughput-value {
+  font-family: var(--font-mono);
+  font-size: 36px;
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 12px;
+  position: relative;
+}
+.throughput-label {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-secondary);
+  position: relative;
+}
+
+/* ===== CTA SECTION ===== */
+.cta-section {
+  padding: 120px 0;
+  background: var(--bg-surface);
+  text-align: center;
+  position: relative;
+}
+.cta-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(0,212,255,0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cta-line {
+  width: 1px;
+  height: 64px;
+  background: linear-gradient(to bottom, transparent, var(--accent));
+  margin: 0 auto 48px;
+}
+.cta-title {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+}
+.cta-sub {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-bottom: 48px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.btn-primary {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  padding: 16px 40px;
+  background: var(--accent);
+  color: var(--text-dark);
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+}
+.btn-primary:hover {
+  box-shadow: 0 0 32px rgba(0,212,255,0.5), 0 8px 32px rgba(0,0,0,0.3);
+  transform: translateY(-2px);
+}
+
+/* ===== FOOTER ===== */
+footer {
+  background: var(--bg-primary);
+  padding: 80px 0;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  position: relative;
+  overflow: hidden;
+}
+.footer-mega {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: clamp(80px, 15vw, 200px);
+  font-weight: 700;
+  color: var(--text-primary);
+  opacity: 0.04;
+  white-space: nowrap;
+  pointer-events: none;
+  letter-spacing: -0.04em;
+}
+.footer-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 80px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 48px;
+  position: relative;
+  z-index: 1;
+}
+.footer-brand .logo { font-size: 20px; margin-bottom: 16px; }
+.footer-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  max-width: 240px;
+}
+.footer-heading {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.footer-info p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.9;
+}
+.footer-socials {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.footer-social-link {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  transition: color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.footer-social-link::before { content: '\2197'; font-size: 10px; }
+.footer-social-link:hover { color: var(--accent); }
+.footer-bottom {
+  max-width: 1280px;
+  margin: 48px auto 0;
+  padding: 24px 80px 0;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+.footer-copy {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  header { padding: 20px 48px; }
+  header.scrolled { padding: 14px 48px; }
+  nav ul { gap: 24px; }
+  .container, .solution-inner, .footer-inner, .footer-bottom { padding-left: 48px; padding-right: 48px; }
+  #hero { padding: 0 48px; }
+  .solution-inner { gap: 48px; }
+}
+
+@media (max-width: 768px) {
+  nav ul { display: none; }
+  .nav-cta { display: none; }
+  .hamburger { display: flex; }
+  header { padding: 20px 24px; }
+  header.scrolled { padding: 14px 24px; }
+  #hero { padding: 0 24px; }
+  .container { padding: 0 24px; }
+  .solution-inner {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding: 0 24px;
+  }
+  .solution-section:nth-child(even) .solution-inner {
+    direction: ltr;
+  }
+  .solution-section { padding: 80px 0; }
+  .specs-table { grid-template-columns: 1fr; }
+  .process-diagram {
+    flex-direction: column;
+    gap: 0;
+  }
+  .process-arrow {
+    transform: rotate(90deg);
+    width: auto;
+    height: 40px;
+  }
+  .detection-stats { grid-template-columns: 1fr; }
+  .throughput-grid { grid-template-columns: 1fr; }
+  .footer-inner { grid-template-columns: 1fr; gap: 40px; padding: 0 24px; }
+  .footer-bottom { padding: 24px 24px 0; flex-direction: column; gap: 16px; text-align: center; }
+  .cta-section { padding: 80px 0; }
+}
+
+@media (max-width: 480px) {
+  .hero-title { font-size: clamp(36px, 12vw, 64px); }
+  .solution-title { font-size: 28px; }
+  .process-step-label { font-size: 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SCROLL PROGRESS -->
+<div id="scroll-progress"></div>
+
+<!-- CUSTOM CURSOR -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- HEADER -->
+<header id="site-header">
+  <a href="index.html" class="logo">NEXA<span>BOT</span></a>
+  <nav>
+    <ul>
+      <li><a href="about.html">회사소개</a></li>
+      <li><a href="solutions.html" class="active">솔루션</a></li>
+      <li><a href="technology.html">기술</a></li>
+      <li><a href="cases.html">실적</a></li>
+      <li><a href="contact.html">문의</a></li>
+    </ul>
+  </nav>
+  <a href="contact.html" class="nav-cta">상담 신청</a>
+  <button class="hamburger" id="hamburger" aria-label="메뉴 열기">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- MOBILE NAV -->
+<div id="mobile-nav">
+  <nav class="mobile-nav-links">
+    <a href="about.html" onclick="closeMobileNav()">회사소개</a>
+    <a href="solutions.html" onclick="closeMobileNav()">솔루션</a>
+    <a href="technology.html" onclick="closeMobileNav()">기술</a>
+    <a href="cases.html" onclick="closeMobileNav()">실적</a>
+    <a href="contact.html" onclick="closeMobileNav()">문의</a>
+  </nav>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-dot-bg"></div>
+  <div class="hero-content">
+    <div class="hero-label">// SOLUTIONS — NEXABOT</div>
+    <h1 class="hero-title" id="hero-title">산업을 바꾸는<br>솔루션.</h1>
+    <p class="hero-sub">로봇 암, AI 비전, 스마트 물류 — 세 가지 축으로 제조 공정의 패러다임을 전환합니다.</p>
+  </div>
+  <div class="hero-scroll">
+    <span>SCROLL</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- SOLUTION 1: ROBOT ARM -->
+<section class="solution-section">
+  <div class="solution-inner">
+    <div class="solution-image-wrap clip-reveal">
+      <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=1200&q=80" alt="6축 다관절 로봇 암" loading="lazy">
+      <div class="solution-image-overlay"></div>
+    </div>
+    <div class="solution-content">
+      <div class="solution-tag reveal">// 01</div>
+      <h2 class="solution-title reveal">6축 다관절 로봇 암</h2>
+      <div class="solution-subtitle reveal">ROBOT ARM SERIES</div>
+      <p class="solution-desc reveal">인간의 팔 동작을 초월하는 6자유도 정밀 제어. ±0.01mm 반복 정밀도로 용접, 조립, 도장, 검사 등 모든 공정을 자동화합니다.</p>
+
+      <div class="specs-table reveal">
+        <div class="spec-item">
+          <span class="spec-label">반복 정밀도</span>
+          <span class="spec-value">±0.01mm</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">자유도</span>
+          <span class="spec-value">6DOF</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">최대 가반하중</span>
+          <span class="spec-value">120kg</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">작업 반경</span>
+          <span class="spec-value">400~1800mm</span>
+        </div>
+        <div class="spec-item" style="grid-column: span 2;">
+          <span class="spec-label">제어 방식</span>
+          <span class="spec-value">실시간 OS</span>
+        </div>
+      </div>
+
+      <div class="app-tags stagger-parent">
+        <span class="app-tag stagger-child">용접</span>
+        <span class="app-tag stagger-child">조립</span>
+        <span class="app-tag stagger-child">도장</span>
+        <span class="app-tag stagger-child">검사</span>
+        <span class="app-tag stagger-child">팔레타이징</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION 2: VISION INSPECTION -->
+<section class="solution-section">
+  <div class="solution-inner">
+    <div class="solution-image-wrap clip-reveal">
+      <img src="https://images.unsplash.com/photo-1518314916381-77a37c2a49ae?w=1200&q=80" alt="AI 비전 검사 시스템" loading="lazy">
+      <div class="solution-image-overlay"></div>
+    </div>
+    <div class="solution-content">
+      <div class="solution-tag reveal">// 02</div>
+      <h2 class="solution-title reveal">AI 비전 검사 시스템</h2>
+      <div class="solution-subtitle reveal">VISION INTELLIGENCE</div>
+      <p class="solution-desc reveal">딥러닝 기반 결함 탐지 엔진으로 99.9% 정확도를 달성합니다. 초당 120프레임 실시간 처리, 마이크론 단위 불량 검출.</p>
+
+      <div class="process-diagram reveal">
+        <div class="process-step">
+          <div class="process-step-num">01</div>
+          <div class="process-step-label">이미지 캡처</div>
+        </div>
+        <div class="process-arrow">
+          <svg viewBox="0 0 24 24"><line x1="2" y1="12" x2="20" y2="12"/><polyline points="14,6 20,12 14,18"/></svg>
+        </div>
+        <div class="process-step">
+          <div class="process-step-num">02</div>
+          <div class="process-step-label">AI 분석</div>
+        </div>
+        <div class="process-arrow">
+          <svg viewBox="0 0 24 24"><line x1="2" y1="12" x2="20" y2="12"/><polyline points="14,6 20,12 14,18"/></svg>
+        </div>
+        <div class="process-step">
+          <div class="process-step-num">03</div>
+          <div class="process-step-label">결함 분류</div>
+        </div>
+        <div class="process-arrow">
+          <svg viewBox="0 0 24 24"><line x1="2" y1="12" x2="20" y2="12"/><polyline points="14,6 20,12 14,18"/></svg>
+        </div>
+        <div class="process-step">
+          <div class="process-step-num">04</div>
+          <div class="process-step-label">실시간 판정</div>
+        </div>
+      </div>
+
+      <div class="detection-stats stagger-parent">
+        <div class="detection-stat stagger-child">
+          <div class="detection-stat-value counter" data-target="99.9" data-suffix="%" data-decimal="1">0</div>
+          <div class="detection-stat-label">정확도</div>
+        </div>
+        <div class="detection-stat stagger-child">
+          <div class="detection-stat-value counter" data-target="120" data-suffix="fps">0</div>
+          <div class="detection-stat-label">처리속도</div>
+        </div>
+        <div class="detection-stat stagger-child">
+          <div class="detection-stat-value">0.001mm</div>
+          <div class="detection-stat-label">검출 해상도</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION 3: SMART CONVEYOR -->
+<section class="solution-section">
+  <div class="solution-inner">
+    <div class="solution-image-wrap clip-reveal">
+      <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1200&q=80" alt="스마트 물류 시스템" loading="lazy">
+      <div class="solution-image-overlay"></div>
+    </div>
+    <div class="solution-content">
+      <div class="solution-tag reveal">// 03</div>
+      <h2 class="solution-title reveal">스마트 물류 시스템</h2>
+      <div class="solution-subtitle reveal">SMART CONVEYOR</div>
+      <p class="solution-desc reveal">자율 주행 AGV와 스마트 컨베이어의 통합 플랫폼. AI가 물류 흐름을 최적화하여 이송 효율을 최대 85% 향상.</p>
+
+      <div class="throughput-grid stagger-parent">
+        <div class="throughput-card stagger-child">
+          <div class="throughput-value counter" data-target="2" data-suffix="x">0</div>
+          <div class="throughput-label">처리량 향상</div>
+        </div>
+        <div class="throughput-card stagger-child">
+          <div class="throughput-value counter" data-target="30" data-suffix="%">0</div>
+          <div class="throughput-label">에너지 효율 개선</div>
+        </div>
+        <div class="throughput-card stagger-child">
+          <div class="throughput-value counter" data-target="85" data-suffix="%">0</div>
+          <div class="throughput-label">다운타임 감소</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-line reveal"></div>
+    <div class="cta-title reveal">맞춤 솔루션<br>상담받기</div>
+    <div class="cta-sub reveal">업종과 규모에 상관없이, 최적의 자동화 솔루션을 제안해 드립니다.</div>
+    <a href="contact.html" class="btn-primary reveal">상담 신청하기</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-mega" aria-hidden="true">ENGINEERING TOMORROW</div>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">NEXA<span>BOT</span></div>
+      <p class="footer-desc">AI 기반 산업용 로봇과 자동화 솔루션으로 대한민국 제조업의 미래를 설계합니다.</p>
+    </div>
+    <div class="footer-info">
+      <div class="footer-heading">// CONTACT</div>
+      <p>경기도 성남시 분당구 판교로 335<br>
+      넥사봇 기술연구소 7F<br>
+      Tel. 031-000-0000<br>
+      contact@nexabot.co.kr</p>
+    </div>
+    <div>
+      <div class="footer-heading">// FOLLOW</div>
+      <div class="footer-socials">
+        <a href="#" class="footer-social-link">LinkedIn</a>
+        <a href="#" class="footer-social-link">YouTube</a>
+        <a href="#" class="footer-social-link">Instagram</a>
+        <a href="#" class="footer-social-link">GitHub</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">&copy; 2026 NEXABOT Co., Ltd. All rights reserved.</span>
+    <span class="footer-copy">사업자등록번호: 123-45-67890</span>
+  </div>
+</footer>
+
+<script>
+/* ===== SCROLL PROGRESS ===== */
+window.addEventListener('scroll', () => {
+  const progress = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+  document.getElementById('scroll-progress').style.width = progress + '%';
+}, { passive: true });
+
+
+/* ===== CUSTOM CURSOR ===== */
+const dot = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, cx = 0, cy = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+(function animate() {
+  cx += (mx - cx) * 0.15;
+  cy += (my - cy) * 0.15;
+  if (dot) { dot.style.left = mx + 'px'; dot.style.top = my + 'px'; }
+  if (ring) { ring.style.left = cx + 'px'; ring.style.top = cy + 'px'; }
+  requestAnimationFrame(animate);
+})();
+
+/* ===== HOVER EXPAND ===== */
+document.querySelectorAll('a, button, .solution-detail').forEach(el => {
+  el.addEventListener('mouseenter', () => ring && ring.classList.add('expanded'));
+  el.addEventListener('mouseleave', () => ring && ring.classList.remove('expanded'));
+});
+
+/* ===== REVEAL ON SCROLL ===== */
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      e.target.querySelectorAll('.counter').forEach(animateCounter);
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal, .clip-reveal, .stagger-parent').forEach(el => revealObserver.observe(el));
+
+/* ===== COUNTER ANIMATION ===== */
+function animateCounter(el) {
+  if (el.dataset.animated) return;
+  el.dataset.animated = 'true';
+  const target = parseFloat(el.dataset.target);
+  const suffix = el.dataset.suffix || '';
+  const decimal = parseInt(el.dataset.decimal) || 0;
+  const duration = 2000;
+  const start = performance.now();
+  function update(now) {
+    const p = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - p, 4);
+    el.textContent = (eased * target).toFixed(decimal) + suffix;
+    if (p < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { animateCounter(e.target); counterObserver.unobserve(e.target); }
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('.counter').forEach(el => counterObserver.observe(el));
+
+/* ===== HEADER SCROLL BEHAVIOR ===== */
+let lastScroll = 0;
+const header = document.getElementById('site-header');
+window.addEventListener('scroll', () => {
+  const y = window.scrollY;
+  if (y > 80) header.classList.add('scrolled');
+  else header.classList.remove('scrolled');
+  lastScroll = y;
+}, { passive: true });
+
+/* ===== HAMBURGER ===== */
+const hamburger = document.getElementById('hamburger');
+const mobileNav = document.getElementById('mobile-nav');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('active');
+  mobileNav.classList.toggle('active');
+  document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
+});
+function closeMobileNav() {
+  hamburger.classList.remove('active');
+  mobileNav.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+/* ===== ESCAPE KEY ===== */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeMobileNav();
+});
+
+/* ===== SAFETY NET ===== */
+setTimeout(() => {
+  document.querySelectorAll('.reveal, .clip-reveal, .stagger-parent').forEach(el => {
+    el.classList.add('visible');
+    el.classList.add('revealed');
+  });
+  document.querySelectorAll('.stagger-child').forEach(el => {
+    el.style.opacity = '1';
+    el.style.transform = 'none';
+  });
+}, 2000);
+
+/* ===== HERO GLITCH (index-matching ::before/::after) ===== */
+(function startHeroGlitch() {
+  var title = document.getElementById('hero-title');
+  if (!title) return;
+  title.dataset.text = title.innerText;
+  function doGlitch() {
+    title.classList.add('glitch-active');
+    setTimeout(function() { title.classList.remove('glitch-active'); }, 400);
+    setTimeout(doGlitch, 4000 + Math.random() * 2000);
+  }
+  setTimeout(doGlitch, 1000);
+})();
+
+/* ===== MAGNETIC BUTTONS ===== */
+document.querySelectorAll('.btn-primary, .nav-cta').forEach(btn => {
+  btn.addEventListener('mousemove', e => {
+    const rect = btn.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = e.clientX - cx;
+    const dy = e.clientY - cy;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    const maxDist = 80;
+    if (dist < maxDist) {
+      const pull = (1 - dist / maxDist) * 0.4;
+      btn.style.transform = `translate(${dx * pull}px, ${dy * pull}px)`;
+    }
+  });
+  btn.addEventListener('mouseleave', () => {
+    btn.style.transform = '';
+  });
+});
+</script>
+</body>
+</html>
