@@ -5,6 +5,21 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+  // ============ SCROLL REVEAL ============
+  document.body.classList.add('js-scroll-reveal');
+  const revealEls = document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right, .fade-in-scale');
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+  revealEls.forEach(el => revealObserver.observe(el));
+  // Fallback: reveal all after 1.5s (for screenshot tools / headless browsers)
+  setTimeout(() => { revealEls.forEach(el => el.classList.add('revealed')); }, 1500);
+
   // ============ SIDEBAR ============
   const sidebar = document.getElementById('sidebar');
   const sidebarToggle = document.getElementById('sidebarToggle');
