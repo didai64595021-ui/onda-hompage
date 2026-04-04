@@ -9,6 +9,8 @@
  * PM2 크론: 매 30분 실행
  */
 
+const fs = require('fs');
+const path = require('path');
 const { supabase } = require('./lib/supabase');
 const { toggleAd } = require('./toggle-ad');
 const { PRODUCT_MAP } = require('./lib/product-map');
@@ -174,7 +176,21 @@ async function main() {
 
     if (budgetRatio >= 0.9) {
       console.log('[예산] 90% 이상 소진 → 전체 광고 OFF');
-      notify(`⛔ 스케줄러: 예산 ${budgetPct}% 소진 → 전체 광고 OFF`);
+      // 중복 알림 방지: 파일 기반 1시간 쿨다운 체크
+      const alertFlagFile = path.join(__dirname, 'cookies', 'budget-alert-sent.json');
+      let shouldAlert = true;
+      try {
+        const flag = JSON.parse(fs.readFileSync(alertFlagFile, 'utf-8'));
+        const sentAt = new Date(flag.sentAt);
+        if (Date.now() - sentAt.getTime() < 60 * 60 * 1000) {
+          shouldAlert = false;
+          console.log('[예산] 최근 1시간 내 이미 알림 전송 — 중복 스킵');
+        }
+      } catch {}
+      if (shouldAlert) {
+        notify(`⛔ 스케줄러: 예산 ${budgetPct}% 소진 → 전체 광고 OFF`);
+        fs.writeFileSync(alertFlagFile, JSON.stringify({ sentAt: new Date().toISOString() }));
+      }
       await setAllAds('off');
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
       console.log(`\n=== 스케줄러 완료 (${elapsed}초) — 예산 초과 OFF ===`);

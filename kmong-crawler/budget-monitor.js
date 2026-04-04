@@ -9,6 +9,8 @@
  * PM2 크론: 매 2시간 (0 xx/2 xx xx xx)
  */
 
+const fs = require('fs');
+const path = require('path');
 const { supabase } = require('./lib/supabase');
 const { toggleAd } = require('./toggle-ad');
 const { PRODUCT_MAP } = require('./lib/product-map');
@@ -283,14 +285,27 @@ async function main() {
 
     // === 월간 예산 체크 (기존 로직) ===
     if (monthlyRatio >= 1.0) {
-      const msg = `🚨 월간 광고비 한도 초과!\n지출: ₩${fmt(monthlySpend)} / 한도: ₩${fmt(settings.monthlyBudget)} (${monthlyPct}%)`;
-      notify(msg);
+      // 중복 알림 방지: 파일 기반 1시간 쿨다운 체크
+      const alertFlagFile = path.join(__dirname, 'cookies', 'budget-alert-sent.json');
+      let shouldAlertMonthly = true;
+      try {
+        const flag = JSON.parse(fs.readFileSync(alertFlagFile, 'utf-8'));
+        const sentAt = new Date(flag.sentAt);
+        if (Date.now() - sentAt.getTime() < 60 * 60 * 1000) {
+          shouldAlertMonthly = false;
+          console.log('[예산] 최근 1시간 내 이미 알림 전송 — 중복 스킵');
+        }
+      } catch {}
+      if (shouldAlertMonthly) {
+        const msg = `🚨 월간 광고비 한도 초과!\n지출: ₩${fmt(monthlySpend)} / 한도: ₩${fmt(settings.monthlyBudget)} (${monthlyPct}%)`;
+        notify(msg);
+        fs.writeFileSync(alertFlagFile, JSON.stringify({ sentAt: new Date().toISOString() }));
+      }
 
       if (settings.autoStop) {
         console.log('[자동정지] 전체 광고 OFF 실행...');
-        notify('⛔ 예산 초과 → 전체 광고 자동 OFF 실행 중...');
         await stopAllAds();
-        notify('✅ 전체 광고 OFF 완료 (예산 초과 자동정지)');
+        console.log('[자동정지] 전체 광고 OFF 완료');
       } else {
         console.log('[정보] 자동정지 OFF — 수동 처리 필요');
       }
