@@ -192,6 +192,14 @@ async function main() {
         fs.writeFileSync(alertFlagFile, JSON.stringify({ sentAt: new Date().toISOString() }));
       }
       await setAllAds('off');
+      // 예산 초과 OFF 상태를 DB에 기록 → 다음 실행에서 재토글 방지
+      for (const product of PRODUCT_MAP) {
+        await supabase
+          .from('kmong_settings')
+          .upsert({ key: `last_ad_state_${product.id}`, value: 'off', updated_at: new Date().toISOString() }, { onConflict: 'key' })
+          .catch(() => {});
+      }
+      console.log('[예산] 전체 서비스 상태 DB에 off 기록 완료');
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
       console.log(`\n=== 스케줄러 완료 (${elapsed}초) — 예산 초과 OFF ===`);
       return;
