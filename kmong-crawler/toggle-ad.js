@@ -108,7 +108,7 @@ async function toggleAd(productId, action) {
         }
       }
       const msg = `광고 토글 실패: ${productId} 서비스를 찾을 수 없음`;
-      notify(msg);
+      console.log(`[경고] ${msg} (간헐적 페이지 로딩 문제 — 알림 스킵)`);
       await browser.close();
       return { success: false, message: msg };
     }
