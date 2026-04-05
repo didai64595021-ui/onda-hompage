@@ -6,9 +6,13 @@
  * - 비승인/승인전 서비스 있으면 텔레그램 경고
  */
 
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { login } = require('./lib/login');
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { supabase } = require('./lib/supabase');
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { matchProductId } = require('./lib/product-map');
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { notify } = require('./lib/telegram');
 
 const MY_GIGS_URL = 'https://kmong.com/my-gigs';

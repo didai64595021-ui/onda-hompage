@@ -4,8 +4,11 @@
  * 매일 오전 10시: 저성과 서비스 콘텐츠 자동 생성
  */
 
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { generateContentForLowPerformers } = require('./lib/content-generator');
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { evaluateAllTests } = require('./lib/ab-test-manager');
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { notify } = require('./lib/telegram');
 
 async function main() {

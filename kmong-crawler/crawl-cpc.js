@@ -5,9 +5,13 @@
  * - 어제 1일치 데이터 수집 후 Supabase에 upsert
  */
 
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { login, saveErrorScreenshot } = require('./lib/login');
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { supabase } = require('./lib/supabase');
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { matchProductId } = require('./lib/product-map');
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { notify } = require('./lib/telegram');
 
 const CLICK_UP_URL = 'https://kmong.com/seller/click-up';

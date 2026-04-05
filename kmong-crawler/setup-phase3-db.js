@@ -8,6 +8,7 @@
  * - kmong_inbox_classification: 인박스 메시지 분류
  */
 
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { supabase } = require('./lib/supabase');
 const { notify } = require('./lib/telegram');
 

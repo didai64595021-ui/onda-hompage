@@ -9,6 +9,7 @@
  * 6. 텔레그램 리포트 발송
  */
 
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { supabase } = require('./lib/supabase');
 const { notify } = require('./lib/telegram');
 const {
