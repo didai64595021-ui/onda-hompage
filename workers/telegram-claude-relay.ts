@@ -95,7 +95,7 @@ function runClaude(prompt: string, workspace: string): Promise<string> {
     ], {
       cwd: workspace,
       env: { ...process.env, HOME: '/home/onda' },
-      timeout: 300000, // 5분 타임아웃
+      timeout: 5400000, // 1시간 30분 타임아웃
     });
 
     let stdout = '';
