@@ -18,6 +18,13 @@
 - coding-agent 스킬 사용. 직접 코딩 X.
 - exec는 조회용만 (ls, cat, git status)
 
+## claude --print 텔레그램 보고 누락 방지 (2026-04-05, 영구)
+- **원인**: claude --print 모드는 비대화형 → 내부에서 bash/notify 실행 불가
+- **해결**: `/home/onda/scripts/claude-with-notify.sh` wrapper 사용
+- **사용법**: `claude-with-notify.sh <project> <task_summary> <chat_id> --permission-mode bypassPermissions --print "태스크"`
+- wrapper가 claude 완료 감지 → 자동으로 텔레그램 전송 (성공/실패/소요시간/커밋 포함)
+- 모든 claude --print 직접 호출 → 이 wrapper로 대체 필수
+
 ## 컴팩션 자동복구
 1. `/home/onda/scripts/compaction-recovery.sh check`
 2. git log/status로 진행도 파악
