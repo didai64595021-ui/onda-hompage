@@ -89,7 +89,7 @@ async function login(opts = {}) {
   // === 2단계: 메인 → 모달 로그인 ===
   const page = await context.newPage();
   console.log('[로그인] 크몽 메인 접속...');
-  await page.goto(MAIN_URL, { waitUntil: 'load', timeout: 30000 });
+  await page.goto(MAIN_URL, { waitUntil: 'load', timeout: 45000 });
   await page.waitForTimeout(5000);
   console.log(`[로그인] 현재 URL: ${page.url()}`);
 
