@@ -28,14 +28,43 @@ document.addEventListener('DOMContentLoaded', () => {
       sidebar.classList.toggle('active');
     });
   }
-  // Sidebar menu active
+  // Sidebar menu active + page panel switching
   document.querySelectorAll('.sidebar-menu-item').forEach(item => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
       document.querySelectorAll('.sidebar-menu-item').forEach(i => i.classList.remove('active'));
       item.classList.add('active');
+      // Switch page panel
+      const page = item.dataset.page;
+      document.querySelectorAll('.page-panel').forEach(p => p.classList.remove('active'));
+      const targetPanel = document.querySelector(`.page-panel[data-panel="${page}"]`);
+      if (targetPanel) targetPanel.classList.add('active');
+      // Update topbar title
+      const topTitle = document.querySelector('.topbar-title');
+      if (topTitle) topTitle.textContent = item.textContent.trim();
       // Close sidebar on mobile
       if (window.innerWidth <= 1024) sidebar.classList.remove('active');
+    });
+  });
+  // Mobile tab bar switching
+  document.querySelectorAll('.mobile-tab-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const page = item.dataset.page;
+      // Update mobile tabs
+      document.querySelectorAll('.mobile-tab-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+      // Update sidebar items
+      document.querySelectorAll('.sidebar-menu-item').forEach(i => {
+        i.classList.toggle('active', i.dataset.page === page);
+      });
+      // Switch page panel
+      document.querySelectorAll('.page-panel').forEach(p => p.classList.remove('active'));
+      const targetPanel = document.querySelector(`.page-panel[data-panel="${page}"]`);
+      if (targetPanel) targetPanel.classList.add('active');
+      // Update topbar title
+      const topTitle = document.querySelector('.topbar-title');
+      if (topTitle) topTitle.textContent = item.textContent.trim();
     });
   });
 
