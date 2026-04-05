@@ -6,11 +6,29 @@
  * - 대시보드 역방향 제어용으로 모듈화
  */
 
+const fs = require('fs');
+const path = require('path');
 const { login } = require('./lib/login');
 const { matchProductId } = require('./lib/product-map');
 const { notify } = require('./lib/telegram');
 
 const CLICK_UP_URL = 'https://kmong.com/seller/click-up';
+const TOGGLE_LOG_FILE = path.join(__dirname, 'cookies', 'toggle-notify-log.json');
+
+// 중복 알림 방지: 같은 서비스+액션이 30분 이내 반복이면 알림 스킵
+function shouldNotifyToggle(productId, action) {
+  try {
+    const log = fs.existsSync(TOGGLE_LOG_FILE) ? JSON.parse(fs.readFileSync(TOGGLE_LOG_FILE, 'utf-8')) : {};
+    const key = `${productId}-${action}`;
+    const lastTime = log[key] ? new Date(log[key]).getTime() : 0;
+    if (Date.now() - lastTime < 30 * 60 * 1000) return false;
+    log[key] = new Date().toISOString();
+    fs.writeFileSync(TOGGLE_LOG_FILE, JSON.stringify(log, null, 2));
+    return true;
+  } catch {
+    return true;
+  }
+}
 
 /**
  * 광고 토글 실행
@@ -135,7 +153,7 @@ async function toggleAd(productId, action) {
     if (currentState === targetState) {
       const msg = `광고 ${productId}: 이미 ${action.toUpperCase()} 상태`;
       console.log(`[스킵] ${msg}`);
-      notify(msg);
+      // 이미 원하는 상태면 알림 스킵 (스팸 방지)
       await browser.close();
       return { success: true, message: msg };
     }
@@ -156,7 +174,11 @@ async function toggleAd(productId, action) {
 
     const msg = `광고 토글 완료: ${productId} → ${action.toUpperCase()}`;
     console.log(`[완료] ${msg}`);
-    notify(msg);
+    if (shouldNotifyToggle(productId, action)) {
+      notify(msg);
+    } else {
+      console.log('[알림 스킵] 30분 내 중복 토글 알림');
+    }
 
     await browser.close();
     return { success: true, message: msg };
@@ -164,7 +186,9 @@ async function toggleAd(productId, action) {
   } catch (err) {
     const msg = `광고 토글 실패: ${err.message}`;
     console.error(`[에러] ${msg}`);
-    notify(msg);
+    if (shouldNotifyToggle(productId, 'error')) {
+      notify(msg);
+    }
     if (browser) await browser.close();
     return { success: false, message: msg };
   }
