@@ -213,6 +213,17 @@ async function distributeBudget(settings, totalSpend) {
 }
 
 async function stopAllAds() {
+  // 6시간 쿨다운: 이미 최근 OFF 실행했으면 스킵 (매 2시간 Playwright 14회 로그인 방지)
+  const offFlagFile = path.join(__dirname, 'cookies', 'budget-off-executed.json');
+  try {
+    const flag = JSON.parse(fs.readFileSync(offFlagFile, 'utf-8'));
+    const execAt = new Date(flag.executedAt);
+    if (Date.now() - execAt.getTime() < 6 * 60 * 60 * 1000) {
+      console.log('[예산] 최근 6시간 내 이미 OFF 실행 — 스킵');
+      return [];
+    }
+  } catch {}
+
   const results = [];
   for (const product of PRODUCT_MAP) {
     try {
@@ -224,6 +235,7 @@ async function stopAllAds() {
       results.push({ id: product.id, success: false, message: err.message });
     }
   }
+  fs.writeFileSync(offFlagFile, JSON.stringify({ executedAt: new Date().toISOString() }));
   return results;
 }
 

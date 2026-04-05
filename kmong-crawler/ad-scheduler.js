@@ -191,7 +191,21 @@ async function main() {
         notify(`⛔ 스케줄러: 예산 ${budgetPct}% 소진 → 전체 광고 OFF`);
         fs.writeFileSync(alertFlagFile, JSON.stringify({ sentAt: new Date().toISOString() }));
       }
-      await setAllAds('off');
+      // 예산 초과 시 광고 OFF는 6시간마다만 실행 (매 30분 실행은 리소스 낭비)
+      const offFlagFile = path.join(__dirname, 'cookies', 'budget-off-executed.json');
+      let shouldOff = true;
+      try {
+        const flag = JSON.parse(fs.readFileSync(offFlagFile, 'utf-8'));
+        const execAt = new Date(flag.executedAt);
+        if (Date.now() - execAt.getTime() < 6 * 60 * 60 * 1000) {
+          shouldOff = false;
+          console.log('[예산] 최근 6시간 내 이미 OFF 실행 — 스킵');
+        }
+      } catch {}
+      if (shouldOff) {
+        await setAllAds('off');
+        fs.writeFileSync(offFlagFile, JSON.stringify({ executedAt: new Date().toISOString() }));
+      }
       // 예산 초과 OFF 상태를 DB에 기록 → 다음 실행에서 재토글 방지
       for (const product of PRODUCT_MAP) {
         try {
