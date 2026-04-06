@@ -71,61 +71,56 @@ async function editGig(productId, changes = {}) {
     const applied = {};
 
     // ────────────────────────────────────────────────
-    // 제목 수정
+    // 제목 수정 (2026-04-06 실제 UI 분석 기반)
+    // 방식: 상단 "편집" 버튼 → [role=dialog] input → fill → "변경하기" 클릭
+    //        → 승인규정 체크 → "제출하기" → 최종확인 모달 "제출하기" → auto-approve
     // ────────────────────────────────────────────────
     if (changes.title) {
       console.log(`[제목] → "${changes.title.substring(0, 50)}"`);
       
-      // "편집" 버튼 클릭 (제목 옆 연필 아이콘 또는 편집 버튼)
-      const editTitleBtn = page.locator('button:has-text("편집")').first();
+      // 특수문자 검증: : + - # / . ( ) 만 허용
+      const invalidChars = changes.title.match(/[^가-힣a-zA-Z0-9\s:\+\-#\/\.\(\)]/g);
+      if (invalidChars) {
+        console.log(`[제목] 허용되지 않는 특수문자 감지: ${invalidChars.join('')} → 제거 처리`);
+        changes.title = changes.title.replace(/[^가-힣a-zA-Z0-9\s:\+\-#\/\.\(\)]/g, '');
+        console.log(`[제목] 정제된 제목: "${changes.title}"`);
+      }
+      if (changes.title.length > 30) {
+        changes.title = changes.title.substring(0, 30);
+        console.log(`[제목] 30자 제한으로 자름: "${changes.title}"`);
+      }
+      
+      // Step 1: 상단 "편집" 버튼 클릭 → 제목 모달 열기
+      const editTitleBtn = page.locator('button').filter({ hasText: '편집' }).first();
       if (await editTitleBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
         await editTitleBtn.click({ force: true });
-        await page.waitForTimeout(2000);
-        console.log('[제목 편집 모달] 오픈 시도');
+        await page.waitForTimeout(3000);
+        console.log('[제목 편집 모달] 오픈');
+      } else {
+        console.log('[제목] 편집 버튼 미발견');
       }
-
-      // 제목 입력 필드 탐색 (모달 또는 인라인)
-      const titleSelectors = [
-        'input[name="gig_title"]',
-        'input[name="title"]',
-        'input[placeholder*="제목"]',
-        'input[placeholder*="서비스명"]',
-        'textarea[name*="title"]',
-        // 가장 큰 텍스트 input (대개 제목)
-        'input[type="text"]:visible',
-      ];
-
-      let titleInput = null;
-      let oldTitle = '';
-      for (const sel of titleSelectors) {
-        const el = page.locator(sel).first();
-        if (await el.isVisible({ timeout: 2000 }).catch(() => false)) {
-          const val = await el.inputValue().catch(() => '');
-          // 서비스 제목처럼 보이는 값(20자 이상)만 선택
-          if (val.length > 10 || sel.includes('name=')) {
-            titleInput = el;
-            oldTitle = val;
-            console.log(`[제목 필드 발견] sel="${sel}" val="${val.substring(0,50)}"`);
-            break;
-          }
-        }
-      }
-
-      if (titleInput) {
-        await titleInput.click({ force: true });
-        await page.keyboard.press('Control+a');
-        await page.keyboard.type(changes.title, { delay: 30 });
-        applied.title = { old: oldTitle, new: changes.title };
-        console.log('[제목] 입력 완료');
+      
+      // Step 2: 모달 input에 새 제목 입력
+      const modalTitleInput = page.locator('[role="dialog"] input').first();
+      if (await modalTitleInput.isVisible({ timeout: 5000 }).catch(() => false)) {
+        const oldTitle = await modalTitleInput.inputValue().catch(() => '');
+        await modalTitleInput.fill(changes.title);
+        await page.waitForTimeout(1000);
+        const newVal = await modalTitleInput.inputValue();
+        console.log(`[제목] 모달 입력: "${oldTitle}" → "${newVal}"`);
+        applied.title = { old: oldTitle, new: newVal };
         
-        // 모달 저장 버튼
-        const modalSave = page.locator('[role="dialog"] button:has-text("저장"), [role="dialog"] button:has-text("확인"), [role="dialog"] button:has-text("완료")').first();
-        if (await modalSave.isVisible({ timeout: 2000 }).catch(() => false)) {
-          await modalSave.click();
-          await page.waitForTimeout(2000);
+        // Step 3: 모달 "변경하기" 버튼 클릭 (draft PUT)
+        const modalChangeBtn = page.locator('[role="dialog"] button:has-text("변경하기")').first();
+        if (await modalChangeBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+          await modalChangeBtn.click({ force: true });
+          await page.waitForTimeout(5000);
+          console.log('[제목] 모달 변경하기 클릭 (draft 저장)');
+        } else {
+          console.log('[제목] 변경하기 버튼 미발견');
         }
       } else {
-        console.log('[제목] 입력 필드 미발견');
+        console.log('[제목] 모달 input 미발견');
       }
     }
 
@@ -248,36 +243,59 @@ async function editGig(productId, changes = {}) {
       fullPage: false,
     });
 
-    // 저장 버튼 클릭 (전체 페이지 저장/심사요청)
-    const saveSelectors = [
-      'button:has-text("심사 요청")',
-      'button:has-text("수정 완료")',
-      'button:has-text("저장하기")',
-      'button:has-text("저장")',
-      'button[type="submit"]',
-    ];
-    let saved = false;
-    for (const sel of saveSelectors) {
-      const btn = page.locator(sel).first();
-      if (await btn.isVisible({ timeout: 2000 }).catch(() => false)) {
-        const btnText = await btn.textContent().catch(() => '');
-        console.log(`[저장 버튼] "${btnText?.trim()}" 클릭`);
-        await btn.click({ force: true });
-        await page.waitForTimeout(4000);
-        saved = true;
-
-        // 확인 모달
-        const confirmBtn = page.locator('button:has-text("확인"), button:has-text("네"), button:has-text("계속")').first();
-        if (await confirmBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-          await confirmBtn.click();
-          await page.waitForTimeout(2000);
-        }
-        break;
+    // 제목만 변경된 경우: 승인규정 체크 → 제출하기 → 최종확인 모달 제출하기
+    // (키워드/설명 변경은 여전히 모달 방식 아님)
+    if (applied.title) {
+      console.log('[제목] draft 저장 완료 → 제출 시작');
+      
+      // 승인규정 체크박스 체크
+      const mandatoryLabel = page.locator('label[for="mandatory-field-0"]').first();
+      if (await mandatoryLabel.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await mandatoryLabel.click({ force: true });
+        await page.waitForTimeout(500);
+        console.log('[제출] 승인규정 체크 완료');
       }
-    }
-
-    if (!saved) {
-      console.log('[저장] 저장 버튼 미발견 — 필드 변경만 적용');
+      
+      // 제출하기 (1인)
+      const submitBtn = page.locator('button:has-text("제출하기")').first();
+      if (await submitBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await submitBtn.scrollIntoViewIfNeeded();
+        await submitBtn.click({ force: true });
+        await page.waitForTimeout(6000);
+        console.log('[제출] 1차 제출하기 클릭');
+      }
+      
+      // 최종 확인 모달의 제출하기 (2차) — [role=dialog] 안 또는 페이지의 마지막 제출 버튼
+      const finalSubmitBtn = page.locator('[role="dialog"] button:has-text("제출하기")').first();
+      if (await finalSubmitBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await finalSubmitBtn.click({ force: true });
+        await page.waitForTimeout(8000);
+        console.log('[제출] 최종 확인 모달 제출하기 클릭');
+      }
+    } else {
+      // 제목 외 변경사항: 기존 저장하기 방식
+      const saveSelectors = [
+        'button:has-text("심사 요청")',
+        'button:has-text("수정 완료")',
+        'button:has-text("저장하기")',
+        'button:has-text("저장")',
+        'button[type="submit"]',
+      ];
+      for (const sel of saveSelectors) {
+        const btn = page.locator(sel).first();
+        if (await btn.isVisible({ timeout: 2000 }).catch(() => false)) {
+          const btnText = await btn.textContent().catch(() => '');
+          console.log(`[저장 버튼] "${btnText?.trim()}" 클릭`);
+          await btn.click({ force: true });
+          await page.waitForTimeout(4000);
+          const confirmBtn = page.locator('button:has-text("확인"), button:has-text("네"), button:has-text("계속")').first();
+          if (await confirmBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+            await confirmBtn.click();
+            await page.waitForTimeout(2000);
+          }
+          break;
+        }
+      }
     }
 
     // 변경 이력 저장 (DB) - 테이블 없으면 무시
