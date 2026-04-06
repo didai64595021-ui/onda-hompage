@@ -81,7 +81,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  /* --- 4. 히어로 슬라이더 --- */
+  /* --- 4. 히어로 슬라이더 (동적 재초기화 지원) --- */
+  let heroSliderInterval = null;
+  window.initHeroSlider = function() {
+    const heroSlider = document.querySelector('.hero-slider');
+    if (!heroSlider) return;
+    const slides = heroSlider.querySelectorAll('.hero-slide');
+    const dots = heroSlider.querySelectorAll('.hero-dot');
+    if (slides.length === 0) return;
+    if (heroSliderInterval) clearInterval(heroSliderInterval);
+    let current = 0;
+    // reset active state
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    dots.forEach(function(d) { d.classList.remove('active'); });
+    slides[0].classList.add('active');
+    if (dots[0]) dots[0].classList.add('active');
+    const goTo = function(idx) {
+      slides[current].classList.remove('active');
+      if (dots[current]) dots[current].classList.remove('active');
+      const oldImg = slides[current].querySelector('img');
+      if (oldImg) { oldImg.style.animation = 'none'; oldImg.offsetHeight; oldImg.style.animation = ''; }
+      current = ((idx % slides.length) + slides.length) % slides.length;
+      slides[current].classList.add('active');
+      if (dots[current]) dots[current].classList.add('active');
+    };
+    const startAuto = function() {
+      clearInterval(heroSliderInterval);
+      heroSliderInterval = setInterval(function() { goTo(current + 1); }, 5000);
+    };
+    dots.forEach(function(dot, i) {
+      dot.addEventListener('click', function() { goTo(i); startAuto(); });
+    });
+    let touchStartX = 0;
+    heroSlider.addEventListener('touchstart', function(e) { touchStartX = e.touches[0].clientX; }, { passive: true });
+    heroSlider.addEventListener('touchend', function(e) {
+      const diff = touchStartX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 50) { goTo(diff > 0 ? current + 1 : current - 1); startAuto(); }
+    }, { passive: true });
+    startAuto();
+  };
+
   const heroSlider = document.querySelector('.hero-slider');
   if (heroSlider) {
     const slides = heroSlider.querySelectorAll('.hero-slide');

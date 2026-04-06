@@ -53,10 +53,84 @@
   }
 
   /**
+   * Render hero slides dynamically from CMS data
+   * Supports both new 'hero-slides' array and legacy 'hero-slide-N-*' keys
+   */
+  function renderHeroSlides(data) {
+    var slider = document.getElementById('heroSlider');
+    if (!slider) return;
+
+    // Remove existing slides
+    slider.querySelectorAll('.hero-slide').forEach(function(el) { el.remove(); });
+
+    // Build slides array: new format takes priority, fallback to legacy keys
+    var slides = data['hero-slides'];
+    if (!slides || !Array.isArray(slides) || slides.length === 0) {
+      slides = [];
+      for (var i = 1; i <= 20; i++) {
+        var img = data['hero-slide-' + i + '-img'];
+        if (!img) break;
+        slides.push({
+          img: img,
+          copy: data['hero-slide-' + i + '-copy'] || '',
+          sub: data['hero-slide-' + i + '-sub'] || ''
+        });
+      }
+    }
+
+    if (slides.length === 0) return;
+
+    var overlay = slider.querySelector('.hero-slider-overlay');
+    var dotsContainer = slider.querySelector('#heroDots');
+
+    slides.forEach(function(slide, idx) {
+      var div = document.createElement('div');
+      div.className = 'hero-slide' + (idx === 0 ? ' active' : '');
+      var img = document.createElement('img');
+      img.src = slide.img || '';
+      img.alt = slide.copy || '';
+      img.width = 1400;
+      img.height = 900;
+      img.loading = idx === 0 ? 'eager' : 'lazy';
+      var contentDiv = document.createElement('div');
+      contentDiv.className = 'hero-slider-content';
+      var copyP = document.createElement('p');
+      copyP.className = 'hero-slider-copy';
+      copyP.textContent = slide.copy || '';
+      var subP = document.createElement('p');
+      subP.className = 'hero-slider-sub';
+      subP.textContent = slide.sub || '';
+      contentDiv.appendChild(copyP);
+      contentDiv.appendChild(subP);
+      div.appendChild(img);
+      div.appendChild(contentDiv);
+      slider.insertBefore(div, overlay);
+
+      // dot
+      if (dotsContainer) {
+        var dot = document.createElement('button');
+        dot.className = 'hero-dot' + (idx === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', '슬라이드 ' + (idx + 1));
+        dotsContainer.appendChild(dot);
+      }
+    });
+
+    // Re-initialize slider if function exists
+    if (typeof window.initHeroSlider === 'function') {
+      window.initHeroSlider();
+    } else if (typeof window.heroSliderInit === 'function') {
+      window.heroSliderInit();
+    }
+  }
+
+  /**
    * Apply CMS data to all data-cms elements on the page
    */
   function applyCmsData(data) {
     if (!data || typeof data !== 'object') return;
+
+    // Render hero slides first
+    renderHeroSlides(data);
 
     document.querySelectorAll('[data-cms]').forEach(el => {
       const key = el.dataset.cms;
