@@ -8,7 +8,7 @@
  * PM2 상시 구동: kmong-telegram-bot
  */
 
-require('dotenv').config({ path: require('path').join(__dirname, '.env') });
+require('dotenv').config({ path: require('path').join(__dirname, '.env'), override: true });
 
 const TelegramBot = require('node-telegram-bot-api');
 const { toggleAd } = require('./toggle-ad');

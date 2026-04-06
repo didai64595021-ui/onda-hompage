@@ -15,6 +15,9 @@ const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 const ALLOWED_CHAT_IDS = (process.env.TELEGRAM_RELAY_CHAT_IDS || '-1003753252286').split(',');
 const DEFAULT_WORKSPACE = process.env.CLAUDE_RELAY_WORKSPACE || '/home/onda/projects/onda-ad';
 const MAX_RESPONSE_LENGTH = 4000;
+const MAX_RETRIES = 2;
+const TYPING_INTERVAL_MS = 8000;       // 8초마다 typing 표시
+const PROGRESS_REPORT_MS = 30000;      // 30초 이상이면 중간보고
 
 // 워크스페이스 매핑 (키워드 기반)
 const WORKSPACE_MAP: Record<string, string> = {
@@ -28,8 +31,18 @@ const WORKSPACE_MAP: Record<string, string> = {
   '콜드메일': '/home/onda/projects/onda-coldmail',
 };
 
+// 에러 메시지 패턴
+const ERROR_PATTERNS = [
+  /⚠️\s*Something went wrong while processing your request\.?[^\n]*(?:\n|$)/g,
+  /Please try again, or use \/new to start a fresh session\.?\s*\n?/g,
+  /^\s*Error:.*$/gm,
+];
+
 let lastUpdateId = 0;
-let isProcessing = false;
+
+// 메시지 큐
+const messageQueue: Array<Record<string, unknown>> = [];
+let processingQueue = false;
 
 // 타임스탬프 로거
 function log(level: string, msg: string) {
@@ -40,16 +53,22 @@ function log(level: string, msg: string) {
 // 텔레그램 API 호출
 async function tgApi(method: string, body?: Record<string, unknown>): Promise<Record<string, unknown>> {
   const url = `https://api.telegram.org/bot${BOT_TOKEN}/${method}`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  return res.json() as Promise<Record<string, unknown>>;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    return res.json() as Promise<Record<string, unknown>>;
+  } catch (err) {
+    log('ERROR', `tgApi ${method} 실패: ${(err as Error).message}`);
+    return { ok: false };
+  }
 }
 
 // 텔레그램 메시지 전송 (4000자 제한 처리)
 async function sendMessage(chatId: string, text: string, replyTo?: number) {
+  if (!text.trim()) return;
   if (text.length <= MAX_RESPONSE_LENGTH) {
     await tgApi('sendMessage', {
       chat_id: chatId,
@@ -57,7 +76,6 @@ async function sendMessage(chatId: string, text: string, replyTo?: number) {
       reply_to_message_id: replyTo,
     });
   } else {
-    // 긴 응답은 파트로 분할
     const parts = [];
     for (let i = 0; i < text.length; i += MAX_RESPONSE_LENGTH) {
       parts.push(text.slice(i, i + MAX_RESPONSE_LENGTH));
@@ -83,11 +101,37 @@ function detectWorkspace(text: string): string {
   return DEFAULT_WORKSPACE;
 }
 
-// Claude Code CLI 실행
-function runClaude(prompt: string, workspace: string): Promise<string> {
-  return new Promise((resolve) => {
-    log('INFO', `Claude 실행: workspace=${workspace}, prompt=${prompt.slice(0, 100)}...`);
+// Claude 출력에서 에러 메시지 필터링
+function cleanClaudeOutput(raw: string): string {
+  let cleaned = raw;
+  for (const pattern of ERROR_PATTERNS) {
+    cleaned = cleaned.replace(pattern, '');
+  }
+  return cleaned.trim();
+}
 
+// typing 표시 + 중간보고 타이머 관리
+function startProgressTimer(chatId: string) {
+  let elapsed = 0;
+  let reported = false;
+
+  const timer = setInterval(async () => {
+    elapsed += TYPING_INTERVAL_MS;
+    await tgApi('sendChatAction', { chat_id: chatId, action: 'typing' });
+
+    if (!reported && elapsed >= PROGRESS_REPORT_MS) {
+      reported = true;
+      await sendMessage(chatId, '⏳ 아직 처리 중입니다. 긴 작업이니 잠시만 기다려주세요.');
+      log('INFO', `중간보고 전송 (${Math.round(elapsed / 1000)}초 경과)`);
+    }
+  }, TYPING_INTERVAL_MS);
+
+  return { stop: () => clearInterval(timer) };
+}
+
+// Claude Code CLI 실행 (단일 시도)
+function runClaudeOnce(prompt: string, workspace: string): Promise<{ success: boolean; output: string; raw: string }> {
+  return new Promise((resolve) => {
     const proc = spawn('claude', [
       '--print',
       '--dangerously-skip-permissions',
@@ -95,7 +139,7 @@ function runClaude(prompt: string, workspace: string): Promise<string> {
     ], {
       cwd: workspace,
       env: { ...process.env, HOME: '/home/onda' },
-      timeout: 5400000, // 1시간 30분 타임아웃
+      timeout: 300000, // 5분 타임아웃 (단일 시도)
     });
 
     let stdout = '';
@@ -110,20 +154,46 @@ function runClaude(prompt: string, workspace: string): Promise<string> {
     });
 
     proc.on('close', (code: number | null) => {
-      if (code === 0 && stdout.trim()) {
-        log('INFO', `Claude 완료: ${stdout.length}자 출력`);
-        resolve(stdout.trim());
+      const cleaned = cleanClaudeOutput(stdout);
+
+      if (code === 0 && cleaned) {
+        resolve({ success: true, output: cleaned, raw: stdout });
+      } else if (code === 0 && stdout.trim() && !cleaned) {
+        // 에러 메시지만 있고 실제 응답 없음
+        resolve({ success: false, output: '', raw: stdout });
       } else {
-        log('ERROR', `Claude 실패: code=${code}, stderr=${stderr.slice(0, 200)}`);
-        resolve(`❌ Claude Code 실행 실패 (exit: ${code})\n${stderr.slice(0, 500)}`);
+        resolve({ success: false, output: stderr.slice(0, 300), raw: stdout });
       }
     });
 
     proc.on('error', (err: Error) => {
-      log('ERROR', `Claude spawn 에러: ${err.message}`);
-      resolve(`❌ Claude Code 실행 에러: ${err.message}`);
+      resolve({ success: false, output: err.message, raw: '' });
     });
   });
+}
+
+// Claude Code CLI 실행 (재시도 포함)
+async function runClaude(prompt: string, workspace: string): Promise<string> {
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    log('INFO', `Claude 실행 (시도 ${attempt}/${MAX_RETRIES}): workspace=${workspace}, prompt=${prompt.slice(0, 100)}...`);
+
+    const result = await runClaudeOnce(prompt, workspace);
+
+    if (result.success) {
+      log('INFO', `Claude 완료: ${result.output.length}자 출력`);
+      return result.output;
+    }
+
+    log('WARN', `Claude 시도 ${attempt} 실패: ${result.output.slice(0, 100)}`);
+
+    if (attempt < MAX_RETRIES) {
+      log('INFO', `${attempt + 1}번째 재시도 대기 (3초)...`);
+      await new Promise(r => setTimeout(r, 3000));
+    }
+  }
+
+  log('ERROR', `Claude ${MAX_RETRIES}회 시도 모두 실패`);
+  return '❌ 처리에 실패했습니다. 잠시 후 다시 시도해주세요.';
 }
 
 // 메시지 처리
@@ -148,18 +218,42 @@ async function handleMessage(msg: Record<string, unknown>) {
 
   log('INFO', `메시지 수신: [${username}] ${text.slice(0, 100)}`);
 
-  // 처리 중 표시
-  await tgApi('sendChatAction', { chat_id: chatId, action: 'typing' });
+  // typing + 중간보고 타이머 시작
+  const progress = startProgressTimer(chatId);
 
-  // 워크스페이스 감지
-  const workspace = detectWorkspace(text);
+  try {
+    // 워크스페이스 감지
+    const workspace = detectWorkspace(text);
 
-  // Claude Code 실행
-  const response = await runClaude(text, workspace);
+    // Claude Code 실행 (재시도 포함)
+    const response = await runClaude(text, workspace);
 
-  // 응답 전송
-  await sendMessage(chatId, response, messageId);
-  log('INFO', `응답 전송 완료: ${response.length}자`);
+    // 응답 전송
+    await sendMessage(chatId, response, messageId);
+    log('INFO', `응답 전송 완료: ${response.length}자`);
+  } catch (err) {
+    log('ERROR', `handleMessage 에러: ${(err as Error).message}`);
+    await sendMessage(chatId, '❌ 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.', messageId);
+  } finally {
+    progress.stop();
+  }
+}
+
+// 메시지 큐 순차 처리
+async function processQueue() {
+  if (processingQueue) return;
+  processingQueue = true;
+
+  while (messageQueue.length > 0) {
+    const msg = messageQueue.shift()!;
+    try {
+      await handleMessage(msg);
+    } catch (err) {
+      log('ERROR', `큐 처리 에러: ${(err as Error).message}`);
+    }
+  }
+
+  processingQueue = false;
 }
 
 // 폴링 루프
@@ -178,19 +272,13 @@ async function pollUpdates() {
         lastUpdateId = update.update_id as number;
         const msg = update.message as Record<string, unknown> | undefined;
         if (msg) {
-          // 순차 처리 (Claude Code 동시 실행 방지)
-          if (!isProcessing) {
-            isProcessing = true;
-            try {
-              await handleMessage(msg);
-            } finally {
-              isProcessing = false;
-            }
-          } else {
-            const chatId = String((msg.chat as Record<string, unknown>).id);
-            await sendMessage(chatId, '⏳ 이전 요청 처리 중입니다. 잠시 후 다시 시도해주세요.');
-          }
+          messageQueue.push(msg);
         }
+      }
+
+      // 큐에 메시지가 있으면 순차 처리 시작
+      if (messageQueue.length > 0) {
+        processQueue();
       }
     } catch (err) {
       log('ERROR', `폴링 에러: ${(err as Error).message}`);
@@ -219,6 +307,7 @@ async function main() {
   log('INFO', `텔레그램 봇 시작: @${botInfo.username}`);
   log('INFO', `허용 채팅방: ${ALLOWED_CHAT_IDS.join(', ')}`);
   log('INFO', `기본 워크스페이스: ${DEFAULT_WORKSPACE}`);
+  log('INFO', `재시도: ${MAX_RETRIES}회, 중간보고: ${PROGRESS_REPORT_MS / 1000}초`);
 
   await pollUpdates();
 }
