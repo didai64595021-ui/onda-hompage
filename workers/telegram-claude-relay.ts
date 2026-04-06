@@ -39,6 +39,7 @@ const GROUP_WORKSPACE: Record<string, { workspace: string; name: string }> = {
   '-1003804670860': { workspace: '/home/onda/projects/onda-logic-monitor', name: '로직모니터본서버' },
   '-5134820548':    { workspace: '/home/onda/projects/onda-logic-monitor-dev', name: '로직모니터테스트' },
   '-5254346681':    { workspace: '/home/onda/projects/onda-logic-monitor', name: '플레이스 블로그 추적기' },
+  '-1003806737505': { workspace: '/home/onda/projects/onda-coldmail', name: '온다 ui 고객 크롤링' },
   '-1003855690620': { workspace: '/home/onda/projects/onda-youtube-investment', name: 'onda-youtube-investment' },
   '-5055799097':    { workspace: '/home/onda/projects/onda-self-marketing', name: '네이버 셀프 마케팅' },
   '-5079107870':    { workspace: '/home/onda/projects/onda-traffic-bot', name: '트래픽 자동주문봇' },
