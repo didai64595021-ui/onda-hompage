@@ -135,6 +135,7 @@ function runClaudeOnce(prompt: string, workspace: string): Promise<{ success: bo
     const proc = spawn('claude', [
       '--print',
       '--dangerously-skip-permissions',
+      '--',
       prompt,
     ], {
       cwd: workspace,
