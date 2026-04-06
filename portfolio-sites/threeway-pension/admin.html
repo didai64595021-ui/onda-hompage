@@ -358,13 +358,7 @@
   // ============================================
   const categories = {
     // 메인(홈) - index.html
-    '🎠 히어로 슬라이더': [
-      'hero-slide-1-img','hero-slide-1-copy','hero-slide-1-sub',
-      'hero-slide-2-img','hero-slide-2-copy','hero-slide-2-sub',
-      'hero-slide-3-img','hero-slide-3-copy','hero-slide-3-sub',
-      'hero-slide-4-img','hero-slide-4-copy','hero-slide-4-sub',
-      'hero-slide-5-img','hero-slide-5-copy','hero-slide-5-sub'
-    ],
+    '🎠 히어로 슬라이더': '__DYNAMIC_HERO_SLIDES__',
     '📺 방송 배지': ['badge-mbc','badge-kbs','badge-broadcast','badge-insta'],
     '🛏️ 객실 미리보기 (메인)': [
       'room-preview-1-img','room-preview-1-name','room-preview-1-desc',
@@ -514,13 +508,13 @@
   const tabMapping = {
     '전체': null,
     '메인(홈)': ['🎠 히어로 슬라이더','📺 방송 배지','🛏️ 객실 미리보기 (메인)','🥩 바비큐 하이라이트','🏊 시설 스크롤 (메인)'],
-    '객실소개': ['🛏️ 객실소개 페이지','🛏️ 객실 상세 (소나무)','🛏️ 객실 상세 (단풍나무)','🛏️ 객실 상세 (튤립)','🛏️ 객실 상세 (스위트1)','🛏️ 객실 상세 (스위트2)','🛏️ 객실 상세 (디즈니)','🛏️ 객실 상세 (민트)'],
+    '펜션소개': ['📖 소개 히어로','🏆 선택하는 이유 카드','📖 소개 스토리','📖 소개 정보'],
+    '객실안내': ['🛏️ 객실소개 페이지','🛏️ 객실 상세 (소나무)','🛏️ 객실 상세 (단풍나무)','🛏️ 객실 상세 (튤립)','🛏️ 객실 상세 (스위트1)','🛏️ 객실 상세 (스위트2)','🛏️ 객실 상세 (디즈니)','🛏️ 객실 상세 (민트)'],
     '요금안내': ['💰 요금 페이지 히어로','💰 요금 - 비수기','💰 요금 - 준성수기','💰 요금 - 성수기','💰 요금 FAQ (뽕뽑는법)','💰 할인 정책 (10인 이상)','💰 할인 정책 (10인 미만)'],
-    '패키지': ['📦 패키지 페이지 히어로','🐷 돼지고기나라 패키지','🦐 해산물나라 패키지','📸 패키지 갤러리','📦 패키지 공통 포함사항'],
-    '시설안내': ['🏊 시설 페이지 히어로','🏊 시설 카드','🏊 시설 상세'],
+    '바비큐패키지': ['📦 패키지 페이지 히어로','🐷 돼지고기나라 패키지','🦐 해산물나라 패키지','📸 패키지 갤러리','📦 패키지 공통 포함사항'],
+    '부대시설': ['🏊 시설 페이지 히어로','🏊 시설 카드','🏊 시설 상세'],
     '주변관광': ['🗺️ 주변관광 히어로','🗺️ 관광명소','🤝 제휴할인'],
     'FAQ': ['❓ FAQ 페이지','❓ FAQ 질문/답변'],
-    '소개': ['📖 소개 히어로','🏆 선택하는 이유 카드','📖 소개 스토리','📖 소개 정보'],
     '공통(헤더/푸터)': ['📞 CTA & 푸터']
   };
 
@@ -530,13 +524,13 @@
   const tabPageMap = {
     '전체': 'index.html',
     '메인(홈)': 'index.html',
-    '객실소개': 'rooms.html',
+    '펜션소개': 'about.html',
+    '객실안내': 'rooms.html',
     '요금안내': 'rates.html',
-    '패키지': 'package.html',
-    '시설안내': 'facilities.html',
+    '바비큐패키지': 'package.html',
+    '부대시설': 'facilities.html',
     '주변관광': 'attractions.html',
     'FAQ': 'faq.html',
-    '소개': 'about.html',
     '공통(헤더/푸터)': 'index.html'
   };
 
@@ -1122,7 +1116,7 @@
     leftSpan.textContent = catName;
     const countSpan = document.createElement('span');
     countSpan.className = 'section-count';
-    countSpan.textContent = '(' + keys.length + ')';
+    countSpan.textContent = keys === '__DYNAMIC_HERO_SLIDES__' ? '(동적)' : '(' + keys.length + ')';
     leftSpan.appendChild(countSpan);
     h2.appendChild(leftSpan);
 
@@ -1144,6 +1138,16 @@
     // 섹션 바디 (접기/펼치기 대상)
     const sectionBody = document.createElement('div');
     sectionBody.className = 'cms-section-body';
+
+    // 히어로 슬라이더 동적 렌더링
+    if (keys === '__DYNAMIC_HERO_SLIDES__') {
+      renderHeroSlidesAdmin(sectionBody);
+      section.appendChild(sectionBody);
+      formEl.appendChild(section);
+      const collapsed = JSON.parse(localStorage.getItem('cms-collapsed') || '{}');
+      if (collapsed[catName]) section.classList.add('collapsed');
+      return; // skip normal field rendering
+    }
 
     keys.forEach(key => {
       const value = cmsData[key] || '';
@@ -1377,12 +1381,178 @@
   }
 
   // ============================================
+  // 히어로 슬라이더 동적 관리
+  // ============================================
+  let heroSlides = [];
+
+  function loadHeroSlides() {
+    // hero-slides 배열 우선, 없으면 기존 개별 키 마이그레이션
+    if (cmsData['hero-slides'] && Array.isArray(cmsData['hero-slides']) && cmsData['hero-slides'].length > 0) {
+      heroSlides = JSON.parse(JSON.stringify(cmsData['hero-slides']));
+    } else {
+      heroSlides = [];
+      for (let i = 1; i <= 20; i++) {
+        const img = cmsData['hero-slide-' + i + '-img'];
+        if (!img) break;
+        heroSlides.push({
+          img: img,
+          copy: cmsData['hero-slide-' + i + '-copy'] || '',
+          sub: cmsData['hero-slide-' + i + '-sub'] || ''
+        });
+      }
+    }
+    if (heroSlides.length === 0) {
+      heroSlides.push({ img: '', copy: '', sub: '' });
+    }
+  }
+
+  function renderHeroSlidesAdmin(container) {
+    loadHeroSlides();
+    container.innerHTML = '';
+
+    const slidesWrap = document.createElement('div');
+    slidesWrap.id = 'hero-slides-admin';
+    container.appendChild(slidesWrap);
+
+    heroSlides.forEach((slide, idx) => {
+      slidesWrap.appendChild(createHeroSlideCard(slide, idx));
+    });
+
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.textContent = '+ 슬라이드 추가';
+    addBtn.style.cssText = 'margin-top:12px;padding:10px 20px;background:#7BA17F;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:0.95rem;font-weight:600';
+    addBtn.addEventListener('click', () => {
+      heroSlides.push({ img: '', copy: '', sub: '' });
+      slidesWrap.appendChild(createHeroSlideCard(heroSlides[heroSlides.length - 1], heroSlides.length - 1));
+      hasUnsavedChanges = true;
+      updateChangeCount();
+      resetAutosaveTimer();
+    });
+    container.appendChild(addBtn);
+  }
+
+  function createHeroSlideCard(slide, idx) {
+    const card = document.createElement('div');
+    card.className = 'hero-slide-card';
+    card.dataset.index = idx;
+    card.style.cssText = 'border:1px solid #ddd;border-radius:12px;padding:16px;margin-bottom:12px;background:#fff';
+
+    // 헤더
+    const header = document.createElement('div');
+    header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:12px';
+    const title = document.createElement('strong');
+    title.textContent = '슬라이드 ' + (idx + 1);
+    title.style.fontSize = '1rem';
+    header.appendChild(title);
+
+    if (heroSlides.length > 1) {
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.textContent = '삭제';
+      delBtn.style.cssText = 'padding:4px 12px;background:#e74c3c;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.85rem';
+      delBtn.addEventListener('click', () => {
+        heroSlides.splice(idx, 1);
+        const wrap = document.getElementById('hero-slides-admin');
+        if (wrap) {
+          wrap.innerHTML = '';
+          heroSlides.forEach((s, i) => wrap.appendChild(createHeroSlideCard(s, i)));
+        }
+        hasUnsavedChanges = true;
+        updateChangeCount();
+        resetAutosaveTimer();
+      });
+      header.appendChild(delBtn);
+    }
+    card.appendChild(header);
+
+    // 이미지 필드
+    const imgLabel = document.createElement('label');
+    imgLabel.textContent = '이미지';
+    imgLabel.style.cssText = 'font-size:0.85rem;font-weight:600;color:#555;display:block;margin-bottom:4px';
+    card.appendChild(imgLabel);
+
+    const imgInput = document.createElement('input');
+    imgInput.type = 'text';
+    imgInput.value = slide.img;
+    imgInput.placeholder = 'images/파일명.jpg 또는 드래그앤드랍';
+    imgInput.style.cssText = 'width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:0.9rem;margin-bottom:4px;box-sizing:border-box';
+    imgInput.addEventListener('input', () => {
+      heroSlides[idx].img = imgInput.value;
+      if (imgInput.value) updatePreview(imgPreview, imgInput.value, imgInput, imgDropZone);
+      else { imgPreview.innerHTML = ''; imgDropZone.style.display = ''; }
+      hasUnsavedChanges = true;
+      updateChangeCount();
+      resetAutosaveTimer();
+    });
+    card.appendChild(imgInput);
+
+    const imgPreview = document.createElement('div');
+    imgPreview.className = 'cms-img-preview';
+    card.appendChild(imgPreview);
+
+    const imgDropZone = createDropZone('hero-slide-' + idx, imgInput, imgPreview);
+    card.appendChild(imgDropZone);
+
+    if (slide.img) updatePreview(imgPreview, slide.img, imgInput, imgDropZone);
+
+    // 카피 필드
+    const copyLabel = document.createElement('label');
+    copyLabel.textContent = '카피 텍스트';
+    copyLabel.style.cssText = 'font-size:0.85rem;font-weight:600;color:#555;display:block;margin:12px 0 4px';
+    card.appendChild(copyLabel);
+
+    const copyInput = document.createElement('input');
+    copyInput.type = 'text';
+    copyInput.value = slide.copy;
+    copyInput.placeholder = '카피 텍스트';
+    copyInput.style.cssText = 'width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:0.9rem;box-sizing:border-box';
+    copyInput.addEventListener('input', () => {
+      heroSlides[idx].copy = copyInput.value;
+      hasUnsavedChanges = true;
+      updateChangeCount();
+      resetAutosaveTimer();
+    });
+    card.appendChild(copyInput);
+
+    // 부제 필드
+    const subLabel = document.createElement('label');
+    subLabel.textContent = '부제 텍스트';
+    subLabel.style.cssText = 'font-size:0.85rem;font-weight:600;color:#555;display:block;margin:12px 0 4px';
+    card.appendChild(subLabel);
+
+    const subInput = document.createElement('input');
+    subInput.type = 'text';
+    subInput.value = slide.sub;
+    subInput.placeholder = '부제 텍스트';
+    subInput.style.cssText = 'width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:0.9rem;box-sizing:border-box';
+    subInput.addEventListener('input', () => {
+      heroSlides[idx].sub = subInput.value;
+      hasUnsavedChanges = true;
+      updateChangeCount();
+      resetAutosaveTimer();
+    });
+    card.appendChild(subInput);
+
+    return card;
+  }
+
+  // ============================================
   // 저장 (Supabase 비동기)
   // ============================================
   async function doSave() {
     document.querySelectorAll('[data-cms-key]').forEach(input => {
       const key = input.dataset.cmsKey;
       cmsData[key] = input.value;
+    });
+
+    // 히어로 슬라이더 배열 저장
+    cmsData['hero-slides'] = heroSlides.filter(s => s.img || s.copy || s.sub);
+    // 하위호환: 개별 키도 동기화
+    cmsData['hero-slides'].forEach((s, i) => {
+      cmsData['hero-slide-' + (i + 1) + '-img'] = s.img;
+      cmsData['hero-slide-' + (i + 1) + '-copy'] = s.copy;
+      cmsData['hero-slide-' + (i + 1) + '-sub'] = s.sub;
     });
 
     showToast('💾 저장 중...');
