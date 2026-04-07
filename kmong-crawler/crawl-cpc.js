@@ -54,24 +54,50 @@ async function crawlCpc() {
     const title = await page.title();
     console.log(`[페이지] ${title} — URL: ${page.url()}`);
 
-    // 날짜 필터: "어제" 선택
+    // === 날짜 필터: "어제" 강제 적용 (필수) ===
+    // 검증 결과 (2026-04-07):
+    //  - 페이지 진입 시 "광고 노출 영역 확장" 안내 모달이 자동 표시 → 필터 UI 가림
+    //  - 필터는 button이 아닌 <a class="rounded-full"> 4개 (지난 7일/오늘/어제/이번 달)
+    //  - default 활성 = "지난 7일" (bg-gray-900) → 매번 캡처 시 7일 누적값 저장 = 7배 inflate 사고
+    //  - 정답: 모달 닫기 → "어제" a 클릭 → 활성 필터 검증
+
+    // 1) 진입 모달 닫기
     try {
-      // 날짜 필터 버튼 클릭 (기본 "지난 7일" 텍스트)
-      const dateFilter = page.locator('button:has-text("지난 7일"), button:has-text("오늘"), button:has-text("어제"), button:has-text("이번 달")').first();
-      if (await dateFilter.isVisible({ timeout: 3000 })) {
-        await dateFilter.click();
-        await page.waitForTimeout(1000);
+      const modalConfirm = page.locator('button:has-text("확인")').first();
+      if (await modalConfirm.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await modalConfirm.click();
+        await page.waitForTimeout(800);
+        console.log('[필터] 진입 안내 모달 닫음');
       }
-      // "어제" 옵션 클릭
-      const yesterdayOption = page.locator('button:has-text("어제")').first();
-      if (await yesterdayOption.isVisible({ timeout: 3000 })) {
-        await yesterdayOption.click();
-        await page.waitForTimeout(2000);
-        console.log('[필터] 어제 날짜 필터 적용');
+    } catch {}
+
+    // 2) "어제" a 태그 클릭 (필수)
+    const yesterdayLink = page.locator('a.rounded-full:has-text("어제")').first();
+    if (!(await yesterdayLink.isVisible({ timeout: 5000 }).catch(() => false))) {
+      const fallback = page.locator('a:has-text("어제")').first();
+      if (!(await fallback.isVisible({ timeout: 2000 }).catch(() => false))) {
+        await saveErrorScreenshot(page, 'no-yesterday-filter');
+        throw new Error('"어제" 필터 a 태그를 찾을 수 없음 — 페이지 구조 변경 가능');
       }
-    } catch {
-      console.log('[필터] 날짜 필터 UI를 찾지 못함 — 기본 데이터 사용');
+      await fallback.click();
+    } else {
+      await yesterdayLink.click();
     }
+    await page.waitForTimeout(2500);
+
+    // 3) 활성 필터 검증 — bg-gray-900 클래스가 "어제"에 붙어 있어야 함
+    const activeFilter = await page.evaluate(() => {
+      const all = document.querySelectorAll('a.rounded-full');
+      for (const el of all) {
+        if ((el.className || '').includes('bg-gray-900')) return (el.innerText || '').trim();
+      }
+      return null;
+    });
+    if (activeFilter !== '어제') {
+      await saveErrorScreenshot(page, 'filter-not-applied');
+      throw new Error(`"어제" 필터 적용 실패 — 현재 활성: ${activeFilter}`);
+    }
+    console.log('[필터] "어제" 필터 적용 검증 완료');
 
     // 테이블에서 CPC 데이터 추출
     // 컬럼: On/Off(0) | 서비스img(1) | 상태(2) | 희망클릭비용(3) | 노출수(4) | 클릭수(5) | 평균클릭비용(6) | 총비용(7) | 신청정보(8)
@@ -131,27 +157,45 @@ async function crawlCpc() {
       console.log(`[매핑] ${serviceName.substring(0, 30)} → ${productId} | 노출:${impressions} 클릭:${clicks} 비용:${totalCost}원 | 광고:${adEnabled ? 'ON' : 'OFF'}`);
     }
 
+    // === product_id 중복 제거 ===
+    // PRODUCT_MAP의 키워드가 두 행에 동시에 매칭되면 같은 product_id가 records에 두 번 들어가
+    // Supabase upsert가 "ON CONFLICT DO UPDATE command cannot affect row a second time" 에러로 실패함.
+    // 같은 product_id는 비용 큰 행을 keep (광고 활성도가 높은 게 진짜).
+    const dedupMap = new Map();
+    for (const r of records) {
+      const prev = dedupMap.get(r.product_id);
+      if (!prev || (r.cpc_cost || 0) > (prev.cpc_cost || 0)) {
+        dedupMap.set(r.product_id, r);
+      } else {
+        console.log(`[중복 제거] ${r.product_id}: "${r.title_text.substring(0,30)}" (비용 ${r.cpc_cost} ≤ ${prev.cpc_cost}) — 스킵`);
+      }
+    }
+    const uniqueRecords = [...dedupMap.values()];
+    if (uniqueRecords.length < records.length) {
+      console.log(`[중복 제거] ${records.length}행 → ${uniqueRecords.length}행`);
+    }
+
     // Supabase upsert
-    if (records.length > 0) {
+    if (uniqueRecords.length > 0) {
       const { data, error } = await supabase
         .from('kmong_cpc_daily')
-        .upsert(records, { onConflict: 'product_id,date' });
+        .upsert(uniqueRecords, { onConflict: 'product_id,date' });
 
       if (error) {
         throw new Error(`Supabase upsert 실패: ${error.message}`);
       }
-      console.log(`[Supabase] ${records.length}건 upsert 완료`);
+      console.log(`[Supabase] ${uniqueRecords.length}건 upsert 완료`);
     } else {
       console.log('[경고] 수집된 CPC 데이터 없음');
     }
 
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-    const msg = `크몽 크롤: CPC ${records.length}건 수집 (${elapsed}초)`;
+    const msg = `크몽 크롤: CPC ${uniqueRecords.length}건 수집 (${elapsed}초)`;
     console.log(`\n=== ${msg} ===`);
     notify(msg);
 
     await browser.close();
-    return records;
+    return uniqueRecords;
 
   } catch (err) {
     console.error(`[에러] ${err.message}`);
