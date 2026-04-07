@@ -463,6 +463,10 @@ tr:hover td { background: rgba(13,153,255,0.04); }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       광고 제어 / 설정
     </div>
+    <div class="nav-item" data-tab="report" onclick="switchTab('report')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+      월간 리포트
+    </div>
   </nav>
   <div class="sidebar-footer">온다마케팅 &copy; 2026</div>
 </aside>
@@ -625,6 +629,178 @@ tr:hover td { background: rgba(13,153,255,0.04); }
           <thead><tr><th>시각</th><th>서비스</th><th>명령</th><th>상태</th><th>결과</th></tr></thead>
           <tbody id="commandHistoryBody"></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- 탭 5: 월간 리포트 (DB-driven) -->
+    <div class="tab-panel" id="tab-report">
+      <!-- 툴바: 월 셀렉트 + 생성 버튼 -->
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px;padding:14px 18px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px">
+        <div style="font-size:12px;color:var(--text-2);font-weight:600">월 선택</div>
+        <select id="reportSelect" onchange="renderReportFromDb(this.value)" style="padding:8px 12px;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;color:var(--text-1);font-size:13px;min-width:200px"></select>
+        <div style="flex:1"></div>
+        <button class="btn-primary" onclick="generateMonthlyReport()" style="font-size:12px">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+          이번 달 리포트 생성/갱신
+        </button>
+      </div>
+      <div id="reportContent"></div>
+    </div>
+
+    <div style="display:none" id="legacy-static-report">
+      <div style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.35);border-radius:12px;padding:18px 20px;margin-bottom:24px">
+        <div style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--danger);margin-bottom:8px">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          데이터 정합성 공지 — crawl-cpc.js 날짜 필터 버그 수정 (2026-04-07)
+        </div>
+        <div style="font-size:13px;color:var(--text-2);line-height:1.7">
+          크롤러가 "어제" 필터를 <code style="background:var(--bg-input);padding:1px 6px;border-radius:4px">button</code> 셀렉터로 찾으려 했으나 실제 DOM은 <code style="background:var(--bg-input);padding:1px 6px;border-radius:4px">a.rounded-full</code> 였습니다. 결과적으로 클릭이 실패하여 페이지 default인 <b style="color:var(--danger)">"지난 7일" 누적값</b>이 매일 "어제 데이터"로 저장되어 광고비가 약 <b style="color:var(--danger)">5~9배 부풀려진</b> 채로 14일치(약 170행) 누적되었습니다.
+          <div style="margin-top:10px">
+            <b style="color:var(--text-1)">수정 내역 (커밋 123802f)</b>
+            <ul style="margin:6px 0 0 18px;list-style:disc">
+              <li>진입 안내 모달 자동 닫기</li>
+              <li><code>a.rounded-full:has-text("어제")</code> 명시적 클릭 + <code>bg-gray-900</code> 활성 클래스 검증 (실패 시 throw)</li>
+              <li>PRODUCT_MAP 키워드 충돌로 인한 product_id 중복 행 dedup (비용 큰 행 우선)</li>
+            </ul>
+          </div>
+          <div style="margin-top:10px;font-size:12px;color:var(--text-3)">
+            ※ 과거 inflated 14일치 데이터는 분석 비교 베이스 보존을 위해 유지. 다음 cron 사이클부터 정상 수치로 적재.
+          </div>
+        </div>
+      </div>
+
+      <!-- 한 줄 결론 -->
+      <div style="background:linear-gradient(135deg,rgba(13,153,255,0.12),rgba(13,153,255,0.02));border:1px solid rgba(13,153,255,0.35);border-radius:12px;padding:20px;margin-bottom:24px">
+        <div style="font-size:11px;color:var(--primary);font-weight:700;margin-bottom:6px">한 줄 결론</div>
+        <div style="font-size:14px;line-height:1.7;color:var(--text-1)">
+          4월 7일간 <b>₩189,140 (월 한도의 38%)</b>을 거의 전량 <b>no-homepage</b>에 쏟아부었지만 결제 0건. 비즈머니 잔액이 <b style="color:var(--danger)">₩9,080</b>까지 떨어져 사실상 광고가 멈춘 상태(어제 광고비 ₩0). 단일 종 95% 의존을 즉시 풀고 비즈머니 충전 후 분산 운영 필요.
+        </div>
+      </div>
+
+      <!-- 4월 KPI -->
+      <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>4월 실측 KPI (4/1 ~ 4/7, 7일간)</div>
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">총 노출</div><div class="kpi-value">1,205</div><div class="kpi-change">일평균 172</div></div>
+        <div class="kpi-card"><div class="kpi-label">총 클릭</div><div class="kpi-value">65</div><div class="kpi-change">일평균 9.3</div></div>
+        <div class="kpi-card"><div class="kpi-label">평균 CTR</div><div class="kpi-value" style="color:var(--success)">5.39%</div><div class="kpi-change up">크몽 평균 1~2% 대비 우수</div></div>
+        <div class="kpi-card"><div class="kpi-label">평균 CPC</div><div class="kpi-value">₩2,909</div><div class="kpi-change">VAT 포함</div></div>
+        <div class="kpi-card"><div class="kpi-label">총 광고비</div><div class="kpi-value">₩189,140</div><div class="kpi-change">월 한도 ₩500K의 37.8%</div></div>
+        <div class="kpi-card"><div class="kpi-label">결제 / 매출</div><div class="kpi-value" style="color:var(--danger)">0건</div><div class="kpi-change down">₩0</div></div>
+        <div class="kpi-card"><div class="kpi-label">4월 ROI</div><div class="kpi-value" style="color:var(--danger)">−100%</div><div class="kpi-change down">비용만 발생</div></div>
+        <div class="kpi-card"><div class="kpi-label">비즈머니 잔액</div><div class="kpi-value" style="color:var(--danger)">₩9,080</div><div class="kpi-change down">사실상 고갈</div></div>
+      </div>
+
+      <!-- 서비스별 4월 성과 -->
+      <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>서비스별 4월 성과 (광고비 큰 순)</div>
+      <div class="table-wrap" style="margin-bottom:24px">
+        <table>
+          <thead><tr><th>서비스</th><th>노출</th><th>클릭</th><th>CTR</th><th>비용</th><th>비중</th><th>평균 CPC</th></tr></thead>
+          <tbody>
+            <tr><td><b>no-homepage</b></td><td>1,030</td><td>55</td><td>5.34%</td><td>₩180,310</td><td style="color:var(--danger);font-weight:700">95.3%</td><td>₩3,278</td></tr>
+            <tr><td>responsive</td><td>19</td><td>4</td><td style="color:var(--success);font-weight:700">21.05%</td><td>₩3,910</td><td>2.1%</td><td>₩977</td></tr>
+            <tr><td>imweb-html</td><td>40</td><td>3</td><td style="color:var(--success)">7.50%</td><td>₩3,000</td><td>1.6%</td><td>₩1,000</td></tr>
+            <tr><td>corp-seo</td><td>10</td><td>1</td><td style="color:var(--success)">10.00%</td><td>₩1,000</td><td>0.5%</td><td>₩1,000</td></tr>
+            <tr><td>cafe24</td><td>2</td><td>1</td><td style="color:var(--success);font-weight:700">50.00%</td><td>₩510</td><td>0.3%</td><td>₩510</td></tr>
+            <tr><td>corp-renew</td><td>12</td><td>1</td><td style="color:var(--success)">8.33%</td><td>₩410</td><td>0.2%</td><td>₩410</td></tr>
+            <tr><td>insta-core</td><td>25</td><td>0</td><td>0%</td><td>₩0</td><td>-</td><td>-</td></tr>
+            <tr><td>design-html</td><td>26</td><td>0</td><td>0%</td><td>₩0</td><td>-</td><td>-</td></tr>
+            <tr><td>pc-mobile</td><td>18</td><td>0</td><td>0%</td><td>₩0</td><td>-</td><td>-</td></tr>
+            <tr><td>mobile-fix</td><td>13</td><td>0</td><td>0%</td><td>₩0</td><td>-</td><td>-</td></tr>
+            <tr><td>onepage</td><td>7</td><td>0</td><td>0%</td><td>₩0</td><td>-</td><td>-</td></tr>
+            <tr><td>maintenance</td><td>3</td><td>0</td><td>0%</td><td>₩0</td><td>-</td><td>-</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 핵심 문제 6가지 -->
+      <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>종합 진단 — 핵심 문제 6가지</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px;margin-bottom:24px">
+        <div class="kpi-card" style="border-left:3px solid var(--danger)"><div style="font-weight:700;margin-bottom:6px">🚨 비즈머니 거의 고갈 (₩9,080)</div><div style="font-size:12px;color:var(--text-2);line-height:1.6">평균 CPC ₩2,909 기준 약 3클릭이면 끝. 어제부터 자연 멈춤. 충전 안 하면 광고 자체 불가능.</div></div>
+        <div class="kpi-card" style="border-left:3px solid var(--danger)"><div style="font-weight:700;margin-bottom:6px">🚨 no-homepage 95.3% 단일 종 의존</div><div style="font-size:12px;color:var(--text-2);line-height:1.6">4월 ₩180K 태우고 결제 0건. 3월말 4건 흐름이 4월에 멈춘 이유 분석 필요.</div></div>
+        <div class="kpi-card" style="border-left:3px solid var(--warning)"><div style="font-weight:700;margin-bottom:6px">🟡 CTR 좋은데 노출 부족한 종 다수</div><div style="font-size:12px;color:var(--text-2);line-height:1.6">responsive 21%, cafe24 50%, imweb-html 7.5%, corp-seo 10% — 입찰가 너무 낮아 노출 2~40회뿐. 잠재력 사장.</div></div>
+        <div class="kpi-card" style="border-left:3px solid var(--warning)"><div style="font-weight:700;margin-bottom:6px">🟡 mobile-fix 골든 키워드 사실상 OFF</div><div style="font-size:12px;color:var(--text-2);line-height:1.6">3월말 ₩3K로 결제 1건 발생한 종이 4월엔 클릭 0. 입찰가/슬롯 부족.</div></div>
+        <div class="kpi-card" style="border-left:3px solid var(--success)"><div style="font-weight:700;margin-bottom:6px">🟢 CTR 자체는 양호</div><div style="font-size:12px;color:var(--text-2);line-height:1.6">전체 5.39%, 일부 종 8~50%. 썸네일/타이틀은 잘 작동. 문제는 상세페이지 전환 + 분배.</div></div>
+        <div class="kpi-card" style="border-left:3px solid var(--success)"><div style="font-weight:700;margin-bottom:6px">🟢 자연 유입 잠재력 있음</div><div style="font-size:12px;color:var(--text-2);line-height:1.6">insta-atoz / portal-map은 광고 0인데 자연 문의 5건 → 광고 켜면 폭발 가능성.</div></div>
+      </div>
+
+      <!-- 5월 ₩500,000 분배표 -->
+      <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>5월 ROI 가중 분배 (₩500,000)</div>
+      <div class="table-wrap" style="margin-bottom:24px">
+        <table>
+          <thead><tr><th>서비스</th><th>비중</th><th>월 한도</th><th>일 한도</th><th>전략</th><th>근거</th></tr></thead>
+          <tbody>
+            <tr><td><b>no-homepage</b></td><td>30%</td><td>₩150,000</td><td>₩5,000</td><td><span class="badge badge-quoted">defense</span></td><td>매출원이지만 4월 0건 → CPA 압축 검증 필요</td></tr>
+            <tr><td><b>mobile-fix</b></td><td>18%</td><td>₩90,000</td><td>₩3,000</td><td><span class="badge badge-paid">attack</span></td><td>3월말 ROI 1666% — 입찰가 ₩500→₩900</td></tr>
+            <tr><td><b>responsive</b></td><td>12%</td><td>₩60,000</td><td>₩2,000</td><td><span class="badge badge-paid">attack</span></td><td>CTR 21% / 노출 10배 확대</td></tr>
+            <tr><td>imweb-html</td><td>10%</td><td>₩50,000</td><td>₩1,700</td><td>balanced</td><td>CTR 7.5%, 가성비 검증</td></tr>
+            <tr><td>insta-atoz</td><td>10%</td><td>₩50,000</td><td>₩1,700</td><td><span class="badge badge-paid">attack</span></td><td>광고 0인데 자연 문의 4건</td></tr>
+            <tr><td>cafe24</td><td>6%</td><td>₩30,000</td><td>₩1,000</td><td>balanced</td><td>CTR 50% — 노출 확대 검증</td></tr>
+            <tr><td>corp-seo</td><td>5%</td><td>₩25,000</td><td>₩830</td><td>balanced</td><td>CTR 10%</td></tr>
+            <tr><td>corp-renew</td><td>4%</td><td>₩20,000</td><td>₩670</td><td>balanced</td><td>CTR 8.3%</td></tr>
+            <tr><td>portal-map</td><td>3%</td><td>₩15,000</td><td>₩500</td><td>테스트</td><td>광고 0인데 자연 문의 1건</td></tr>
+            <tr><td>insta-core</td><td>1%</td><td>₩5,000</td><td>₩170</td><td>saving</td><td>4/5 소재 변경 검증</td></tr>
+            <tr><td>design-html</td><td>1%</td><td>₩5,000</td><td>₩170</td><td>saving</td><td>4월 0클릭</td></tr>
+            <tr><td>pc-mobile / onepage / maintenance</td><td>0%</td><td>₩0</td><td>OFF</td><td><span class="badge badge-cancelled">OFF</span></td><td>4월 0클릭, 소재 재기획 후</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 실행 로드맵 -->
+      <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>실행 로드맵</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:12px;margin-bottom:24px">
+        <div class="kpi-card">
+          <div style="font-weight:700;color:var(--danger);margin-bottom:8px">🔥 오늘 (4/7)</div>
+          <ul style="margin:0;padding-left:18px;font-size:12px;color:var(--text-2);line-height:1.8">
+            <li><b>비즈머니 ₩100,000 충전</b></li>
+            <li>kmong_settings SQL 4건 적용</li>
+            <li>no-homepage 입찰가 ₩3,278 → ₩2,000</li>
+            <li>mobile-fix 입찰가 ₩563 → ₩900</li>
+            <li>insta-atoz / portal-map 광고 ON</li>
+            <li>design-html / pc-mobile / onepage / maintenance OFF 유지</li>
+          </ul>
+        </div>
+        <div class="kpi-card">
+          <div style="font-weight:700;color:var(--warning);margin-bottom:8px">⚡ 이번 주 (4/8~4/13)</div>
+          <ul style="margin:0;padding-left:18px;font-size:12px;color:var(--text-2);line-height:1.8">
+            <li>no-homepage 상세페이지 점검 (3월말 vs 4월 비교)</li>
+            <li>no-homepage 패키지 3단 분할 (150K/250K/400K)</li>
+            <li>responsive / cafe24 / imweb-html / corp-seo / corp-renew 입찰가 인상</li>
+            <li>1차 A/B 테스트 3건 등록</li>
+          </ul>
+        </div>
+        <div class="kpi-card">
+          <div style="font-weight:700;color:var(--success);margin-bottom:8px">📊 다음 주 (4/14~4/20)</div>
+          <ul style="margin:0;padding-left:18px;font-size:12px;color:var(--text-2);line-height:1.8">
+            <li>crawl-cpc.js 수정본 1주일 누적 데이터 검증</li>
+            <li>analyze-daily.js 매일 9시 리포트 검증</li>
+            <li>grade B/C 종 소재 재기획</li>
+          </ul>
+        </div>
+        <div class="kpi-card">
+          <div style="font-weight:700;color:var(--primary);margin-bottom:8px">🎯 4/30 마감</div>
+          <ul style="margin:0;padding-left:18px;font-size:12px;color:var(--text-2);line-height:1.8">
+            <li>4월 결산</li>
+            <li>5월 ₩500,000 분배 확정</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 5월 시나리오 -->
+      <div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>5월 시나리오 (₩500,000 기준)</div>
+      <div class="table-wrap" style="margin-bottom:24px">
+        <table>
+          <thead><tr><th>시나리오</th><th>결제</th><th>매출</th><th>광고비</th><th>순이익</th><th>ROI</th></tr></thead>
+          <tbody>
+            <tr><td>현재 그대로 (no-homepage 95% 유지)</td><td>0</td><td>0</td><td>500K</td><td style="color:var(--danger)">−500K</td><td style="color:var(--danger);font-weight:700">−100%</td></tr>
+            <tr><td>분배 조정만 (CTR 좋은 종 노출 확대)</td><td>8</td><td>1,600K</td><td>500K</td><td style="color:var(--success)">+1,100K</td><td style="color:var(--success);font-weight:700">+220%</td></tr>
+            <tr><td><b>분배 + no-homepage 상세 보강</b></td><td><b>14</b></td><td><b>2,800K</b></td><td>500K</td><td style="color:var(--success);font-weight:700">+2,300K</td><td style="color:var(--success);font-weight:700">+460%</td></tr>
+            <tr><td>위 + mobile-fix 5배 확장 성공</td><td>18</td><td>3,400K</td><td>500K</td><td style="color:var(--success);font-weight:700">+2,900K</td><td style="color:var(--success);font-weight:700">+580%</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="font-size:11px;color:var(--text-3);margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+        보고서 원본: <code>kmong-crawler/STRATEGY_REPORT_2026-04-07.md</code> · 생성: 2026-04-07 18:00 KST · v2 (실측 데이터 기반)
       </div>
     </div>
 
@@ -845,9 +1021,10 @@ function switchTab(tab) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   document.querySelector(`.nav-item[data-tab="${tab}"]`).classList.add('active');
-  const titles = { cpc: 'CPC 소재테스트', funnel: '전환 퍼널', inquiry: '서비스별 문의량', adcontrol: '광고 제어 / 설정' };
+  const titles = { cpc: 'CPC 소재테스트', funnel: '전환 퍼널', inquiry: '서비스별 문의량', adcontrol: '광고 제어 / 설정', report: '월간 리포트' };
   document.getElementById('pageTitle').textContent = titles[tab];
   if (window.innerWidth <= 1024) closeSidebar();
+  if (tab === 'report') loadReportTab();
 }
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); }
@@ -1377,6 +1554,230 @@ async function sendAdCommand(productId, action) {
 async function refreshData() {
   await loadProducts();
   await Promise.all([loadCpcTab(), loadFunnelTab(), loadInquiryTab(), loadAdControlTab()]);
+}
+
+/* === 월간 리포트 === */
+let monthlyReports = [];
+let currentReportYM = null;
+
+async function loadReportTab() {
+  const sel = document.getElementById('reportSelect');
+  const { data, error } = await sb.from('kmong_monthly_reports').select('*').order('year_month', { ascending: false });
+  if (error) { document.getElementById('reportContent').innerHTML = `<div class="empty-state"><p>리포트 로드 실패: ${error.message}</p></div>`; return; }
+  monthlyReports = data || [];
+  if (!monthlyReports.length) {
+    sel.innerHTML = '<option value="">저장된 리포트 없음</option>';
+    document.getElementById('reportContent').innerHTML = `<div class="empty-state" style="padding:60px 20px"><p>저장된 월간 리포트가 없습니다.<br>위 "이번 달 리포트 생성/갱신" 버튼을 눌러 첫 리포트를 만드세요.</p></div>`;
+    return;
+  }
+  sel.innerHTML = monthlyReports.map(r => `<option value="${r.year_month}">${r.year_month} — ${escapeHtml(r.title || '제목 없음')}</option>`).join('');
+  if (!currentReportYM || !monthlyReports.find(r => r.year_month === currentReportYM)) {
+    currentReportYM = monthlyReports[0].year_month;
+  }
+  sel.value = currentReportYM;
+  renderReportFromDb(currentReportYM);
+}
+
+function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function renderReportFromDb(ym) {
+  currentReportYM = ym;
+  const r = monthlyReports.find(x => x.year_month === ym);
+  if (!r) { document.getElementById('reportContent').innerHTML = '<div class="empty-state"><p>해당 월 리포트 없음</p></div>'; return; }
+  const k = r.kpi || {};
+  const fM = n => n == null ? '-' : '₩' + Number(n).toLocaleString('ko-KR');
+  const fN = n => n == null ? '-' : Number(n).toLocaleString('ko-KR');
+  const fP = n => n == null ? '-' : Number(n).toFixed(2) + '%';
+
+  let html = '';
+
+  // 메타 헤더
+  html += `<div style="margin-bottom:18px"><h2 style="font-size:18px;font-weight:700;margin-bottom:6px">${escapeHtml(r.title)}</h2><div style="font-size:12px;color:var(--text-3)">${escapeHtml(r.summary?.period || ym)} · ${escapeHtml(r.status || 'final')} · 생성: ${fmtDateTime(r.created_at)}${r.source_commit ? ' · 커밋 ' + escapeHtml(r.source_commit) : ''}</div></div>`;
+
+  // 정합성 노트
+  if (r.notes) {
+    html += `<div style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.35);border-radius:12px;padding:16px 20px;margin-bottom:24px"><div style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--danger);margin-bottom:8px"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>데이터 정합성 노트</div><div style="font-size:13px;color:var(--text-2);line-height:1.7">${escapeHtml(r.notes)}</div></div>`;
+  }
+
+  // 한 줄 결론
+  if (r.summary?.headline) {
+    html += `<div style="background:linear-gradient(135deg,rgba(13,153,255,0.12),rgba(13,153,255,0.02));border:1px solid rgba(13,153,255,0.35);border-radius:12px;padding:18px;margin-bottom:24px"><div style="font-size:11px;color:var(--primary);font-weight:700;margin-bottom:6px">한 줄 결론</div><div style="font-size:14px;line-height:1.7;color:var(--text-1)">${escapeHtml(r.summary.headline)}</div></div>`;
+  }
+
+  // KPI
+  if (Object.keys(k).length) {
+    const kpiList = [
+      { label: '총 노출', value: fN(k.total_impressions), sub: k.daily_avg_impressions != null ? `일평균 ${fN(k.daily_avg_impressions)}` : '' },
+      { label: '총 클릭', value: fN(k.total_clicks), sub: k.daily_avg_clicks != null ? `일평균 ${k.daily_avg_clicks}` : '' },
+      { label: '평균 CTR', value: fP(k.avg_ctr_pct), sub: '', color: 'success' },
+      { label: '평균 CPC', value: fM(k.avg_cpc), sub: 'VAT 포함' },
+      { label: '총 광고비', value: fM(k.total_cost), sub: k.limit_usage_pct != null ? `한도의 ${k.limit_usage_pct}%` : '' },
+      { label: '결제 / 매출', value: (k.orders || 0) + '건', sub: fM(k.revenue), color: (k.orders || 0) === 0 ? 'danger' : 'success' },
+      { label: 'ROI', value: (k.roi_pct != null ? k.roi_pct + '%' : '-'), sub: '', color: (k.roi_pct || 0) < 0 ? 'danger' : 'success' },
+      { label: '비즈머니 잔액', value: fM(k.bizmoney_balance), sub: k.yesterday_cost === 0 ? '어제 광고비 ₩0' : '', color: (k.bizmoney_balance || 0) < 50000 ? 'danger' : '' }
+    ];
+    html += `<div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>${ym} 실측 KPI</div><div class="kpi-grid">`;
+    kpiList.forEach(it => {
+      html += `<div class="kpi-card"><div class="kpi-label">${it.label}</div><div class="kpi-value"${it.color ? ` style="color:var(--${it.color})"` : ''}>${it.value}</div>${it.sub ? `<div class="kpi-change ${it.color === 'danger' ? 'down' : it.color === 'success' ? 'up' : ''}">${it.sub}</div>` : ''}</div>`;
+    });
+    html += `</div>`;
+  }
+
+  // 서비스별 성과
+  if ((r.service_breakdown || []).length) {
+    html += `<div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>서비스별 성과 (광고비 큰 순)</div><div class="table-wrap" style="margin-bottom:24px"><table><thead><tr><th>서비스</th><th>노출</th><th>클릭</th><th>CTR</th><th>비용</th><th>비중</th><th>평균 CPC</th></tr></thead><tbody>`;
+    r.service_breakdown.forEach(s => {
+      const ctrColor = s.ctr >= 8 ? 'var(--success)' : '';
+      const shareColor = s.share >= 90 ? 'var(--danger)' : '';
+      html += `<tr><td>${s.service === 'no-homepage' || s.service === 'mobile-fix' || s.service === 'responsive' ? '<b>' + escapeHtml(s.service) + '</b>' : escapeHtml(s.service)}</td><td>${fN(s.impressions)}</td><td>${fN(s.clicks)}</td><td${ctrColor ? ` style="color:${ctrColor};font-weight:600"` : ''}>${s.ctr || 0}%</td><td>${fM(s.cost)}</td><td${shareColor ? ` style="color:${shareColor};font-weight:700"` : ''}>${s.share || 0}%</td><td>${s.avg_cpc != null ? fM(s.avg_cpc) : '-'}</td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+
+  // 진단
+  if ((r.diagnosis || []).length) {
+    html += `<div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>종합 진단</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px;margin-bottom:24px">`;
+    r.diagnosis.forEach(d => {
+      const c = d.level === 'critical' ? 'danger' : d.level === 'warning' ? 'warning' : 'success';
+      html += `<div class="kpi-card" style="border-left:3px solid var(--${c})"><div style="font-weight:700;margin-bottom:6px">${escapeHtml(d.icon || '')} ${escapeHtml(d.title)}</div><div style="font-size:12px;color:var(--text-2);line-height:1.6">${escapeHtml(d.desc)}</div></div>`;
+    });
+    html += `</div>`;
+  }
+
+  // 예산 분배
+  if ((r.budget_plan || []).length) {
+    html += `<div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>다음 달 ROI 가중 분배</div><div class="table-wrap" style="margin-bottom:24px"><table><thead><tr><th>서비스</th><th>비중</th><th>월 한도</th><th>일 한도</th><th>전략</th><th>근거</th></tr></thead><tbody>`;
+    r.budget_plan.forEach(b => {
+      const stratClass = b.strategy === 'attack' ? 'badge-paid' : b.strategy === 'defense' ? 'badge-quoted' : b.strategy === 'OFF' ? 'badge-cancelled' : '';
+      html += `<tr><td>${escapeHtml(b.service)}</td><td>${b.share}%</td><td>${b.monthly ? fM(b.monthly) : '₩0'}</td><td>${b.daily ? fM(b.daily) : 'OFF'}</td><td>${stratClass ? `<span class="badge ${stratClass}">${escapeHtml(b.strategy)}</span>` : escapeHtml(b.strategy || '')}</td><td>${escapeHtml(b.reason || '')}</td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+
+  // 로드맵
+  if ((r.roadmap || []).length) {
+    html += `<div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>실행 로드맵</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:12px;margin-bottom:24px">`;
+    r.roadmap.forEach(p => {
+      html += `<div class="kpi-card"><div style="font-weight:700;color:var(--${p.color || 'primary'});margin-bottom:8px">${escapeHtml(p.phase)}</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--text-2);line-height:1.8">${(p.items || []).map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul></div>`;
+    });
+    html += `</div>`;
+  }
+
+  // 시나리오
+  if ((r.scenarios || []).length) {
+    html += `<div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>시나리오</div><div class="table-wrap" style="margin-bottom:24px"><table><thead><tr><th>시나리오</th><th>결제</th><th>매출</th><th>광고비</th><th>순이익</th><th>ROI</th></tr></thead><tbody>`;
+    r.scenarios.forEach(s => {
+      const profitColor = s.profit < 0 ? 'var(--danger)' : 'var(--success)';
+      const roiColor = s.roi < 0 ? 'var(--danger)' : 'var(--success)';
+      html += `<tr><td>${s.recommended ? '<b>' + escapeHtml(s.name) + '</b> ⭐' : escapeHtml(s.name)}</td><td>${fN(s.orders)}</td><td>${fM(s.revenue)}</td><td>${fM(s.cost)}</td><td style="color:${profitColor};font-weight:600">${fM(s.profit)}</td><td style="color:${roiColor};font-weight:700">${s.roi}%</td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+
+  html += `<div style="font-size:11px;color:var(--text-3);margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">리포트 ID: <code>${escapeHtml(r.id)}</code> · 갱신: ${fmtDateTime(r.updated_at)} · 생성자: ${escapeHtml(r.generated_by || 'manual')}</div>`;
+
+  document.getElementById('reportContent').innerHTML = html;
+}
+
+async function generateMonthlyReport() {
+  const now = new Date();
+  const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  if (!confirm(`${ym} 리포트를 현재 DB 데이터로 생성/갱신할까요?`)) return;
+  showToast(`${ym} 집계 중...`);
+  try {
+    const monthStart = `${ym}-01`;
+    const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const monthEnd = next.toISOString().slice(0, 10);
+
+    // CPC 집계
+    const { data: cpcRows } = await sb.from('kmong_cpc_daily').select('*').gte('date', monthStart).lt('date', monthEnd);
+    const rows = cpcRows || [];
+
+    // 결제/문의
+    const { data: ords } = await sb.from('kmong_orders').select('product_id,total_amount,status,order_date').gte('order_date', monthStart).lt('order_date', monthEnd);
+    const { data: inqs } = await sb.from('kmong_inquiries').select('product_id,inquiry_date').gte('inquiry_date', monthStart).lt('inquiry_date', monthEnd);
+
+    const totalImp = rows.reduce((s, r) => s + (r.impressions || 0), 0);
+    const totalClk = rows.reduce((s, r) => s + (r.clicks || 0), 0);
+    const totalCost = rows.reduce((s, r) => s + (r.cpc_cost || 0), 0);
+    const ctr = totalImp > 0 ? +(totalClk / totalImp * 100).toFixed(2) : 0;
+    const avgCpc = totalClk > 0 ? Math.round(totalCost / totalClk) : 0;
+    const orders = (ords || []).filter(o => o.status === 'paid').length;
+    const revenue = (ords || []).filter(o => o.status === 'paid').reduce((s, o) => s + (o.total_amount || 0), 0);
+    const days = Math.max(1, new Set(rows.map(r => r.date)).size);
+
+    // 서비스별 집계
+    const byService = {};
+    rows.forEach(r => {
+      const k = r.product_id || 'unknown';
+      if (!byService[k]) byService[k] = { service: k, impressions: 0, clicks: 0, cost: 0 };
+      byService[k].impressions += r.impressions || 0;
+      byService[k].clicks += r.clicks || 0;
+      byService[k].cost += r.cpc_cost || 0;
+    });
+    const serviceArr = Object.values(byService).map(s => ({
+      service: s.service,
+      impressions: s.impressions,
+      clicks: s.clicks,
+      ctr: s.impressions > 0 ? +(s.clicks / s.impressions * 100).toFixed(2) : 0,
+      cost: s.cost,
+      share: totalCost > 0 ? +(s.cost / totalCost * 100).toFixed(1) : 0,
+      avg_cpc: s.clicks > 0 ? Math.round(s.cost / s.clicks) : null
+    })).sort((a, b) => b.cost - a.cost);
+
+    // 자동 진단 (rule-based)
+    const diagnosis = [];
+    if (orders === 0 && totalCost > 0) diagnosis.push({ level: 'critical', icon: '🚨', title: '결제 0건', desc: `이번 달 광고비 ${fmtMoney(totalCost)} 집행했지만 결제 없음. 상세페이지/타깃 점검 필요.` });
+    const top = serviceArr[0];
+    if (top && top.share > 80) diagnosis.push({ level: 'critical', icon: '🚨', title: `${top.service} ${top.share}% 단일 종 의존`, desc: '비중이 너무 높음. 다른 종으로 분산 필요.' });
+    serviceArr.forEach(s => {
+      if (s.impressions > 0 && s.impressions < 50 && s.ctr >= 10) {
+        diagnosis.push({ level: 'warning', icon: '🟡', title: `${s.service} CTR ${s.ctr}% 인데 노출 ${s.impressions}회`, desc: '입찰가가 낮아 노출이 안 나오는 가성비 종. 입찰가 인상 검토.' });
+      }
+    });
+    if (ctr >= 4) diagnosis.push({ level: 'good', icon: '🟢', title: `평균 CTR ${ctr}% 양호`, desc: '소재 자체는 잘 작동. 분배와 상세페이지 전환 개선이 핵심.' });
+
+    const report = {
+      year_month: ym,
+      title: `${ym} 크몽 광고 자동 리포트`,
+      status: 'auto',
+      generated_by: 'dashboard',
+      summary: {
+        headline: `${ym} ${days}일 누적 광고비 ${fmtMoney(totalCost)} / 결제 ${orders}건 / 매출 ${fmtMoney(revenue)} / ROI ${revenue - totalCost >= 0 ? '+' : ''}${totalCost > 0 ? Math.round((revenue - totalCost) / totalCost * 100) : 0}%`,
+        period: `${monthStart} ~ ${monthEnd} (${days}일 데이터)`,
+        data_source: 'kmong_cpc_daily + kmong_orders + kmong_inquiries (자동 집계)'
+      },
+      kpi: {
+        total_impressions: totalImp,
+        total_clicks: totalClk,
+        avg_ctr_pct: ctr,
+        avg_cpc: avgCpc,
+        total_cost: totalCost,
+        monthly_limit: 500000,
+        limit_usage_pct: +(totalCost / 500000 * 100).toFixed(1),
+        orders,
+        revenue,
+        roi_pct: totalCost > 0 ? Math.round((revenue - totalCost) / totalCost * 100) : 0,
+        daily_avg_impressions: Math.round(totalImp / days),
+        daily_avg_clicks: +(totalClk / days).toFixed(1)
+      },
+      service_breakdown: serviceArr,
+      diagnosis,
+      budget_plan: [],
+      roadmap: [],
+      scenarios: [],
+      notes: '자동 생성 리포트. 예산 분배/로드맵/시나리오는 비어있으므로 수동 보완이 필요합니다.'
+    };
+
+    const { error } = await sb.from('kmong_monthly_reports').upsert(report, { onConflict: 'year_month' });
+    if (error) { showToast('생성 실패: ' + error.message, 'error'); return; }
+    showToast(`${ym} 리포트 생성/갱신 완료`, 'success');
+    currentReportYM = ym;
+    await loadReportTab();
+  } catch (e) {
+    showToast('생성 실패: ' + e.message, 'error');
+    console.error(e);
+  }
 }
 
 /* === 폼 제출 === */

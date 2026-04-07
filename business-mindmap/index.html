@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>사업구상 마인드맵</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117; --panel:#181b23; --side:#141720; --input:#1e2130;
+  --border:#2a2d3a; --t1:#e1e4ea; --t2:#8b8fa4; --t3:#5a5e72;
+  --primary:#0D99FF; --success:#34d399; --danger:#f87171;
+  --side-w:240px;
+}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--t1);
+  display:flex;-webkit-font-smoothing:antialiased;
+}
+button{cursor:pointer;border:none;background:none;font:inherit;color:inherit}
+input,textarea{font:inherit;color:inherit;font-size:14px}
+
+/* === 사이드바 === */
+.side{
+  width:var(--side-w);background:var(--side);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;flex-shrink:0;
+}
+.side-head{padding:18px 16px;border-bottom:1px solid var(--border)}
+.side-head .title{font-size:14px;font-weight:700;color:var(--primary);display:flex;align-items:center;gap:8px}
+.side-head .title svg{width:18px;height:18px}
+.side-head .sub{font-size:11px;color:var(--t2);margin-top:4px}
+.side-new{
+  margin:12px 12px 8px;padding:10px 12px;background:var(--primary);color:#fff;
+  border-radius:8px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;justify-content:center;
+  transition:opacity .2s;
+}
+.side-new:hover{opacity:.85}
+.side-list{flex:1;overflow-y:auto;padding:4px 8px 12px}
+.map-item{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 12px;border-radius:8px;font-size:13px;color:var(--t2);
+  cursor:pointer;transition:all .15s;margin-bottom:2px;min-height:38px;
+}
+.map-item:hover{background:rgba(13,153,255,.08);color:var(--t1)}
+.map-item.active{background:rgba(13,153,255,.18);color:var(--primary);font-weight:600}
+.map-item .name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.map-item .del{
+  opacity:0;font-size:14px;padding:2px 6px;border-radius:4px;color:var(--t3);
+  transition:all .15s;
+}
+.map-item:hover .del{opacity:1}
+.map-item .del:hover{background:rgba(248,113,113,.18);color:var(--danger)}
+.side-foot{padding:12px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--t3)}
+
+/* === 캔버스 === */
+.main{flex:1;position:relative;overflow:hidden;min-width:0}
+.canvas-hint{
+  position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:5;
+  background:rgba(24,27,35,.85);backdrop-filter:blur(8px);border:1px solid var(--border);
+  border-radius:8px;padding:8px 14px;font-size:12px;color:var(--t2);pointer-events:none;
+  opacity:0;transition:opacity .3s;
+}
+.canvas-hint.show{opacity:1}
+.canvas{position:absolute;inset:0;cursor:default}
+.canvas svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.line{stroke:var(--border);stroke-width:2;fill:none}
+.line.preview{stroke:var(--primary);stroke-dasharray:6 4;stroke-width:2}
+
+.bubble{
+  position:absolute;transform:translate(-50%,-50%);
+  min-width:120px;max-width:200px;padding:14px 16px;
+  background:var(--panel);border:2px solid var(--primary);border-radius:16px;
+  text-align:center;cursor:grab;user-select:none;touch-action:none;
+  transition:transform .15s,box-shadow .2s,border-color .2s;
+  box-shadow:0 4px 16px rgba(0,0,0,.4);
+}
+.bubble:hover{transform:translate(-50%,-50%) scale(1.04);box-shadow:0 6px 24px rgba(13,153,255,.3)}
+.bubble.dragging{cursor:grabbing;opacity:.8}
+.bubble.root{border-color:var(--success);background:linear-gradient(135deg,rgba(52,211,153,.15),var(--panel))}
+.bubble .b-title{font-size:13px;font-weight:700;color:var(--t1);line-height:1.3;word-break:keep-all}
+.bubble .b-body{font-size:11px;color:var(--t2);margin-top:4px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:keep-all}
+.bubble .b-empty{font-size:12px;color:var(--t3);font-style:italic}
+
+/* === 빈 상태 === */
+.empty{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:var(--t3);text-align:center;padding:40px;
+}
+.empty svg{width:64px;height:64px;opacity:.3;margin-bottom:16px}
+.empty .title{font-size:16px;font-weight:600;color:var(--t2);margin-bottom:6px}
+.empty .desc{font-size:13px;line-height:1.6;max-width:300px}
+
+/* === 모달 === */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);
+  z-index:100;display:none;align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--panel);border:1px solid var(--border);border-radius:16px;
+  width:100%;max-width:440px;max-height:90vh;overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+.modal-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-head h2{font-size:16px;font-weight:700}
+.modal-close{font-size:22px;color:var(--t2);width:32px;height:32px;border-radius:6px}
+.modal-close:hover{background:var(--input);color:var(--t1)}
+.modal-body{padding:22px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;color:var(--t2);margin-bottom:6px;font-weight:600}
+.field input,.field textarea{
+  width:100%;padding:10px 14px;background:var(--input);border:1px solid var(--border);
+  border-radius:8px;color:var(--t1);transition:border-color .2s;
+}
+.field textarea{resize:vertical;min-height:100px;font-family:inherit;line-height:1.5}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--primary)}
+.modal-foot{padding:16px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;transition:all .2s;min-height:38px}
+.btn-save{background:var(--primary);color:#fff}
+.btn-save:hover{opacity:.9}
+.btn-cancel{background:var(--input);color:var(--t2);border:1px solid var(--border)}
+.btn-cancel:hover{color:var(--t1)}
+.btn-del{background:rgba(248,113,113,.12);color:var(--danger);border:1px solid rgba(248,113,113,.3);margin-right:auto}
+.btn-del:hover{background:rgba(248,113,113,.22)}
+.btn-del:disabled{opacity:.4;cursor:not-allowed}
+
+/* === 토스트 === */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translate(-50%,100px);
+  background:var(--panel);border:1px solid var(--border);border-radius:8px;
+  padding:12px 20px;font-size:13px;z-index:200;opacity:0;transition:all .3s;
+}
+.toast.show{transform:translate(-50%,0);opacity:1}
+.toast.error{border-color:var(--danger);color:var(--danger)}
+.toast.success{border-color:var(--success);color:var(--success)}
+
+/* === 햄버거 (모바일) === */
+.hamburger{
+  display:none;position:absolute;top:14px;left:14px;z-index:10;
+  width:40px;height:40px;background:var(--panel);border:1px solid var(--border);border-radius:8px;
+  align-items:center;justify-content:center;
+}
+.hamburger svg{width:20px;height:20px;color:var(--t1)}
+
+@media (max-width:768px){
+  .side{position:absolute;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%);transition:transform .3s}
+  .side.open{transform:translateX(0)}
+  .hamburger{display:flex}
+  .canvas-hint{top:64px;font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<aside class="side" id="side">
+  <div class="side-head">
+    <div class="title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><line x1="9.5" y1="9.5" x2="6.5" y2="6.5"/><line x1="14.5" y1="9.5" x2="17.5" y2="6.5"/><line x1="9.5" y1="14.5" x2="6.5" y2="17.5"/><line x1="14.5" y1="14.5" x2="17.5" y2="17.5"/></svg>
+      사업구상 마인드맵
+    </div>
+    <div class="sub">드래그로 확산 · 클릭으로 편집</div>
+  </div>
+  <button class="side-new" onclick="createMap()">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    새 마인드맵
+  </button>
+  <div class="side-list" id="mapList"></div>
+  <div class="side-foot">온다마케팅 © 2026</div>
+</aside>
+
+<main class="main">
+  <button class="hamburger" onclick="document.getElementById('side').classList.toggle('open')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="canvas-hint" id="hint">버블에서 빈 공간으로 드래그 → 새 버블 · 버블 클릭 → 편집</div>
+  <div class="canvas" id="canvas">
+    <svg id="lines"></svg>
+  </div>
+  <div class="empty" id="empty">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/></svg>
+    <div class="title">마인드맵을 선택하거나 새로 만드세요</div>
+    <div class="desc">왼쪽 "+ 새 마인드맵" 버튼을 누르면 가운데 원에서 드래그로 아이디어를 확산시킬 수 있습니다.</div>
+  </div>
+</main>
+
+<!-- 편집 모달 -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>버블 편집</h2>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>제목</label>
+        <input id="fTitle" type="text" placeholder="아이디어 제목" maxlength="60">
+      </div>
+      <div class="field">
+        <label>내용</label>
+        <textarea id="fBody" placeholder="설명, 메모, 아이디어 디테일..." maxlength="1000"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-del" id="bDel" onclick="deleteBubble()">삭제</button>
+      <button class="btn btn-cancel" onclick="closeModal()">취소</button>
+      <button class="btn btn-save" onclick="saveBubble()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* === Supabase === */
+const SUPABASE_URL='https://byaipfmwicukyzruqtsj.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5YWlwZm13aWN1a3l6cnVxdHNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTc3MjgsImV4cCI6MjA4NjUzMzcyOH0.GGm46X0W0joFXdYtdg-N9n8UQYiVHpbtZVZ__jfbY40';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+/* === 상태 === */
+let maps=[], currentMapId=null, bubbles=[];
+let editingBubbleId=null;
+let drag=null; // {bubbleId, startX, startY, curX, curY, moved}
+
+/* === 토스트 === */
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show '+type;
+  setTimeout(()=>t.className='toast',2500);
+}
+
+/* === 마인드맵 목록 === */
+async function loadMaps(){
+  const {data,error}=await sb.from('mindmaps').select('*').order('updated_at',{ascending:false});
+  if(error){toast('맵 로드 실패: '+error.message,'error');return}
+  maps=data||[]; renderMaps();
+  if(maps.length && !currentMapId) selectMap(maps[0].id);
+  if(!maps.length){currentMapId=null;bubbles=[];renderCanvas()}
+}
+
+function renderMaps(){
+  const list=document.getElementById('mapList');
+  list.innerHTML=maps.map(m=>`
+    <div class="map-item ${m.id===currentMapId?'active':''}" onclick="selectMap('${m.id}')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+      <span class="name">${escapeHtml(m.name||'(이름 없음)')}</span>
+      <span class="del" onclick="event.stopPropagation();deleteMap('${m.id}')">×</span>
+    </div>
+  `).join('');
+}
+
+async function createMap(){
+  const name='새 마인드맵 '+(maps.length+1);
+  const {data,error}=await sb.from('mindmaps').insert({name}).select().single();
+  if(error){toast('생성 실패: '+error.message,'error');return}
+  // 가운데 root 버블 자동 생성
+  const rect=document.getElementById('canvas').getBoundingClientRect();
+  const cx=rect.width/2, cy=rect.height/2;
+  const {error:e2}=await sb.from('mindmap_bubbles').insert({
+    mindmap_id:data.id, parent_id:null, title:'중심 아이디어', body:'', x:cx, y:cy, is_root:true
+  });
+  if(e2){toast('루트 버블 생성 실패: '+e2.message,'error');return}
+  currentMapId=data.id;
+  await loadMaps();
+  await selectMap(data.id);
+  toast('새 마인드맵 생성','success');
+}
+
+async function deleteMap(id){
+  if(!confirm('이 마인드맵과 모든 버블을 삭제할까요?'))return;
+  const {error}=await sb.from('mindmaps').delete().eq('id',id);
+  if(error){toast('삭제 실패: '+error.message,'error');return}
+  if(currentMapId===id){currentMapId=null;bubbles=[]}
+  await loadMaps();
+  toast('삭제됨','success');
+}
+
+async function selectMap(id){
+  currentMapId=id;
+  renderMaps();
+  const {data,error}=await sb.from('mindmap_bubbles').select('*').eq('mindmap_id',id).order('created_at');
+  if(error){toast('버블 로드 실패: '+error.message,'error');return}
+  bubbles=data||[];
+  renderCanvas();
+  document.getElementById('side').classList.remove('open');
+  setTimeout(()=>{document.getElementById('hint').classList.add('show');setTimeout(()=>document.getElementById('hint').classList.remove('show'),3500)},200);
+}
+
+/* === 캔버스 렌더 === */
+function renderCanvas(){
+  const canvas=document.getElementById('canvas');
+  const empty=document.getElementById('empty');
+  // 기존 버블 제거 (svg는 유지)
+  canvas.querySelectorAll('.bubble').forEach(b=>b.remove());
+  if(!currentMapId){empty.style.display='flex';return}
+  empty.style.display='none';
+  // 라인 그리기
+  const svg=document.getElementById('lines');
+  svg.innerHTML='';
+  bubbles.forEach(b=>{
+    if(b.parent_id){
+      const p=bubbles.find(x=>x.id===b.parent_id);
+      if(p){
+        const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+        line.setAttribute('x1',p.x);line.setAttribute('y1',p.y);
+        line.setAttribute('x2',b.x);line.setAttribute('y2',b.y);
+        line.setAttribute('class','line');
+        svg.appendChild(line);
+      }
+    }
+  });
+  // 버블 DOM
+  bubbles.forEach(b=>{
+    const el=document.createElement('div');
+    el.className='bubble'+(b.is_root?' root':'');
+    el.style.left=b.x+'px'; el.style.top=b.y+'px';
+    el.dataset.id=b.id;
+    const titleHtml=b.title?`<div class="b-title">${escapeHtml(b.title)}</div>`:`<div class="b-empty">제목 없음</div>`;
+    const bodyHtml=b.body?`<div class="b-body">${escapeHtml(b.body)}</div>`:'';
+    el.innerHTML=titleHtml+bodyHtml;
+    el.addEventListener('pointerdown',e=>onBubbleDown(e,b.id));
+    canvas.appendChild(el);
+  });
+}
+
+/* === 드래그 → 새 버블 === */
+function onBubbleDown(e,id){
+  e.stopPropagation();
+  const b=bubbles.find(x=>x.id===id); if(!b)return;
+  drag={bubbleId:id,startX:b.x,startY:b.y,curX:b.x,curY:b.y,moved:false,pointerId:e.pointerId};
+  const el=e.currentTarget;
+  try{el.setPointerCapture(e.pointerId)}catch{}
+  el.classList.add('dragging');
+  const onMove=ev=>{
+    if(!drag||ev.pointerId!==drag.pointerId)return;
+    const rect=document.getElementById('canvas').getBoundingClientRect();
+    drag.curX=ev.clientX-rect.left;
+    drag.curY=ev.clientY-rect.top;
+    const dx=drag.curX-drag.startX, dy=drag.curY-drag.startY;
+    if(Math.hypot(dx,dy)>14) drag.moved=true;
+    if(drag.moved) drawPreview();
+  };
+  const onUp=async ev=>{
+    el.removeEventListener('pointermove',onMove);
+    el.removeEventListener('pointerup',onUp);
+    el.removeEventListener('pointercancel',onUp);
+    el.classList.remove('dragging');
+    clearPreview();
+    if(!drag)return;
+    if(drag.moved){
+      // 새 버블 생성
+      await createBubble(drag.bubbleId,drag.curX,drag.curY);
+    }else{
+      // 클릭 = 편집
+      openModal(drag.bubbleId);
+    }
+    drag=null;
+  };
+  el.addEventListener('pointermove',onMove);
+  el.addEventListener('pointerup',onUp);
+  el.addEventListener('pointercancel',onUp);
+}
+
+function drawPreview(){
+  let line=document.getElementById('preview-line');
+  const svg=document.getElementById('lines');
+  if(!line){
+    line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('id','preview-line');
+    line.setAttribute('class','line preview');
+    svg.appendChild(line);
+  }
+  line.setAttribute('x1',drag.startX);line.setAttribute('y1',drag.startY);
+  line.setAttribute('x2',drag.curX);line.setAttribute('y2',drag.curY);
+}
+function clearPreview(){
+  const line=document.getElementById('preview-line');
+  if(line)line.remove();
+}
+
+async function createBubble(parentId,x,y){
+  const {data,error}=await sb.from('mindmap_bubbles').insert({
+    mindmap_id:currentMapId, parent_id:parentId, title:'', body:'', x, y, is_root:false
+  }).select().single();
+  if(error){toast('버블 생성 실패: '+error.message,'error');return}
+  bubbles.push(data);
+  renderCanvas();
+  // 새로 만든 버블 바로 편집 모달 열기
+  openModal(data.id);
+}
+
+/* === 모달 === */
+function openModal(id){
+  const b=bubbles.find(x=>x.id===id); if(!b)return;
+  editingBubbleId=id;
+  document.getElementById('fTitle').value=b.title||'';
+  document.getElementById('fBody').value=b.body||'';
+  document.getElementById('bDel').disabled=!!b.is_root;
+  document.getElementById('modal').classList.add('open');
+  setTimeout(()=>document.getElementById('fTitle').focus(),50);
+}
+function closeModal(){
+  editingBubbleId=null;
+  document.getElementById('modal').classList.remove('open');
+}
+async function saveBubble(){
+  if(!editingBubbleId)return;
+  const title=document.getElementById('fTitle').value.trim();
+  const body=document.getElementById('fBody').value.trim();
+  const {error}=await sb.from('mindmap_bubbles').update({title,body,updated_at:new Date().toISOString()}).eq('id',editingBubbleId);
+  if(error){toast('저장 실패: '+error.message,'error');return}
+  const b=bubbles.find(x=>x.id===editingBubbleId);
+  if(b){b.title=title;b.body=body}
+  await sb.from('mindmaps').update({updated_at:new Date().toISOString()}).eq('id',currentMapId);
+  renderCanvas();
+  closeModal();
+  toast('저장됨','success');
+}
+async function deleteBubble(){
+  if(!editingBubbleId)return;
+  const b=bubbles.find(x=>x.id===editingBubbleId);
+  if(!b||b.is_root){toast('루트 버블은 마인드맵 자체를 삭제하세요','error');return}
+  if(!confirm('이 버블과 자식 버블을 모두 삭제할까요?'))return;
+  const {error}=await sb.from('mindmap_bubbles').delete().eq('id',editingBubbleId);
+  if(error){toast('삭제 실패: '+error.message,'error');return}
+  closeModal();
+  await selectMap(currentMapId);
+  toast('삭제됨','success');
+}
+
+/* === 유틸 === */
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+/* === 키보드 === */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&document.getElementById('modal').classList.contains('open'))closeModal();
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'&&document.getElementById('modal').classList.contains('open'))saveBubble();
+});
+
+/* === 모달 바깥 클릭 === */
+document.getElementById('modal').addEventListener('click',e=>{
+  if(e.target.id==='modal')closeModal();
+});
+
+/* === 시작 === */
+loadMaps();
+</script>
+</body>
+</html>
