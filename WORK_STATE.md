@@ -1,46 +1,60 @@
 # onda-hompage 작업 상태
 
-> 자동 업데이트: 2026-04-03 KST
+> 자동 업데이트: 2026-04-07 KST
 
 ## 현재 작업
-크몽 RPA 전체 복구+강화 (3단계 에이전트 루프)
+객실/시설/관광/사진 카드 동적 추가-삭제 리팩토링 (히어로 슬라이더 방식 확장)
+**3-에이전트 루프 (Planner→Generator→Evaluator) 풀코스 진행 중**
 
-### Sprint 1: 크몽 로그인 수정 + 크롤러 복구
-- [ ] Step 1-1: login.js 수정 (/biz 리다이렉트 + 모달 처리 + 셀렉터 강화)
-- [ ] Step 1-2: 로그인 테스트 실행 + 쿠키 갱신
-- [ ] Step 1-3: PM2 전체 프로세스 재가동 + 검증
+## 작업 배경
+사용자 지시: 현재 객실 미리보기/시설 카드/관광 명소 등은 고정 슬롯 수(예: 시설 카드 6개, 관광 8개)로 하드코딩되어 있음. 히어로 슬라이더처럼 동적 추가/삭제가 가능하도록 리팩토링.
 
-### Sprint 2: 기술부채 전수 해소
-- [ ] Step 2-1: ad-scheduler.js KST 타임존 수정
-- [ ] Step 2-2: analyzer.js 결제율 계산 수정 (진행중 제외)
-- [ ] Step 2-3: crawl-gig-status.js 중복 방지 (upsert)
-- [ ] Step 2-4: content-generator.js 패턴 테이블 시드 데이터
-- [ ] Step 2-5: command-processor.js 동시성 제어 + 타임아웃
-- [ ] Step 2-6: telegram.js 에러 핸들링 강화
-- [ ] Step 2-7: supabase.js URL 환경변수화
-- [ ] Step 2-8: 크롤러 전체 에러핸들링 강화
+## 리팩토링 대상 (6개 영역)
+| 영역 | 현재 슬롯 | 새 배열 키 | 컨테이너 ID | HTML 파일 |
+|---|---|---|---|---|
+| 객실 미리보기 (메인) | 3개 고정 | `room-previews` | `roomPreviewList` | index.html |
+| 시설 스크롤 (메인) | 5개 고정 | `fac-scroll-cards` | `facScrollList` | index.html |
+| 시설 카드 (그리드) | 6개 고정 | `fac-cards` | `facCardList` | facilities.html |
+| 관광 명소 | 8개 고정 | `attr-spots` | `attrSpotList` | attractions.html |
+| 제휴 할인 업체 | 4개 고정 | `attr-partners` | `attrPartnerList` | attractions.html |
+| 패키지 갤러리 (사진) | 6개 고정 | `pkg-galleries` | `pkgGalleryList` | package.html |
 
-### Sprint 3: AI 자동관리 + 예산 관리 실동작 구현
-- [ ] Step 3-1: 예산 설정 Supabase 저장/로드 (RLS 우회)
-- [ ] Step 3-2: AI 자동관리 ON/OFF 실동작 (서비스별 모드 관리)
-- [ ] Step 3-3: CTR/ROI 기반 입찰 자동조정 로직 강화
-- [ ] Step 3-4: 주/월 단위 예산 분배 + 서비스별 최적 배분
-- [ ] Step 3-5: 대시보드 예산 UI 연동 (저장/로드/표시)
+## 단계별 계획 (Step 1~10)
+- [x] **Step 1**: WORK_STATE.md 단계 계획 작성
+- [ ] **Step 2**: cms.js — 범용 `renderDynamicGroups()` + 6개 카드 빌더
+- [ ] **Step 3**: cms-data.json — 6개 새 배열 키 추가 (레거시 키 유지)
+- [ ] **Step 4**: index.html — 객실 미리보기 + 시설 스크롤 컨테이너 ID
+- [ ] **Step 5**: facilities.html — 시설 카드 컨테이너 ID
+- [ ] **Step 6**: attractions.html — 관광 + 파트너 컨테이너 ID
+- [ ] **Step 7**: package.html — 갤러리 컨테이너 ID
+- [ ] **Step 8**: admin.html — 동적 매니저 일반화 + categories 마커 6개 + doSave 동기화
+- [ ] **Step 9**: Playwright 통합 테스트 (디버깅 루프 = 0 에러까지)
+- [ ] **Step 10**: Cloudflare Pages 배포 + threeway1.com 접속 확인 + 보고
 
-### Sprint 4: OpenClaw 연동 + adlog 업체 정리
-- [ ] Step 4-1: OpenClaw로 adlog.kr 접속 + 그룹 "기본" 아닌 업체 추출
-- [ ] Step 4-2: 추출된 업체 목록 하드코딩 + 대시보드 매칭
-- [ ] Step 4-3: 8080 대시보드 비매칭 업체 제외 처리
+## 참조 패턴 (히어로 슬라이더)
+이미 `hero-slides[]` 배열로 동적 구현 완료됨:
+- **cms.js:59-124** — `renderHeroSlides()` (배열 우선, 레거시 폴백)
+- **cms.js:646-1652** — `doSave()` 배열↔레거시 양방향 동기화
+- **admin.html:1483-1502** — `loadHeroSlides()` 배열 로드 + 레거시 마이그레이션
+- **admin.html:1504-1528** — `renderHeroSlidesAdmin()` 카드 그리드 + 추가 버튼
+- **admin.html:1530-1634** — `createHeroSlideCard()` 개별 카드 + 삭제 + 이미지 업로드
+- **admin.html:395** — `'🎠 히어로 슬라이더': '__DYNAMIC_HERO_SLIDES__'`
 
-### Sprint 5: 크몽 전 기능 RPA + 통합 테스트
-- [ ] Step 5-1: 소재 변경 RPA (타이틀/썸네일 자동 교체)
-- [ ] Step 5-2: 상세페이지 관리 RPA
-- [ ] Step 5-3: 포트폴리오 관리 RPA
-- [ ] Step 5-4: ROI/CTR 통합 최적화 루프
-- [ ] Step 5-5: 전체 E2E 테스트 + 평가
+## 호환성 원칙
+- 기존 `hero-slide-1-img`, `room-preview-1-img`, `fac-card-1-img` 등 개별 키는 모두 유지
+- 새 배열 데이터가 있으면 우선 사용, 없으면 개별 키로 폴백
+- 저장 시 양쪽 다 동기화 (이전 admin/페이지가 깨지지 않도록)
 
-## 이전 완료 작업
-(Phase 1~8 전부 완료 — 2026-04-02)
+## 리팩토링 위험 요소 (건드리지 않을 것)
+- Supabase `threeway_cms` 테이블 스키마
+- rooms.html 7개 객실 상세 (다른 페이지에서 URL 앵커로 참조됨 — 별도 작업)
+- about.html `why-1~9-*` 9개 카드 (사용자 명시 안 함)
+- 요금/패키지 메뉴/FAQ 등 다른 패턴 영역
 
 ## Git 상태 (자동)
 - **브랜치**: main
+- **최근 커밋**: 0ce13a0 [auto-snapshot] 2026-04-07 12:00
+- **미커밋 변경**: portfolio-sites/threeway-pension/admin.html (수정), _headers (신규)
+
+## 알려진 이슈
+- (없음)
