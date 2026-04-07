@@ -22,6 +22,8 @@ import json
 import time
 import random
 import logging
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from io import StringIO
 from urllib.parse import urlencode, quote
 
@@ -275,6 +277,8 @@ class CrawlerEngine:
         timeout=5,
         callback=None,
         api_keys=None,
+        detail_workers=4,
+        save_every=10,
     ):
         """
         Args:
@@ -284,12 +288,16 @@ class CrawlerEngine:
             timeout: 요청 타임아웃 (초)
             callback: 진행 상황 콜백 fn(event, data)
             api_keys: 네이버 API 키 리스트 [{"client_id": "...", "client_secret": "..."}, ...]
+            detail_workers: PHASE 2 상세 크롤링 동시 워커 수 (기본 4, 1=직렬)
+            save_every: xlsx/progress 저장 주기 — N건마다 1회 (기본 10)
         """
         self.delay_min = delay_min
         self.delay_max = delay_max
         self.timeout = timeout
         self.callback = callback or (lambda e, d: None)
         self.running = False
+        self.detail_workers = max(1, int(detail_workers or 1))
+        self.save_every = max(1, int(save_every or 1))
         self.stats = {
             "place_id": 0, "category": 0, "name": 0, "address": 0,
             "phone": 0, "visitor_review": 0, "blog_review": 0,
@@ -297,6 +305,10 @@ class CrawlerEngine:
             "blocked": 0, "success": 0,
         }
         self._consecutive_blocks = 0
+        # ═ 동시성 락 (PHASE 2 병렬 처리용) ═
+        self._stats_lock = threading.Lock()
+        self._save_lock = threading.Lock()
+        self._cb_lock = threading.Lock()
 
         # 네이버 API 키 (로테이션) — 기본 내장 키
         _default_keys = [
@@ -330,9 +342,10 @@ class CrawlerEngine:
         # requests 세션 (쿠키 없음, 연결 풀 강화)
         self.session = requests.Session()
         self.session.cookies.clear()
-        # 연결 풀 크기 확대 → 재연결 오버헤드 제거
+        # 연결 풀 크기 확대 → 병렬 워커 + 재연결 오버헤드 제거
+        _pool_size = max(20, self.detail_workers * 4)
         adapter = requests.adapters.HTTPAdapter(
-            pool_connections=20, pool_maxsize=20, max_retries=1
+            pool_connections=_pool_size, pool_maxsize=_pool_size, max_retries=1
         )
         self.session.mount("http://", adapter)
         self.session.mount("https://", adapter)
@@ -2466,8 +2479,13 @@ class CrawlerEngine:
         total = 999 if items else 0
         return items, total
 
+    def _stat_inc(self, key, n=1):
+        """thread-safe stats 증가"""
+        with self._stats_lock:
+            self.stats[key] = self.stats.get(key, 0) + n
+
     def _detail_crawl_one(self, r, total, idx):
-        """1건 상세 크롤링 — GraphQL 우선, place HTML 폴백"""
+        """1건 상세 크롤링 — GraphQL 우선, place HTML 폴백 (thread-safe)"""
         name = r.get("상호명", "")
         pid = r.get("고유번호", "")
         log_items = []
@@ -2497,15 +2515,15 @@ class CrawlerEngine:
         current_phone = (r.get("안심번호") or "").strip()
         if current_phone:
             log_items.append(f"tel:{current_phone}")
-            self.stats["phone"] += 1
+            self._stat_inc("phone")
         elif gql.get("phone"):
             r["안심번호"] = gql["phone"]
             log_items.append(f"tel:{gql['phone']}")
-            self.stats["phone"] += 1
+            self._stat_inc("phone")
         elif parsed_place.get("phone"):
             r["안심번호"] = parsed_place["phone"]
             log_items.append(f"tel:{parsed_place['phone']}")
-            self.stats["phone"] += 1
+            self._stat_inc("phone")
 
         # ═══ 방문자/블로그 리뷰 ═══
         cur_vr = str(r.get("방문자리뷰수") or "0").strip()
@@ -2530,11 +2548,11 @@ class CrawlerEngine:
         if need_hp:
             if gql.get("homepage"):
                 r["홈페이지URL"] = gql["homepage"]
-                self.stats["hp"] += 1
+                self._stat_inc("hp")
                 log_items.append(f"hp:{gql['homepage']}")
             elif parsed_place.get("homepage"):
                 r["홈페이지URL"] = parsed_place["homepage"]
-                self.stats["hp"] += 1
+                self._stat_inc("hp")
                 log_items.append(f"hp:{parsed_place['homepage']}")
 
         # ═══ 이메일 (홈페이지에서 추출) ═══
@@ -2545,12 +2563,12 @@ class CrawlerEngine:
             emails = self.extract_emails(html)
             if emails:
                 r["업체이메일"] = emails[0]
-                self.stats["email"] += 1
+                self._stat_inc("email")
                 log_items.append(f"email:{emails[0]}")
         # place HTML에서도 시도
         if not (r.get("업체이메일") or "").strip() and parsed_place.get("email"):
             r["업체이메일"] = parsed_place["email"]
-            self.stats["email"] += 1
+            self._stat_inc("email")
             log_items.append(f"email:{parsed_place['email']}(place)")
 
         # ═══ 네이버아이디 ═══

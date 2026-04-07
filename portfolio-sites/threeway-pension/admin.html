@@ -44,6 +44,20 @@
       border-color: #7BA17F;
       background: rgba(123, 161, 127, 0.08);
     }
+    .cms-drop-zone.replace-mode {
+      padding: 14px;
+      border-color: #7BA17F;
+      background: rgba(123, 161, 127, 0.05);
+      color: #5a8060;
+    }
+    .cms-drop-zone.replace-mode .drop-icon {
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+    }
+    .cms-drop-zone.replace-mode p {
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
     .cms-drop-zone p {
       margin: 0;
       font-size: 0.9rem;
@@ -904,10 +918,28 @@
     showToast('✅ 이미지 로드 완료 (' + sizeKB + 'KB). 저장을 눌러주세요.');
   }
 
+  function setDropZoneMode(dropZone, mode) {
+    if (!dropZone) return;
+    const mainP = dropZone.querySelector('p:not(.drop-hint)');
+    const icon = dropZone.querySelector('.drop-icon');
+    if (mode === 'replace') {
+      if (mainP) mainP.textContent = '🔄 새 이미지를 드래그하여 교체';
+      if (icon) icon.textContent = '🔄';
+      dropZone.classList.add('replace-mode');
+    } else {
+      if (mainP) mainP.textContent = '이미지를 드래그하여 놓으세요';
+      if (icon) icon.textContent = '📁';
+      dropZone.classList.remove('replace-mode');
+    }
+  }
+
   function updatePreview(container, src, input, dropZone) {
     container.innerHTML = '';
     if (!src) {
-      if (dropZone) dropZone.style.display = '';
+      if (dropZone) {
+        dropZone.style.display = '';
+        setDropZoneMode(dropZone, 'add');
+      }
       return;
     }
     const img = document.createElement('img');
@@ -921,12 +953,19 @@
     removeBtn.addEventListener('click', () => {
       input.value = '';
       container.innerHTML = '';
-      if (dropZone) dropZone.style.display = '';
+      if (dropZone) {
+        dropZone.style.display = '';
+        setDropZoneMode(dropZone, 'add');
+      }
       markFieldChanged(input);
     });
     container.appendChild(removeBtn);
 
-    if (dropZone) dropZone.style.display = 'none';
+    // 이미지가 있어도 드롭존을 유지해 교체 가능하게 함
+    if (dropZone) {
+      dropZone.style.display = '';
+      setDropZoneMode(dropZone, 'replace');
+    }
   }
 
   // ============================================
@@ -1702,4 +1741,4 @@
 </script>
 </body>
 </html>
-<!-- deployed 2026. 04. 02. (목) 15:59:37 KST -->
+<!-- deployed 2026. 04. 07. - fix: 이미지 드롭존 항상 표시 (교체 가능) -->
