@@ -121,51 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
     startAuto();
   };
 
-  const heroSlider = document.querySelector('.hero-slider');
-  if (heroSlider) {
-    const slides = heroSlider.querySelectorAll('.hero-slide');
-    const dots = heroSlider.querySelectorAll('.hero-dot');
-    let current = 0;
-    let interval;
-
-    const goTo = (idx) => {
-      slides[current].classList.remove('active');
-      if (dots[current]) dots[current].classList.remove('active');
-      // Reset Ken Burns
-      const oldImg = slides[current].querySelector('img');
-      if (oldImg) { oldImg.style.animation = 'none'; oldImg.offsetHeight; oldImg.style.animation = ''; }
-
-      current = idx % slides.length;
-      slides[current].classList.add('active');
-      if (dots[current]) dots[current].classList.add('active');
-    };
-
-    const next = () => goTo(current + 1);
-
-    const startAuto = () => {
-      clearInterval(interval);
-      interval = setInterval(next, 5000);
-    };
-
-    dots.forEach((dot, i) => {
-      dot.addEventListener('click', () => { goTo(i); startAuto(); });
-    });
-
-    // Touch swipe support
-    let touchStartX = 0;
-    heroSlider.addEventListener('touchstart', (e) => {
-      touchStartX = e.touches[0].clientX;
-    }, { passive: true });
-    heroSlider.addEventListener('touchend', (e) => {
-      const diff = touchStartX - e.changedTouches[0].clientX;
-      if (Math.abs(diff) > 50) {
-        if (diff > 0) { goTo(current + 1); } else { goTo((current - 1 + slides.length) % slides.length); }
-        startAuto();
-      }
-    }, { passive: true });
-
-    startAuto();
-  }
+  // (legacy 슬라이더 블록 제거 — cms.js가 window.initHeroSlider()를 호출함)
+  // 빈 슬라이드에서 setInterval 충돌이 발생하던 문제 해결
 
   /* --- 5. 스크롤 reveal (UIUX B조) --- */
   document.body.classList.add('js-scroll-reveal');
