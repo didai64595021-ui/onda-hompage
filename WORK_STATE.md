@@ -19,17 +19,22 @@
 | 제휴 할인 업체 | 4개 고정 | `attr-partners` | `attrPartnerList` | attractions.html |
 | 패키지 갤러리 (사진) | 6개 고정 | `pkg-galleries` | `pkgGalleryList` | package.html |
 
-## 단계별 계획 (Step 1~10)
+## 단계별 계획 (Step 1~10) — **전 단계 완료**
 - [x] **Step 1**: WORK_STATE.md 단계 계획 작성
-- [ ] **Step 2**: cms.js — 범용 `renderDynamicGroups()` + 6개 카드 빌더
-- [ ] **Step 3**: cms-data.json — 6개 새 배열 키 추가 (레거시 키 유지)
-- [ ] **Step 4**: index.html — 객실 미리보기 + 시설 스크롤 컨테이너 ID
-- [ ] **Step 5**: facilities.html — 시설 카드 컨테이너 ID
-- [ ] **Step 6**: attractions.html — 관광 + 파트너 컨테이너 ID
-- [ ] **Step 7**: package.html — 갤러리 컨테이너 ID
-- [ ] **Step 8**: admin.html — 동적 매니저 일반화 + categories 마커 6개 + doSave 동기화
-- [ ] **Step 9**: Playwright 통합 테스트 (디버깅 루프 = 0 에러까지)
-- [ ] **Step 10**: Cloudflare Pages 배포 + threeway1.com 접속 확인 + 보고
+- [x] **Step 2**: cms.js — 범용 `renderDynamicGroups()` + 6개 카드 빌더 (217줄 추가)
+- [x] **Step 3**: cms-data.json — 6개 새 배열 키 추가 (154줄, 레거시 키 유지)
+- [x] **Step 4**: index.html — `#roomPreviewList`, `#facScrollList`
+- [x] **Step 5**: facilities.html — `#facCardList`
+- [x] **Step 6**: attractions.html — `#attrSpotList`, `#attrPartnerList`
+- [x] **Step 7**: package.html — `#pkgGalleryList`
+- [x] **Step 8**: admin.html — `DYN_GROUPS` + `loadDynamicGroup` + `renderDynamicGroupAdmin` + `createDynamicCard` + 폼 분기 + doSave 동기화 (355줄 추가)
+- [x] **Step 9**: Playwright 통합 테스트 23/23 (100%) — 디버깅 루프 0 에러 (legacy hero slider 충돌 수정)
+- [x] **Step 10**: Cloudflare Pages 배포 완료 — `threeway-pension` 프로젝트 → threeway1.com 검증 15/15 통과
+
+## 배포 결과
+- **미리보기**: https://e3d0a40f.threeway-pension.pages.dev
+- **본 사이트**: https://threeway1.com (검증 완료)
+- **검증**: 6개 동적 그룹 모두 정상 렌더 + 콘솔 에러 0건
 
 ## 참조 패턴 (히어로 슬라이더)
 이미 `hero-slides[]` 배열로 동적 구현 완료됨:
