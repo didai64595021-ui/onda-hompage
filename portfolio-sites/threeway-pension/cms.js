@@ -124,6 +124,220 @@
   }
 
   /**
+   * 동적 카드 그룹 정의 (히어로 슬라이더와 동일한 패턴)
+   *
+   * 각 그룹:
+   * - arrayKey: 새 배열 키 (예: 'room-previews')
+   * - legacyPrefix: 레거시 개별 키 prefix (예: 'room-preview')
+   * - legacyMax: 마이그레이션 시 최대 인덱스
+   * - fields: 레거시 호환을 위해 마이그레이션할 필드명 배열
+   *           단일 필드(갤러리)는 fields=[''] 로 표시
+   * - containerId: HTML 컨테이너 ID
+   * - render: (item, idx) => HTMLElement (카드 빌더)
+   *
+   * 동적 렌더링은 새 배열 데이터가 있을 때만 실행 (없으면 기존 HTML 유지 → 레거시 호환)
+   */
+  function buildEl(tag, attrs, children) {
+    var el = document.createElement(tag);
+    if (attrs) {
+      Object.keys(attrs).forEach(function (k) {
+        if (k === 'class') el.className = attrs[k];
+        else if (k === 'dataset') Object.keys(attrs[k]).forEach(function (dk) { el.dataset[dk] = attrs[k][dk]; });
+        else if (k.indexOf('data-') === 0) el.setAttribute(k, attrs[k]);
+        else el[k] = attrs[k];
+      });
+    }
+    if (children) {
+      children.forEach(function (c) {
+        if (c == null) return;
+        el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+      });
+    }
+    return el;
+  }
+
+  // ─── 카드 빌더 6종 ───
+  function buildRoomPreviewCard(item, idx) {
+    var delay = 'delay-' + ((idx % 3) + 1);
+    var imgWrap = buildEl('div', { class: 'card-img-wrap' }, [
+      buildEl('img', { src: item.img || '', alt: item.name || '', width: 800, height: 600 })
+    ]);
+    var body = buildEl('div', { class: 'card-body' }, [
+      item.tag ? buildEl('span', { class: 'card-tag' }, [item.tag]) : null,
+      buildEl('h3', null, [item.name || '']),
+      buildEl('p', null, [item.desc || ''])
+    ]);
+    return buildEl('a', {
+      href: item.href || '#',
+      class: 'card fade-in ' + delay
+    }, [imgWrap, body]);
+  }
+
+  function buildFacScrollCard(item) {
+    var imgWrap = buildEl('div', { class: 'card-img-wrap' }, [
+      buildEl('img', { src: item.img || '', alt: item.name || '', width: 800, height: 533 })
+    ]);
+    var body = buildEl('div', { class: 'card-body' }, [
+      buildEl('h4', null, [item.name || '']),
+      buildEl('p', null, [item.desc || ''])
+    ]);
+    return buildEl('div', { class: 'hscroll-card' }, [imgWrap, body]);
+  }
+
+  function buildFacCard(item, idx) {
+    var delay = 'delay-' + ((idx % 3) + 1);
+    var card = buildEl('div', {
+      class: 'facility-card fade-in ' + delay,
+      'data-lightbox': item.img || ''
+    }, [
+      buildEl('img', { src: item.img || '', alt: item.name || '', width: 800, height: 600 }),
+      buildEl('div', { class: 'facility-card-overlay' }, [
+        buildEl('h3', null, [item.name || '']),
+        buildEl('p', null, [item.desc || ''])
+      ])
+    ]);
+    return card;
+  }
+
+  function buildAttrSpotCard(item, idx) {
+    var delay = 'delay-' + ((idx % 4) + 1);
+    var imgWrap = buildEl('div', { class: 'attraction-img-wrap' }, [
+      buildEl('img', { src: item.img || '', alt: item.name || '', width: 800, height: 450 }),
+      buildEl('span', { class: 'attraction-distance-badge' }, [item.dist || ''])
+    ]);
+    var body = buildEl('div', { class: 'attraction-card-body' }, [
+      buildEl('span', { class: 'attraction-tag' }, [item.tag || '']),
+      buildEl('h3', null, [item.name || '']),
+      buildEl('p', null, [item.desc || ''])
+    ]);
+    return buildEl('div', { class: 'attraction-card-v2 fade-in ' + delay }, [imgWrap, body]);
+  }
+
+  function buildAttrPartnerCard(item, idx) {
+    var delay = 'delay-' + ((idx % 4) + 1);
+    return buildEl('div', { class: 'partner-card fade-in ' + delay }, [
+      buildEl('div', { class: 'partner-icon' }, [item.icon || '🤝']),
+      buildEl('h3', null, [item.name || '']),
+      buildEl('p', { class: 'partner-discount' }, [item.discount || '']),
+      buildEl('p', { class: 'partner-note' }, [item.note || ''])
+    ]);
+  }
+
+  function buildPkgGalleryItem(item) {
+    var src = typeof item === 'string' ? item : (item.img || '');
+    return buildEl('div', { class: 'gallery-item', 'data-lightbox': src }, [
+      buildEl('img', { src: src, alt: '', width: 600, height: 450 })
+    ]);
+  }
+
+  var DYNAMIC_GROUPS = [
+    {
+      arrayKey: 'room-previews',
+      legacyPrefix: 'room-preview',
+      legacyMax: 30,
+      fields: ['img', 'name', 'desc'],
+      containerId: 'roomPreviewList',
+      render: buildRoomPreviewCard
+    },
+    {
+      arrayKey: 'fac-scroll-cards',
+      legacyPrefix: 'fac-scroll',
+      legacyMax: 30,
+      fields: ['img', 'name', 'desc'],
+      containerId: 'facScrollList',
+      render: buildFacScrollCard
+    },
+    {
+      arrayKey: 'fac-cards',
+      legacyPrefix: 'fac-card',
+      legacyMax: 30,
+      fields: ['img', 'name', 'desc'],
+      containerId: 'facCardList',
+      render: buildFacCard
+    },
+    {
+      arrayKey: 'attr-spots',
+      legacyPrefix: 'attr-spot',
+      legacyMax: 30,
+      fields: ['img', 'dist', 'tag', 'name', 'desc'],
+      containerId: 'attrSpotList',
+      render: buildAttrSpotCard
+    },
+    {
+      arrayKey: 'attr-partners',
+      legacyPrefix: 'attr-partner',
+      legacyMax: 30,
+      fields: ['name', 'discount', 'note'],
+      containerId: 'attrPartnerList',
+      render: buildAttrPartnerCard
+    },
+    {
+      arrayKey: 'pkg-galleries',
+      legacyPrefix: 'pkg-gallery',
+      legacyMax: 30,
+      fields: [''],
+      containerId: 'pkgGalleryList',
+      render: buildPkgGalleryItem
+    }
+  ];
+
+  // 그룹 정의 노출 (admin 페이지에서 재사용)
+  window.CMS_DYNAMIC_GROUPS = DYNAMIC_GROUPS;
+
+  /**
+   * 새 배열 데이터 또는 레거시 키로부터 그룹 항목 추출
+   */
+  function getGroupItems(data, group) {
+    var arr = data[group.arrayKey];
+    if (Array.isArray(arr) && arr.length > 0) {
+      return arr;
+    }
+    // 레거시 마이그레이션
+    var items = [];
+    for (var i = 1; i <= group.legacyMax; i++) {
+      if (group.fields.length === 1 && group.fields[0] === '') {
+        // 단일 키 패턴 (pkg-gallery-1)
+        var v = data[group.legacyPrefix + '-' + i];
+        if (!v) break;
+        items.push(v);
+      } else {
+        // 다중 필드 패턴 (room-preview-1-img)
+        var first = data[group.legacyPrefix + '-' + i + '-' + group.fields[0]];
+        if (!first) break;
+        var item = {};
+        group.fields.forEach(function (f) {
+          item[f] = data[group.legacyPrefix + '-' + i + '-' + f] || '';
+        });
+        items.push(item);
+      }
+    }
+    return items;
+  }
+
+  /**
+   * 동적 그룹 일괄 렌더링
+   * - 컨테이너가 존재할 때만 (페이지에 마커가 있을 때만)
+   * - 항목이 0개면 컨테이너 그대로 두기 (기존 HTML 유지)
+   */
+  function renderDynamicGroups(data) {
+    DYNAMIC_GROUPS.forEach(function (group) {
+      var container = document.getElementById(group.containerId);
+      if (!container) return;
+      var items = getGroupItems(data, group);
+      if (items.length === 0) return;
+      // 기존 자식 모두 제거 후 재렌더
+      while (container.firstChild) container.removeChild(container.firstChild);
+      items.forEach(function (item, idx) {
+        try {
+          container.appendChild(group.render(item, idx));
+        } catch (e) {
+          console.warn('[CMS] render fail', group.arrayKey, idx, e);
+        }
+      });
+    });
+  }
+
+  /**
    * Apply CMS data to all data-cms elements on the page
    */
   function applyCmsData(data) {
@@ -131,6 +345,9 @@
 
     // Render hero slides first
     renderHeroSlides(data);
+
+    // Render dynamic card groups (room/facility/attraction/partner/gallery)
+    renderDynamicGroups(data);
 
     document.querySelectorAll('[data-cms]').forEach(el => {
       const key = el.dataset.cms;
