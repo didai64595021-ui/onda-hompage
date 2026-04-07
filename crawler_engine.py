@@ -791,11 +791,117 @@ class CrawlerEngine:
             if hp_url and not any(b in hp_url.lower() for b in HP_BLACKLIST):
                 result["homepage"] = hp_url
 
+        # 톡톡 URL 추출 (있는 매장만 — 없으면 키 자체 없음)
+        # 패턴: talk.naver.com/ct/{businessId}, talk.naver.com/{path}, m.talk.naver.com
+        # 또는 JSON 필드 talkUrl/talktalkUrl
+        talk = None
+        m = re.search(r'"(?:talkUrl|talktalkUrl|talkURL)"\s*:\s*"(https?:[^"]+)"', html)
+        if m:
+            talk = m.group(1).replace("\\u002F", "/").replace("\\/", "/")
+        if not talk:
+            m = re.search(r'https?:\\?/\\?/(?:m\.)?talk\.naver\.com/(?:ct/)?[\w/?=&\-]+', html)
+            if m:
+                talk = m.group(0).replace("\\/", "/").replace("\\u002F", "/")
+        if talk:
+            # 너무 긴 잡음 제거 (URL 길이 < 200)
+            if len(talk) < 200 and "talk.naver.com" in talk:
+                result["talktalk_url"] = talk
+
+        # 카카오톡 채널 (있는 매장만)
+        m = re.search(r'https?:\\?/\\?/(?:pf|plus)\.kakao\.com/_[\w]+', html)
+        if m:
+            kakao = m.group(0).replace("\\/", "/").replace("\\u002F", "/")
+            if len(kakao) < 100:
+                result["kakao_channel_url"] = kakao
+
+        # 평균 별점 (있을 때만)
+        m = re.search(r'"score"\s*:\s*([0-9]+\.?[0-9]*)', html)
+        if m:
+            try:
+                score = float(m.group(1))
+                if 0 < score <= 5:
+                    result["avg_rating"] = round(score, 2)
+            except ValueError:
+                pass
+
         return result
 
     # ═══════════════════════════════════════════
     # 홈페이지 검증
     # ═══════════════════════════════════════════
+
+    def _diagnose_homepage(self, url):
+        """홈페이지 URL에 HEAD 요청으로 상태 진단.
+        반환: dict with status, has_https, has_mobile_view, last_modified
+        - status: 'live' / 'outdated' / 'broken'
+          - broken: status >= 400 또는 연결 실패
+          - outdated: viewport meta 없음 OR last-modified 2년 이상 전
+          - live: 그 외
+        """
+        diag = {
+            "status": "broken",
+            "has_https": url.startswith("https://"),
+            "has_mobile_view": False,
+            "last_modified": "",
+        }
+        if not url or not url.startswith("http"):
+            return diag
+        try:
+            # HEAD 먼저 (가벼움)
+            head = self.session.head(url, timeout=5, allow_redirects=True)
+            if head.status_code >= 400:
+                return diag
+            lm = head.headers.get("Last-Modified", "")
+            diag["last_modified"] = lm
+            # GET으로 viewport 확인 (50KB만)
+            try:
+                resp = self.session.get(url, timeout=6, stream=True, allow_redirects=True)
+                if resp.status_code >= 400:
+                    return diag
+                chunk = resp.raw.read(50000, decode_content=True)
+                resp.close()
+                html_head = chunk.decode("utf-8", errors="ignore") if isinstance(chunk, bytes) else chunk
+                diag["has_mobile_view"] = bool(
+                    re.search(r'<meta[^>]*name=["\']viewport["\']', html_head, re.I)
+                )
+            except Exception:
+                pass
+            # outdated 판정
+            status = "live"
+            if not diag["has_mobile_view"]:
+                status = "outdated"
+            if lm:
+                try:
+                    from email.utils import parsedate_to_datetime
+                    lm_dt = parsedate_to_datetime(lm)
+                    age_days = (time.time() - lm_dt.timestamp()) / 86400
+                    if age_days > 730:  # 2년
+                        status = "outdated"
+                except Exception:
+                    pass
+            diag["status"] = status
+            return diag
+        except Exception as e:
+            logger.debug(f"diagnose homepage error {url}: {e}")
+            return diag
+
+    @staticmethod
+    def _classify_niche(row):
+        """매장 row에서 ONDA 매칭 타겟 자동 분류.
+        반환: list of tags ['selfmarketing', 'homepage_build', 'homepage_renew']
+        규칙:
+        - selfmarketing: 항상 포함 (리뷰/리워드 매칭 기본 풀)
+        - homepage_build: 홈페이지 없음 (URL 비어있거나 'X')
+        - homepage_renew: 홈페이지 있는데 상태 outdated/broken
+        """
+        tags = ["selfmarketing"]
+        hp = (row.get("홈페이지URL") or "").strip()
+        hp_status = (row.get("홈페이지상태") or "").strip()
+        if not hp or hp == "X":
+            tags.append("homepage_build")
+        elif hp_status in ("outdated", "broken"):
+            tags.append("homepage_renew")
+        return tags
 
     def _extract_homepage_with_verify(self, search_html, name):
         """검색 결과 HTML에서 홈페이지 URL 추출 + 경량 검증.
@@ -960,6 +1066,8 @@ class CrawlerEngine:
     OUT_HEADERS = [
         "업종(키워드)", "상호명", "네이버아이디", "업체이메일", "안심번호", "업체주소", "홈페이지URL",
         "방문자리뷰수", "블로그리뷰수", "고유번호", "플레이스URL", "업데이트날짜",
+        # 신규 타겟 시그널 (셀프마케팅/홈제작/홈보수 매칭용)
+        "톡톡URL", "카카오채널URL", "홈페이지상태", "평균별점", "매칭타겟",
     ]
 
     @staticmethod
@@ -1054,6 +1162,10 @@ class CrawlerEngine:
             "phone": 0, "visitor_review": 0, "blog_review": 0,
             "hp": 0, "email": 0, "naver_id": 0,
             "blocked": 0, "success": 0,
+            # 신규 타겟 시그널
+            "talktalk": 0, "kakao": 0,
+            "hp_live": 0, "hp_outdated": 0, "hp_broken": 0, "hp_none": 0,
+            "niche_self": 0, "niche_build": 0, "niche_renew": 0,
         }
 
         if not progress_file:
@@ -1103,6 +1215,10 @@ class CrawlerEngine:
                     ("업체주소", "address"), ("안심번호", "phone"),
                     ("방문자리뷰수", "visitor_review"), ("블로그리뷰수", "blog_review"),
                     ("홈페이지URL", "hp"), ("업체이메일", "email"),
+                    # 신규 시그널
+                    ("톡톡URL", "talktalk"), ("카카오채널URL", "kakao"),
+                    ("홈페이지상태", "hp_status"), ("평균별점", "avg_rating"),
+                    ("매칭타겟", "niche_tags"),
                 ]:
                     val = prev.get(prog_col, "")
                     if val and not (r.get(csv_col) or "").strip():
@@ -1174,6 +1290,22 @@ class CrawlerEngine:
                         r["블로그리뷰수"] = parsed_place["blog_review"]
                         self.stats["blog_review"] += 1
                         log_items.append(f"blog:{parsed_place['blog_review']}")
+
+                    # 톡톡 URL (있는 매장만 — 빈 값으로 덮어쓰지 않음)
+                    if parsed_place.get("talktalk_url") and not (r.get("톡톡URL") or "").strip():
+                        r["톡톡URL"] = parsed_place["talktalk_url"]
+                        self.stats["talktalk"] += 1
+                        log_items.append("talk:Y")
+
+                    # 카카오 채널 (있는 매장만)
+                    if parsed_place.get("kakao_channel_url") and not (r.get("카카오채널URL") or "").strip():
+                        r["카카오채널URL"] = parsed_place["kakao_channel_url"]
+                        self.stats["kakao"] += 1
+                        log_items.append("kakao:Y")
+
+                    # 평균 별점
+                    if parsed_place.get("avg_rating") and not (r.get("평균별점") or "").strip():
+                        r["평균별점"] = str(parsed_place["avg_rating"])
 
                     self._random_delay()
 
@@ -1255,6 +1387,28 @@ class CrawlerEngine:
             if not (r.get("업데이트날짜") or "").strip():
                 r["업데이트날짜"] = time.strftime("%Y-%m-%d")
 
+            # ══ STEP 6: 홈페이지 상태 진단 (있는 매장만) ══
+            hp_url = (r.get("홈페이지URL") or "").strip()
+            need_hp_status = not (r.get("홈페이지상태") or "").strip()
+            if need_hp_status:
+                if not hp_url or hp_url == "X":
+                    r["홈페이지상태"] = "none"
+                    self.stats["hp_none"] += 1
+                else:
+                    diag = self._diagnose_homepage(hp_url)
+                    r["홈페이지상태"] = diag["status"]
+                    self.stats[f"hp_{diag['status']}"] += 1
+                    log_items.append(f"hp_status:{diag['status']}")
+                    self._random_delay()
+
+            # ══ STEP 7: 매칭 타겟 자동 분류 ══
+            niche_tags = self._classify_niche(r)
+            r["매칭타겟"] = ",".join(niche_tags)
+            for tag in niche_tags:
+                key = "niche_" + tag.replace("homepage_", "").replace("selfmarketing", "self")
+                if key in self.stats:
+                    self.stats[key] += 1
+
             # ── 진행 저장 (5건마다) ──
             prog_key = pid or name
             progress[prog_key] = {
@@ -1270,6 +1424,12 @@ class CrawlerEngine:
                 "email": r.get("업체이메일", ""),
                 "naver_id": r.get("네이버아이디", ""),
                 "update_date": r.get("업데이트날짜", ""),
+                # 신규 시그널 필드
+                "talktalk": r.get("톡톡URL", ""),
+                "kakao": r.get("카카오채널URL", ""),
+                "hp_status": r.get("홈페이지상태", ""),
+                "avg_rating": r.get("평균별점", ""),
+                "niche_tags": r.get("매칭타겟", ""),
             }
             if i % 5 == 0 or i == len(rows) - 1:
                 try:
@@ -1312,6 +1472,11 @@ class CrawlerEngine:
         c_pid, p_pid = _pct("고유번호")
         c_purl, p_purl = _pct("플레이스URL")
         c_date, p_date = _pct("업데이트날짜")
+        # 신규 시그널 채움율
+        c_talk, p_talk = _pct("톡톡URL")
+        c_kakao, p_kakao = _pct("카카오채널URL")
+        c_hpst, p_hpst = _pct("홈페이지상태", empty_vals=("",))
+        c_niche, p_niche = _pct("매칭타겟", empty_vals=("",))
 
         s = self.stats
         summary = (
@@ -1328,6 +1493,13 @@ class CrawlerEngine:
             f"  고유번호:     {c_pid}/{total} ({p_pid}%)  +{s['place_id']}\n"
             f"  플레이스URL:  {c_purl}/{total} ({p_purl}%)\n"
             f"  업데이트날짜: {c_date}/{total} ({p_date}%)\n"
+            f"\n=== 타겟 시그널 ===\n"
+            f"  톡톡URL:      {c_talk}/{total} ({p_talk}%)  +{s['talktalk']}\n"
+            f"  카카오채널:   {c_kakao}/{total} ({p_kakao}%)  +{s['kakao']}\n"
+            f"  홈페이지상태: {c_hpst}/{total} ({p_hpst}%)  "
+            f"live={s['hp_live']} outdated={s['hp_outdated']} broken={s['hp_broken']} none={s['hp_none']}\n"
+            f"  매칭타겟:     {c_niche}/{total} ({p_niche}%)  "
+            f"셀프={s['niche_self']} 홈제작={s['niche_build']} 홈보수={s['niche_renew']}\n"
             f"\n완료: {output_file}"
         )
         self.callback("log", summary)
@@ -2591,6 +2763,10 @@ class CrawlerEngine:
             "phone": 0, "visitor_review": 0, "blog_review": 0,
             "hp": 0, "email": 0, "naver_id": 0,
             "blocked": 0, "success": 0,
+            # 신규 타겟 시그널
+            "talktalk": 0, "kakao": 0,
+            "hp_live": 0, "hp_outdated": 0, "hp_broken": 0, "hp_none": 0,
+            "niche_self": 0, "niche_build": 0, "niche_renew": 0,
         }
 
         if not progress_file:
