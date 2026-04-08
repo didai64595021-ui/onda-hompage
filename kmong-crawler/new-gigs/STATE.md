@@ -26,8 +26,8 @@
 
 ## 단계별 진행 (각 단계 완료 시 git commit)
 - [x] **Step 1**: 시장조사 (병렬 에이전트 2개) → `01-market-research-1-macro.md`, `01-market-research-2-aibot.md` ✅ (2026-04-08 14:00 KST)
-- [ ] **Step 2** (다음 재개 시작점): 6개 상품 기획서 → `02-product-specs.md`
-- [ ] **Step 3**: 이미지 생성 (OpenAI + Gemini 12장) → `03-images/`
+- [x] **Step 2**: 6개 상품 기획서 → `02-product-specs.md` + `02-product-specs/01~06-*.md` ✅ (2026-04-08 23:xx KST)
+- [ ] **Step 3** (다음 진행): 이미지 생성 (OpenAI + Gemini 12장) → `03-images/`
 - [ ] **Step 4**: 이미지 비교 후 6장 선정
 - [ ] **Step 5**: `create-gig.js` 신규 등록 RPA 개발 (UI 정찰 → 작성 → dry-run)
 - [ ] **Step 6**: 6개 상품 실제 등록
