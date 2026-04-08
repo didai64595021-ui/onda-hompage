@@ -302,6 +302,8 @@ class CrawlerEngine:
             "place_id": 0, "category": 0, "name": 0, "address": 0,
             "phone": 0, "visitor_review": 0, "blog_review": 0,
             "hp": 0, "email": 0, "naver_id": 0,
+            "responsive": 0, "talktalk": 0, "kakao": 0, "instagram": 0,
+            "no_phone_btn": 0, "new_biz": 0,
             "blocked": 0, "success": 0,
         }
         self._consecutive_blocks = 0
@@ -558,6 +560,190 @@ class CrawlerEngine:
         return REGION_PATTERN.sub(" ", name).strip()
 
     # ═══════════════════════════════════════════
+    # 신규 보조 헬퍼 (반응형 / 톡톡 / 신규업체 / 리뷰합계)
+    # ═══════════════════════════════════════════
+
+    @staticmethod
+    def detect_responsive(html):
+        """홈페이지 HTML이 반응형인지 판정.
+        - viewport meta + (media query OR 반응형 프레임워크) → "O"
+        - 그 외 → "X"
+        반환: "O" / "X"
+        """
+        if not html or len(html) < 50:
+            return "X"
+        lo = html.lower()
+        # 1) viewport meta 필수 (width=device-width)
+        has_viewport = bool(re.search(
+            r'<meta[^>]+name=["\']viewport["\'][^>]*content=["\'][^"\']*width\s*=\s*device-width',
+            lo,
+        ))
+        if not has_viewport:
+            return "X"
+        # 2) 보조 단서 — 미디어쿼리 / 반응형 프레임워크
+        clues = (
+            "@media",
+            "max-width",
+            "min-width",
+            "bootstrap",
+            "tailwind",
+            "responsive",
+            "col-md-",
+            "col-sm-",
+            "col-lg-",
+            "flex-",
+            "grid-",
+        )
+        if any(c in lo for c in clues):
+            return "O"
+        # viewport만 있고 단서 없으면 그래도 O로 간주 (모바일 대응 의도가 있음)
+        return "O"
+
+    @staticmethod
+    def extract_talktalk_url(html):
+        """HTML 텍스트에서 네이버 톡톡 URL 추출.
+        지원 패턴:
+        - https://talk.naver.com/<id>
+        - https://talk.naver.com/ct/<id>
+        반환: URL 문자열 또는 ""
+        """
+        if not html:
+            return ""
+        # JSON 인코딩된 슬래시(\u002F) 디코딩
+        text = html.replace("\\u002F", "/").replace("\\/", "/")
+        m = re.search(r'https?://talk\.naver\.com/[A-Za-z0-9_/\-]+', text)
+        if m:
+            url = m.group(0).rstrip('"\'<>)')
+            # 너무 짧으면 무효 처리
+            if len(url) > len("https://talk.naver.com/") + 1:
+                return url
+        return ""
+
+    @staticmethod
+    def extract_kakao_url(html):
+        """HTML 텍스트에서 카카오톡 채널/플러스친구 URL 추출.
+        지원 패턴:
+        - https://pf.kakao.com/_xxxxx
+        - https://plus.kakao.com/...
+        - https://open.kakao.com/...
+        - https://kakaochannel.com/...
+        반환: URL 문자열 또는 ""
+        """
+        if not html:
+            return ""
+        text = html.replace("\\u002F", "/").replace("\\/", "/")
+        patterns = [
+            r'https?://pf\.kakao\.com/[A-Za-z0-9_\-/]+',
+            r'https?://plus\.kakao\.com/[A-Za-z0-9_\-/]+',
+            r'https?://open\.kakao\.com/[A-Za-z0-9_\-/]+',
+            r'https?://kakaochannel\.com/[A-Za-z0-9_\-/]+',
+        ]
+        for p in patterns:
+            m = re.search(p, text)
+            if m:
+                url = m.group(0).rstrip('"\'<>)?,;')
+                # 최소 길이 검증
+                if len(url) > 22:
+                    return url
+        return ""
+
+    @staticmethod
+    def extract_instagram_url(html):
+        """HTML 텍스트에서 인스타그램 프로필 URL 추출.
+        지원 패턴:
+        - https://www.instagram.com/<username>
+        - https://instagram.com/<username>
+        주의: /p/<postid>, /reel/<id>, /explore 등 비프로필 경로는 제외.
+        반환: URL 문자열 또는 ""
+        """
+        if not html:
+            return ""
+        text = html.replace("\\u002F", "/").replace("\\/", "/")
+        # username만 매칭 (소문자/숫자/언더스코어/마침표, 30자 이하)
+        # lookahead로 끝 경계 검사 — 슬래시/따옴표/태그/쿼리/공백/콤마/세미콜론/문자열끝
+        m = re.search(
+            r'https?://(?:www\.)?instagram\.com/([A-Za-z0-9_.]{1,30})(?=$|[/"\'<>\s\?,;)\]])',
+            text,
+        )
+        if not m:
+            return ""
+        username = m.group(1)
+        # 비프로필 경로/예약어 제외
+        if username.lower() in (
+            "p", "reel", "reels", "tv", "explore", "stories", "accounts",
+            "developer", "about", "directory", "legal", "privacy", "terms",
+            "web", "fragment", "challenge",
+        ):
+            return ""
+        return f"https://www.instagram.com/{username}"
+
+    @staticmethod
+    def detect_phone_button(html):
+        """홈페이지 HTML에 모바일 바로 전화 버튼이 있는지 검사.
+        지원 패턴:
+        - <a href="tel:01012345678">
+        - href='tel:0212345678'
+        - onclick="location.href='tel:...'"
+        - data-href="tel:..."
+        반환: True (전화버튼 있음) / False (없음)
+        """
+        if not html:
+            return False
+        # tel: 링크 (가장 신뢰할 수 있는 단서)
+        if re.search(r'''(?:href|data-href|src)\s*=\s*["']\s*tel:\s*[\d+\-\s()]{6,}''', html, re.IGNORECASE):
+            return True
+        if re.search(r'''location\.href\s*=\s*["']\s*tel:''', html, re.IGNORECASE):
+            return True
+        if re.search(r'''window\.open\s*\(\s*["']\s*tel:''', html, re.IGNORECASE):
+            return True
+        return False
+
+    @staticmethod
+    def detect_new_business(html):
+        """place HTML 또는 GraphQL 응답 텍스트에서 '신규개업' 여부 감지.
+        다음 단서 중 하나라도 있으면 "O":
+        - "isNewlyOpened": true / "newlyOpenBadge"
+        - "newBusinessHours" 또는 "newBusiness" 키
+        - apollo state 안의 "NEW_BUSINESS"
+        - 한글 배지 텍스트 "신규" / "NEW" (place_blind 인접)
+        반환: "O" / "X"
+        """
+        if not html:
+            return "X"
+        patterns = [
+            r'"isNewlyOpened"\s*:\s*true',
+            r'"isNew"\s*:\s*true',
+            r'"newlyOpenBadge"',
+            r'"newBusinessHours"',
+            r'"newBusiness"\s*:\s*true',
+            r'"NEW_BUSINESS"',
+            r'"newOpen"\s*:\s*true',
+            r'"isNewOpen"\s*:\s*true',
+        ]
+        for p in patterns:
+            if re.search(p, html):
+                return "O"
+        # place HTML 한글/배지 휴리스틱 (오탐 줄이려고 강한 단어만)
+        if re.search(r'place_blind[^<]{0,40}>[^<]*신규개업', html):
+            return "O"
+        if re.search(r'>NEW<\s*/[a-z]+>\s*신규', html):
+            return "O"
+        return "X"
+
+    @staticmethod
+    def _compute_review_total(r):
+        """방문자리뷰수 + 블로그리뷰수 → 정수 합계.
+        문자열/공백/None 모두 0으로 처리.
+        """
+        def _to_int(v):
+            try:
+                s = str(v or "").strip().replace(",", "")
+                return int(s) if s else 0
+            except (ValueError, TypeError):
+                return 0
+        return _to_int(r.get("방문자리뷰수")) + _to_int(r.get("블로그리뷰수"))
+
+    # ═══════════════════════════════════════════
     # STEP 0: 고유번호(placeId) 추출
     # ═══════════════════════════════════════════
 
@@ -809,6 +995,25 @@ class CrawlerEngine:
             if hp_url and not any(b in hp_url.lower() for b in HP_BLACKLIST):
                 result["homepage"] = hp_url
 
+        # 네이버 톡톡 URL (place HTML 안의 talk.naver.com 링크)
+        talktalk = self.extract_talktalk_url(html)
+        if talktalk:
+            result["talktalk"] = talktalk
+
+        # 카카오톡 URL
+        kakao = self.extract_kakao_url(html)
+        if kakao:
+            result["kakao"] = kakao
+
+        # 인스타그램 URL
+        insta = self.extract_instagram_url(html)
+        if insta:
+            result["instagram"] = insta
+
+        # 신규개업 여부
+        if self.detect_new_business(html) == "O":
+            result["is_new"] = "O"
+
         return result
 
     # ═══════════════════════════════════════════
@@ -876,6 +1081,7 @@ class CrawlerEngine:
         try:
             resp = self.session.post(url, json=payload, headers=headers, timeout=self.timeout)
             if resp.status_code == 200:
+                raw_text = resp.text or ""
                 data = resp.json()
                 if data and isinstance(data, list) and data[0].get("data"):
                     detail = data[0]["data"].get("placeDetail", {})
@@ -904,6 +1110,35 @@ class CrawlerEngine:
                     # 카테고리/주소
                     result["category"] = base.get("category", "")
                     result["address"] = base.get("roadAddress") or base.get("address") or ""
+
+                    # 네이버 톡톡 URL (repr/etc 우선, 없으면 raw text)
+                    tt = ""
+                    kk = ""
+                    ig = ""
+                    for src in ([repr_hp] if repr_hp else []) + (etc_links or []):
+                        u = (src.get("url") if src else "") or ""
+                        if not tt and "talk.naver.com" in u:
+                            tt = u
+                        if not kk and ("pf.kakao.com" in u or "plus.kakao.com" in u or "kakaochannel.com" in u or "open.kakao.com" in u):
+                            kk = u
+                        if not ig and "instagram.com" in u:
+                            ig = u
+                    if not tt:
+                        tt = self.extract_talktalk_url(raw_text)
+                    if not kk:
+                        kk = self.extract_kakao_url(raw_text)
+                    if not ig:
+                        ig = self.extract_instagram_url(raw_text)
+                    if tt:
+                        result["talktalk"] = tt
+                    if kk:
+                        result["kakao"] = kk
+                    if ig:
+                        result["instagram"] = ig
+
+                    # 신규개업 여부 (raw text 휴리스틱)
+                    if self.detect_new_business(raw_text) == "O":
+                        result["is_new"] = "O"
 
                     self.stats["success"] += 1
             elif resp.status_code in (429, 403):
@@ -976,8 +1211,12 @@ class CrawlerEngine:
     # ═══════════════════════════════════════════
 
     OUT_HEADERS = [
-        "업종(키워드)", "상호명", "네이버아이디", "업체이메일", "안심번호", "업체주소", "홈페이지URL",
-        "방문자리뷰수", "블로그리뷰수", "고유번호", "플레이스URL", "업데이트날짜",
+        "업종(키워드)", "상호명", "네이버아이디", "업체이메일", "안심번호", "업체주소",
+        "홈페이지URL", "홈페이지반응형", "전화버튼없음",
+        "네이버톡톡URL", "카카오톡", "인스타그램",
+        "방문자리뷰수", "블로그리뷰수", "리뷰합계",
+        "신규업체",
+        "고유번호", "플레이스URL", "업데이트날짜",
     ]
 
     @staticmethod
@@ -994,10 +1233,16 @@ class CrawlerEngine:
             writer = csv.DictWriter(f, fieldnames=CrawlerEngine.OUT_HEADERS, extrasaction="ignore")
             writer.writeheader()
             for r in rows:
+                # 리뷰합계 계산 (방문자 + 블로그)
+                r["리뷰합계"] = CrawlerEngine._compute_review_total(r)
                 out = {}
                 for h in CrawlerEngine.OUT_HEADERS:
                     val = r.get(h, "")
-                    if h == "홈페이지URL" and (not val or not val.strip()):
+                    if h in (
+                        "홈페이지URL", "홈페이지반응형", "전화버튼없음",
+                        "네이버톡톡URL", "카카오톡", "인스타그램",
+                        "신규업체",
+                    ) and (not val or not str(val).strip()):
                         val = "X"
                     if h == "업데이트날짜" and not val:
                         val = time.strftime("%Y-%m-%d")
@@ -1021,15 +1266,21 @@ class CrawlerEngine:
 
         # 데이터
         for row_idx, r in enumerate(rows, 2):
+            # 리뷰합계 계산 (방문자 + 블로그)
+            r["리뷰합계"] = CrawlerEngine._compute_review_total(r)
             for col, h in enumerate(CrawlerEngine.OUT_HEADERS, 1):
                 val = r.get(h, "")
-                if h == "홈페이지URL" and (not val or not val.strip()):
+                if h in (
+                    "홈페이지URL", "홈페이지반응형", "전화버튼없음",
+                    "네이버톡톡URL", "카카오톡", "인스타그램",
+                    "신규업체",
+                ) and (not val or not str(val).strip()):
                     val = "X"
                 if h == "업데이트날짜" and not val:
                     val = time.strftime("%Y-%m-%d")
-                if h in ("방문자리뷰수", "블로그리뷰수"):
+                if h in ("방문자리뷰수", "블로그리뷰수", "리뷰합계"):
                     try:
-                        val = int(val) if val else 0
+                        val = int(val) if val not in ("", None) else 0
                     except (ValueError, TypeError):
                         val = 0
                 ws.cell(row=row_idx, column=col, value=val)
@@ -1071,6 +1322,8 @@ class CrawlerEngine:
             "place_id": 0, "category": 0, "name": 0, "address": 0,
             "phone": 0, "visitor_review": 0, "blog_review": 0,
             "hp": 0, "email": 0, "naver_id": 0,
+            "responsive": 0, "talktalk": 0, "kakao": 0, "instagram": 0,
+            "no_phone_btn": 0, "new_biz": 0,
             "blocked": 0, "success": 0,
         }
 
@@ -1120,7 +1373,15 @@ class CrawlerEngine:
                     ("업종(키워드)", "category"), ("상호명", "name"),
                     ("업체주소", "address"), ("안심번호", "phone"),
                     ("방문자리뷰수", "visitor_review"), ("블로그리뷰수", "blog_review"),
-                    ("홈페이지URL", "hp"), ("업체이메일", "email"),
+                    ("리뷰합계", "review_total"),
+                    ("홈페이지URL", "hp"),
+                    ("홈페이지반응형", "responsive"),
+                    ("전화버튼없음", "no_phone_btn"),
+                    ("네이버톡톡URL", "talktalk"),
+                    ("카카오톡", "kakao"),
+                    ("인스타그램", "instagram"),
+                    ("신규업체", "is_new"),
+                    ("업체이메일", "email"),
                 ]:
                     val = prev.get(prog_col, "")
                     if val and not (r.get(csv_col) or "").strip():
@@ -1156,6 +1417,30 @@ class CrawlerEngine:
                 if need_any:
                     place_html = self._fetch_place_html(pid, name)
                     parsed_place = self._parse_place_html(place_html)
+
+                    # 네이버 톡톡 URL (place HTML 1차)
+                    if parsed_place.get("talktalk") and not (r.get("네이버톡톡URL") or "").strip():
+                        r["네이버톡톡URL"] = parsed_place["talktalk"]
+                        self.stats["talktalk"] += 1
+                        log_items.append("talk:O")
+
+                    # 카카오톡 URL (place HTML 1차)
+                    if parsed_place.get("kakao") and not (r.get("카카오톡") or "").strip():
+                        r["카카오톡"] = parsed_place["kakao"]
+                        self.stats["kakao"] += 1
+                        log_items.append("kakao:O")
+
+                    # 인스타그램 URL (place HTML 1차)
+                    if parsed_place.get("instagram") and not (r.get("인스타그램") or "").strip():
+                        r["인스타그램"] = parsed_place["instagram"]
+                        self.stats["instagram"] += 1
+                        log_items.append("ig:O")
+
+                    # 신규업체 (place HTML 1차)
+                    if parsed_place.get("is_new") == "O" and not (r.get("신규업체") or "").strip():
+                        r["신규업체"] = "O"
+                        self.stats["new_biz"] += 1
+                        log_items.append("new:O")
 
                     # 업종(키워드)
                     if parsed_place.get("category") and not (r.get("업종(키워드)") or "").strip():
@@ -1230,17 +1515,54 @@ class CrawlerEngine:
                         log_items.append(f"hp:{verified_hp}")
                 self._random_delay()
 
-            # ══ STEP 3: 이메일 (홈페이지 HTML + 네이버 검색 폴백) ══
+            # ══ STEP 3: 이메일 + 홈페이지 분석 (반응형/전화버튼/카카오/인스타 — HTML 1회 재활용) ══
             need_email = not (r.get("업체이메일") or "").strip()
+            need_resp = not (r.get("홈페이지반응형") or "").strip()
+            need_phone_btn = not (r.get("전화버튼없음") or "").strip()
+            need_kakao = not (r.get("카카오톡") or "").strip()
+            need_insta = not (r.get("인스타그램") or "").strip()
             hp_url = (r.get("홈페이지URL") or "").strip()
-            if need_email and hp_url and hp_url != "X" and hp_url.startswith("http"):
+            if hp_url and hp_url != "X" and hp_url.startswith("http") and (
+                need_email or need_resp or need_phone_btn or need_kakao or need_insta
+            ):
                 referer = f"https://www.google.com/search?q={quote(name)}"
                 html = self._fetch(hp_url, referer=referer, timeout=6)
-                emails = self.extract_emails(html)
-                if emails:
-                    r["업체이메일"] = emails[0]
-                    self.stats["email"] += 1
-                    log_items.append(f"email:{emails[0]}")
+                # 이메일
+                if need_email:
+                    emails = self.extract_emails(html)
+                    if emails:
+                        r["업체이메일"] = emails[0]
+                        self.stats["email"] += 1
+                        log_items.append(f"email:{emails[0]}")
+                # 반응형
+                if need_resp and html:
+                    resp_flag = self.detect_responsive(html)
+                    r["홈페이지반응형"] = resp_flag
+                    if resp_flag == "O":
+                        self.stats["responsive"] += 1
+                    log_items.append(f"resp:{resp_flag}")
+                # 전화버튼 (없음 = O = 영업타겟)
+                if need_phone_btn:
+                    has_btn = self.detect_phone_button(html) if html else False
+                    flag = "X" if has_btn else "O"
+                    r["전화버튼없음"] = flag
+                    if flag == "O":
+                        self.stats["no_phone_btn"] += 1
+                    log_items.append(f"nophonebtn:{flag}")
+                # 카카오톡
+                if need_kakao and html:
+                    kk = self.extract_kakao_url(html)
+                    if kk:
+                        r["카카오톡"] = kk
+                        self.stats["kakao"] += 1
+                        log_items.append("kakao:O(hp)")
+                # 인스타그램
+                if need_insta and html:
+                    ig = self.extract_instagram_url(html)
+                    if ig:
+                        r["인스타그램"] = ig
+                        self.stats["instagram"] += 1
+                        log_items.append("ig:O(hp)")
                 self._random_delay()
 
             # 이메일 폴백 (네이버 검색)
@@ -1269,6 +1591,49 @@ class CrawlerEngine:
                 r["네이버아이디"] = naver_id + "@naver.com"
                 self.stats["naver_id"] += 1
 
+            # ══ STEP 4-1: 톡톡/카카오/인스타/신규업체 GraphQL 보충 (place HTML에서 못 채운 경우) ══
+            need_talk = not (r.get("네이버톡톡URL") or "").strip()
+            need_kakao2 = not (r.get("카카오톡") or "").strip()
+            need_insta2 = not (r.get("인스타그램") or "").strip()
+            need_new = not (r.get("신규업체") or "").strip()
+            if pid and (need_talk or need_kakao2 or need_insta2 or need_new):
+                gql_extra = self._fetch_place_graphql(pid)
+                if need_talk and gql_extra.get("talktalk"):
+                    r["네이버톡톡URL"] = gql_extra["talktalk"]
+                    self.stats["talktalk"] += 1
+                    log_items.append("talk:O(gql)")
+                if need_kakao2 and gql_extra.get("kakao"):
+                    r["카카오톡"] = gql_extra["kakao"]
+                    self.stats["kakao"] += 1
+                    log_items.append("kakao:O(gql)")
+                if need_insta2 and gql_extra.get("instagram"):
+                    r["인스타그램"] = gql_extra["instagram"]
+                    self.stats["instagram"] += 1
+                    log_items.append("ig:O(gql)")
+                if need_new and gql_extra.get("is_new") == "O":
+                    r["신규업체"] = "O"
+                    self.stats["new_biz"] += 1
+                    log_items.append("new:O(gql)")
+                self._random_delay()
+
+            # 미감지 항목은 X로 확정
+            if not (r.get("네이버톡톡URL") or "").strip():
+                r["네이버톡톡URL"] = "X"
+            if not (r.get("카카오톡") or "").strip():
+                r["카카오톡"] = "X"
+            if not (r.get("인스타그램") or "").strip():
+                r["인스타그램"] = "X"
+            if not (r.get("신규업체") or "").strip():
+                r["신규업체"] = "X"
+            if not (r.get("홈페이지반응형") or "").strip():
+                r["홈페이지반응형"] = "X"
+            if not (r.get("전화버튼없음") or "").strip():
+                # 홈페이지 자체가 없거나 검사 실패 → 영업 타겟 아님 (X)
+                r["전화버튼없음"] = "X"
+
+            # 리뷰합계 계산 (방문자 + 블로그)
+            r["리뷰합계"] = self._compute_review_total(r)
+
             # ══ STEP 5: 업데이트날짜 ══
             if not (r.get("업데이트날짜") or "").strip():
                 r["업데이트날짜"] = time.strftime("%Y-%m-%d")
@@ -1284,7 +1649,14 @@ class CrawlerEngine:
                 "phone": r.get("안심번호", ""),
                 "visitor_review": r.get("방문자리뷰수", ""),
                 "blog_review": r.get("블로그리뷰수", ""),
+                "review_total": r.get("리뷰합계", ""),
                 "hp": r.get("홈페이지URL", ""),
+                "responsive": r.get("홈페이지반응형", ""),
+                "no_phone_btn": r.get("전화버튼없음", ""),
+                "talktalk": r.get("네이버톡톡URL", ""),
+                "kakao": r.get("카카오톡", ""),
+                "instagram": r.get("인스타그램", ""),
+                "is_new": r.get("신규업체", ""),
                 "email": r.get("업체이메일", ""),
                 "naver_id": r.get("네이버아이디", ""),
                 "update_date": r.get("업데이트날짜", ""),
@@ -1324,6 +1696,12 @@ class CrawlerEngine:
         c_phone, p_phone = _pct("안심번호")
         c_addr, p_addr = _pct("업체주소")
         c_hp, p_hp = _pct("홈페이지URL")
+        c_resp, p_resp = _pct("홈페이지반응형", empty_vals=("", "X"))
+        c_nopb, p_nopb = _pct("전화버튼없음", empty_vals=("", "X"))
+        c_talk, p_talk = _pct("네이버톡톡URL", empty_vals=("", "X"))
+        c_kakao, p_kakao = _pct("카카오톡", empty_vals=("", "X"))
+        c_insta, p_insta = _pct("인스타그램", empty_vals=("", "X"))
+        c_new, p_new = _pct("신규업체", empty_vals=("", "X"))
         c_visit, p_visit = _pct("방문자리뷰수")
         c_blog, p_blog = _pct("블로그리뷰수")
         c_nid, p_nid = _pct("네이버아이디")
@@ -1334,18 +1712,24 @@ class CrawlerEngine:
         s = self.stats
         summary = (
             f"\n=== 최종 결과 ({total}건) ===\n"
-            f"  업종(키워드): {c_cat}/{total} ({p_cat}%)  +{s['category']}\n"
-            f"  상호명:       {c_name}/{total} ({p_name}%)  +{s['name']}\n"
-            f"  업체이메일:   {c_email}/{total} ({p_email}%)  +{s['email']}\n"
-            f"  안심번호:     {c_phone}/{total} ({p_phone}%)  +{s['phone']}\n"
-            f"  업체주소:     {c_addr}/{total} ({p_addr}%)  +{s['address']}\n"
-            f"  홈페이지URL:  {c_hp}/{total} ({p_hp}%)  +{s['hp']}\n"
-            f"  방문자리뷰수: {c_visit}/{total} ({p_visit}%)  +{s['visitor_review']}\n"
-            f"  블로그리뷰수: {c_blog}/{total} ({p_blog}%)  +{s['blog_review']}\n"
-            f"  네이버아이디: {c_nid}/{total} ({p_nid}%)  +{s['naver_id']}\n"
-            f"  고유번호:     {c_pid}/{total} ({p_pid}%)  +{s['place_id']}\n"
-            f"  플레이스URL:  {c_purl}/{total} ({p_purl}%)\n"
-            f"  업데이트날짜: {c_date}/{total} ({p_date}%)\n"
+            f"  업종(키워드):    {c_cat}/{total} ({p_cat}%)  +{s['category']}\n"
+            f"  상호명:          {c_name}/{total} ({p_name}%)  +{s['name']}\n"
+            f"  업체이메일:      {c_email}/{total} ({p_email}%)  +{s['email']}\n"
+            f"  안심번호:        {c_phone}/{total} ({p_phone}%)  +{s['phone']}\n"
+            f"  업체주소:        {c_addr}/{total} ({p_addr}%)  +{s['address']}\n"
+            f"  홈페이지URL:     {c_hp}/{total} ({p_hp}%)  +{s['hp']}\n"
+            f"  홈페이지반응형:  {c_resp}/{total} ({p_resp}%)  +{s.get('responsive', 0)}\n"
+            f"  전화버튼없음:    {c_nopb}/{total} ({p_nopb}%)  +{s.get('no_phone_btn', 0)}\n"
+            f"  네이버톡톡URL:   {c_talk}/{total} ({p_talk}%)  +{s.get('talktalk', 0)}\n"
+            f"  카카오톡:        {c_kakao}/{total} ({p_kakao}%)  +{s.get('kakao', 0)}\n"
+            f"  인스타그램:      {c_insta}/{total} ({p_insta}%)  +{s.get('instagram', 0)}\n"
+            f"  신규업체:        {c_new}/{total} ({p_new}%)  +{s.get('new_biz', 0)}\n"
+            f"  방문자리뷰수:    {c_visit}/{total} ({p_visit}%)  +{s['visitor_review']}\n"
+            f"  블로그리뷰수:    {c_blog}/{total} ({p_blog}%)  +{s['blog_review']}\n"
+            f"  네이버아이디:    {c_nid}/{total} ({p_nid}%)  +{s['naver_id']}\n"
+            f"  고유번호:        {c_pid}/{total} ({p_pid}%)  +{s['place_id']}\n"
+            f"  플레이스URL:     {c_purl}/{total} ({p_purl}%)\n"
+            f"  업데이트날짜:    {c_date}/{total} ({p_date}%)\n"
             f"\n완료: {output_file}"
         )
         self.callback("log", summary)
@@ -2555,17 +2939,80 @@ class CrawlerEngine:
                 self._stat_inc("hp")
                 log_items.append(f"hp:{parsed_place['homepage']}")
 
-        # ═══ 이메일 (홈페이지에서 추출) ═══
+        # ═══ 네이버 톡톡 URL ═══
+        if not (r.get("네이버톡톡URL") or "").strip():
+            tt = gql.get("talktalk") or parsed_place.get("talktalk") or ""
+            if tt:
+                r["네이버톡톡URL"] = tt
+                self._stat_inc("talktalk")
+                log_items.append("talk:O")
+
+        # ═══ 카카오톡 URL ═══
+        if not (r.get("카카오톡") or "").strip():
+            kk = gql.get("kakao") or parsed_place.get("kakao") or ""
+            if kk:
+                r["카카오톡"] = kk
+                self._stat_inc("kakao")
+                log_items.append("kakao:O")
+
+        # ═══ 인스타그램 URL ═══
+        if not (r.get("인스타그램") or "").strip():
+            ig = gql.get("instagram") or parsed_place.get("instagram") or ""
+            if ig:
+                r["인스타그램"] = ig
+                self._stat_inc("instagram")
+                log_items.append("ig:O")
+
+        # ═══ 신규업체 ═══
+        if not (r.get("신규업체") or "").strip():
+            if gql.get("is_new") == "O" or parsed_place.get("is_new") == "O":
+                r["신규업체"] = "O"
+                self._stat_inc("new_biz")
+                log_items.append("new:O")
+
+        # ═══ 이메일 + 홈페이지 분석 (반응형/전화버튼/카카오/인스타 — HTML 1회 재활용) ═══
         need_email = not (r.get("업체이메일") or "").strip()
+        need_resp = not (r.get("홈페이지반응형") or "").strip()
+        need_phone_btn = not (r.get("전화버튼없음") or "").strip()
+        need_kakao_hp = not (r.get("카카오톡") or "").strip()
+        need_insta_hp = not (r.get("인스타그램") or "").strip()
         hp_url = (r.get("홈페이지URL") or "").strip()
-        if need_email and hp_url and hp_url != "X" and hp_url.startswith("http"):
+        if hp_url and hp_url != "X" and hp_url.startswith("http") and (
+            need_email or need_resp or need_phone_btn or need_kakao_hp or need_insta_hp
+        ):
             html = self._fetch(hp_url, referer=f"https://www.google.com/search?q={quote(name)}", timeout=3)
-            emails = self.extract_emails(html)
-            if emails:
-                r["업체이메일"] = emails[0]
-                self._stat_inc("email")
-                log_items.append(f"email:{emails[0]}")
-        # place HTML에서도 시도
+            if need_email:
+                emails = self.extract_emails(html)
+                if emails:
+                    r["업체이메일"] = emails[0]
+                    self._stat_inc("email")
+                    log_items.append(f"email:{emails[0]}")
+            if need_resp:
+                resp_flag = self.detect_responsive(html) if html else "X"
+                r["홈페이지반응형"] = resp_flag
+                if resp_flag == "O":
+                    self._stat_inc("responsive")
+                log_items.append(f"resp:{resp_flag}")
+            if need_phone_btn:
+                has_btn = self.detect_phone_button(html) if html else False
+                flag = "X" if has_btn else "O"
+                r["전화버튼없음"] = flag
+                if flag == "O":
+                    self._stat_inc("no_phone_btn")
+                log_items.append(f"nophonebtn:{flag}")
+            if need_kakao_hp and html:
+                kk2 = self.extract_kakao_url(html)
+                if kk2:
+                    r["카카오톡"] = kk2
+                    self._stat_inc("kakao")
+                    log_items.append("kakao:O(hp)")
+            if need_insta_hp and html:
+                ig2 = self.extract_instagram_url(html)
+                if ig2:
+                    r["인스타그램"] = ig2
+                    self._stat_inc("instagram")
+                    log_items.append("ig:O(hp)")
+        # place HTML에서도 이메일 시도
         if not (r.get("업체이메일") or "").strip() and parsed_place.get("email"):
             r["업체이메일"] = parsed_place["email"]
             self._stat_inc("email")
@@ -2608,6 +3055,24 @@ class CrawlerEngine:
                 r["네이버아이디"] = naver_id + "@naver.com"
                 self.stats["naver_id"] += 1
 
+        # 미감지 항목은 X로 확정
+        if not (r.get("네이버톡톡URL") or "").strip():
+            r["네이버톡톡URL"] = "X"
+        if not (r.get("카카오톡") or "").strip():
+            r["카카오톡"] = "X"
+        if not (r.get("인스타그램") or "").strip():
+            r["인스타그램"] = "X"
+        if not (r.get("신규업체") or "").strip():
+            r["신규업체"] = "X"
+        if not (r.get("홈페이지반응형") or "").strip():
+            r["홈페이지반응형"] = "X"
+        if not (r.get("전화버튼없음") or "").strip():
+            # 홈페이지 자체가 없거나 검사 실패 → 영업 타겟 아님 (X)
+            r["전화버튼없음"] = "X"
+
+        # 리뷰합계 계산 (방문자 + 블로그)
+        r["리뷰합계"] = self._compute_review_total(r)
+
         # 로그
         log_msg = f"[{idx}/{total}] {name}"
         if log_items:
@@ -2647,6 +3112,8 @@ class CrawlerEngine:
             "place_id": 0, "category": 0, "name": 0, "address": 0,
             "phone": 0, "visitor_review": 0, "blog_review": 0,
             "hp": 0, "email": 0, "naver_id": 0,
+            "responsive": 0, "talktalk": 0, "kakao": 0, "instagram": 0,
+            "no_phone_btn": 0, "new_biz": 0,
             "blocked": 0, "success": 0,
         }
 
@@ -2788,9 +3255,16 @@ class CrawlerEngine:
                 "업체주소": road_addr,
                 "방문자리뷰수": visitor_review,
                 "블로그리뷰수": blog_review,
+                "리뷰합계": 0,
                 "플레이스URL": f"https://m.place.naver.com/place/{pid}" if pid else "",
                 "업데이트날짜": time.strftime("%Y-%m-%d"),
                 "홈페이지URL": "",
+                "홈페이지반응형": "",
+                "전화버튼없음": "",
+                "네이버톡톡URL": "",
+                "카카오톡": "",
+                "인스타그램": "",
+                "신규업체": "",
                 "업체이메일": "",
                 "네이버아이디": "",
             }
@@ -2814,6 +3288,19 @@ class CrawlerEngine:
                     row["방문자리뷰수"] = parsed["visitor_review"]
                 if parsed.get("blog_review") and blog_review == "0":
                     row["블로그리뷰수"] = parsed["blog_review"]
+                # 톡톡/카카오/인스타/신규는 place HTML 파싱 시점에 같이 채움
+                if parsed.get("talktalk"):
+                    row["네이버톡톡URL"] = parsed["talktalk"]
+                    self._stat_inc("talktalk")
+                if parsed.get("kakao"):
+                    row["카카오톡"] = parsed["kakao"]
+                    self._stat_inc("kakao")
+                if parsed.get("instagram"):
+                    row["인스타그램"] = parsed["instagram"]
+                    self._stat_inc("instagram")
+                if parsed.get("is_new") == "O":
+                    row["신규업체"] = "O"
+                    self._stat_inc("new_biz")
                 self._random_delay()
 
             rows.append(row)
@@ -2890,6 +3377,12 @@ class CrawlerEngine:
         c_phone, p_phone = _pct("안심번호")
         c_addr, p_addr = _pct("업체주소")
         c_hp, p_hp = _pct("홈페이지URL")
+        c_resp, p_resp = _pct("홈페이지반응형", empty_vals=("", "X"))
+        c_nopb, p_nopb = _pct("전화버튼없음", empty_vals=("", "X"))
+        c_talk, p_talk = _pct("네이버톡톡URL", empty_vals=("", "X"))
+        c_kakao, p_kakao = _pct("카카오톡", empty_vals=("", "X"))
+        c_insta, p_insta = _pct("인스타그램", empty_vals=("", "X"))
+        c_new, p_new = _pct("신규업체", empty_vals=("", "X"))
         c_visit, p_visit = _pct("방문자리뷰수")
         c_blog, p_blog = _pct("블로그리뷰수")
         c_nid, p_nid = _pct("네이버아이디")
@@ -2900,18 +3393,24 @@ class CrawlerEngine:
         s = self.stats
         summary = (
             f"\n=== 최종 결과 ({total}건) ===\n"
-            f"  업종(키워드): {c_cat}/{total} ({p_cat}%)\n"
-            f"  상호명:       {c_name}/{total} ({p_name}%)\n"
-            f"  업체이메일:   {c_email}/{total} ({p_email}%)  +{s['email']}\n"
-            f"  안심번호:     {c_phone}/{total} ({p_phone}%)\n"
-            f"  업체주소:     {c_addr}/{total} ({p_addr}%)\n"
-            f"  홈페이지URL:  {c_hp}/{total} ({p_hp}%)  +{s['hp']}\n"
-            f"  방문자리뷰수: {c_visit}/{total} ({p_visit}%)\n"
-            f"  블로그리뷰수: {c_blog}/{total} ({p_blog}%)\n"
-            f"  네이버아이디: {c_nid}/{total} ({p_nid}%)  +{s['naver_id']}\n"
-            f"  고유번호:     {c_pid}/{total} ({p_pid}%)\n"
-            f"  플레이스URL:  {c_purl}/{total} ({p_purl}%)\n"
-            f"  업데이트날짜: {c_date}/{total} ({p_date}%)\n"
+            f"  업종(키워드):    {c_cat}/{total} ({p_cat}%)\n"
+            f"  상호명:          {c_name}/{total} ({p_name}%)\n"
+            f"  업체이메일:      {c_email}/{total} ({p_email}%)  +{s['email']}\n"
+            f"  안심번호:        {c_phone}/{total} ({p_phone}%)\n"
+            f"  업체주소:        {c_addr}/{total} ({p_addr}%)\n"
+            f"  홈페이지URL:     {c_hp}/{total} ({p_hp}%)  +{s['hp']}\n"
+            f"  홈페이지반응형:  {c_resp}/{total} ({p_resp}%)  +{s.get('responsive', 0)}\n"
+            f"  전화버튼없음:    {c_nopb}/{total} ({p_nopb}%)  +{s.get('no_phone_btn', 0)}\n"
+            f"  네이버톡톡URL:   {c_talk}/{total} ({p_talk}%)  +{s.get('talktalk', 0)}\n"
+            f"  카카오톡:        {c_kakao}/{total} ({p_kakao}%)  +{s.get('kakao', 0)}\n"
+            f"  인스타그램:      {c_insta}/{total} ({p_insta}%)  +{s.get('instagram', 0)}\n"
+            f"  신규업체:        {c_new}/{total} ({p_new}%)  +{s.get('new_biz', 0)}\n"
+            f"  방문자리뷰수:    {c_visit}/{total} ({p_visit}%)\n"
+            f"  블로그리뷰수:    {c_blog}/{total} ({p_blog}%)\n"
+            f"  네이버아이디:    {c_nid}/{total} ({p_nid}%)  +{s['naver_id']}\n"
+            f"  고유번호:        {c_pid}/{total} ({p_pid}%)\n"
+            f"  플레이스URL:     {c_purl}/{total} ({p_purl}%)\n"
+            f"  업데이트날짜:    {c_date}/{total} ({p_date}%)\n"
             f"\n완료: {output_file}"
         )
         self.callback("log", summary)

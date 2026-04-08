@@ -888,6 +888,8 @@
     showToast('🔄 이미지 최적화 중...');
     const compressed = await compressImage(file, 800, 0.6);
     input.value = compressed;
+    // 동적 카드(객실/시설/관광/갤러리 등)는 'input' 이벤트로 cfg.state 동기화하므로 반드시 디스패치
+    input.dispatchEvent(new Event('input', { bubbles: true }));
     updatePreview(previewContainer, compressed, input, dropZone);
     markFieldChanged(input);
 
@@ -970,6 +972,8 @@
     removeBtn.textContent = '✕ 제거';
     removeBtn.addEventListener('click', () => {
       input.value = '';
+      // 동적 카드 상태 동기화를 위해 'input' 이벤트 디스패치
+      input.dispatchEvent(new Event('input', { bubbles: true }));
       // 빈 상태 다시 그리기 (업로드 버튼 표시)
       updatePreview(container, '', input, dropZone);
       markFieldChanged(input);
