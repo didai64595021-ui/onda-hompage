@@ -16,14 +16,16 @@
 
 ## 6개 상품 인덱스
 
-| # | 파일 | 카테고리 | 제목 (가) | Standard | Deluxe | Premium |
-|---|---|---|---|---|---|---|
-| 1 | [01-telegram-alert-bot.md](02-product-specs/01-telegram-alert-bot.md) | 봇·챗봇(617) + 자동화(663) | [24시간 자동감시] 텔레그램·카톡 시세·뉴스·키워드 알림봇 5,000건 작업 | ₩50,000 | ₩150,000 | ₩350,000 |
-| 2 | [02-seller-price-monitor.md](02-product-specs/02-seller-price-monitor.md) | 자동화(663) + 쇼핑몰·커머스 | [셀러 필수] 스마트스토어·쿠팡 가격·재고·리뷰 24시간 자동 모니터링 | ₩150,000 | ₩350,000 | ₩700,000 |
-| 3 | [03-doc-gpt-automation.md](02-product-specs/03-doc-gpt-automation.md) | 자동화(663) "AI 노코드" | [B2B 전용] 사내문서·엑셀·PDF + GPT 결합 업무자동화 (Make/n8n) | ₩200,000 | ₩600,000 | ₩1,500,000 |
-| 4 | [04-pdf-chatbot.md](02-product-specs/04-pdf-chatbot.md) | 맞춤형챗봇·GPT(667) | [5분만에 답변] PDF 1개로 만드는 24시간 AI 상담봇 \| 홈페이지 설치 | ₩59,000 | ₩99,000 | ₩149,000 |
-| 5 | [05-rag-enterprise.md](02-product-specs/05-rag-enterprise.md) | 맞춤형챗봇·GPT(667) | [B2B 전용] 사내문서·노션·구글드라이브 통합 RAG 챗봇 환각 0% 약속 | ₩290,000 | ₩490,000 | ₩790,000 |
-| 6 | [06-fullstack-channel.md](02-product-specs/06-fullstack-channel.md) | 맞춤형챗봇·GPT(667) | [엔터프라이즈] AI 챗봇+카카오 채널+업무자동화 풀스택 30일 유지보수 | ₩990,000 | ₩1,490,000 | ₩1,990,000 |
+> ⚠ **30자 한도 발견 (2026-04-08 정찰)**: 크몽 신규 등록 페이지 제목 `0/30`, 특수문자 `: + - # / . ( )` 만 허용. 아래 제목은 모두 30자 이내·허용 문자만 사용.
+
+| # | 파일 | 카테고리 | 제목 (30자) | 자수 | Standard | Deluxe | Premium |
+|---|---|---|---|---|---|---|---|
+| 1 | [01-telegram-alert-bot.md](02-product-specs/01-telegram-alert-bot.md) | 봇·챗봇(617) + 자동화(663) | 텔레그램 카톡 24시간 시세 뉴스 키워드 알림봇 제작 | 27 | ₩50,000 | ₩150,000 | ₩350,000 |
+| 2 | [02-seller-price-monitor.md](02-product-specs/02-seller-price-monitor.md) | 자동화(663) + 쇼핑몰·커머스 | 스마트스토어 쿠팡 가격 재고 24시간 자동 모니터링 | 28 | ₩150,000 | ₩350,000 | ₩700,000 |
+| 3 | [03-doc-gpt-automation.md](02-product-specs/03-doc-gpt-automation.md) | 자동화(663) "AI 노코드" | 사내문서 엑셀 PDF + GPT 업무자동화 노코드 | 27 | ₩200,000 | ₩600,000 | ₩1,500,000 |
+| 4 | [04-pdf-chatbot.md](02-product-specs/04-pdf-chatbot.md) | 맞춤형챗봇·GPT(667) | PDF 1개로 만드는 24시간 AI 상담봇 5분 답변 | 28 | ₩59,000 | ₩99,000 | ₩149,000 |
+| 5 | [05-rag-enterprise.md](02-product-specs/05-rag-enterprise.md) | 맞춤형챗봇·GPT(667) | 사내문서 노션 구글드라이브 통합 RAG 챗봇 (B2B) | 30 | ₩290,000 | ₩490,000 | ₩790,000 |
+| 6 | [06-fullstack-channel.md](02-product-specs/06-fullstack-channel.md) | 맞춤형챗봇·GPT(667) | AI 챗봇 + 카카오 채널 + 업무자동화 풀스택 구축 | 28 | ₩990,000 | ₩1,490,000 | ₩1,990,000 |
 
 ## 공통 약관 블록 (모든 상품 상세설명 하단 의무 삽입)
 
