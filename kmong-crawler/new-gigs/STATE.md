@@ -26,9 +26,9 @@
 
 ## 단계별 진행 (각 단계 완료 시 git commit)
 - [x] **Step 1**: 시장조사 (병렬 에이전트 2개) → `01-market-research-1-macro.md`, `01-market-research-2-aibot.md` ✅ (2026-04-08 14:00 KST)
-- [x] **Step 2**: 6개 상품 기획서 → `02-product-specs.md` + `02-product-specs/01~06-*.md` ✅ (2026-04-08 23:xx KST)
-- [ ] **Step 3** (다음 진행): 이미지 생성 (OpenAI + Gemini 12장) → `03-images/`
-- [ ] **Step 4**: 이미지 비교 후 6장 선정
+- [x] **Step 2**: 6개 상품 기획서 → `02-product-specs.md` + `02-product-specs/01~06-*.md` ✅ (2026-04-08 23:15 KST)
+- [x] **Step 3**: 이미지 생성 — OpenAI gpt-image-1 6장 성공, Gemini 403 전부 실패 ✅ (2026-04-08 23:20 KST)
+- [x] **Step 4**: Gemini 비교 불가 → OpenAI 6장 전부 선정 ✅ (2026-04-08 23:22 KST)
 - [ ] **Step 5**: `create-gig.js` 신규 등록 RPA 개발 (UI 정찰 → 작성 → dry-run)
 - [ ] **Step 6**: 6개 상품 실제 등록
 - [ ] **Step 7**: Playwright 검수 (이미지/오타/가격/모바일) → `04-qa-report.md`
