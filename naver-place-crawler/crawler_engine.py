@@ -621,40 +621,71 @@ class CrawlerEngine:
             return ""
         return cid
 
+    # 디버그용: 마지막 톡톡 추출 시도 정보 (빈 결과 원인 추적)
+    _last_talktalk_debug = None
+
     @staticmethod
     def extract_talktalk_url(html):
-        """HTML 텍스트에서 네이버 톡톡 URL 추출 (관대한 매칭 + 블랙리스트).
+        """HTML/JSON 텍스트에서 네이버 톡톡 URL 추출 (관대한 매칭 + 블랙리스트).
 
-        매칭 대상 (모든 형식):
-        - https://talk.naver.com/ct/<id>     (비즈니스 톡톡 표준 경로)
-        - https://talk.naver.com/W<id>       (대문자 W 단축 URL)
-        - https://talk.naver.com/<id>        (그 외 단축 형식 — 영숫자/언더스코어/하이픈)
+        매칭 대상:
+        A) URL 형식
+           - https://talk.naver.com/ct/<id>     (비즈니스 톡톡 표준)
+           - https://talk.naver.com/W<id>       (대문자 W 단축)
+           - https://talk.naver.com/<id>        (소문자/영숫자 단축)
+        B) JSON 필드 (네이버 GraphQL/플레이스 API 응답에 박힌 ID)
+           - "talktalkId":"<id>"
+           - "talkChannelId":"<id>"
+           - "chatChannelId":"<id>"
+           - "talkId":"<id>"
+           - "naverTalkId":"<id>"
 
-        검증:
-        - ID 길이 4~30자
-        - 시스템/공용 placeholder(공유누리 예약 AI 등) 블랙리스트 거절
-
-        모든 출력은 ct/소문자 형식으로 통일 (DB 일관성).
+        검증: ID 4~30자 + 블랙리스트 (w9ni795 등 시스템 placeholder 차단)
+        모든 출력은 ct/소문자 형식.
         """
         if not html:
             return ""
         # JSON 인코딩된 슬래시(\u002F) 디코딩
         text = html.replace("\\u002F", "/").replace("\\/", "/")
 
-        # 한 번의 정규식으로 모든 talk.naver.com 경로 매칭
-        # 경로 = ct/<id> 또는 <id> (영숫자 + _ + -)
-        # 첫 번째 path segment만 ID로 사용 (그 다음 / 또는 비-식별자에서 끊김)
+        debug = {"input_len": len(text), "talk_substring": "talk.naver.com" in text or "talktalk" in text.lower(),
+                 "pattern_a_hits": 0, "pattern_b_hits": 0, "rejected_ids": []}
+
+        # === Pattern A: talk.naver.com URL (관대) ===
         for m in re.finditer(r'https?://talk\.naver\.com/([A-Za-z0-9_/\-]+)', text):
+            debug["pattern_a_hits"] += 1
             raw_path = m.group(1).rstrip('"\'<>),;.?#&')
-            # ct/ 접두사 제거
             if raw_path.lower().startswith('ct/'):
                 cid_raw = raw_path[3:].split('/')[0]
             else:
                 cid_raw = raw_path.split('/')[0]
             cid = CrawlerEngine._normalize_talktalk_id(cid_raw)
             if cid:
+                CrawlerEngine._last_talktalk_debug = debug
                 return f"https://talk.naver.com/ct/{cid}"
+            else:
+                debug["rejected_ids"].append(cid_raw)
 
+        # === Pattern B: JSON 필드 안의 ID ===
+        json_field_patterns = [
+            r'"talktalkId"\s*:\s*"([A-Za-z0-9_\-]{4,30})"',
+            r'"talkChannelId"\s*:\s*"([A-Za-z0-9_\-]{4,30})"',
+            r'"chatChannelId"\s*:\s*"([A-Za-z0-9_\-]{4,30})"',
+            r'"talkId"\s*:\s*"([A-Za-z0-9_\-]{4,30})"',
+            r'"naverTalkId"\s*:\s*"([A-Za-z0-9_\-]{4,30})"',
+            r'"channelId"\s*:\s*"([A-Za-z0-9_\-]{4,30})"',  # 네이버 booking 응답
+        ]
+        for p in json_field_patterns:
+            for m in re.finditer(p, text):
+                debug["pattern_b_hits"] += 1
+                cid = CrawlerEngine._normalize_talktalk_id(m.group(1))
+                if cid:
+                    CrawlerEngine._last_talktalk_debug = debug
+                    return f"https://talk.naver.com/ct/{cid}"
+                else:
+                    debug["rejected_ids"].append(m.group(1))
+
+        CrawlerEngine._last_talktalk_debug = debug
         return ""
 
     @staticmethod
@@ -1096,10 +1127,19 @@ class CrawlerEngine:
             if hp_url and not any(b in hp_url.lower() for b in HP_BLACKLIST):
                 result["homepage"] = hp_url
 
-        # 네이버 톡톡 URL (place HTML 안의 talk.naver.com 링크)
+        # 네이버 톡톡 URL (place HTML 안의 talk.naver.com 링크 또는 JSON 필드)
         talktalk = self.extract_talktalk_url(html)
         if talktalk:
             result["talktalk"] = talktalk
+        else:
+            # 디버그: 입력에 talk 단서가 있었는데 추출 실패한 경우 GUI 콘솔에 노출
+            dbg = CrawlerEngine._last_talktalk_debug
+            if dbg and dbg.get("talk_substring") and (dbg.get("pattern_a_hits", 0) + dbg.get("pattern_b_hits", 0)) > 0:
+                try:
+                    rejected = ', '.join(dbg.get("rejected_ids", [])[:3])
+                    self.callback("log", f"[talk-debug] place HTML에 talk 단서 있으나 추출 실패. A={dbg['pattern_a_hits']} B={dbg['pattern_b_hits']} 거절ID=[{rejected}]")
+                except Exception:
+                    pass
 
         # 카카오톡 URL
         kakao = self.extract_kakao_url(html)
@@ -1228,6 +1268,15 @@ class CrawlerEngine:
                             ig = u
                     if not tt:
                         tt = self.extract_talktalk_url(raw_text)
+                    # 디버그: 톡톡 추출 실패한 경우 GraphQL 응답에 단서가 있었는지 노출
+                    if not tt:
+                        dbg = CrawlerEngine._last_talktalk_debug
+                        if dbg and dbg.get("talk_substring") and (dbg.get("pattern_a_hits", 0) + dbg.get("pattern_b_hits", 0)) > 0:
+                            try:
+                                rejected = ', '.join(dbg.get("rejected_ids", [])[:3])
+                                self.callback("log", f"[talk-debug] GraphQL에 talk 단서 있으나 추출 실패. A={dbg['pattern_a_hits']} B={dbg['pattern_b_hits']} 거절ID=[{rejected}]")
+                            except Exception:
+                                pass
                     if not kk:
                         kk = self.extract_kakao_url(raw_text)
                     if not ig:
