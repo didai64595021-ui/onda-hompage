@@ -141,12 +141,63 @@ section{padding:64px 0;height:auto}
 .section-header{text-align:center;margin-bottom:48px}
 .section-header .section-desc{margin:0 auto}
 
-/* 배지 */
+/* 배지 (2026-04-09 개선): Grid 4열 균등 + min-height로 텍스트 길이 무관 정렬 통일.
+   사용자 요구: "버튼 사이 간격 통일이 최우선" — flex+gap에서는 텍스트 길이에 따라
+   .badge-item 폭이 달라져 시각 간격이 어긋나 보임. Grid 1fr로 슬롯 폭 동일 강제. */
 .badge-section{background:var(--white);border-top:1px solid rgba(44,62,45,.06);border-bottom:1px solid rgba(44,62,45,.06)}
-.badge-row{display:flex;align-items:center;justify-content:center;gap:48px;flex-wrap:wrap}
-.badge-item{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
-.badge-icon{width:60px;height:60px;background:var(--header);color:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;font-family:'Cormorant Garamond',serif}
-.badge-text{font-size:.9rem;color:var(--mute);font-weight:500}
+.badge-row{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(140px,1fr));
+  column-gap:32px;
+  row-gap:24px;
+  max-width:880px;
+  margin:0 auto;
+  align-items:start;
+  justify-items:center;
+}
+.badge-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+  text-align:center;
+  width:100%;
+  max-width:180px;
+}
+.badge-icon{
+  width:60px;
+  height:60px;
+  background:var(--header);
+  color:var(--accent);
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.5rem;
+  font-weight:700;
+  font-family:'Cormorant Garamond',serif;
+  flex-shrink:0;
+}
+.badge-text{
+  font-size:.9rem;
+  color:var(--mute);
+  font-weight:500;
+  line-height:1.45;
+  word-break:keep-all;       /* 한글 단어 단위 자연 줄바꿈 */
+  min-height:2.6em;          /* 1줄/2줄 텍스트 모두 동일 높이 → 아이콘 정렬 통일 */
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+}
+/* 좁은 PC/태블릿: 4열 → 2x2 그리드 (768~1024 사이는 모바일이 아니므로 hide되지 않음) */
+@media (max-width:1024px){
+  .badge-row{
+    grid-template-columns:repeat(2,minmax(140px,1fr));
+    max-width:440px;
+    column-gap:24px;
+    row-gap:28px;
+  }
+}
 
 /* 안건 TW-1 (2026-04-09): 모바일에서 MBC/KBS 뱃지 섹션 완전 숨김 — 사용자 요청
    PC에서는 그대로 노출. 모바일은 추가될수록 지저분해진다는 사용자 결정. */
