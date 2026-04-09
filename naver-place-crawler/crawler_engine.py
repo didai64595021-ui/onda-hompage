@@ -623,27 +623,35 @@ class CrawlerEngine:
 
     @staticmethod
     def extract_talktalk_url(html):
-        """HTML 텍스트에서 네이버 톡톡 URL 추출 (엄격 모드).
-        표준 형식만 인정:
+        """HTML 텍스트에서 네이버 톡톡 URL 추출 (관대한 매칭 + 블랙리스트).
+
+        매칭 대상 (모든 형식):
         - https://talk.naver.com/ct/<id>     (비즈니스 톡톡 표준 경로)
-        - https://talk.naver.com/W<id>       (단축 URL → ct/로 리다이렉트되는 형식)
-        시스템 placeholder(공유누리 예약 AI 등)는 블랙리스트로 거절.
-        반환: 정규화된 ct/ 형식 URL 또는 ""
+        - https://talk.naver.com/W<id>       (대문자 W 단축 URL)
+        - https://talk.naver.com/<id>        (그 외 단축 형식 — 영숫자/언더스코어/하이픈)
+
+        검증:
+        - ID 길이 4~30자
+        - 시스템/공용 placeholder(공유누리 예약 AI 등) 블랙리스트 거절
+
+        모든 출력은 ct/소문자 형식으로 통일 (DB 일관성).
         """
         if not html:
             return ""
         # JSON 인코딩된 슬래시(\u002F) 디코딩
         text = html.replace("\\u002F", "/").replace("\\/", "/")
 
-        # 패턴 1: ct/<id> 직접 매칭
-        for m in re.finditer(r'https?://talk\.naver\.com/ct/([A-Za-z0-9]{4,30})\b', text):
-            cid = CrawlerEngine._normalize_talktalk_id(m.group(1))
-            if cid:
-                return f"https://talk.naver.com/ct/{cid}"
-
-        # 패턴 2: W<id> 단축 URL (W는 ct/ 경로의 prefix이기도 하므로 그대로 ID에 포함됨)
-        for m in re.finditer(r'https?://talk\.naver\.com/(W[A-Za-z0-9]{3,14})\b', text):
-            cid = CrawlerEngine._normalize_talktalk_id(m.group(1))
+        # 한 번의 정규식으로 모든 talk.naver.com 경로 매칭
+        # 경로 = ct/<id> 또는 <id> (영숫자 + _ + -)
+        # 첫 번째 path segment만 ID로 사용 (그 다음 / 또는 비-식별자에서 끊김)
+        for m in re.finditer(r'https?://talk\.naver\.com/([A-Za-z0-9_/\-]+)', text):
+            raw_path = m.group(1).rstrip('"\'<>),;.?#&')
+            # ct/ 접두사 제거
+            if raw_path.lower().startswith('ct/'):
+                cid_raw = raw_path[3:].split('/')[0]
+            else:
+                cid_raw = raw_path.split('/')[0]
+            cid = CrawlerEngine._normalize_talktalk_id(cid_raw)
             if cid:
                 return f"https://talk.naver.com/ct/{cid}"
 
