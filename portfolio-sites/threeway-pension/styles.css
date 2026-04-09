@@ -507,6 +507,14 @@ section{padding:64px 0;height:auto}
 .fade-in{opacity:1;transform:none;transition:opacity .6s ease,transform .6s ease}
 .js-scroll-reveal .fade-in:not(.revealed){opacity:0;transform:translateY(30px)}
 .js-scroll-reveal .fade-in.revealed{opacity:1;transform:none}
+/* 안건 TW 회귀 fix (2026-04-09): cms.js가 #roomPreviewList 등 dynamic 컨테이너를
+   재렌더링하면 새 카드가 IntersectionObserver에 등록 안 돼서 영원히 opacity:0이 됨.
+   해당 컨테이너 내부의 fade-in은 무조건 visible 처리 (안전망). */
+#roomPreviewList .fade-in,
+#facScrollList .fade-in,
+#facCardList .fade-in,
+#attrSpotsList .fade-in,
+#partnerList .fade-in{opacity:1 !important;transform:none !important}
 .delay-1{transition-delay:.1s}
 .delay-2{transition-delay:.2s}
 .delay-3{transition-delay:.3s}

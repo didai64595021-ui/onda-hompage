@@ -169,7 +169,7 @@
     ]);
     return buildEl('a', {
       href: item.href || '#',
-      class: 'card fade-in ' + delay
+      class: 'card fade-in revealed ' + delay
     }, [imgWrap, body]);
   }
 
@@ -187,7 +187,7 @@
   function buildFacCard(item, idx) {
     var delay = 'delay-' + ((idx % 3) + 1);
     var card = buildEl('div', {
-      class: 'facility-card fade-in ' + delay,
+      class: 'facility-card fade-in revealed ' + delay,
       'data-lightbox': item.img || ''
     }, [
       buildEl('img', { src: item.img || '', alt: item.name || '', width: 800, height: 600 }),
@@ -210,12 +210,12 @@
       buildEl('h3', null, [item.name || '']),
       buildEl('p', null, [item.desc || ''])
     ]);
-    return buildEl('div', { class: 'attraction-card-v2 fade-in ' + delay }, [imgWrap, body]);
+    return buildEl('div', { class: 'attraction-card-v2 fade-in revealed ' + delay }, [imgWrap, body]);
   }
 
   function buildAttrPartnerCard(item, idx) {
     var delay = 'delay-' + ((idx % 4) + 1);
-    return buildEl('div', { class: 'partner-card fade-in ' + delay }, [
+    return buildEl('div', { class: 'partner-card fade-in revealed ' + delay }, [
       buildEl('div', { class: 'partner-icon' }, [item.icon || '🤝']),
       buildEl('h3', null, [item.name || '']),
       buildEl('p', { class: 'partner-discount' }, [item.discount || '']),
