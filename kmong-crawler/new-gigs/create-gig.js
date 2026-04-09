@@ -34,6 +34,7 @@ const path = require('path');
 const { login } = require('../lib/login');
 const { closeModals } = require('../lib/modal-handler');
 const { PRODUCTS } = require('./gig-data');
+const { EXTRA } = require('./gig-data-extra');
 
 const SCREENSHOT_DIR = path.join(__dirname, 'screenshots');
 const IMAGE_DIR = path.join(__dirname, '03-images');
@@ -175,6 +176,7 @@ async function fillReactSelect(page, inputId, value, label = '') {
   const fallback = pick !== target;
 
   // 4. 옵션 클릭 — kmong 커스텀 옵션 (전체 텍스트 매칭)
+  // mousedown + mouseup + click 모두 dispatch (react-select 가 onMouseDown 도 listening)
   const ok = await page.evaluate((pickText) => {
     const all = [...document.querySelectorAll('div')].filter(el => {
       const cls = String(el.className || '');
@@ -186,19 +188,24 @@ async function fillReactSelect(page, inputId, value, label = '') {
     });
     const target = all.find(el => (el.innerText || '').trim() === pickText);
     if (target) {
+      const md = new MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 0 });
+      const mu = new MouseEvent('mouseup', { bubbles: true, cancelable: true, button: 0 });
+      target.dispatchEvent(md);
+      target.dispatchEvent(mu);
       target.click();
       return true;
     }
     return false;
   }, pick);
   if (ok) {
-    await sleep(500);
+    // react-select 의 form state commit 까지 충분한 시간 대기
+    await sleep(1800);
     console.log(`  ✓ ${tag} ${inputId} = "${pick}"${fallback ? ` (fallback, 요청="${value}")` : ''}`);
     return { ok: true, picked: pick, fallback, options };
   }
-  // fallback: keyboard
+  // fallback: keyboard Enter (커서가 옵션 위에 있을 때)
   await page.keyboard.press('Enter').catch(() => {});
-  await sleep(400);
+  await sleep(800);
   console.log(`  ⚠ ${tag} ${inputId} keyboard fallback "${pick}"`);
   return { ok: true, picked: pick, fallback, viaKeyboard: true, options };
 }
@@ -528,6 +535,190 @@ async function submitGig(page, product) {
 }
 
 // ──────────────────────────────────────────
+// Phase E: 빈 필드 보강용 헬퍼들
+// ──────────────────────────────────────────
+
+// REVISION (수정 및 재진행 안내) textarea 채우기
+async function fillRevision(page, text) {
+  const ta = page.locator('textarea[name="REVISION.valueData.revision"]').first();
+  if (!(await ta.isVisible({ timeout: 3000 }).catch(() => false))) {
+    console.log(`  ✗ REVISION textarea 미발견`);
+    return { ok: false, error: 'REVISION 미발견' };
+  }
+  await ta.scrollIntoViewIfNeeded({ timeout: 2000 }).catch(() => {});
+  await sleep(200);
+  await ta.click({ force: true });
+  await page.keyboard.press('Control+A').catch(() => {});
+  await sleep(100);
+  await page.keyboard.press('Delete').catch(() => {});
+  await sleep(100);
+  await ta.fill(text);
+  console.log(`  ✓ REVISION (${text.length}자)`);
+  return { ok: true, length: text.length };
+}
+
+// 상세 이미지 갤러리 (#IMAGE_GALLERY) — 9슬롯 multi-upload
+async function fillSubGallery(page, imagePaths) {
+  if (!imagePaths || imagePaths.length === 0) return { ok: true, skipped: true };
+  // 존재 검증
+  const existing = imagePaths.filter((p) => fs.existsSync(p));
+  if (existing.length === 0) {
+    console.log(`  ✗ 갤러리 이미지 0장 (모두 없음): ${imagePaths.join(', ')}`);
+    return { ok: false, error: 'all images missing' };
+  }
+  const inp = page.locator('#IMAGE_GALLERY input[type="file"]').first();
+  if ((await inp.count()) === 0) {
+    console.log(`  ✗ #IMAGE_GALLERY input 미발견`);
+    return { ok: false, error: 'IMAGE_GALLERY input 미발견' };
+  }
+  // multi-upload 시도
+  try {
+    await inp.setInputFiles(existing);
+    await sleep(6000);
+    console.log(`  ✓ 갤러리 ${existing.length}장 multi-upload`);
+    return { ok: true, count: existing.length, mode: 'multi' };
+  } catch (e) {
+    // 한 장씩 시도
+    let count = 0;
+    for (const p of existing) {
+      try {
+        await inp.setInputFiles(p);
+        await sleep(4000);
+        count++;
+      } catch (e2) {
+        console.log(`  ⚠ 갤러리 ${path.basename(p)} 실패: ${e2.message}`);
+      }
+    }
+    console.log(`  ${count > 0 ? '✓' : '✗'} 갤러리 ${count}/${existing.length}장 (single mode)`);
+    return { ok: count > 0, count, mode: 'single', requested: existing.length };
+  }
+}
+
+// extraSelects 배열 처리 — { label, value, nth? }
+// react state commit 안정화를 위해 각 select 사이 sleep 추가
+async function fillExtraSelects(page, selectMap, items) {
+  if (!items || items.length === 0) return { ok: true, skipped: true, results: [] };
+  const counter = {};
+  const results = [];
+  for (const item of items) {
+    const nth = item.nth !== undefined ? item.nth : (counter[item.label] || 0);
+    counter[item.label] = (counter[item.label] || 0) + 1;
+    const r = await fillSelectByLabel(page, selectMap, item.label, item.value, nth);
+    results.push({ label: item.label, value: item.value, nth, ok: r.ok, picked: r.picked, fallback: r.fallback, skipped: r.skipped });
+    // 각 select 사이 1초 sleep — react state commit + dropdown 닫기 안정화
+    await sleep(1000);
+  }
+  const okCount = results.filter((r) => r.ok).length;
+  return { ok: okCount > 0, results, okCount, total: items.length };
+}
+
+// react-select 선택값 검증 (singleValue text)
+async function getSelectedValue(page, inputId) {
+  return await page.evaluate((iid) => {
+    const el = document.getElementById(iid);
+    if (!el) return null;
+    let cur = el;
+    for (let i = 0; i < 12; i++) {
+      cur = cur.parentElement;
+      if (!cur) break;
+      if (typeof cur.className === 'string' && cur.className.includes('control')) {
+        const sv = cur.querySelector('[class*="singleValue"]');
+        if (sv) return (sv.innerText || '').trim();
+        return '';
+      }
+    }
+    return '';
+  }, inputId);
+}
+
+// ──────────────────────────────────────────
+// Phase E: update 모드 — 기존 draft 페이지에 빈 필드만 채워서 다시 임시저장
+// ──────────────────────────────────────────
+async function updateDraft(product, mode = 'update') {
+  const extra = EXTRA[product.id];
+  if (!extra) {
+    return { ok: false, log: { id: product.id, errors: [`EXTRA[${product.id}] 미정의`] } };
+  }
+  const probeOnly = mode === 'update-probe';
+  const url = `https://kmong.com/my-gigs/edit/${extra.draftId}?rootCategoryId=6&subCategoryId=${extra.subCategoryId}`;
+
+  console.log(`\n${'='.repeat(60)}`);
+  console.log(`[update] 상품 ${product.id} — ${product.title}`);
+  console.log(`[update] draftId=${extra.draftId} cat=${extra.subCategoryId} probeOnly=${probeOnly}`);
+  console.log(`${'='.repeat(60)}`);
+
+  const log = {
+    id: product.id,
+    title: product.title,
+    mode,
+    draftId: extra.draftId,
+    steps: [],
+    errors: [],
+    at: new Date().toISOString(),
+  };
+
+  let browser;
+  try {
+    const r = await login({ slowMo: 100 });
+    browser = r.browser;
+    const page = r.page;
+
+    console.log(`[update] goto ${url}`);
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await sleep(7000);
+    await closeModals(page).catch(() => {});
+    await snap(page, `gig-${product.id}-update-initial`);
+
+    // 1. extraSelects (카테고리별 추가 select)
+    console.log(`\n[update] extraSelects (${(extra.extraSelects || []).length}개)`);
+    const selectMap = await discoverSelects(page);
+    console.log(`  selectMap=${selectMap.length}개`);
+    const sRes = await fillExtraSelects(page, selectMap, extra.extraSelects || []);
+    log.steps.push({ name: 'extraSelects', ...sRes });
+
+    // 2. REVISION
+    console.log(`\n[update] REVISION`);
+    const rRes = await fillRevision(page, extra.revision);
+    log.steps.push({ name: 'revision', ...rRes });
+
+    // 3. 갤러리 이미지
+    console.log(`\n[update] 상세 이미지 갤러리`);
+    const galleryPaths = (extra.gallery || []).map((f) => path.join(IMAGE_DIR, f));
+    const gRes = await fillSubGallery(page, galleryPaths);
+    log.steps.push({ name: 'gallery', ...gRes });
+
+    await snap(page, `gig-${product.id}-update-filled`);
+
+    // 4. 임시 저장
+    if (probeOnly) {
+      console.log(`\n[update] probeOnly=true — 저장 안 함`);
+      log.steps.push({ name: 'save', skipped: true, mode: 'probe' });
+    } else {
+      console.log(`\n[update] "임시 저장하기" 클릭`);
+      const saveBtn = page.locator('button:has-text("임시 저장하기")').first();
+      if (await saveBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await saveBtn.click({ force: true });
+        await sleep(7000);
+        await snap(page, `gig-${product.id}-update-saved`);
+        log.steps.push({ name: 'save', ok: true, savedUrl: page.url() });
+        console.log(`  ✓ 임시 저장 완료 — URL: ${page.url()}`);
+      } else {
+        log.steps.push({ name: 'save', ok: false, error: '임시 저장 버튼 미발견' });
+        log.errors.push('임시 저장 버튼 미발견');
+      }
+    }
+
+    return { ok: log.errors.length === 0, log };
+  } catch (e) {
+    console.error(`✗ update 실패: ${e.message}`);
+    log.errors.push(e.message);
+    return { ok: false, log };
+  } finally {
+    if (browser) await browser.close().catch(() => {});
+  }
+}
+
+// ──────────────────────────────────────────
 // 단일 상품 등록
 // ──────────────────────────────────────────
 async function createGig(product, mode) {
@@ -584,16 +775,27 @@ function parseArgs() {
 
 function usage() {
   return `사용법:
-  node create-gig.js --product 1 --mode probe   # 1번 상품, 옵션 탐색만
-  node create-gig.js --product 1 --mode save    # 1번 상품, 임시 저장
-  node create-gig.js --product all --mode save  # 6개 모두 임시 저장
-  node create-gig.js --product 1 --mode submit  # 1번 상품, 실제 발행
+  node create-gig.js --product 1 --mode probe          # 1번 상품, 옵션 탐색만
+  node create-gig.js --product 1 --mode save           # 1번 상품, 신규 임시 저장
+  node create-gig.js --product all --mode save         # 8개 모두 신규 임시 저장
+  node create-gig.js --product 1 --mode submit         # 1번 상품, 실제 발행
+  node create-gig.js --product 1 --mode update-probe   # Phase E 빈 필드 보강 dry-run
+  node create-gig.js --product 1 --mode update         # Phase E 빈 필드 보강 + 저장
+  node create-gig.js --product all --mode update       # 8개 모두 Phase E 보강
 
 Modes:
-  probe   드롭다운 옵션 탐색만, 저장 X (안전, 첫 실행 권장)
-  save    모든 필드 채운 후 "임시 저장하기" 클릭 (안전, 사용자 직접 검수)
-  submit  "제출하기" 클릭 (실 발행, 비용 발생 가능)
+  probe         드롭다운 옵션 탐색만, 저장 X (안전, 첫 실행 권장)
+  save          모든 필드 채운 후 "임시 저장하기" 클릭 (신규 등록)
+  submit        "제출하기" 클릭 (실 발행, 비용 발생 가능)
+  update-probe  Phase E (빈 필드 보강) — 기존 draft URL 진입 후 dry-run, 저장 X
+  update        Phase E — 기존 draft URL 진입 후 빈 필드 채우고 다시 임시저장
 `;
+}
+
+// require('./create-gig') 시 자동 실행 차단 — CLI 직접 호출일 때만 IIFE 동작
+if (require.main !== module) {
+  module.exports = { createGig, updateDraft, fillStep1, fillStep2, fillRevision, fillSubGallery, fillExtraSelects };
+  return;
 }
 
 (async () => {
@@ -608,16 +810,18 @@ Modes:
     process.exit(1);
   }
 
-  if (!['probe', 'save', 'submit'].includes(opts.mode)) {
-    console.error(`잘못된 mode: ${opts.mode}. probe/save/submit 중 하나`);
+  const VALID_MODES = ['probe', 'save', 'submit', 'update', 'update-probe'];
+  if (!VALID_MODES.includes(opts.mode)) {
+    console.error(`잘못된 mode: ${opts.mode}. ${VALID_MODES.join('/')} 중 하나`);
     process.exit(1);
   }
 
   console.log(`▶ 실행: product=${opts.product} mode=${opts.mode} 대상=${targets.length}개`);
 
+  const isUpdateMode = opts.mode === 'update' || opts.mode === 'update-probe';
   const results = [];
   for (const p of targets) {
-    const r = await createGig(p, opts.mode);
+    const r = isUpdateMode ? await updateDraft(p, opts.mode) : await createGig(p, opts.mode);
     results.push(r);
     // 다음 상품 전 잠시 대기
     if (targets.length > 1) await sleep(3000);
