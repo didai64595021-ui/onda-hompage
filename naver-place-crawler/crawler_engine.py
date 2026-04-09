@@ -1213,7 +1213,7 @@ class CrawlerEngine:
     OUT_HEADERS = [
         "업종(키워드)", "상호명", "네이버아이디", "업체이메일", "안심번호", "업체주소",
         "홈페이지URL", "홈페이지반응형", "전화버튼없음",
-        "네이버톡톡URL", "카카오톡", "인스타그램",
+        "톡톡", "톡톡URL", "카카오톡", "인스타그램",
         "방문자리뷰수", "블로그리뷰수", "리뷰합계",
         "신규업체",
         "고유번호", "플레이스URL", "업데이트날짜",
@@ -1240,7 +1240,7 @@ class CrawlerEngine:
                     val = r.get(h, "")
                     if h in (
                         "홈페이지URL", "홈페이지반응형", "전화버튼없음",
-                        "네이버톡톡URL", "카카오톡", "인스타그램",
+                        "톡톡", "카카오톡", "인스타그램",
                         "신규업체",
                     ) and (not val or not str(val).strip()):
                         val = "X"
@@ -1272,7 +1272,7 @@ class CrawlerEngine:
                 val = r.get(h, "")
                 if h in (
                     "홈페이지URL", "홈페이지반응형", "전화버튼없음",
-                    "네이버톡톡URL", "카카오톡", "인스타그램",
+                    "톡톡", "카카오톡", "인스타그램",
                     "신규업체",
                 ) and (not val or not str(val).strip()):
                     val = "X"
@@ -1377,7 +1377,8 @@ class CrawlerEngine:
                     ("홈페이지URL", "hp"),
                     ("홈페이지반응형", "responsive"),
                     ("전화버튼없음", "no_phone_btn"),
-                    ("네이버톡톡URL", "talktalk"),
+                    ("톡톡", "talktalk_flag"),
+                    ("톡톡URL", "talktalk_url"),
                     ("카카오톡", "kakao"),
                     ("인스타그램", "instagram"),
                     ("신규업체", "is_new"),
@@ -1419,8 +1420,9 @@ class CrawlerEngine:
                     parsed_place = self._parse_place_html(place_html)
 
                     # 네이버 톡톡 URL (place HTML 1차)
-                    if parsed_place.get("talktalk") and not (r.get("네이버톡톡URL") or "").strip():
-                        r["네이버톡톡URL"] = parsed_place["talktalk"]
+                    if parsed_place.get("talktalk") and not (r.get("톡톡URL") or "").strip():
+                        r["톡톡URL"] = parsed_place["talktalk"]
+                        r["톡톡"] = "O"
                         self.stats["talktalk"] += 1
                         log_items.append("talk:O")
 
@@ -1592,14 +1594,15 @@ class CrawlerEngine:
                 self.stats["naver_id"] += 1
 
             # ══ STEP 4-1: 톡톡/카카오/인스타/신규업체 GraphQL 보충 (place HTML에서 못 채운 경우) ══
-            need_talk = not (r.get("네이버톡톡URL") or "").strip()
+            need_talk = not (r.get("톡톡URL") or "").strip()
             need_kakao2 = not (r.get("카카오톡") or "").strip()
             need_insta2 = not (r.get("인스타그램") or "").strip()
             need_new = not (r.get("신규업체") or "").strip()
             if pid and (need_talk or need_kakao2 or need_insta2 or need_new):
                 gql_extra = self._fetch_place_graphql(pid)
                 if need_talk and gql_extra.get("talktalk"):
-                    r["네이버톡톡URL"] = gql_extra["talktalk"]
+                    r["톡톡URL"] = gql_extra["talktalk"]
+                    r["톡톡"] = "O"
                     self.stats["talktalk"] += 1
                     log_items.append("talk:O(gql)")
                 if need_kakao2 and gql_extra.get("kakao"):
@@ -1616,9 +1619,9 @@ class CrawlerEngine:
                     log_items.append("new:O(gql)")
                 self._random_delay()
 
-            # 미감지 항목은 X로 확정
-            if not (r.get("네이버톡톡URL") or "").strip():
-                r["네이버톡톡URL"] = "X"
+            # 미감지 항목은 X로 확정 (톡톡URL은 빈값 유지 — 복사 편의)
+            if not (r.get("톡톡") or "").strip():
+                r["톡톡"] = "X"
             if not (r.get("카카오톡") or "").strip():
                 r["카카오톡"] = "X"
             if not (r.get("인스타그램") or "").strip():
@@ -1653,7 +1656,8 @@ class CrawlerEngine:
                 "hp": r.get("홈페이지URL", ""),
                 "responsive": r.get("홈페이지반응형", ""),
                 "no_phone_btn": r.get("전화버튼없음", ""),
-                "talktalk": r.get("네이버톡톡URL", ""),
+                "talktalk_flag": r.get("톡톡", ""),
+                "talktalk_url": r.get("톡톡URL", ""),
                 "kakao": r.get("카카오톡", ""),
                 "instagram": r.get("인스타그램", ""),
                 "is_new": r.get("신규업체", ""),
@@ -1698,7 +1702,7 @@ class CrawlerEngine:
         c_hp, p_hp = _pct("홈페이지URL")
         c_resp, p_resp = _pct("홈페이지반응형", empty_vals=("", "X"))
         c_nopb, p_nopb = _pct("전화버튼없음", empty_vals=("", "X"))
-        c_talk, p_talk = _pct("네이버톡톡URL", empty_vals=("", "X"))
+        c_talk, p_talk = _pct("톡톡", empty_vals=("", "X"))
         c_kakao, p_kakao = _pct("카카오톡", empty_vals=("", "X"))
         c_insta, p_insta = _pct("인스타그램", empty_vals=("", "X"))
         c_new, p_new = _pct("신규업체", empty_vals=("", "X"))
@@ -1720,7 +1724,7 @@ class CrawlerEngine:
             f"  홈페이지URL:     {c_hp}/{total} ({p_hp}%)  +{s['hp']}\n"
             f"  홈페이지반응형:  {c_resp}/{total} ({p_resp}%)  +{s.get('responsive', 0)}\n"
             f"  전화버튼없음:    {c_nopb}/{total} ({p_nopb}%)  +{s.get('no_phone_btn', 0)}\n"
-            f"  네이버톡톡URL:   {c_talk}/{total} ({p_talk}%)  +{s.get('talktalk', 0)}\n"
+            f"  톡톡:            {c_talk}/{total} ({p_talk}%)  +{s.get('talktalk', 0)}\n"
             f"  카카오톡:        {c_kakao}/{total} ({p_kakao}%)  +{s.get('kakao', 0)}\n"
             f"  인스타그램:      {c_insta}/{total} ({p_insta}%)  +{s.get('instagram', 0)}\n"
             f"  신규업체:        {c_new}/{total} ({p_new}%)  +{s.get('new_biz', 0)}\n"
@@ -2940,10 +2944,11 @@ class CrawlerEngine:
                 log_items.append(f"hp:{parsed_place['homepage']}")
 
         # ═══ 네이버 톡톡 URL ═══
-        if not (r.get("네이버톡톡URL") or "").strip():
+        if not (r.get("톡톡URL") or "").strip():
             tt = gql.get("talktalk") or parsed_place.get("talktalk") or ""
             if tt:
-                r["네이버톡톡URL"] = tt
+                r["톡톡URL"] = tt
+                r["톡톡"] = "O"
                 self._stat_inc("talktalk")
                 log_items.append("talk:O")
 
@@ -3055,9 +3060,9 @@ class CrawlerEngine:
                 r["네이버아이디"] = naver_id + "@naver.com"
                 self.stats["naver_id"] += 1
 
-        # 미감지 항목은 X로 확정
-        if not (r.get("네이버톡톡URL") or "").strip():
-            r["네이버톡톡URL"] = "X"
+        # 미감지 항목은 X로 확정 (톡톡URL은 빈값 유지 — 복사 편의)
+        if not (r.get("톡톡") or "").strip():
+            r["톡톡"] = "X"
         if not (r.get("카카오톡") or "").strip():
             r["카카오톡"] = "X"
         if not (r.get("인스타그램") or "").strip():
@@ -3261,7 +3266,8 @@ class CrawlerEngine:
                 "홈페이지URL": "",
                 "홈페이지반응형": "",
                 "전화버튼없음": "",
-                "네이버톡톡URL": "",
+                "톡톡": "",
+                "톡톡URL": "",
                 "카카오톡": "",
                 "인스타그램": "",
                 "신규업체": "",
@@ -3290,7 +3296,8 @@ class CrawlerEngine:
                     row["블로그리뷰수"] = parsed["blog_review"]
                 # 톡톡/카카오/인스타/신규는 place HTML 파싱 시점에 같이 채움
                 if parsed.get("talktalk"):
-                    row["네이버톡톡URL"] = parsed["talktalk"]
+                    row["톡톡URL"] = parsed["talktalk"]
+                    row["톡톡"] = "O"
                     self._stat_inc("talktalk")
                 if parsed.get("kakao"):
                     row["카카오톡"] = parsed["kakao"]
@@ -3379,7 +3386,7 @@ class CrawlerEngine:
         c_hp, p_hp = _pct("홈페이지URL")
         c_resp, p_resp = _pct("홈페이지반응형", empty_vals=("", "X"))
         c_nopb, p_nopb = _pct("전화버튼없음", empty_vals=("", "X"))
-        c_talk, p_talk = _pct("네이버톡톡URL", empty_vals=("", "X"))
+        c_talk, p_talk = _pct("톡톡", empty_vals=("", "X"))
         c_kakao, p_kakao = _pct("카카오톡", empty_vals=("", "X"))
         c_insta, p_insta = _pct("인스타그램", empty_vals=("", "X"))
         c_new, p_new = _pct("신규업체", empty_vals=("", "X"))
@@ -3401,7 +3408,7 @@ class CrawlerEngine:
             f"  홈페이지URL:     {c_hp}/{total} ({p_hp}%)  +{s['hp']}\n"
             f"  홈페이지반응형:  {c_resp}/{total} ({p_resp}%)  +{s.get('responsive', 0)}\n"
             f"  전화버튼없음:    {c_nopb}/{total} ({p_nopb}%)  +{s.get('no_phone_btn', 0)}\n"
-            f"  네이버톡톡URL:   {c_talk}/{total} ({p_talk}%)  +{s.get('talktalk', 0)}\n"
+            f"  톡톡:            {c_talk}/{total} ({p_talk}%)  +{s.get('talktalk', 0)}\n"
             f"  카카오톡:        {c_kakao}/{total} ({p_kakao}%)  +{s.get('kakao', 0)}\n"
             f"  인스타그램:      {c_insta}/{total} ({p_insta}%)  +{s.get('instagram', 0)}\n"
             f"  신규업체:        {c_new}/{total} ({p_new}%)  +{s.get('new_biz', 0)}\n"
