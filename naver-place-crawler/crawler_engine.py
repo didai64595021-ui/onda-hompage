@@ -2099,7 +2099,16 @@ class CrawlerEngine:
             page = 1
 
             try:
-                search_url = f"https://map.naver.com/p/search/{quote(keyword)}"
+                # ── 키워드 띄어쓰기 강제 (POI redirect 회피) ──
+                # "강남헬스장" 같은 붙여쓰기 키워드는 네이버가 단일 상호("강남헬스")로 매칭해
+                # appLink?pinId=강남헬스 (POI 페이지)로 redirect 시켜 검색결과 페이지를 못 받음.
+                # _parse_keyword_location 으로 분리 후 "강남 헬스장" 으로 강제 → 검색의도 명시
+                _loc, _biz = self._parse_keyword_location(keyword)
+                search_keyword = f"{_loc} {_biz}".strip() if _biz else keyword
+                if search_keyword != keyword:
+                    self.callback("log", f"  ✏️ 키워드 분리: '{keyword}' → '{search_keyword}' (POI redirect 회피)")
+
+                search_url = f"https://map.naver.com/p/search/{quote(search_keyword)}"
 
                 # ── 0단계: map.naver.com 메인 먼저 진입 (쿠키 수집 → appLink redirect 우회) ──
                 # 일부 키워드(강남미용실/부산헬스장 등 인기 키워드)는 첫 진입 시 m.map.naver.com/appLink로
@@ -2118,11 +2127,11 @@ class CrawlerEngine:
                 cur_url = driver.current_url or ""
                 if "appLink" in cur_url or "m.map.naver.com" in cur_url:
                     self.callback("log", f"  🔁 appLink redirect 감지 — 폴백 URL 시도")
-                    # 폴백 URL 후보들
+                    # 폴백 URL 후보들 (역시 띄어쓰기 키워드 사용)
                     fallback_urls = [
-                        f"https://map.naver.com/v5/search/{quote(keyword)}",
-                        f"https://map.naver.com/?query={quote(keyword)}",
-                        f"https://map.naver.com/p/entry/place/{quote(keyword)}",
+                        f"https://map.naver.com/v5/search/{quote(search_keyword)}",
+                        f"https://map.naver.com/?query={quote(search_keyword)}",
+                        f"https://pcmap.place.naver.com/place/list?query={quote(search_keyword)}",
                     ]
                     for fb_url in fallback_urls:
                         try:
