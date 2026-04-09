@@ -303,7 +303,7 @@ class CrawlerEngine:
             "phone": 0, "visitor_review": 0, "blog_review": 0,
             "hp": 0, "email": 0, "naver_id": 0,
             "responsive": 0, "talktalk": 0, "kakao": 0, "instagram": 0,
-            "no_phone_btn": 0, "new_biz": 0,
+            "no_phone_btn": 0, "webbuilder": 0, "new_biz": 0,
             "blocked": 0, "success": 0,
         }
         self._consecutive_blocks = 0
@@ -697,6 +697,57 @@ class CrawlerEngine:
         if re.search(r'''window\.open\s*\(\s*["']\s*tel:''', html, re.IGNORECASE):
             return True
         return False
+
+    # SaaS 웹빌더 시그니처 (도메인/HTML marker 양쪽 검사)
+    # 영업 정책: O = 웹빌더 사용 (코드 수정 불가), X = 일반 HTML (수정 가능 → 영업 타겟)
+    _WEBBUILDER_SIGNATURES = (
+        ("modoo",        ("modoo.at", "MODOO_BUILD", "modoo-resource")),
+        ("imweb",        ("imweb.me", "imweb.kr", "static.imweb", "imweb-")),
+        ("wix",          ("wix.com", "wixstatic", "wixsite", "wix-bolt", "_wixCIDX")),
+        ("cafe24",       ("cafe24.com", "ec.cafe24.com", "cafe24cdn")),
+        ("sixshop",      ("sixshop.com", "sixshopservice")),
+        ("makeshop",     ("makeshop.co.kr", "makeshopcafe")),
+        ("godomall",     ("godomall.com", "godo.co.kr", "godomall-")),
+        ("squarespace",  ("squarespace.com", "static1.squarespace")),
+        ("weebly",       ("weebly.com", "weeblycloud")),
+        ("shopify",      ("myshopify.com", "cdn.shopify.com")),
+        ("webflow",      ("webflow.com", "webflow.io")),
+        ("jimdo",        ("jimdo.com", "jimdofree.com")),
+        ("wordpress.com",("wordpress.com", "wp.com")),  # 호스팅판만 (셀프호스트 wp-content 제외)
+        ("google-sites", ("sites.google.com",)),
+        ("naver-blog",   ("blog.naver.com", "blog.me")),
+        ("tistory",      ("tistory.com",)),
+        ("homepy",       ("homepy.com",)),
+        ("1px",          ("1px.kr",)),
+    )
+
+    @staticmethod
+    def detect_webbuilder(html, url=None):
+        """홈페이지가 SaaS 웹빌더로 만들어졌는지 검사.
+        도메인(URL hostname) + HTML 내 marker 두 방향으로 검사.
+        반환: "O" (웹빌더 감지 — 코드 수정 불가) / "X" (일반 HTML — 영업 타겟)
+        """
+        # 1) URL hostname 검사 (가장 강한 단서)
+        if url:
+            try:
+                from urllib.parse import urlparse
+                host = (urlparse(url).hostname or "").lower()
+            except Exception:
+                host = ""
+            if host:
+                for _name, markers in CrawlerEngine._WEBBUILDER_SIGNATURES:
+                    for m in markers:
+                        # 도메인 매칭: hostname이 marker로 끝나거나 marker 자체
+                        if host == m or host.endswith("." + m) or m in host:
+                            return "O"
+        # 2) HTML 본문 marker 검사
+        if html:
+            text = html if isinstance(html, str) else str(html)
+            for _name, markers in CrawlerEngine._WEBBUILDER_SIGNATURES:
+                for m in markers:
+                    if m in text:
+                        return "O"
+        return "X"
 
     @staticmethod
     def detect_new_business(html):
@@ -1212,7 +1263,7 @@ class CrawlerEngine:
 
     OUT_HEADERS = [
         "업종(키워드)", "상호명", "네이버아이디", "업체이메일", "안심번호", "업체주소",
-        "홈페이지URL", "홈페이지반응형", "전화버튼없음",
+        "홈페이지URL", "홈페이지반응형", "전화버튼없음", "웹빌더",
         "톡톡", "톡톡URL", "카카오톡", "인스타그램",
         "방문자리뷰수", "블로그리뷰수", "리뷰합계",
         "신규업체",
@@ -1239,7 +1290,7 @@ class CrawlerEngine:
                 for h in CrawlerEngine.OUT_HEADERS:
                     val = r.get(h, "")
                     if h in (
-                        "홈페이지URL", "홈페이지반응형", "전화버튼없음",
+                        "홈페이지URL", "홈페이지반응형", "전화버튼없음", "웹빌더",
                         "톡톡", "카카오톡", "인스타그램",
                         "신규업체",
                     ) and (not val or not str(val).strip()):
@@ -1271,7 +1322,7 @@ class CrawlerEngine:
             for col, h in enumerate(CrawlerEngine.OUT_HEADERS, 1):
                 val = r.get(h, "")
                 if h in (
-                    "홈페이지URL", "홈페이지반응형", "전화버튼없음",
+                    "홈페이지URL", "홈페이지반응형", "전화버튼없음", "웹빌더",
                     "톡톡", "카카오톡", "인스타그램",
                     "신규업체",
                 ) and (not val or not str(val).strip()):
@@ -1323,7 +1374,7 @@ class CrawlerEngine:
             "phone": 0, "visitor_review": 0, "blog_review": 0,
             "hp": 0, "email": 0, "naver_id": 0,
             "responsive": 0, "talktalk": 0, "kakao": 0, "instagram": 0,
-            "no_phone_btn": 0, "new_biz": 0,
+            "no_phone_btn": 0, "webbuilder": 0, "new_biz": 0,
             "blocked": 0, "success": 0,
         }
 
@@ -1377,6 +1428,7 @@ class CrawlerEngine:
                     ("홈페이지URL", "hp"),
                     ("홈페이지반응형", "responsive"),
                     ("전화버튼없음", "no_phone_btn"),
+                    ("웹빌더", "webbuilder"),
                     ("톡톡", "talktalk_flag"),
                     ("톡톡URL", "talktalk_url"),
                     ("카카오톡", "kakao"),
@@ -1517,15 +1569,16 @@ class CrawlerEngine:
                         log_items.append(f"hp:{verified_hp}")
                 self._random_delay()
 
-            # ══ STEP 3: 이메일 + 홈페이지 분석 (반응형/전화버튼/카카오/인스타 — HTML 1회 재활용) ══
+            # ══ STEP 3: 이메일 + 홈페이지 분석 (반응형/전화버튼/웹빌더/카카오/인스타 — HTML 1회 재활용) ══
             need_email = not (r.get("업체이메일") or "").strip()
             need_resp = not (r.get("홈페이지반응형") or "").strip()
             need_phone_btn = not (r.get("전화버튼없음") or "").strip()
+            need_webbuilder = not (r.get("웹빌더") or "").strip()
             need_kakao = not (r.get("카카오톡") or "").strip()
             need_insta = not (r.get("인스타그램") or "").strip()
             hp_url = (r.get("홈페이지URL") or "").strip()
             if hp_url and hp_url != "X" and hp_url.startswith("http") and (
-                need_email or need_resp or need_phone_btn or need_kakao or need_insta
+                need_email or need_resp or need_phone_btn or need_webbuilder or need_kakao or need_insta
             ):
                 referer = f"https://www.google.com/search?q={quote(name)}"
                 html = self._fetch(hp_url, referer=referer, timeout=6)
@@ -1551,6 +1604,13 @@ class CrawlerEngine:
                     if flag == "O":
                         self.stats["no_phone_btn"] += 1
                     log_items.append(f"nophonebtn:{flag}")
+                # 웹빌더 (O = 웹빌더 사용 / X = 일반 HTML, 영업 타겟)
+                if need_webbuilder:
+                    wb_flag = self.detect_webbuilder(html, url=hp_url)
+                    r["웹빌더"] = wb_flag
+                    if wb_flag == "O":
+                        self.stats["webbuilder"] += 1
+                    log_items.append(f"wb:{wb_flag}")
                 # 카카오톡
                 if need_kakao and html:
                     kk = self.extract_kakao_url(html)
@@ -1633,6 +1693,9 @@ class CrawlerEngine:
             if not (r.get("전화버튼없음") or "").strip():
                 # 홈페이지 자체가 없거나 검사 실패 → 영업 타겟 아님 (X)
                 r["전화버튼없음"] = "X"
+            if not (r.get("웹빌더") or "").strip():
+                # 홈페이지 없음/검사 실패 → 웹빌더 아님 = X (영업 가능 추정)
+                r["웹빌더"] = "X"
 
             # 리뷰합계 계산 (방문자 + 블로그)
             r["리뷰합계"] = self._compute_review_total(r)
@@ -1656,6 +1719,7 @@ class CrawlerEngine:
                 "hp": r.get("홈페이지URL", ""),
                 "responsive": r.get("홈페이지반응형", ""),
                 "no_phone_btn": r.get("전화버튼없음", ""),
+                "webbuilder": r.get("웹빌더", ""),
                 "talktalk_flag": r.get("톡톡", ""),
                 "talktalk_url": r.get("톡톡URL", ""),
                 "kakao": r.get("카카오톡", ""),
@@ -1702,6 +1766,7 @@ class CrawlerEngine:
         c_hp, p_hp = _pct("홈페이지URL")
         c_resp, p_resp = _pct("홈페이지반응형", empty_vals=("", "X"))
         c_nopb, p_nopb = _pct("전화버튼없음", empty_vals=("", "X"))
+        c_wb, p_wb = _pct("웹빌더", empty_vals=("", "X"))
         c_talk, p_talk = _pct("톡톡", empty_vals=("", "X"))
         c_kakao, p_kakao = _pct("카카오톡", empty_vals=("", "X"))
         c_insta, p_insta = _pct("인스타그램", empty_vals=("", "X"))
@@ -1724,6 +1789,7 @@ class CrawlerEngine:
             f"  홈페이지URL:     {c_hp}/{total} ({p_hp}%)  +{s['hp']}\n"
             f"  홈페이지반응형:  {c_resp}/{total} ({p_resp}%)  +{s.get('responsive', 0)}\n"
             f"  전화버튼없음:    {c_nopb}/{total} ({p_nopb}%)  +{s.get('no_phone_btn', 0)}\n"
+            f"  웹빌더:          {c_wb}/{total} ({p_wb}%)  +{s.get('webbuilder', 0)}\n"
             f"  톡톡:            {c_talk}/{total} ({p_talk}%)  +{s.get('talktalk', 0)}\n"
             f"  카카오톡:        {c_kakao}/{total} ({p_kakao}%)  +{s.get('kakao', 0)}\n"
             f"  인스타그램:      {c_insta}/{total} ({p_insta}%)  +{s.get('instagram', 0)}\n"
@@ -2975,15 +3041,16 @@ class CrawlerEngine:
                 self._stat_inc("new_biz")
                 log_items.append("new:O")
 
-        # ═══ 이메일 + 홈페이지 분석 (반응형/전화버튼/카카오/인스타 — HTML 1회 재활용) ═══
+        # ═══ 이메일 + 홈페이지 분석 (반응형/전화버튼/웹빌더/카카오/인스타 — HTML 1회 재활용) ═══
         need_email = not (r.get("업체이메일") or "").strip()
         need_resp = not (r.get("홈페이지반응형") or "").strip()
         need_phone_btn = not (r.get("전화버튼없음") or "").strip()
+        need_webbuilder = not (r.get("웹빌더") or "").strip()
         need_kakao_hp = not (r.get("카카오톡") or "").strip()
         need_insta_hp = not (r.get("인스타그램") or "").strip()
         hp_url = (r.get("홈페이지URL") or "").strip()
         if hp_url and hp_url != "X" and hp_url.startswith("http") and (
-            need_email or need_resp or need_phone_btn or need_kakao_hp or need_insta_hp
+            need_email or need_resp or need_phone_btn or need_webbuilder or need_kakao_hp or need_insta_hp
         ):
             html = self._fetch(hp_url, referer=f"https://www.google.com/search?q={quote(name)}", timeout=3)
             if need_email:
@@ -3005,6 +3072,12 @@ class CrawlerEngine:
                 if flag == "O":
                     self._stat_inc("no_phone_btn")
                 log_items.append(f"nophonebtn:{flag}")
+            if need_webbuilder:
+                wb_flag = self.detect_webbuilder(html, url=hp_url)
+                r["웹빌더"] = wb_flag
+                if wb_flag == "O":
+                    self._stat_inc("webbuilder")
+                log_items.append(f"wb:{wb_flag}")
             if need_kakao_hp and html:
                 kk2 = self.extract_kakao_url(html)
                 if kk2:
@@ -3074,6 +3147,9 @@ class CrawlerEngine:
         if not (r.get("전화버튼없음") or "").strip():
             # 홈페이지 자체가 없거나 검사 실패 → 영업 타겟 아님 (X)
             r["전화버튼없음"] = "X"
+        if not (r.get("웹빌더") or "").strip():
+            # 홈페이지 없음/검사 실패 → 웹빌더 아님 = X (영업 가능 추정)
+            r["웹빌더"] = "X"
 
         # 리뷰합계 계산 (방문자 + 블로그)
         r["리뷰합계"] = self._compute_review_total(r)
@@ -3118,7 +3194,7 @@ class CrawlerEngine:
             "phone": 0, "visitor_review": 0, "blog_review": 0,
             "hp": 0, "email": 0, "naver_id": 0,
             "responsive": 0, "talktalk": 0, "kakao": 0, "instagram": 0,
-            "no_phone_btn": 0, "new_biz": 0,
+            "no_phone_btn": 0, "webbuilder": 0, "new_biz": 0,
             "blocked": 0, "success": 0,
         }
 
@@ -3266,6 +3342,7 @@ class CrawlerEngine:
                 "홈페이지URL": "",
                 "홈페이지반응형": "",
                 "전화버튼없음": "",
+                "웹빌더": "",
                 "톡톡": "",
                 "톡톡URL": "",
                 "카카오톡": "",
@@ -3386,6 +3463,7 @@ class CrawlerEngine:
         c_hp, p_hp = _pct("홈페이지URL")
         c_resp, p_resp = _pct("홈페이지반응형", empty_vals=("", "X"))
         c_nopb, p_nopb = _pct("전화버튼없음", empty_vals=("", "X"))
+        c_wb, p_wb = _pct("웹빌더", empty_vals=("", "X"))
         c_talk, p_talk = _pct("톡톡", empty_vals=("", "X"))
         c_kakao, p_kakao = _pct("카카오톡", empty_vals=("", "X"))
         c_insta, p_insta = _pct("인스타그램", empty_vals=("", "X"))
@@ -3408,6 +3486,7 @@ class CrawlerEngine:
             f"  홈페이지URL:     {c_hp}/{total} ({p_hp}%)  +{s['hp']}\n"
             f"  홈페이지반응형:  {c_resp}/{total} ({p_resp}%)  +{s.get('responsive', 0)}\n"
             f"  전화버튼없음:    {c_nopb}/{total} ({p_nopb}%)  +{s.get('no_phone_btn', 0)}\n"
+            f"  웹빌더:          {c_wb}/{total} ({p_wb}%)  +{s.get('webbuilder', 0)}\n"
             f"  톡톡:            {c_talk}/{total} ({p_talk}%)  +{s.get('talktalk', 0)}\n"
             f"  카카오톡:        {c_kakao}/{total} ({p_kakao}%)  +{s.get('kakao', 0)}\n"
             f"  인스타그램:      {c_insta}/{total} ({p_insta}%)  +{s.get('instagram', 0)}\n"
