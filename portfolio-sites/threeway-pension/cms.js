@@ -78,6 +78,11 @@
       }
     }
 
+    // 빈 img 슬라이드는 메인 페이지에 노출 금지 (broken image 방지)
+    // admin.html은 사용자가 만든 빈 카드를 그대로 보존해 입력 도움을 주지만,
+    // 사이트에는 이미지가 있는 슬라이드만 노출한다.
+    slides = (slides || []).filter(function (s) { return s && s.img; });
+
     if (slides.length === 0) return;
 
     var overlay = slider.querySelector('.hero-slider-overlay');

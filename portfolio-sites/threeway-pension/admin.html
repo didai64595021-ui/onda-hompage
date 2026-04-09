@@ -1755,6 +1755,18 @@
     card.dataset.index = idx;
     card.style.cssText = 'border:1px solid #ddd;border-radius:12px;padding:16px;margin-bottom:12px;background:#fff';
 
+    // 빈 슬라이드 시각 경고 (이미지/카피/부제 모두 없을 때)
+    const isEmpty = !slide.img && !slide.copy && !slide.sub;
+    if (isEmpty) {
+      card.style.borderColor = '#f39c12';
+      card.style.background = '#fffbeb';
+      const warn = document.createElement('div');
+      warn.className = 'hero-slide-empty-warn';
+      warn.textContent = '⚠️ 새 슬라이드 — 이미지나 카피를 입력해야 사이트에 표시됩니다';
+      warn.style.cssText = 'background:#fef3c7;color:#92400e;padding:8px 12px;border-radius:6px;font-size:0.82rem;margin-bottom:10px;font-weight:500';
+      card.appendChild(warn);
+    }
+
     // 헤더
     const header = document.createElement('div');
     header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:12px';
@@ -1865,13 +1877,23 @@
     });
 
     // 히어로 슬라이더 배열 저장
-    cmsData['hero-slides'] = heroSlides.filter(s => s.img || s.copy || s.sub);
+    // ⚠️ 사용자가 "+ 슬라이드 추가"를 눌러서 만든 빈 슬라이드도 그대로 보존한다.
+    //   (예전엔 filter(s => s.img || s.copy || s.sub) 로 silent 제외해서
+    //    "추가가 안 된다"는 오해를 만들었음. 빈 슬라이드는 cms.js renderHeroSlides
+    //    에서 메인 페이지 렌더링 시에만 스킵되므로 broken image 걱정 없음.)
+    cmsData['hero-slides'] = heroSlides.slice();
     // 하위호환: 개별 키도 동기화
     cmsData['hero-slides'].forEach((s, i) => {
       cmsData['hero-slide-' + (i + 1) + '-img'] = s.img;
       cmsData['hero-slide-' + (i + 1) + '-copy'] = s.copy;
       cmsData['hero-slide-' + (i + 1) + '-sub'] = s.sub;
     });
+    // 이전에 더 많이 있던 슬라이드 잔재 정리 (레거시 키 청소)
+    for (var hi = cmsData['hero-slides'].length + 1; hi <= 30; hi++) {
+      delete cmsData['hero-slide-' + hi + '-img'];
+      delete cmsData['hero-slide-' + hi + '-copy'];
+      delete cmsData['hero-slide-' + hi + '-sub'];
+    }
 
     // 동적 그룹 6개 일괄 저장 + 레거시 동기화
     Object.keys(DYN_GROUPS).forEach(function (marker) {
