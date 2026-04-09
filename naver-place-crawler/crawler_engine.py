@@ -300,7 +300,7 @@ class CrawlerEngine:
         self.save_every = max(1, int(save_every or 1))
         self.stats = {
             "place_id": 0, "category": 0, "name": 0, "address": 0,
-            "phone": 0, "visitor_review": 0, "blog_review": 0,
+            "phone": 0, "mobile_phone": 0, "visitor_review": 0, "blog_review": 0,
             "hp": 0, "email": 0, "naver_id": 0,
             "responsive": 0, "talktalk": 0, "kakao": 0, "instagram": 0,
             "no_phone_btn": 0, "webbuilder": 0, "new_biz": 0,
@@ -759,6 +759,81 @@ class CrawlerEngine:
         return f"https://www.instagram.com/{username}"
 
     @staticmethod
+    def _normalize_mobile_phone(raw):
+        """전화번호 포맷 정규화: 01012345678 → 010-1234-5678"""
+        if not raw:
+            return ""
+        digits = re.sub(r'[^\d]', '', str(raw))
+        if len(digits) == 11 and digits.startswith('01'):
+            return f"{digits[:3]}-{digits[3:7]}-{digits[7:]}"
+        if len(digits) == 10 and digits.startswith('01'):
+            return f"{digits[:3]}-{digits[3:6]}-{digits[6:]}"
+        return raw
+
+    @staticmethod
+    def extract_mobile_phone(html):
+        """네이버 예약/플레이스 HTML 에서 업체 대표 010 핸드폰 번호 추출.
+        추출 전략 (우선순위 순):
+          1. JSON 필드: bookingTelNumber / bookingPhone / contactPhone / mobile / cellPhone
+          2. tel:010... 앵커/onclick
+          3. 일반 텍스트 010-XXXX-XXXX 패턴
+          4. 하이픈 없는 11자리 01X 번호
+        안심번호(050/070)는 반환 X (무선 010/011/016~019만).
+        """
+        if not html:
+            return ""
+        text = html if isinstance(html, str) else str(html)
+        # unicode escape 복원 (네이버 SSR JSON이 \u002F 등으로 escape된 경우)
+        text = text.replace("\\u002F", "/").replace("\\/", "/")
+
+        # 1. JSON 필드 우선 — 네이버 예약 위젯/플레이스 상세 안의 공식 필드
+        json_patterns = [
+            r'"bookingTelNumber"\s*:\s*"(01[016789][-\s]?\d{3,4}[-\s]?\d{4})"',
+            r'"bookingPhone"\s*:\s*"(01[016789][-\s]?\d{3,4}[-\s]?\d{4})"',
+            r'"bookingTel"\s*:\s*"(01[016789][-\s]?\d{3,4}[-\s]?\d{4})"',
+            r'"contactPhone"\s*:\s*"(01[016789][-\s]?\d{3,4}[-\s]?\d{4})"',
+            r'"mobile(?:Phone|Tel)?"\s*:\s*"(01[016789][-\s]?\d{3,4}[-\s]?\d{4})"',
+            r'"cellPhone"\s*:\s*"(01[016789][-\s]?\d{3,4}[-\s]?\d{4})"',
+            # 포맷 없는 11자리 (JSON 필드 내)
+            r'"bookingTelNumber"\s*:\s*"(01[016789]\d{7,8})"',
+            r'"bookingPhone"\s*:\s*"(01[016789]\d{7,8})"',
+            r'"mobile(?:Phone|Tel)?"\s*:\s*"(01[016789]\d{7,8})"',
+        ]
+        for p in json_patterns:
+            m = re.search(p, text)
+            if m:
+                return CrawlerEngine._normalize_mobile_phone(m.group(1))
+
+        # 2. tel: href / onclick — 하이픈 있든 없든
+        tel_patterns = [
+            r'''(?:href|data-href|data-tel)\s*=\s*["']\s*tel:\s*(01[016789][-\s]?\d{3,4}[-\s]?\d{4})''',
+            r'''(?:href|data-href|data-tel)\s*=\s*["']\s*tel:\s*(01[016789]\d{7,8})''',
+            r'''location\.href\s*=\s*["']\s*tel:\s*(01[016789][-\s\d]{7,12})''',
+        ]
+        for p in tel_patterns:
+            m = re.search(p, text, re.IGNORECASE)
+            if m:
+                return CrawlerEngine._normalize_mobile_phone(m.group(1))
+
+        # 3. 일반 텍스트 010-XXXX-XXXX (하이픈 필수)
+        m = re.search(r'(01[016789]-\d{3,4}-\d{4})', text)
+        if m:
+            return m.group(1)
+
+        # 4. 공백 구분 010 XXXX XXXX
+        m = re.search(r'(01[016789])\s+(\d{3,4})\s+(\d{4})', text)
+        if m:
+            return CrawlerEngine._normalize_mobile_phone(''.join(m.groups()))
+
+        # 5. 하이픈 없는 11자리 — false positive 높아서 마지막 수단 + JSON 필드 근처만
+        # "number":"01012345678" 형태
+        m = re.search(r'"(?:number|tel|phoneNumber)"\s*:\s*"(01[016789]\d{7,8})"', text)
+        if m:
+            return CrawlerEngine._normalize_mobile_phone(m.group(1))
+
+        return ""
+
+    @staticmethod
     def detect_phone_button(html):
         """홈페이지 HTML에 모바일 바로 전화 버튼이 있는지 검사.
         지원 패턴:
@@ -950,6 +1025,49 @@ class CrawlerEngine:
             return mobile_data  # dict 형태로 반환 (place HTML 대신)
         return ""
 
+    @staticmethod
+    def _guess_place_types(category_hint):
+        """카테고리 힌트로 네이버 플레이스 type 추정.
+        매칭 안되면 가장 범용 type 목록 반환 (3회 fallback)."""
+        cat = (category_hint or "").lower()
+        if any(k in cat for k in ["병원", "의원", "치과", "한의원", "보건", "약국", "클리닉", "성형", "피부과"]):
+            return ["hospital", "place"]
+        if any(k in cat for k in ["음식", "레스토랑", "카페", "맛집", "주점", "펍", " 바 ", "식당", "한식", "중식", "일식", "양식", "베이커리", "분식"]):
+            return ["restaurant", "place"]
+        if any(k in cat for k in ["미용", "헤어", "네일", "피부관리", "스파", "왁싱", "마사지"]):
+            return ["beauty", "place"]
+        if any(k in cat for k in ["학원", "교습", "교육", "과외"]):
+            return ["academy", "place"]
+        return ["place", "restaurant", "hospital"]
+
+    def _fetch_booking_phone_fallback(self, pid, category_hint=""):
+        """place HTML 에 mobile_phone 이 없을 때 네이버 예약/대체 페이지에서 010 번호 fetch.
+        카테고리 힌트로 type 추정 → 해당 type 의 /booking 및 /home 페이지 시도."""
+        if not pid:
+            return ""
+        types = self._guess_place_types(category_hint)
+        tried = 0
+        max_tries = 3
+        for t in types:
+            if tried >= max_tries:
+                break
+            urls = [
+                f"https://m.place.naver.com/{t}/{pid}/booking",
+            ]
+            for url in urls:
+                if tried >= max_tries:
+                    break
+                tried += 1
+                try:
+                    html = self._fetch(url, referer="https://m.naver.com/", timeout=6)
+                    if html and len(html) > 1500:
+                        phone = self.extract_mobile_phone(html)
+                        if phone:
+                            return phone
+                except Exception:
+                    continue
+        return ""
+
     def _fetch_place_from_mobile_search(self, pid, name=""):
         """모바일 네이버 검색 결과에서 업체 상세 정보 추출.
         place HTML 프록시 없는 Windows 환경용 폴백.
@@ -1068,6 +1186,11 @@ class CrawlerEngine:
         p = (vp.group(1) if vp else "") or (ph.group(1) if ph else "")
         if p and re.search(r"\d", p):
             result["phone"] = p
+
+        # 모바일(010) 전화번호 — 네이버 예약 섹션 등에 노출된 업체 대표 핸드폰
+        mobile = self.extract_mobile_phone(html)
+        if mobile:
+            result["mobile_phone"] = mobile
 
         # 방문자리뷰수 (여러 필드명 대응)
         for pat in [r'"visitorReviewCount"\s*:\s*(\d+)', r'"visitorReviewsTotal"\s*:\s*(\d+)']:
@@ -1363,7 +1486,7 @@ class CrawlerEngine:
     # ═══════════════════════════════════════════
 
     OUT_HEADERS = [
-        "업종(키워드)", "상호명", "네이버아이디", "업체이메일", "안심번호", "업체주소",
+        "업종(키워드)", "상호명", "네이버아이디", "업체이메일", "안심번호", "010전화", "업체주소",
         "홈페이지URL", "홈페이지반응형", "전화버튼없음", "웹빌더",
         "톡톡", "톡톡URL", "카카오톡", "인스타그램",
         "방문자리뷰수", "블로그리뷰수", "리뷰합계",
@@ -1472,7 +1595,7 @@ class CrawlerEngine:
         self.running = True
         self.stats = {
             "place_id": 0, "category": 0, "name": 0, "address": 0,
-            "phone": 0, "visitor_review": 0, "blog_review": 0,
+            "phone": 0, "mobile_phone": 0, "visitor_review": 0, "blog_review": 0,
             "hp": 0, "email": 0, "naver_id": 0,
             "responsive": 0, "talktalk": 0, "kakao": 0, "instagram": 0,
             "no_phone_btn": 0, "webbuilder": 0, "new_biz": 0,
@@ -1620,6 +1743,19 @@ class CrawlerEngine:
                         r["안심번호"] = parsed_place["phone"]
                         self.stats["phone"] += 1
                         log_items.append(f"tel:{parsed_place['phone']}")
+
+                    # 010 전화번호 (네이버 예약/플레이스에서 추출된 대표 핸드폰)
+                    if parsed_place.get("mobile_phone") and not (r.get("010전화") or "").strip():
+                        r["010전화"] = parsed_place["mobile_phone"]
+                        self.stats["mobile_phone"] += 1
+                        log_items.append(f"m-tel:{parsed_place['mobile_phone']}")
+                    elif not (r.get("010전화") or "").strip() and pid:
+                        # place HTML 에 없으면 예약 페이지 fallback (카테고리 기반 type 추정)
+                        booking_phone = self._fetch_booking_phone_fallback(pid, parsed_place.get("category", ""))
+                        if booking_phone:
+                            r["010전화"] = booking_phone
+                            self.stats["mobile_phone"] += 1
+                            log_items.append(f"m-tel:{booking_phone}(bk)")
 
                     # 방문자리뷰수
                     if parsed_place.get("visitor_review") and not (r.get("방문자리뷰수") or "").strip():
@@ -1814,6 +1950,7 @@ class CrawlerEngine:
                 "name": r.get("상호명", ""),
                 "address": r.get("업체주소", ""),
                 "phone": r.get("안심번호", ""),
+                "mobile_phone": r.get("010전화", ""),
                 "visitor_review": r.get("방문자리뷰수", ""),
                 "blog_review": r.get("블로그리뷰수", ""),
                 "review_total": r.get("리뷰합계", ""),
@@ -1863,6 +2000,7 @@ class CrawlerEngine:
         c_name, p_name = _pct("상호명")
         c_email, p_email = _pct("업체이메일")
         c_phone, p_phone = _pct("안심번호")
+        c_mobile, p_mobile = _pct("010전화")
         c_addr, p_addr = _pct("업체주소")
         c_hp, p_hp = _pct("홈페이지URL")
         c_resp, p_resp = _pct("홈페이지반응형", empty_vals=("", "X"))
@@ -1886,6 +2024,7 @@ class CrawlerEngine:
             f"  상호명:          {c_name}/{total} ({p_name}%)  +{s['name']}\n"
             f"  업체이메일:      {c_email}/{total} ({p_email}%)  +{s['email']}\n"
             f"  안심번호:        {c_phone}/{total} ({p_phone}%)  +{s['phone']}\n"
+            f"  010전화:         {c_mobile}/{total} ({p_mobile}%)  +{s.get('mobile_phone', 0)}\n"
             f"  업체주소:        {c_addr}/{total} ({p_addr}%)  +{s['address']}\n"
             f"  홈페이지URL:     {c_hp}/{total} ({p_hp}%)  +{s['hp']}\n"
             f"  홈페이지반응형:  {c_resp}/{total} ({p_resp}%)  +{s.get('responsive', 0)}\n"
@@ -3483,7 +3622,7 @@ class CrawlerEngine:
         self.running = True
         self.stats = {
             "place_id": 0, "category": 0, "name": 0, "address": 0,
-            "phone": 0, "visitor_review": 0, "blog_review": 0,
+            "phone": 0, "mobile_phone": 0, "visitor_review": 0, "blog_review": 0,
             "hp": 0, "email": 0, "naver_id": 0,
             "responsive": 0, "talktalk": 0, "kakao": 0, "instagram": 0,
             "no_phone_btn": 0, "webbuilder": 0, "new_biz": 0,
@@ -3751,6 +3890,7 @@ class CrawlerEngine:
         c_name, p_name = _pct("상호명")
         c_email, p_email = _pct("업체이메일")
         c_phone, p_phone = _pct("안심번호")
+        c_mobile, p_mobile = _pct("010전화")
         c_addr, p_addr = _pct("업체주소")
         c_hp, p_hp = _pct("홈페이지URL")
         c_resp, p_resp = _pct("홈페이지반응형", empty_vals=("", "X"))
