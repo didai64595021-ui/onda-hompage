@@ -2101,9 +2101,41 @@ class CrawlerEngine:
             try:
                 search_url = f"https://map.naver.com/p/search/{quote(keyword)}"
 
-                # ── 1단계: 검색 URL 직접 접속 (쿠키 없이 — GraphQL 방식에서 쿠키 불필요) ──
+                # ── 0단계: map.naver.com 메인 먼저 진입 (쿠키 수집 → appLink redirect 우회) ──
+                # 일부 키워드(강남미용실/부산헬스장 등 인기 키워드)는 첫 진입 시 m.map.naver.com/appLink로
+                # 강제 redirect됨. 메인 페이지를 먼저 방문해서 쿠키를 미리 받으면 redirect 회피 가능
+                try:
+                    driver.get("https://map.naver.com/")
+                    time.sleep(2 + random.random())
+                except Exception:
+                    pass
+
+                # ── 1단계: 검색 URL 직접 접속 ──
                 driver.get(search_url)
                 time.sleep(5 + random.random() * 2)
+
+                # ── 1.5단계: appLink redirect 감지 → 다른 URL로 폴백 ──
+                cur_url = driver.current_url or ""
+                if "appLink" in cur_url or "m.map.naver.com" in cur_url:
+                    self.callback("log", f"  🔁 appLink redirect 감지 — 폴백 URL 시도")
+                    # 폴백 URL 후보들
+                    fallback_urls = [
+                        f"https://map.naver.com/v5/search/{quote(keyword)}",
+                        f"https://map.naver.com/?query={quote(keyword)}",
+                        f"https://map.naver.com/p/entry/place/{quote(keyword)}",
+                    ]
+                    for fb_url in fallback_urls:
+                        try:
+                            driver.get(fb_url)
+                            time.sleep(3 + random.random())
+                            new_url = driver.current_url or ""
+                            if "appLink" not in new_url and "m.map.naver.com" not in new_url:
+                                self.callback("log", f"  ✅ 폴백 성공: {fb_url[:60]}")
+                                break
+                        except Exception:
+                            continue
+                    else:
+                        self.callback("log", f"  ⚠️ 모든 폴백 URL이 appLink로 redirect")
 
                 # ── 2단계: iframe 로딩 대기 (최대 15초) ──
                 has_iframe = False
