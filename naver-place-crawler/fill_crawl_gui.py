@@ -1457,114 +1457,191 @@ class CrawlerGUI:
             self._safe_callback("finished", None)
 
     def _run_queue_crawl(self, output_file, cfg):
-        """큐의 키워드를 순차적으로 크롤링, 결과를 시트별로 하나의 xlsx에 저장"""
+        """큐의 키워드를 4 슬롯 병렬 크롤링, 결과를 시트별로 하나의 xlsx에 저장.
+
+        병렬 구조:
+          - PARALLEL_KEYWORDS=4 슬롯 워커가 동시 실행
+          - 각 슬롯은 자기 CrawlerEngine + 자기 Selenium 브라우저 + 12 PHASE2 워커
+          - 슬롯 워커들은 공유 큐(_queue_items)에서 pending 키워드를 atomic하게 가져감
+          - xlsx 시트 병합은 _merge_lock 으로 직렬화
+          - 1 GUI 안에서 GUI 4개 효과
+        """
         import tempfile
+        from concurrent.futures import ThreadPoolExecutor, as_completed
         try:
             import openpyxl
         except ImportError:
             openpyxl = None
 
+        PARALLEL_KEYWORDS = 4  # 동시 처리 키워드 수 (1 GUI = 4 GUI 효과)
+
         start_page = self.start_page_var.get()
         max_pages = self.max_pages_var.get()
 
-        # 실시간 큐 반영: 매번 pending을 새로 찾음 (진행 중 추가/삭제 반영)
-        while True:
-            if self._queue_stop_requested:
-                self._safe_callback("log", "큐 중지됨. 남은 키워드는 대기 상태 유지.")
-                break
+        # Tkinter 변수는 메인 스레드 외 접근 위험 — 워커 시작 전 1번만 캡처
+        _use_rank = False
+        _nid = ""
+        _npw = ""
+        try:
+            rank_mode = getattr(self, 'rank_mode_var', None)
+            _use_rank = rank_mode.get() if rank_mode else False
+            _nid = self.naver_id_var.get().strip() if hasattr(self, 'naver_id_var') else ""
+            _npw = self.naver_pw_var.get().strip() if hasattr(self, 'naver_pw_var') else ""
+        except Exception:
+            pass
 
-            # 현재 시점의 pending 키워드 찾기
-            queue_idx = None
-            for i, item in enumerate(self._queue_items):
-                if item["status"] == "pending":
-                    queue_idx = i
-                    break
+        # 슬롯 관리 + 락 (lazy 초기화)
+        self._engine_slots = []
+        slots_lock = threading.Lock()
+        merge_lock = threading.Lock()  # _merge_to_output 직렬화 (xlsx 동시 쓰기 방지)
+        next_lock = threading.Lock()   # pending 키워드 atomic pop
+        progress_lock = threading.Lock()
+        completed = [0]                # 큐 완료 카운트 (mutable)
 
-            if queue_idx is None:
-                break  # pending 없음 → 큐 완료
+        # ─── 슬롯별 콜백 wrapper (로그 prefix + 슬롯별 progress 무시) ───
+        def make_slot_callback(slot_id, kw):
+            kw_short = kw[:10]
+            def cb(event, data):
+                if event == "log":
+                    self._safe_callback("log", f"[S{slot_id}|{kw_short}] {data}")
+                elif event == "stats":
+                    self._safe_callback("stats", data)
+                elif event in ("total", "progress"):
+                    # 슬롯별 값이 섞이면 깜빡임 → 큐 진행도(완료/총)로 대체
+                    pass
+                else:
+                    self._safe_callback(event, data)
+            return cb
 
-            item = self._queue_items[queue_idx]
-            keyword = item["keyword"]
+        # ─── pending 키워드 atomic pop ───
+        def _pop_next_pending():
+            with next_lock:
+                if self._queue_stop_requested:
+                    return None
+                for it in self._queue_items:
+                    if it["status"] == "pending":
+                        it["status"] = "running"
+                        self.root.after(0, self._queue_refresh_listbox)
+                        return it
+                return None
 
-            # 상태 업데이트: 진행중
-            item["status"] = "running"
-            self._queue_current_idx = queue_idx
-            self.root.after(0, self._queue_refresh_listbox)
-
-            self._safe_callback("log", f"\n{'='*50}")
-            self._safe_callback("log", f"큐 [{queue_idx+1}/{len(self._queue_items)}] 키워드: {keyword}")
-            self._safe_callback("log", f"{'='*50}")
-
-            # 각 키워드별 임시 파일 (기존 파일 재사용 → progress_file 경로 유지 → 이어하기 가능)
-            if item.get("temp_file") and os.path.isfile(item["temp_file"]):
-                kw_temp = item["temp_file"]
-            else:
-                fd, kw_temp = tempfile.mkstemp(suffix=".xlsx", prefix=f"crawl_kw_")
-                os.close(fd)
-                item["temp_file"] = kw_temp
-
-            # 엔진 생성 (매 키워드마다 새로 생성)
-            self.engine = CrawlerEngine(
-                proxy_file=cfg["proxy_file"],
-                delay_min=cfg["delay_min"],
-                delay_max=cfg["delay_max"],
-                timeout=cfg["timeout"],
-                callback=self._engine_callback,
-                api_keys=cfg["api_keys"],
-                detail_workers=12,  # 3배 병렬 (IP차단 없는 환경)
-            )
-
-            # 진행률 리셋
-            self.root.after(0, lambda: self.progress_bar.set(0))
-            self.root.after(0, lambda: self.progress_label.config(text="0/0 (0%)"))
-            self.total_rows = 0
-
+        # ─── 1 키워드 처리 (워커 스레드) ───
+        def _process_keyword(slot_id, item):
+            kw = item["keyword"]
+            engine = None
             try:
-                rank_mode = getattr(self, 'rank_mode_var', None)
-                use_rank = rank_mode.get() if rank_mode else False
-                nid = self.naver_id_var.get().strip() if hasattr(self, 'naver_id_var') else ""
-                npw = self.naver_pw_var.get().strip() if hasattr(self, 'naver_pw_var') else ""
-                self.engine.run_keyword_search(keyword, kw_temp, start_page, max_pages,
-                                                rank_mode=use_rank,
-                                                naver_id=nid or None, naver_pw=npw or None)
-
-                # 중지 판단: _queue_stop_requested만 사용 (engine.running은 정상완료에서도 False)
-                if self._queue_stop_requested:
-                    item["status"] = "pending"
-                    count = self._count_xlsx_rows(kw_temp)
-                    if count > 0:
-                        item["count"] = count
-                    self._keyword_results[keyword] = kw_temp
-                    self._safe_callback("log", f"⏸ '{keyword}' 일시중지됨 — {count}건 수집됨, 다음 시작 시 이어서 진행")
+                # 임시 파일 (이어하기 지원)
+                if item.get("temp_file") and os.path.isfile(item["temp_file"]):
+                    kw_temp = item["temp_file"]
                 else:
-                    item["status"] = "done"
-                    count = self._count_xlsx_rows(kw_temp)
-                    item["count"] = count
-                    self._safe_callback("log", f"✅ '{keyword}' 완료 — {count}건 수집")
-            except Exception as e:
-                if self._queue_stop_requested:
-                    item["status"] = "pending"
-                    count = self._count_xlsx_rows(kw_temp)
-                    if count > 0:
+                    fd, kw_temp = tempfile.mkstemp(suffix=".xlsx", prefix="crawl_kw_")
+                    os.close(fd)
+                    item["temp_file"] = kw_temp
+
+                self._safe_callback("log", f"\n▶ [S{slot_id}] '{kw}' 시작 (임시: {os.path.basename(kw_temp)})")
+
+                # 슬롯 엔진 생성
+                engine = CrawlerEngine(
+                    proxy_file=cfg["proxy_file"],
+                    delay_min=cfg["delay_min"],
+                    delay_max=cfg["delay_max"],
+                    timeout=cfg["timeout"],
+                    callback=make_slot_callback(slot_id, kw),
+                    api_keys=cfg["api_keys"],
+                    detail_workers=12,
+                )
+                with slots_lock:
+                    self._engine_slots.append(engine)
+                    self.engine = engine  # 호환: self.engine 도 마지막 슬롯 가리킴
+
+                try:
+                    engine.run_keyword_search(kw, kw_temp, start_page, max_pages,
+                                              rank_mode=_use_rank,
+                                              naver_id=_nid or None, naver_pw=_npw or None)
+
+                    if self._queue_stop_requested:
+                        item["status"] = "pending"
+                        count = self._count_xlsx_rows(kw_temp)
+                        if count > 0:
+                            item["count"] = count
+                        self._keyword_results[kw] = kw_temp
+                        self._safe_callback("log", f"⏸ [S{slot_id}] '{kw}' 일시중지 — {count}건")
+                    else:
+                        item["status"] = "done"
+                        count = self._count_xlsx_rows(kw_temp)
                         item["count"] = count
-                    self._keyword_results[keyword] = kw_temp
-                    self._safe_callback("log", f"⏸ '{keyword}' 일시중지됨 — {count}건 수집됨, 다음 시작 시 이어서 진행")
-                else:
-                    item["status"] = "failed"
-                    self._safe_callback("log", f"❌ '{keyword}' 실패: {e}")
+                        self._safe_callback("log", f"✅ [S{slot_id}] '{kw}' 완료 — {count}건")
+                except Exception as e:
+                    if self._queue_stop_requested:
+                        item["status"] = "pending"
+                        count = self._count_xlsx_rows(kw_temp)
+                        if count > 0:
+                            item["count"] = count
+                        self._keyword_results[kw] = kw_temp
+                        self._safe_callback("log", f"⏸ [S{slot_id}] '{kw}' 일시중지 — {count}건")
+                    else:
+                        item["status"] = "failed"
+                        self._safe_callback("log", f"❌ [S{slot_id}] '{kw}' 실패: {e}")
 
-            self.root.after(0, self._queue_refresh_listbox)
+                self.root.after(0, self._queue_refresh_listbox)
 
-            # 중간 결과를 메인 xlsx에 시트로 병합
-            self._merge_to_output(kw_temp, output_file, keyword)
+                # 메인 xlsx 시트 병합 (직렬화)
+                with merge_lock:
+                    self._merge_to_output(kw_temp, output_file, kw)
 
-            # 키워드 완료마다 중간 다운로드 활성화
-            self.root.after(0, lambda: self.download_btn.config(
-                state="normal", fg=C_SUCCESS,
-                text="\u2b07 중간결과"))
+                self._keyword_results[kw] = kw_temp
 
-            # 키워드별 결과 파일 보존 (선택 다운로드용)
-            self._keyword_results[keyword] = kw_temp
+                # 큐 진행도 업데이트 (완료 키워드 / 전체)
+                with progress_lock:
+                    completed[0] += 1
+                    done = completed[0]
+                    total = len(self._queue_items)
+                    pct = (done / total * 100) if total else 0
+                self.root.after(0, lambda d=done, t=total, p=pct: (
+                    self.progress_bar.set(p),
+                    self.progress_label.config(text=f"{d}/{t} 키워드 ({p:.0f}%)")
+                ))
+
+                # 다운로드 버튼 활성화 (중간결과)
+                self.root.after(0, lambda: self.download_btn.config(
+                    state="normal", fg=C_SUCCESS, text="\u2b07 중간결과"))
+
+            finally:
+                # 슬롯 엔진 정리
+                if engine:
+                    with slots_lock:
+                        if engine in self._engine_slots:
+                            self._engine_slots.remove(engine)
+
+        # ─── 슬롯 워커: pending 다 떨어질 때까지 키워드 받아 처리 ───
+        def _slot_worker(slot_id):
+            self._safe_callback("log", f"🚀 슬롯 S{slot_id} 시작")
+            while True:
+                if self._queue_stop_requested:
+                    return
+                item = _pop_next_pending()
+                if item is None:
+                    return
+                _process_keyword(slot_id, item)
+            return
+
+        # 진행률 초기화
+        self.root.after(0, lambda: self.progress_bar.set(0))
+        self.root.after(0, lambda: self.progress_label.config(text=f"0/{len(self._queue_items)} 키워드 (0%)"))
+        self.total_rows = 0
+
+        self._safe_callback("log", f"\n{'='*50}")
+        self._safe_callback("log", f"🔥 큐 병렬 모드: {PARALLEL_KEYWORDS} 슬롯 동시 / 총 {len(self._queue_items)} 키워드")
+        self._safe_callback("log", f"{'='*50}")
+
+        # ─── 슬롯 워커 풀 실행 ───
+        with ThreadPoolExecutor(max_workers=PARALLEL_KEYWORDS, thread_name_prefix="kwslot") as kw_executor:
+            futures = [kw_executor.submit(_slot_worker, i + 1) for i in range(PARALLEL_KEYWORDS)]
+            for f in as_completed(futures):
+                try:
+                    f.result()
+                except Exception as e:
+                    self._safe_callback("log", f"❌ 슬롯 워커 오류: {e}")
 
         self._queue_running = False
         self._queue_current_idx = -1
@@ -1643,8 +1720,19 @@ class CrawlerGUI:
             dst_wb.close()
 
     def _stop_crawl(self):
+        # 큐 병렬 모드: 모든 슬롯 엔진 stop
+        if hasattr(self, "_engine_slots") and self._engine_slots:
+            for eng in list(self._engine_slots):
+                try:
+                    eng.stop()
+                except Exception:
+                    pass
+        # 단일 키워드 모드 호환
         if self.engine:
-            self.engine.stop()
+            try:
+                self.engine.stop()
+            except Exception:
+                pass
         if self._queue_running:
             self._queue_stop_requested = True
         self.stop_btn.config(state="disabled")
