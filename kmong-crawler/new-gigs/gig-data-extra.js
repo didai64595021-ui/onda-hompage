@@ -71,6 +71,7 @@ const EXTRA = {
     gallery: ['06-openai.png', '04-openai.png', '02-openai.png'],
     extraSelects: [
       { label: '사용하는 AI 툴', value: 'ChatGPT' },
+      { label: '활용 목적', value: '사내 문서 검색용 GPT' },
     ],
   },
 
