@@ -759,78 +759,51 @@ class CrawlerEngine:
         return f"https://www.instagram.com/{username}"
 
     @staticmethod
-    def _normalize_mobile_phone(raw):
-        """전화번호 포맷 정규화: 01012345678 → 010-1234-5678"""
-        if not raw:
+    def extract_booking_biz_id(place_html):
+        """place HTML 에서 네이버 예약 biz ID 추출.
+        onda-coldmail/scripts 의 검증된 로직 기준.
+        반환: 숫자 문자열 또는 ""
+        """
+        if not place_html:
             return ""
-        digits = re.sub(r'[^\d]', '', str(raw))
-        if len(digits) == 11 and digits.startswith('01'):
-            return f"{digits[:3]}-{digits[3:7]}-{digits[7:]}"
-        if len(digits) == 10 and digits.startswith('01'):
-            return f"{digits[:3]}-{digits[3:6]}-{digits[6:]}"
-        return raw
+        m = re.search(r'"bookingBusinessId"\s*:\s*"(\d+)"', place_html)
+        return m.group(1) if m else ""
 
     @staticmethod
-    def extract_mobile_phone(html):
-        """네이버 예약/플레이스 HTML 에서 업체 대표 010 핸드폰 번호 추출.
-        추출 전략 (우선순위 순):
-          1. JSON 필드: bookingTelNumber / bookingPhone / contactPhone / mobile / cellPhone
-          2. tel:010... 앵커/onclick
-          3. 일반 텍스트 010-XXXX-XXXX 패턴
-          4. 하이픈 없는 11자리 01X 번호
-        안심번호(050/070)는 반환 X (무선 010/011/016~019만).
+    def _extract_010_from_text(text):
+        """텍스트에서 010-XXXX-XXXX 형식의 전화번호 unique 추출.
+        onda-coldmail 의 검증된 단순 regex 방식.
+        반환: 첫 번째 010 번호 또는 "".
         """
-        if not html:
+        if not text:
             return ""
-        text = html if isinstance(html, str) else str(html)
-        # unicode escape 복원 (네이버 SSR JSON이 \u002F 등으로 escape된 경우)
-        text = text.replace("\\u002F", "/").replace("\\/", "/")
+        phones = re.findall(r'010-\d{4}-\d{4}', text)
+        if not phones:
+            return ""
+        # unique preserve order + 첫 번째
+        seen = set()
+        for p in phones:
+            if p not in seen:
+                seen.add(p)
+                return p
+        return ""
 
-        # 1. JSON 필드 우선 — 네이버 예약 위젯/플레이스 상세 안의 공식 필드
-        json_patterns = [
-            r'"bookingTelNumber"\s*:\s*"(01[016789][-\s]?\d{3,4}[-\s]?\d{4})"',
-            r'"bookingPhone"\s*:\s*"(01[016789][-\s]?\d{3,4}[-\s]?\d{4})"',
-            r'"bookingTel"\s*:\s*"(01[016789][-\s]?\d{3,4}[-\s]?\d{4})"',
-            r'"contactPhone"\s*:\s*"(01[016789][-\s]?\d{3,4}[-\s]?\d{4})"',
-            r'"mobile(?:Phone|Tel)?"\s*:\s*"(01[016789][-\s]?\d{3,4}[-\s]?\d{4})"',
-            r'"cellPhone"\s*:\s*"(01[016789][-\s]?\d{3,4}[-\s]?\d{4})"',
-            # 포맷 없는 11자리 (JSON 필드 내)
-            r'"bookingTelNumber"\s*:\s*"(01[016789]\d{7,8})"',
-            r'"bookingPhone"\s*:\s*"(01[016789]\d{7,8})"',
-            r'"mobile(?:Phone|Tel)?"\s*:\s*"(01[016789]\d{7,8})"',
-        ]
-        for p in json_patterns:
-            m = re.search(p, text)
-            if m:
-                return CrawlerEngine._normalize_mobile_phone(m.group(1))
-
-        # 2. tel: href / onclick — 하이픈 있든 없든
-        tel_patterns = [
-            r'''(?:href|data-href|data-tel)\s*=\s*["']\s*tel:\s*(01[016789][-\s]?\d{3,4}[-\s]?\d{4})''',
-            r'''(?:href|data-href|data-tel)\s*=\s*["']\s*tel:\s*(01[016789]\d{7,8})''',
-            r'''location\.href\s*=\s*["']\s*tel:\s*(01[016789][-\s\d]{7,12})''',
-        ]
-        for p in tel_patterns:
-            m = re.search(p, text, re.IGNORECASE)
-            if m:
-                return CrawlerEngine._normalize_mobile_phone(m.group(1))
-
-        # 3. 일반 텍스트 010-XXXX-XXXX (하이픈 필수)
-        m = re.search(r'(01[016789]-\d{3,4}-\d{4})', text)
-        if m:
-            return m.group(1)
-
-        # 4. 공백 구분 010 XXXX XXXX
-        m = re.search(r'(01[016789])\s+(\d{3,4})\s+(\d{4})', text)
-        if m:
-            return CrawlerEngine._normalize_mobile_phone(''.join(m.groups()))
-
-        # 5. 하이픈 없는 11자리 — false positive 높아서 마지막 수단 + JSON 필드 근처만
-        # "number":"01012345678" 형태
-        m = re.search(r'"(?:number|tel|phoneNumber)"\s*:\s*"(01[016789]\d{7,8})"', text)
-        if m:
-            return CrawlerEngine._normalize_mobile_phone(m.group(1))
-
+    @staticmethod
+    def _extract_real_phone_from_text(text):
+        """텍스트에서 일반 유선 전화번호 추출 (0507 안심번호 제외).
+        반환: 첫 번째 번호 또는 "".
+        """
+        if not text:
+            return ""
+        phones = re.findall(r'0[2-9][0-9]?-\d{3,4}-\d{4}', text)
+        filtered = [p for p in phones if not p.startswith('0507')]
+        if not filtered:
+            return ""
+        seen = set()
+        for p in filtered:
+            if p not in seen:
+                seen.add(p)
+                return p
         return ""
 
     @staticmethod
@@ -1025,48 +998,55 @@ class CrawlerEngine:
             return mobile_data  # dict 형태로 반환 (place HTML 대신)
         return ""
 
-    @staticmethod
-    def _guess_place_types(category_hint):
-        """카테고리 힌트로 네이버 플레이스 type 추정.
-        매칭 안되면 가장 범용 type 목록 반환 (3회 fallback)."""
-        cat = (category_hint or "").lower()
-        if any(k in cat for k in ["병원", "의원", "치과", "한의원", "보건", "약국", "클리닉", "성형", "피부과"]):
-            return ["hospital", "place"]
-        if any(k in cat for k in ["음식", "레스토랑", "카페", "맛집", "주점", "펍", " 바 ", "식당", "한식", "중식", "일식", "양식", "베이커리", "분식"]):
-            return ["restaurant", "place"]
-        if any(k in cat for k in ["미용", "헤어", "네일", "피부관리", "스파", "왁싱", "마사지"]):
-            return ["beauty", "place"]
-        if any(k in cat for k in ["학원", "교습", "교육", "과외"]):
-            return ["academy", "place"]
-        return ["place", "restaurant", "hospital"]
+    def _fetch_booking_010(self, booking_biz_id, talktalk_url=""):
+        """네이버 예약(booking.naver.com) 및 톡톡 fallback 으로 010/실제전화 추출.
 
-    def _fetch_booking_phone_fallback(self, pid, category_hint=""):
-        """place HTML 에 mobile_phone 이 없을 때 네이버 예약/대체 페이지에서 010 번호 fetch.
-        카테고리 힌트로 type 추정 → 해당 type 의 /booking 및 /home 페이지 시도."""
-        if not pid:
-            return ""
-        types = self._guess_place_types(category_hint)
-        tried = 0
-        max_tries = 3
-        for t in types:
-            if tried >= max_tries:
-                break
-            urls = [
-                f"https://m.place.naver.com/{t}/{pid}/booking",
-            ]
-            for url in urls:
-                if tried >= max_tries:
-                    break
-                tried += 1
+        onda-coldmail/scripts/{extract-dog, interior, clean, gangnam-hair}-010.js 의
+        검증된 로직을 Python 으로 포팅. 핵심 흐름:
+          1. m.booking.naver.com/booking/13/bizes/{bizId} HTML fetch
+             → /010-\d{4}-\d{4}/g regex, unique → 첫 번째
+             → /0[2-9][0-9]?-\d{3,4}-\d{4}/g regex (0507 제외) → 일반 전화
+          2. 010 못 찾고 톡톡 있으면 talk.naver.com/ct/{talkId} fallback 동일 regex
+
+        반환: (phone010: str, real_phone: str) — 없으면 ""
+        """
+        phone010 = ""
+        real_phone = ""
+
+        # 1. booking.naver.com
+        if booking_biz_id:
+            url = f"https://m.booking.naver.com/booking/13/bizes/{booking_biz_id}"
+            try:
+                html = self._fetch(url, referer="https://m.place.naver.com/", timeout=6)
+                if html:
+                    phone010 = self._extract_010_from_text(html)
+                    real_phone = self._extract_real_phone_from_text(html)
+            except Exception:
+                pass
+
+        # 2. talk.naver.com fallback (010 못 찾은 경우만)
+        if not phone010 and talktalk_url:
+            # extract_talktalk_url 은 항상 "https://talk.naver.com/ct/{id}" 형식으로 정규화
+            talk_id = ""
+            m = re.search(r'talk\.naver\.com/ct/([a-zA-Z0-9_\-]+)', talktalk_url)
+            if m:
+                talk_id = m.group(1)
+            if talk_id:
                 try:
-                    html = self._fetch(url, referer="https://m.naver.com/", timeout=6)
-                    if html and len(html) > 1500:
-                        phone = self.extract_mobile_phone(html)
-                        if phone:
-                            return phone
+                    thtml = self._fetch(f"https://talk.naver.com/ct/{talk_id}",
+                                        referer="https://m.place.naver.com/", timeout=6)
+                    if thtml:
+                        p010 = self._extract_010_from_text(thtml)
+                        if p010:
+                            phone010 = p010
+                        if not real_phone:
+                            rp = self._extract_real_phone_from_text(thtml)
+                            if rp:
+                                real_phone = rp
                 except Exception:
-                    continue
-        return ""
+                    pass
+
+        return phone010, real_phone
 
     def _fetch_place_from_mobile_search(self, pid, name=""):
         """모바일 네이버 검색 결과에서 업체 상세 정보 추출.
@@ -1187,10 +1167,10 @@ class CrawlerEngine:
         if p and re.search(r"\d", p):
             result["phone"] = p
 
-        # 모바일(010) 전화번호 — 네이버 예약 섹션 등에 노출된 업체 대표 핸드폰
-        mobile = self.extract_mobile_phone(html)
-        if mobile:
-            result["mobile_phone"] = mobile
+        # 네이버 예약 bizId (후속 booking.naver.com fetch 로 010 번호 추출에 사용)
+        biz_id = self.extract_booking_biz_id(html)
+        if biz_id:
+            result["booking_biz_id"] = biz_id
 
         # 방문자리뷰수 (여러 필드명 대응)
         for pat in [r'"visitorReviewCount"\s*:\s*(\d+)', r'"visitorReviewsTotal"\s*:\s*(\d+)']:
@@ -1744,18 +1724,18 @@ class CrawlerEngine:
                         self.stats["phone"] += 1
                         log_items.append(f"tel:{parsed_place['phone']}")
 
-                    # 010 전화번호 (네이버 예약/플레이스에서 추출된 대표 핸드폰)
-                    if parsed_place.get("mobile_phone") and not (r.get("010전화") or "").strip():
-                        r["010전화"] = parsed_place["mobile_phone"]
-                        self.stats["mobile_phone"] += 1
-                        log_items.append(f"m-tel:{parsed_place['mobile_phone']}")
-                    elif not (r.get("010전화") or "").strip() and pid:
-                        # place HTML 에 없으면 예약 페이지 fallback (카테고리 기반 type 추정)
-                        booking_phone = self._fetch_booking_phone_fallback(pid, parsed_place.get("category", ""))
-                        if booking_phone:
-                            r["010전화"] = booking_phone
-                            self.stats["mobile_phone"] += 1
-                            log_items.append(f"m-tel:{booking_phone}(bk)")
+                    # 010 전화번호 — 네이버 예약(booking.naver.com) + 톡톡 fallback
+                    # onda-coldmail 검증된 로직: bookingBusinessId → /booking/13/bizes/{id} → 010 regex
+                    if not (r.get("010전화") or "").strip():
+                        biz_id = parsed_place.get("booking_biz_id", "")
+                        talktalk_url = parsed_place.get("talktalk", "") or (r.get("톡톡URL") or "").strip()
+                        if biz_id or talktalk_url:
+                            phone010, real_phone = self._fetch_booking_010(biz_id, talktalk_url)
+                            if phone010:
+                                r["010전화"] = phone010
+                                self.stats["mobile_phone"] += 1
+                                src = "bk" if biz_id else "talk"
+                                log_items.append(f"010:{phone010}({src})")
 
                     # 방문자리뷰수
                     if parsed_place.get("visitor_review") and not (r.get("방문자리뷰수") or "").strip():
