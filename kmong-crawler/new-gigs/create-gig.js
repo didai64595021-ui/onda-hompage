@@ -364,17 +364,13 @@ async function fillStep2(page, product, opts = {}) {
   console.log(`[Step2] 주요 특징`);
   await fillSelectByLabel(page, selectMap, '기술 수준', product.features.tech);
   // 카테고리별 추가 필드 — 라벨이 다양해서 모두 시도, 발견된 것만 채움
-  if (product.features.messenger) {
-    // 봇·챗봇: "플랫폼" / "메신저 채널"
-    await fillSelectByLabel(page, selectMap, '플랫폼', product.features.messenger);
-    await fillSelectByLabel(page, selectMap, '메신저 채널', product.features.messenger);
-  }
-  if (product.features.botField) {
-    // 봇·챗봇: "용도" / "봇 분야" / "봇 카테고리"
-    await fillSelectByLabel(page, selectMap, '용도', product.features.botField);
-    await fillSelectByLabel(page, selectMap, '봇 분야', product.features.botField);
-    await fillSelectByLabel(page, selectMap, '봇 카테고리', product.features.botField);
-  }
+  // 봇·챗봇(617): 플랫폼 + 용도
+  await fillSelectByLabel(page, selectMap, '플랫폼', product.features.messenger || '텔레그램');
+  await fillSelectByLabel(page, selectMap, '용도', product.features.botField || '알림');
+  // 맞춤형 챗봇·GPT(667): 사용하는 AI 툴 + 활용 목적
+  await fillSelectByLabel(page, selectMap, '사용하는 AI 툴', product.features.aiTool || 'Claude');
+  await fillSelectByLabel(page, selectMap, '활용 목적', product.features.purpose || '챗봇');
+  // 공통
   await fillSelectByLabel(page, selectMap, '팀 규모', product.features.team);
   await fillSelectByLabel(page, selectMap, '상주 여부', product.features.onsite);
 
