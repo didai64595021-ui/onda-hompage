@@ -148,6 +148,29 @@ section{padding:64px 0;height:auto}
 .badge-icon{width:60px;height:60px;background:var(--header);color:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;font-family:'Cormorant Garamond',serif}
 .badge-text{font-size:.9rem;color:var(--mute);font-weight:500}
 
+/* 안건 TW-1 (2026-04-09): 모바일에서 MBC/KBS 뱃지 섹션 완전 숨김 — 사용자 요청
+   PC에서는 그대로 노출. 모바일은 추가될수록 지저분해진다는 사용자 결정. */
+@media (max-width:768px){
+  .badge-section{display:none !important}
+}
+
+/* 안건 TW-2/TW-4: section-title-kr 헤드라인 강조 (Our Rooms / Amenities 아래 카피)
+   기존 inline style:1.2rem 제거 후 클래스로 처리. 모바일에서도 부각. */
+.rooms-headline,
+.facilities-headline{
+  font-size:clamp(1.25rem,2.4vw,1.7rem);
+  color:var(--text);
+  font-weight:700;
+  line-height:1.5;
+  max-width:760px;
+  margin:0 auto;
+  word-break:keep-all;
+}
+.rooms-headline{color:var(--accent,#7BA17F)}
+@media (max-width:480px){
+  .rooms-headline,.facilities-headline{font-size:1.1rem;line-height:1.55;padding:0 8px}
+}
+
 /* 카드 */
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px}
 .card{background:var(--white);border-radius:16px;overflow:hidden;box-shadow:0 2px 16px var(--shadow);transition:transform .3s,box-shadow .3s;display:flex;flex-direction:column}
@@ -542,14 +565,16 @@ section{padding:64px 0;height:auto}
   .gallery-grid{grid-template-columns:repeat(2,1fr)}
   .pkg-cards-wrap{grid-template-columns:1fr}
   .pkg-menu-grid{grid-template-columns:1fr 1fr}
-  .floating-buttons{bottom:16px;right:16px;gap:10px}
-  .floating-phone{width:56px;height:56px;font-size:1.4rem}
-  .floating-insta{width:56px;height:56px;font-size:1.4rem}
-  .floating-insta svg{width:26px;height:26px}
-  .floating-place{width:56px;height:56px;font-size:1.4rem}
-  .floating-place svg{width:28px;height:28px}
-  .floating-blog{width:56px;height:56px;font-size:1.4rem}
-  .floating-blog svg{width:34px;height:34px}
+  /* 안건 TW-3 (2026-04-09): 모바일 첫화면 hero 영역에 floating 전화 버튼이
+     너무 크게 겹쳐서 지저분해 보이는 문제 → 사이즈 축소 + 약간 투명 */
+  .floating-buttons{bottom:14px;right:14px;gap:8px;opacity:.92}
+  .floating-phone{width:48px;height:48px;font-size:1.2rem}
+  .floating-insta{width:48px;height:48px;font-size:1.2rem}
+  .floating-insta svg{width:22px;height:22px}
+  .floating-place{width:48px;height:48px;font-size:1.2rem}
+  .floating-place svg{width:24px;height:24px}
+  .floating-blog{width:48px;height:48px;font-size:1.2rem}
+  .floating-blog svg{width:28px;height:28px}
 .logo-img{height:48px}
   .logo-text .logo-en{font-size:1.1rem}
   .logo-text .logo-kr{font-size:.55rem}
