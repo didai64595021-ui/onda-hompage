@@ -2144,20 +2144,65 @@ class CrawlerEngine:
                     return None
 
                 if not has_iframe:
-                    self.callback("log", "  ⚠️ searchIframe 미발견 — Selenium 스킵")
-                    driver.quit()
-                    return None
+                    # 디버그: 어떤 iframe이 있는지 + 페이지 단서 노출
+                    try:
+                        all_iframes = driver.find_elements(By.TAG_NAME, "iframe")
+                        iframe_ids = [(f.get_attribute('id') or f.get_attribute('name') or '?')[:40] for f in all_iframes]
+                        page_title = driver.title or ''
+                        cur_url = driver.current_url or ''
+                        body_preview = ''
+                        try:
+                            body_preview = driver.find_element(By.TAG_NAME, "body").text[:200].replace('\n', ' ')
+                        except Exception:
+                            pass
+                        self.callback("log", f"  ⚠️ searchIframe 미발견 — title='{page_title[:50]}' url='{cur_url[:80]}'")
+                        self.callback("log", f"  발견된 iframe: {iframe_ids if iframe_ids else '(없음)'}")
+                        if body_preview:
+                            self.callback("log", f"  body미리보기: {body_preview}")
+                    except Exception as _e:
+                        self.callback("log", f"  ⚠️ searchIframe 미발견 (디버그 실패: {_e})")
+
+                    # 폴백 1: 다른 iframe 이름들 시도 (네이버가 카테고리별로 다른 iframe 사용 가능성)
+                    fallback_iframe = None
+                    for fb_sel in [
+                        "iframe#entryIframe",
+                        "iframe#placeListIframe",
+                        "iframe#centerSearchIframe",
+                        "iframe[name='searchIframe']",
+                        "iframe",
+                    ]:
+                        try:
+                            fb_el = driver.find_element(By.CSS_SELECTOR, fb_sel)
+                            if fb_el:
+                                fallback_iframe = (fb_sel, fb_el)
+                                self.callback("log", f"  🔁 폴백 iframe 발견: {fb_sel}")
+                                break
+                        except Exception:
+                            continue
+                    if not fallback_iframe:
+                        self.callback("log", "  ⚠️ 폴백 iframe도 없음 — Selenium 스킵")
+                        driver.quit()
+                        return None
+                    # 폴백 iframe으로 진행
+                    has_iframe = True
 
                 # ── iframe 진입 ──
                 driver.switch_to.default_content()
                 iframe_found = False
+                last_iframe_error = None
                 for _retry in range(10):
                     try:
-                        iframe = driver.find_element(By.CSS_SELECTOR, "iframe#searchIframe")
+                        # 1차 시도: searchIframe
+                        try:
+                            iframe = driver.find_element(By.CSS_SELECTOR, "iframe#searchIframe")
+                        except Exception:
+                            # 2차 시도: 어느 iframe이든
+                            iframe = driver.find_element(By.CSS_SELECTOR, "iframe#entryIframe, iframe#placeListIframe, iframe")
                         driver.switch_to.frame(iframe)
                         iframe_found = True
                         break
-                    except Exception:
+                    except Exception as _ie:
+                        last_iframe_error = str(_ie)[:100]
                         time.sleep(1)
                         try:
                             for btn in driver.find_elements(By.CSS_SELECTOR,
@@ -2168,7 +2213,7 @@ class CrawlerEngine:
                             pass
 
                 if not iframe_found:
-                    self.callback("log", "  ⚠️ iframe 전환 실패")
+                    self.callback("log", f"  ⚠️ iframe 전환 실패: {last_iframe_error or 'unknown'}")
                     driver.quit()
                     return None
 
