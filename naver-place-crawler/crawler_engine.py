@@ -599,25 +599,67 @@ class CrawlerEngine:
         # viewport만 있고 단서 없으면 그래도 O로 간주 (모바일 대응 의도가 있음)
         return "O"
 
+    # 네이버 톡톡 시스템/공용 채널 블랙리스트 (업체 톡톡 아님)
+    # - w9ni795: "네이버 공유누리 예약 AI" — 예약 모듈 placeholder, 모든 페이지에 박힘
+    TALKTALK_BLACKLIST = frozenset({
+        "w9ni795",
+    })
+
+    @staticmethod
+    def _normalize_talktalk_id(raw_id):
+        """톡톡 채널 ID 정규화 + 블랙리스트 검사.
+        반환: 통과 시 정규화된 ID(소문자), 차단 시 ""
+        """
+        if not raw_id:
+            return ""
+        cid = raw_id.lower().strip("/")
+        # 길이 검증 (4자 미만 = 잡음)
+        if len(cid) < 4 or len(cid) > 30:
+            return ""
+        # 블랙리스트
+        if cid in CrawlerEngine.TALKTALK_BLACKLIST:
+            return ""
+        return cid
+
     @staticmethod
     def extract_talktalk_url(html):
-        """HTML 텍스트에서 네이버 톡톡 URL 추출.
-        지원 패턴:
-        - https://talk.naver.com/<id>
-        - https://talk.naver.com/ct/<id>
-        반환: URL 문자열 또는 ""
+        """HTML 텍스트에서 네이버 톡톡 URL 추출 (엄격 모드).
+        표준 형식만 인정:
+        - https://talk.naver.com/ct/<id>     (비즈니스 톡톡 표준 경로)
+        - https://talk.naver.com/W<id>       (단축 URL → ct/로 리다이렉트되는 형식)
+        시스템 placeholder(공유누리 예약 AI 등)는 블랙리스트로 거절.
+        반환: 정규화된 ct/ 형식 URL 또는 ""
         """
         if not html:
             return ""
         # JSON 인코딩된 슬래시(\u002F) 디코딩
         text = html.replace("\\u002F", "/").replace("\\/", "/")
-        m = re.search(r'https?://talk\.naver\.com/[A-Za-z0-9_/\-]+', text)
-        if m:
-            url = m.group(0).rstrip('"\'<>)')
-            # 너무 짧으면 무효 처리
-            if len(url) > len("https://talk.naver.com/") + 1:
-                return url
+
+        # 패턴 1: ct/<id> 직접 매칭
+        for m in re.finditer(r'https?://talk\.naver\.com/ct/([A-Za-z0-9]{4,30})\b', text):
+            cid = CrawlerEngine._normalize_talktalk_id(m.group(1))
+            if cid:
+                return f"https://talk.naver.com/ct/{cid}"
+
+        # 패턴 2: W<id> 단축 URL (W는 ct/ 경로의 prefix이기도 하므로 그대로 ID에 포함됨)
+        for m in re.finditer(r'https?://talk\.naver\.com/(W[A-Za-z0-9]{3,14})\b', text):
+            cid = CrawlerEngine._normalize_talktalk_id(m.group(1))
+            if cid:
+                return f"https://talk.naver.com/ct/{cid}"
+
         return ""
+
+    @staticmethod
+    def normalize_talktalk_url(url):
+        """이미 갖고 있는 URL을 검증/정규화 (GraphQL repr/etc 출처용).
+        통과 시 ct/ 형식 URL 반환, 실패 시 ""
+        """
+        if not url:
+            return ""
+        # 도메인 빠른 체크
+        if "talk.naver.com" not in url:
+            return ""
+        return CrawlerEngine.extract_talktalk_url(url)
 
     @staticmethod
     def extract_kakao_url(html):
@@ -1162,14 +1204,16 @@ class CrawlerEngine:
                     result["category"] = base.get("category", "")
                     result["address"] = base.get("roadAddress") or base.get("address") or ""
 
-                    # 네이버 톡톡 URL (repr/etc 우선, 없으면 raw text)
+                    # 네이버 톡톡 URL (repr/etc 우선, 없으면 raw text — 모두 정규화/블랙리스트 검사)
                     tt = ""
                     kk = ""
                     ig = ""
                     for src in ([repr_hp] if repr_hp else []) + (etc_links or []):
                         u = (src.get("url") if src else "") or ""
                         if not tt and "talk.naver.com" in u:
-                            tt = u
+                            normalized = self.normalize_talktalk_url(u)
+                            if normalized:
+                                tt = normalized
                         if not kk and ("pf.kakao.com" in u or "plus.kakao.com" in u or "kakaochannel.com" in u or "open.kakao.com" in u):
                             kk = u
                         if not ig and "instagram.com" in u:
