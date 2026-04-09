@@ -1430,6 +1430,7 @@ class CrawlerGUI:
                 timeout=cfg["timeout"],
                 callback=self._engine_callback,
                 api_keys=cfg["api_keys"],
+                detail_workers=12,  # 3배 병렬 (IP차단 없는 환경)
             )
             keyword = self.keyword_var.get().strip()
             start_page = self.start_page_var.get()
@@ -1510,6 +1511,7 @@ class CrawlerGUI:
                 timeout=cfg["timeout"],
                 callback=self._engine_callback,
                 api_keys=cfg["api_keys"],
+                detail_workers=12,  # 3배 병렬 (IP차단 없는 환경)
             )
 
             # 진행률 리셋

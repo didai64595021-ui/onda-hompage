@@ -277,7 +277,7 @@ class CrawlerEngine:
         timeout=5,
         callback=None,
         api_keys=None,
-        detail_workers=4,
+        detail_workers=12,
         save_every=10,
     ):
         """
@@ -288,7 +288,7 @@ class CrawlerEngine:
             timeout: 요청 타임아웃 (초)
             callback: 진행 상황 콜백 fn(event, data)
             api_keys: 네이버 API 키 리스트 [{"client_id": "...", "client_secret": "..."}, ...]
-            detail_workers: PHASE 2 상세 크롤링 동시 워커 수 (기본 4, 1=직렬)
+            detail_workers: PHASE 2 상세 크롤링 동시 워커 수 (기본 12, IP차단 없을 때 3배 병렬)
             save_every: xlsx/progress 저장 주기 — N건마다 1회 (기본 10)
         """
         self.delay_min = delay_min
@@ -2312,31 +2312,136 @@ class CrawlerEngine:
                 logs = driver.get_log("performance")
                 gql_payload = None
 
+                # 카테고리별 오퍼레이션명 변동(getNxList 외)에 견고하게:
+                # 페이지네이션 가능한 GraphQL POST = variables.input.start + display 둘 다 보유
                 for entry in logs:
                     try:
                         log = _json.loads(entry["message"])
                         msg = log.get("message", {})
-                        if msg.get("method") == "Network.requestWillBeSent":
-                            params = msg.get("params", {})
-                            req = params.get("request", {})
-                            url = req.get("url", "")
-                            if "graphql" in url and req.get("method") == "POST":
-                                post_data = req.get("postData", "")
-                                if "getNxList" in post_data:
-                                    gql_payload = _json.loads(post_data)
-                                    if isinstance(gql_payload, list):
-                                        gql_payload = gql_payload[0]
-                                    break
+                        if msg.get("method") != "Network.requestWillBeSent":
+                            continue
+                        params = msg.get("params", {})
+                        req = params.get("request", {})
+                        url = req.get("url", "")
+                        if "graphql" not in url or req.get("method") != "POST":
+                            continue
+                        post_data = req.get("postData", "")
+                        if not post_data:
+                            continue
+                        # 빠른 키워드 필터 — start/display 둘 다 있어야 후보
+                        if '"start"' not in post_data or '"display"' not in post_data:
+                            continue
+                        try:
+                            candidate = _json.loads(post_data)
+                        except Exception:
+                            continue
+                        if isinstance(candidate, list):
+                            candidate = candidate[0] if candidate else None
+                        if not isinstance(candidate, dict):
+                            continue
+                        # variables.input.start/display 가 실제로 있는지 검증 (페이지네이션 가능)
+                        v = (candidate.get("variables") or {})
+                        inp = (v.get("input") or {}) if isinstance(v, dict) else {}
+                        if isinstance(inp, dict) and "start" in inp and "display" in inp:
+                            gql_payload = candidate
+                            break
                     except Exception:
                         continue
 
                 if not gql_payload:
-                    self.callback("log", "  ⚠️ GraphQL 쿼리 캡처 실패 — HTML 폴백")
-                    src = driver.page_source
-                    for m in _re.finditer(r'"id"\s*:\s*"(\d{5,})"', src):
-                        pid = m.group(1)
-                        if pid not in {r["id"] for r in results}:
-                            results.append({"id": pid, "name": "", "rank": len(results) + 1, "page": 1})
+                    self.callback("log", "  ⚠️ GraphQL 쿼리 캡처 실패 — 페이지 순회 폴백 (1742f6f 패턴)")
+                    # 폴백: 현재 페이지에서 PID 수집 → 다음 페이지 클릭 → 반복
+                    visited = 0
+                    no_change_rounds = 0
+                    max_pg = max_pages if max_pages > 0 else 20
+                    while visited < max_pg:
+                        if not self.running:
+                            break
+                        visited += 1
+                        # 1) 현재 페이지 PID 추출 (HTML page_source)
+                        try:
+                            src = driver.page_source
+                        except Exception:
+                            break
+                        existing = {r["id"] for r in results}
+                        added = 0
+                        for m in _re.finditer(r'"id"\s*:\s*"(\d{5,})"', src):
+                            pid = m.group(1)
+                            if pid not in existing:
+                                existing.add(pid)
+                                results.append({"id": pid, "name": "", "rank": len(results) + 1, "page": visited})
+                                added += 1
+                        self.callback("log", f"  📊 폴백 [{visited}회차]: +{added}건 (누적 {len(results)}건)")
+                        if added == 0:
+                            no_change_rounds += 1
+                            if no_change_rounds >= 2:
+                                break
+                        else:
+                            no_change_rounds = 0
+                        # 2) 다음 페이지 클릭 — DOM에서 활성 페이지 +1 시도, 실패 시 "다음" 버튼
+                        try:
+                            driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", body)
+                            time.sleep(0.4)
+                        except Exception:
+                            pass
+                        clicked = False
+                        # 활성 페이지 번호 탐색
+                        active_text = ""
+                        try:
+                            for sel in ["a.mBN2s[aria-current='true']", "a[aria-current='page']", "a.qxokY", "a.mBN2s.qxokY"]:
+                                if active_text:
+                                    break
+                                for el in driver.find_elements(By.CSS_SELECTOR, sel):
+                                    t = (el.text or "").strip()
+                                    if t.isdigit():
+                                        active_text = t
+                                        break
+                        except Exception:
+                            pass
+                        # 숫자 페이지 클릭 시도
+                        target_nums = []
+                        if active_text and active_text.isdigit():
+                            target_nums.append(str(int(active_text) + 1))
+                        # 보조: 1742f6f 처럼 단순히 visited+1 도 시도
+                        if str(visited + 1) not in target_nums:
+                            target_nums.append(str(visited + 1))
+                        for tgt in target_nums:
+                            if clicked:
+                                break
+                            for sel in ["a.mBN2s", "a[role='button']"]:
+                                if clicked:
+                                    break
+                                for btn in driver.find_elements(By.CSS_SELECTOR, sel):
+                                    try:
+                                        if btn.text.strip() == tgt:
+                                            driver.execute_script("arguments[0].scrollIntoView({block:'center'})", btn)
+                                            time.sleep(0.2)
+                                            ActionChains(driver).move_to_element(btn).pause(0.15).click().perform()
+                                            clicked = True
+                                            time.sleep(2.0 + random.random())
+                                            break
+                                    except Exception:
+                                        continue
+                        # "다음" 버튼 폴백
+                        if not clicked:
+                            try:
+                                for btn in driver.find_elements(By.CSS_SELECTOR, "a, button"):
+                                    try:
+                                        aria = btn.get_attribute("aria-label") or ""
+                                        cls = (btn.get_attribute("class") or "").lower()
+                                        txt = (btn.text or "").strip()
+                                        if "다음" in aria or txt == "다음" or "next" in cls:
+                                            btn.click()
+                                            clicked = True
+                                            time.sleep(2.0 + random.random())
+                                            break
+                                    except Exception:
+                                        continue
+                            except Exception:
+                                pass
+                        if not clicked:
+                            self.callback("log", f"  ℹ️ 다음 페이지 버튼 없음 → 폴백 종료 (총 {len(results)}건)")
+                            break
                     driver.quit()
                     return results if results else None
 
