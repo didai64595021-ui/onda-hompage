@@ -1428,13 +1428,13 @@ class CrawlerEngine:
 
                     # 카카오톡 URL (place HTML 1차)
                     if parsed_place.get("kakao") and not (r.get("카카오톡") or "").strip():
-                        r["카카오톡"] = parsed_place["kakao"]
+                        r["카카오톡"] = "O"
                         self.stats["kakao"] += 1
                         log_items.append("kakao:O")
 
                     # 인스타그램 URL (place HTML 1차)
                     if parsed_place.get("instagram") and not (r.get("인스타그램") or "").strip():
-                        r["인스타그램"] = parsed_place["instagram"]
+                        r["인스타그램"] = "O"
                         self.stats["instagram"] += 1
                         log_items.append("ig:O")
 
@@ -1555,14 +1555,14 @@ class CrawlerEngine:
                 if need_kakao and html:
                     kk = self.extract_kakao_url(html)
                     if kk:
-                        r["카카오톡"] = kk
+                        r["카카오톡"] = "O"
                         self.stats["kakao"] += 1
                         log_items.append("kakao:O(hp)")
                 # 인스타그램
                 if need_insta and html:
                     ig = self.extract_instagram_url(html)
                     if ig:
-                        r["인스타그램"] = ig
+                        r["인스타그램"] = "O"
                         self.stats["instagram"] += 1
                         log_items.append("ig:O(hp)")
                 self._random_delay()
@@ -1606,11 +1606,11 @@ class CrawlerEngine:
                     self.stats["talktalk"] += 1
                     log_items.append("talk:O(gql)")
                 if need_kakao2 and gql_extra.get("kakao"):
-                    r["카카오톡"] = gql_extra["kakao"]
+                    r["카카오톡"] = "O"
                     self.stats["kakao"] += 1
                     log_items.append("kakao:O(gql)")
                 if need_insta2 and gql_extra.get("instagram"):
-                    r["인스타그램"] = gql_extra["instagram"]
+                    r["인스타그램"] = "O"
                     self.stats["instagram"] += 1
                     log_items.append("ig:O(gql)")
                 if need_new and gql_extra.get("is_new") == "O":
@@ -2952,19 +2952,19 @@ class CrawlerEngine:
                 self._stat_inc("talktalk")
                 log_items.append("talk:O")
 
-        # ═══ 카카오톡 URL ═══
+        # ═══ 카카오톡 (O/X) ═══
         if not (r.get("카카오톡") or "").strip():
             kk = gql.get("kakao") or parsed_place.get("kakao") or ""
             if kk:
-                r["카카오톡"] = kk
+                r["카카오톡"] = "O"
                 self._stat_inc("kakao")
                 log_items.append("kakao:O")
 
-        # ═══ 인스타그램 URL ═══
+        # ═══ 인스타그램 (O/X) ═══
         if not (r.get("인스타그램") or "").strip():
             ig = gql.get("instagram") or parsed_place.get("instagram") or ""
             if ig:
-                r["인스타그램"] = ig
+                r["인스타그램"] = "O"
                 self._stat_inc("instagram")
                 log_items.append("ig:O")
 
@@ -3008,13 +3008,13 @@ class CrawlerEngine:
             if need_kakao_hp and html:
                 kk2 = self.extract_kakao_url(html)
                 if kk2:
-                    r["카카오톡"] = kk2
+                    r["카카오톡"] = "O"
                     self._stat_inc("kakao")
                     log_items.append("kakao:O(hp)")
             if need_insta_hp and html:
                 ig2 = self.extract_instagram_url(html)
                 if ig2:
-                    r["인스타그램"] = ig2
+                    r["인스타그램"] = "O"
                     self._stat_inc("instagram")
                     log_items.append("ig:O(hp)")
         # place HTML에서도 이메일 시도
@@ -3300,10 +3300,10 @@ class CrawlerEngine:
                     row["톡톡"] = "O"
                     self._stat_inc("talktalk")
                 if parsed.get("kakao"):
-                    row["카카오톡"] = parsed["kakao"]
+                    row["카카오톡"] = "O"
                     self._stat_inc("kakao")
                 if parsed.get("instagram"):
-                    row["인스타그램"] = parsed["instagram"]
+                    row["인스타그램"] = "O"
                     self._stat_inc("instagram")
                 if parsed.get("is_new") == "O":
                     row["신규업체"] = "O"
