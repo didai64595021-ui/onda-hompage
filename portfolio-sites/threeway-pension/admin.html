@@ -1408,6 +1408,136 @@
         card.appendChild(dropZone);
 
         updatePreview(preview, item[f.key] || '', input, dropZone);
+
+        // ── 다중 이미지 갤러리 에디터 ──
+        var imgsKey = f.key.replace(/-?img$/, '') ? 'imgs' : 'imgs';
+        if (!item[imgsKey]) item[imgsKey] = [];
+        var galleryWrap = document.createElement('div');
+        galleryWrap.className = 'dyn-card-gallery';
+        galleryWrap.style.cssText = 'margin-top:8px;padding:10px;background:#f9fafb;border:1px solid #e5e5e5;border-radius:8px;';
+
+        var galleryTitle = document.createElement('div');
+        galleryTitle.style.cssText = 'font-size:.8rem;font-weight:600;color:#666;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;';
+        var galleryTitleText = document.createElement('span');
+        galleryTitleText.textContent = '📸 추가 이미지';
+        galleryTitle.appendChild(galleryTitleText);
+        var galleryCount = document.createElement('span');
+        galleryCount.className = 'gallery-count-label';
+        galleryCount.style.cssText = 'font-size:.75rem;color:#999;font-weight:400;';
+        galleryTitle.appendChild(galleryCount);
+        galleryWrap.appendChild(galleryTitle);
+
+        var galleryList = document.createElement('div');
+        galleryList.style.cssText = 'display:flex;flex-direction:column;gap:6px;';
+        galleryWrap.appendChild(galleryList);
+
+        (function(theItem, theImgsKey, theList, theCountLabel, theMarker, theIdx) {
+          function rebuildGalleryList() {
+            theList.innerHTML = '';
+            var imgs = theItem[theImgsKey] || [];
+            // 카운트 업데이트
+            var total = (theItem.img ? 1 : 0) + imgs.length;
+            theCountLabel.textContent = total + '장' + (total >= 2 ? ' — 슬라이더 활성화' : '');
+
+            imgs.forEach(function(src, gi) {
+              var row = document.createElement('div');
+              row.style.cssText = 'display:flex;align-items:center;gap:6px;';
+
+              var thumb = document.createElement('img');
+              thumb.src = src;
+              thumb.alt = '';
+              thumb.style.cssText = 'width:56px;height:42px;object-fit:cover;border-radius:4px;border:1px solid #ddd;flex-shrink:0;';
+              thumb.onerror = function() { this.style.background = '#eee'; };
+              row.appendChild(thumb);
+
+              var inp = document.createElement('input');
+              inp.type = 'text';
+              inp.value = src;
+              inp.placeholder = 'images/파일명.jpg';
+              inp.style.cssText = 'flex:1;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:.85rem;min-width:0;';
+              inp.addEventListener('input', function() {
+                imgs[gi] = this.value;
+                theItem[theImgsKey] = imgs;
+                thumb.src = this.value;
+                hasUnsavedChanges = true;
+                updateChangeCount();
+                resetAutosaveTimer();
+              });
+              row.appendChild(inp);
+
+              // 드래그앤드롭 업로드
+              var uploadBtn = document.createElement('label');
+              uploadBtn.textContent = '📁';
+              uploadBtn.title = '파일 선택';
+              uploadBtn.style.cssText = 'padding:4px 8px;border:1px solid #ddd;border-radius:6px;cursor:pointer;font-size:.9rem;background:#fff;';
+              var fileInp = document.createElement('input');
+              fileInp.type = 'file';
+              fileInp.accept = 'image/*';
+              fileInp.style.display = 'none';
+              fileInp.addEventListener('change', async function() {
+                if (!this.files[0]) return;
+                var dataUrl = await compressImage(this.files[0], 1200, 0.8);
+                imgs[gi] = dataUrl;
+                theItem[theImgsKey] = imgs;
+                inp.value = dataUrl.substring(0, 40) + '...';
+                thumb.src = dataUrl;
+                hasUnsavedChanges = true;
+                updateChangeCount();
+                resetAutosaveTimer();
+              });
+              uploadBtn.appendChild(fileInp);
+              row.appendChild(uploadBtn);
+
+              // 삭제
+              var delBtn = document.createElement('button');
+              delBtn.textContent = '✕';
+              delBtn.title = '삭제';
+              delBtn.style.cssText = 'padding:4px 8px;border:1px solid #e74c3c;border-radius:6px;background:#fff;color:#e74c3c;cursor:pointer;font-weight:700;font-size:.8rem;flex-shrink:0;';
+              delBtn.addEventListener('click', function() {
+                imgs.splice(gi, 1);
+                theItem[theImgsKey] = imgs;
+                rebuildGalleryList();
+                hasUnsavedChanges = true;
+                updateChangeCount();
+                resetAutosaveTimer();
+              });
+              row.appendChild(delBtn);
+
+              theList.appendChild(row);
+            });
+
+            // 추가 버튼
+            var addBtn = document.createElement('button');
+            addBtn.type = 'button';
+            addBtn.innerHTML = '➕ 사진 추가';
+            addBtn.style.cssText = 'padding:8px 16px;border:2px dashed #7BA17F;border-radius:8px;background:rgba(123,161,127,.05);color:#7BA17F;cursor:pointer;font-weight:600;font-size:.85rem;margin-top:4px;width:100%;';
+            addBtn.addEventListener('click', function() {
+              // 파일 선택 다이얼로그
+              var fileInput = document.createElement('input');
+              fileInput.type = 'file';
+              fileInput.accept = 'image/*';
+              fileInput.multiple = true;
+              fileInput.addEventListener('change', async function() {
+                var files = Array.from(this.files);
+                if (files.length === 0) return;
+                for (var fi = 0; fi < files.length; fi++) {
+                  var dataUrl = await compressImage(files[fi], 1200, 0.8);
+                  imgs.push(dataUrl);
+                  theItem[theImgsKey] = imgs;
+                }
+                rebuildGalleryList();
+                hasUnsavedChanges = true;
+                updateChangeCount();
+                resetAutosaveTimer();
+              });
+              fileInput.click();
+            });
+            theList.appendChild(addBtn);
+          }
+          rebuildGalleryList();
+        })(item, imgsKey, galleryList, galleryCount, marker, idx);
+
+        card.appendChild(galleryWrap);
       } else {
         input.addEventListener('input', function () {
           cfg.state[idx][f.key] = input.value;
@@ -1542,6 +1672,106 @@
 
         // 값이 없어도 항상 updatePreview 호출 → 업로드 버튼 표시
         updatePreview(preview, value, input, dropZone);
+
+        // ── 다중 이미지 갤러리 에디터 (standalone) ──
+        const imgsArrayKey = key.replace(/-img$/, '-imgs');
+        if (!cmsData[imgsArrayKey]) cmsData[imgsArrayKey] = [];
+        const sgWrap = document.createElement('div');
+        sgWrap.className = 'standalone-gallery-editor';
+        sgWrap.style.cssText = 'margin-top:8px;padding:10px;background:#f9fafb;border:1px solid #e5e5e5;border-radius:8px;';
+
+        const sgTitle = document.createElement('div');
+        sgTitle.style.cssText = 'font-size:.8rem;font-weight:600;color:#666;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;';
+        const sgTitleText = document.createElement('span');
+        sgTitleText.textContent = '📸 추가 이미지';
+        sgTitle.appendChild(sgTitleText);
+        const sgCountLabel = document.createElement('span');
+        sgCountLabel.style.cssText = 'font-size:.75rem;color:#999;font-weight:400;';
+        sgTitle.appendChild(sgCountLabel);
+        sgWrap.appendChild(sgTitle);
+
+        const sgList = document.createElement('div');
+        sgList.style.cssText = 'display:flex;flex-direction:column;gap:6px;';
+        sgWrap.appendChild(sgList);
+
+        (function(theKey, theList, theCountLabel) {
+          function rebuildSgList() {
+            theList.innerHTML = '';
+            var imgs = cmsData[theKey] || [];
+            var mainHas = cmsData[theKey.replace(/-imgs$/, '-img')] ? 1 : 0;
+            theCountLabel.textContent = (mainHas + imgs.length) + '장' + ((mainHas + imgs.length) >= 2 ? ' — 슬라이더 활성화' : '');
+
+            imgs.forEach(function(src, gi) {
+              var row = document.createElement('div');
+              row.style.cssText = 'display:flex;align-items:center;gap:6px;';
+
+              var thumb = document.createElement('img');
+              thumb.src = src; thumb.alt = '';
+              thumb.style.cssText = 'width:56px;height:42px;object-fit:cover;border-radius:4px;border:1px solid #ddd;flex-shrink:0;';
+              thumb.onerror = function() { this.style.background = '#eee'; };
+              row.appendChild(thumb);
+
+              var inp = document.createElement('input');
+              inp.type = 'text'; inp.value = src;
+              inp.placeholder = 'images/파일명.jpg';
+              inp.style.cssText = 'flex:1;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:.85rem;min-width:0;';
+              inp.addEventListener('input', function() {
+                imgs[gi] = this.value; cmsData[theKey] = imgs;
+                thumb.src = this.value;
+                hasUnsavedChanges = true; updateChangeCount(); resetAutosaveTimer();
+              });
+              row.appendChild(inp);
+
+              var uploadBtn = document.createElement('label');
+              uploadBtn.textContent = '📁'; uploadBtn.title = '파일 선택';
+              uploadBtn.style.cssText = 'padding:4px 8px;border:1px solid #ddd;border-radius:6px;cursor:pointer;font-size:.9rem;background:#fff;';
+              var fileInp = document.createElement('input');
+              fileInp.type = 'file'; fileInp.accept = 'image/*'; fileInp.style.display = 'none';
+              fileInp.addEventListener('change', async function() {
+                if (!this.files[0]) return;
+                var dataUrl = await compressImage(this.files[0], 1200, 0.8);
+                imgs[gi] = dataUrl; cmsData[theKey] = imgs;
+                inp.value = dataUrl.substring(0, 40) + '...'; thumb.src = dataUrl;
+                hasUnsavedChanges = true; updateChangeCount(); resetAutosaveTimer();
+              });
+              uploadBtn.appendChild(fileInp);
+              row.appendChild(uploadBtn);
+
+              var delBtn = document.createElement('button');
+              delBtn.textContent = '✕'; delBtn.title = '삭제';
+              delBtn.style.cssText = 'padding:4px 8px;border:1px solid #e74c3c;border-radius:6px;background:#fff;color:#e74c3c;cursor:pointer;font-weight:700;font-size:.8rem;flex-shrink:0;';
+              delBtn.addEventListener('click', function() {
+                imgs.splice(gi, 1); cmsData[theKey] = imgs;
+                rebuildSgList();
+                hasUnsavedChanges = true; updateChangeCount(); resetAutosaveTimer();
+              });
+              row.appendChild(delBtn);
+              theList.appendChild(row);
+            });
+
+            var addBtn = document.createElement('button');
+            addBtn.type = 'button'; addBtn.innerHTML = '➕ 사진 추가';
+            addBtn.style.cssText = 'padding:8px 16px;border:2px dashed #7BA17F;border-radius:8px;background:rgba(123,161,127,.05);color:#7BA17F;cursor:pointer;font-weight:600;font-size:.85rem;margin-top:4px;width:100%;';
+            addBtn.addEventListener('click', function() {
+              var fileInput = document.createElement('input');
+              fileInput.type = 'file'; fileInput.accept = 'image/*'; fileInput.multiple = true;
+              fileInput.addEventListener('change', async function() {
+                var files = Array.from(this.files);
+                for (var fi = 0; fi < files.length; fi++) {
+                  var dataUrl = await compressImage(files[fi], 1200, 0.8);
+                  imgs.push(dataUrl); cmsData[theKey] = imgs;
+                }
+                rebuildSgList();
+                hasUnsavedChanges = true; updateChangeCount(); resetAutosaveTimer();
+              });
+              fileInput.click();
+            });
+            theList.appendChild(addBtn);
+          }
+          rebuildSgList();
+        })(imgsArrayKey, sgList, sgCountLabel);
+
+        field.appendChild(sgWrap);
       } else if (isPriceKey(key)) {
         // 가격 필드 (개선 4)
         const wrapper = document.createElement('div');
