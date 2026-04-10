@@ -168,7 +168,7 @@ const REVIEW_PRODUCTS = [
     rootCategoryId: 2,
     subCategoryId: 243,
     image: 'R03-blog-review.png',
-    title: 'N사 블로그리뷰 사진+텍스트 풀커버',
+    title: '블로그리뷰 사진+텍스트 풀커버 포스팅',
 
     description: `"블로그 검색 1페이지에 우리 매장 후기가 없으면, 없는 매장입니다"
 
