@@ -2265,6 +2265,59 @@ class CrawlerEngine:
                     else:
                         self.callback("log", f"  ⚠️ 모든 폴백 URL이 appLink로 redirect")
 
+                # ── 1.7단계: "검색 결과가 없습니다" → pcmap.place.naver.com 시도 ──
+                cur_url = driver.current_url or ""
+                if "pcmap.place.naver.com" not in cur_url:
+                    try:
+                        _body_text = driver.find_element(By.TAG_NAME, "body").text[:500]
+                    except Exception:
+                        _body_text = ""
+                    if "검색 결과가 없습니다" in _body_text:
+                        self.callback("log", "  🔄 '결과 없음' 감지 → pcmap.place.naver.com 시도")
+                        pcmap_url = f"https://pcmap.place.naver.com/place/list?query={quote(search_keyword)}"
+                        try:
+                            driver.get(pcmap_url)
+                            time.sleep(3 + random.random())
+                        except Exception:
+                            pass
+
+                # ── 1.8단계: pcmap.place.naver.com 직접 파싱 (iframe 불요) ──
+                cur_url = driver.current_url or ""
+                if "pcmap.place.naver.com" in cur_url:
+                    self.callback("log", "  📋 pcmap 직접 파싱 모드 (iframe 불요)")
+                    try:
+                        # 스크롤로 더 많은 결과 로딩
+                        for _ in range(20):
+                            driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
+                            time.sleep(0.4)
+                        src = driver.page_source
+                        pids = []
+                        seen_p = set()
+                        # 패턴 1: /place/숫자 또는 /hospital/숫자 링크
+                        for m in _re.finditer(r'/(?:place|hospital)/(\d{5,})', src):
+                            pid = m.group(1)
+                            if pid not in seen_p:
+                                seen_p.add(pid)
+                                pids.append(pid)
+                        # 패턴 2: "id":"숫자" JSON
+                        for m in _re.finditer(r'"id"\s*:\s*"(\d{7,})"', src):
+                            pid = m.group(1)
+                            if pid not in seen_p:
+                                seen_p.add(pid)
+                                pids.append(pid)
+                        if pids:
+                            for pid in pids:
+                                results.append({"id": pid, "name": "", "rank": len(results) + 1, "page": 1})
+                            self.callback("log", f"  ✅ pcmap에서 {len(pids)}건 PID 수집")
+                            driver.quit()
+                            return results
+                        else:
+                            self.callback("log", "  ⚠️ pcmap에서 PID 미발견 — 모바일 폴백으로")
+                    except Exception as _pe:
+                        self.callback("log", f"  ⚠️ pcmap 파싱 실패: {_pe}")
+                    driver.quit()
+                    return None
+
                 # ── 2단계: iframe 로딩 대기 (최대 15초) ──
                 has_iframe = False
                 is_blocked = False
@@ -2329,7 +2382,7 @@ class CrawlerEngine:
                         "iframe#placeListIframe",
                         "iframe#centerSearchIframe",
                         "iframe[name='searchIframe']",
-                        "iframe",
+                        "iframe:not([id^='gnb_']):not([name^='gnb_'])",
                     ]:
                         try:
                             fb_el = driver.find_element(By.CSS_SELECTOR, fb_sel)
