@@ -354,6 +354,9 @@
     // Render dynamic card groups (room/facility/attraction/partner/gallery)
     renderDynamicGroups(data);
 
+    // Render room detail galleries from CMS
+    renderRoomGalleries(data);
+
     document.querySelectorAll('[data-cms]').forEach(el => {
       const key = el.dataset.cms;
       if (!key || !(key in data)) return;
@@ -455,6 +458,325 @@
     URL.revokeObjectURL(url);
   }
 
+  /* ============================================
+     범용 CMS 갤러리 컴포넌트
+     - img[data-cms="xxx-img"]에 대응하는 "xxx-imgs" 배열이 있으면
+       자동으로 슬라이더로 변환
+     - 1장이면 기존과 동일, 2장 이상이면 prev/next + dots 표시
+     ============================================ */
+
+  function renderCmsGalleries(data) {
+    if (!data || typeof data !== 'object') return;
+
+    document.querySelectorAll('img[data-cms]').forEach(function(img) {
+      var key = img.dataset.cms;
+      if (!key || !/-img$/.test(key)) return;
+
+      var galleryKey = key.replace(/-img$/, '-imgs');
+      var images = data[galleryKey];
+      if (!Array.isArray(images) || images.length < 2) return;
+
+      // 이미 갤러리로 변환된 경우 스킵
+      if (img.closest('.cms-gallery')) return;
+
+      // 원래 이미지의 부모 컨테이너 찾기
+      var parent = img.parentElement;
+      var isHero = !!img.closest('.page-hero, .hero');
+      var isHighlight = !!img.closest('.highlight-img-wrap');
+      var isCard = !!img.closest('.card-img-wrap, .pkg-card-img, .why-card-img');
+
+      // 갤러리 컨테이너 생성
+      var gallery = document.createElement('div');
+      gallery.className = 'cms-gallery';
+      if (isHero) gallery.classList.add('cms-gallery--hero');
+      else if (isHighlight) gallery.classList.add('cms-gallery--highlight');
+      else if (isCard) gallery.classList.add('cms-gallery--card');
+
+      gallery.dataset.cmsGallery = galleryKey;
+
+      // 슬라이드 트랙
+      var track = document.createElement('div');
+      track.className = 'cms-gallery-track';
+
+      images.forEach(function(src, idx) {
+        var slide = document.createElement('div');
+        slide.className = 'cms-gallery-slide';
+        if (idx === 0) slide.classList.add('active');
+        var slideImg = document.createElement('img');
+        slideImg.src = src;
+        slideImg.alt = img.alt || '';
+        slideImg.width = img.width || 800;
+        slideImg.height = img.height || 600;
+        slideImg.loading = idx === 0 ? 'eager' : 'lazy';
+        slide.appendChild(slideImg);
+        track.appendChild(slide);
+      });
+
+      gallery.appendChild(track);
+
+      // 화살표
+      var prevBtn = document.createElement('button');
+      prevBtn.className = 'cms-gallery-arrow cms-gallery-prev';
+      prevBtn.setAttribute('aria-label', '이전');
+      prevBtn.innerHTML = '&#8249;';
+      gallery.appendChild(prevBtn);
+
+      var nextBtn = document.createElement('button');
+      nextBtn.className = 'cms-gallery-arrow cms-gallery-next';
+      nextBtn.setAttribute('aria-label', '다음');
+      nextBtn.innerHTML = '&#8250;';
+      gallery.appendChild(nextBtn);
+
+      // 도트
+      var dotsWrap = document.createElement('div');
+      dotsWrap.className = 'cms-gallery-dots';
+      images.forEach(function(_, idx) {
+        var dot = document.createElement('button');
+        dot.className = 'cms-gallery-dot' + (idx === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', '이미지 ' + (idx + 1));
+        dotsWrap.appendChild(dot);
+      });
+      gallery.appendChild(dotsWrap);
+
+      // 카운터
+      var counter = document.createElement('div');
+      counter.className = 'cms-gallery-counter';
+      counter.textContent = '1 / ' + images.length;
+      gallery.appendChild(counter);
+
+      // 원래 img를 갤러리로 교체
+      if (isHero) {
+        // 히어로: img.hero-bg를 갤러리로 교체
+        img.parentNode.insertBefore(gallery, img);
+        img.style.display = 'none';
+      } else {
+        // 일반: 부모 내에서 img를 갤러리로 교체
+        parent.insertBefore(gallery, img);
+        img.style.display = 'none';
+      }
+
+      // 슬라이더 로직 초기화
+      initCmsGallery(gallery, images.length, isHero);
+    });
+  }
+
+  function initCmsGallery(gallery, count, isHero) {
+    var current = 0;
+    var slides = gallery.querySelectorAll('.cms-gallery-slide');
+    var dots = gallery.querySelectorAll('.cms-gallery-dot');
+    var counter = gallery.querySelector('.cms-gallery-counter');
+    var track = gallery.querySelector('.cms-gallery-track');
+    var autoInterval = null;
+
+    function goTo(idx) {
+      idx = ((idx % count) + count) % count;
+      if (isHero) {
+        // 페이드 전환 (히어로)
+        slides[current].classList.remove('active');
+        slides[idx].classList.add('active');
+      } else {
+        // 스크롤 전환 (카드/하이라이트)
+        track.scrollTo({ left: idx * track.clientWidth, behavior: 'smooth' });
+      }
+      dots[current].classList.remove('active');
+      dots[idx].classList.add('active');
+      current = idx;
+      if (counter) counter.textContent = (idx + 1) + ' / ' + count;
+    }
+
+    // 화살표 이벤트
+    var prevBtn = gallery.querySelector('.cms-gallery-prev');
+    var nextBtn = gallery.querySelector('.cms-gallery-next');
+    if (prevBtn) prevBtn.addEventListener('click', function(e) { e.stopPropagation(); goTo(current - 1); resetAuto(); });
+    if (nextBtn) nextBtn.addEventListener('click', function(e) { e.stopPropagation(); goTo(current + 1); resetAuto(); });
+
+    // 도트 이벤트
+    dots.forEach(function(dot, i) {
+      dot.addEventListener('click', function(e) { e.stopPropagation(); goTo(i); resetAuto(); });
+    });
+
+    // 터치 스와이프
+    var touchStartX = 0;
+    gallery.addEventListener('touchstart', function(e) { touchStartX = e.touches[0].clientX; }, { passive: true });
+    gallery.addEventListener('touchend', function(e) {
+      var diff = touchStartX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 50) { goTo(diff > 0 ? current + 1 : current - 1); resetAuto(); }
+    }, { passive: true });
+
+    // 스크롤 기반 동기화 (비히어로)
+    if (!isHero && track) {
+      track.addEventListener('scroll', function() {
+        var newIdx = Math.round(track.scrollLeft / track.clientWidth);
+        if (newIdx !== current && newIdx >= 0 && newIdx < count) {
+          dots[current].classList.remove('active');
+          current = newIdx;
+          dots[current].classList.add('active');
+          if (counter) counter.textContent = (current + 1) + ' / ' + count;
+        }
+      }, { passive: true });
+    }
+
+    // 히어로 자동 전환
+    if (isHero) {
+      function startAuto() {
+        clearInterval(autoInterval);
+        autoInterval = setInterval(function() { goTo(current + 1); }, 5000);
+      }
+      function resetAuto() { startAuto(); }
+      startAuto();
+    } else {
+      function resetAuto() {} // noop for non-hero
+    }
+  }
+
+  /**
+   * 동적 카드 그룹의 멀티이미지 지원
+   * 카드 데이터의 imgs 배열이 있으면 카드 이미지를 미니 갤러리로 변환
+   */
+  function renderDynamicGroupGalleries(data) {
+    DYNAMIC_GROUPS.forEach(function(group) {
+      var items = getGroupItems(data, group);
+      if (!items || items.length === 0) return;
+      var container = document.getElementById(group.containerId);
+      if (!container) return;
+
+      items.forEach(function(item, idx) {
+        if (!item.imgs || !Array.isArray(item.imgs) || item.imgs.length < 2) return;
+        var cards = container.children;
+        if (idx >= cards.length) return;
+        var card = cards[idx];
+        var imgWrap = card.querySelector('.card-img-wrap, .attraction-img-wrap');
+        if (!imgWrap) return;
+        var existingImg = imgWrap.querySelector('img');
+        if (!existingImg || imgWrap.querySelector('.cms-gallery')) return;
+
+        var gallery = document.createElement('div');
+        gallery.className = 'cms-gallery cms-gallery--card';
+        var track = document.createElement('div');
+        track.className = 'cms-gallery-track';
+
+        item.imgs.forEach(function(src, i) {
+          var slide = document.createElement('div');
+          slide.className = 'cms-gallery-slide' + (i === 0 ? ' active' : '');
+          var sImg = document.createElement('img');
+          sImg.src = src;
+          sImg.alt = item.name || '';
+          sImg.width = 800;
+          sImg.height = 600;
+          sImg.loading = i === 0 ? 'eager' : 'lazy';
+          slide.appendChild(sImg);
+          track.appendChild(slide);
+        });
+        gallery.appendChild(track);
+
+        var prevBtn = document.createElement('button');
+        prevBtn.className = 'cms-gallery-arrow cms-gallery-prev';
+        prevBtn.setAttribute('aria-label', '이전');
+        prevBtn.innerHTML = '&#8249;';
+        gallery.appendChild(prevBtn);
+
+        var nextBtn = document.createElement('button');
+        nextBtn.className = 'cms-gallery-arrow cms-gallery-next';
+        nextBtn.setAttribute('aria-label', '다음');
+        nextBtn.innerHTML = '&#8250;';
+        gallery.appendChild(nextBtn);
+
+        var dotsWrap = document.createElement('div');
+        dotsWrap.className = 'cms-gallery-dots';
+        item.imgs.forEach(function(_, i) {
+          var dot = document.createElement('button');
+          dot.className = 'cms-gallery-dot' + (i === 0 ? ' active' : '');
+          dotsWrap.appendChild(dot);
+        });
+        gallery.appendChild(dotsWrap);
+
+        var counter = document.createElement('div');
+        counter.className = 'cms-gallery-counter';
+        counter.textContent = '1 / ' + item.imgs.length;
+        gallery.appendChild(counter);
+
+        existingImg.style.display = 'none';
+        imgWrap.insertBefore(gallery, existingImg);
+        initCmsGallery(gallery, item.imgs.length, false);
+      });
+    });
+  }
+
+  /**
+   * 객실 상세 갤러리 CMS 렌더링
+   * data-cms-room-gallery="room-gallery-sonamu" → CMS의 "room-gallery-sonamu" 배열로 교체
+   */
+  function renderRoomGalleries(data) {
+    document.querySelectorAll('[data-cms-room-gallery]').forEach(function(slider) {
+      var key = slider.dataset.cmsRoomGallery;
+      var images = data[key];
+      if (!Array.isArray(images) || images.length === 0) return;
+
+      var track = slider.querySelector('.room-gallery-track');
+      if (!track) return;
+
+      // 기존 슬라이드 제거
+      while (track.firstChild) track.removeChild(track.firstChild);
+
+      // 새 슬라이드 삽입
+      images.forEach(function(src) {
+        var slide = document.createElement('div');
+        slide.className = 'room-slide';
+        var img = document.createElement('img');
+        img.src = src;
+        img.alt = '';
+        img.width = 800;
+        img.height = 600;
+        slide.appendChild(img);
+        track.appendChild(slide);
+      });
+
+      // 도트 재생성
+      var dotsWrap = slider.querySelector('.room-gallery-dots');
+      if (dotsWrap) {
+        while (dotsWrap.firstChild) dotsWrap.removeChild(dotsWrap.firstChild);
+        images.forEach(function(_, i) {
+          var dot = document.createElement('button');
+          dot.className = 'room-gallery-dot' + (i === 0 ? ' active' : '');
+          dotsWrap.appendChild(dot);
+        });
+      } else if (images.length > 1) {
+        dotsWrap = document.createElement('div');
+        dotsWrap.className = 'room-gallery-dots';
+        images.forEach(function(_, i) {
+          var dot = document.createElement('button');
+          dot.className = 'room-gallery-dot' + (i === 0 ? ' active' : '');
+          dotsWrap.appendChild(dot);
+        });
+        slider.appendChild(dotsWrap);
+      }
+
+      // 화살표 표시/숨김
+      var prevBtn = slider.querySelector('.room-gallery-arrow.prev');
+      var nextBtn = slider.querySelector('.room-gallery-arrow.next');
+      if (images.length <= 1) {
+        if (prevBtn) prevBtn.style.display = 'none';
+        if (nextBtn) nextBtn.style.display = 'none';
+        if (dotsWrap) dotsWrap.style.display = 'none';
+      } else {
+        if (!prevBtn) {
+          prevBtn = document.createElement('button');
+          prevBtn.className = 'room-gallery-arrow prev';
+          prevBtn.setAttribute('aria-label', '이전');
+          prevBtn.innerHTML = '&#8249;';
+          slider.appendChild(prevBtn);
+        }
+        if (!nextBtn) {
+          nextBtn = document.createElement('button');
+          nextBtn.className = 'room-gallery-arrow next';
+          nextBtn.setAttribute('aria-label', '다음');
+          nextBtn.innerHTML = '&#8250;';
+          slider.appendChild(nextBtn);
+        }
+      }
+    });
+  }
+
   // Expose CMS API globally for admin page
   window.CMS = {
     load: loadCmsData,
@@ -469,6 +791,9 @@
   if (!document.querySelector('.cms-admin-wrap')) {
     loadCmsData().then(data => {
       applyCmsData(data);
+      // 갤러리 변환은 CMS 데이터 적용 후 실행
+      renderCmsGalleries(data);
+      renderDynamicGroupGalleries(data);
     });
   }
 })();
