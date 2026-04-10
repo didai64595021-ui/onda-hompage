@@ -27,8 +27,8 @@ const PRODUCTS = [
         <div style="font-size:42px;font-weight:900;color:#fff;line-height:1.2;text-shadow:0 2px 8px rgba(0,0,0,0.3);">영수증리뷰</div>
         <div style="font-size:22px;color:#e3f2fd;margin-top:6px;font-weight:500;">사진 촬영 + 텍스트 후기 원스톱</div>
         <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;">
-          <div style="background:#ff6f00;color:#fff;padding:8px 16px;border-radius:8px;font-size:15px;font-weight:700;">5건 24,000원</div>
-          <div style="background:#2e7d32;color:#fff;padding:8px 16px;border-radius:8px;font-size:15px;font-weight:700;">시장가 30% ↓</div>
+          <div style="background:#ff6f00;color:#fff;padding:8px 16px;border-radius:8px;font-size:15px;font-weight:700;">건당 2,000원</div>
+          <div style="background:#2e7d32;color:#fff;padding:8px 16px;border-radius:8px;font-size:15px;font-weight:700;">5건 10,000원~</div>
         </div>
       </div>
       <div style="position:absolute;bottom:16px;display:flex;gap:16px;font-size:13px;color:rgba(255,255,255,0.7);">
@@ -51,18 +51,18 @@ const PRODUCTS = [
         <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
           <div style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);padding:10px 18px;border-radius:10px;text-align:center;">
             <div style="font-size:13px;color:#ce93d8;">30건</div>
-            <div style="font-size:18px;color:#fff;font-weight:800;">105,000원</div>
+            <div style="font-size:18px;color:#fff;font-weight:800;">60,000원</div>
           </div>
           <div style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);padding:10px 18px;border-radius:10px;text-align:center;">
             <div style="font-size:13px;color:#ce93d8;">50건</div>
-            <div style="font-size:18px;color:#fff;font-weight:800;">160,000원</div>
+            <div style="font-size:18px;color:#fff;font-weight:800;">100,000원</div>
           </div>
           <div style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);padding:10px 18px;border-radius:10px;text-align:center;">
             <div style="font-size:13px;color:#ce93d8;">100건</div>
-            <div style="font-size:18px;color:#fff;font-weight:800;">290,000원</div>
+            <div style="font-size:18px;color:#fff;font-weight:800;">200,000원</div>
           </div>
         </div>
-        <div style="margin-top:16px;font-size:15px;color:#ffab00;font-weight:700;">타사 대비 최대 58% 절감</div>
+        <div style="margin-top:16px;font-size:15px;color:#ffab00;font-weight:700;">건당 2,000원 균일가</div>
       </div>
       <div style="position:absolute;bottom:16px;display:flex;gap:16px;font-size:13px;color:rgba(255,255,255,0.7);">
         <span>📸 사진풀커버</span><span>🏪 멀티매장</span><span>📋 중간보고</span>
@@ -84,21 +84,21 @@ const PRODUCTS = [
           <div style="display:flex;gap:24px;align-items:center;">
             <div style="text-align:center;">
               <div style="font-size:13px;color:#666;">1건</div>
-              <div style="font-size:22px;color:#1b5e20;font-weight:800;">3,500원</div>
+              <div style="font-size:22px;color:#1b5e20;font-weight:800;">2,000원</div>
             </div>
             <div style="width:1px;height:36px;background:#e0e0e0;"></div>
             <div style="text-align:center;">
               <div style="font-size:13px;color:#666;">3건</div>
-              <div style="font-size:22px;color:#1b5e20;font-weight:800;">9,500원</div>
+              <div style="font-size:22px;color:#1b5e20;font-weight:800;">6,000원</div>
             </div>
             <div style="width:1px;height:36px;background:#e0e0e0;"></div>
             <div style="text-align:center;">
               <div style="font-size:13px;color:#666;">5건</div>
-              <div style="font-size:22px;color:#1b5e20;font-weight:800;">15,000원</div>
+              <div style="font-size:22px;color:#1b5e20;font-weight:800;">10,000원</div>
             </div>
           </div>
         </div>
-        <div style="margin-top:14px;font-size:14px;color:#388e3c;font-weight:600;">시장가 대비 30% 저렴 | 사진+텍스트 풀커버</div>
+        <div style="margin-top:14px;font-size:14px;color:#388e3c;font-weight:600;">건당 2,000원 | 사진+텍스트 풀커버</div>
       </div>
       <div style="position:absolute;bottom:16px;display:flex;gap:16px;font-size:13px;color:#2e7d32;">
         <span>📸 방문촬영</span><span>✍️ 체험후기</span><span>🔍 SEO키워드</span><span>✅ 사전검수</span>
@@ -120,18 +120,18 @@ const PRODUCTS = [
         <div style="display:flex;gap:8px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
           <div style="background:#fff;border:2px solid #ff6d00;padding:10px 20px;border-radius:10px;text-align:center;">
             <div style="font-size:13px;color:#e65100;">3명</div>
-            <div style="font-size:20px;color:#bf360c;font-weight:800;">10,000원</div>
+            <div style="font-size:20px;color:#bf360c;font-weight:800;">6,000원</div>
           </div>
           <div style="background:#fff;border:2px solid #ff6d00;padding:10px 20px;border-radius:10px;text-align:center;">
             <div style="font-size:13px;color:#e65100;">5명</div>
-            <div style="font-size:20px;color:#bf360c;font-weight:800;">15,000원</div>
+            <div style="font-size:20px;color:#bf360c;font-weight:800;">10,000원</div>
           </div>
           <div style="background:#fff;border:2px solid #ff6d00;padding:10px 20px;border-radius:10px;text-align:center;">
             <div style="font-size:13px;color:#e65100;">10명</div>
-            <div style="font-size:20px;color:#bf360c;font-weight:800;">28,000원</div>
+            <div style="font-size:20px;color:#bf360c;font-weight:800;">20,000원</div>
           </div>
         </div>
-        <div style="margin-top:14px;font-size:14px;color:#e65100;font-weight:600;">기존 체험단 퀄리티 불만? → 사진10장+1,500자 보장</div>
+        <div style="margin-top:14px;font-size:14px;color:#e65100;font-weight:600;">건당 2,000원 | 사진+글 풀커버 보장</div>
       </div>
       <div style="position:absolute;bottom:16px;display:flex;gap:16px;font-size:13px;color:#bf360c;">
         <span>👥 블로거섭외</span><span>📸 방문촬영</span><span>✍️ 원고작성</span><span>✅ 검수포함</span>

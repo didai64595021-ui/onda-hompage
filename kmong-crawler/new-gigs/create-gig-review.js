@@ -166,8 +166,12 @@ async function fillSelectByLabel(page, selectMap, labelKey, value, nthOfLabel = 
 // ──────────────────────────────────────────
 async function fillTipTap(page, containerId, text, label = '') {
   const tag = label ? `[${label}]` : '';
+  const container = page.locator(`#${containerId}`);
+  // 스크롤해서 보이게
+  await container.scrollIntoViewIfNeeded({ timeout: 5000 }).catch(() => {});
+  await sleep(500);
   const editor = page.locator(`#${containerId} .ProseMirror`);
-  if (!(await editor.isVisible({ timeout: 3000 }).catch(() => false))) {
+  if (!(await editor.isVisible({ timeout: 5000 }).catch(() => false))) {
     console.log(`  ✗ ${tag} #${containerId} ProseMirror 미발견`);
     return { ok: false };
   }
