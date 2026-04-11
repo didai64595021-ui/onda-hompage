@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ONDA STUDIO — Portfolio</title>
+<meta name="description" content="온다마케팅 포트폴리오. 프리미엄 웹사이트 디자인 & 개발 컬렉션.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0a;
+  --bg-2: #131313;
+  --fg: #f5f5f5;
+  --fg-dim: rgba(245, 245, 245, 0.55);
+  --accent: #f5f5f5;
+  --line: rgba(245, 245, 245, 0.12);
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  height: 100%;
+}
+
+body { line-height: 1.5; }
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+
+.display { font-family: 'Bricolage Grotesque', 'Inter', sans-serif; font-weight: 800; letter-spacing: -0.03em; line-height: 0.9; }
+
+/* ============ Loader ============ */
+.loader {
+  position: fixed; inset: 0; background: var(--bg);
+  z-index: 1000; display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.7s ease, visibility 0.7s ease;
+}
+.loader.hidden { opacity: 0; visibility: hidden; }
+.loader-text {
+  font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800;
+  font-size: clamp(2rem, 6vw, 4rem); letter-spacing: -0.03em;
+  display: flex; gap: 0.6em;
+}
+.loader-text span { opacity: 0; transform: translateY(20px); animation: rise 0.8s forwards; }
+.loader-text span:nth-child(1) { animation-delay: 0.05s; }
+.loader-text span:nth-child(2) { animation-delay: 0.20s; }
+@keyframes rise { to { opacity: 1; transform: translateY(0); } }
+
+/* ============ Header ============ */
+.header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 28px 40px;
+  mix-blend-mode: difference;
+}
+.brand {
+  font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800;
+  font-size: 0.95rem; letter-spacing: 0.04em;
+}
+.brand sup { font-size: 0.55em; vertical-align: super; opacity: 0.6; margin-left: 4px; }
+.nav-right { display: flex; gap: 32px; font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; }
+.nav-right a { opacity: 0.85; transition: opacity 0.2s; }
+.nav-right a:hover { opacity: 1; }
+
+/* ============ Intro / Hero ============ */
+.intro {
+  position: fixed; inset: 0; display: flex; flex-direction: column;
+  justify-content: center; padding: 0 6vw; z-index: 50;
+  pointer-events: none;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.intro.gone { opacity: 0; transform: translateY(-30px); pointer-events: none; }
+.intro-tag {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--fg-dim); margin-bottom: 32px;
+}
+.intro-tag::before { content: ''; width: 28px; height: 1px; background: var(--fg-dim); }
+.intro-title {
+  font-size: clamp(3.5rem, 11vw, 13rem);
+  margin-bottom: 36px;
+}
+.intro-title .line { display: block; overflow: hidden; }
+.intro-title .line span { display: inline-block; transform: translateY(105%); animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.intro-title .line:nth-child(1) span { animation-delay: 1.0s; }
+.intro-title .line:nth-child(2) span { animation-delay: 1.15s; }
+@keyframes slideUp { to { transform: translateY(0); } }
+
+.intro-desc {
+  max-width: 560px; font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+  color: var(--fg-dim); margin-bottom: 48px;
+  opacity: 0; transform: translateY(20px); animation: fadeUp 0.9s 1.4s forwards;
+}
+@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+.scroll-cta {
+  display: inline-flex; align-items: center; gap: 14px;
+  font-size: 0.78rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--fg); padding-bottom: 6px; border-bottom: 1px solid var(--fg);
+  align-self: flex-start; pointer-events: auto; cursor: pointer;
+  background: none; border-top: none; border-left: none; border-right: none;
+  font-family: inherit;
+  opacity: 0; transform: translateY(20px); animation: fadeUp 0.9s 1.6s forwards;
+}
+.scroll-cta .arrow {
+  display: inline-block; transform: rotate(90deg);
+  transition: transform 0.3s ease;
+}
+.scroll-cta:hover .arrow { transform: rotate(90deg) translateX(5px); }
+
+/* ============ Showcase Container (horizontal) ============ */
+.showcase {
+  position: fixed; inset: 0; display: flex;
+  will-change: transform;
+  transition: transform 1.1s cubic-bezier(0.77, 0, 0.175, 1);
+  transform: translateX(100vw);
+}
+.showcase.active { transform: translateX(0); }
+
+.slide {
+  flex: 0 0 100vw; height: 100vh;
+  position: relative; display: flex; align-items: stretch;
+  overflow: hidden;
+}
+
+/* Slide image */
+.slide-image {
+  position: absolute; inset: 0; overflow: hidden;
+}
+.slide-image::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.55) 35%, rgba(10,10,10,0.25) 70%, rgba(10,10,10,0.4) 100%);
+  z-index: 1;
+}
+.slide-image img {
+  width: 100%; height: 100%; object-fit: cover; object-position: center top;
+  transform: scale(1.08);
+  transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.slide.in-view .slide-image img { transform: scale(1); }
+
+/* Number badge */
+.slide-number {
+  position: absolute; top: 50%; left: 6vw; z-index: 3;
+  font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800;
+  font-size: clamp(8rem, 22vw, 24rem); line-height: 0.85;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--fg);
+  transform: translateY(-50%) translateX(-30px);
+  opacity: 0;
+  transition: opacity 1.1s ease 0.2s, transform 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+  pointer-events: none;
+}
+.slide.in-view .slide-number {
+  opacity: 0.16; transform: translateY(-50%) translateX(0);
+}
+
+/* Slide content */
+.slide-content {
+  position: relative; z-index: 4;
+  width: 100%; padding: 0 6vw;
+  display: flex; flex-direction: column; justify-content: center;
+  align-self: center;
+}
+.slide-meta {
+  display: flex; align-items: center; gap: 24px;
+  font-size: 0.74rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--fg-dim); margin-bottom: 28px;
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.9s ease 0.4s, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.4s;
+}
+.slide.in-view .slide-meta { opacity: 1; transform: translateY(0); }
+.slide-meta .dot { width: 6px; height: 6px; background: var(--fg); border-radius: 50%; opacity: 0.5; }
+.slide-meta .index { color: var(--fg); }
+
+.slide-title {
+  font-size: clamp(3rem, 9vw, 10rem);
+  max-width: 14ch; margin-bottom: 32px;
+  opacity: 0; transform: translateY(40px);
+  transition: opacity 1s ease 0.55s, transform 1s cubic-bezier(0.16, 1, 0.3, 1) 0.55s;
+}
+.slide.in-view .slide-title { opacity: 1; transform: translateY(0); }
+
+.slide-desc {
+  max-width: 480px; font-size: clamp(0.95rem, 1vw, 1.05rem);
+  color: rgba(245,245,245,0.78); margin-bottom: 36px;
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.9s ease 0.7s, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.7s;
+}
+.slide.in-view .slide-desc { opacity: 1; transform: translateY(0); }
+
+.slide-tags { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 40px;
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.9s ease 0.85s, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.85s; }
+.slide.in-view .slide-tags { opacity: 1; transform: translateY(0); }
+.slide-tag {
+  font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 8px 16px; border: 1px solid var(--line);
+  border-radius: 100px; color: rgba(245,245,245,0.85);
+}
+
+.slide-cta {
+  display: inline-flex; align-items: center; gap: 14px;
+  font-size: 0.78rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--fg); padding: 18px 30px;
+  border: 1px solid var(--fg); align-self: flex-start;
+  transition: background 0.3s ease, color 0.3s ease, padding 0.3s ease;
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.9s ease 1s, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) 1s,
+              background 0.3s ease, color 0.3s ease, padding 0.3s ease;
+}
+.slide.in-view .slide-cta { opacity: 1; transform: translateY(0); }
+.slide-cta:hover { background: var(--fg); color: var(--bg); padding-right: 38px; }
+.slide-cta .arrow { display: inline-block; transition: transform 0.3s ease; }
+.slide-cta:hover .arrow { transform: translateX(4px); }
+
+/* ============ Side Counter ============ */
+.counter {
+  position: fixed; left: 40px; bottom: 40px; z-index: 90;
+  display: flex; align-items: center; gap: 14px;
+  font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700;
+  font-size: 0.85rem; letter-spacing: 0.05em;
+  opacity: 0; transition: opacity 0.6s ease;
+}
+.counter.shown { opacity: 1; }
+.counter-current { font-size: 1.5rem; }
+.counter-line { width: 80px; height: 1px; background: rgba(245,245,245,0.25); position: relative; overflow: hidden; }
+.counter-line::after { content: ''; position: absolute; inset: 0; background: var(--fg); transform-origin: left; transform: scaleX(calc(var(--p,0) / 100)); transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1); }
+.counter-total { font-size: 1.5rem; opacity: 0.5; }
+
+/* ============ Nav Arrows ============ */
+.nav-arrows {
+  position: fixed; right: 40px; bottom: 40px; z-index: 90;
+  display: flex; gap: 14px;
+  opacity: 0; transition: opacity 0.6s ease;
+}
+.nav-arrows.shown { opacity: 1; }
+.nav-btn {
+  width: 56px; height: 56px; border: 1px solid var(--line);
+  background: transparent; color: var(--fg); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+  font-family: inherit;
+}
+.nav-btn:hover { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.nav-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+.nav-btn:disabled:hover { background: transparent; color: var(--fg); }
+.nav-btn svg { width: 20px; height: 20px; }
+
+/* ============ Hint ============ */
+.scroll-hint {
+  position: fixed; right: 40px; top: 50%; transform: translateY(-50%) rotate(90deg);
+  transform-origin: right center; z-index: 90;
+  font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--fg-dim); opacity: 0;
+  transition: opacity 0.6s ease;
+  display: flex; align-items: center; gap: 14px;
+}
+.scroll-hint.shown { opacity: 1; }
+.scroll-hint::after { content: ''; width: 40px; height: 1px; background: var(--fg-dim); }
+
+/* ============ Responsive ============ */
+@media (max-width: 768px) {
+  .header { padding: 20px 24px; }
+  .nav-right { gap: 18px; font-size: 0.7rem; }
+  .intro { padding: 0 24px; }
+  .slide-content { padding: 0 24px; }
+  .slide-title { font-size: clamp(2.4rem, 12vw, 5rem); }
+  .counter { left: 24px; bottom: 24px; }
+  .nav-arrows { right: 24px; bottom: 24px; }
+  .scroll-hint { display: none; }
+  .slide-image::after {
+    background: linear-gradient(180deg, rgba(10,10,10,0.85) 0%, rgba(10,10,10,0.6) 50%, rgba(10,10,10,0.92) 100%);
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div class="loader" id="loader">
+  <div class="loader-text">
+    <span>ONDA</span><span>STUDIO</span>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="brand">ONDA STUDIO<sup>©2026</sup></div>
+  <nav class="nav-right">
+    <a href="../../index.html">Home</a>
+    <a href="../../about.html">About</a>
+    <a href="../../contact.html">Contact</a>
+  </nav>
+</header>
+
+<!-- INTRO -->
+<section class="intro" id="intro">
+  <div class="intro-tag">Selected Works · 2025—2026</div>
+  <h1 class="intro-title display">
+    <span class="line"><span>Design that</span></span>
+    <span class="line"><span>speaks loud.</span></span>
+  </h1>
+  <p class="intro-desc">
+    프리미엄 브랜드를 위한 웹사이트 컬렉션. 6개의 프로젝트, 6개의 무드.
+    각각의 사이트가 가진 고유한 분위기를 디자인과 인터랙션으로 풀어냈습니다.
+  </p>
+  <button class="scroll-cta" id="enterBtn">
+    Enter showcase <span class="arrow">↓</span>
+  </button>
+</section>
+
+<!-- SHOWCASE -->
+<section class="showcase" id="showcase">
+
+  <!-- 01 -->
+  <div class="slide" data-index="01">
+    <div class="slide-image"><img src="images/01_riverside.jpg" alt="리버사이드 파크" loading="eager"></div>
+    <div class="slide-number">01</div>
+    <div class="slide-content">
+      <div class="slide-meta">
+        <span class="index">01 / 06</span><span class="dot"></span><span>Apartment / Real Estate</span>
+      </div>
+      <h2 class="slide-title display">리버사이드 파크</h2>
+      <p class="slide-desc">프리미엄 아파트 분양 사이트. 풀스크린 히어로, 인터랙티브 평면도, 커스텀 커서로 몰입감 있는 분양 경험을 디자인합니다.</p>
+      <div class="slide-tags"><span class="slide-tag">부동산</span><span class="slide-tag">분양</span><span class="slide-tag">프리미엄</span></div>
+      <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/showcase-apartment/" target="_blank" rel="noopener" class="slide-cta">View Project <span class="arrow">→</span></a>
+    </div>
+  </div>
+
+  <!-- 02 -->
+  <div class="slide" data-index="02">
+    <div class="slide-image"><img src="images/02_nexabot.jpg" alt="NEXABOT" loading="lazy"></div>
+    <div class="slide-number">02</div>
+    <div class="slide-content">
+      <div class="slide-meta">
+        <span class="index">02 / 06</span><span class="dot"></span><span>B2B / Robotics</span>
+      </div>
+      <h2 class="slide-title display">NEXABOT</h2>
+      <p class="slide-desc">산업용 로봇 솔루션 기업의 브랜드 사이트. CSS 글리치 효과와 테크 감성 디자인으로 혁신의 이미지를 구축합니다.</p>
+      <div class="slide-tags"><span class="slide-tag">B2B</span><span class="slide-tag">로봇</span><span class="slide-tag">테크놀로지</span></div>
+      <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/premium-robot/" target="_blank" rel="noopener" class="slide-cta">View Project <span class="arrow">→</span></a>
+    </div>
+  </div>
+
+  <!-- 03 -->
+  <div class="slide" data-index="03">
+    <div class="slide-image"><img src="images/03_signaturepups.jpg" alt="시그니처펍스" loading="lazy"></div>
+    <div class="slide-number">03</div>
+    <div class="slide-content">
+      <div class="slide-meta">
+        <span class="index">03 / 06</span><span class="dot"></span><span>Pet / Breeding</span>
+      </div>
+      <h2 class="slide-title display">시그니처펍스</h2>
+      <p class="slide-desc">프리미엄 강아지 분양 전문점. 위례 신도시 기반, 건강한 반려견과의 만남을 설계하는 감성 브랜딩 사이트.</p>
+      <div class="slide-tags"><span class="slide-tag">반려동물</span><span class="slide-tag">분양</span><span class="slide-tag">브랜딩</span></div>
+      <a href="https://beamish-crisp-2621e0.netlify.app/" target="_blank" rel="noopener" class="slide-cta">View Project <span class="arrow">→</span></a>
+    </div>
+  </div>
+
+  <!-- 04 -->
+  <div class="slide" data-index="04">
+    <div class="slide-image"><img src="images/04_lawfirm.jpg" alt="법무법인 정의" loading="lazy"></div>
+    <div class="slide-number">04</div>
+    <div class="slide-content">
+      <div class="slide-meta">
+        <span class="index">04 / 06</span><span class="dot"></span><span>Law / Corporate</span>
+      </div>
+      <h2 class="slide-title display">법무법인 정의</h2>
+      <p class="slide-desc">20년 경력 변호사팀의 법무법인. 형사·민사·기업법무·부동산까지. KR/EN 이중언어, 5개 페이지 멀티페이지 구조.</p>
+      <div class="slide-tags"><span class="slide-tag">법무</span><span class="slide-tag">이중언어</span><span class="slide-tag">멀티페이지</span></div>
+      <a href="https://didai64595021-ui.github.io/onda-hompage/lawfirm/" target="_blank" rel="noopener" class="slide-cta">View Project <span class="arrow">→</span></a>
+    </div>
+  </div>
+
+  <!-- 05 -->
+  <div class="slide" data-index="05">
+    <div class="slide-image"><img src="images/05_kuro.jpg" alt="KURO 오마카세" loading="lazy"></div>
+    <div class="slide-number">05</div>
+    <div class="slide-content">
+      <div class="slide-meta">
+        <span class="index">05 / 06</span><span class="dot"></span><span>Restaurant / Fine Dining</span>
+      </div>
+      <h2 class="slide-title display">KURO 오마카세</h2>
+      <p class="slide-desc">일본식 프리미엄 오마카세 레스토랑. 다크 감성의 풀스크린 레이아웃과 시차 스크롤로 고급 다이닝의 경험을 전달합니다.</p>
+      <div class="slide-tags"><span class="slide-tag">레스토랑</span><span class="slide-tag">오마카세</span><span class="slide-tag">프리미엄</span></div>
+      <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/premium-dining/" target="_blank" rel="noopener" class="slide-cta">View Project <span class="arrow">→</span></a>
+    </div>
+  </div>
+
+  <!-- 06 -->
+  <div class="slide" data-index="06">
+    <div class="slide-image"><img src="images/06_noir.jpg" alt="NOIR 위스키바" loading="lazy"></div>
+    <div class="slide-number">06</div>
+    <div class="slide-content">
+      <div class="slide-meta">
+        <span class="index">06 / 06</span><span class="dot"></span><span>Bar / Cocktail Lounge</span>
+      </div>
+      <h2 class="slide-title display">NOIR 위스키바</h2>
+      <p class="slide-desc">프리미엄 위스키 & 칵테일 바. 딥다크 무드와 앰버 컬러 인터랙션으로 시그니처 칵테일 메뉴를 감각적으로 풀어냈습니다.</p>
+      <div class="slide-tags"><span class="slide-tag">바</span><span class="slide-tag">위스키</span><span class="slide-tag">나이트라이프</span></div>
+      <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/cocktail-bar/" target="_blank" rel="noopener" class="slide-cta">View Project <span class="arrow">→</span></a>
+    </div>
+  </div>
+
+</section>
+
+<!-- COUNTER & NAV -->
+<div class="counter" id="counter">
+  <span class="counter-current" id="counterCur">01</span>
+  <span class="counter-line" id="counterLine"></span>
+  <span class="counter-total">06</span>
+</div>
+
+<div class="nav-arrows" id="navArrows">
+  <button class="nav-btn" id="prevBtn" aria-label="Previous">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+  </button>
+  <button class="nav-btn" id="nextBtn" aria-label="Next">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+  </button>
+</div>
+
+<div class="scroll-hint" id="scrollHint">Scroll · Drag · Arrow Keys</div>
+
+<script>
+(function () {
+  const loader     = document.getElementById('loader');
+  const intro      = document.getElementById('intro');
+  const showcase   = document.getElementById('showcase');
+  const enterBtn   = document.getElementById('enterBtn');
+  const counter    = document.getElementById('counter');
+  const counterCur = document.getElementById('counterCur');
+  const counterLine= document.getElementById('counterLine');
+  const navArrows  = document.getElementById('navArrows');
+  const prevBtn    = document.getElementById('prevBtn');
+  const nextBtn    = document.getElementById('nextBtn');
+  const scrollHint = document.getElementById('scrollHint');
+  const slides     = Array.from(document.querySelectorAll('.slide'));
+  const total      = slides.length;
+  let current = 0;
+  let entered = false;
+
+  // Hide loader
+  window.addEventListener('load', () => setTimeout(() => loader.classList.add('hidden'), 1700));
+
+  function updateUI() {
+    showcase.style.transform = `translateX(-${current * 100}vw)`;
+    slides.forEach((s, i) => s.classList.toggle('in-view', i === current));
+    counterCur.textContent = String(current + 1).padStart(2, '0');
+    counterLine.style.setProperty('--p', ((current + 1) / total) * 100);
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+  }
+
+  function enterShowcase() {
+    if (entered) return;
+    entered = true;
+    intro.classList.add('gone');
+    showcase.classList.add('active');
+    setTimeout(() => {
+      counter.classList.add('shown');
+      navArrows.classList.add('shown');
+      scrollHint.classList.add('shown');
+      updateUI();
+    }, 600);
+  }
+
+  function go(delta) {
+    if (!entered) { if (delta > 0) enterShowcase(); return; }
+    const next = Math.max(0, Math.min(total - 1, current + delta));
+    if (next === current) return;
+    current = next;
+    updateUI();
+  }
+
+  enterBtn.addEventListener('click', enterShowcase);
+  prevBtn.addEventListener('click', () => go(-1));
+  nextBtn.addEventListener('click', () => go(1));
+
+  // Wheel
+  let wheelLock = false;
+  window.addEventListener('wheel', (e) => {
+    if (wheelLock) return;
+    if (Math.abs(e.deltaY) < 20 && Math.abs(e.deltaX) < 20) return;
+    wheelLock = true;
+    setTimeout(() => wheelLock = false, 900);
+    const delta = (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY) > 0 ? 1 : -1;
+    go(delta);
+  }, { passive: true });
+
+  // Keyboard
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); go(-1); }
+    else if (e.key === 'Home') { current = 0; updateUI(); }
+    else if (e.key === 'End') { current = total - 1; updateUI(); }
+  });
+
+  // Touch / drag
+  let touchStartX = 0, touchStartY = 0, dragging = false;
+  window.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    dragging = true;
+  }, { passive: true });
+  window.addEventListener('touchend', (e) => {
+    if (!dragging) return;
+    dragging = false;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? 1 : -1);
+    else if (Math.abs(dy) > 50) go(dy < 0 ? 1 : -1);
+  }, { passive: true });
+})();
+</script>
+</body>
+</html>
