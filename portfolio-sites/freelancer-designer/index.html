@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HYODESIGN - 디자인으로 말합니다</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root { --bg: #fafafa; --text: #111; --gray: #888; --light-gray: #e0e0e0; --radius: 12px; }
+  html { scroll-behavior: smooth; font-size: 16px; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; cursor: none; }
+  a { color: inherit; text-decoration: none; cursor: none; }
+  ::selection { background: #111; color: #fafafa; }
+
+  /* Custom Cursor */
+  .cursor {
+    position: fixed; width: 36px; height: 36px; border: 1.5px solid var(--text);
+    border-radius: 50%; pointer-events: none; z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: width .25s, height .25s, border-color .25s, background .25s;
+  }
+  .cursor.hover { width: 56px; height: 56px; border-color: var(--gray); background: rgba(17,17,17,.06); }
+
+  /* Nav */
+  nav {
+    position: fixed; top: 0; left: 0; width: 100%;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 28px 48px; z-index: 100; mix-blend-mode: difference;
+  }
+  nav .logo { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 1.1rem; color: #fff; letter-spacing: -.02em; }
+  nav .nav-links { display: flex; gap: 32px; }
+  nav .nav-links a { font-size: .8rem; font-weight: 500; color: #fff; letter-spacing: .04em; text-transform: uppercase; position: relative; }
+  nav .nav-links a::after { content: ''; position: absolute; bottom: -3px; left: 0; width: 0; height: 1px; background: #fff; transition: width .4s cubic-bezier(.25,.1,.25,1); }
+  nav .nav-links a:hover::after { width: 100%; }
+
+  /* Hero */
+  .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 0 48px; position: relative; }
+  .hero-label { font-size: .75rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--gray); margin-bottom: 32px; overflow: hidden; }
+  .hero-label span { display: inline-block; transform: translateY(100%); animation: slideUp .8s cubic-bezier(.25,.1,.25,1) .3s forwards; }
+  .hero h1 { font-family: 'Bricolage Grotesque', sans-serif; font-size: clamp(3rem,8vw,7.5rem); font-weight: 800; line-height: .95; letter-spacing: -.04em; max-width: 900px; }
+  .hero h1 .line { display: block; overflow: hidden; }
+  .hero h1 .line span { display: inline-block; transform: translateY(110%); animation: slideUp .9s cubic-bezier(.25,.1,.25,1) forwards; }
+  .hero h1 .line:nth-child(2) span { animation-delay: .15s; }
+  .hero-desc { margin-top: 40px; font-size: 1rem; font-weight: 300; color: var(--gray); line-height: 1.7; max-width: 420px; overflow: hidden; }
+  .hero-desc span { display: inline-block; transform: translateY(100%); animation: slideUp .8s cubic-bezier(.25,.1,.25,1) .5s forwards; }
+  .scroll-arrow { position: absolute; bottom: 48px; left: 48px; display: flex; align-items: center; gap: 12px; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--gray); }
+  .scroll-arrow svg { animation: bobDown 2s ease-in-out infinite; }
+  @keyframes slideUp { to { transform: translateY(0); } }
+  @keyframes bobDown { 0%,100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+
+  /* Marquee Band */
+  .marquee-band { padding: 24px 0; border-top: 1px solid var(--light-gray); border-bottom: 1px solid var(--light-gray); overflow: hidden; white-space: nowrap; }
+  .marquee-inner { display: inline-flex; gap: 64px; animation: marqueeScroll 20s linear infinite; }
+  .marquee-inner span { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--gray); }
+  .marquee-inner span::before { content: '\2022'; margin-right: 64px; opacity: .3; }
+  @keyframes marqueeScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+  /* Section common */
+  section { padding: 160px 48px; }
+  .section-label { font-size: .7rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--gray); margin-bottom: 64px; }
+  .reveal { opacity: 0; transform: translateY(40px); transition: opacity .8s cubic-bezier(.25,.1,.25,1), transform .8s cubic-bezier(.25,.1,.25,1); }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: .1s; }
+  .reveal-delay-2 { transition-delay: .2s; }
+  .reveal-delay-3 { transition-delay: .3s; }
+
+  /* Expertise */
+  .expertise-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; }
+  .expertise-item { padding: 40px 0; border-top: 1px solid var(--light-gray); transition: border-color .4s; }
+  .expertise-item:hover { border-color: var(--text); }
+  .expertise-num { font-family: 'Bricolage Grotesque', sans-serif; font-size: 3.5rem; font-weight: 700; letter-spacing: -.03em; color: var(--light-gray); transition: color .4s; }
+  .expertise-item:hover .expertise-num { color: var(--text); }
+  .expertise-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.3rem; font-weight: 700; margin: 20px 0 12px; letter-spacing: -.02em; }
+  .expertise-desc { font-size: .85rem; font-weight: 300; color: var(--gray); line-height: 1.7; }
+
+  /* Selected Work */
+  .work-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 20px; }
+  .work-card { position: relative; border-radius: var(--radius); overflow: hidden; aspect-ratio: 4/3; cursor: none; }
+  .work-card .card-bg { width: 100%; height: 100%; transition: transform .6s cubic-bezier(.25,.1,.25,1); }
+  .work-card:hover .card-bg { transform: scale(1.04); }
+  .work-card .card-label {
+    position: absolute; bottom: 24px; left: 24px; background: var(--bg); color: var(--text);
+    font-size: .7rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+    padding: 8px 16px; border-radius: 40px; opacity: 0; transform: translateY(12px);
+    transition: opacity .4s, transform .4s;
+  }
+  .work-card:hover .card-label { opacity: 1; transform: translateY(0); }
+  .work-card .card-title {
+    position: absolute; bottom: 64px; left: 24px; font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 1.4rem; font-weight: 700; color: #fff; mix-blend-mode: difference; letter-spacing: -.02em;
+  }
+  .work-card:nth-child(1) .card-bg { background: linear-gradient(135deg, #d8d0f0, #b8b0e0); }
+  .work-card:nth-child(2) .card-bg { background: linear-gradient(135deg, #c0e8d8, #90d4b8); }
+  .work-card:nth-child(3) .card-bg { background: linear-gradient(135deg, #f0d8c8, #e8c0a8); }
+  .work-card:nth-child(4) .card-bg { background: linear-gradient(135deg, #c8ddf0, #a8c8e8); }
+  .work-card:nth-child(5) .card-bg { background: linear-gradient(135deg, #e8d8e8, #d0b8d0); }
+  .work-card:nth-child(6) .card-bg { background: linear-gradient(135deg, #f0e8c8, #e0d4a0); }
+  .work-card:nth-child(2) { margin-top: 80px; }
+  .work-card:nth-child(5) { margin-top: -40px; }
+
+  /* Stats Band */
+  .stats {
+    padding: 100px 48px; display: grid; grid-template-columns: repeat(4,1fr);
+    gap: 32px; text-align: center; border-top: 1px solid var(--light-gray); border-bottom: 1px solid var(--light-gray);
+  }
+  .stat-item .stat-num { font-family: 'Bricolage Grotesque', sans-serif; font-size: clamp(2.5rem,4vw,4rem); font-weight: 800; letter-spacing: -.03em; }
+  .stat-item .stat-suffix { font-family: 'Bricolage Grotesque', sans-serif; font-size: clamp(1.2rem,2vw,1.8rem); font-weight: 600; color: var(--gray); }
+  .stat-item .stat-label { font-size: .75rem; font-weight: 400; color: var(--gray); margin-top: 8px; letter-spacing: .04em; }
+
+  /* Approach */
+  .approach-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 48px; margin-top: 80px; }
+  .approach-step { position: relative; padding: 48px 0; }
+  .approach-step::before { content: ''; position: absolute; top: 0; left: 0; width: 40px; height: 1px; background: var(--text); }
+  .approach-icon {
+    width: 48px; height: 48px; border: 1.5px solid var(--light-gray); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; margin-bottom: 28px;
+    transition: border-color .3s, background .3s, color .3s;
+  }
+  .approach-step:hover .approach-icon { border-color: var(--text); background: var(--text); color: var(--bg); }
+  .approach-num { font-family: 'Bricolage Grotesque', sans-serif; font-size: .7rem; font-weight: 600; letter-spacing: .1em; color: var(--gray); margin-bottom: 16px; }
+  .approach-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 14px; letter-spacing: -.02em; }
+  .approach-desc { font-size: .85rem; font-weight: 300; color: var(--gray); line-height: 1.8; }
+
+  /* CTA */
+  .cta { text-align: center; padding: 200px 48px; position: relative; }
+  .cta h2 { font-family: 'Bricolage Grotesque', sans-serif; font-size: clamp(2.5rem,5vw,5rem); font-weight: 800; letter-spacing: -.04em; margin-bottom: 32px; }
+  .cta p { font-size: 1rem; font-weight: 300; color: var(--gray); margin-bottom: 48px; line-height: 1.7; }
+  .cta-btn {
+    display: inline-flex; align-items: center; gap: 12px; border: 1.5px solid var(--text);
+    padding: 18px 44px; border-radius: 60px; font-size: .85rem; font-weight: 600;
+    letter-spacing: .04em; text-transform: uppercase; transition: background .4s, color .4s;
+  }
+  .cta-btn:hover { background: var(--text); color: var(--bg); }
+  .cta-btn svg { transition: transform .3s; }
+  .cta-btn:hover svg { transform: translateX(4px); }
+
+  /* Footer */
+  footer { border-top: 1px solid var(--light-gray); padding: 40px 48px; display: flex; justify-content: space-between; align-items: center; }
+  footer .footer-copy { font-size: .75rem; color: var(--gray); }
+  footer .footer-links { display: flex; gap: 24px; }
+  footer .footer-links a { font-size: .75rem; color: var(--gray); transition: color .3s; }
+  footer .footer-links a:hover { color: var(--text); }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    nav { padding: 20px 24px; }
+    nav .nav-links { gap: 20px; }
+    nav .nav-links a { font-size: .7rem; }
+    .hero { padding: 0 24px; }
+    .hero h1 { font-size: clamp(2.4rem,10vw,3.5rem); }
+    .hero-desc { font-size: .9rem; max-width: 100%; }
+    .scroll-arrow { left: 24px; bottom: 32px; }
+    section { padding: 100px 24px; }
+    .expertise-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+    .expertise-num { font-size: 2.5rem; }
+    .expertise-title { font-size: 1.1rem; }
+    .work-grid { grid-template-columns: 1fr; gap: 16px; }
+    .work-card:nth-child(2) { margin-top: 0; }
+    .work-card:nth-child(5) { margin-top: 0; }
+    .work-card .card-title { font-size: 1.1rem; }
+    .stats { grid-template-columns: 1fr 1fr; padding: 60px 24px; }
+    .approach-grid { grid-template-columns: 1fr; gap: 32px; }
+    .approach-title { font-size: 1.25rem; }
+    .cta { padding: 120px 24px; }
+    footer { flex-direction: column; gap: 16px; padding: 32px 24px; text-align: center; }
+  }
+  @media (max-width: 480px) {
+    .expertise-grid { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: 1fr 1fr; gap: 24px; }
+    nav .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div class="cursor" id="cursor"></div>
+
+<!-- Nav -->
+<nav>
+  <div class="logo">HYODESIGN</div>
+  <div class="nav-links">
+    <a href="#expertise">Expertise</a>
+    <a href="#work">Work</a>
+    <a href="#approach">Approach</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-label"><span>Visual Designer &mdash; Brand &amp; Digital</span></div>
+  <h1>
+    <span class="line"><span>디자인으로</span></span>
+    <span class="line"><span>말합니다.</span></span>
+  </h1>
+  <div class="hero-desc">
+    <span>로고, 상세페이지, 배너, SNS 템플릿까지.<br>
+    브랜드의 첫인상을 만드는 디자이너 효입니다.</span>
+  </div>
+  <div class="scroll-arrow">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2">
+      <path d="M8 2v12M3 9l5 5 5-5"/>
+    </svg>
+    Scroll
+  </div>
+</section>
+
+<!-- Marquee Band -->
+<div class="marquee-band">
+  <div class="marquee-inner">
+    <span>Logo Design</span><span>Detail Page</span><span>Banner</span>
+    <span>SNS Template</span><span>Brand Identity</span><span>Print</span>
+    <span>Logo Design</span><span>Detail Page</span><span>Banner</span>
+    <span>SNS Template</span><span>Brand Identity</span><span>Print</span>
+  </div>
+</div>
+
+<!-- Expertise -->
+<section id="expertise">
+  <div class="section-label reveal">Expertise</div>
+  <div class="expertise-grid">
+    <div class="expertise-item reveal">
+      <div class="expertise-num">01</div>
+      <div class="expertise-title">로고 디자인</div>
+      <div class="expertise-desc">
+        브랜드의 본질을 한눈에 전달하는<br>
+        심볼과 워드마크를 설계합니다.
+      </div>
+    </div>
+    <div class="expertise-item reveal reveal-delay-1">
+      <div class="expertise-num">02</div>
+      <div class="expertise-title">상세페이지</div>
+      <div class="expertise-desc">
+        구매 전환을 높이는 구조와 비주얼로<br>
+        상품의 가치를 극대화합니다.
+      </div>
+    </div>
+    <div class="expertise-item reveal reveal-delay-2">
+      <div class="expertise-num">03</div>
+      <div class="expertise-title">배너 / 광고소재</div>
+      <div class="expertise-desc">
+        클릭을 유도하는 임팩트 있는 구성과<br>
+        매체 최적화된 소재를 제작합니다.
+      </div>
+    </div>
+    <div class="expertise-item reveal reveal-delay-3">
+      <div class="expertise-num">04</div>
+      <div class="expertise-title">SNS 템플릿</div>
+      <div class="expertise-desc">
+        일관된 브랜드 톤을 유지하면서<br>
+        운영 효율을 높이는 템플릿 시스템.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Selected Work -->
+<section id="work">
+  <div class="section-label reveal">Selected Work</div>
+  <div class="work-grid">
+    <div class="work-card reveal">
+      <div class="card-bg"></div>
+      <div class="card-title">Bloom Cosmetics</div>
+      <div class="card-label">Brand Identity</div>
+    </div>
+    <div class="work-card reveal reveal-delay-1">
+      <div class="card-bg"></div>
+      <div class="card-title">Daily Kitchen</div>
+      <div class="card-label">Detail Page</div>
+    </div>
+    <div class="work-card reveal reveal-delay-2">
+      <div class="card-bg"></div>
+      <div class="card-title">FitPro Gym</div>
+      <div class="card-label">Ad Banner</div>
+    </div>
+    <div class="work-card reveal reveal-delay-3">
+      <div class="card-bg"></div>
+      <div class="card-title">Moody Cafe</div>
+      <div class="card-label">SNS Template</div>
+    </div>
+    <div class="work-card reveal">
+      <div class="card-bg"></div>
+      <div class="card-title">Aura Studio</div>
+      <div class="card-label">Logo Design</div>
+    </div>
+    <div class="work-card reveal reveal-delay-1">
+      <div class="card-bg"></div>
+      <div class="card-title">Greenery Market</div>
+      <div class="card-label">Detail Page</div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats Band -->
+<div class="stats">
+  <div class="stat-item reveal">
+    <div><span class="stat-num" data-target="320">0</span><span class="stat-suffix">+</span></div>
+    <div class="stat-label">완료 프로젝트</div>
+  </div>
+  <div class="stat-item reveal reveal-delay-1">
+    <div><span class="stat-num" data-target="98">0</span><span class="stat-suffix">%</span></div>
+    <div class="stat-label">재주문율</div>
+  </div>
+  <div class="stat-item reveal reveal-delay-2">
+    <div><span class="stat-num" data-target="5">0</span><span class="stat-suffix">년</span></div>
+    <div class="stat-label">디자인 경력</div>
+  </div>
+  <div class="stat-item reveal reveal-delay-3">
+    <div><span class="stat-num" data-target="4.9">0</span><span class="stat-suffix">/5</span></div>
+    <div class="stat-label">고객 평점</div>
+  </div>
+</div>
+
+<!-- Approach -->
+<section id="approach">
+  <div class="section-label reveal">Approach</div>
+  <div class="approach-grid">
+    <div class="approach-step reveal">
+      <div class="approach-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+      </div>
+      <div class="approach-num">Step 01</div>
+      <div class="approach-title">리서치</div>
+      <div class="approach-desc">
+        브랜드, 타깃, 경쟁사를 분석하고<br>
+        디자인 방향성을 함께 정합니다.<br>
+        모든 작업의 출발점입니다.
+      </div>
+    </div>
+    <div class="approach-step reveal reveal-delay-1">
+      <div class="approach-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+          <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+          <path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/>
+        </svg>
+      </div>
+      <div class="approach-num">Step 02</div>
+      <div class="approach-title">디자인</div>
+      <div class="approach-desc">
+        컨셉에 맞는 시안을 제작하고<br>
+        디테일을 다듬어 완성도를 높입니다.<br>
+        빠르되 정교하게.
+      </div>
+    </div>
+    <div class="approach-step reveal reveal-delay-2">
+      <div class="approach-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </div>
+      <div class="approach-num">Step 03</div>
+      <div class="approach-title">피드백</div>
+      <div class="approach-desc">
+        수정 요청을 빠르게 반영하고<br>
+        만족할 때까지 소통합니다.<br>
+        완성은 함께 만드는 것.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="contact">
+  <h2 class="reveal">프로젝트를<br>시작해볼까요?</h2>
+  <p class="reveal reveal-delay-1">
+    새로운 브랜드든, 리뉴얼이든 편하게 이야기해주세요.
+  </p>
+  <a href="#" class="cta-btn reveal reveal-delay-2">
+    크몽에서 문의하기
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M3 8h10M9 4l4 4-4 4"/>
+    </svg>
+  </a>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-copy">&copy; 2026 HYODESIGN. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="#">Kmong</a>
+    <a href="#">Instagram</a>
+    <a href="#">Behance</a>
+  </div>
+</footer>
+
+<script>
+(function() {
+  // ── Custom Cursor ──
+  var cursor = document.getElementById('cursor');
+  var cx = 0, cy = 0, tx = 0, ty = 0;
+
+  document.addEventListener('mousemove', function(e) {
+    tx = e.clientX; ty = e.clientY;
+  });
+
+  (function loop() {
+    cx += (tx - cx) * 0.12;
+    cy += (ty - cy) * 0.12;
+    cursor.style.left = cx + 'px';
+    cursor.style.top = cy + 'px';
+    requestAnimationFrame(loop);
+  })();
+
+  var hoverEls = document.querySelectorAll('a, .work-card, .cta-btn, .expertise-item, .approach-step');
+  hoverEls.forEach(function(el) {
+    el.addEventListener('mouseenter', function() { cursor.classList.add('hover'); });
+    el.addEventListener('mouseleave', function() { cursor.classList.remove('hover'); });
+  });
+
+  // Hide cursor on touch devices
+  if ('ontouchstart' in window) {
+    cursor.style.display = 'none';
+    document.body.style.cursor = 'auto';
+    document.querySelectorAll('a').forEach(function(a) { a.style.cursor = 'auto'; });
+  }
+
+  // ── Scroll Reveal (IntersectionObserver) ──
+  var reveals = document.querySelectorAll('.reveal');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' });
+
+  reveals.forEach(function(el) { observer.observe(el); });
+
+  // ── Number Counter Animation ──
+  var statNums = document.querySelectorAll('.stat-num[data-target]');
+  var statsObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var el = entry.target;
+        var target = parseFloat(el.getAttribute('data-target'));
+        var isFloat = target % 1 !== 0;
+        var duration = 1800;
+        var start = performance.now();
+
+        function tick(now) {
+          var elapsed = now - start;
+          var progress = Math.min(elapsed / duration, 1);
+          var eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+          var current = eased * target;
+          el.textContent = isFloat ? current.toFixed(1) : Math.round(current);
+          if (progress < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+        statsObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  statNums.forEach(function(el) { statsObserver.observe(el); });
+
+  // ── Smooth Nav Scroll ──
+  document.querySelectorAll('nav a[href^="#"]').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      var target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // ── Parallax on Work Cards (desktop only) ──
+  if (window.innerWidth > 768) {
+    var cards = document.querySelectorAll('.work-card');
+    window.addEventListener('scroll', function() {
+      cards.forEach(function(card, i) {
+        var rect = card.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          var offset = (rect.top - window.innerHeight * 0.5) * (i % 2 === 0 ? 0.03 : -0.03);
+          card.querySelector('.card-bg').style.transform =
+            'translateY(' + offset + 'px) scale(1)';
+        }
+      });
+    }, { passive: true });
+  }
+})();
+</script>
+</body>
+</html>

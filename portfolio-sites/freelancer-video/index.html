@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CUTLAB | 영상으로 브랜드를 만듭니다</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0c0c0c;--neon:#00ff88;--neon-dim:#00ff8833;--neon-glow:#00ff8866;--white:#f0f0f0;--gray:#888;--card:#141414;--border:#222}
+html{scroll-behavior:smooth;cursor:none}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--white);overflow-x:hidden;cursor:none}
+h1,h2,h3{font-family:'Bricolage Grotesque',sans-serif}
+a{color:var(--neon);text-decoration:none}
+
+/* Cursor */
+.cursor{position:fixed;top:0;left:0;width:28px;height:28px;pointer-events:none;z-index:9999;mix-blend-mode:difference;transition:transform .15s}
+.cursor::before,.cursor::after{content:'';position:absolute;background:var(--neon)}
+.cursor::before{width:28px;height:1.5px;top:50%;transform:translateY(-50%)}
+.cursor::after{width:1.5px;height:28px;left:50%;transform:translateX(-50%)}
+.cursor.hover{transform:scale(2.2)}
+
+/* VHS Overlays */
+.scanlines{position:fixed;inset:0;pointer-events:none;z-index:9998;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,136,.018) 2px,rgba(0,255,136,.018) 4px);animation:scanMove 8s linear infinite}
+@keyframes scanMove{0%{background-position:0 0}100%{background-position:0 100vh}}
+.vhs-noise{position:fixed;inset:0;pointer-events:none;z-index:9997;opacity:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.03) 10%,transparent 11%,transparent 50%,rgba(255,255,255,.02) 51%,transparent 52%);animation:vhsFlash 6s ease infinite}
+@keyframes vhsFlash{0%,89%,92%,100%{opacity:0}90%{opacity:1}91%{opacity:.6}}
+
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:20px 40px;background:rgba(12,12,12,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+nav .logo{font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:800;letter-spacing:.05em}
+nav .logo span{color:var(--neon)}
+nav ul{list-style:none;display:flex;gap:32px}
+nav ul li a{font-size:13px;font-weight:500;color:var(--gray);text-transform:uppercase;letter-spacing:.1em;transition:color .3s}
+nav ul li a:hover{color:var(--neon)}
+
+/* Marquee */
+.marquee{overflow:hidden;white-space:nowrap;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 0}
+.marquee-inner{display:inline-flex;animation:marquee 22s linear infinite}
+.marquee-inner span{font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(13px,1.4vw,17px);font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--gray);padding:0 36px}
+.marquee-inner .dot{display:inline-block;width:6px;height:6px;background:var(--neon);border-radius:50%;margin:0 28px;vertical-align:middle}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* Hero */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;position:relative;padding:80px 20px 40px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);padding:6px 18px;border-radius:100px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);margin-bottom:36px}
+.hero-badge .pulse{width:8px;height:8px;background:var(--neon);border-radius:50%;animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 var(--neon-dim)}50%{box-shadow:0 0 0 8px transparent}}
+.hero h1{font-size:clamp(42px,8vw,100px);font-weight:800;line-height:1.05;letter-spacing:-.03em;margin-bottom:24px}
+.hero h1 .glitch{position:relative;display:inline-block}
+.hero h1 .glitch::before,.hero h1 .glitch::after{content:attr(data-text);position:absolute;left:0;top:0;width:100%;overflow:hidden}
+.hero h1 .glitch::before{animation:glitch1 3s infinite;color:var(--neon);clip-path:polygon(0 0,100% 0,100% 35%,0 35%);text-shadow:2px 0 #ff0055}
+.hero h1 .glitch::after{animation:glitch2 3s infinite;clip-path:polygon(0 65%,100% 65%,100% 100%,0 100%);text-shadow:-2px 0 #00aaff}
+@keyframes glitch1{0%,92%,100%{transform:translate(0)}93%{transform:translate(-5px,-2px)}96%{transform:translate(4px,1px)}}
+@keyframes glitch2{0%,92%,100%{transform:translate(0)}94%{transform:translate(5px,2px)}97%{transform:translate(-4px,-1px)}}
+.hero-sub{font-size:clamp(14px,1.5vw,18px);color:var(--gray);font-weight:300;max-width:520px;line-height:1.7;margin-bottom:44px}
+.reel-counter{font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(60px,10vw,120px);font-weight:800;color:transparent;-webkit-text-stroke:1px var(--border);letter-spacing:.05em;position:absolute;bottom:60px;right:5%;user-select:none;opacity:.25}
+.hero-cta{display:inline-flex;align-items:center;gap:10px;padding:14px 40px;border:1px solid var(--neon);color:var(--neon);font-weight:600;font-size:14px;letter-spacing:.05em;text-transform:uppercase;border-radius:2px;transition:all .3s}
+.hero-cta:hover{background:var(--neon);color:var(--bg);box-shadow:0 0 40px var(--neon-dim)}
+.hero-scroll{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--gray)}
+.hero-scroll span{width:1px;height:40px;background:linear-gradient(to bottom,var(--neon),transparent);animation:scrollLine 2s ease infinite}
+@keyframes scrollLine{0%{opacity:1;transform:scaleY(1)}100%{opacity:0;transform:scaleY(0);transform-origin:bottom}}
+
+/* Sections */
+section{padding:100px 20px}
+.container{max-width:1200px;margin:0 auto}
+.section-label{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--neon);margin-bottom:12px}
+.section-title{font-size:clamp(28px,4vw,48px);font-weight:800;line-height:1.1;margin-bottom:48px}
+
+/* Reveal */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal:nth-child(2){transition-delay:.1s}
+.reveal:nth-child(3){transition-delay:.2s}
+.reveal:nth-child(4){transition-delay:.3s}
+
+/* Services */
+.services-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.service-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:36px 28px;position:relative;overflow:hidden;transition:all .4s}
+.service-card::before{content:'';position:absolute;inset:-1px;border-radius:4px;padding:1px;background:linear-gradient(135deg,var(--neon),transparent 60%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .4s}
+.service-card:hover::before{opacity:1}
+.service-card:hover{box-shadow:0 0 40px var(--neon-dim);transform:translateY(-4px)}
+.service-num{font-family:'Bricolage Grotesque',sans-serif;font-size:48px;font-weight:800;color:transparent;-webkit-text-stroke:1px var(--border);margin-bottom:20px;transition:all .3s}
+.service-card:hover .service-num{-webkit-text-stroke-color:var(--neon)}
+.service-card h3{font-size:20px;font-weight:700;margin-bottom:10px}
+.service-card p{font-size:14px;color:var(--gray);line-height:1.7}
+.service-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.service-tags span{font-size:10px;padding:3px 10px;border:1px solid var(--border);border-radius:2px;color:var(--gray);letter-spacing:.05em;text-transform:uppercase}
+
+/* Showreel */
+.showreel-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.reel-item{position:relative;aspect-ratio:16/9;background:linear-gradient(135deg,#1a1a1a,#0a0a0a);border:1px solid var(--border);border-radius:4px;overflow:hidden;cursor:pointer;transition:all .4s}
+.reel-item::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(0,0,0,.15) 1px,rgba(0,0,0,.15) 2px);pointer-events:none;opacity:.4}
+.reel-item:hover{border-color:var(--neon);box-shadow:0 0 40px var(--neon-dim)}
+.reel-item::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.8))}
+.reel-overlay{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px}
+.reel-play{width:56px;height:56px;border:2px solid var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .3s}
+.reel-play::after{content:'';width:0;height:0;border-left:18px solid var(--white);border-top:11px solid transparent;border-bottom:11px solid transparent;margin-left:4px}
+.reel-item:hover .reel-play{border-color:var(--neon);box-shadow:0 0 20px var(--neon-dim)}
+.reel-item:hover .reel-play::after{border-left-color:var(--neon)}
+.reel-label{font-size:13px;font-weight:500;letter-spacing:.05em;text-transform:uppercase}
+.reel-tag{position:absolute;top:16px;left:16px;z-index:3;font-size:10px;letter-spacing:.15em;text-transform:uppercase;padding:4px 10px;border:1px solid var(--border);border-radius:2px;color:var(--gray)}
+.reel-duration{position:absolute;bottom:16px;right:16px;z-index:3;font-family:'Bricolage Grotesque',sans-serif;font-size:12px;color:var(--gray);letter-spacing:.05em}
+
+/* Process */
+.process-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;text-align:center}
+.process-step{position:relative;padding:32px 20px}
+.process-step::after{content:'';position:absolute;top:40px;right:-12px;width:24px;height:1px;background:var(--border)}
+.process-step:last-child::after{display:none}
+.process-num{font-family:'Bricolage Grotesque',sans-serif;font-size:11px;font-weight:700;color:var(--neon);letter-spacing:.15em;margin-bottom:16px}
+.process-step h3{font-size:17px;font-weight:700;margin-bottom:10px}
+.process-step p{font-size:13px;color:var(--gray);line-height:1.6}
+
+/* Stats */
+.stats-section{background:linear-gradient(180deg,var(--bg),#0a0a0a);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;text-align:center}
+.stat-item .stat-num{font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(40px,6vw,72px);font-weight:800;color:var(--neon);line-height:1;margin-bottom:8px}
+.stat-item .stat-suffix{font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(20px,3vw,36px);font-weight:800;color:var(--neon)}
+.stat-item .stat-label{font-size:14px;color:var(--gray);letter-spacing:.05em;margin-top:4px}
+
+/* CTA */
+.cta-section{text-align:center;padding:120px 20px}
+.cta-section h2{font-size:clamp(32px,5vw,56px);font-weight:800;margin-bottom:16px}
+.cta-section p{color:var(--gray);font-size:16px;margin-bottom:40px;max-width:480px;margin-inline:auto;line-height:1.6}
+.cta-btn{display:inline-flex;align-items:center;gap:10px;padding:18px 52px;background:var(--neon);color:var(--bg);font-weight:700;font-size:16px;letter-spacing:.03em;border-radius:2px;transition:all .3s;text-transform:uppercase}
+.cta-btn:hover{box-shadow:0 0 60px var(--neon-glow);transform:translateY(-2px);color:var(--bg)}
+.cta-btn svg{width:18px;height:18px;transition:transform .3s}
+.cta-btn:hover svg{transform:translateX(5px)}
+
+/* Footer */
+footer{border-top:1px solid var(--border);padding:40px 20px;text-align:center}
+footer .footer-brand{font-family:'Bricolage Grotesque',sans-serif;font-size:24px;font-weight:800;letter-spacing:.05em;margin-bottom:12px}
+footer .footer-brand span{color:var(--neon)}
+footer p{font-size:12px;color:var(--gray)}
+
+/* Responsive */
+@media(max-width:768px){
+  nav{padding:16px 20px}
+  nav ul{gap:18px}
+  nav ul li a{font-size:11px}
+  .services-grid{grid-template-columns:1fr}
+  .showreel-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr;gap:32px}
+  .process-grid{grid-template-columns:repeat(2,1fr);gap:16px}
+  .process-step::after{display:none}
+  .reel-counter{display:none}
+  .hero{min-height:90vh;padding-top:100px}
+  section{padding:60px 16px}
+  .cursor{display:none}
+}
+@media(min-width:769px) and (max-width:1024px){
+  .services-grid{grid-template-columns:repeat(2,1fr)}
+  .process-grid{grid-template-columns:repeat(2,1fr)}
+  .process-step::after{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div class="cursor" id="cursor"></div>
+
+<!-- VHS Overlays -->
+<div class="scanlines"></div>
+<div class="vhs-noise"></div>
+
+<!-- Navigation -->
+<nav>
+  <div class="logo">CUT<span>LAB</span></div>
+  <ul>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#showreel">Showreel</a></li>
+    <li><a href="#process">Process</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-badge"><span class="pulse"></span>Available for Freelance</div>
+  <h1>
+    <span class="glitch" data-text="영상으로">영상으로</span><br>
+    브랜드를 만듭니다
+  </h1>
+  <p class="hero-sub">유튜브 편집부터 숏폼, 프로모션 영상, 모션그래픽까지.<br>브랜드의 이야기를 영상 언어로 설계합니다.</p>
+  <a href="#contact" class="hero-cta">견적 문의 &rarr;</a>
+  <div class="reel-counter" id="reelCounter">00:00</div>
+  <div class="hero-scroll">scroll<span></span></div>
+</section>
+
+<!-- Marquee 1 -->
+<div class="marquee">
+  <div class="marquee-inner">
+    <span>YouTube Edit<i class="dot"></i></span><span>Short-Form<i class="dot"></i></span><span>Promo Video<i class="dot"></i></span><span>Motion Graphics<i class="dot"></i></span><span>Color Grading<i class="dot"></i></span><span>Sound Design<i class="dot"></i></span>
+    <span>YouTube Edit<i class="dot"></i></span><span>Short-Form<i class="dot"></i></span><span>Promo Video<i class="dot"></i></span><span>Motion Graphics<i class="dot"></i></span><span>Color Grading<i class="dot"></i></span><span>Sound Design<i class="dot"></i></span>
+  </div>
+</div>
+
+<!-- Services -->
+<section id="services">
+  <div class="container">
+    <div class="reveal">
+      <p class="section-label">Services</p>
+      <h2 class="section-title">무엇을 만드나요</h2>
+    </div>
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <div class="service-num">01</div>
+        <h3>유튜브 편집</h3>
+        <p>자막, 컷편집, 효과음, 썸네일까지. 조회수를 끌어올리는 편집 전략을 적용합니다.</p>
+        <div class="service-tags"><span>Premiere</span><span>자막</span><span>썸네일</span></div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-num">02</div>
+        <h3>숏폼 / 릴스</h3>
+        <p>세로 9:16, 후킹 구조, 트렌드 반영. 1분 안에 시선을 사로잡는 숏폼을 제작합니다.</p>
+        <div class="service-tags"><span>Reels</span><span>Shorts</span><span>TikTok</span></div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-num">03</div>
+        <h3>프로모션 영상</h3>
+        <p>제품 런칭, 브랜드 소개, 행사 영상. 목적에 맞는 시나리오부터 최종 납품까지.</p>
+        <div class="service-tags"><span>브랜딩</span><span>광고</span><span>이벤트</span></div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-num">04</div>
+        <h3>모션그래픽</h3>
+        <p>인포그래픽, 로고 애니메이션, 타이틀 시퀀스. 움직임으로 메시지를 전달합니다.</p>
+        <div class="service-tags"><span>After Effects</span><span>C4D</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Showreel -->
+<section id="showreel">
+  <div class="container">
+    <div class="reveal">
+      <p class="section-label">Showreel</p>
+      <h2 class="section-title">최근 작업물</h2>
+    </div>
+    <div class="showreel-grid">
+      <div class="reel-item reveal">
+        <span class="reel-tag">YouTube</span>
+        <span class="reel-duration">03:24</span>
+        <div class="reel-overlay"><div class="reel-play"></div><span class="reel-label">브랜드 다큐멘터리</span></div>
+      </div>
+      <div class="reel-item reveal">
+        <span class="reel-tag">Short-Form</span>
+        <span class="reel-duration">00:58</span>
+        <div class="reel-overlay"><div class="reel-play"></div><span class="reel-label">바이럴 숏폼 시리즈</span></div>
+      </div>
+      <div class="reel-item reveal">
+        <span class="reel-tag">Promo</span>
+        <span class="reel-duration">01:30</span>
+        <div class="reel-overlay"><div class="reel-play"></div><span class="reel-label">제품 런칭 필름</span></div>
+      </div>
+      <div class="reel-item reveal">
+        <span class="reel-tag">Motion</span>
+        <span class="reel-duration">00:15</span>
+        <div class="reel-overlay"><div class="reel-play"></div><span class="reel-label">로고 모션 패키지</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Marquee 2 -->
+<div class="marquee">
+  <div class="marquee-inner">
+    <span>Premiere Pro<i class="dot"></i></span><span>After Effects<i class="dot"></i></span><span>DaVinci Resolve<i class="dot"></i></span><span>Cinema 4D<i class="dot"></i></span><span>Photoshop<i class="dot"></i></span><span>Figma<i class="dot"></i></span>
+    <span>Premiere Pro<i class="dot"></i></span><span>After Effects<i class="dot"></i></span><span>DaVinci Resolve<i class="dot"></i></span><span>Cinema 4D<i class="dot"></i></span><span>Photoshop<i class="dot"></i></span><span>Figma<i class="dot"></i></span>
+  </div>
+</div>
+
+<!-- Process -->
+<section id="process">
+  <div class="container">
+    <div class="reveal">
+      <p class="section-label">Process</p>
+      <h2 class="section-title">작업 프로세스</h2>
+    </div>
+    <div class="process-grid">
+      <div class="process-step reveal">
+        <div class="process-num">STEP 01</div>
+        <h3>상담 & 기획</h3>
+        <p>영상의 목적, 타깃, 톤앤매너를 함께 정리합니다.</p>
+      </div>
+      <div class="process-step reveal">
+        <div class="process-num">STEP 02</div>
+        <h3>편집 & 제작</h3>
+        <p>컷편집, 색보정, 효과, 사운드까지 빠르게 작업합니다.</p>
+      </div>
+      <div class="process-step reveal">
+        <div class="process-num">STEP 03</div>
+        <h3>피드백 & 수정</h3>
+        <p>시안 확인 후 수정 2회까지 무료로 반영합니다.</p>
+      </div>
+      <div class="process-step reveal">
+        <div class="process-num">STEP 04</div>
+        <h3>납품 완료</h3>
+        <p>최종 파일 전달. 평균 3일 이내 납품합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats -->
+<section class="stats-section">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item reveal">
+        <div><span class="stat-num" data-target="150">0</span><span class="stat-suffix">+</span></div>
+        <p class="stat-label">완료 프로젝트</p>
+      </div>
+      <div class="stat-item reveal">
+        <div><span class="stat-num" data-target="500">0</span><span class="stat-suffix">만+</span></div>
+        <p class="stat-label">구독자 총 합산</p>
+      </div>
+      <div class="stat-item reveal">
+        <div><span class="stat-num" data-target="3">0</span><span class="stat-suffix">일</span></div>
+        <p class="stat-label">평균 납기</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <div class="container reveal">
+    <p class="section-label">Contact</p>
+    <h2>다음 프로젝트,<br>함께 만들까요?</h2>
+    <p>영상 제작이 필요하시다면 편하게 문의주세요.<br>빠른 견적과 함께 최적의 방향을 제안드립니다.</p>
+    <a href="https://kmong.com" target="_blank" rel="noopener" class="cta-btn">
+      크몽에서 견적 문의
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-brand">CUT<span>LAB</span></div>
+  <p>&copy; 2026 CUTLAB. All rights reserved.</p>
+</footer>
+
+<script>
+/* Custom Cursor */
+(function(){
+  var c=document.getElementById('cursor');if(!c)return;
+  var mx=0,my=0,cx=0,cy=0;
+  document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY});
+  (function loop(){cx+=(mx-cx)*.14;cy+=(my-cy)*.14;c.style.transform='translate('+(cx-14)+'px,'+(cy-14)+'px)';requestAnimationFrame(loop)})();
+  document.querySelectorAll('a,button,.reel-item,.service-card').forEach(function(el){
+    el.addEventListener('mouseenter',function(){c.classList.add('hover')});
+    el.addEventListener('mouseleave',function(){c.classList.remove('hover')});
+  });
+})();
+
+/* Reel Counter */
+(function(){
+  var el=document.getElementById('reelCounter');if(!el)return;
+  var s=0;
+  setInterval(function(){
+    s++;
+    el.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+  },1000);
+})();
+
+/* Scroll Reveal */
+(function(){
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}
+    });
+  },{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el)});
+})();
+
+/* Stats Counter */
+(function(){
+  var animated=new Set();
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting&&!animated.has(e.target)){
+        animated.add(e.target);
+        var target=parseInt(e.target.dataset.target,10),dur=1800,start=performance.now();
+        function tick(now){
+          var p=Math.min((now-start)/dur,1),ease=1-Math.pow(1-p,3);
+          e.target.textContent=Math.floor(ease*target);
+          if(p<1)requestAnimationFrame(tick);else e.target.textContent=target;
+        }
+        requestAnimationFrame(tick);
+      }
+    });
+  },{threshold:.5});
+  document.querySelectorAll('.stat-num[data-target]').forEach(function(c){obs.observe(c)});
+})();
+
+/* Nav active highlight */
+(function(){
+  var links=document.querySelectorAll('nav ul li a');
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        links.forEach(function(l){l.style.color=''});
+        var a=document.querySelector('nav a[href="#'+e.target.id+'"]');
+        if(a)a.style.color='var(--neon)';
+      }
+    });
+  },{threshold:.3});
+  document.querySelectorAll('section[id]').forEach(function(s){obs.observe(s)});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STUDIO MINJUN | 모든 순간을 작품으로</title>
+<meta name="description" content="상품촬영, 프로필촬영, 공간촬영, 숏폼 영상 전문 포토그래퍼 스튜디오 민준">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0a;--fg:#f5f5f5;--fg-dim:#888;--accent:#e8c547;
+  --font-display:'Bricolage Grotesque',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --noise:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--fg);font-family:var(--font-body);
+  font-weight:300;line-height:1.6;overflow-x:hidden;cursor:none;
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
+  background-image:var(--noise);background-repeat:repeat;background-size:256px;
+  opacity:1;
+}
+/* Custom cursor */
+.cursor{
+  position:fixed;width:20px;height:20px;border-radius:50%;
+  border:1.5px solid var(--fg);pointer-events:none;z-index:9999;
+  mix-blend-mode:difference;transform:translate(-50%,-50%);
+  transition:width .3s,height .3s;
+}
+.cursor.hover{width:50px;height:50px}
+/* Grid lines overlay */
+.grid-lines{
+  position:fixed;inset:0;pointer-events:none;z-index:1;
+  display:grid;grid-template-columns:repeat(6,1fr);
+  padding:0 clamp(1rem,4vw,4rem);
+}
+.grid-lines span{border-right:1px solid rgba(255,255,255,.03)}
+.grid-lines span:last-child{border-right:none}
+/* Reveal animation */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .8s cubic-bezier(.22,1,.36,1),transform .8s cubic-bezier(.22,1,.36,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
+/* Layout */
+section{position:relative;z-index:2}
+.container{max-width:1400px;margin:0 auto;padding:0 clamp(1.5rem,4vw,4rem)}
+/* Nav */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:1.5rem clamp(1.5rem,4vw,4rem);
+  display:flex;justify-content:space-between;align-items:center;
+  mix-blend-mode:difference;
+}
+.nav-logo{font-family:var(--font-display);font-weight:800;font-size:1rem;letter-spacing:.15em;text-transform:uppercase;color:var(--fg);text-decoration:none}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{
+  color:var(--fg-dim);text-decoration:none;font-size:.8rem;letter-spacing:.1em;
+  text-transform:uppercase;transition:color .3s;
+}
+.nav-links a:hover{color:var(--fg)}
+/* Hero */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;padding:8rem 0 4rem;
+}
+.hero-label{
+  font-size:.75rem;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--fg-dim);margin-bottom:2rem;
+}
+.hero h1{
+  font-family:var(--font-display);font-weight:800;
+  font-size:clamp(3rem,8vw,9rem);line-height:.95;
+  letter-spacing:-.03em;margin-bottom:2rem;
+}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero-sub{
+  max-width:480px;font-size:1.05rem;color:var(--fg-dim);
+  line-height:1.7;margin-bottom:3rem;
+}
+.scroll-indicator{
+  display:flex;align-items:center;gap:.8rem;
+  font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--fg-dim);
+}
+.scroll-line{width:40px;height:1px;background:var(--fg-dim);animation:scrollPulse 2s infinite}
+@keyframes scrollPulse{0%,100%{opacity:.3}50%{opacity:1}}
+/* Services */
+.services{padding:10rem 0}
+.section-label{
+  font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--fg-dim);margin-bottom:1rem;
+}
+.section-title{
+  font-family:var(--font-display);font-weight:800;
+  font-size:clamp(2rem,4vw,3.5rem);line-height:1.1;
+  letter-spacing:-.02em;margin-bottom:4rem;
+}
+.services-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:2px;
+}
+.service-card{
+  background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);
+  padding:2.5rem 2rem;transition:background .4s,border-color .4s;
+  position:relative;overflow:hidden;
+}
+.service-card::before{
+  content:'';position:absolute;top:0;left:0;width:100%;height:2px;
+  background:var(--accent);transform:scaleX(0);transform-origin:left;
+  transition:transform .5s cubic-bezier(.22,1,.36,1);
+}
+.service-card:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1)}
+.service-card:hover::before{transform:scaleX(1)}
+.service-icon{
+  width:48px;height:48px;margin-bottom:1.5rem;
+  border:1px solid rgba(255,255,255,.15);border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+.service-icon::after{
+  content:'';position:absolute;width:20px;height:20px;
+  border-radius:2px;
+}
+.service-card:nth-child(1) .service-icon::after{
+  width:16px;height:16px;border:2px solid var(--accent);border-radius:2px;
+  box-shadow:4px 4px 0 -1px var(--accent);
+}
+.service-card:nth-child(2) .service-icon::after{
+  width:18px;height:18px;border-radius:50%;border:2px solid var(--accent);
+  background:radial-gradient(circle at 40% 40%,transparent 30%,var(--accent) 31%,var(--accent) 33%,transparent 34%);
+}
+.service-card:nth-child(3) .service-icon::after{
+  width:20px;height:14px;border:2px solid var(--accent);border-radius:3px;
+  background:linear-gradient(135deg,transparent 40%,var(--accent) 41%,var(--accent) 43%,transparent 44%);
+}
+.service-card:nth-child(4) .service-icon::after{
+  width:0;height:0;border-left:10px solid var(--accent);
+  border-top:8px solid transparent;border-bottom:8px solid transparent;
+}
+.service-title{
+  font-family:var(--font-display);font-weight:600;font-size:1.2rem;
+  margin-bottom:.6rem;letter-spacing:-.01em;
+}
+.service-desc{font-size:.85rem;color:var(--fg-dim);line-height:1.6}
+.service-num{
+  font-family:var(--font-display);font-size:4rem;font-weight:800;
+  color:rgba(255,255,255,.03);position:absolute;bottom:.5rem;right:1rem;
+  line-height:1;
+}
+/* Gallery */
+.gallery{padding:10rem 0}
+.gallery-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  grid-auto-rows:280px;
+  gap:8px;
+}
+.gallery-item{
+  position:relative;overflow:hidden;border-radius:4px;
+  cursor:none;
+}
+.gallery-item:nth-child(1){grid-column:span 2;grid-row:span 2}
+.gallery-item:nth-child(5){grid-column:span 2}
+.gallery-placeholder{
+  width:100%;height:100%;transition:transform .6s cubic-bezier(.22,1,.36,1);
+}
+.gallery-item:hover .gallery-placeholder{transform:scale(1.05)}
+.gallery-item:nth-child(1) .gallery-placeholder{background:linear-gradient(135deg,#b45309,#fbbf24,#92400e)}
+.gallery-item:nth-child(2) .gallery-placeholder{background:linear-gradient(135deg,#9f1239,#fb7185,#881337)}
+.gallery-item:nth-child(3) .gallery-placeholder{background:linear-gradient(135deg,#334155,#94a3b8,#1e293b)}
+.gallery-item:nth-child(4) .gallery-placeholder{background:linear-gradient(135deg,#065f46,#34d399,#064e3b)}
+.gallery-item:nth-child(5) .gallery-placeholder{background:linear-gradient(135deg,#4c1d95,#a78bfa,#5b21b6)}
+.gallery-item:nth-child(6) .gallery-placeholder{background:linear-gradient(135deg,#0c4a6e,#38bdf8,#075985)}
+.gallery-item:nth-child(7) .gallery-placeholder{background:linear-gradient(135deg,#78350f,#fcd34d,#451a03)}
+.gallery-item:nth-child(8) .gallery-placeholder{background:linear-gradient(135deg,#831843,#f9a8d4,#701a75)}
+.gallery-overlay{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:1.5rem;
+  background:linear-gradient(to top,rgba(0,0,0,.7) 0%,transparent 60%);
+  opacity:0;transition:opacity .4s;
+}
+.gallery-item:hover .gallery-overlay{opacity:1}
+.gallery-overlay h4{font-family:var(--font-display);font-size:1.1rem;font-weight:600;margin-bottom:.2rem}
+.gallery-overlay span{font-size:.75rem;color:var(--fg-dim);letter-spacing:.1em;text-transform:uppercase}
+/* Process */
+.process{padding:10rem 0;overflow:hidden}
+.process-track{
+  display:flex;gap:0;margin-top:4rem;position:relative;
+}
+.process-track::before{
+  content:'';position:absolute;top:32px;left:0;right:0;
+  height:1px;background:rgba(255,255,255,.1);
+}
+.process-step{
+  flex:1;min-width:0;padding:0 2rem;position:relative;
+}
+.process-num{
+  width:64px;height:64px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-weight:800;font-size:1.2rem;
+  margin-bottom:2rem;background:var(--bg);position:relative;z-index:2;
+  transition:border-color .4s,color .4s;
+}
+.process-step:hover .process-num{border-color:var(--accent);color:var(--accent)}
+.process-step h4{
+  font-family:var(--font-display);font-weight:600;font-size:1.1rem;
+  margin-bottom:.6rem;
+}
+.process-step p{font-size:.85rem;color:var(--fg-dim);line-height:1.6}
+.process-arrow{
+  color:rgba(255,255,255,.15);font-size:1.5rem;
+  display:flex;align-items:center;padding-top:1rem;
+}
+/* CTA */
+.cta{padding:10rem 0;text-align:center}
+.cta h2{
+  font-family:var(--font-display);font-weight:800;
+  font-size:clamp(2.5rem,6vw,6rem);line-height:1;
+  letter-spacing:-.03em;margin-bottom:1.5rem;
+}
+.cta p{color:var(--fg-dim);font-size:1.05rem;margin-bottom:3rem;max-width:400px;margin-left:auto;margin-right:auto}
+.cta-btn{
+  display:inline-flex;align-items:center;gap:.8rem;
+  padding:1.1rem 2.8rem;border:1px solid var(--fg);
+  color:var(--fg);text-decoration:none;font-size:.85rem;
+  letter-spacing:.15em;text-transform:uppercase;
+  font-family:var(--font-body);font-weight:500;
+  transition:background .4s,color .4s;
+  position:relative;overflow:hidden;
+}
+.cta-btn::before{
+  content:'';position:absolute;inset:0;background:var(--fg);
+  transform:translateY(101%);transition:transform .4s cubic-bezier(.22,1,.36,1);
+}
+.cta-btn:hover::before{transform:translateY(0)}
+.cta-btn span{position:relative;z-index:1}
+.cta-btn:hover{color:var(--bg)}
+.cta-btn svg{position:relative;z-index:1;transition:transform .3s}
+.cta-btn:hover svg{transform:translateX(4px)}
+/* Footer */
+footer{
+  border-top:1px solid rgba(255,255,255,.06);
+  padding:3rem clamp(1.5rem,4vw,4rem);
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:.75rem;color:var(--fg-dim);position:relative;z-index:2;
+}
+footer a{color:var(--fg-dim);text-decoration:none;transition:color .3s}
+footer a:hover{color:var(--fg)}
+.footer-links{display:flex;gap:2rem}
+/* Responsive */
+@media(max-width:768px){
+  .nav-links{display:none}
+  .grid-lines{grid-template-columns:repeat(3,1fr)}
+  .services-grid{grid-template-columns:1fr}
+  .gallery-grid{grid-template-columns:repeat(2,1fr);grid-auto-rows:200px}
+  .gallery-item:nth-child(1){grid-column:span 2;grid-row:span 1}
+  .gallery-item:nth-child(5){grid-column:span 1}
+  .process-track{flex-direction:column;gap:2.5rem}
+  .process-track::before{display:none}
+  .process-arrow{display:none}
+  .process-step{padding:0}
+  .cursor{display:none}
+  body{cursor:auto}
+  footer{flex-direction:column;gap:1rem;text-align:center}
+}
+@media(max-width:480px){
+  .gallery-grid{grid-template-columns:1fr;grid-auto-rows:220px}
+  .gallery-item:nth-child(1){grid-column:span 1}
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<div class="grid-lines" aria-hidden="true">
+  <span></span><span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<nav>
+  <a href="#" class="nav-logo">Studio Minjun</a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#process">Process</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<section class="hero" id="hero">
+  <div class="container">
+    <p class="hero-label reveal">Photography & Film</p>
+    <h1 class="reveal reveal-delay-1">모든 순간을<br><em>작품</em>으로</h1>
+    <p class="hero-sub reveal reveal-delay-2">브랜드의 본질을 포착하고, 감각적인 비주얼로 완성합니다.<br>상품부터 공간, 사람까지 — 빛으로 이야기를 만듭니다.</p>
+    <div class="scroll-indicator reveal reveal-delay-3">
+      <span class="scroll-line"></span>
+      Scroll to explore
+    </div>
+  </div>
+</section>
+
+<!-- Services -->
+<section class="services" id="services">
+  <div class="container">
+    <p class="section-label reveal">What We Do</p>
+    <h2 class="section-title reveal">촬영의 모든 영역을<br>하나의 시선으로</h2>
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <div class="service-icon"></div>
+        <h3 class="service-title">상품촬영</h3>
+        <p class="service-desc">제품의 질감과 매력을 극대화하는 상업 촬영</p>
+        <span class="service-num">01</span>
+      </div>
+      <div class="service-card reveal reveal-delay-1">
+        <div class="service-icon"></div>
+        <h3 class="service-title">프로필촬영</h3>
+        <p class="service-desc">개인과 브랜드의 정체성을 담은 인물 촬영</p>
+        <span class="service-num">02</span>
+      </div>
+      <div class="service-card reveal reveal-delay-2">
+        <div class="service-icon"></div>
+        <h3 class="service-title">공간촬영</h3>
+        <p class="service-desc">건축과 인테리어 공간의 분위기를 포착</p>
+        <span class="service-num">03</span>
+      </div>
+      <div class="service-card reveal reveal-delay-3">
+        <div class="service-icon"></div>
+        <h3 class="service-title">숏폼 영상</h3>
+        <p class="service-desc">릴스, 숏츠에 최적화된 감각적인 영상 제작</p>
+        <span class="service-num">04</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Gallery -->
+<section class="gallery" id="gallery">
+  <div class="container">
+    <p class="section-label reveal">Selected Work</p>
+    <h2 class="section-title reveal">최근 프로젝트</h2>
+    <div class="gallery-grid">
+      <div class="gallery-item reveal">
+        <div class="gallery-placeholder"></div>
+        <div class="gallery-overlay">
+          <h4>Aura Cosmetics</h4>
+          <span>Product Photography</span>
+        </div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-1">
+        <div class="gallery-placeholder"></div>
+        <div class="gallery-overlay">
+          <h4>CEO Portrait Series</h4>
+          <span>Profile Photography</span>
+        </div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-2">
+        <div class="gallery-placeholder"></div>
+        <div class="gallery-overlay">
+          <h4>Cafe Moru Interior</h4>
+          <span>Space Photography</span>
+        </div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-1">
+        <div class="gallery-placeholder"></div>
+        <div class="gallery-overlay">
+          <h4>Hana Jewelry</h4>
+          <span>Product Photography</span>
+        </div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-2">
+        <div class="gallery-placeholder"></div>
+        <div class="gallery-overlay">
+          <h4>Brand Film: Seorae</h4>
+          <span>Short-form Video</span>
+        </div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-1">
+        <div class="gallery-placeholder"></div>
+        <div class="gallery-overlay">
+          <h4>Studio Blanc</h4>
+          <span>Space Photography</span>
+        </div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-2">
+        <div class="gallery-placeholder"></div>
+        <div class="gallery-overlay">
+          <h4>Artisan Leather</h4>
+          <span>Product Photography</span>
+        </div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-3">
+        <div class="gallery-placeholder"></div>
+        <div class="gallery-overlay">
+          <h4>Personal Branding</h4>
+          <span>Profile Photography</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Process -->
+<section class="process" id="process">
+  <div class="container">
+    <p class="section-label reveal">How We Work</p>
+    <h2 class="section-title reveal">프로세스</h2>
+    <div class="process-track">
+      <div class="process-step reveal">
+        <div class="process-num">01</div>
+        <h4>상담</h4>
+        <p>촬영 목적, 브랜드 방향성, 원하는 분위기를 함께 논의합니다.</p>
+      </div>
+      <div class="process-arrow reveal">&rarr;</div>
+      <div class="process-step reveal reveal-delay-1">
+        <div class="process-num">02</div>
+        <h4>기획</h4>
+        <p>컨셉 보드, 촬영 리스트, 스케줄을 체계적으로 구성합니다.</p>
+      </div>
+      <div class="process-arrow reveal">&rarr;</div>
+      <div class="process-step reveal reveal-delay-2">
+        <div class="process-num">03</div>
+        <h4>촬영</h4>
+        <p>전문 장비와 조명으로 최상의 결과물을 만들어냅니다.</p>
+      </div>
+      <div class="process-arrow reveal">&rarr;</div>
+      <div class="process-step reveal reveal-delay-3">
+        <div class="process-num">04</div>
+        <h4>납품</h4>
+        <p>정밀한 리터칭 후 고해상도 파일과 웹용 파일을 전달합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="contact">
+  <div class="container">
+    <h2 class="reveal">함께<br>만들어요</h2>
+    <p class="reveal reveal-delay-1">다음 프로젝트의 비주얼 파트너가 되겠습니다.</p>
+    <a href="#" class="cta-btn reveal reveal-delay-2">
+      <span>프로젝트 문의하기</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <span>&copy; 2026 Studio Minjun. All rights reserved.</span>
+  <div class="footer-links">
+    <a href="#">Instagram</a>
+    <a href="#">Kmong Profile</a>
+    <a href="mailto:hello@studiominjun.com">Email</a>
+  </div>
+</footer>
+
+<script>
+// Custom cursor
+const cursor = document.getElementById('cursor');
+let cx = 0, cy = 0, tx = 0, ty = 0;
+document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
+(function animateCursor() {
+  cx += (tx - cx) * 0.15;
+  cy += (ty - cy) * 0.15;
+  cursor.style.left = cx + 'px';
+  cursor.style.top = cy + 'px';
+  requestAnimationFrame(animateCursor);
+})();
+document.querySelectorAll('a, button, .gallery-item, .service-card, .cta-btn').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+});
+
+// Intersection Observer reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
