@@ -268,19 +268,79 @@ img { display: block; max-width: 100%; }
 .scroll-hint.shown { opacity: 1; }
 .scroll-hint::after { content: ''; width: 40px; height: 1px; background: var(--fg-dim); }
 
-/* ============ Responsive ============ */
+/* ============ Per-slide object-position (focal point) ============ */
+.slide[data-index="01"] .slide-image img { object-position: center center; }
+.slide[data-index="02"] .slide-image img { object-position: 40% 40%; }
+.slide[data-index="03"] .slide-image img { object-position: center center; }
+.slide[data-index="04"] .slide-image img { object-position: 65% center; }
+.slide[data-index="05"] .slide-image img { object-position: center center; }
+.slide[data-index="06"] .slide-image img { object-position: center center; }
+
+/* ============ Responsive — Tablet ============ */
+@media (max-width: 1024px) {
+  .header { padding: 24px 32px; }
+  .slide-content { padding: 0 5vw; }
+  .slide-title { font-size: clamp(2.8rem, 10vw, 7rem); }
+  .slide-number { font-size: clamp(6rem, 18vw, 16rem); }
+  .slide-image::after {
+    background: linear-gradient(90deg, rgba(10,10,10,0.9) 0%, rgba(10,10,10,0.5) 40%, rgba(10,10,10,0.2) 70%, rgba(10,10,10,0.35) 100%);
+  }
+}
+
+/* ============ Responsive — Mobile ============ */
 @media (max-width: 768px) {
   .header { padding: 20px 24px; }
   .nav-right { gap: 18px; font-size: 0.7rem; }
   .intro { padding: 0 24px; }
-  .slide-content { padding: 0 24px; }
-  .slide-title { font-size: clamp(2.4rem, 12vw, 5rem); }
+  .slide-content { padding: 0 24px; padding-top: 15vh; }
+  .slide-title { font-size: clamp(2.2rem, 11vw, 4.5rem); max-width: 100%; }
+  .slide-desc { font-size: 0.9rem; max-width: 100%; }
+  .slide-meta { margin-bottom: 20px; }
+  .slide-tags { margin-bottom: 28px; }
+  .slide-number {
+    font-size: clamp(5rem, 30vw, 10rem);
+    top: auto; bottom: 80px; left: 24px;
+    transform: none; opacity: 0;
+  }
+  .slide.in-view .slide-number { opacity: 0.08; transform: none; }
   .counter { left: 24px; bottom: 24px; }
   .nav-arrows { right: 24px; bottom: 24px; }
+  .nav-btn { width: 44px; height: 44px; }
   .scroll-hint { display: none; }
+
+  /* Mobile: vertical gradient for portrait images */
   .slide-image::after {
-    background: linear-gradient(180deg, rgba(10,10,10,0.85) 0%, rgba(10,10,10,0.6) 50%, rgba(10,10,10,0.92) 100%);
+    background: linear-gradient(180deg,
+      rgba(10,10,10,0.75) 0%,
+      rgba(10,10,10,0.35) 35%,
+      rgba(10,10,10,0.15) 55%,
+      rgba(10,10,10,0.65) 85%,
+      rgba(10,10,10,0.9) 100%);
   }
+
+  /* Per-slide mobile focal points — portrait crop */
+  .slide[data-index="01"] .slide-image img { object-position: 55% center; }
+  .slide[data-index="02"] .slide-image img { object-position: 38% 30%; }
+  .slide[data-index="03"] .slide-image img { object-position: center 30%; }
+  .slide[data-index="04"] .slide-image img { object-position: 70% 20%; }
+  .slide[data-index="05"] .slide-image img { object-position: center 40%; }
+  .slide[data-index="06"] .slide-image img { object-position: center center; }
+}
+
+/* ============ Responsive — Small Mobile ============ */
+@media (max-width: 400px) {
+  .header { padding: 16px 18px; }
+  .brand { font-size: 0.82rem; }
+  .nav-right { gap: 12px; font-size: 0.65rem; }
+  .slide-content { padding: 0 18px; padding-top: 14vh; }
+  .slide-title { font-size: clamp(1.8rem, 10vw, 3.5rem); margin-bottom: 20px; }
+  .slide-desc { font-size: 0.85rem; margin-bottom: 24px; }
+  .slide-tag { font-size: 0.65rem; padding: 6px 12px; }
+  .slide-cta { font-size: 0.72rem; padding: 14px 22px; }
+  .counter { left: 18px; bottom: 18px; }
+  .counter-line { width: 50px; }
+  .nav-arrows { right: 18px; bottom: 18px; gap: 10px; }
+  .nav-btn { width: 40px; height: 40px; }
 }
 </style>
 </head>
