@@ -1266,26 +1266,26 @@ DEMO_DATA.kmong_products = [
 
 // === Generate CPC daily data (30 days x 14 products) ===
 const _productCpcProfile = {
-  product_photo:  { baseImp: 180, baseCtr: 1.8, cpcUnit: 150, trend: 1.4 },
-  profile_photo:  { baseImp: 120, baseCtr: 2.1, cpcUnit: 130, trend: 1.2 },
-  food_photo:     { baseImp: 160, baseCtr: 2.0, cpcUnit: 160, trend: 1.3 },
-  interior_photo: { baseImp: 90,  baseCtr: 1.6, cpcUnit: 180, trend: 1.0 },
-  detail_photo:   { baseImp: 200, baseCtr: 2.3, cpcUnit: 140, trend: 1.5 },
-  concept_photo:  { baseImp: 70,  baseCtr: 1.5, cpcUnit: 200, trend: 0.8 },
-  brand_package:  { baseImp: 60,  baseCtr: 1.3, cpcUnit: 220, trend: 0.7 },
-  shortform:      { baseImp: 140, baseCtr: 2.5, cpcUnit: 120, trend: 1.6 },
-  video_edit:     { baseImp: 110, baseCtr: 1.9, cpcUnit: 140, trend: 1.1 },
-  product_3d:     { baseImp: 50,  baseCtr: 1.4, cpcUnit: 190, trend: 0.6 },
-  logo_design:    { baseImp: 150, baseCtr: 1.7, cpcUnit: 170, trend: 1.2 },
-  namecard:       { baseImp: 100, baseCtr: 2.2, cpcUnit: 110, trend: 1.0 },
-  detail_design:  { baseImp: 170, baseCtr: 2.0, cpcUnit: 150, trend: 1.3 },
-  banner_design:  { baseImp: 130, baseCtr: 2.4, cpcUnit: 100, trend: 1.4 },
-  sns_design:     { baseImp: 140, baseCtr: 2.6, cpcUnit: 90,  trend: 1.5 },
-  package_design: { baseImp: 80,  baseCtr: 1.5, cpcUnit: 180, trend: 0.9 },
-  catalog:        { baseImp: 60,  baseCtr: 1.3, cpcUnit: 200, trend: 0.7 },
-  poster:         { baseImp: 90,  baseCtr: 1.8, cpcUnit: 120, trend: 1.0 },
-  retouch:        { baseImp: 160, baseCtr: 2.8, cpcUnit: 80,  trend: 1.4 },
-  composite:      { baseImp: 100, baseCtr: 2.2, cpcUnit: 90,  trend: 1.1 },
+  product_photo:  { baseImp: 180, baseCtr: 1.8, cpcUnit: 1800, trend: 1.4 },
+  profile_photo:  { baseImp: 120, baseCtr: 2.1, cpcUnit: 1400, trend: 1.2 },
+  food_photo:     { baseImp: 160, baseCtr: 2.0, cpcUnit: 2000, trend: 1.3 },
+  interior_photo: { baseImp: 90,  baseCtr: 1.6, cpcUnit: 2200, trend: 1.0 },
+  detail_photo:   { baseImp: 200, baseCtr: 2.3, cpcUnit: 1600, trend: 1.5 },
+  concept_photo:  { baseImp: 70,  baseCtr: 1.5, cpcUnit: 2800, trend: 0.8 },
+  brand_package:  { baseImp: 60,  baseCtr: 1.3, cpcUnit: 3000, trend: 0.7 },
+  shortform:      { baseImp: 140, baseCtr: 2.5, cpcUnit: 1200, trend: 1.6 },
+  video_edit:     { baseImp: 110, baseCtr: 1.9, cpcUnit: 1500, trend: 1.1 },
+  product_3d:     { baseImp: 50,  baseCtr: 1.4, cpcUnit: 2500, trend: 0.6 },
+  logo_design:    { baseImp: 150, baseCtr: 1.7, cpcUnit: 2200, trend: 1.2 },
+  namecard:       { baseImp: 100, baseCtr: 2.2, cpcUnit: 1100, trend: 1.0 },
+  detail_design:  { baseImp: 170, baseCtr: 2.0, cpcUnit: 1800, trend: 1.3 },
+  banner_design:  { baseImp: 130, baseCtr: 2.4, cpcUnit: 1000, trend: 1.4 },
+  sns_design:     { baseImp: 140, baseCtr: 2.6, cpcUnit: 1000, trend: 1.5 },
+  package_design: { baseImp: 80,  baseCtr: 1.5, cpcUnit: 2400, trend: 0.9 },
+  catalog:        { baseImp: 60,  baseCtr: 1.3, cpcUnit: 2600, trend: 0.7 },
+  poster:         { baseImp: 90,  baseCtr: 1.8, cpcUnit: 1300, trend: 1.0 },
+  retouch:        { baseImp: 160, baseCtr: 2.8, cpcUnit: 1000, trend: 1.4 },
+  composite:      { baseImp: 100, baseCtr: 2.2, cpcUnit: 1100, trend: 1.1 },
 };
 
 DEMO_DATA.kmong_cpc_daily = [];
@@ -1424,14 +1424,23 @@ DEMO_DATA.kmong_creative_changes = [
 ];
 
 // === Profits summary ===
+// === Profits (동적 계산 — 이번 달 주문 데이터 기반) ===
+const _monthStart = _today.toISOString().slice(0,7) + '-01';
+const _thisMonthOrders = DEMO_DATA.kmong_orders.filter(o => o.status === 'completed' && o.order_date >= _monthStart);
+const _thisMonthRevenue = _thisMonthOrders.reduce((s, o) => s + o.amount, 0);
+const _allCompletedRevenue = DEMO_DATA.kmong_orders.filter(o => o.status === 'completed').reduce((s, o) => s + o.amount, 0);
+
 DEMO_DATA.kmong_profits_summary = [{
-  id:1, available_profit: 2850000, expected_profit: 1420000, withdrawn_profit: 3200000,
-  total_revenue: 7470000, crawled_at: _dt(0, 9, 0)
+  id:1,
+  available_profit: Math.round(_allCompletedRevenue * 0.38),
+  expected_profit: Math.round(_allCompletedRevenue * 0.19),
+  withdrawn_profit: Math.round(_allCompletedRevenue * 0.25),
+  total_revenue: _allCompletedRevenue,
+  crawled_at: _dt(0, 9, 0)
 }];
 
-// === Profits monthly ===
 DEMO_DATA.kmong_profits_monthly = [{
-  id:1, term: _today.toISOString().slice(0,7), completed_amount: 5680000
+  id:1, term: _today.toISOString().slice(0,7), completed_amount: _thisMonthRevenue
 }];
 
 // === Profits transactions (join with orders for sales tab) ===
