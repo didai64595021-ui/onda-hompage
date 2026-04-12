@@ -1071,9 +1071,9 @@ td .reply-preview:hover { color: var(--primary); }
       <div class="chart-card full" style="margin-bottom:16px">
         <div class="chart-title" style="display:flex;justify-content:space-between;align-items:center">
           <span><span class="dot" style="background:var(--warning)"></span>세금계산서 신청 내역</span>
-          <div style="display:flex;gap:8px">
-            <button onclick="downloadTaxExcel('under100')" style="padding:6px 14px;font-size:11px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:inherit">📥 국세청 양식 (100건 미만)</button>
-            <button onclick="downloadTaxExcel('over100')" style="padding:6px 14px;font-size:11px;background:var(--bg-input);color:var(--text-2);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:inherit">📥 국세청 양식 (100건 초과)</button>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span id="taxCountBadge" style="font-size:11px;color:var(--text-3);padding:4px 10px;background:var(--bg-input);border-radius:4px"></span>
+            <button onclick="downloadTaxExcelAuto()" style="padding:6px 14px;font-size:11px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:inherit">📥 국세청 양식 다운로드</button>
           </div>
         </div>
         <div class="table-wrap" style="border:0;margin:0">
@@ -3865,6 +3865,7 @@ async function saveReplyEdit() {
 async function loadTaxTab() {
   const { data: invoices } = await sb.from('kmong_tax_invoices').select('*').order('order_date', { ascending: false });
   const rows = invoices || [];
+  updateTaxCountBadge();
 
   // KPI 계산
   const thisMonth = new Date().toISOString().slice(0, 7);
@@ -3957,7 +3958,21 @@ async function loadTaxTab() {
   });
 }
 
-/* === 국세청 세금계산서 엑셀 다운로드 === */
+/* === 국세청 세금계산서 엑셀 다운로드 (자동 양식 판별) === */
+function updateTaxCountBadge() {
+  const count = (DEMO_DATA.kmong_tax_invoices || []).filter(r => r.status === '발행완료' || r.status === '신청됨').length;
+  const badge = document.getElementById('taxCountBadge');
+  if (badge) {
+    const format = count > 100 ? '100건 초과' : '100건 미만';
+    badge.textContent = `발행대상 ${count}건 → ${format} 양식 자동적용`;
+    badge.style.color = count > 100 ? 'var(--warning)' : 'var(--success)';
+  }
+}
+function downloadTaxExcelAuto() {
+  const invoices = (DEMO_DATA.kmong_tax_invoices || []).filter(r => r.status === '발행완료' || r.status === '신청됨');
+  const format = invoices.length > 100 ? 'over100' : 'under100';
+  downloadTaxExcel(format);
+}
 function downloadTaxExcel(format) {
   const invoices = (DEMO_DATA.kmong_tax_invoices || []).filter(r => r.status === '발행완료' || r.status === '신청됨');
   if (invoices.length === 0) { showToast('다운로드할 세금계산서가 없습니다', 'error'); return; }
