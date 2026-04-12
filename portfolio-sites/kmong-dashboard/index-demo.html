@@ -620,6 +620,10 @@ td .reply-preview:hover { color: var(--primary); }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
       자동응답
     </div>
+    <div class="nav-item" data-tab="tax" onclick="switchTab('tax')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      세무·정산
+    </div>
   </nav>
   <div class="sidebar-summary" id="sidebarSummary">
     <div class="sidebar-summary-title">월간 매출 요약</div>
@@ -1056,6 +1060,46 @@ td .reply-preview:hover { color: var(--primary); }
         <div class="chart-card">
           <div class="chart-title"><span class="dot" style="background:var(--success)"></span>응답 통계</div>
           <div id="replyStats" style="padding:16px;font-size:13px;color:var(--text-2)">로딩 중...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 세무·정산 탭 -->
+    <div class="tab-panel" id="tab-tax">
+      <div class="kpi-grid" id="taxKpi"></div>
+
+      <div class="chart-card full" style="margin-bottom:16px">
+        <div class="chart-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span><span class="dot" style="background:var(--warning)"></span>세금계산서 신청 내역</span>
+          <div style="display:flex;gap:8px">
+            <button onclick="downloadTaxExcel('under100')" style="padding:6px 14px;font-size:11px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:inherit">📥 국세청 양식 (100건 미만)</button>
+            <button onclick="downloadTaxExcel('over100')" style="padding:6px 14px;font-size:11px;background:var(--bg-input);color:var(--text-2);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:inherit">📥 국세청 양식 (100건 초과)</button>
+          </div>
+        </div>
+        <div class="table-wrap" style="border:0;margin:0">
+          <table id="tableTaxInvoice">
+            <thead><tr><th>주문일</th><th>주문번호</th><th>의뢰인</th><th>서비스명</th><th>금액</th><th>공급가액</th><th>부가세</th><th>발행상태</th><th>액션</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-title"><span class="dot" style="background:var(--success)"></span>월별 정산 현황 (최근 6개월)</div>
+          <div class="chart-wrap" style="height:280px"><canvas id="chartMonthlySettlement"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title"><span class="dot" style="background:var(--primary)"></span>사업자 정보</div>
+          <div id="businessInfo" style="padding:8px 0;font-size:13px;color:var(--text-2)">
+            <div style="display:grid;gap:10px">
+              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-3)">사업자 유형</span><span style="color:var(--text-1);font-weight:600">일반과세자</span></div>
+              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-3)">사업자번호</span><span style="color:var(--text-1);font-weight:600">123-45-67890</span></div>
+              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-3)">대표자명</span><span style="color:var(--text-1);font-weight:600">홍길동</span></div>
+              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-3)">업태/종목</span><span style="color:var(--text-1);font-weight:600">서비스업 / 디자인·촬영</span></div>
+              <div style="display:flex;justify-content:space-between;padding:8px 0"><span style="color:var(--text-3)">세금계산서 발행</span><span style="font-weight:600;color:var(--success)">가능</span></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1587,6 +1631,64 @@ DEMO_DATA.kmong_roi_analysis = DEMO_DATA.kmong_products.map(p => {
   return { product_id: p.product_id, roi_pct: Math.round((revenue - cost) / cost * 100), revenue, cost, period_end: _d(0) };
 });
 
+// === Tax Invoice demo data (세금계산서) ===
+DEMO_DATA.kmong_tax_invoices = [];
+(function() {
+  const completedOrders = DEMO_DATA.kmong_orders.filter(o => o.status === 'completed');
+  let taxId = 1;
+  completedOrders.forEach(o => {
+    // 70% have tax invoice requested
+    const rand = Math.random();
+    let invoice_status;
+    if (rand < 0.30) {
+      invoice_status = '미신청';
+    } else {
+      // Of the 70% requested: 60% issued, 30% pending, 10% unable
+      const r2 = Math.random();
+      if (r2 < 0.60) invoice_status = '발행완료';
+      else if (r2 < 0.90) invoice_status = '신청됨(대기)';
+      else invoice_status = '발행불가';
+    }
+    const supply_amount = Math.round(o.amount / 1.1);
+    const vat_amount = o.amount - supply_amount;
+    const bizNo = String(100+Math.floor(Math.random()*900)) + String(10+Math.floor(Math.random()*90)) + String(10000+Math.floor(Math.random()*90000));
+    DEMO_DATA.kmong_tax_invoices.push({
+      id: taxId++,
+      order_id: o.order_id,
+      order_date: o.order_date,
+      product_id: o.product_id,
+      buyer_name: o.buyer_name,
+      buyer_biz_no: bizNo,
+      buyer_email: 'buyer' + taxId + '@example.com',
+      service_name: o.service_name,
+      amount: o.amount,
+      supply_amount: supply_amount,
+      vat_amount: vat_amount,
+      invoice_status: invoice_status,
+      status: invoice_status === '발행완료' ? '발행완료' : invoice_status === '신청됨(대기)' ? '신청됨' : invoice_status
+    });
+  });
+})();
+
+// === Monthly settlement demo data (월별 정산) ===
+DEMO_DATA.kmong_monthly_settlement = [];
+(function() {
+  const now = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const label = d.toISOString().slice(0, 7);
+    // Growth trend: earlier months smaller
+    const base = 2800000 + (5 - i) * 520000;
+    const amount = Math.round(base * (0.85 + Math.random() * 0.3));
+    DEMO_DATA.kmong_monthly_settlement.push({
+      month: label,
+      settled_amount: amount,
+      supply_amount: Math.round(amount / 1.1),
+      vat_amount: amount - Math.round(amount / 1.1)
+    });
+  }
+})();
+
 // === Mock Supabase Client ===
 function _createQueryBuilder(table) {
   const qb = {
@@ -1716,9 +1818,9 @@ function switchTab(tab) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   document.querySelector(`.nav-item[data-tab="${tab}"]`).classList.add('active');
-  const titles = { cpc: 'CPC 소재테스트', funnel: '전환 퍼널', inquiry: '서비스별 문의량', roi: 'ROI 분석', sales: '매출 분석', content: 'AI 콘텐츠 관리', abtest: 'A/B 테스트', inbox: '인박스 AI', adcontrol: '광고 제어', autoreply: '자동응답' };
+  const titles = { cpc: 'CPC 소재테스트', funnel: '전환 퍼널', inquiry: '서비스별 문의량', roi: 'ROI 분석', sales: '매출 분석', content: 'AI 콘텐츠 관리', abtest: 'A/B 테스트', inbox: '인박스 AI', adcontrol: '광고 제어', autoreply: '자동응답', tax: '세무·정산' };
   // 탭 전환 시 데이터 새로고침
-  const tabLoaders = { sales: loadSalesTab, adcontrol: loadAdControlTab, autoreply: loadAutoReplyTab, roi: loadRoiTab, funnel: loadFunnelTab, inquiry: loadInquiryTab, content: loadContentTab, abtest: loadAbTestTab, inbox: loadInboxTab };
+  const tabLoaders = { sales: loadSalesTab, adcontrol: loadAdControlTab, autoreply: loadAutoReplyTab, roi: loadRoiTab, funnel: loadFunnelTab, inquiry: loadInquiryTab, content: loadContentTab, abtest: loadAbTestTab, inbox: loadInboxTab, tax: loadTaxTab };
   if (tabLoaders[tab]) tabLoaders[tab]();
   document.getElementById('pageTitle').textContent = titles[tab];
   if (window.innerWidth <= 1024) closeSidebar();
@@ -3757,6 +3859,197 @@ async function saveReplyEdit() {
   showToast('답변 수정 완료');
   closeReplyModal();
   loadAutoReplyTab();
+}
+
+/* === 세무·정산 탭 === */
+async function loadTaxTab() {
+  const { data: invoices } = await sb.from('kmong_tax_invoices').select('*').order('order_date', { ascending: false });
+  const rows = invoices || [];
+
+  // KPI 계산
+  const thisMonth = new Date().toISOString().slice(0, 7);
+  const thisMonthRows = rows.filter(r => (r.order_date || '').startsWith(thisMonth));
+  const thisMonthCompleted = thisMonthRows.length;
+  const thisMonthAmount = thisMonthRows.reduce((s, r) => s + (r.amount || 0), 0);
+  const pendingCount = rows.filter(r => r.invoice_status === '신청됨(대기)').length;
+  const issuedCount = rows.filter(r => r.invoice_status === '발행완료').length;
+  const notIssuedCount = rows.filter(r => r.invoice_status === '미신청').length;
+  const taxableAmount = rows.filter(r => r.invoice_status !== '발행불가').reduce((s, r) => s + (r.vat_amount || 0), 0);
+
+  document.getElementById('taxKpi').innerHTML = [
+    { label: '이번달 거래완료', value: fmt(thisMonthCompleted) + '건', color: 'var(--primary)' },
+    { label: '이번달 매출액', value: fmtMoney(thisMonthAmount), color: 'var(--success)' },
+    { label: '세금계산서 신청', value: fmt(pendingCount) + '건', color: 'var(--warning)' },
+    { label: '세금계산서 발행완료', value: fmt(issuedCount) + '건', color: 'var(--primary)' },
+    { label: '미발행 건', value: fmt(notIssuedCount) + '건', color: 'var(--danger)', urgent: true },
+    { label: '예상 부가세', value: fmtMoney(taxableAmount), color: 'var(--warning)' },
+  ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}${k.urgent ? ' <span style="font-size:10px;color:var(--danger);font-weight:700">긴급</span>' : ''}</div><div class="kpi-value" style="color:${k.color}">${k.value}</div></div>`).join('');
+
+  // 테이블 렌더링
+  const tbody = document.querySelector('#tableTaxInvoice tbody');
+  if (rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><p>세금계산서 내역이 없습니다</p></div></td></tr>';
+  } else {
+    tbody.innerHTML = rows.map(r => {
+      const statusMap = {
+        '미신청': 'badge-pending',
+        '신청됨(대기)': 'badge-quoted',
+        '발행완료': 'badge-paid',
+        '발행불가': 'badge-cancelled'
+      };
+      const badgeClass = statusMap[r.invoice_status] || 'badge-pending';
+      let actionBtn = '';
+      if (r.invoice_status === '신청됨(대기)') {
+        actionBtn = '<button class="btn-primary" style="padding:2px 8px;font-size:11px;margin:1px" onclick="showToast(\'세금계산서 발행 처리 중\')">발행</button>';
+      }
+      actionBtn += '<button class="btn-icon" style="padding:2px 8px;font-size:11px;margin:1px" onclick="showToast(\'주문 정보 확인\')">정보확인</button>';
+      return `<tr>
+        <td style="font-size:11px">${fmtDate(r.order_date)}</td>
+        <td style="color:var(--primary)">#${r.order_id}</td>
+        <td>${r.buyer_name || '-'}</td>
+        <td style="font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis">${r.service_name || '-'}</td>
+        <td style="text-align:right">${fmtMoney(r.amount)}</td>
+        <td style="text-align:right">${fmtMoney(r.supply_amount)}</td>
+        <td style="text-align:right">${fmtMoney(r.vat_amount)}</td>
+        <td><span class="badge ${badgeClass}">${r.invoice_status}</span></td>
+        <td style="white-space:nowrap">${actionBtn}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // 월별 정산 차트
+  const { data: monthly } = await sb.from('kmong_monthly_settlement').select('*').order('month', { ascending: true });
+  const monthlyData = monthly || [];
+
+  makeChart('chartMonthlySettlement', {
+    type: 'bar',
+    data: {
+      labels: monthlyData.map(m => m.month.slice(2).replace('-', '/')),
+      datasets: [
+        {
+          label: '정산 금액',
+          data: monthlyData.map(m => m.settled_amount),
+          backgroundColor: '#0D99FF88',
+          borderColor: '#0D99FF',
+          borderWidth: 1,
+          borderRadius: 4,
+        },
+        {
+          label: '부가세',
+          data: monthlyData.map(m => m.vat_amount),
+          backgroundColor: '#fbbf2488',
+          borderColor: '#fbbf24',
+          borderWidth: 1,
+          borderRadius: 4,
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top', labels: { font: { size: 11 }, boxWidth: 12 } }
+      },
+      scales: {
+        y: { ticks: { callback: v => (v / 10000).toFixed(0) + '만' } },
+        x: { ticks: { maxRotation: 0 } }
+      }
+    }
+  });
+}
+
+/* === 국세청 세금계산서 엑셀 다운로드 === */
+function downloadTaxExcel(format) {
+  const invoices = (DEMO_DATA.kmong_tax_invoices || []).filter(r => r.status === '발행완료' || r.status === '신청됨');
+  if (invoices.length === 0) { showToast('다운로드할 세금계산서가 없습니다', 'error'); return; }
+
+  // 사업자 정보 (공급자)
+  const supplier = {
+    bizNo: '1234567890', branchNo: '', name: '온다스튜디오', ceo: '홍길동',
+    addr: '서울특별시 강남구 테헤란로 123', bizType: '서비스업', bizItem: '디자인,촬영',
+    email: 'tax@ondastudio.com'
+  };
+
+  let csvRows = [];
+  const today = new Date();
+  const dateStr = d => { const dt = new Date(d); return dt.getFullYear() + String(dt.getMonth()+1).padStart(2,'0') + String(dt.getDate()).padStart(2,'0'); };
+  const dayStr = d => String(new Date(d).getDate()).padStart(2,'0');
+
+  if (format === 'under100') {
+    // 100건 미초과: 63컬럼 — 공급자+공급받는자
+    const header = [
+      '전자(세금)계산서 종류','작성일자',
+      '공급자 등록번호','공급자 종사업장번호','공급자 상호','공급자 성명','공급자 사업장주소','공급자 업태','공급자 종목','공급자 이메일',
+      '공급받는자 등록번호','공급받는자 종사업장번호','공급받는자 상호','공급받는자 성명','공급받는자 사업장주소','공급받는자 업태','공급받는자 종목','공급받는자 이메일1','공급받는자 이메일2',
+      '공급가액 합계','세액 합계','비고',
+      '일자1','품목1','규격1','수량1','단가1','공급가액1','세액1','품목비고1',
+      '일자2','품목2','규격2','수량2','단가2','공급가액2','세액2','품목비고2',
+      '일자3','품목3','규격3','수량3','단가3','공급가액3','세액3','품목비고3',
+      '일자4','품목4','규격4','수량4','단가4','공급가액4','세액4','품목비고4',
+      '현금','수표','어음','외상미수금','영수(01),청구(02)'
+    ];
+    csvRows.push(header);
+
+    for (const inv of invoices) {
+      const supplyAmt = Math.round(inv.amount / 1.1);
+      const vatAmt = inv.amount - supplyAmt;
+      const svcName = inv.service_name || productName(inv.product_id);
+      const row = [
+        '01', dateStr(inv.order_date),
+        supplier.bizNo, supplier.branchNo, supplier.name, supplier.ceo, supplier.addr, supplier.bizType, supplier.bizItem, supplier.email,
+        inv.buyer_biz_no || '', '', inv.buyer_name || '', inv.buyer_name || '', '', '', '', inv.buyer_email || '', '',
+        supplyAmt, vatAmt, '',
+        dayStr(inv.order_date), svcName, '', '1', supplyAmt, supplyAmt, vatAmt, '',
+        '','','','','','','','',
+        '','','','','','','','',
+        '','','','','','','','',
+        inv.amount, '', '', '', '01'
+      ];
+      csvRows.push(row);
+    }
+  } else {
+    // 100건 초과: 37컬럼 — 공급받는자만
+    const header = [
+      '전자세금계산서 종류','작성일자',
+      '공급받는자 등록번호','공급받는자 종사업장번호','공급받는자 상호','공급받는자 성명','공급받는자 사업장주소','공급받는자 업태','공급받는자 종목','공급받는자 이메일1','공급받는자 이메일2',
+      '공급가액 합계','세액 합계','비고',
+      '일자1','품목1','규격1','수량1','단가1','공급가액1','세액1','품목비고1',
+      '일자2','품목2','규격2','수량2','단가2','공급가액2','세액2','품목비고2',
+      '현금','수표','어음','외상미수금','영수(01),청구(02)'
+    ];
+    csvRows.push(header);
+
+    for (const inv of invoices) {
+      const supplyAmt = Math.round(inv.amount / 1.1);
+      const vatAmt = inv.amount - supplyAmt;
+      const svcName = inv.service_name || productName(inv.product_id);
+      const row = [
+        '01', dateStr(inv.order_date),
+        inv.buyer_biz_no || '', '', inv.buyer_name || '', inv.buyer_name || '', '', '', '', inv.buyer_email || '', '',
+        supplyAmt, vatAmt, '',
+        dayStr(inv.order_date), svcName, '', '1', supplyAmt, supplyAmt, vatAmt, '',
+        '','','','','','','','',
+        inv.amount, '', '', '', '01'
+      ];
+      csvRows.push(row);
+    }
+  }
+
+  // CSV → BOM + UTF-8 다운로드
+  const csvContent = csvRows.map(r => r.map(v => {
+    const s = String(v == null ? '' : v);
+    return s.includes(',') || s.includes('"') || s.includes('\n') ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }).join(',')).join('\n');
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const label = format === 'under100' ? '100건미만' : '100건초과';
+  const dateLabel = today.getFullYear() + String(today.getMonth()+1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
+  a.href = url;
+  a.download = `세금계산서_국세청_${label}_${dateLabel}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`국세청 양식 (${label}) ${invoices.length}건 다운로드 완료`);
 }
 
 function showTextModal(title, text) {
