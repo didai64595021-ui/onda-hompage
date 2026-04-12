@@ -121,6 +121,10 @@ a{color:inherit;text-decoration:none}
   min-height:100vh;min-height:100svh;
   display:flex;flex-direction:column;justify-content:center;
   padding:0 var(--pad);position:relative;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(59,130,246,0.06), transparent 50%),
+    radial-gradient(ellipse at 80% 30%, rgba(168,85,247,0.04), transparent 40%),
+    radial-gradient(ellipse at 60% 80%, rgba(16,185,129,0.03), transparent 45%);
 }
 .hero-label{
   font-family:var(--mono);font-size:clamp(11px,1vw,13px);
@@ -190,10 +194,30 @@ a{color:inherit;text-decoration:none}
   align-items:center;
   gap:clamp(16px,3vw,48px);
   padding:clamp(18px,2.8vw,32px) 0;
+  padding-left:0;
   border-bottom:1px solid rgba(245,245,240,.1);
   cursor:pointer;position:relative;
-  transition:color .45s var(--ease);
+  transition:color .45s var(--ease),padding-left .4s var(--ease);
 }
+/* Accent color bar on left */
+.project-row::after{
+  content:'';position:absolute;
+  left:0;top:12%;bottom:12%;
+  width:3px;border-radius:2px;
+  background:var(--project-accent,var(--accent));
+  transform:scaleY(0);
+  transform-origin:center;
+  transition:transform .4s var(--ease-out);
+  z-index:2;
+}
+.project-row:hover::after{transform:scaleY(1)}
+.project-row:hover{padding-left:16px}
+.project-row:nth-child(1){--project-accent:#3b82f6}
+.project-row:nth-child(2){--project-accent:#10b981}
+.project-row:nth-child(3){--project-accent:#a855f7}
+.project-row:nth-child(4){--project-accent:#f97316}
+.project-row:nth-child(5){--project-accent:#ec4899}
+.project-row:nth-child(6){--project-accent:#06b6d4}
 .project-row::before{
   content:'';position:absolute;
   inset:0;
@@ -243,7 +267,7 @@ a{color:inherit;text-decoration:none}
   transition:color .3s var(--ease),opacity .3s var(--ease);
   cursor:default;
 }
-.stack-col li:hover{opacity:1;color:var(--accent)}
+.stack-col li:hover{opacity:1;color:var(--tech-color,var(--accent))}
 
 /* ==============================
    PROCESS — 4 columns, divider lines
@@ -256,7 +280,12 @@ a{color:inherit;text-decoration:none}
 .process-item{
   padding:clamp(24px,3vw,44px) clamp(16px,2vw,32px);
   position:relative;
+  transition:background .5s var(--ease);
 }
+.process-item:nth-child(1):hover{background:rgba(59,130,246,.06)}
+.process-item:nth-child(2):hover{background:rgba(168,85,247,.06)}
+.process-item:nth-child(3):hover{background:rgba(16,185,129,.06)}
+.process-item:nth-child(4):hover{background:rgba(249,115,22,.06)}
 .process-item + .process-item::before{
   content:'';position:absolute;left:0;top:0;bottom:0;
   width:1px;background:rgba(245,245,240,.08);
@@ -332,13 +361,18 @@ a{color:inherit;text-decoration:none}
 }
 @media(max-width:768px){
   .project-row{grid-template-columns:1fr;gap:6px}
+  .project-row:hover{padding-left:12px}
   .project-year{text-align:left}
+  .project-stack{font-size:12px;white-space:normal}
   .stack-grid{grid-template-columns:1fr}
+  .stack-col li{font-size:16px;line-height:2.6;min-height:44px;display:flex;align-items:center}
   .hero-scroll{display:none}
   .hero-index{display:none}
   .cursor-dot{display:none}
   body{cursor:auto}
   .section-header{flex-direction:column;gap:8px}
+  .contact-link{font-size:14px;min-height:44px;display:inline-flex;align-items:center}
+  .contact-link-label{font-size:11px}
 }
 @media(max-width:480px){
   .process-grid{grid-template-columns:1fr}
@@ -346,6 +380,9 @@ a{color:inherit;text-decoration:none}
     left:0;right:0;top:0;bottom:auto;
     width:100%;height:1px;
   }
+  .process-num{font-size:32px;margin-bottom:12px}
+  .process-item{padding:20px 16px}
+  .contact-link{word-break:break-all}
 }
 </style>
 </head>
@@ -431,31 +468,31 @@ a{color:inherit;text-decoration:none}
     <div class="stack-col">
       <div class="stack-col-label">Frontend</div>
       <ul>
-        <li>React</li>
-        <li>Next.js</li>
-        <li>TypeScript</li>
-        <li>Vue.js</li>
-        <li>Tailwind CSS</li>
+        <li style="--tech-color:#61dafb">React</li>
+        <li style="--tech-color:#f5f5f0">Next.js</li>
+        <li style="--tech-color:#3178c6">TypeScript</li>
+        <li style="--tech-color:#42b883">Vue.js</li>
+        <li style="--tech-color:#38bdf8">Tailwind CSS</li>
       </ul>
     </div>
     <div class="stack-col">
       <div class="stack-col-label">Backend</div>
       <ul>
-        <li>Node.js</li>
-        <li>Python</li>
-        <li>FastAPI</li>
-        <li>Express</li>
-        <li>PostgreSQL</li>
+        <li style="--tech-color:#68a063">Node.js</li>
+        <li style="--tech-color:#ffd43b">Python</li>
+        <li style="--tech-color:#009688">FastAPI</li>
+        <li style="--tech-color:#f5f5f0">Express</li>
+        <li style="--tech-color:#336791">PostgreSQL</li>
       </ul>
     </div>
     <div class="stack-col">
       <div class="stack-col-label">Infra</div>
       <ul>
-        <li>AWS</li>
-        <li>Docker</li>
-        <li>Cloudflare</li>
-        <li>GitHub Actions</li>
-        <li>Playwright</li>
+        <li style="--tech-color:#ff9900">AWS</li>
+        <li style="--tech-color:#2496ed">Docker</li>
+        <li style="--tech-color:#f6821f">Cloudflare</li>
+        <li style="--tech-color:#f5f5f0">GitHub Actions</li>
+        <li style="--tech-color:#2ead33">Playwright</li>
       </ul>
     </div>
   </div>
