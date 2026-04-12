@@ -343,8 +343,8 @@ img { display: block; max-width: 100%; }
 /* Flow example */
 .flow-example {
   max-width: 540px; padding: 18px 22px;
-  border-left: 2px solid rgba(16,185,129,0.4);
-  background: rgba(16,185,129,0.03);
+  border-left: 2px solid rgba(245,245,245,0.15);
+  background: rgba(245,245,245,0.02);
   border-radius: 0 8px 8px 0;
   margin-bottom: 32px;
   opacity: 0; transform: translateY(20px);
@@ -353,26 +353,37 @@ img { display: block; max-width: 100%; }
 .slide.in-view .flow-example { opacity: 1; transform: translateY(0); }
 .flow-example-label {
   font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
-  color: rgba(16,185,129,0.7); margin-bottom: 10px; display: block; font-weight: 600;
+  color: rgba(245,245,245,0.45); margin-bottom: 10px; display: block; font-weight: 600;
 }
 .flow-example-content {
-  font-size: 0.85rem; color: rgba(245,245,245,0.72); line-height: 1.65;
+  font-size: 0.85rem; color: rgba(245,245,245,0.65); line-height: 1.7;
 }
-.flow-example-content strong { color: rgba(245,245,245,0.95); font-weight: 600; }
-.flow-example-result {
-  display: inline-flex; align-items: center; gap: 8px;
-  margin-top: 10px; padding: 6px 14px;
-  background: rgba(16,185,129,0.1); border-radius: 6px;
-  font-size: 0.82rem; font-weight: 600; color: rgba(16,185,129,0.9);
-}
+.flow-example-content strong { color: rgba(245,245,245,0.9); font-weight: 600; }
 
-/* ============ Per-slide object-position (focal point) ============ */
-.slide[data-index="03"] .slide-image img { object-position: center 30%; }
+/* Logic chain */
+.logic-chain {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-top: 14px; font-size: 0.8rem; color: rgba(245,245,245,0.7);
+}
+.logic-chain span { padding: 5px 12px; border: 1px solid rgba(245,245,245,0.12); border-radius: 6px; }
+.logic-arrow { border: none !important; padding: 0 !important; opacity: 0.4; }
+
+/* Bridge badge on portfolio slides */
+.slide-bridge {
+  display: inline-block; max-width: 480px;
+  font-size: 0.78rem; color: rgba(245,245,245,0.5);
+  border-top: 1px solid rgba(245,245,245,0.1);
+  padding-top: 16px; margin-top: 4px; margin-bottom: 36px;
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.9s ease 0.7s, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.7s;
+}
+.slide.in-view .slide-bridge { opacity: 1; transform: translateY(0); }
+
+/* ============ Per-slide object-position ============ */
+.slide[data-index="03"] .slide-image img { object-position: center top; }
 .slide[data-index="04"] .slide-image img { object-position: center center; }
-.slide[data-index="05"] .slide-image img { object-position: center top; }
+.slide[data-index="05"] .slide-image img { object-position: center center; }
 .slide[data-index="06"] .slide-image img { object-position: center center; }
-.slide[data-index="07"] .slide-image img { object-position: center center; }
-.slide[data-index="08"] .slide-image img { object-position: center center; }
 
 /* ============ Responsive — Tablet ============ */
 @media (max-width: 1024px) {
@@ -409,28 +420,20 @@ img { display: block; max-width: 100%; }
   .nav-btn { width: 44px; height: 44px; }
   .scroll-hint { display: none; }
 
-  /* Mobile: vertical gradient for portrait images */
   .slide-image::after {
     background: linear-gradient(180deg,
-      rgba(10,10,10,0.75) 0%,
-      rgba(10,10,10,0.35) 35%,
-      rgba(10,10,10,0.15) 55%,
-      rgba(10,10,10,0.65) 85%,
-      rgba(10,10,10,0.9) 100%);
+      rgba(10,10,10,0.75) 0%, rgba(10,10,10,0.35) 35%,
+      rgba(10,10,10,0.15) 55%, rgba(10,10,10,0.65) 85%, rgba(10,10,10,0.9) 100%);
   }
   .pitch-slide .slide-image::after {
     background: linear-gradient(180deg, rgba(10,10,10,0.8) 0%, rgba(10,10,10,0.5) 50%, rgba(10,10,10,0.75) 100%);
   }
 
-  /* Per-slide mobile focal points — portrait crop */
-  .slide[data-index="03"] .slide-image img { object-position: center 25%; }
-  .slide[data-index="04"] .slide-image img { object-position: center center; }
-  .slide[data-index="05"] .slide-image img { object-position: center top; }
-  .slide[data-index="06"] .slide-image img { object-position: center 30%; }
-  .slide[data-index="07"] .slide-image img { object-position: center 40%; }
-  .slide[data-index="08"] .slide-image img { object-position: center center; }
+  .slide[data-index="03"] .slide-image img { object-position: center top; }
+  .slide[data-index="04"] .slide-image img { object-position: center 30%; }
+  .slide[data-index="05"] .slide-image img { object-position: center 40%; }
+  .slide[data-index="06"] .slide-image img { object-position: center center; }
 
-  /* Pitch slide mobile adjustments */
   .pain-points { gap: 14px; }
   .pain-icon { width: 32px; height: 32px; font-size: 0.8rem; }
   .pain-text strong { font-size: 0.85rem; }
@@ -440,6 +443,8 @@ img { display: block; max-width: 100%; }
   .flow-text { font-size: 0.82rem; }
   .flow-example { padding: 14px 16px; }
   .flow-example-content { font-size: 0.8rem; }
+  .logic-chain { font-size: 0.72rem; gap: 6px; }
+  .logic-chain span { padding: 4px 10px; }
 }
 
 /* ============ Responsive — Small Mobile ============ */
@@ -473,7 +478,7 @@ img { display: block; max-width: 100%; }
 
 <!-- HEADER -->
 <header class="header">
-  <div class="brand">ONDA STUDIO<sup>©2026</sup></div>
+  <div class="brand">ONDA STUDIO<sup>&#169;2026</sup></div>
   <nav class="nav-right">
     <a href="../../index.html">Home</a>
     <a href="../../about.html">About</a>
@@ -483,7 +488,7 @@ img { display: block; max-width: 100%; }
 
 <!-- INTRO -->
 <section class="intro" id="intro">
-  <div class="intro-tag">Selected Works · 2025—2026</div>
+  <div class="intro-tag">Selected Works &#183; 2025&#8212;2026</div>
   <h1 class="intro-title display">
     <span class="line"><span>Design that</span></span>
     <span class="line"><span>speaks loud.</span></span>
@@ -493,7 +498,7 @@ img { display: block; max-width: 100%; }
     광고 최적화부터 포트폴리오 사이트 제작까지, 실질적 전환을 만듭니다.
   </p>
   <button class="scroll-cta" id="enterBtn">
-    Enter showcase <span class="arrow">↓</span>
+    Enter showcase <span class="arrow">&#8595;</span>
   </button>
 </section>
 
@@ -506,172 +511,148 @@ img { display: block; max-width: 100%; }
     <div class="slide-number">01</div>
     <div class="slide-content">
       <div class="slide-meta">
-        <span class="index">01 / 08</span><span class="dot"></span><span>Kmong Freelancer / Pain Point</span>
+        <span class="index">01 / 06</span><span class="dot"></span><span>Kmong Freelancer / Pain Point</span>
       </div>
       <h2 class="slide-title display">전문성은 있는데, 매출이 안 나온다면</h2>
       <div class="pain-points">
         <div class="pain-point">
-          <div class="pain-icon">📊</div>
+          <div class="pain-icon">&#128202;</div>
           <div class="pain-text">
-            <strong>CPC 광고, 감으로 돌리고 있지 않나요?</strong>
-            <span>클릭업 광고의 CPC·CTR·ROI를 모른 채 운영하면 광고비만 새어나갑니다. 어떤 소재가 전환되는지, 데이터 없이는 판단할 수 없습니다.</span>
+            <strong>클릭업 광고, 감으로 돌리고 있지 않나요?</strong>
+            <span>어떤 썸네일이 클릭되는지, 어떤 타이틀이 전환되는지 &#8212; 데이터 없이 돌리는 CPC는 광고비를 태우는 것과 같습니다.</span>
           </div>
         </div>
         <div class="pain-point">
-          <div class="pain-icon">🖼️</div>
+          <div class="pain-icon">&#128444;</div>
           <div class="pain-text">
-            <strong>포트폴리오, 나열형으로 충분한가요?</strong>
-            <span>크몽은 항목 분리도 안 되는 나열형뿐. 고객은 3초 안에 전문성을 판단합니다. 같은 실력이라도 보여주는 방식이 매출을 가릅니다.</span>
+            <strong>포트폴리오, 나열형으로 전문성이 보이나요?</strong>
+            <span>크몽은 항목 분리도 안 되는 나열형뿐. 같은 실력이라도 보여주는 방식에 따라 클릭률이 달라집니다.</span>
           </div>
         </div>
         <div class="pain-point">
-          <div class="pain-icon">💡</div>
+          <div class="pain-icon">&#128161;</div>
           <div class="pain-text">
-            <strong>같은 전문성인데, 상품 1개에 머물러 있진 않나요?</strong>
-            <span>사진촬영만 하고 계신가요? 같은 역량으로 상품촬영·프로필·공간촬영·숏폼까지 — 4~5개 상품을 더 팔 수 있습니다.</span>
+            <strong>같은 역량인데, 상품 1개에 머물러 있진 않나요?</strong>
+            <span>촬영&#183;디자인&#183;개발&#183;영상 &#8212; 어떤 분야든 같은 전문성으로 3~4개 상품을 더 등록할 수 있습니다. 시장은 이미 있습니다.</span>
           </div>
         </div>
       </div>
       <div class="slide-tags">
         <span class="slide-tag">크몽 프리랜서</span>
         <span class="slide-tag">CPC 광고</span>
-        <span class="slide-tag">포트폴리오 한계</span>
-        <span class="slide-tag">매출 정체</span>
+        <span class="slide-tag">포트폴리오</span>
+        <span class="slide-tag">매출 성장</span>
       </div>
-      <button class="slide-cta" onclick="document.getElementById('nextBtn').click()">솔루션 확인하기 <span class="arrow">→</span></button>
+      <button class="slide-cta" onclick="document.getElementById('nextBtn').click()">솔루션 확인하기 <span class="arrow">&#8594;</span></button>
     </div>
   </div>
 
-  <!-- 02: 솔루션 플로우 + 전환 예시 -->
+  <!-- 02: 솔루션 플로우 -->
   <div class="slide pitch-slide" data-index="02">
     <div class="slide-image"></div>
     <div class="slide-number">02</div>
     <div class="slide-content">
       <div class="slide-meta">
-        <span class="index">02 / 08</span><span class="dot"></span><span>Solution / Conversion Flow</span>
+        <span class="index">02 / 06</span><span class="dot"></span><span>Solution / Growth Loop</span>
       </div>
-      <h2 class="slide-title display">진단 → 최적화 → 확장</h2>
-      <p class="slide-desc">감이 아닌 데이터로 운영하고, 1개가 아닌 5개로 확장하는 크몽 매출 성장 로드맵.</p>
+      <h2 class="slide-title display">진단 &#8594; 최적화 &#8594; 확장</h2>
       <div class="slide-flow">
         <div class="flow-step">
           <span class="flow-num">01</span>
-          <span class="flow-text">CPC·CTR·ROI <strong>통합 대시보드</strong>로 광고 성과 실시간 진단</span>
+          <span class="flow-text">크몽 상품&#183;광고 현황 분석 &#8212; <strong>어디서 매출이 새는지</strong> 진단</span>
         </div>
         <div class="flow-connector"></div>
         <div class="flow-step">
           <span class="flow-num">02</span>
-          <span class="flow-text">기존 소재 <strong>A/B 테스트</strong> → CTR 최적화, CPC 40% 이상 절감</span>
+          <span class="flow-text">썸네일&#183;타이틀 <strong>A/B 테스트</strong> &#8212; 클릭되는 소재 조합 검증</span>
         </div>
         <div class="flow-connector"></div>
         <div class="flow-step">
           <span class="flow-num">03</span>
-          <span class="flow-text"><strong>20만원대 포트폴리오 사이트</strong> 제작 → 외부링크 삽입 (크몽 제재 無)</span>
+          <span class="flow-text"><strong>20만원대 포트폴리오 사이트</strong> 제작 &#8594; 크몽 외부링크 연동</span>
         </div>
         <div class="flow-connector"></div>
         <div class="flow-step">
           <span class="flow-num">04</span>
-          <span class="flow-text">시장조사 기반 <strong>추가 상품 발굴</strong> → 등록 대행부터 매출 전환까지</span>
+          <span class="flow-text">시장조사로 <strong>추가 상품 발굴</strong> &#8594; 등록 대행 + 소재 테스트까지</span>
         </div>
       </div>
       <div class="flow-example">
-        <span class="flow-example-label">실제 적용 예시 — 사진촬영 전문가</span>
+        <span class="flow-example-label">이런 식으로 진행됩니다</span>
         <div class="flow-example-content">
-          <strong>Before:</strong> 단순 촬영 1개 상품 · 나열형 포폴 · CPC 감으로 운영<br>
-          <strong>After:</strong> 상품촬영 · 프로필 · 공간촬영 · 숏폼 <strong>4개 상품 확장</strong> + 포트폴리오 사이트 + CPC 최적화
-          <div class="flow-example-result">매출 3.5배 성장 · CTR 2.3배↑ · CPC 40%↓</div>
+          <strong>촬영 전문가</strong>라면 &#8212; 단순 촬영 외에 상품촬영&#183;프로필&#183;공간&#183;숏폼.<br>
+          <strong>디자이너</strong>라면 &#8212; 로고 외에 상세페이지&#183;배너&#183;SNS 템플릿.<br>
+          같은 역량으로 등록 가능한 상품을 찾고, 포트폴리오 사이트로 전문성을 보여주고, 소재 테스트로 전환되는 조합을 찾습니다.
+        </div>
+        <div class="logic-chain">
+          <span>좋은 포트폴리오</span><span class="logic-arrow">&#8594;</span>
+          <span>높은 클릭률</span><span class="logic-arrow">&#8594;</span>
+          <span>낮은 광고비</span><span class="logic-arrow">&#8594;</span>
+          <span>매출 성장</span>
         </div>
       </div>
-      <a href="../../contact.html" class="slide-cta">무료 상담 신청 <span class="arrow">→</span></a>
+      <a href="../../contact.html" class="slide-cta">무료 상담 신청 <span class="arrow">&#8594;</span></a>
     </div>
   </div>
 
-  <!-- 03: 크몽 CPC 광고 최적화 (기존 01) -->
+  <!-- 03: 리버사이드 파크 + 브릿지 -->
   <div class="slide" data-index="03">
-    <div class="slide-image"><img src="images/slide_cpc_dashboard.jpg" alt="CPC 광고 통합 대시보드" loading="lazy"></div>
+    <div class="slide-image"><img src="images/01_riverside.jpg" alt="리버사이드 파크" loading="lazy"></div>
     <div class="slide-number">03</div>
     <div class="slide-content">
       <div class="slide-meta">
-        <span class="index">03 / 08</span><span class="dot"></span><span>Kmong CPC / Growth</span>
-      </div>
-      <h2 class="slide-title display">광고비만 나가고 전환은 없나요?</h2>
-      <p class="slide-desc">크몽 클릭업 광고의 CPC · CTR · ROI를 한눈에. 기존 상품 소재 리뉴얼, A/B 테스트로 실제 매출 전환을 달성하고, 본인 전문성에 맞는 추가 상품까지 발굴합니다. 사진촬영만 하고 계신가요? 같은 전문성으로 가능한 상품들, 시장조사로 찾아드립니다.</p>
-      <div class="slide-tags"><span class="slide-tag">CPC 최적화</span><span class="slide-tag">A/B 테스트</span><span class="slide-tag">상품 발굴</span><span class="slide-tag">매출전환</span></div>
-      <a href="../kmong-dashboard/index-demo.html" target="_blank" rel="noopener" class="slide-cta">대시보드 미리보기 <span class="arrow">→</span></a>
-    </div>
-  </div>
-
-  <!-- 04: 포트폴리오 사이트 제작 (기존 02) -->
-  <div class="slide" data-index="04">
-    <div class="slide-image"><img src="images/slide_portfolio_site.jpg" alt="프리미엄 포트폴리오 사이트" loading="lazy"></div>
-    <div class="slide-number">04</div>
-    <div class="slide-content">
-      <div class="slide-meta">
-        <span class="index">04 / 08</span><span class="dot"></span><span>Portfolio / Conversion</span>
-      </div>
-      <h2 class="slide-title display">크몽 나열형, 한계 느끼셨죠?</h2>
-      <p class="slide-desc">크몽은 항목 분리도 안 되는 나열형 포트폴리오뿐. 20만원대로 UI 디자인 포트폴리오 사이트를 만들어 외부링크로 삽입하세요. 연락처만 빼면 크몽 제재 없습니다. CTR 상승 → CPC 하락 → ROI 상승, 숫자로 증명합니다.</p>
-      <div class="slide-tags"><span class="slide-tag">포트폴리오</span><span class="slide-tag">외부링크</span><span class="slide-tag">CTR 상승</span><span class="slide-tag">20만원대</span></div>
-      <a href="../../contact.html" class="slide-cta">상담 신청 <span class="arrow">→</span></a>
-    </div>
-  </div>
-
-  <!-- 05: 리버사이드 파크 (기존 03) -->
-  <div class="slide" data-index="05">
-    <div class="slide-image"><img src="images/01_riverside.jpg" alt="리버사이드 파크" loading="lazy"></div>
-    <div class="slide-number">05</div>
-    <div class="slide-content">
-      <div class="slide-meta">
-        <span class="index">05 / 08</span><span class="dot"></span><span>Apartment / Real Estate</span>
+        <span class="index">03 / 06</span><span class="dot"></span><span>Design Quality / Showcase</span>
       </div>
       <h2 class="slide-title display">리버사이드 파크</h2>
       <p class="slide-desc">프리미엄 아파트 분양 사이트. 풀스크린 히어로, 인터랙티브 평면도, 커스텀 커서로 몰입감 있는 분양 경험을 디자인합니다.</p>
+      <div class="slide-bridge">이 수준의 디자인을 크몽 프리랜서 포트폴리오 사이트에 20만원대로 적용합니다.</div>
       <div class="slide-tags"><span class="slide-tag">부동산</span><span class="slide-tag">분양</span><span class="slide-tag">프리미엄</span></div>
-      <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/showcase-apartment/" target="_blank" rel="noopener" class="slide-cta">View Project <span class="arrow">→</span></a>
+      <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/showcase-apartment/" target="_blank" rel="noopener" class="slide-cta">View Project <span class="arrow">&#8594;</span></a>
     </div>
   </div>
 
-  <!-- 06: 시그니처펍스 (기존 04) -->
-  <div class="slide" data-index="06">
+  <!-- 04: 시그니처펍스 -->
+  <div class="slide" data-index="04">
     <div class="slide-image"><img src="images/03_signaturepups.jpg" alt="시그니처펍스" loading="lazy"></div>
-    <div class="slide-number">06</div>
+    <div class="slide-number">04</div>
     <div class="slide-content">
       <div class="slide-meta">
-        <span class="index">06 / 08</span><span class="dot"></span><span>Pet / Breeding</span>
+        <span class="index">04 / 06</span><span class="dot"></span><span>Pet / Breeding</span>
       </div>
       <h2 class="slide-title display">시그니처펍스</h2>
       <p class="slide-desc">프리미엄 강아지 분양 전문점. 위례 신도시 기반, 건강한 반려견과의 만남을 설계하는 감성 브랜딩 사이트.</p>
       <div class="slide-tags"><span class="slide-tag">반려동물</span><span class="slide-tag">분양</span><span class="slide-tag">브랜딩</span></div>
-      <a href="https://beamish-crisp-2621e0.netlify.app/" target="_blank" rel="noopener" class="slide-cta">View Project <span class="arrow">→</span></a>
+      <a href="https://beamish-crisp-2621e0.netlify.app/" target="_blank" rel="noopener" class="slide-cta">View Project <span class="arrow">&#8594;</span></a>
     </div>
   </div>
 
-  <!-- 07: KURO 오마카세 (기존 05) -->
-  <div class="slide" data-index="07">
+  <!-- 05: KURO 오마카세 -->
+  <div class="slide" data-index="05">
     <div class="slide-image"><img src="images/05_kuro.jpg" alt="KURO 오마카세" loading="lazy"></div>
-    <div class="slide-number">07</div>
+    <div class="slide-number">05</div>
     <div class="slide-content">
       <div class="slide-meta">
-        <span class="index">07 / 08</span><span class="dot"></span><span>Restaurant / Fine Dining</span>
+        <span class="index">05 / 06</span><span class="dot"></span><span>Restaurant / Fine Dining</span>
       </div>
       <h2 class="slide-title display">KURO 오마카세</h2>
       <p class="slide-desc">일본식 프리미엄 오마카세 레스토랑. 다크 감성의 풀스크린 레이아웃과 시차 스크롤로 고급 다이닝의 경험을 전달합니다.</p>
       <div class="slide-tags"><span class="slide-tag">레스토랑</span><span class="slide-tag">오마카세</span><span class="slide-tag">프리미엄</span></div>
-      <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/premium-dining/" target="_blank" rel="noopener" class="slide-cta">View Project <span class="arrow">→</span></a>
+      <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/premium-dining/" target="_blank" rel="noopener" class="slide-cta">View Project <span class="arrow">&#8594;</span></a>
     </div>
   </div>
 
-  <!-- 08: NOIR 위스키바 (기존 06) -->
-  <div class="slide" data-index="08">
+  <!-- 06: NOIR 위스키바 -->
+  <div class="slide" data-index="06">
     <div class="slide-image"><img src="images/06_noir.jpg" alt="NOIR 위스키바" loading="lazy"></div>
-    <div class="slide-number">08</div>
+    <div class="slide-number">06</div>
     <div class="slide-content">
       <div class="slide-meta">
-        <span class="index">08 / 08</span><span class="dot"></span><span>Bar / Cocktail Lounge</span>
+        <span class="index">06 / 06</span><span class="dot"></span><span>Bar / Cocktail Lounge</span>
       </div>
       <h2 class="slide-title display">NOIR 위스키바</h2>
-      <p class="slide-desc">프리미엄 위스키 & 칵테일 바. 딥다크 무드와 앰버 컬러 인터랙션으로 시그니처 칵테일 메뉴를 감각적으로 풀어냈습니다.</p>
+      <p class="slide-desc">프리미엄 위스키 &amp; 칵테일 바. 딥다크 무드와 앰버 컬러 인터랙션으로 시그니처 칵테일 메뉴를 감각적으로 풀어냈습니다.</p>
       <div class="slide-tags"><span class="slide-tag">바</span><span class="slide-tag">위스키</span><span class="slide-tag">나이트라이프</span></div>
-      <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/cocktail-bar/" target="_blank" rel="noopener" class="slide-cta">View Project <span class="arrow">→</span></a>
+      <a href="https://didai64595021-ui.github.io/onda-hompage/portfolio-sites/cocktail-bar/" target="_blank" rel="noopener" class="slide-cta">View Project <span class="arrow">&#8594;</span></a>
     </div>
   </div>
 
@@ -681,7 +662,7 @@ img { display: block; max-width: 100%; }
 <div class="counter" id="counter">
   <span class="counter-current" id="counterCur">01</span>
   <span class="counter-line" id="counterLine"></span>
-  <span class="counter-total">08</span>
+  <span class="counter-total">06</span>
 </div>
 
 <div class="nav-arrows" id="navArrows">
@@ -693,32 +674,31 @@ img { display: block; max-width: 100%; }
   </button>
 </div>
 
-<div class="scroll-hint" id="scrollHint">Scroll · Drag · Arrow Keys</div>
+<div class="scroll-hint" id="scrollHint">Scroll &#183; Drag &#183; Arrow Keys</div>
 
 <script>
 (function () {
-  const loader     = document.getElementById('loader');
-  const intro      = document.getElementById('intro');
-  const showcase   = document.getElementById('showcase');
-  const enterBtn   = document.getElementById('enterBtn');
-  const counter    = document.getElementById('counter');
-  const counterCur = document.getElementById('counterCur');
-  const counterLine= document.getElementById('counterLine');
-  const navArrows  = document.getElementById('navArrows');
-  const prevBtn    = document.getElementById('prevBtn');
-  const nextBtn    = document.getElementById('nextBtn');
-  const scrollHint = document.getElementById('scrollHint');
-  const slides     = Array.from(document.querySelectorAll('.slide'));
-  const total      = slides.length;
-  let current = 0;
-  let entered = false;
+  var loader     = document.getElementById('loader');
+  var intro      = document.getElementById('intro');
+  var showcase   = document.getElementById('showcase');
+  var enterBtn   = document.getElementById('enterBtn');
+  var counter    = document.getElementById('counter');
+  var counterCur = document.getElementById('counterCur');
+  var counterLine= document.getElementById('counterLine');
+  var navArrows  = document.getElementById('navArrows');
+  var prevBtn    = document.getElementById('prevBtn');
+  var nextBtn    = document.getElementById('nextBtn');
+  var scrollHint = document.getElementById('scrollHint');
+  var slides     = Array.from(document.querySelectorAll('.slide'));
+  var total      = slides.length;
+  var current = 0;
+  var entered = false;
 
-  // Hide loader
-  window.addEventListener('load', () => setTimeout(() => loader.classList.add('hidden'), 1700));
+  window.addEventListener('load', function() { setTimeout(function() { loader.classList.add('hidden'); }, 1700); });
 
   function updateUI() {
-    showcase.style.transform = `translateX(-${current * 100}vw)`;
-    slides.forEach((s, i) => s.classList.toggle('in-view', i === current));
+    showcase.style.transform = 'translateX(-' + (current * 100) + 'vw)';
+    slides.forEach(function(s, i) { s.classList.toggle('in-view', i === current); });
     counterCur.textContent = String(current + 1).padStart(2, '0');
     counterLine.style.setProperty('--p', ((current + 1) / total) * 100);
     prevBtn.disabled = current === 0;
@@ -730,7 +710,7 @@ img { display: block; max-width: 100%; }
     entered = true;
     intro.classList.add('gone');
     showcase.classList.add('active');
-    setTimeout(() => {
+    setTimeout(function() {
       counter.classList.add('shown');
       navArrows.classList.add('shown');
       scrollHint.classList.add('shown');
@@ -740,47 +720,44 @@ img { display: block; max-width: 100%; }
 
   function go(delta) {
     if (!entered) { if (delta > 0) enterShowcase(); return; }
-    const next = Math.max(0, Math.min(total - 1, current + delta));
+    var next = Math.max(0, Math.min(total - 1, current + delta));
     if (next === current) return;
     current = next;
     updateUI();
   }
 
   enterBtn.addEventListener('click', enterShowcase);
-  prevBtn.addEventListener('click', () => go(-1));
-  nextBtn.addEventListener('click', () => go(1));
+  prevBtn.addEventListener('click', function() { go(-1); });
+  nextBtn.addEventListener('click', function() { go(1); });
 
-  // Wheel
-  let wheelLock = false;
-  window.addEventListener('wheel', (e) => {
+  var wheelLock = false;
+  window.addEventListener('wheel', function(e) {
     if (wheelLock) return;
     if (Math.abs(e.deltaY) < 20 && Math.abs(e.deltaX) < 20) return;
     wheelLock = true;
-    setTimeout(() => wheelLock = false, 900);
-    const delta = (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY) > 0 ? 1 : -1;
+    setTimeout(function() { wheelLock = false; }, 900);
+    var delta = (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY) > 0 ? 1 : -1;
     go(delta);
   }, { passive: true });
 
-  // Keyboard
-  window.addEventListener('keydown', (e) => {
+  window.addEventListener('keydown', function(e) {
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(1); }
     else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); go(-1); }
     else if (e.key === 'Home') { current = 0; updateUI(); }
     else if (e.key === 'End') { current = total - 1; updateUI(); }
   });
 
-  // Touch / drag
-  let touchStartX = 0, touchStartY = 0, dragging = false;
-  window.addEventListener('touchstart', (e) => {
+  var touchStartX = 0, touchStartY = 0, dragging = false;
+  window.addEventListener('touchstart', function(e) {
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
     dragging = true;
   }, { passive: true });
-  window.addEventListener('touchend', (e) => {
+  window.addEventListener('touchend', function(e) {
     if (!dragging) return;
     dragging = false;
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    const dy = e.changedTouches[0].clientY - touchStartY;
+    var dx = e.changedTouches[0].clientX - touchStartX;
+    var dy = e.changedTouches[0].clientY - touchStartY;
     if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? 1 : -1);
     else if (Math.abs(dy) > 50) go(dy < 0 ? 1 : -1);
   }, { passive: true });
