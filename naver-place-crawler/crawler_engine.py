@@ -304,7 +304,7 @@ class CrawlerEngine:
             "hp": 0, "email": 0, "naver_id": 0,
             "responsive": 0, "talktalk": 0, "kakao": 0, "instagram": 0,
             "no_phone_btn": 0, "webbuilder": 0, "new_biz": 0,
-            "blocked": 0, "success": 0,
+            "blocked": 0, "success": 0, "fail": 0,
         }
         self._consecutive_blocks = 0
         # ═ 동시성 락 (PHASE 2 병렬 처리용) ═
@@ -420,7 +420,7 @@ class CrawlerEngine:
     def _is_blocked(self, status_code, text):
         if status_code in (403, 429):
             return True
-        if not text or len(text) < 500:
+        if not text or len(text) < 30:
             return True
         # 실제 차단 페이지 감지 (captchaApi 등 설정 URL은 정상이므로 제외)
         block_signs = ["서비스 이용이 제한", "자동입력 방지", "이 페이지를 찾을 수 없습니다"]
@@ -432,15 +432,19 @@ class CrawlerEngine:
         return False
 
     def _random_delay(self, min_s=None, max_s=None):
-        backoff = min(1.5 ** self._consecutive_blocks, 10)
+        backoff = min(2.0 ** self._consecutive_blocks, 30)
         lo = (min_s if min_s is not None else self.delay_min) * backoff
         hi = (max_s if max_s is not None else self.delay_max) * backoff
         time.sleep(random.uniform(lo, hi))
 
-    def _fetch(self, url, referer=None, timeout=None):
-        """HTTP GET with fingerprint, proxy rotation, retry"""
+    def _fetch(self, url, referer=None, timeout=None, skip_block_check=False):
+        """HTTP GET with fingerprint, proxy rotation, retry.
+        skip_block_check=True: 외부 사이트(홈페이지 등) fetch 시 네이버 차단 판정 건너뜀.
+        """
         timeout = timeout or self.timeout
-        for attempt in range(3):
+        is_naver = "naver.com" in url or "naver.net" in url
+        check_block = not skip_block_check and is_naver
+        for attempt in range(5):
             if not self.running:
                 return ""
             try:
@@ -455,26 +459,36 @@ class CrawlerEngine:
                     url, headers=headers, proxies=proxy_dict, timeout=timeout, allow_redirects=True
                 )
 
-                if self._is_blocked(resp.status_code, resp.text):
+                if check_block and self._is_blocked(resp.status_code, resp.text):
                     if proxy:
                         self._mark_blocked(proxy)
-                        self.callback("log", f"차단 감지 → IP 로테이션 (시도 {attempt+1}/3)")
+                        self.callback("log", f"차단 감지 → IP 로테이션 (시도 {attempt+1}/5)")
                         continue
                     else:
                         self.stats["blocked"] += 1
                         self._consecutive_blocks += 1
-                        time.sleep(3 * (attempt + 1))
+                        wait = min(5 * (2 ** attempt) + random.uniform(0, 3), 60)
+                        self.callback("log", f"  ⏳ 차단 대기 {wait:.0f}초 (시도 {attempt+1}/5)")
+                        time.sleep(wait)
                         continue
 
+                # 외부 사이트는 HTTP 에러만 체크
+                if not is_naver and resp.status_code >= 400:
+                    if attempt < 4:
+                        time.sleep(1)
+                        continue
+                    return ""
+
                 self.stats["success"] += 1
-                self._consecutive_blocks = 0
+                if is_naver:
+                    self._consecutive_blocks = 0
                 resp.encoding = "utf-8"
                 return resp.text
 
             except Exception as e:
                 logger.debug(f"fetch error: {e}")
-                if attempt < 2:
-                    time.sleep(1 * (attempt + 1))
+                if attempt < 4:
+                    time.sleep(2 * (attempt + 1) + random.uniform(0, 2))
         return ""
 
     # ═══════════════════════════════════════════
@@ -771,21 +785,26 @@ class CrawlerEngine:
 
     @staticmethod
     def _extract_010_from_text(text):
-        """텍스트에서 010-XXXX-XXXX 형식의 전화번호 unique 추출.
-        onda-coldmail 의 검증된 단순 regex 방식.
-        반환: 첫 번째 010 번호 또는 "".
+        """텍스트에서 010 전화번호 추출 (다양한 형식 지원).
+        onda-coldmail 의 검증된 로직 확장.
+        지원: 010-1234-5678, 01012345678, 010.1234.5678, 010 1234 5678
+        반환: 첫 번째 010 번호 (010-XXXX-XXXX 형태로 정규화) 또는 "".
         """
         if not text:
             return ""
-        phones = re.findall(r'010-\d{4}-\d{4}', text)
+        # 다양한 구분자: 하이픈, 점, 공백, 없음
+        phones = re.findall(r'010[-.\s]?\d{4}[-.\s]?\d{4}', text)
         if not phones:
             return ""
-        # unique preserve order + 첫 번째
+        # 정규화: 숫자만 추출 후 010-XXXX-XXXX 형태로
         seen = set()
         for p in phones:
-            if p not in seen:
-                seen.add(p)
-                return p
+            digits = re.sub(r'\D', '', p)
+            if len(digits) == 11 and digits.startswith('010'):
+                normalized = f"{digits[:3]}-{digits[3:7]}-{digits[7:]}"
+                if normalized not in seen:
+                    seen.add(normalized)
+                    return normalized
         return ""
 
     @staticmethod
@@ -1312,6 +1331,7 @@ class CrawlerEngine:
                   name phone virtualPhone category
                   address roadAddress
                   visitorReviewsTotal
+                  bookingBusinessId
                 }
                 homepages {
                   repr { url type }
@@ -1336,6 +1356,11 @@ class CrawlerEngine:
                     # 전화번호
                     result["phone"] = base.get("virtualPhone") or base.get("phone") or ""
                     result["real_phone"] = base.get("phone") or ""
+
+                    # booking biz ID (010 추출 핵심)
+                    biz_id = base.get("bookingBusinessId") or ""
+                    if biz_id:
+                        result["booking_biz_id"] = str(biz_id)
 
                     # 홈페이지 (repr에서)
                     repr_hp = hp.get("repr")
@@ -1579,7 +1604,7 @@ class CrawlerEngine:
             "hp": 0, "email": 0, "naver_id": 0,
             "responsive": 0, "talktalk": 0, "kakao": 0, "instagram": 0,
             "no_phone_btn": 0, "webbuilder": 0, "new_biz": 0,
-            "blocked": 0, "success": 0,
+            "blocked": 0, "success": 0, "fail": 0,
         }
 
         if not progress_file:
@@ -1724,18 +1749,25 @@ class CrawlerEngine:
                         self.stats["phone"] += 1
                         log_items.append(f"tel:{parsed_place['phone']}")
 
-                    # 010 전화번호 — 네이버 예약(booking.naver.com) + 톡톡 fallback
+                    # 010 전화번호 — 네이버 예약(booking.naver.com) + 톡톡 + place HTML fallback
                     # onda-coldmail 검증된 로직: bookingBusinessId → /booking/13/bizes/{id} → 010 regex
                     if not (r.get("010전화") or "").strip():
                         biz_id = parsed_place.get("booking_biz_id", "")
                         talktalk_url = parsed_place.get("talktalk", "") or (r.get("톡톡URL") or "").strip()
+                        phone010 = ""
+                        src = ""
                         if biz_id or talktalk_url:
                             phone010, real_phone = self._fetch_booking_010(biz_id, talktalk_url)
+                            src = "bk" if biz_id else "talk"
+                        # fallback: place HTML 자체에서 010 추출
+                        if not phone010 and place_html:
+                            phone010 = self._extract_010_from_text(place_html)
                             if phone010:
-                                r["010전화"] = phone010
-                                self.stats["mobile_phone"] += 1
-                                src = "bk" if biz_id else "talk"
-                                log_items.append(f"010:{phone010}({src})")
+                                src = "html"
+                        if phone010:
+                            r["010전화"] = phone010
+                            self.stats["mobile_phone"] += 1
+                            log_items.append(f"010:{phone010}({src})")
 
                     # 방문자리뷰수
                     if parsed_place.get("visitor_review") and not (r.get("방문자리뷰수") or "").strip():
@@ -1799,6 +1831,13 @@ class CrawlerEngine:
             ):
                 referer = f"https://www.google.com/search?q={quote(name)}"
                 html = self._fetch(hp_url, referer=referer, timeout=6)
+                # 010 전화번호 — 업체 홈페이지에서 추출 (가장 효과적인 소스)
+                if html and not (r.get("010전화") or "").strip():
+                    hp_010 = self._extract_010_from_text(html)
+                    if hp_010:
+                        r["010전화"] = hp_010
+                        self.stats["mobile_phone"] += 1
+                        log_items.append(f"010:{hp_010}(hp)")
                 # 이메일
                 if need_email:
                     emails = self.extract_emails(html)
@@ -1870,13 +1909,23 @@ class CrawlerEngine:
                 r["네이버아이디"] = naver_id + "@naver.com"
                 self.stats["naver_id"] += 1
 
-            # ══ STEP 4-1: 톡톡/카카오/인스타/신규업체 GraphQL 보충 (place HTML에서 못 채운 경우) ══
+            # ══ STEP 4-1: GraphQL 보충 (톡톡/카카오/인스타/신규/010) ══
             need_talk = not (r.get("톡톡URL") or "").strip()
             need_kakao2 = not (r.get("카카오톡") or "").strip()
             need_insta2 = not (r.get("인스타그램") or "").strip()
             need_new = not (r.get("신규업체") or "").strip()
-            if pid and (need_talk or need_kakao2 or need_insta2 or need_new):
+            need_010 = not (r.get("010전화") or "").strip()
+            if pid and (need_talk or need_kakao2 or need_insta2 or need_new or need_010):
                 gql_extra = self._fetch_place_graphql(pid)
+                # 010 — GraphQL에서 booking_biz_id 가져와서 booking 페이지에서 추출
+                if need_010 and gql_extra.get("booking_biz_id"):
+                    gql_biz_id = gql_extra["booking_biz_id"]
+                    gql_talk = gql_extra.get("talktalk", "") or (r.get("톡톡URL") or "")
+                    p010_gql, _ = self._fetch_booking_010(gql_biz_id, gql_talk)
+                    if p010_gql:
+                        r["010전화"] = p010_gql
+                        self.stats["mobile_phone"] += 1
+                        log_items.append(f"010:{p010_gql}(gql-bk)")
                 if need_talk and gql_extra.get("talktalk"):
                     r["톡톡URL"] = gql_extra["talktalk"]
                     r["톡톡"] = "O"
@@ -2175,8 +2224,8 @@ class CrawlerEngine:
         import re as _re
         pid_pattern = _re.compile(r'/place/(\d+)')
 
-        # ── 프록시 재시도 루프 (최대 3회) ──
-        max_proxy_retries = 3 if self.proxies else 1
+        # ── 프록시 재시도 루프 (프록시 있으면 3회, 없으면 직접 5회 재시도 + 쿨다운) ──
+        max_proxy_retries = 3 if self.proxies else 5
         sel_proxy = self._get_next_proxy() if self.proxies else None
 
         for _proxy_attempt in range(max_proxy_retries):
@@ -2345,14 +2394,20 @@ class CrawlerEngine:
                     except Exception:
                         pass
 
-                # 차단 감지 시 프록시 교체 재시도
+                # 차단 감지 시 재시도 (프록시 교체 또는 쿨다운 후 직접 재시도)
                 if is_blocked and not has_iframe:
                     self.callback("log", "  🚫 IP 차단 감지")
                     driver.quit()
-                    if sel_proxy and _proxy_attempt < max_proxy_retries - 1:
-                        self._mark_blocked(sel_proxy)
-                        sel_proxy = self._get_next_proxy()
-                        self.callback("log", f"  🔄 프록시 교체 후 재시도 ({_proxy_attempt + 2}/{max_proxy_retries})")
+                    if _proxy_attempt < max_proxy_retries - 1:
+                        if sel_proxy:
+                            self._mark_blocked(sel_proxy)
+                            sel_proxy = self._get_next_proxy()
+                            self.callback("log", f"  🔄 프록시 교체 후 재시도 ({_proxy_attempt + 2}/{max_proxy_retries})")
+                        else:
+                            # 프록시 없이 직접 연결 — 쿨다운 후 재시도
+                            wait = min(30 * (2 ** _proxy_attempt) + random.uniform(0, 10), 180)
+                            self.callback("log", f"  ⏳ 차단 쿨다운 {wait:.0f}초 대기 후 재시도 ({_proxy_attempt + 2}/{max_proxy_retries})")
+                            time.sleep(wait)
                         continue
                     return None
 
@@ -3659,7 +3714,7 @@ class CrawlerEngine:
             "hp": 0, "email": 0, "naver_id": 0,
             "responsive": 0, "talktalk": 0, "kakao": 0, "instagram": 0,
             "no_phone_btn": 0, "webbuilder": 0, "new_biz": 0,
-            "blocked": 0, "success": 0,
+            "blocked": 0, "success": 0, "fail": 0,
         }
 
         if not progress_file:
@@ -3720,9 +3775,12 @@ class CrawlerEngine:
             if added:
                 self.callback("log", f"  → {source}: +{added}건 (총 {len(all_items)}건)")
 
-        # 방법 1: Selenium 스크롤+페이지네이션 (가장 정확, 순위 보존)
+        # 방법 1: Selenium 스크롤+페이지네이션 (핵심 — 반드시 성공시킴)
         self.callback("log", "🌐 [1/4] Selenium 스크롤 수집 시도...")
-        if self.running:
+        _sel_retries = 3  # Selenium 자체 재시도 (차단 시 쿨다운 포함)
+        for _sel_try in range(_sel_retries):
+            if not self.running:
+                break
             sel_max = max_pages if max_pages > 0 else 0
             sel_results = self._selenium_rank_search(keyword, max_pages=sel_max, naver_id=naver_id, naver_pw=naver_pw)
             if sel_results:
@@ -3741,8 +3799,14 @@ class CrawlerEngine:
                     })
                     selenium_ranks[str(sr["id"])] = sr["rank"]
                 _add_items(sel_items, f"Selenium ({len(sel_results)}건)")
+                break  # 성공 시 루프 탈출
             else:
-                self.callback("log", "  ⚠️ Selenium 실패 — 모바일 지도로 폴백")
+                if _sel_try < _sel_retries - 1:
+                    wait = 45 * (_sel_try + 1) + random.uniform(0, 15)
+                    self.callback("log", f"  ⚠️ Selenium 실패 — {wait:.0f}초 쿨다운 후 재시도 ({_sel_try + 2}/{_sel_retries})")
+                    time.sleep(wait)
+                else:
+                    self.callback("log", "  ⚠️ Selenium 최종 실패 — 모바일 지도로 폴백")
 
         # 방법 2: 모바일 지도 검색 (Selenium 부족분 보충)
         if self.running and len(all_items) < 50:
