@@ -1316,10 +1316,10 @@ class CrawlerEngine:
         """
         import json as _json
         url = "https://pcmap-api.place.naver.com/graphql"
-        fp = self._get_fingerprint()
+        # 모바일 UA 사용 (PC UA는 네이버 GraphQL에서 429 차단)
         headers = {
-            "User-Agent": fp["ua"],
-            "Referer": "https://map.naver.com/",
+            "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Mobile/15E148 Safari/604.1",
+            "Referer": "https://m.map.naver.com/",
             "Content-Type": "application/json",
         }
         payload = [{
@@ -1331,7 +1331,6 @@ class CrawlerEngine:
                   name phone virtualPhone category
                   address roadAddress
                   visitorReviewsTotal
-                  bookingBusinessId
                 }
                 homepages {
                   repr { url type }
@@ -1356,11 +1355,6 @@ class CrawlerEngine:
                     # 전화번호
                     result["phone"] = base.get("virtualPhone") or base.get("phone") or ""
                     result["real_phone"] = base.get("phone") or ""
-
-                    # booking biz ID (010 추출 핵심)
-                    biz_id = base.get("bookingBusinessId") or ""
-                    if biz_id:
-                        result["booking_biz_id"] = str(biz_id)
 
                     # 홈페이지 (repr에서)
                     repr_hp = hp.get("repr")
