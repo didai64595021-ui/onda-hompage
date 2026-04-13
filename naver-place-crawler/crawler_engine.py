@@ -1005,11 +1005,18 @@ class CrawlerEngine:
         except Exception as e:
             logger.debug(f"place proxy fetch error: {e}")
 
-        # 폴백: 직접 fetch (한국 IP면 작동할 수 있음)
+        # 폴백: 모바일 UA로 직접 fetch (PC UA는 429 차단됨)
         referer = f"https://m.search.naver.com/search.naver?query={quote(name)}"
-        html = self._fetch(url, referer=referer)
-        if html and len(html) > 10000:
-            return html
+        try:
+            resp2 = self.session.get(url, headers={
+                "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Mobile/15E148 Safari/604.1",
+                "Referer": referer,
+            }, timeout=self.timeout)
+            if resp2.status_code == 200 and len(resp2.content) > 10000:
+                resp2.encoding = "utf-8"
+                return resp2.text
+        except Exception:
+            pass
 
         # 3차 폴백: 모바일 검색 결과에서 해당 업체 JSON 블록 추출
         mobile_data = self._fetch_place_from_mobile_search(pid, name)

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>프리미엄정형외과 - VIP 관절·척추 전문</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#0a6847;--gold:#c8a951;--dark:#0b1a12;--text:#333;--gray:#888;--light:#f6f9f7}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--text);overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+
+.header{position:fixed;top:0;width:100%;z-index:100;background:rgba(11,26,18,0.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(200,169,81,0.15);transition:all .3s}
+.header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:72px}
+.logo{font-size:22px;font-weight:900;color:#fff}.logo span{color:var(--gold)}
+nav{display:flex;gap:32px}nav a{font-size:15px;font-weight:600;color:rgba(255,255,255,.7);transition:color .3s}nav a:hover{color:var(--gold)}
+.header-cta{background:var(--gold);color:#111;padding:10px 24px;border-radius:8px;font-weight:700;font-size:14px;transition:all .3s}
+.header-cta:hover{background:#b8972e;transform:translateY(-1px)}
+
+.hero{height:100vh;background:linear-gradient(160deg,var(--dark) 0%,#0d2e1a 40%,#143d26 100%);position:relative;display:flex;align-items:center;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 30%,rgba(200,169,81,0.08),transparent 60%)}
+.hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:120px;background:linear-gradient(transparent,rgba(11,26,18,0.6))}
+.hero-content{max-width:1200px;margin:0 auto;padding:0 24px;position:relative;z-index:2;text-align:center;width:100%}
+.hero-badge{display:inline-block;border:1px solid var(--gold);padding:8px 24px;border-radius:24px;color:var(--gold);font-size:13px;font-weight:700;letter-spacing:2px;margin-bottom:28px}
+.hero h1{font-size:54px;font-weight:900;color:#fff;line-height:1.3;margin-bottom:20px}
+.hero h1 span{color:var(--gold)}
+.hero p{font-size:20px;color:rgba(255,255,255,.6);line-height:1.7;margin-bottom:40px;max-width:600px;margin-left:auto;margin-right:auto}
+.hero-buttons{display:flex;gap:16px;justify-content:center}
+.btn-gold{background:var(--gold);color:#111;padding:16px 40px;border-radius:10px;font-size:17px;font-weight:800;border:none;cursor:pointer;transition:all .3s;box-shadow:0 8px 24px rgba(200,169,81,.25)}
+.btn-gold:hover{background:#b8972e;transform:translateY(-2px)}
+.btn-outline{background:transparent;color:#fff;padding:16px 40px;border-radius:10px;font-size:17px;font-weight:700;border:2px solid rgba(255,255,255,.2);cursor:pointer;transition:all .3s}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.hero-stats{display:flex;justify-content:center;gap:48px;margin-top:56px}
+.stat-item{text-align:center}
+.stat-num{font-family:'Montserrat';font-size:44px;font-weight:900;color:var(--gold)}
+.stat-label{font-size:15px;color:rgba(255,255,255,.7);margin-top:4px;font-weight:600}
+
+.section{padding:100px 24px;max-width:1200px;margin:0 auto}
+.section-label{font-family:'Montserrat';font-size:14px;font-weight:800;color:var(--primary);letter-spacing:3px;text-transform:uppercase}
+.section-title{font-size:38px;font-weight:900;margin-top:8px;line-height:1.3}.section-title span{color:var(--primary)}
+.section-desc{font-size:17px;color:var(--gray);margin-top:12px;line-height:1.6}
+
+.clinics{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px}
+.clinic-card{background:#fff;border:1px solid #e8e8e8;border-radius:16px;padding:32px 24px;transition:all .4s;cursor:pointer;position:relative;overflow:hidden}
+.clinic-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--gold);opacity:0;transition:opacity .3s}
+.clinic-card:hover{transform:translateY(-6px);box-shadow:0 16px 40px rgba(10,104,71,.08)}.clinic-card:hover::before{opacity:1}
+.clinic-icon{font-size:32px;margin-bottom:12px}
+.clinic-card h3{font-size:19px;font-weight:800;margin-bottom:8px}.clinic-card p{font-size:14px;color:var(--gray);line-height:1.5}
+
+.doctors-bg{background:var(--light)}
+.doctors-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+.doctor-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.05);transition:all .4s}
+.doctor-card:hover{transform:translateY(-6px);box-shadow:0 12px 32px rgba(10,104,71,.1)}
+.doctor-img{height:240px;background:linear-gradient(135deg,#e8f5ee,#d0eadb);display:flex;align-items:center;justify-content:center;font-size:100px;color:rgba(10,104,71,.12)}
+.doctor-info{padding:20px}.doctor-info h3{font-size:18px;font-weight:800}
+.doctor-info .position{font-size:13px;color:var(--primary);font-weight:700;margin-top:4px}
+.doctor-info .spec{font-size:13px;color:var(--gray);margin-top:8px;line-height:1.5}
+
+.numbers{background:linear-gradient(135deg,var(--dark),#0d2e1a);padding:80px 24px;color:#fff}
+.numbers-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:40px;text-align:center}
+.number-item .num{font-family:'Montserrat';font-size:48px;font-weight:900;color:var(--gold)}
+.number-item .label{font-size:16px;font-weight:600;margin-top:8px;color:rgba(255,255,255,.7)}
+
+.reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+.review-card{background:#fff;border:1px solid #eee;border-radius:16px;padding:28px;transition:all .3s}
+.review-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.06);border-color:var(--gold)}
+.review-stars{color:var(--gold);font-size:18px}.review-text{font-size:15px;color:#555;line-height:1.7;margin-top:12px}
+.review-author{font-size:14px;color:var(--gray);margin-top:16px;font-weight:600}
+
+.cta{background:linear-gradient(135deg,var(--primary),#085a3a);padding:80px 24px;text-align:center;color:#fff}
+.cta h2{font-size:36px;font-weight:900}.cta p{font-size:18px;opacity:.8;margin-top:12px}
+.cta .btn-white{display:inline-block;background:var(--gold);color:#111;padding:18px 48px;border-radius:10px;font-size:18px;font-weight:800;margin-top:28px;transition:all .3s;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.cta .btn-white:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,.3)}
+
+footer{background:var(--dark);color:rgba(255,255,255,.5);padding:48px 24px;text-align:center;font-size:14px;line-height:1.8}
+footer strong{color:rgba(255,255,255,.8)}
+
+.fixed-cta{position:fixed;bottom:24px;right:24px;z-index:99;display:flex;flex-direction:column;gap:10px}
+.fixed-btn{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer;transition:all .3s}.fixed-btn:hover{transform:scale(1.1)}
+.fixed-phone{background:var(--primary)}.fixed-kakao{background:#fee500;color:#3c1e1e}
+
+@media(max-width:768px){
+nav{display:none}.hero h1{font-size:30px}.hero-stats{flex-wrap:wrap;gap:24px}
+.clinics,.doctors-grid,.reviews{grid-template-columns:1fr}
+.numbers-inner{grid-template-columns:repeat(2,1fr);gap:24px}.section-title{font-size:26px}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+<div class="header-inner">
+<div class="logo">프리미엄<span>정형외과</span></div>
+<nav><a href="#clinics">VIP클리닉</a><a href="#doctors">의료진</a><a href="#reviews">치료후기</a><a href="#contact">예약</a></nav>
+<a href="#contact" class="header-cta">VIP 예약</a>
+</div>
+</header>
+
+<section class="hero">
+<div class="hero-content">
+<div class="hero-badge" data-aos="fade-down">VIP ORTHOPEDIC CLINIC</div>
+<h1 data-aos="fade-up">프리미엄 관절·척추<br><span>1:1 VIP 전담 진료</span></h1>
+<p data-aos="fade-up" data-aos-delay="100">대기 없는 프라이빗 진료, 대학병원 출신 전문의의<br>맞춤형 치료 프로그램을 경험하세요.</p>
+<div class="hero-buttons" data-aos="fade-up" data-aos-delay="200">
+<button class="btn-gold">VIP 상담 예약</button>
+<button class="btn-outline">클리닉 둘러보기</button>
+</div>
+<div class="hero-stats" data-aos="fade-up" data-aos-delay="300">
+<div class="stat-item"><div class="stat-num">32,000+</div><div class="stat-label">누적 진료</div></div>
+<div class="stat-item"><div class="stat-num">99.1%</div><div class="stat-label">만족도</div></div>
+<div class="stat-item"><div class="stat-num">3명</div><div class="stat-label">전문의</div></div>
+</div>
+</div>
+</section>
+
+<section class="section" id="clinics">
+<div class="section-label" data-aos="fade-up">VIP CLINIC</div>
+<div class="section-title" data-aos="fade-up">프리미엄 <span>전문 클리닉</span></div>
+<div class="section-desc" data-aos="fade-up">1:1 전담 주치의 시스템으로 최상의 치료를 약속합니다.</div>
+<div class="clinics">
+<div class="clinic-card" data-aos="fade-up"><div class="clinic-icon">🦴</div><h3>VIP 관절 클리닉</h3><p>프라이빗 진료실에서 1:1 관절 정밀 진단 및 맞춤 치료</p></div>
+<div class="clinic-card" data-aos="fade-up" data-aos-delay="100"><div class="clinic-icon">🏥</div><h3>척추 비수술 센터</h3><p>최소침습 시술, 신경차단술, 고주파 열치료</p></div>
+<div class="clinic-card" data-aos="fade-up" data-aos-delay="200"><div class="clinic-icon">💪</div><h3>어깨·스포츠 클리닉</h3><p>회전근개, 오십견, 운동손상 전문 치료</p></div>
+<div class="clinic-card" data-aos="fade-up"><div class="clinic-icon">💉</div><h3>재생주사 클리닉</h3><p>PRP, 줄기세포, 프롤로 주사 치료</p></div>
+<div class="clinic-card" data-aos="fade-up" data-aos-delay="100"><div class="clinic-icon">🏃</div><h3>VIP 재활센터</h3><p>전담 물리치료사 배정, 1:1 도수치료</p></div>
+<div class="clinic-card" data-aos="fade-up" data-aos-delay="200"><div class="clinic-icon">🔬</div><h3>정밀검진 센터</h3><p>3D CT, 초음파, MRI 원스톱 정밀 진단</p></div>
+</div>
+</section>
+
+<section class="doctors-bg" id="doctors">
+<div class="section" style="padding-bottom:100px">
+<div class="section-label" data-aos="fade-up">DOCTORS</div>
+<div class="section-title" data-aos="fade-up">VIP 전담 <span>전문의진</span></div>
+<div class="section-desc" data-aos="fade-up">대학병원 교수 출신 전문의가 직접 진료합니다.</div>
+<div class="doctors-grid">
+<div class="doctor-card" data-aos="fade-up"><div class="doctor-img">👨‍⚕️</div><div class="doctor-info"><h3>한진우 대표원장</h3><div class="position">관절센터장 · 의학박사</div><div class="spec">서울대 정형외과 전문의<br>前 서울대병원 교수<br>무릎·고관절 인공관절 전문</div></div></div>
+<div class="doctor-card" data-aos="fade-up" data-aos-delay="100"><div class="doctor-img">👩‍⚕️</div><div class="doctor-info"><h3>윤서현 원장</h3><div class="position">척추센터장</div><div class="spec">연세대 의대 졸업<br>세브란스 척추외과 전임의<br>척추 비수술·미세수술 전문</div></div></div>
+<div class="doctor-card" data-aos="fade-up" data-aos-delay="200"><div class="doctor-img">👨‍⚕️</div><div class="doctor-info"><h3>박준혁 원장</h3><div class="position">재생의학센터장</div><div class="spec">가톨릭대 의대 졸업<br>성모병원 스포츠의학 전임의<br>PRP·줄기세포 전문</div></div></div>
+</div>
+</div>
+</section>
+
+<section class="numbers">
+<div class="numbers-inner">
+<div class="number-item" data-aos="fade-up"><div class="num">32,000+</div><div class="label">누적 진료 건수</div></div>
+<div class="number-item" data-aos="fade-up" data-aos-delay="100"><div class="num">99.1%</div><div class="label">환자 만족도</div></div>
+<div class="number-item" data-aos="fade-up" data-aos-delay="200"><div class="num">12년</div><div class="label">개원 경력</div></div>
+<div class="number-item" data-aos="fade-up" data-aos-delay="300"><div class="num">4.9</div><div class="label">네이버 평점</div></div>
+</div>
+</section>
+
+<section class="section" id="reviews">
+<div class="section-label" data-aos="fade-up">REVIEWS</div>
+<div class="section-title" data-aos="fade-up">환자 <span>치료후기</span></div>
+<div class="reviews">
+<div class="review-card" data-aos="fade-up"><div class="review-stars">★★★★★</div><div class="review-text">"VIP 라운지에서 대기 없이 바로 진료받았습니다. 한진우 원장님의 꼼꼼한 진단과 설명이 정말 인상적이었어요."</div><div class="review-author">— 50대 남성, 무릎관절</div></div>
+<div class="review-card" data-aos="fade-up" data-aos-delay="100"><div class="review-stars">★★★★★</div><div class="review-text">"전담 물리치료사가 매번 같은 분이라 제 상태를 정확히 알고 치료해주셔서 회복이 빨랐습니다."</div><div class="review-author">— 40대 여성, 척추 재활</div></div>
+<div class="review-card" data-aos="fade-up" data-aos-delay="200"><div class="review-stars">★★★★★</div><div class="review-text">"프리미엄이라 비쌀까 걱정했는데 건강보험 적용되는 부분이 많았고, 결과적으로 다른 병원보다 만족도가 훨씬 높았습니다."</div><div class="review-author">— 60대 여성, 어깨 치료</div></div>
+</div>
+</section>
+
+<section class="cta" id="contact">
+<h2 data-aos="fade-up">VIP 전담 진료를 경험하세요</h2>
+<p data-aos="fade-up">온라인 예약 시 첫 방문 정밀 검진 무료 제공</p>
+<a href="tel:02-5678-1234" class="btn-white" data-aos="fade-up">02-5678-1234 VIP 예약</a>
+</section>
+
+<footer>
+<strong>프리미엄정형외과의원</strong><br>
+서울특별시 강남구 압구정로 456 프리미엄메디컬타워 7층<br>
+대표원장: 한진우 | 사업자번호: 234-56-78901<br>
+진료시간: 평일 09:00~19:00 / 토요일 09:00~14:00 / 일·공휴일 휴진<br>
+&copy; 2026 프리미엄정형외과. All rights reserved.
+</footer>
+
+<div class="fixed-cta">
+<div class="fixed-btn fixed-phone">📞</div>
+<div class="fixed-btn fixed-kakao">💬</div>
+</div>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>AOS.init({duration:800,once:true,offset:80});</script>
+</body>
+</html>

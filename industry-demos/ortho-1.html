@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>바른마디정형외과 - 관절·척추 전문</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#0059bd;--primary-light:#e8f4ff;--accent:#ff6b35;--dark:#0a1628;--text:#333;--gray:#888;--light:#f8fafc}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--text);overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+
+/* 헤더 */
+.header{position:fixed;top:0;width:100%;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,0,0,0.06);transition:all 0.3s}
+.header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:72px}
+.logo{font-size:22px;font-weight:900;color:var(--primary)}
+.logo span{color:var(--accent)}
+nav{display:flex;gap:32px}
+nav a{font-size:15px;font-weight:600;color:#555;transition:color 0.3s}
+nav a:hover{color:var(--primary)}
+.header-cta{background:var(--primary);color:#fff;padding:10px 24px;border-radius:8px;font-weight:700;font-size:14px;transition:all 0.3s}
+.header-cta:hover{background:#004a9e;transform:translateY(-1px)}
+
+/* 히어로 */
+.hero{height:100vh;background:linear-gradient(135deg,var(--dark) 0%,#0d2847 50%,#143d6b 100%);position:relative;display:flex;align-items:center;overflow:hidden}
+.hero::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.hero-glow{position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(0,89,189,0.15),transparent 70%);right:-100px;top:-100px}
+.hero-glow2{position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(255,107,53,0.08),transparent 70%);left:10%;bottom:10%}
+.hero-content{max-width:1200px;margin:0 auto;padding:0 24px;position:relative;z-index:2;display:flex;align-items:center;gap:60px;width:100%}
+.hero-text{flex:1}
+.hero-badge{display:inline-block;background:rgba(0,89,189,0.2);border:1px solid rgba(0,89,189,0.4);padding:8px 20px;border-radius:24px;color:#6db3f8;font-size:13px;font-weight:700;letter-spacing:1px;margin-bottom:24px}
+.hero h1{font-size:56px;font-weight:900;color:#fff;line-height:1.25;margin-bottom:20px}
+.hero h1 span{color:#6db3f8}
+.hero p{font-size:20px;color:rgba(255,255,255,0.7);line-height:1.7;margin-bottom:36px}
+.hero-buttons{display:flex;gap:16px}
+.btn-primary{background:var(--primary);color:#fff;padding:16px 36px;border-radius:12px;font-size:17px;font-weight:700;border:none;cursor:pointer;transition:all 0.3s;box-shadow:0 8px 24px rgba(0,89,189,0.3)}
+.btn-primary:hover{background:#004a9e;transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,89,189,0.4)}
+.btn-outline{background:transparent;color:#fff;padding:16px 36px;border-radius:12px;font-size:17px;font-weight:700;border:2px solid rgba(255,255,255,0.3);cursor:pointer;transition:all 0.3s}
+.btn-outline:hover{border-color:#fff;background:rgba(255,255,255,0.1)}
+.hero-stats{flex:0 0 380px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.stat-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:28px 20px;text-align:center;backdrop-filter:blur(10px)}
+.stat-num{font-family:'Montserrat',sans-serif;font-size:42px;font-weight:900;color:#6db3f8}
+.stat-label{font-size:15px;font-weight:700;color:rgba(255,255,255,0.8);margin-top:6px}
+.stat-sub{font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px}
+
+/* 진료과목 */
+.section{padding:100px 24px;max-width:1200px;margin:0 auto}
+.section-label{font-family:'Montserrat';font-size:14px;font-weight:800;color:var(--primary);letter-spacing:3px;text-transform:uppercase}
+.section-title{font-size:40px;font-weight:900;margin-top:8px;line-height:1.3}
+.section-title span{color:var(--primary)}
+.section-desc{font-size:18px;color:var(--gray);margin-top:12px;line-height:1.6}
+
+.clinics{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:48px}
+.clinic-card{background:#fff;border:1px solid #eee;border-radius:16px;padding:36px 24px;text-align:center;transition:all 0.4s;cursor:pointer}
+.clinic-card:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(0,89,189,0.1);border-color:var(--primary)}
+.clinic-icon{width:64px;height:64px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px}
+.clinic-card h3{font-size:20px;font-weight:800;margin-bottom:8px}
+.clinic-card p{font-size:14px;color:var(--gray);line-height:1.5}
+
+/* 의료진 */
+.doctors-bg{background:var(--light)}
+.doctors-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:48px}
+.doctor-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);transition:all 0.4s}
+.doctor-card:hover{transform:translateY(-6px);box-shadow:0 12px 32px rgba(0,89,189,0.12)}
+.doctor-img{height:260px;background:linear-gradient(135deg,#e8f4ff,#d0e8ff);display:flex;align-items:flex-end;justify-content:center;font-size:120px;color:rgba(0,89,189,0.15)}
+.doctor-info{padding:20px}
+.doctor-info h3{font-size:18px;font-weight:800}
+.doctor-info .position{font-size:13px;color:var(--primary);font-weight:700;margin-top:4px}
+.doctor-info .spec{font-size:13px;color:var(--gray);margin-top:8px;line-height:1.5}
+
+/* 숫자 섹션 */
+.numbers{background:var(--dark);padding:80px 24px;color:#fff}
+.numbers-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:40px;text-align:center}
+.number-item .num{font-family:'Montserrat';font-size:52px;font-weight:900;color:#6db3f8}
+.number-item .label{font-size:16px;font-weight:700;margin-top:8px;color:rgba(255,255,255,0.8)}
+
+/* 후기 */
+.reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+.review-card{background:#fff;border:1px solid #eee;border-radius:16px;padding:28px;transition:all 0.3s}
+.review-card:hover{box-shadow:0 8px 24px rgba(0,0,0,0.08)}
+.review-stars{color:#f59e0b;font-size:18px}
+.review-text{font-size:15px;color:#555;line-height:1.7;margin-top:12px}
+.review-author{font-size:14px;color:var(--gray);margin-top:16px;font-weight:600}
+
+/* 인증 */
+.certs{display:flex;justify-content:center;gap:48px;margin-top:48px;flex-wrap:wrap}
+.cert{text-align:center;padding:24px 32px;background:var(--primary-light);border-radius:16px;min-width:200px}
+.cert-icon{font-size:36px;margin-bottom:8px}
+.cert-name{font-size:15px;font-weight:800;color:var(--primary)}
+
+/* CTA */
+.cta{background:linear-gradient(135deg,var(--primary),#004a9e);padding:80px 24px;text-align:center;color:#fff}
+.cta h2{font-size:36px;font-weight:900}
+.cta p{font-size:18px;opacity:0.8;margin-top:12px}
+.cta .btn-white{display:inline-block;background:#fff;color:var(--primary);padding:18px 48px;border-radius:12px;font-size:18px;font-weight:800;margin-top:28px;transition:all 0.3s;box-shadow:0 8px 24px rgba(0,0,0,0.2)}
+.cta .btn-white:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,0.3)}
+
+/* 푸터 */
+footer{background:var(--dark);color:rgba(255,255,255,0.5);padding:48px 24px;text-align:center;font-size:14px;line-height:1.8}
+footer strong{color:rgba(255,255,255,0.8)}
+
+/* 고정 버튼 */
+.fixed-cta{position:fixed;bottom:24px;right:24px;z-index:99;display:flex;flex-direction:column;gap:10px}
+.fixed-btn{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,0.2);cursor:pointer;transition:all 0.3s}
+.fixed-btn:hover{transform:scale(1.1)}
+.fixed-phone{background:var(--primary)}
+.fixed-kakao{background:#fee500;color:#3c1e1e}
+
+/* 반응형 */
+@media(max-width:768px){
+  nav{display:none}
+  .hero h1{font-size:32px}
+  .hero-content{flex-direction:column;text-align:center;padding-top:100px}
+  .hero-stats{flex:none;width:100%}
+  .clinics,.doctors-grid{grid-template-columns:repeat(2,1fr)}
+  .numbers-inner{grid-template-columns:repeat(2,1fr);gap:24px}
+  .reviews{grid-template-columns:1fr}
+  .section-title{font-size:28px}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">바른마디<span>정형외과</span></div>
+    <nav>
+      <a href="#clinics">진료안내</a>
+      <a href="#doctors">의료진</a>
+      <a href="#reviews">치료후기</a>
+      <a href="#cert">인증</a>
+      <a href="#contact">오시는길</a>
+    </nav>
+    <a href="#contact" class="header-cta">진료예약</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-content">
+    <div class="hero-text" data-aos="fade-right">
+      <div class="hero-badge">보건복지부 지정 관절전문병원</div>
+      <h1>관절·척추<br><span>비수술 치료의 새 기준</span></h1>
+      <p>대학병원 출신 전문의 8인이 함께합니다.<br>정확한 진단, 맞춤 치료, 빠른 회복.</p>
+      <div class="hero-buttons">
+        <button class="btn-primary">온라인 예약</button>
+        <button class="btn-outline">전문의 상담</button>
+      </div>
+    </div>
+    <div class="hero-stats" data-aos="fade-left" data-aos-delay="200">
+      <div class="stat-card"><div class="stat-num">54,800+</div><div class="stat-label">누적 수술</div><div class="stat-sub">2010~2026</div></div>
+      <div class="stat-card"><div class="stat-num">98.2%</div><div class="stat-label">환자 만족도</div><div class="stat-sub">2025 기준</div></div>
+      <div class="stat-card"><div class="stat-num">8명</div><div class="stat-label">전문의</div><div class="stat-sub">대학병원 출신</div></div>
+      <div class="stat-card"><div class="stat-num">4.9</div><div class="stat-label">네이버 평점</div><div class="stat-sub">리뷰 2,340건</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="clinics">
+  <div class="section-label" data-aos="fade-up">CLINIC</div>
+  <div class="section-title" data-aos="fade-up">전문 <span>클리닉</span> 안내</div>
+  <div class="section-desc" data-aos="fade-up">각 분야별 전문의가 정확한 진단과 맞춤 치료를 제공합니다.</div>
+  <div class="clinics">
+    <div class="clinic-card" data-aos="fade-up" data-aos-delay="0"><div class="clinic-icon">🦴</div><h3>무릎 클리닉</h3><p>인공관절, 연골재생, 십자인대, 반월상 연골 치료</p></div>
+    <div class="clinic-card" data-aos="fade-up" data-aos-delay="100"><div class="clinic-icon">💪</div><h3>어깨 클리닉</h3><p>회전근개, 오십견, 탈구, 석회성건염 치료</p></div>
+    <div class="clinic-card" data-aos="fade-up" data-aos-delay="200"><div class="clinic-icon">🏥</div><h3>척추 클리닉</h3><p>디스크, 협착증, 측만증, 비수술 치료</p></div>
+    <div class="clinic-card" data-aos="fade-up" data-aos-delay="300"><div class="clinic-icon">🏃</div><h3>스포츠 클리닉</h3><p>운동 손상, 재활치료, 체외충격파</p></div>
+    <div class="clinic-card" data-aos="fade-up" data-aos-delay="0"><div class="clinic-icon">🦶</div><h3>족부 클리닉</h3><p>무지외반증, 족저근막염, 발목인대</p></div>
+    <div class="clinic-card" data-aos="fade-up" data-aos-delay="100"><div class="clinic-icon">✋</div><h3>수부 클리닉</h3><p>손목터널증후군, 방아쇠수지, 건초염</p></div>
+    <div class="clinic-card" data-aos="fade-up" data-aos-delay="200"><div class="clinic-icon">💉</div><h3>비수술 센터</h3><p>줄기세포, PRP, 프롤로, 도수치료</p></div>
+    <div class="clinic-card" data-aos="fade-up" data-aos-delay="300"><div class="clinic-icon">🔬</div><h3>재생의학 센터</h3><p>자가골수줄기세포, 재생주사 치료</p></div>
+  </div>
+</section>
+
+<section class="doctors-bg" id="doctors">
+  <div class="section" style="padding-bottom:100px">
+    <div class="section-label" data-aos="fade-up">DOCTORS</div>
+    <div class="section-title" data-aos="fade-up">대학병원 출신 <span>전문의 8인</span></div>
+    <div class="section-desc" data-aos="fade-up">서울대·연세대·가톨릭대 출신 전문의가 직접 진료합니다.</div>
+    <div class="doctors-grid">
+      <div class="doctor-card" data-aos="fade-up"><div class="doctor-img">👨‍⚕️</div><div class="doctor-info"><h3>김정훈 원장</h3><div class="position">대표원장 · 관절센터장</div><div class="spec">서울대 의대 졸업<br>서울대병원 정형외과 전문의<br>인공관절·연골재생 전문</div></div></div>
+      <div class="doctor-card" data-aos="fade-up" data-aos-delay="100"><div class="doctor-img">👨‍⚕️</div><div class="doctor-info"><h3>이수현 원장</h3><div class="position">척추센터장</div><div class="spec">연세대 의대 졸업<br>세브란스병원 전임의<br>척추 비수술·디스크 전문</div></div></div>
+      <div class="doctor-card" data-aos="fade-up" data-aos-delay="200"><div class="doctor-img">👩‍⚕️</div><div class="doctor-info"><h3>박서연 원장</h3><div class="position">어깨·스포츠센터장</div><div class="spec">가톨릭대 의대 졸업<br>서울성모병원 전임의<br>어깨·스포츠손상 전문</div></div></div>
+      <div class="doctor-card" data-aos="fade-up" data-aos-delay="300"><div class="doctor-img">👨‍⚕️</div><div class="doctor-info"><h3>최원석 원장</h3><div class="position">재생의학센터장</div><div class="spec">서울대 의대 박사<br>줄기세포·PRP 전문<br>비수술 재생치료</div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="numbers">
+  <div class="numbers-inner">
+    <div class="number-item" data-aos="fade-up"><div class="num">54,800+</div><div class="label">누적 수술 건수</div></div>
+    <div class="number-item" data-aos="fade-up" data-aos-delay="100"><div class="num">8명</div><div class="label">전문의</div></div>
+    <div class="number-item" data-aos="fade-up" data-aos-delay="200"><div class="num">16년</div><div class="label">개원 경력</div></div>
+    <div class="number-item" data-aos="fade-up" data-aos-delay="300"><div class="num">98.2%</div><div class="label">환자 만족도</div></div>
+  </div>
+</section>
+
+<section class="section" id="reviews">
+  <div class="section-label" data-aos="fade-up">REVIEWS</div>
+  <div class="section-title" data-aos="fade-up">환자 <span>치료후기</span></div>
+  <div class="reviews">
+    <div class="review-card" data-aos="fade-up"><div class="review-stars">★★★★★</div><div class="review-text">"무릎 인공관절 수술 후 1개월 만에 걸을 수 있었습니다. 김정훈 원장님의 세심한 설명과 치료에 정말 감사드립니다."</div><div class="review-author">— 60대 여성, 인공관절 수술</div></div>
+    <div class="review-card" data-aos="fade-up" data-aos-delay="100"><div class="review-stars">★★★★★</div><div class="review-text">"허리디스크로 고생했는데 비수술 치료로 완치됐습니다. 수술 없이 이렇게 좋아질 수 있다니 놀랍습니다."</div><div class="review-author">— 40대 남성, 디스크 비수술</div></div>
+    <div class="review-card" data-aos="fade-up" data-aos-delay="200"><div class="review-stars">★★★★★</div><div class="review-text">"축구하다 십자인대가 파열됐는데, 수술 후 6개월 만에 다시 운동할 수 있게 됐습니다. 재활 프로그램이 정말 체계적이에요."</div><div class="review-author">— 30대 남성, 십자인대 수술</div></div>
+  </div>
+</section>
+
+<section class="section" id="cert" style="text-align:center">
+  <div class="section-label" data-aos="fade-up">CERTIFICATION</div>
+  <div class="section-title" data-aos="fade-up">인증 및 <span>수상</span></div>
+  <div class="certs">
+    <div class="cert" data-aos="fade-up"><div class="cert-icon">🏅</div><div class="cert-name">보건복지부 지정<br>관절전문병원</div></div>
+    <div class="cert" data-aos="fade-up" data-aos-delay="100"><div class="cert-icon">🏆</div><div class="cert-name">의료기관 인증<br>보건복지부</div></div>
+    <div class="cert" data-aos="fade-up" data-aos-delay="200"><div class="cert-icon">🌍</div><div class="cert-name">외국인환자<br>유치기관</div></div>
+    <div class="cert" data-aos="fade-up" data-aos-delay="300"><div class="cert-icon">📺</div><div class="cert-name">KBS·MBC·SBS<br>다수 출연</div></div>
+  </div>
+</section>
+
+<section class="cta" id="contact">
+  <h2 data-aos="fade-up">지금 바로 전문의 상담 받으세요</h2>
+  <p data-aos="fade-up">온라인 예약 시 대기 없이 빠른 진료가 가능합니다.</p>
+  <a href="tel:02-1234-5678" class="btn-white" data-aos="fade-up">02-1234-5678 전화 예약</a>
+</section>
+
+<footer>
+  <strong>바른마디정형외과의원</strong><br>
+  서울특별시 강남구 테헤란로 123 바른마디빌딩 3~5층<br>
+  대표원장: 김정훈 | 사업자번호: 123-45-67890<br>
+  진료시간: 평일 09:00~19:00 / 토요일 09:00~14:00 / 일·공휴일 휴진<br>
+  ⓒ 2026 바른마디정형외과. All rights reserved.
+</footer>
+
+<div class="fixed-cta">
+  <div class="fixed-btn fixed-phone">📞</div>
+  <div class="fixed-btn fixed-kakao">💬</div>
+</div>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>AOS.init({duration:800,once:true,offset:80});</script>
+</body>
+</html>

@@ -41,16 +41,22 @@ REGIONS_FULL = [
 
 JOBS = [
     {
-        "name": "인테리어_전국",
-        "sheet_tab": "인테리어_전국",
-        "keywords": [f"{r} 인테리어" for r in REGIONS_FULL],
-        "output_dir": os.path.join(BASE_DIR, "results_interior"),
+        "name": "헬스PT_전국",
+        "sheet_tab": "헬스PT_전국",
+        "keywords": [f"{r} 헬스장" for r in REGIONS_FULL] + [f"{r} PT" for r in REGIONS_FULL],
+        "output_dir": os.path.join(BASE_DIR, "results_health"),
     },
     {
-        "name": "맛집_재시도",
-        "sheet_tab": "맛집_재시도",
-        "keywords": None,  # progress.json에서 자동 수집
-        "output_dir": os.path.join(BASE_DIR, "results_retry"),
+        "name": "네일_전국",
+        "sheet_tab": "네일_전국",
+        "keywords": [f"{r} 네일샵" for r in REGIONS_FULL],
+        "output_dir": os.path.join(BASE_DIR, "results_nail"),
+    },
+    {
+        "name": "피부과_전국",
+        "sheet_tab": "피부과_전국",
+        "keywords": [f"{r} 피부과" for r in REGIONS_FULL],
+        "output_dir": os.path.join(BASE_DIR, "results_derma"),
     },
     {
         "name": "미용실_전국",
@@ -63,6 +69,18 @@ JOBS = [
         "sheet_tab": "필라테스_전국",
         "keywords": [f"{r} 필라테스" for r in REGIONS_FULL],
         "output_dir": os.path.join(BASE_DIR, "results_pilates"),
+    },
+    {
+        "name": "맛집_재시도",
+        "sheet_tab": "맛집_재시도",
+        "keywords": None,
+        "output_dir": os.path.join(BASE_DIR, "results_retry"),
+    },
+    {
+        "name": "인테리어_전국",
+        "sheet_tab": "인테리어_전국",
+        "keywords": [f"{r} 인테리어" for r in REGIONS_FULL],
+        "output_dir": os.path.join(BASE_DIR, "results_interior"),
     },
 ]
 
