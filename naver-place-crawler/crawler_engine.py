@@ -438,13 +438,11 @@ class CrawlerEngine:
         time.sleep(random.uniform(lo, hi))
 
     def _fetch(self, url, referer=None, timeout=None, skip_block_check=False):
-        """HTTP GET with fingerprint, proxy rotation, retry.
-        skip_block_check=True: 외부 사이트(홈페이지 등) fetch 시 네이버 차단 판정 건너뜀.
-        """
+        """HTTP GET with fingerprint, proxy rotation, retry."""
         timeout = timeout or self.timeout
         is_naver = "naver.com" in url or "naver.net" in url
         check_block = not skip_block_check and is_naver
-        for attempt in range(5):
+        for attempt in range(3):
             if not self.running:
                 return ""
             try:
@@ -462,19 +460,17 @@ class CrawlerEngine:
                 if check_block and self._is_blocked(resp.status_code, resp.text):
                     if proxy:
                         self._mark_blocked(proxy)
-                        self.callback("log", f"차단 감지 → IP 로테이션 (시도 {attempt+1}/5)")
+                        self.callback("log", f"차단 감지 → IP 로테이션 (시도 {attempt+1}/3)")
                         continue
                     else:
                         self.stats["blocked"] += 1
                         self._consecutive_blocks += 1
-                        wait = min(5 * (2 ** attempt) + random.uniform(0, 3), 60)
-                        self.callback("log", f"  ⏳ 차단 대기 {wait:.0f}초 (시도 {attempt+1}/5)")
-                        time.sleep(wait)
+                        time.sleep(3 * (attempt + 1))
                         continue
 
                 # 외부 사이트는 HTTP 에러만 체크
                 if not is_naver and resp.status_code >= 400:
-                    if attempt < 4:
+                    if attempt < 2:
                         time.sleep(1)
                         continue
                     return ""
@@ -487,8 +483,8 @@ class CrawlerEngine:
 
             except Exception as e:
                 logger.debug(f"fetch error: {e}")
-                if attempt < 4:
-                    time.sleep(2 * (attempt + 1) + random.uniform(0, 2))
+                if attempt < 2:
+                    time.sleep(1 * (attempt + 1))
         return ""
 
     # ═══════════════════════════════════════════
@@ -1005,18 +1001,11 @@ class CrawlerEngine:
         except Exception as e:
             logger.debug(f"place proxy fetch error: {e}")
 
-        # 폴백: 모바일 UA로 직접 fetch (PC UA는 429 차단됨)
+        # 폴백: 직접 fetch (한국 IP면 작동할 수 있음)
         referer = f"https://m.search.naver.com/search.naver?query={quote(name)}"
-        try:
-            resp2 = self.session.get(url, headers={
-                "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Mobile/15E148 Safari/604.1",
-                "Referer": referer,
-            }, timeout=self.timeout)
-            if resp2.status_code == 200 and len(resp2.content) > 10000:
-                resp2.encoding = "utf-8"
-                return resp2.text
-        except Exception:
-            pass
+        html = self._fetch(url, referer=referer)
+        if html and len(html) > 10000:
+            return html
 
         # 3차 폴백: 모바일 검색 결과에서 해당 업체 JSON 블록 추출
         mobile_data = self._fetch_place_from_mobile_search(pid, name)
@@ -2225,8 +2214,8 @@ class CrawlerEngine:
         import re as _re
         pid_pattern = _re.compile(r'/place/(\d+)')
 
-        # ── 프록시 재시도 루프 (프록시 있으면 3회, 없으면 직접 5회 재시도 + 쿨다운) ──
-        max_proxy_retries = 3 if self.proxies else 5
+        # ── 프록시 재시도 루프 (최대 3회) ──
+        max_proxy_retries = 3 if self.proxies else 1
         sel_proxy = self._get_next_proxy() if self.proxies else None
 
         for _proxy_attempt in range(max_proxy_retries):
@@ -2395,20 +2384,14 @@ class CrawlerEngine:
                     except Exception:
                         pass
 
-                # 차단 감지 시 재시도 (프록시 교체 또는 쿨다운 후 직접 재시도)
+                # 차단 감지 시 프록시 교체 재시도
                 if is_blocked and not has_iframe:
                     self.callback("log", "  🚫 IP 차단 감지")
                     driver.quit()
-                    if _proxy_attempt < max_proxy_retries - 1:
-                        if sel_proxy:
-                            self._mark_blocked(sel_proxy)
-                            sel_proxy = self._get_next_proxy()
-                            self.callback("log", f"  🔄 프록시 교체 후 재시도 ({_proxy_attempt + 2}/{max_proxy_retries})")
-                        else:
-                            # 프록시 없이 직접 연결 — 쿨다운 후 재시도
-                            wait = min(30 * (2 ** _proxy_attempt) + random.uniform(0, 10), 180)
-                            self.callback("log", f"  ⏳ 차단 쿨다운 {wait:.0f}초 대기 후 재시도 ({_proxy_attempt + 2}/{max_proxy_retries})")
-                            time.sleep(wait)
+                    if sel_proxy and _proxy_attempt < max_proxy_retries - 1:
+                        self._mark_blocked(sel_proxy)
+                        sel_proxy = self._get_next_proxy()
+                        self.callback("log", f"  🔄 프록시 교체 후 재시도 ({_proxy_attempt + 2}/{max_proxy_retries})")
                         continue
                     return None
 
@@ -3776,12 +3759,9 @@ class CrawlerEngine:
             if added:
                 self.callback("log", f"  → {source}: +{added}건 (총 {len(all_items)}건)")
 
-        # 방법 1: Selenium 스크롤+페이지네이션 (핵심 — 반드시 성공시킴)
+        # 방법 1: Selenium 스크롤+페이지네이션 (가장 정확, 순위 보존)
         self.callback("log", "🌐 [1/4] Selenium 스크롤 수집 시도...")
-        _sel_retries = 3  # Selenium 자체 재시도 (차단 시 쿨다운 포함)
-        for _sel_try in range(_sel_retries):
-            if not self.running:
-                break
+        if self.running:
             sel_max = max_pages if max_pages > 0 else 0
             sel_results = self._selenium_rank_search(keyword, max_pages=sel_max, naver_id=naver_id, naver_pw=naver_pw)
             if sel_results:
@@ -3800,14 +3780,8 @@ class CrawlerEngine:
                     })
                     selenium_ranks[str(sr["id"])] = sr["rank"]
                 _add_items(sel_items, f"Selenium ({len(sel_results)}건)")
-                break  # 성공 시 루프 탈출
             else:
-                if _sel_try < _sel_retries - 1:
-                    wait = 45 * (_sel_try + 1) + random.uniform(0, 15)
-                    self.callback("log", f"  ⚠️ Selenium 실패 — {wait:.0f}초 쿨다운 후 재시도 ({_sel_try + 2}/{_sel_retries})")
-                    time.sleep(wait)
-                else:
-                    self.callback("log", "  ⚠️ Selenium 최종 실패 — 모바일 지도로 폴백")
+                self.callback("log", "  ⚠️ Selenium 실패 — 모바일 지도로 폴백")
 
         # 방법 2: 모바일 지도 검색 (Selenium 부족분 보충)
         if self.running and len(all_items) < 50:
