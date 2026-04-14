@@ -19,7 +19,7 @@ PARALLEL = 4
 SA_PATH = "google-sa.json"
 SHEET_ID = "1T3zN0mecMdfxuaNQLa3wGP2sFgCWI38wrcU8iq3Gz9U"
 BOT_TOKEN = "8574880668:AAHb75dmkFchbjBNj7VgPZuKrptFgIjQ_es"
-CHAT_ID = "7383805736"
+CHAT_ID = "-1003806737505"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # 구/동 세분화 데이터

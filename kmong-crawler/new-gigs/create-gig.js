@@ -242,7 +242,14 @@ async function fillTipTap(page, containerId, text, label = '') {
 
 // ──────────────────────────────────────────
 // 헬퍼: 카테고리 클릭 (모달 대신 popover)
+//  - exact → 정규화(가운뎃점/공백 제거) → 부분 일치 → popover 옵션 dump
 // ──────────────────────────────────────────
+function normalizeCatText(s) {
+  return String(s || '')
+    .replace(/[\u00B7\u30FB\u22C5\u2219\u2022\u2027\uFF65\/·\s]/g, '')
+    .toLowerCase();
+}
+
 async function selectCategory(page, label, value) {
   const btn = page.locator(`button:has-text("${label}")`).first();
   if (!(await btn.isVisible({ timeout: 5000 }).catch(() => false))) {
@@ -251,21 +258,73 @@ async function selectCategory(page, label, value) {
   await btn.click({ force: true });
   await sleep(2000);
 
+  // 1) exact 일치
   const opt = page.getByText(value, { exact: true }).first();
-  if (await opt.isVisible({ timeout: 3000 }).catch(() => false)) {
+  if (await opt.isVisible({ timeout: 2000 }).catch(() => false)) {
     await opt.click({ force: true });
     await sleep(1500);
     return { ok: true };
   }
-  // 부분 일치
-  const partial = page.locator('button, li').filter({ hasText: value }).first();
+
+  // 2) 정규화 매칭 (popover 내 모든 후보 옵션 텍스트 비교)
+  const target = normalizeCatText(value);
+  const pickResult = await page.evaluate((targetNorm) => {
+    function norm(s) {
+      return String(s || '')
+        .replace(/[\u00B7\u30FB\u22C5\u2219\u2022\u2027\uFF65\/·\s]/g, '')
+        .toLowerCase();
+    }
+    const all = [...document.querySelectorAll('button, li, div, span, a, p')];
+    const candidates = [];
+    for (const el of all) {
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) continue;
+      // 직계 텍스트만 (중첩 부모 제외)
+      const directText = [...el.childNodes]
+        .filter(n => n.nodeType === 3)
+        .map(n => n.textContent.trim())
+        .join('').trim();
+      if (!directText) continue;
+      if (directText.length < 2 || directText.length > 40) continue;
+      if (!/[\uAC00-\uD7A3A-Za-z]/.test(directText)) continue;
+      candidates.push({ el, text: directText, normText: norm(directText) });
+    }
+    // 정확 정규화 일치
+    let hit = candidates.find(c => c.normText === targetNorm);
+    // 부분 포함 (양방향)
+    if (!hit) hit = candidates.find(c => c.normText.includes(targetNorm) || targetNorm.includes(c.normText));
+    if (hit) {
+      hit.el.scrollIntoView({ block: 'center' });
+      hit.el.click();
+      return { ok: true, picked: hit.text };
+    }
+    // 실패 시 candidates 텍스트 dump (디버깅)
+    const seen = new Set();
+    const dump = candidates
+      .map(c => c.text)
+      .filter(t => { if (seen.has(t)) return false; seen.add(t); return true; })
+      .slice(0, 80);
+    return { ok: false, dump };
+  }, target);
+
+  if (pickResult.ok) {
+    await sleep(1500);
+    console.log(`  ✓ [${label}] 정규화 매칭 → "${pickResult.picked}" (요청="${value}")`);
+    return { ok: true, normalized: true };
+  }
+
+  // 3) 부분 일치 (Playwright 기본)
+  const partial = page.locator('button, li, div').filter({ hasText: value }).first();
   if (await partial.isVisible({ timeout: 1500 }).catch(() => false)) {
     await partial.click({ force: true });
     await sleep(1500);
     return { ok: true, partial: true };
   }
+
   await page.keyboard.press('Escape').catch(() => {});
-  return { ok: false, error: `${label} 옵션 "${value}" 미발견` };
+  const dumpStr = (pickResult.dump || []).join(' | ');
+  console.log(`  ✗ [${label}] 매칭 실패. popover 텍스트 dump: ${dumpStr}`);
+  return { ok: false, error: `${label} 옵션 "${value}" 미발견`, dump: pickResult.dump };
 }
 
 // ──────────────────────────────────────────
@@ -296,13 +355,98 @@ async function fillStep1(page, product) {
   console.log(`[Step1] 2차 카테고리: ${product.cat2}`);
   const r2 = await selectCategory(page, '2차 카테고리', product.cat2);
   if (!r2.ok) throw new Error(`2차 카테고리 실패: ${r2.error}`);
+  await sleep(2000);
+
+  // 3차 카테고리 (있으면 — 2026-04 크몽 UI 업데이트 대응)
+  // 전략 1: "추천 카테고리" 카드 클릭 (가장 안정적, cat2 매칭하는 첫번째)
+  // 전략 2: 3차 카테고리 dropdown 열고 첫 option 선택 (fallback)
+  const cat3Required = await page.locator('text=3차 카테고리를 선택해주세요').first().isVisible({ timeout: 1500 }).catch(() => false);
+  const cat3BtnVisible = await page.locator('button').filter({ hasText: '3차 카테고리' }).first().isVisible({ timeout: 1500 }).catch(() => false);
+
+  if (cat3Required || cat3BtnVisible) {
+    console.log(`[Step1] 3차 카테고리 필수 — 선택 진행`);
+
+    // 전략 1: 추천 카테고리 카드 클릭
+    const suggestionPicked = await page.evaluate((cat2) => {
+      // ">"로 구분된 카테고리 패스 형식의 클릭가능 요소 찾기
+      const candidates = [...document.querySelectorAll('button, a, li, div, span')].filter(el => {
+        const r = el.getBoundingClientRect();
+        if (r.width === 0 || r.height === 0) return false;
+        const t = (el.innerText || '').trim();
+        if (!t || t.length > 80) return false;
+        // 카테고리 패스 형식: "X > Y > Z" 또는 "X > Y"
+        const segments = t.split('>').map(s => s.trim());
+        if (segments.length < 2) return false;
+        // cat2를 포함해야 함
+        if (!segments.some(s => s.includes(cat2))) return false;
+        return true;
+      });
+      if (candidates.length === 0) return null;
+      // 가장 짧은 (가장 leaf인) 카드 우선
+      candidates.sort((a, b) => (a.innerText || '').length - (b.innerText || '').length);
+      const target = candidates[0];
+      // click 시도
+      target.scrollIntoView({ behavior: 'instant', block: 'center' });
+      target.click();
+      return (target.innerText || '').trim().slice(0, 100);
+    }, product.cat2);
+
+    if (suggestionPicked) {
+      await sleep(1800);
+      console.log(`[Step1] 추천 카테고리 클릭: "${suggestionPicked}"`);
+    } else {
+      // 전략 2: 3차 카테고리 dropdown 열고 명확한 클래스 패턴 button 선택
+      // 옵션 button 클래스: "rounded-[4px] px-2.5 py-1.5" (디버그로 확인됨)
+      console.log(`[Step1] 추천 카테고리 미발견 → 3차 dropdown 시도`);
+      const cat3Btn = page.locator('button').filter({ hasText: '3차 카테고리' }).first();
+      await cat3Btn.click({ force: true });
+      await sleep(2500);
+
+      const dropdownPicked = await page.evaluate((preferredCat3) => {
+        const opts = [...document.querySelectorAll('button')].filter(el => {
+          const cls = String(el.className || '');
+          // 3차 옵션 button 시그니처
+          if (!cls.includes('rounded-[4px]') || !cls.includes('px-2.5') || !cls.includes('py-1.5')) return false;
+          const r = el.getBoundingClientRect();
+          return r.width > 0 && r.height > 0;
+        });
+        if (opts.length === 0) return null;
+        // preferredCat3 매칭 우선
+        let target = null;
+        if (preferredCat3) {
+          target = opts.find(el => (el.innerText || '').trim() === preferredCat3);
+        }
+        if (!target) target = opts[0];
+        target.scrollIntoView({ behavior: 'instant', block: 'center' });
+        target.click();
+        return (target.innerText || '').trim();
+      }, product.cat3);
+      await sleep(1800);
+      console.log(`[Step1] 3차 dropdown 선택: ${dropdownPicked || '(미선택)'}`);
+    }
+  } else {
+    console.log(`[Step1] 3차 카테고리 없음 — 스킵`);
+  }
 
   await snap(page, `gig-${product.id}-step1-filled`);
 
-  // 다음 클릭
+  // 다음 클릭 — 활성(disabled 아닌) 다음 버튼 찾아서 클릭
   console.log(`[Step1] "다음" 클릭`);
-  await page.locator('button:has-text("다음")').first().click();
-  await sleep(6000);
+  const nextBtn = page.locator('button:has-text("다음"):not([disabled])').first();
+  if (await nextBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await nextBtn.click({ force: true });
+  } else {
+    // 폴백: 일반 다음 버튼
+    await page.locator('button:has-text("다음")').first().click();
+  }
+  await sleep(7000);
+
+  // URL 변화 확인 — /my-gigs/new에서 /edit/{id}로 이동했는지
+  const urlAfterNext = page.url();
+  if (urlAfterNext.includes('/my-gigs/new')) {
+    await snap(page, `gig-${product.id}-step1-NAV-FAIL`);
+    throw new Error(`다음 클릭 후 페이지 미이동 — URL=${urlAfterNext}`);
+  }
 
   console.log(`[Step1] Step 2 진입 — URL: ${page.url()}`);
   return { ok: true, draftUrl: page.url() };

@@ -1506,32 +1506,38 @@
               theList.appendChild(row);
             });
 
-            // 추가 버튼
-            var addBtn = document.createElement('button');
-            addBtn.type = 'button';
-            addBtn.innerHTML = '➕ 사진 추가';
-            addBtn.style.cssText = 'padding:8px 16px;border:2px dashed #7BA17F;border-radius:8px;background:rgba(123,161,127,.05);color:#7BA17F;cursor:pointer;font-weight:600;font-size:.85rem;margin-top:4px;width:100%;';
-            addBtn.addEventListener('click', function() {
-              // 파일 선택 다이얼로그
-              var fileInput = document.createElement('input');
-              fileInput.type = 'file';
-              fileInput.accept = 'image/*';
-              fileInput.multiple = true;
-              fileInput.addEventListener('change', async function() {
-                var files = Array.from(this.files);
-                if (files.length === 0) return;
-                for (var fi = 0; fi < files.length; fi++) {
-                  var dataUrl = await compressImage(files[fi], 1200, 0.8);
-                  imgs.push(dataUrl);
-                  theItem[theImgsKey] = imgs;
-                }
-                rebuildGalleryList();
-                hasUnsavedChanges = true;
-                updateChangeCount();
-                resetAutosaveTimer();
-              });
-              fileInput.click();
+            // 추가 버튼: 드래그앤드롭 + 클릭 파일선택
+            var addBtn = document.createElement('label');
+            addBtn.innerHTML = '📁 <b>➕ 사진 추가</b> (드래그해서 놓아도 됩니다)';
+            addBtn.style.cssText = 'padding:10px 16px;border:2px dashed #7BA17F;border-radius:8px;background:rgba(123,161,127,.05);color:#7BA17F;cursor:pointer;font-weight:600;font-size:.85rem;margin-top:4px;width:100%;text-align:center;display:block;box-sizing:border-box;transition:all .15s ease;';
+            var dynFileInput = document.createElement('input');
+            dynFileInput.type = 'file';
+            dynFileInput.accept = 'image/*';
+            dynFileInput.multiple = true;
+            dynFileInput.style.display = 'none';
+            addBtn.appendChild(dynFileInput);
+            async function processDynFiles(fileList) {
+              var files = Array.from(fileList || []).filter(function(f){ return /^image\//.test(f.type); });
+              if (files.length === 0) return;
+              showToast('🔄 ' + files.length + '장 이미지 최적화 중...');
+              for (var fi = 0; fi < files.length; fi++) {
+                try { var dataUrl = await compressImage(files[fi], 1200, 0.8); imgs.push(dataUrl); theItem[theImgsKey] = imgs; }
+                catch(e) { console.warn('변환 실패', e); }
+              }
+              rebuildGalleryList();
+              hasUnsavedChanges = true;
+              updateChangeCount();
+              resetAutosaveTimer();
+              showToast('✅ ' + files.length + '장 추가 완료');
+            }
+            dynFileInput.addEventListener('change', function() { processDynFiles(this.files); this.value=''; });
+            ['dragenter','dragover'].forEach(function(ev){
+              addBtn.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); addBtn.style.background='rgba(123,161,127,.18)'; addBtn.style.borderColor='#5a8463'; });
             });
+            ['dragleave','drop'].forEach(function(ev){
+              addBtn.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); addBtn.style.background='rgba(123,161,127,.05)'; addBtn.style.borderColor='#7BA17F'; });
+            });
+            addBtn.addEventListener('drop', function(e){ if (e.dataTransfer && e.dataTransfer.files) processDynFiles(e.dataTransfer.files); });
             theList.appendChild(addBtn);
           }
           rebuildGalleryList();
@@ -1749,23 +1755,34 @@
               theList.appendChild(row);
             });
 
-            var addBtn = document.createElement('button');
-            addBtn.type = 'button'; addBtn.innerHTML = '➕ 사진 추가';
-            addBtn.style.cssText = 'padding:8px 16px;border:2px dashed #7BA17F;border-radius:8px;background:rgba(123,161,127,.05);color:#7BA17F;cursor:pointer;font-weight:600;font-size:.85rem;margin-top:4px;width:100%;';
-            addBtn.addEventListener('click', function() {
-              var fileInput = document.createElement('input');
-              fileInput.type = 'file'; fileInput.accept = 'image/*'; fileInput.multiple = true;
-              fileInput.addEventListener('change', async function() {
-                var files = Array.from(this.files);
-                for (var fi = 0; fi < files.length; fi++) {
-                  var dataUrl = await compressImage(files[fi], 1200, 0.8);
-                  imgs.push(dataUrl); cmsData[theKey] = imgs;
-                }
-                rebuildSgList();
-                hasUnsavedChanges = true; updateChangeCount(); resetAutosaveTimer();
-              });
-              fileInput.click();
+            // 드래그앤드롭 + 클릭 파일선택 모두 지원
+            var addBtn = document.createElement('label');
+            addBtn.innerHTML = '📁 <b>➕ 사진 추가</b> (드래그해서 놓아도 됩니다)';
+            addBtn.style.cssText = 'padding:10px 16px;border:2px dashed #7BA17F;border-radius:8px;background:rgba(123,161,127,.05);color:#7BA17F;cursor:pointer;font-weight:600;font-size:.85rem;margin-top:4px;width:100%;text-align:center;display:block;box-sizing:border-box;transition:all .15s ease;';
+            var fileInput = document.createElement('input');
+            fileInput.type = 'file'; fileInput.accept = 'image/*'; fileInput.multiple = true;
+            fileInput.style.display = 'none';
+            addBtn.appendChild(fileInput);
+            async function processSgFiles(fileList) {
+              var files = Array.from(fileList || []).filter(function(f){ return /^image\//.test(f.type); });
+              if (files.length === 0) return;
+              showToast('🔄 ' + files.length + '장 이미지 최적화 중...');
+              for (var fi = 0; fi < files.length; fi++) {
+                try { var dataUrl = await compressImage(files[fi], 1200, 0.8); imgs.push(dataUrl); cmsData[theKey] = imgs; }
+                catch(e) { console.warn('변환 실패', e); }
+              }
+              rebuildSgList();
+              hasUnsavedChanges = true; updateChangeCount(); resetAutosaveTimer();
+              showToast('✅ ' + files.length + '장 추가 완료');
+            }
+            fileInput.addEventListener('change', function() { processSgFiles(this.files); this.value=''; });
+            ['dragenter','dragover'].forEach(function(ev){
+              addBtn.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); addBtn.style.background='rgba(123,161,127,.18)'; addBtn.style.borderColor='#5a8463'; });
             });
+            ['dragleave','drop'].forEach(function(ev){
+              addBtn.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); addBtn.style.background='rgba(123,161,127,.05)'; addBtn.style.borderColor='#7BA17F'; });
+            });
+            addBtn.addEventListener('drop', function(e){ if (e.dataTransfer && e.dataTransfer.files) processSgFiles(e.dataTransfer.files); });
             theList.appendChild(addBtn);
           }
           rebuildSgList();
@@ -2074,22 +2091,102 @@
         listWrap.appendChild(row);
       });
 
-      // 추가 버튼
+      // ── 추가 영역: 드래그앤드롭 + 파일선택 + URL 직접 추가 ──
       var addRow = document.createElement('div');
-      addRow.style.cssText = 'display:flex;gap:8px;margin-top:4px;';
+      addRow.style.cssText = 'display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;';
 
-      var addBtn = document.createElement('button');
-      addBtn.innerHTML = '➕ 이미지 추가';
-      addBtn.style.cssText = 'padding:10px 20px;border:2px dashed #7BA17F;border-radius:8px;background:rgba(123,161,127,.05);color:#7BA17F;cursor:pointer;font-weight:600;font-size:.9rem;flex:1;';
-      addBtn.addEventListener('click', function() {
+      // 드래그앤드롭 존 (파일 선택도 겸용)
+      var dropZone = document.createElement('label');
+      dropZone.innerHTML = '📁 <b>파일 선택</b> 또는 여기로 <b>드래그 앤 드롭</b><br><span style="font-size:.78rem;color:#999;font-weight:400;">여러 장 한 번에 업로드 가능 · jpg/png/webp · 각 5MB 이하</span>';
+      dropZone.style.cssText = 'flex:2;min-width:260px;padding:14px 18px;border:2px dashed #7BA17F;border-radius:10px;background:rgba(123,161,127,.05);color:#4a7050;cursor:pointer;font-weight:600;font-size:.9rem;text-align:center;transition:all .15s ease;line-height:1.4;';
+      var fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      fileInput.multiple = true;
+      fileInput.style.display = 'none';
+      dropZone.appendChild(fileInput);
+
+      // URL 직접 추가 버튼 (기존 방식 유지)
+      var urlBtn = document.createElement('button');
+      urlBtn.type = 'button';
+      urlBtn.innerHTML = '🔗 URL 직접 추가';
+      urlBtn.style.cssText = 'flex:1;min-width:130px;padding:10px 16px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#666;cursor:pointer;font-weight:600;font-size:.9rem;';
+      urlBtn.addEventListener('click', function() {
         currentImages.push('');
         cmsData[galleryKey] = currentImages;
+        hasUnsavedChanges = true;
+        updateChangeCount();
+        resetAutosaveTimer();
         rebuildList();
-        // 마지막 input에 포커스
         var inputs = listWrap.querySelectorAll('input[type="text"]');
         if (inputs.length > 0) inputs[inputs.length - 1].focus();
       });
-      addRow.appendChild(addBtn);
+
+      // 공통 파일 처리 로직
+      async function processFiles(files) {
+        var list = Array.from(files || []).filter(function(f) {
+          return /^image\//.test(f.type);
+        });
+        if (list.length === 0) return;
+
+        // 크기 검증
+        var valid = [];
+        for (var i = 0; i < list.length; i++) {
+          if (list[i].size > MAX_FILE_SIZE) {
+            showToast('⚠️ "' + list[i].name + '" 파일이 5MB를 초과합니다 (스킵)');
+          } else {
+            valid.push(list[i]);
+          }
+        }
+        if (valid.length === 0) return;
+
+        showToast('🔄 ' + valid.length + '장 이미지 최적화 중...');
+        for (var j = 0; j < valid.length; j++) {
+          try {
+            var dataUrl = await compressImage(valid[j], 1200, 0.8);
+            currentImages.push(dataUrl);
+          } catch (e) {
+            console.warn('이미지 변환 실패:', valid[j].name, e);
+          }
+        }
+        cmsData[galleryKey] = currentImages;
+        hasUnsavedChanges = true;
+        updateChangeCount();
+        resetAutosaveTimer();
+        rebuildList();
+        showToast('✅ ' + valid.length + '장 추가 완료 (저장 버튼을 눌러 반영)');
+      }
+
+      // 파일 선택 이벤트
+      fileInput.addEventListener('change', function() {
+        processFiles(this.files);
+        this.value = ''; // 동일 파일 재선택 가능하도록 리셋
+      });
+
+      // 드래그앤드롭 이벤트
+      ['dragenter', 'dragover'].forEach(function(ev) {
+        dropZone.addEventListener(ev, function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          dropZone.style.background = 'rgba(123,161,127,.18)';
+          dropZone.style.borderColor = '#5a8463';
+        });
+      });
+      ['dragleave', 'drop'].forEach(function(ev) {
+        dropZone.addEventListener(ev, function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          dropZone.style.background = 'rgba(123,161,127,.05)';
+          dropZone.style.borderColor = '#7BA17F';
+        });
+      });
+      dropZone.addEventListener('drop', function(e) {
+        var files = e.dataTransfer && e.dataTransfer.files;
+        if (files && files.length > 0) processFiles(files);
+      });
+
+      addRow.appendChild(dropZone);
+      addRow.appendChild(urlBtn);
       listWrap.appendChild(addRow);
 
       // 카운트 표시

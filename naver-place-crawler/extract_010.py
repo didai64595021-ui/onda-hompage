@@ -17,10 +17,10 @@ import urllib.request
 SA_PATH = "google-sa.json"
 SHEET_ID = "1T3zN0mecMdfxuaNQLa3wGP2sFgCWI38wrcU8iq3Gz9U"
 BOT_TOKEN = "8574880668:AAHb75dmkFchbjBNj7VgPZuKrptFgIjQ_es"
-CHAT_ID = "7383805736"
+CHAT_ID = "-1003806737505"
 
-DELAY_MIN = 3.0  # 단일 워커 + 충분한 딜레이
-DELAY_MAX = 6.0
+DELAY_MIN = 1.5  # 단일 워커 + 충분한 딜레이
+DELAY_MAX = 3.0
 MAX_RETRY = 3
 
 gc = gspread.service_account(filename=SA_PATH)
@@ -179,7 +179,7 @@ def process_tab(tab_name):
                 print(f"  [SHEET ERROR] {e}", flush=True)
 
         # 진행 보고
-        if (i+1) % 100 == 0:
+        if (i+1) % 500 == 0:
             tg(f"📞 [{tab_name}] {i+1}/{total}\n발견 {found}건 ({found*100//(i+1)}%)\n소스별: {by_source}")
 
         time.sleep(random.uniform(DELAY_MIN, DELAY_MAX))

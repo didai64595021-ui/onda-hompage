@@ -38,12 +38,27 @@ console.log(`[cleanup-by-id] 대상=${targetIds.join(',')} mode=${isExecute ? 'E
 (async () => {
   const { browser, page } = await login({ slowMo: 150 });
   try {
+    // 쿠키 우회 필수 warm-up: /my-gigs/new 먼저 진입
+    await page.goto('https://kmong.com/my-gigs/new', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await sleep(3500);
+
     let totalDeleted = 0;
     for (let pageNo = 1; pageNo <= 5; pageNo++) {
       const url = `https://kmong.com/my-gigs?statusType=WAITING&page=${pageNo}`;
       console.log(`\n[페이지 ${pageNo}] ${url}`);
-      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-      await sleep(4000);
+      // 쿠키 우회: direct goto 대신 client-side navigation (Referer 유지)
+      await page.evaluate((u) => { window.location.href = u; }, url);
+      await page.waitForLoadState('domcontentloaded', { timeout: 30000 }).catch(() => {});
+      await sleep(5000);
+      // listing 접근 성공 확인
+      if (!page.url().includes('/my-gigs?')) {
+        console.log(`  listing 리다이렉트됨 → ${page.url()} (페이지 ${pageNo} 스킵)`);
+        if (pageNo === 1) {
+          console.log(`  ⚠️ /my-gigs 접근 불가 — cleanup 중단`);
+          break;
+        }
+        continue;
+      }
       for (let i = 0; i < 4; i++) {
         await page.evaluate(() => window.scrollBy(0, 1200));
         await sleep(400);
