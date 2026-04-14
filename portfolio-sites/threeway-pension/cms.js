@@ -641,7 +641,19 @@
       if (!container) return;
 
       items.forEach(function(item, idx) {
-        if (!item.imgs || !Array.isArray(item.imgs) || item.imgs.length < 2) return;
+        // 대표 이미지(item.img) + 추가 이미지(item.imgs)를 하나로 병합
+        // - CMS 어드민은 "대표 1장 + 추가 N장"을 합친 총합으로 슬라이더 활성화를 표시함
+        // - 기존 로직은 item.imgs만 썼고 length<2면 스킵해서, 추가 1장일 때 아무것도 안 나오고
+        //   렌더되더라도 대표 이미지가 슬라이더에서 누락되는 버그가 있었음
+        var merged = [];
+        if (item.img) merged.push(item.img);
+        if (Array.isArray(item.imgs)) {
+          item.imgs.forEach(function(src) {
+            if (src && typeof src === 'string') merged.push(src);
+          });
+        }
+        if (merged.length < 2) return;
+
         var cards = container.children;
         if (idx >= cards.length) return;
         var card = cards[idx];
@@ -655,7 +667,7 @@
         var track = document.createElement('div');
         track.className = 'cms-gallery-track';
 
-        item.imgs.forEach(function(src, i) {
+        merged.forEach(function(src, i) {
           var slide = document.createElement('div');
           slide.className = 'cms-gallery-slide' + (i === 0 ? ' active' : '');
           var sImg = document.createElement('img');
@@ -683,7 +695,7 @@
 
         var dotsWrap = document.createElement('div');
         dotsWrap.className = 'cms-gallery-dots';
-        item.imgs.forEach(function(_, i) {
+        merged.forEach(function(_, i) {
           var dot = document.createElement('button');
           dot.className = 'cms-gallery-dot' + (i === 0 ? ' active' : '');
           dotsWrap.appendChild(dot);
@@ -692,12 +704,12 @@
 
         var counter = document.createElement('div');
         counter.className = 'cms-gallery-counter';
-        counter.textContent = '1 / ' + item.imgs.length;
+        counter.textContent = '1 / ' + merged.length;
         gallery.appendChild(counter);
 
         existingImg.style.display = 'none';
         imgWrap.insertBefore(gallery, existingImg);
-        initCmsGallery(gallery, item.imgs.length, false);
+        initCmsGallery(gallery, merged.length, false);
       });
     });
   }
