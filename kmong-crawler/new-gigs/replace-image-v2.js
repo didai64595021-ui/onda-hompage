@@ -26,6 +26,10 @@ const REPORT = path.join(__dirname, 'replace-image-v2-report.json');
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
+// --only=13,14,15 필터 (productId)
+const argv = process.argv.slice(2);
+const ONLY = (argv.find(a => a.startsWith('--only=')) || '').replace('--only=', '').split(',').filter(Boolean);
+
 /**
  * run-log에서 productId별 최신 draftId 수집
  */
@@ -128,8 +132,9 @@ async function editAndReplace(page, imagePath) {
 }
 
 (async () => {
-  const drafts = collectDrafts();
-  console.log(`대상 draft: ${drafts.length}개`);
+  let drafts = collectDrafts();
+  if (ONLY.length) drafts = drafts.filter(d => ONLY.includes(d.productId));
+  console.log(`대상 draft: ${drafts.length}개${ONLY.length ? ` (--only=${ONLY.join(',')})` : ''}`);
 
   // productId → image 매핑
   const productMap = {};
