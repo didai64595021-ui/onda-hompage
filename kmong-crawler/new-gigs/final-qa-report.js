@@ -19,6 +19,8 @@ function safe(file) {
 const updBody = safe('update-body-report.json');
 const pricing = safe('fill-pricing-report.json');
 const verFields = safe('verify-fields-report.json');
+const verThumb4 = safe('verify-thumbnails-v4-report.json');
+const verThumb3 = safe('verify-thumbnails-v3-report.json');
 const verThumb2 = safe('verify-thumbnails-v2-report.json');
 const verThumb1 = safe('verify-thumbnails-report.json');
 const cleanup = safe('cleanup-duplicates-report.json');
@@ -58,12 +60,15 @@ function pricingStatus(draftId) {
   return r.ok ? '✓' : `✗ ${r.reason || ''}`;
 }
 function thumbStatus(draftId) {
-  const src = verThumb2 || verThumb1;
+  const src = verThumb4 || verThumb3 || verThumb2 || verThumb1;
   if (!src) return '-';
   const list = src.results || src.all || [];
   const r = list.find((x) => x.draftId === draftId);
   if (!r) return '미실행';
-  if (r.ok) return `✓ ${r.main ? r.main.naturalW + 'x' + r.main.naturalH : ''}`;
+  if (r.ok) {
+    if (r.count !== undefined) return `✓ ${r.count}/${r.max || 4}`;
+    return `✓ ${r.main ? r.main.naturalW + 'x' + r.main.naturalH : ''}`;
+  }
   return `✗ ${r.reason || 'size'}`;
 }
 function fieldsStatus(draftId) {
@@ -88,7 +93,8 @@ lines.push(`- 대상 draft: ${drafts.length}`);
 lines.push(`- update-body: ${updBody ? `OK ${updBody.ok}/${updBody.total} (NG ${updBody.ng})` : '미실행'}`);
 lines.push(`- fill-pricing: ${pricing ? `OK ${pricing.ok}/${pricing.total} (NG ${pricing.ng})` : '미실행'}`);
 lines.push(`- verify-fields: ${verFields ? `OK ${verFields.ok}/${verFields.total} (NG ${verFields.ng})` : '미실행'}`);
-lines.push(`- verify-thumbnails-v2: ${verThumb2 ? `OK ${verThumb2.ok}/${verThumb2.total} (NG ${verThumb2.ng})` : '미실행'}`);
+lines.push(`- verify-thumbnails-v4 (신뢰): ${verThumb4 ? `OK ${verThumb4.ok}/${verThumb4.total} (NG ${verThumb4.ng})` : '미실행'}`);
+lines.push(`- verify-thumbnails-v3 (이전): ${verThumb3 ? `OK ${verThumb3.ok}/${verThumb3.total} (NG ${verThumb3.ng})` : '미실행'}`);
 lines.push(`- cleanup-duplicates: ${cleanup ? `삭제 ${cleanup.deleted?.length || 0}, 잔여 noise ${cleanup.remainingNonKeep?.length || 0}` : '미실행'}`);
 lines.push(`- 금지어 스캔: ${bannedHits.length === 0 ? '✓ 0건' : bannedHits.map((h) => `${h.kw}:${h.count}`).join(', ')}`);
 lines.push('');
