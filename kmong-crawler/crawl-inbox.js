@@ -189,13 +189,17 @@ async function crawlInbox() {
       const productId = matchProductId(serviceName) || (gigId ? String(gigId) : null);
       console.log(`  → 매핑: ${serviceName || '(미확인)'} → productId: ${productId || 'N/A'}`);
 
+      // 실시간 gig 메타데이터 → notes JSON (스키마 변경 없이 보존)
+      const gigUrl = gigId ? `https://kmong.com/gig/${gigId}` : null;
+      const notesPayload = { gig_id: gigId, service_title: serviceName || null, gig_url: gigUrl };
+
       inquiries.push({
         product_id: productId,
         inquiry_date: inquiryDate,
         customer_name: customerName,
         inquiry_type: '크몽 메시지',
         status: 'new',
-        service_name: serviceName || null,
+        notes: JSON.stringify(notesPayload),
         message_content: messageContent || null,
         conversation_url: `https://kmong.com/inboxes?inbox_group_id=${inboxGroupId}&partner_id=${group.partner?.USERID || ''}`,
       });
@@ -232,6 +236,7 @@ async function crawlInbox() {
           status: inquiry.status,
           message_content: inquiry.message_content,
           conversation_url: inquiry.conversation_url,
+          notes: inquiry.notes,
         });
 
       if (error) {

@@ -125,7 +125,11 @@ async function autoReply() {
 
       // 6. 텔레그램 카드 발송 (인라인 [발송][수정][건너뜀])
       const qualityLabel = needsManual ? '⚠️ 직접 작성 권장' : `✅ 품질 ${quality.score}점`;
-      const gigUrl = getGigUrlById(inquiry.product_id);
+      // notes JSON에서 실시간 gig 메타데이터 추출 (crawl-inbox 저장분) + product-map fallback
+      let meta = {};
+      try { meta = inquiry.notes ? JSON.parse(inquiry.notes) : {}; } catch {}
+      const gigUrl = meta.gig_url || getGigUrlById(inquiry.product_id);
+      const serviceTitle = meta.service_title || '';
       const conversationUrl = inquiry.conversation_url || 'https://kmong.com/inboxes';
       const card = [
         `💬 <b>신규 문의 #${inquiry.id}</b>  (${qualityLabel})`,
@@ -133,7 +137,8 @@ async function autoReply() {
         `📝 <b>고객 문의</b>:`,
         esc((inquiry.message_content || '(내용 없음)').slice(0, 500)),
         ``,
-        `🔗 <b>서비스</b>: ${esc(analysis.serviceType)}${statsText ? ` · ${esc(statsText)}` : ''}`,
+        serviceTitle ? `🔗 <b>문의 서비스</b>: ${esc(serviceTitle)}` : `🔗 <b>서비스</b>: ${esc(analysis.serviceType)}`,
+        statsText ? `📊 거래통계: ${esc(statsText)}` : null,
         gigUrl ? `📎 서비스 페이지: ${gigUrl}` : null,
         `💬 대화방: ${conversationUrl}`,
         ``,
