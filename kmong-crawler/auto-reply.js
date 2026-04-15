@@ -12,7 +12,7 @@
 
 const { supabase } = require('./lib/supabase');
 const { notify, sendCard } = require('./lib/telegram');
-const { analyzeInquiry, selectBestTemplate, renderTemplate, getServiceStats, calculateReplyQuality, getRecentApprovedReplies } = require('./lib/reply-generator');
+const { analyzeInquiry, selectBestTemplate, renderTemplate, getServiceStats, calculateReplyQuality, getRecentApprovedReplies, getSimilarApprovedReplies } = require('./lib/reply-generator');
 const { getCategoryById, getGigUrlById } = require('./lib/product-map');
 const { askClaude } = require('./lib/claude-max');
 
@@ -77,14 +77,16 @@ async function autoReply() {
         }
       }
 
-      // 2-2. 학습 — 같은 서비스의 최근 합격 답변 (Few-shot 참고용)
+      // 2-2. 학습 — 현재 질문과 유사한 과거 sent 답변 (키워드 매칭 + 같은 product 보너스)
       let approvedExamples = [];
-      if (inquiry.product_id) {
-        const learn = await getRecentApprovedReplies(inquiry.product_id, 5);
-        if (learn.ok && learn.examples.length > 0) {
-          approvedExamples = learn.examples;
-          console.log(`  학습참고: 합격답변 ${learn.examples.length}건 (같은상품 ${learn.sameProductCount}건 + 타상품 ${learn.examples.length - learn.sameProductCount}건)`);
-        }
+      const similar = await getSimilarApprovedReplies(inquiry.message_content, inquiry.product_id, 3);
+      if (similar.length > 0) {
+        approvedExamples = similar;
+        console.log(`  학습참고: 유사 답변 ${similar.length}건 (score=${similar.map(s => s.score).join(',')})`);
+      } else if (inquiry.product_id) {
+        // 유사 답변 없으면 같은 서비스 최근 답변으로 톤 학습
+        const learn = await getRecentApprovedReplies(inquiry.product_id, 3);
+        if (learn.ok) approvedExamples = learn.examples;
       }
 
       // 3. Rule-based 답변 먼저 생성 (fallback + 품질 평가용)

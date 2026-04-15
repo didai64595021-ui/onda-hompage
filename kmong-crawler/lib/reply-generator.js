@@ -362,6 +362,46 @@ async function getRecentApprovedReplies(productId, limit = 5) {
   return { ok: true, examples, sameProductCount: same?.length || 0 };
 }
 
+/**
+ * 학습 — 현재 고객 메시지와 유사한 과거 sent 답변 찾기 (Few-shot 강화)
+ *  - 키워드 매칭 수 + 같은 product_id 보너스
+ *  - [발송] 승인된 답변 = 학습 풀
+ *  - [수정] 후 발송된 것도 포함 (auto_reply_text에 저장된 최종본이 진실)
+ * @param {string} currentMessage - 현재 고객 문의 메시지
+ * @param {string} productId - 현재 문의의 product_id (같은 서비스 보너스)
+ * @param {number} limit - 반환할 유사 답변 수
+ * @returns {Array<{message_content, auto_reply_text, product_id, score}>}
+ */
+async function getSimilarApprovedReplies(currentMessage, productId, limit = 3) {
+  const keywords = (currentMessage || '').match(/[가-힣a-zA-Z]{2,}/g) || [];
+  if (keywords.length === 0) return [];
+
+  // 너무 흔한 단어 제거
+  const stopwords = new Set(['안녕하세요', '문의', '감사합니다', '드려요', '있나요', '어떻게', '가능', '궁금', '합니다', '드립니다', '드려', '해주세요']);
+  const sigKeywords = keywords.filter(k => !stopwords.has(k) && k.length >= 2).slice(0, 6);
+  if (sigKeywords.length === 0) return [];
+
+  // sent 상태의 답변 + 키워드 중 하나라도 포함된 것
+  const orFilter = sigKeywords.map(k => `message_content.ilike.%${k}%`).join(',');
+  const { data } = await supabase
+    .from('kmong_inquiries')
+    .select('id, product_id, message_content, auto_reply_text, inquiry_date')
+    .eq('auto_reply_status', 'sent')
+    .not('auto_reply_text', 'is', null)
+    .or(orFilter)
+    .order('inquiry_date', { ascending: false })
+    .limit(limit * 4);
+
+  // 점수: 매칭 키워드 수 + 같은 product_id 보너스
+  const scored = (data || []).map(r => {
+    const matchCount = sigKeywords.filter(k => String(r.message_content || '').includes(k)).length;
+    const sameProduct = r.product_id === productId ? 2 : 0;
+    return { ...r, score: matchCount + sameProduct };
+  }).filter(r => r.score >= 1);
+
+  return scored.sort((a, b) => b.score - a.score).slice(0, limit);
+}
+
 module.exports = {
   analyzeInquiry,
   selectBestTemplate,
@@ -371,6 +411,7 @@ module.exports = {
   getServiceStats,
   calculateReplyQuality,
   getRecentApprovedReplies,
+  getSimilarApprovedReplies,
   PACKAGES,
   OPTIONS,
   ANSWER_MAP,
