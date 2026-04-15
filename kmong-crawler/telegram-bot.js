@@ -38,6 +38,20 @@ const bot = new TelegramBot(BOT_TOKEN, {
     params: { timeout: 30 },
     interval: 2000,
   },
+  // api.telegram.org 간헐 ETIMEDOUT 대응: request timeout 15초 + IPv4 강제
+  request: {
+    timeout: 15000,
+    family: 4,
+    forever: false,
+  },
+});
+
+// polling/webhook 에러 캐치 — ETIMEDOUT 반복 시 소음 방지
+bot.on('polling_error', (err) => {
+  console.error('[polling_error]', err.code || '', err.message?.slice(0, 100) || '(no message)');
+});
+bot.on('webhook_error', (err) => {
+  console.error('[webhook_error]', err.code || '', err.message?.slice(0, 100) || '(no message)');
 });
 
 // 기존 웹훅 제거 (폴링 충돌 방지)
@@ -516,7 +530,8 @@ bot.on('callback_query', async (query) => {
       bot.editMessageReplyMarkup({ inline_keyboard: [[{ text: '⏭️ 건너뜀', callback_data: 'noop' }]] }, { chat_id: chatId, message_id: messageId }).catch(() => {});
       bot.answerCallbackQuery(query.id, { text: '건너뜀 처리' });
     } else if (action === 'edit') {
-      bot.answerCallbackQuery(query.id, { text: '수정 모드' });
+      // answerCallbackQuery는 실패해도 진행 (ETIMEDOUT 있어도 수정 플로우는 열어야 함)
+      bot.answerCallbackQuery(query.id, { text: '수정 모드' }).catch((e) => console.error('[answerCB 실패]', e.code || '', e.message?.slice(0, 80)));
       const promptMsg = await bot.sendMessage(chatId, `✏️ 문의 #${inquiryId} 답변 수정.\n새 답변을 이 메시지에 reply 해주세요. (취소하려면 무시)`, { reply_markup: { force_reply: true, selective: false } });
       bot.onReplyToMessage(chatId, promptMsg.message_id, async (replyMsg) => {
         const newReply = (replyMsg.text || '').trim();
