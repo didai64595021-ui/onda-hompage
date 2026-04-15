@@ -61,15 +61,15 @@ async function callClaude({ accessToken, model, system, messages, max_tokens = 1
  * @returns {Promise<{ok: boolean, text?: string, usage?: object, error?: string, account?: string}>}
  */
 const MODEL_ALIAS = {
-  sonnet: 'claude-sonnet-4-5',
-  opus:   'claude-opus-4-5',
+  sonnet: 'claude-sonnet-4-6',
+  opus:   'claude-opus-4-6',
   haiku:  'claude-haiku-4-5',
 };
 
-// 429 시 자동 다운그레이드: sonnet → haiku, opus → sonnet → haiku
+// 429 시 자동 다운그레이드: sonnet 4.6 → 4.5 → haiku, opus 4.6 → sonnet → haiku
 const FALLBACK_CHAIN = {
-  opus:   ['claude-opus-4-5', 'claude-sonnet-4-5', 'claude-haiku-4-5'],
-  sonnet: ['claude-sonnet-4-5', 'claude-haiku-4-5'],
+  opus:   ['claude-opus-4-6', 'claude-sonnet-4-6', 'claude-sonnet-4-5', 'claude-haiku-4-5'],
+  sonnet: ['claude-sonnet-4-6', 'claude-sonnet-4-5', 'claude-haiku-4-5'],
   haiku:  ['claude-haiku-4-5'],
 };
 
