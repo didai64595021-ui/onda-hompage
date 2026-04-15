@@ -150,15 +150,18 @@ async function crawlInbox() {
           return await r.json();
         }, inboxGroupId);
 
-        if (detailData?.button?.gigs && detailData.button.gigs.length > 0) {
-          // 첫 번째 gig을 문의 서비스로 사용
-          const gig = detailData.button.gigs[0];
-          serviceName = gig.title || '';
-          gigId = gig.gigId;
-          console.log(`  → 서비스: ${serviceName} (gigId: ${gigId})`);
-        } else if (detailData?.label) {
-          console.log(`  → 라벨: ${JSON.stringify(detailData.label)}`);
+        // button.gigs 배열은 순서가 보장 안 됨 — 일단 모든 gig 후보 저장해두고 나중에 메시지와 매칭
+        const allGigs = (detailData?.button?.gigs || []).map(g => ({ gigId: g.gigId, title: g.title || '' }));
+        if (allGigs.length > 1) {
+          console.log(`  → 연관 gig ${allGigs.length}개: ${allGigs.map(g => g.gigId + '(' + g.title.slice(0,20) + ')').join(', ')}`);
         }
+        // 기본값은 마지막 원소 (대부분 가장 최근 연관) — 아래 message 매칭으로 덮어씀
+        if (allGigs.length > 0) {
+          const last = allGigs[allGigs.length - 1];
+          serviceName = last.title;
+          gigId = last.gigId;
+        }
+        if (detailData?.label) console.log(`  → 라벨: ${JSON.stringify(detailData.label).slice(0,120)}`);
 
         // 3단계: 메시지 내용 가져오기 (첫 메시지 = 고객 문의 내용)
         const msgData = await page.evaluate(async (gId) => {
@@ -182,11 +185,37 @@ async function crawlInbox() {
 
           // messageContent = 가장 최근 고객 메시지 (답변 대상)
           const latestCustomer = [...sortedMsgs].reverse().find(m => !m.is_mine);
-          if (latestCustomer) messageContent = latestCustomer.message;
+          if (latestCustomer) {
+            messageContent = latestCustomer.message;
+            // 메시지에 gig 정보가 붙어있으면 그게 진짜 '현재 문의 서비스' (최신)
+            // 크몽 API 응답 필드명이 알려져 있지 않으니 여러 후보 탐색
+            const msgGigId = latestCustomer.gig_id || latestCustomer.gigId || latestCustomer.gig?.gigId || latestCustomer.meta?.gigId || null;
+            if (msgGigId) {
+              const matched = allGigs.find(g => String(g.gigId) === String(msgGigId));
+              if (matched) {
+                serviceName = matched.title;
+                gigId = matched.gigId;
+                console.log(`  → 메시지에 붙은 gig_id로 오버라이드: ${serviceName} (${gigId})`);
+              } else {
+                // allGigs에 없으면 msgGigId 자체를 채택
+                gigId = msgGigId;
+                serviceName = latestCustomer.gig_title || latestCustomer.gigTitle || '';
+                console.log(`  → 메시지 gig_id(새로 등장): ${serviceName || '(title미상)'} (${gigId})`);
+              }
+            }
+          }
         }
+        console.log(`  → 최종 서비스: ${serviceName || '(미확인)'} (gigId: ${gigId || 'N/A'})`);
 
         if (messageContent) {
           console.log(`  → 고객 메시지: ${messageContent.substring(0, 80)}...`);
+        }
+
+        // 진단용: 첫 인라인 전체 로그 (문제 재발 시 실제 API 구조 확인)
+        if (allGigs.length > 1 && msgData?.messages?.length) {
+          const sample = msgData.messages[0];
+          const diagKeys = Object.keys(sample || {}).filter(k => /gig|product|service|meta/i.test(k));
+          if (diagKeys.length > 0) console.log(`  🔍 message 필드 후보(${diagKeys.join(',')}):`, JSON.stringify(diagKeys.reduce((a,k) => ({ ...a, [k]: sample[k] }), {})).slice(0, 200));
         }
 
       } catch (e) {
