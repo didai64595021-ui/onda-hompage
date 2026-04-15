@@ -200,6 +200,22 @@ async function crawlInbox() {
           console.log(`  → 고객 메시지: ${messageContent.substring(0, 80)}...`);
         }
 
+        // 4단계: gig 상세 실시간 fetch (소재 최적화로 자주 바뀌므로 매번 신규)
+        var gigDetail = null;
+        if (gigId) {
+          try {
+            const { fetchGigDetail } = require('./lib/gig-detail');
+            gigDetail = await fetchGigDetail(page, gigId);
+            if (gigDetail && !gigDetail._error) {
+              console.log(`  → gig 상세: ${gigDetail.packages?.length || 0}개 패키지, ${gigDetail.descriptions?.length || 0}개 본문블록`);
+            } else {
+              console.warn(`  → gig 상세 실패: ${gigDetail?._error || 'null'}`);
+            }
+          } catch (e) {
+            console.warn(`  → gig 상세 fetch 예외: ${e.message}`);
+          }
+        }
+
       } catch (e) {
         console.warn(`  → API 호출 실패: ${e.message}`);
       }
@@ -207,13 +223,14 @@ async function crawlInbox() {
       const productId = matchProductId(serviceName) || (gigId ? String(gigId) : null);
       console.log(`  → 매핑: ${serviceName || '(미확인)'} → productId: ${productId || 'N/A'}`);
 
-      // 실시간 gig 메타데이터 + 대화 스레드 → notes JSON (스키마 변경 없이 보존)
+      // 실시간 gig 메타데이터 + 대화 스레드 + gig 상세 → notes JSON (스키마 변경 없이 보존)
       const gigUrl = gigId ? `https://kmong.com/gig/${gigId}` : null;
       const notesPayload = {
         gig_id: gigId,
         service_title: serviceName || null,
         gig_url: gigUrl,
         conversation_thread: conversationThread || [],
+        gig_detail: gigDetail || null,
       };
 
       inquiries.push({

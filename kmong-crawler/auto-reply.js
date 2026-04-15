@@ -15,6 +15,7 @@ const { notify, sendCard } = require('./lib/telegram');
 const { analyzeInquiry, selectBestTemplate, renderTemplate, getServiceStats, calculateReplyQuality, getRecentApprovedReplies, getSimilarApprovedReplies } = require('./lib/reply-generator');
 const { getCategoryById, getGigUrlById } = require('./lib/product-map');
 const { askClaude } = require('./lib/claude-max');
+const { formatGigDetailForPrompt } = require('./lib/gig-detail');
 
 // HTML 이스케이프
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -147,7 +148,7 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
 - 코딩 방식 제작 → 호스팅 무료, 디자인 자유도 100%
 - 관리자 CMS 제공 → 고객이 직접 수정 가능
 - 반응형 (PC·모바일·태블릿), 7일 무상 수정, 도메인 연결 대행
-- 가격: STANDARD 12만 / DELUXE 20만 / PREMIUM 35만 (구성에 따라 조정)
+- 구체 가격은 반드시 [크몽 서비스 스펙] 블록의 패키지 price 값 사용
 - 아임웹/카페24 이전도 가능 (기존 콘텐츠 유지 + 디자인 개선 + 월 호스팅비 0원)
 
 문의 유형별 톤:
@@ -167,6 +168,9 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
           ).join('\n');
         }
 
+        // 실시간 gig 상세 (crawl-inbox가 매번 fetch 해서 notes.gig_detail에 저장)
+        const gigDetailBlock = meta.gig_detail ? formatGigDetailForPrompt(meta.gig_detail) : '';
+
         const taskContext = [
           `문의 모드: ${isFollowUp ? '후속 문의 (인사 생략)' : '첫 문의'}`,
           `고객이 본 서비스 페이지 제목: ${serviceTitle}`,
@@ -174,6 +178,7 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
             ? `⚠️ 이 서비스는 내부 카테고리에 아직 매핑 안 됨 — 페이지 제목을 전적으로 의존해서 맥락 파악하세요`
             : `매핑 카테고리: ${analysis.serviceType}`,
           statsText ? `거래 통계: ${statsText}` : null,
+          gigDetailBlock ? `\n${gigDetailBlock}` : null,
           historyBlock || null,
           fewShot ? `\n최근 합격 답변 톤 참고:\n${fewShot}` : null,
         ].filter(Boolean).join('\n');
