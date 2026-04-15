@@ -14,6 +14,7 @@ const { supabase } = require('./lib/supabase');
 const { notify, sendCard } = require('./lib/telegram');
 const { analyzeInquiry, selectBestTemplate, renderTemplate, getServiceStats, calculateReplyQuality, getRecentApprovedReplies } = require('./lib/reply-generator');
 const { getCategoryById, getGigUrlById } = require('./lib/product-map');
+const { askClaude } = require('./lib/claude-max');
 
 // HTML 이스케이프
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -49,6 +50,15 @@ async function autoReply() {
     for (const inquiry of newInquiries) {
       console.log(`\n[처리] #${inquiry.id} — ${inquiry.customer_name}`);
 
+      // 2-0. 기존 고객의 후속 문의인지 판단 (같은 customer_name의 과거 inquiry 카운트)
+      const { count: priorCount } = await supabase
+        .from('kmong_inquiries')
+        .select('*', { count: 'exact', head: true })
+        .eq('customer_name', inquiry.customer_name)
+        .lt('inquiry_date', inquiry.inquiry_date);
+      const isFollowUp = (priorCount || 0) >= 1;
+      console.log(`  이전 문의 ${priorCount || 0}건 → ${isFollowUp ? 'follow_up 모드' : 'first_contact 모드'}`);
+
       // 2. 문의 내용 분석 — product_id의 카테고리를 기본 인사말/serviceType으로 주입
       const productCategory = getCategoryById(inquiry.product_id);
       const analysis = analyzeInquiry(inquiry.message_content, productCategory);
@@ -77,12 +87,13 @@ async function autoReply() {
         }
       }
 
-      // 3. 최적 템플릿 선택 — 홈페이지/웹 계열 문의일 때만 기존 '신규제작' 템플릿 사용
-      // (인스타/디자인 등 다른 서비스는 template=null → 기본 답변으로 fallback하여 서비스 맥락 반영)
+      // 3. Rule-based 답변 먼저 생성 (fallback + 품질 평가용)
       const isWebInquiry = /홈페이지|랜딩|워드프레스|반응형|HTML|SEO|유지보수|카페24|아임웹/.test(analysis.serviceType || '');
       const template = isWebInquiry ? await selectBestTemplate('first_contact', '신규제작') : null;
 
       let replyText;
+      let replySource = 'rule';
+      let claudeModel = null;
       if (template) {
         console.log(`  템플릿: ${template.template_name} (전환율 ${template.conversion_rate}%)`);
         replyText = renderTemplate(template, {
@@ -90,15 +101,83 @@ async function autoReply() {
           '{answer_to_question}': analysis.answer,
         });
       } else {
-        // 템플릿 없으면 기본 답변 (거래 데이터 반영)
         const priceGuide = statsText ? `\n참고로 비슷한 구성의 최근 계약은 ${statsText} 범위였습니다.\n` : '';
         replyText = `안녕하세요! ${analysis.serviceType} 문의 감사합니다.\n\n${analysis.answer}${priceGuide}\n딱 맞는 상품으로 안내드리려고 하는데요, 몇 가지만 여쭤볼게요.\n\n1. 한 페이지에 다 담을까요, 메뉴별로 나눌까요?\n2. 납품 후 사진이나 문구를 직접 바꿀 일이 있으실까요?\n3. 아래 추가 기능 중 필요한 게 있으시면 골라주세요\n   - 카카오채널 연동\n   - 네이버예약 연동\n   - 인스타그램 피드 연동\n   - SEO 심화 최적화\n\n말씀해주세요!`;
       }
 
-      // 3-1. 응답 품질 점수 산정
+      // 3-1. Rule-based 답변 품질 평가
       const quality = calculateReplyQuality(analysis, replyText);
-      console.log(`  품질점수: ${quality.score}/100 (${quality.reasons.join(', ')})`);
-      const needsManual = quality.score < 60;
+      console.log(`  rule 품질점수: ${quality.score}/100 (${quality.reasons.join(', ')})`);
+
+      // 3-2. Claude 에스컬레이션 조건:
+      //   (a) follow_up 모드 — 후속 문의는 맥락 필요
+      //   (b) 품질점수 < 70 — rule 매칭 부실
+      //   (c) 복합 니즈 키워드 — 간단 매칭으로 커버 어려움
+      //   (d) product-map 매핑 실패 (신규 등록된 gig) — 자동 Claude 모드
+      const isUnmappedProduct = !productCategory || /^\d+$/.test(String(inquiry.product_id || ''));
+      const hasComplexIntent = /이전|이사|옮기|이전하고싶|견적이|기간이|리뉴얼|개편|옮겨|바꾸고/.test(inquiry.message_content || '');
+      const needsClaude = isFollowUp || quality.score < 70 || hasComplexIntent || isUnmappedProduct;
+      if (isUnmappedProduct) console.log(`  ℹ️ 미매핑 product_id → Claude 자동 처리 (service_title 기반)`);
+      if (needsClaude) {
+        // 메타 JSON에서 서비스 제목 가져오기
+        let meta = {};
+        try { meta = inquiry.notes ? JSON.parse(inquiry.notes) : {}; } catch {}
+        const serviceTitle = meta.service_title || analysis.serviceType || '홈페이지 제작';
+
+        // few-shot: 최근 sent 답변 2개만 스타일 참고
+        const fewShot = approvedExamples.slice(0, 2).map((e, i) =>
+          `[예시${i + 1}] 고객: ${String(e.message_content || '').slice(0, 120)}\n   답변: ${String(e.auto_reply_text || '').slice(0, 400)}`
+        ).join('\n\n');
+
+        const sys = `당신은 ONDA 마케팅의 크몽 판매 담당자입니다. 고객이 우리 크몽 서비스 페이지에서 문의를 보낸 상황입니다. 목표는 문의를 계약으로 전환하는 것.
+
+답변 규칙:
+- 한국어, 3~6문장. 이모지 금지(":)"는 허용). 긴 번호 리스트 피하기
+- 첫 문의만 "안녕하세요!" 인사, 후속 문의는 바로 본론
+- 고객 실제 의도(메시지 내용)를 서비스 페이지 제목보다 우선 판독
+- 외부 플랫폼이나 경쟁사를 추천하지 말 것 — 우리 서비스로 끌어오기
+- 아임웹/카페24/워드프레스 등 경쟁 플랫폼 언급 시 "우리가 대신 해드립니다" 로 받아치기
+- 항상 다음 스텝 제시: 견적 요청 / 참고자료 / 상담 예약 등 CTA 포함
+
+ONDA 강점 (필요시 자연스럽게 녹이기):
+- 코딩 방식 제작 → 호스팅 무료, 디자인 자유도 100%
+- 관리자 CMS 제공 → 고객이 직접 수정 가능
+- 반응형 (PC·모바일·태블릿), 7일 무상 수정, 도메인 연결 대행
+- 가격: STANDARD 12만 / DELUXE 20만 / PREMIUM 35만 (구성에 따라 조정)
+- 아임웹/카페24 이전도 가능 (기존 콘텐츠 유지 + 디자인 개선 + 월 호스팅비 0원)
+
+문의 유형별 톤:
+- 견적/가격 질문 → 구성 3단계 가격 + 옵션 비용 제시
+- 기간 질문 → "3~7일 내" + 작업 단계 요약
+- 기능 추가 → 가능 여부 + 옵션 가격
+- 타 플랫폼 이전 → "우리가 대신 이전 + 디자인 개선 + 월 비용 0원" 어필
+- 막연한 문의 → 업종/용도/참고 사이트 3개 질문으로 되물어서 견적 안내 유도`;
+
+        const taskContext = [
+          `문의 모드: ${isFollowUp ? '후속 문의 (인사 생략)' : '첫 문의'}`,
+          `고객이 본 서비스 페이지 제목: ${serviceTitle}`,
+          isUnmappedProduct
+            ? `⚠️ 이 서비스는 내부 카테고리에 아직 매핑 안 됨 — 페이지 제목을 전적으로 의존해서 맥락 파악하세요`
+            : `매핑 카테고리: ${analysis.serviceType}`,
+          statsText ? `거래 통계: ${statsText}` : null,
+          fewShot ? `\n최근 합격 답변 톤 참고:\n${fewShot}` : null,
+        ].filter(Boolean).join('\n');
+
+        const userMsg = `${taskContext}\n\n[고객 문의]\n${inquiry.message_content || '(내용 없음)'}\n\n위 문의에 대한 답변을 바로 작성해주세요. 설명이나 주석 없이 답변 본문만.`;
+
+        console.log(`  🤖 Claude 호출 (${isFollowUp ? 'follow_up' : 'first/low-score'}) — model=sonnet`);
+        const c = await askClaude({ system: sys, messages: [{ role: 'user', content: userMsg }], model: 'sonnet', max_tokens: 600, temperature: 0.4 });
+        if (c.ok && c.text && c.text.length >= 40) {
+          replyText = c.text.trim();
+          replySource = 'claude';
+          claudeModel = c.model;
+          console.log(`  ✓ Claude 답변 생성 (${replyText.length}자, tokens in=${c.usage?.input_tokens} out=${c.usage?.output_tokens})`);
+        } else {
+          console.log(`  ⚠️ Claude 실패 → rule-based 유지: ${c.error || '응답 너무 짧음'}`);
+        }
+      }
+
+      const needsManual = quality.score < 60 && replySource === 'rule';
 
       // 4. Supabase 업데이트
       const { error: updateErr } = await supabase
@@ -124,7 +203,8 @@ async function autoReply() {
       }
 
       // 6. 텔레그램 카드 발송 (인라인 [발송][수정][건너뜀])
-      const qualityLabel = needsManual ? '⚠️ 직접 작성 권장' : `✅ 품질 ${quality.score}점`;
+      const sourceLabel = replySource === 'claude' ? `🤖 Claude ${claudeModel}` : `📋 rule ${quality.score}점`;
+      const qualityLabel = needsManual ? `⚠️ 직접 작성 권장 · ${sourceLabel}` : sourceLabel;
       // notes JSON에서 실시간 gig 메타데이터 추출 (crawl-inbox 저장분) + product-map fallback
       let meta = {};
       try { meta = inquiry.notes ? JSON.parse(inquiry.notes) : {}; } catch {}

@@ -60,33 +60,46 @@ async function callClaude({ accessToken, model, system, messages, max_tokens = 1
  * @param {number} [opts.temperature]
  * @returns {Promise<{ok: boolean, text?: string, usage?: object, error?: string, account?: string}>}
  */
+const MODEL_ALIAS = {
+  sonnet: 'claude-sonnet-4-5',
+  opus:   'claude-opus-4-5',
+  haiku:  'claude-haiku-4-5',
+};
+
+// 429 시 자동 다운그레이드: sonnet → haiku, opus → sonnet → haiku
+const FALLBACK_CHAIN = {
+  opus:   ['claude-opus-4-5', 'claude-sonnet-4-5', 'claude-haiku-4-5'],
+  sonnet: ['claude-sonnet-4-5', 'claude-haiku-4-5'],
+  haiku:  ['claude-haiku-4-5'],
+};
+
 async function askClaude({ system, messages, model = 'sonnet', max_tokens = 1024, temperature = 0.3, retryOn429 = true }) {
-  // ondadaad@gmail.com 계정 통일 — account2만 사용, rate limit 시 재시도
-  const resolvedModel = model === 'sonnet' ? 'claude-sonnet-4-5' :  // 4-6은 별도 신청 필요 — 검증 후 교체
-                        model === 'opus'   ? 'claude-opus-4-5'   :
-                        model === 'haiku'  ? 'claude-haiku-4-5'  :
-                        model;
+  // ondadaad@gmail.com 계정 통일 — account2만 사용
+  const chain = FALLBACK_CHAIN[model] || [MODEL_ALIAS[model] || model];
 
   const token = readToken(CRED_PRIMARY);
   if (!token) return { ok: false, error: 'account2 토큰 없음 (unified-token-guard.sh 실행 확인)' };
   if (tokenExpired(CRED_PRIMARY)) return { ok: false, error: 'account2 토큰 만료 (1분 내 cron 갱신)' };
 
-  let r = await callClaude({ accessToken: token, model: resolvedModel, system, messages, max_tokens, temperature });
-
-  // 429 → 8초 대기 후 1회 재시도
-  if (r.status === 429 && retryOn429) {
-    await new Promise((res) => setTimeout(res, 8000));
-    r = await callClaude({ accessToken: token, model: resolvedModel, system, messages, max_tokens, temperature });
+  let lastStatus = null, lastBody = null;
+  for (const m of chain) {
+    let r = await callClaude({ accessToken: token, model: m, system, messages, max_tokens, temperature });
+    // 429 → 8초 대기 후 동일 모델 1회 재시도, 그래도 실패면 체인 다음 모델
+    if (r.status === 429 && retryOn429) {
+      await new Promise((res) => setTimeout(res, 8000));
+      r = await callClaude({ accessToken: token, model: m, system, messages, max_tokens, temperature });
+    }
+    if (r.status === 200) {
+      try {
+        const j = JSON.parse(r.body);
+        const text = (j.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('\n');
+        return { ok: true, text, usage: j.usage, account: 'account2', model: m };
+      } catch (e) { return { ok: false, error: `응답 파싱 실패: ${e.message}` }; }
+    }
+    lastStatus = r.status; lastBody = r.body;
+    if (r.status !== 429) break;  // 429가 아닌 에러는 모델 바꿔도 안 해결되니 중단
   }
-
-  if (r.status === 200) {
-    try {
-      const j = JSON.parse(r.body);
-      const text = (j.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('\n');
-      return { ok: true, text, usage: j.usage, account: 'account2', model: resolvedModel };
-    } catch (e) { return { ok: false, error: `응답 파싱 실패: ${e.message}` }; }
-  }
-  return { ok: false, error: `HTTP ${r.status}: ${r.body.slice(0, 300)}`, status: r.status };
+  return { ok: false, error: `HTTP ${lastStatus}: ${String(lastBody).slice(0, 300)}`, status: lastStatus };
 }
 
 module.exports = { askClaude, readToken, tokenExpired };
