@@ -155,6 +155,16 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
 - 타 플랫폼 이전 → "우리가 대신 이전 + 디자인 개선 + 월 비용 0원" 어필
 - 막연한 문의 → 업종/용도/참고 사이트 3개 질문으로 되물어서 견적 안내 유도`;
 
+        // 대화 맥락: notes에 저장된 thread에서 현재 메시지를 제외한 이전 히스토리
+        const thread = Array.isArray(meta.conversation_thread) ? meta.conversation_thread : [];
+        let historyBlock = '';
+        if (thread.length > 1) {
+          const history = thread.slice(-10, -1);  // 직전 최대 9개 (현재 메시지 제외)
+          historyBlock = '\n[직전 대화 히스토리 (오래된 → 최신)]\n' + history.map((m, i) =>
+            `${i + 1}. ${m.role === 'assistant' ? '우리' : '고객'}: ${m.content.slice(0, 200)}`
+          ).join('\n');
+        }
+
         const taskContext = [
           `문의 모드: ${isFollowUp ? '후속 문의 (인사 생략)' : '첫 문의'}`,
           `고객이 본 서비스 페이지 제목: ${serviceTitle}`,
@@ -162,10 +172,11 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
             ? `⚠️ 이 서비스는 내부 카테고리에 아직 매핑 안 됨 — 페이지 제목을 전적으로 의존해서 맥락 파악하세요`
             : `매핑 카테고리: ${analysis.serviceType}`,
           statsText ? `거래 통계: ${statsText}` : null,
+          historyBlock || null,
           fewShot ? `\n최근 합격 답변 톤 참고:\n${fewShot}` : null,
         ].filter(Boolean).join('\n');
 
-        const userMsg = `${taskContext}\n\n[고객 문의]\n${inquiry.message_content || '(내용 없음)'}\n\n위 문의에 대한 답변을 바로 작성해주세요. 설명이나 주석 없이 답변 본문만.`;
+        const userMsg = `${taskContext}\n\n[지금 답변해야 할 고객 메시지]\n${inquiry.message_content || '(내용 없음)'}\n\n위 고객 메시지에 대한 답변을 작성해주세요. 직전 대화 히스토리가 있으면 반드시 연결되게 답변하고, 설명이나 주석 없이 답변 본문만 출력하세요.`;
 
         console.log(`  🤖 Claude 호출 (${isFollowUp ? 'follow_up' : 'first/low-score'}) — model=sonnet`);
         const c = await askClaude({ system: sys, messages: [{ role: 'user', content: userMsg }], model: 'sonnet', max_tokens: 600, temperature: 0.4 });

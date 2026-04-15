@@ -168,14 +168,21 @@ async function crawlInbox() {
         }, inboxGroupId);
 
         messageContent = '';
+        var conversationThread = [];
         if (msgData?.messages) {
-          // 가장 오래된 메시지 (마지막 페이지의 마지막 메시지가 첫 메시지)
-          // 여기서는 현재 페이지의 첫 메시지(최신)를 마지막 메시지(최초)보다 먼저 처리
-          // 고객이 보낸 첫 메시지 찾기
-          const customerMsgs = msgData.messages.filter(m => !m.is_mine && m.message);
-          if (customerMsgs.length > 0) {
-            messageContent = customerMsgs[customerMsgs.length - 1].message; // 가장 오래된 고객 메시지
-          }
+          // 전체 대화 스레드 (시간순 정렬, 최근 20개) — auto-reply가 Claude 맥락으로 활용
+          const sortedMsgs = [...msgData.messages]
+            .filter(m => m.message && String(m.message).trim())
+            .sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+          conversationThread = sortedMsgs.slice(-20).map(m => ({
+            role: m.is_mine ? 'assistant' : 'user',
+            content: String(m.message).slice(0, 800),
+            at: m.created_at || null,
+          }));
+
+          // messageContent = 가장 최근 고객 메시지 (답변 대상)
+          const latestCustomer = [...sortedMsgs].reverse().find(m => !m.is_mine);
+          if (latestCustomer) messageContent = latestCustomer.message;
         }
 
         if (messageContent) {
@@ -189,9 +196,14 @@ async function crawlInbox() {
       const productId = matchProductId(serviceName) || (gigId ? String(gigId) : null);
       console.log(`  → 매핑: ${serviceName || '(미확인)'} → productId: ${productId || 'N/A'}`);
 
-      // 실시간 gig 메타데이터 → notes JSON (스키마 변경 없이 보존)
+      // 실시간 gig 메타데이터 + 대화 스레드 → notes JSON (스키마 변경 없이 보존)
       const gigUrl = gigId ? `https://kmong.com/gig/${gigId}` : null;
-      const notesPayload = { gig_id: gigId, service_title: serviceName || null, gig_url: gigUrl };
+      const notesPayload = {
+        gig_id: gigId,
+        service_title: serviceName || null,
+        gig_url: gigUrl,
+        conversation_thread: conversationThread || [],
+      };
 
       inquiries.push({
         product_id: productId,
