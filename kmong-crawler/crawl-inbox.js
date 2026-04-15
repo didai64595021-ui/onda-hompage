@@ -240,7 +240,7 @@ async function crawlInbox() {
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
     const msg = `크몽 크롤: 문의 ${insertedCount}건 수집 (${elapsed}초)`;
     console.log(`\n=== ${msg} ===`);
-    notify(msg);
+    if (insertedCount > 0) notify(msg);  // 0건이면 알림 스킵 (불필요한 알림 방지)
 
     await browser.close();
     return inquiries;
