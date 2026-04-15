@@ -180,6 +180,7 @@ async function crawlInbox() {
 
           // messageContent = 가장 최근 고객 메시지 (답변 대상)
           const latestCustomer = [...sortedMsgs].reverse().find(m => !m.is_mine);
+          var latestMessageId = latestCustomer?.MID || null;
           if (latestCustomer) {
             messageContent = latestCustomer.message;
             // ★ 크몽 API 실제 구조: 고객이 gig에 연결된 문의를 보내면 extra_data에 {PID, title, price, category_info} 삽입됨
@@ -231,6 +232,7 @@ async function crawlInbox() {
         gig_url: gigUrl,
         conversation_thread: conversationThread || [],
         gig_detail: gigDetail || null,
+        latest_message_id: latestMessageId,  // 중복 판정 기준 (메시지 텍스트보다 정확)
       };
 
       inquiries.push({
@@ -247,23 +249,41 @@ async function crawlInbox() {
 
     console.log(`\n[결과] 24시간 내 문의: ${inquiries.length}건`);
 
-    // 중복 체크 — 같은 고객 + 같은 메시지 내용 (48h 내) 일 때만 스킵
-    // 기존 고객의 새 메시지는 신규 row 로 추가 → 자동답변 워크플로우 처리
+    // 중복 체크 — 같은 고객의 가장 최근 inquiry의 latest_message_id (notes JSON) 와 비교
+    // 메시지 텍스트만 비교하면 '"ㅎㅇ"' 같은 반복 인사가 중복 판정되어 놓침 → MID 기반이 정확
     let insertedCount = 0;
     for (const inquiry of inquiries) {
       const { data: existing } = await supabase
         .from('kmong_inquiries')
-        .select('id, message_content')
+        .select('id, message_content, notes, inquiry_date')
         .eq('customer_name', inquiry.customer_name)
-        .gte('inquiry_date', new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString());
+        .gte('inquiry_date', new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString())
+        .order('inquiry_date', { ascending: false });
 
-      const sameMsg = (existing || []).some(e => (e.message_content || '') === (inquiry.message_content || ''));
-      if (sameMsg) {
-        console.log(`[스킵] 동일 메시지 중복: ${inquiry.customer_name}`);
+      // 현재 inquiry의 MID
+      let curMID = null;
+      try { curMID = JSON.parse(inquiry.notes || '{}').latest_message_id; } catch {}
+
+      const sameMID = curMID && (existing || []).some(e => {
+        try { return JSON.parse(e.notes || '{}').latest_message_id === curMID; } catch { return false; }
+      });
+      if (sameMID) {
+        console.log(`[스킵] 동일 MID 중복: ${inquiry.customer_name} (MID=${curMID})`);
         continue;
       }
+      // MID 없으면 fallback: 메시지 텍스트 + 1시간 이내만 중복 처리 (짧은 윈도우)
+      if (!curMID) {
+        const recentSameMsg = (existing || []).some(e =>
+          (e.message_content || '') === (inquiry.message_content || '') &&
+          (new Date(e.inquiry_date) > new Date(Date.now() - 60 * 60 * 1000))
+        );
+        if (recentSameMsg) {
+          console.log(`[스킵] 1시간 내 동일 메시지: ${inquiry.customer_name}`);
+          continue;
+        }
+      }
       if (existing && existing.length > 0) {
-        console.log(`[추가] 기존 고객 새 메시지: ${inquiry.customer_name} (${existing.length}번째)`);
+        console.log(`[추가] 기존 고객 새 메시지: ${inquiry.customer_name} (${existing.length + 1}번째, MID=${curMID || '?'})`);
       }
 
       const { error } = await supabase
