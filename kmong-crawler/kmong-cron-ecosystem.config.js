@@ -57,7 +57,7 @@ module.exports = {
       name: 'kmong-crawl-inbox',
       script: './crawl-inbox.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '2 */2 * * *',  // 2시간마다 (+2분, CPC 다음)
+      cron_restart: '*/5 * * * *',  // 5분마다 — 신규 문의 빠른 감지 (자동답변 워크플로우)
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },
@@ -103,7 +103,7 @@ module.exports = {
       name: 'kmong-auto-reply',
       script: './auto-reply.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '8 */2 * * *',  // 2시간마다 (+8분, inbox 크롤 후)
+      cron_restart: '1-59/5 * * * *',  // 5분마다 (+1분, inbox 직후) — 빠른 응답
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },

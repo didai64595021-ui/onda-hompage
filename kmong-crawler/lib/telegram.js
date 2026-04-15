@@ -52,4 +52,28 @@ function notify(message) {
   }
 }
 
-module.exports = { notify };
+/**
+ * 인라인 키보드 카드 전송 (callback_query 트리거용)
+ * @param {string} message - 본문 (HTML)
+ * @param {object} replyMarkup - 텔레그램 reply_markup 객체. 예: { inline_keyboard: [[{text:'발송', callback_data:'send_41'}]] }
+ * @param {string} chatId - 채팅 ID (기본: ONDA 서버 그룹)
+ */
+function sendCard(message, replyMarkup, chatId = '-1003753252286') {
+  return new Promise((resolve) => {
+    try {
+      const token = process.env.TELEGRAM_BOT_TOKEN;
+      if (!token) { console.error('[텔레그램] TELEGRAM_BOT_TOKEN 없음'); resolve({ ok: false }); return; }
+      const data = JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML', reply_markup: replyMarkup, disable_web_page_preview: true });
+      const req = https.request({ hostname: 'api.telegram.org', path: `/bot${token}/sendMessage`, method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) } }, (res) => {
+        let body = ''; res.on('data', c => body += c);
+        res.on('end', () => {
+          try { const j = JSON.parse(body); resolve(j); } catch { resolve({ ok: false, body }); }
+        });
+      });
+      req.on('error', (e) => { console.error('[텔레그램 카드]', e.message); resolve({ ok: false, error: e.message }); });
+      req.write(data); req.end();
+    } catch (err) { console.error('[텔레그램 카드]', err.message); resolve({ ok: false, error: err.message }); }
+  });
+}
+
+module.exports = { notify, sendCard };

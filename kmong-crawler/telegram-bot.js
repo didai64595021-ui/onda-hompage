@@ -11,6 +11,7 @@
 require('dotenv').config({ path: require('path').join(__dirname, '.env'), override: true });
 
 const TelegramBot = require('node-telegram-bot-api');
+const path = require('path');
 const { toggleAd } = require('./toggle-ad');
 const { supabase } = require('./lib/supabase');
 const { PRODUCT_MAP } = require('./lib/product-map');
@@ -452,6 +453,88 @@ async function pollAdCommands() {
 // 30초마다 대시보드 명령 큐 확인
 setInterval(pollAdCommands, 30000);
 pollAdCommands(); // 시작 시 즉시 1회
+
+// ═══════════════════════════════════════
+// 크몽 자동답변 callback_query 핸들러 (Phase H)
+// ═══════════════════════════════════════
+const { spawn } = require('child_process');
+
+async function refetchInquiry(id) {
+  const { data, error } = await supabase.from('kmong_inquiries').select('*').eq('id', id).single();
+  return error ? null : data;
+}
+
+function buildReplyCard(inquiry, qualityLabel = '재검토') {
+  const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const url = inquiry.conversation_url || 'https://kmong.com/inboxes';
+  const text = [
+    `💬 <b>신규 문의 #${inquiry.id}</b>  (${qualityLabel})`,
+    ``,
+    `📝 <b>고객 문의</b>:`,
+    esc((inquiry.message_content || '(내용 없음)').slice(0, 500)),
+    ``,
+    `🔗 ${url}`,
+    ``,
+    `💡 <b>우리 답변</b>:`,
+    `──────────────────`,
+    esc(inquiry.auto_reply_text || '(답변 없음)'),
+    `──────────────────`,
+  ].join('\n');
+  const reply_markup = {
+    inline_keyboard: [[
+      { text: '✅ 발송', callback_data: `kreply_send_${inquiry.id}` },
+      { text: '✏️ 수정', callback_data: `kreply_edit_${inquiry.id}` },
+      { text: '⏭️ 건너뜀', callback_data: `kreply_skip_${inquiry.id}` },
+    ]],
+  };
+  return { text, reply_markup };
+}
+
+bot.on('callback_query', async (query) => {
+  const data = query.data || '';
+  if (!data.startsWith('kreply_')) return;  // 다른 봇 callback 패스
+  const chatId = query.message.chat.id;
+  const messageId = query.message.message_id;
+  const m = data.match(/^kreply_(send|edit|skip)_(\d+)$/);
+  if (!m) { bot.answerCallbackQuery(query.id, { text: '잘못된 명령' }); return; }
+  const action = m[1];
+  const inquiryId = parseInt(m[2], 10);
+
+  try {
+    if (action === 'send') {
+      // 1) status='approved' 업데이트
+      const { error } = await supabase.from('kmong_inquiries').update({ auto_reply_status: 'approved' }).eq('id', inquiryId);
+      if (error) { bot.answerCallbackQuery(query.id, { text: `DB 오류: ${error.message.slice(0, 50)}` }); return; }
+      // 2) send-reply.js 즉시 spawn (cron 30분 대기 X)
+      const proc = spawn('node', [path.join(__dirname, 'send-reply.js')], { cwd: __dirname, detached: true, stdio: 'ignore' });
+      proc.unref();
+      // 3) 키보드 잠그기 + 메시지 갱신
+      bot.editMessageReplyMarkup({ inline_keyboard: [[{ text: `✅ 발송 승인 (${new Date().toLocaleTimeString('ko-KR')}) — 즉시 발송 중`, callback_data: 'noop' }]] }, { chat_id: chatId, message_id: messageId }).catch(() => {});
+      bot.answerCallbackQuery(query.id, { text: '발송 승인 + 즉시 발송 트리거' });
+    } else if (action === 'skip') {
+      await supabase.from('kmong_inquiries').update({ auto_reply_status: 'skipped' }).eq('id', inquiryId);
+      bot.editMessageReplyMarkup({ inline_keyboard: [[{ text: '⏭️ 건너뜀', callback_data: 'noop' }]] }, { chat_id: chatId, message_id: messageId }).catch(() => {});
+      bot.answerCallbackQuery(query.id, { text: '건너뜀 처리' });
+    } else if (action === 'edit') {
+      bot.answerCallbackQuery(query.id, { text: '수정 모드' });
+      const promptMsg = await bot.sendMessage(chatId, `✏️ 문의 #${inquiryId} 답변 수정.\n새 답변을 이 메시지에 reply 해주세요. (취소하려면 무시)`, { reply_markup: { force_reply: true, selective: false } });
+      bot.onReplyToMessage(chatId, promptMsg.message_id, async (replyMsg) => {
+        const newReply = (replyMsg.text || '').trim();
+        if (!newReply) { bot.sendMessage(chatId, '⚠️ 빈 메시지 — 수정 취소'); return; }
+        const { error } = await supabase.from('kmong_inquiries').update({ auto_reply_text: newReply, auto_reply_status: 'generated' }).eq('id', inquiryId);
+        if (error) { bot.sendMessage(chatId, `❌ DB 오류: ${error.message}`); return; }
+        const inq = await refetchInquiry(inquiryId);
+        if (inq) {
+          const card = buildReplyCard(inq, '✏️ 수정 반영');
+          await bot.sendMessage(chatId, card.text, { parse_mode: 'HTML', reply_markup: card.reply_markup, disable_web_page_preview: true });
+        }
+      });
+    }
+  } catch (err) {
+    console.error('[kreply callback]', err.message);
+    bot.answerCallbackQuery(query.id, { text: `오류: ${err.message.slice(0, 50)}` });
+  }
+});
 
 console.log('=== 크몽 텔레그램 봇 시작 ===');
 console.log(`허용 채팅방: ${ALLOWED_CHAT_ID}`);

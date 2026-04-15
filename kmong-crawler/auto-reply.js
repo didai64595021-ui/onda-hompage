@@ -11,8 +11,11 @@
  */
 
 const { supabase } = require('./lib/supabase');
-const { notify } = require('./lib/telegram');
+const { notify, sendCard } = require('./lib/telegram');
 const { analyzeInquiry, selectBestTemplate, renderTemplate, getServiceStats, calculateReplyQuality } = require('./lib/reply-generator');
+
+// HTML 이스케이프
+const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 async function autoReply() {
   const startTime = Date.now();
@@ -106,30 +109,32 @@ async function autoReply() {
         });
       }
 
-      // 6. 텔레그램 미리보기 발송
-      const qualityLabel = needsManual ? '⚠️ 관리자 직접 작성 권장' : `✅ 품질 ${quality.score}점`;
-      const preview = [
-        `크몽 신규 문의 (자동 답변 생성)`,
+      // 6. 텔레그램 카드 발송 (인라인 [발송][수정][건너뜀])
+      const qualityLabel = needsManual ? '⚠️ 직접 작성 권장' : `✅ 품질 ${quality.score}점`;
+      const conversationUrl = inquiry.conversation_url || 'https://kmong.com/inboxes';
+      const card = [
+        `💬 <b>신규 문의 #${inquiry.id}</b>  (${qualityLabel})`,
         ``,
-        `고객: ${inquiry.customer_name}`,
-        `문의 내용: "${(inquiry.message_content || '(내용 없음)').substring(0, 100)}"`,
-        `감지 서비스: ${analysis.serviceType}`,
-        statsText ? `거래 통계: ${statsText}` : '',
-        template ? `사용 템플릿: ${template.template_name}` : '',
-        `품질: ${qualityLabel} (${quality.reasons.join(', ')})`,
+        `📝 <b>고객 문의</b>:`,
+        esc((inquiry.message_content || '(내용 없음)').slice(0, 500)),
         ``,
-        `자동 생성 답변:`,
+        `🔗 <b>서비스</b>: ${esc(analysis.serviceType)}${statsText ? ` · ${esc(statsText)}` : ''}`,
+        conversationUrl,
+        ``,
+        `💡 <b>우리 답변</b>:`,
         `──────────────────`,
-        replyText,
+        esc(replyText),
         `──────────────────`,
-        ``,
-        `문의 ID: #${inquiry.id}`,
-        needsManual
-          ? `⚠️ 품질 점수가 낮습니다. 관리자가 직접 작성해주세요.`
-          : `크몽에서 위 답변을 복붙하거나 수정하여 발송해주세요.`,
       ].filter(Boolean).join('\n');
 
-      notify(preview);
+      const replyMarkup = {
+        inline_keyboard: [[
+          { text: '✅ 발송', callback_data: `kreply_send_${inquiry.id}` },
+          { text: '✏️ 수정', callback_data: `kreply_edit_${inquiry.id}` },
+          { text: '⏭️ 건너뜀', callback_data: `kreply_skip_${inquiry.id}` },
+        ]],
+      };
+      await sendCard(card, replyMarkup);
       generatedCount++;
       console.log(`  [완료] 답변 생성 + 텔레그램 발송 (품질: ${quality.score}점)`);
     }
