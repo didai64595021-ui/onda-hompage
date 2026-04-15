@@ -203,19 +203,23 @@ async function crawlInbox() {
 
     console.log(`\n[결과] 24시간 내 문의: ${inquiries.length}건`);
 
-    // 중복 체크 후 Supabase insert
+    // 중복 체크 — 같은 고객 + 같은 메시지 내용 (48h 내) 일 때만 스킵
+    // 기존 고객의 새 메시지는 신규 row 로 추가 → 자동답변 워크플로우 처리
     let insertedCount = 0;
     for (const inquiry of inquiries) {
       const { data: existing } = await supabase
         .from('kmong_inquiries')
-        .select('id')
+        .select('id, message_content')
         .eq('customer_name', inquiry.customer_name)
-        .gte('inquiry_date', new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString())
-        .limit(1);
+        .gte('inquiry_date', new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString());
 
-      if (existing && existing.length > 0) {
-        console.log(`[스킵] 중복: ${inquiry.customer_name}`);
+      const sameMsg = (existing || []).some(e => (e.message_content || '') === (inquiry.message_content || ''));
+      if (sameMsg) {
+        console.log(`[스킵] 동일 메시지 중복: ${inquiry.customer_name}`);
         continue;
+      }
+      if (existing && existing.length > 0) {
+        console.log(`[추가] 기존 고객 새 메시지: ${inquiry.customer_name} (${existing.length}번째)`);
       }
 
       const { error } = await supabase
