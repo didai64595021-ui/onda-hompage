@@ -13,6 +13,7 @@
 const { login, saveErrorScreenshot } = require('./lib/login');
 const { supabase } = require('./lib/supabase');
 const { notify } = require('./lib/telegram');
+const { closeModals } = require('./lib/modal-handler');
 
 const INBOX_URL = 'https://kmong.com/inboxes';
 
@@ -53,9 +54,11 @@ async function sendReply() {
       console.log(`\n[발송] #${inquiry.id} — ${inquiry.customer_name}`);
 
       try {
-        // 3. 메시지함 이동
+        // 3. 메시지함 이동 (모달 닫기 필수 — pointer events intercept 방지)
         await page.goto(INBOX_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
         await page.waitForTimeout(3000);
+        await closeModals(page).catch(() => {});
+        await page.waitForTimeout(500);
 
         // 4. 해당 고객 대화 찾기
         const msgLink = page.locator(`a[href*="inbox_group_id"]:has-text("${inquiry.customer_name}")`).first();

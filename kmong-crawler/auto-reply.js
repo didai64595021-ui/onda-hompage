@@ -12,7 +12,7 @@
 
 const { supabase } = require('./lib/supabase');
 const { notify, sendCard } = require('./lib/telegram');
-const { analyzeInquiry, selectBestTemplate, renderTemplate, getServiceStats, calculateReplyQuality } = require('./lib/reply-generator');
+const { analyzeInquiry, selectBestTemplate, renderTemplate, getServiceStats, calculateReplyQuality, getRecentApprovedReplies } = require('./lib/reply-generator');
 
 // HTML 이스케이프
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -62,6 +62,16 @@ async function autoReply() {
           const fmtW = n => (n / 10000).toFixed(0);
           statsText = `평균 ${fmtW(stats.avgAmount)}만원 (${fmtW(stats.minAmount)}~${fmtW(stats.maxAmount)}만원, ${stats.orderCount}건)`;
           console.log(`  거래통계: ${statsText}`);
+        }
+      }
+
+      // 2-2. 학습 — 같은 서비스의 최근 합격 답변 (Few-shot 참고용)
+      let approvedExamples = [];
+      if (inquiry.product_id) {
+        const learn = await getRecentApprovedReplies(inquiry.product_id, 5);
+        if (learn.ok && learn.examples.length > 0) {
+          approvedExamples = learn.examples;
+          console.log(`  학습참고: 합격답변 ${learn.examples.length}건 (같은상품 ${learn.sameProductCount}건 + 타상품 ${learn.examples.length - learn.sameProductCount}건)`);
         }
       }
 

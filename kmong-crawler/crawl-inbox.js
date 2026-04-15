@@ -247,6 +247,17 @@ async function crawlInbox() {
     if (insertedCount > 0) notify(msg);  // 0건이면 알림 스킵 (불필요한 알림 방지)
 
     await browser.close();
+
+    // 체이닝: 신규 문의 있으면 auto-reply 즉시 spawn (cron 대기 X)
+    if (insertedCount > 0) {
+      const { spawn } = require('child_process');
+      const proc = spawn('node', [require('path').join(__dirname, 'auto-reply.js')], {
+        cwd: __dirname, detached: true, stdio: 'ignore', env: process.env,
+      });
+      proc.unref();
+      console.log(`[체이닝] auto-reply 즉시 spawn → 답변 카드 생성 시작`);
+    }
+
     return inquiries;
 
   } catch (err) {

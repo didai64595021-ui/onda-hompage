@@ -8,7 +8,7 @@ const https = require('https');
 function notify(message) {
   try {
     const token = process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = '-1003738825402'; // KMONG 그룹
+    const chatId = '-5018738099'; // KMONG 그룹
 
     if (!token) {
       console.error('[텔레그램] TELEGRAM_BOT_TOKEN 없음 — 알림 스킵');
@@ -58,7 +58,7 @@ function notify(message) {
  * @param {object} replyMarkup - 텔레그램 reply_markup 객체. 예: { inline_keyboard: [[{text:'발송', callback_data:'send_41'}]] }
  * @param {string} chatId - 채팅 ID (기본: ONDA 서버 그룹)
  */
-function sendCard(message, replyMarkup, chatId = '-1003738825402') {
+function sendCard(message, replyMarkup, chatId = '-5018738099') {
   return new Promise((resolve) => {
     try {
       const token = process.env.TELEGRAM_BOT_TOKEN;

@@ -318,6 +318,45 @@ function generateQuoteMessage(quoteInfo) {
   return msg;
 }
 
+/**
+ * 학습 — 최근 발송 완료된 답변 (합격 멘트) 조회
+ *  - status가 'sent' 또는 auto_reply_status='sent' 인 inquiry 들의 final auto_reply_text
+ *  - 같은 product_id 우선, 부족하면 같은 service_name 카테고리, 그래도 부족하면 전체
+ *  - 차기 답변 생성 시 톤/구조 참고용 (Few-shot examples)
+ */
+async function getRecentApprovedReplies(productId, limit = 5) {
+  // 1. 같은 product_id 의 sent 답변
+  let { data: same, error } = await supabase
+    .from('kmong_inquiries')
+    .select('id, customer_name, message_content, auto_reply_text, inquiry_date, product_id')
+    .eq('product_id', productId)
+    .eq('auto_reply_status', 'sent')
+    .not('auto_reply_text', 'is', null)
+    .order('inquiry_date', { ascending: false })
+    .limit(limit);
+  if (error) return { ok: false, error: error.message, examples: [] };
+  let examples = same || [];
+
+  // 2. 부족하면 다른 product_id 의 sent 답변으로 보충 (전체 카테 톤 학습)
+  if (examples.length < limit) {
+    const remain = limit - examples.length;
+    const { data: any } = await supabase
+      .from('kmong_inquiries')
+      .select('id, customer_name, message_content, auto_reply_text, inquiry_date, product_id')
+      .eq('auto_reply_status', 'sent')
+      .not('auto_reply_text', 'is', null)
+      .order('inquiry_date', { ascending: false })
+      .limit(remain * 2);
+    const seen = new Set(examples.map(e => e.id));
+    for (const r of (any || [])) {
+      if (seen.has(r.id)) continue;
+      examples.push(r);
+      if (examples.length >= limit) break;
+    }
+  }
+  return { ok: true, examples, sameProductCount: same?.length || 0 };
+}
+
 module.exports = {
   analyzeInquiry,
   selectBestTemplate,
@@ -326,6 +365,7 @@ module.exports = {
   generateQuoteMessage,
   getServiceStats,
   calculateReplyQuality,
+  getRecentApprovedReplies,
   PACKAGES,
   OPTIONS,
   ANSWER_MAP,
