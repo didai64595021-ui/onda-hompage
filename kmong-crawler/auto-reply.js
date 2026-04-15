@@ -24,16 +24,15 @@ async function autoReply() {
   const startTime = Date.now();
 
   try {
-    console.log('=== 크몽 자동 답변 생성 시작 ===');
+    // regen 모드: 특정 inquiry ID 하나만 재생성 (status 무관)
+    const regenId = process.env.INQUIRY_ID ? parseInt(process.env.INQUIRY_ID, 10) : null;
+    console.log(`=== 크몽 자동 답변 생성 시작 ===${regenId ? ` (🔄 regen #${regenId})` : ''}`);
 
-    // 1. 미처리 문의 조회
-    const { data: newInquiries, error: fetchErr } = await supabase
-      .from('kmong_inquiries')
-      .select('*')
-      .eq('status', 'new')
-      .eq('auto_reply_status', 'pending')
-      .order('inquiry_date', { ascending: false })
-      .limit(10);
+    // 1. 문의 조회 — regen이면 단건, 아니면 pending 전체
+    const query = supabase.from('kmong_inquiries').select('*');
+    const { data: newInquiries, error: fetchErr } = regenId
+      ? await query.eq('id', regenId).limit(1)
+      : await query.eq('status', 'new').eq('auto_reply_status', 'pending').order('inquiry_date', { ascending: false }).limit(10);
 
     if (fetchErr) {
       throw new Error(`문의 조회 실패: ${fetchErr.message}`);
@@ -185,8 +184,12 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
 
         const userMsg = `${taskContext}\n\n[지금 답변해야 할 고객 메시지]\n${inquiry.message_content || '(내용 없음)'}\n\n위 고객 메시지에 대한 답변을 작성해주세요. 직전 대화 히스토리가 있으면 반드시 연결되게 답변하고, 설명이나 주석 없이 답변 본문만 출력하세요.`;
 
-        console.log(`  🤖 Claude 호출 (${isFollowUp ? 'follow_up' : 'first/low-score'}) — model=sonnet`);
-        const c = await askClaude({ system: sys, messages: [{ role: 'user', content: userMsg }], model: 'sonnet', max_tokens: 600, temperature: 0.4 });
+        // regen 모드: 사용자가 "맥락에 안 맞는다"고 판단한 상황 → temperature 올리고 명시적 instruction 추가
+        const claudeTemp = regenId ? 0.7 : 0.4;
+        const regenHint = regenId ? '\n\n⚠️ 직전 답변이 맥락에 맞지 않았습니다. 고객 메시지를 다시 정확히 읽고 새롭게 작성하되, 이전 답변과 구조·어조·강조점이 다르도록 해주세요.' : '';
+        const finalUserMsg = userMsg + regenHint;
+        console.log(`  🤖 Claude 호출 (${regenId ? 'regen' : (isFollowUp ? 'follow_up' : 'first/low-score')}) — model=sonnet, temp=${claudeTemp}`);
+        const c = await askClaude({ system: sys, messages: [{ role: 'user', content: finalUserMsg }], model: 'sonnet', max_tokens: 600, temperature: claudeTemp });
         if (c.ok && c.text && c.text.length >= 40) {
           replyText = c.text.trim();
           replySource = 'claude';
@@ -253,7 +256,7 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
           [{ text: '✅ 발송', callback_data: `kreply_send_${inquiry.id}` }],
           [
             { text: '✏️ 수정', callback_data: `kreply_edit_${inquiry.id}` },
-            { text: '⏭️ 건너뜀', callback_data: `kreply_skip_${inquiry.id}` },
+            { text: '🔄 재생성', callback_data: `kreply_regen_${inquiry.id}` },
           ],
         ],
       };

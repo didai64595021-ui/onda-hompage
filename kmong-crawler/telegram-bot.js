@@ -509,7 +509,7 @@ bot.on('callback_query', async (query) => {
   if (!data.startsWith('kreply_')) return;  // 다른 봇 callback 패스
   const chatId = query.message.chat.id;
   const messageId = query.message.message_id;
-  const m = data.match(/^kreply_(send|edit|skip)_(\d+)$/);
+  const m = data.match(/^kreply_(send|edit|skip|regen)_(\d+)$/);
   if (!m) { bot.answerCallbackQuery(query.id, { text: '잘못된 명령' }); return; }
   const action = m[1];
   const inquiryId = parseInt(m[2], 10);
@@ -529,6 +529,19 @@ bot.on('callback_query', async (query) => {
       await supabase.from('kmong_inquiries').update({ auto_reply_status: 'skipped' }).eq('id', inquiryId);
       bot.editMessageReplyMarkup({ inline_keyboard: [[{ text: '⏭️ 건너뜀', callback_data: 'noop' }]] }, { chat_id: chatId, message_id: messageId }).catch(() => {});
       bot.answerCallbackQuery(query.id, { text: '건너뜀 처리' });
+    } else if (action === 'regen') {
+      bot.answerCallbackQuery(query.id, { text: '🔄 재생성 중...' }).catch(() => {});
+      bot.editMessageReplyMarkup({ inline_keyboard: [[{ text: `🔄 재생성 중 (${new Date().toLocaleTimeString('ko-KR')})`, callback_data: 'noop' }]] }, { chat_id: chatId, message_id: messageId }).catch(() => {});
+      // auto-reply.js를 단일 inquiry ID 재생성 모드로 spawn
+      const fs = require('fs');
+      const logFile = '/home/onda/logs/kmong-auto-reply-spawn.log';
+      fs.appendFileSync(logFile, `\n\n===== regen spawn @ ${new Date().toISOString()} (inquiry #${inquiryId}) =====\n`);
+      const out = fs.openSync(logFile, 'a'), err = fs.openSync(logFile, 'a');
+      const proc = spawn('node', [path.join(__dirname, 'auto-reply.js')], {
+        cwd: __dirname, detached: true, stdio: ['ignore', out, err],
+        env: { ...process.env, INQUIRY_ID: String(inquiryId) },
+      });
+      proc.unref();
     } else if (action === 'edit') {
       // answerCallbackQuery는 실패해도 진행 (ETIMEDOUT 있어도 수정 플로우는 열어야 함)
       bot.answerCallbackQuery(query.id, { text: '수정 모드' }).catch((e) => console.error('[answerCB 실패]', e.code || '', e.message?.slice(0, 80)));
