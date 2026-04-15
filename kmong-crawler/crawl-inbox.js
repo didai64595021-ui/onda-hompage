@@ -296,11 +296,17 @@ async function crawlInbox() {
     // 체이닝: 신규 문의 있으면 auto-reply 즉시 spawn (cron 대기 X)
     if (insertedCount > 0) {
       const { spawn } = require('child_process');
+      const fs = require('fs');
+      const logFile = '/home/onda/logs/kmong-auto-reply-spawn.log';
+      const ts = new Date().toISOString();
+      fs.appendFileSync(logFile, `\n\n===== spawn @ ${ts} (new inquiries: ${insertedCount}) =====\n`);
+      const out = fs.openSync(logFile, 'a');
+      const err = fs.openSync(logFile, 'a');
       const proc = spawn('node', [require('path').join(__dirname, 'auto-reply.js')], {
-        cwd: __dirname, detached: true, stdio: 'ignore', env: process.env,
+        cwd: __dirname, detached: true, stdio: ['ignore', out, err], env: process.env,
       });
       proc.unref();
-      console.log(`[체이닝] auto-reply 즉시 spawn → 답변 카드 생성 시작`);
+      console.log(`[체이닝] auto-reply 즉시 spawn → 답변 카드 생성 시작 (로그: ${logFile})`);
     }
 
     return inquiries;
