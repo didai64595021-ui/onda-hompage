@@ -55,12 +55,15 @@ const OPTIONS = [
  * @param {string} messageContent - 고객 문의 내용
  * @returns {object} { answer, answers, serviceType, detectedKeywords, questionCount }
  */
-function analyzeInquiry(messageContent) {
+function analyzeInquiry(messageContent, fallbackCategory = null) {
+  // 서비스별 기본 인사말 (fallbackCategory = product_id에서 매핑된 카테고리)
+  const defaultAck = `${fallbackCategory || '홈페이지 제작'} 문의 감사합니다 :)`;
+
   if (!messageContent) {
     return {
-      answer: '홈페이지 제작 문의 감사합니다 :)',
+      answer: defaultAck,
       answers: [],
-      serviceType: '홈페이지 제작',
+      serviceType: fallbackCategory || '홈페이지 제작',
       detectedKeywords: [],
       questionCount: 0,
     };
@@ -87,7 +90,7 @@ function analyzeInquiry(messageContent) {
   // 여러 답변을 하나로 조합
   let answer;
   if (answers.length === 0) {
-    answer = '홈페이지 제작 문의 감사합니다 :)';
+    answer = defaultAck;
   } else if (answers.length === 1) {
     answer = answers[0].text;
   } else {
@@ -95,20 +98,22 @@ function analyzeInquiry(messageContent) {
     answer = answers.map((a, i) => `${i + 1}. ${a.text}`).join('\n');
   }
 
-  // 서비스 유형 판단 (점수 기반 정밀 감지)
-  let serviceType = '홈페이지 제작';
+  // 서비스 유형 판단 — fallbackCategory가 있으면 우선 채택, 아니면 내용 기반 감지
+  let serviceType = fallbackCategory || '홈페이지 제작';
   let bestScore = 0;
 
-  for (const sd of SERVICE_DETECTION) {
-    let score = 0;
-    for (const kw of sd.keywords) {
-      if (text.includes(kw.toLowerCase())) {
-        score += kw.length;
+  if (!fallbackCategory) {
+    for (const sd of SERVICE_DETECTION) {
+      let score = 0;
+      for (const kw of sd.keywords) {
+        if (text.includes(kw.toLowerCase())) {
+          score += kw.length;
+        }
       }
-    }
-    if (score > bestScore) {
-      bestScore = score;
-      serviceType = sd.type;
+      if (score > bestScore) {
+        bestScore = score;
+        serviceType = sd.type;
+      }
     }
   }
 

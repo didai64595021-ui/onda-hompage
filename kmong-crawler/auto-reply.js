@@ -13,6 +13,7 @@
 const { supabase } = require('./lib/supabase');
 const { notify, sendCard } = require('./lib/telegram');
 const { analyzeInquiry, selectBestTemplate, renderTemplate, getServiceStats, calculateReplyQuality, getRecentApprovedReplies } = require('./lib/reply-generator');
+const { getCategoryById, getGigUrlById } = require('./lib/product-map');
 
 // HTML 이스케이프
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -48,9 +49,10 @@ async function autoReply() {
     for (const inquiry of newInquiries) {
       console.log(`\n[처리] #${inquiry.id} — ${inquiry.customer_name}`);
 
-      // 2. 문의 내용 분석
-      const analysis = analyzeInquiry(inquiry.message_content);
-      console.log(`  서비스: ${analysis.serviceType}`);
+      // 2. 문의 내용 분석 — product_id의 카테고리를 기본 인사말/serviceType으로 주입
+      const productCategory = getCategoryById(inquiry.product_id);
+      const analysis = analyzeInquiry(inquiry.message_content, productCategory);
+      console.log(`  서비스: ${analysis.serviceType}${productCategory ? ' (product_id→category)' : ' (내용 분석)'}`);
       console.log(`  키워드: ${analysis.detectedKeywords.join(', ') || '없음'}`);
       console.log(`  질문 수: ${analysis.questionCount}`);
 
@@ -75,8 +77,10 @@ async function autoReply() {
         }
       }
 
-      // 3. 최적 템플릿 선택
-      const template = await selectBestTemplate('first_contact', '신규제작');
+      // 3. 최적 템플릿 선택 — 홈페이지/웹 계열 문의일 때만 기존 '신규제작' 템플릿 사용
+      // (인스타/디자인 등 다른 서비스는 template=null → 기본 답변으로 fallback하여 서비스 맥락 반영)
+      const isWebInquiry = /홈페이지|랜딩|워드프레스|반응형|HTML|SEO|유지보수|카페24|아임웹/.test(analysis.serviceType || '');
+      const template = isWebInquiry ? await selectBestTemplate('first_contact', '신규제작') : null;
 
       let replyText;
       if (template) {
@@ -121,6 +125,7 @@ async function autoReply() {
 
       // 6. 텔레그램 카드 발송 (인라인 [발송][수정][건너뜀])
       const qualityLabel = needsManual ? '⚠️ 직접 작성 권장' : `✅ 품질 ${quality.score}점`;
+      const gigUrl = getGigUrlById(inquiry.product_id);
       const conversationUrl = inquiry.conversation_url || 'https://kmong.com/inboxes';
       const card = [
         `💬 <b>신규 문의 #${inquiry.id}</b>  (${qualityLabel})`,
@@ -129,7 +134,8 @@ async function autoReply() {
         esc((inquiry.message_content || '(내용 없음)').slice(0, 500)),
         ``,
         `🔗 <b>서비스</b>: ${esc(analysis.serviceType)}${statsText ? ` · ${esc(statsText)}` : ''}`,
-        conversationUrl,
+        gigUrl ? `📎 서비스 페이지: ${gigUrl}` : null,
+        `💬 대화방: ${conversationUrl}`,
         ``,
         `💡 <b>우리 답변</b>:`,
         `──────────────────`,
