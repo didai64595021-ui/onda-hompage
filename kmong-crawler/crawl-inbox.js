@@ -168,25 +168,38 @@ async function crawlInbox() {
         messageContent = '';
         var conversationThread = [];
         if (msgData?.messages) {
-          // 전체 대화 스레드 (시간순 정렬, 최근 20개) — auto-reply가 Claude 맥락으로 활용
+          // 크몽 sent_at: "26.04.15 13:19" 형식 파싱
+          const parseSentAt = (s) => {
+            const m = /^(\d{2})\.(\d{2})\.(\d{2})\s+(\d{2}):(\d{2})/.exec(String(s || ''));
+            if (!m) return 0;
+            return new Date(2000 + +m[1], +m[2] - 1, +m[3], +m[4], +m[5]).getTime();
+          };
           const sortedMsgs = [...msgData.messages]
             .filter(m => m.message && String(m.message).trim())
-            .sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
-          conversationThread = sortedMsgs.slice(-20).map(m => ({
+            .map(m => ({ ...m, _ts: parseSentAt(m.sent_at) }))
+            .sort((a, b) => a._ts - b._ts);
+
+          // 현재 gig 스코프 경계: 가장 최근 extra_data 있는 고객 메시지의 timestamp
+          //  → 그 이전 메시지(다른 gig 문의들)는 thread에서 제외 (Claude 맥락 오염 방지)
+          const boundary = [...sortedMsgs].reverse().find(m => !m.is_mine && m.extra_data && (m.extra_data.PID || m.extra_data.title));
+          const boundaryTs = boundary?._ts || 0;
+          const scopedMsgs = boundaryTs > 0 ? sortedMsgs.filter(m => m._ts >= boundaryTs) : sortedMsgs;
+
+          conversationThread = scopedMsgs.slice(-20).map(m => ({
             role: m.is_mine ? 'assistant' : 'user',
             content: String(m.message).slice(0, 800),
-            at: m.created_at || null,
+            at: m.sent_at || null,
           }));
 
-          // messageContent = 가장 최근 고객 메시지 (답변 대상)
-          const latestCustomer = [...sortedMsgs].reverse().find(m => !m.is_mine);
+          // messageContent = 가장 최근 고객 메시지 (답변 대상) — 현재 gig 스코프 내에서 찾음
+          const latestCustomer = [...scopedMsgs].reverse().find(m => !m.is_mine);
           var latestMessageId = latestCustomer?.MID || null;
           if (latestCustomer) {
             messageContent = latestCustomer.message;
             // ★ 크몽 API 실제 구조: 고객이 gig에 연결된 문의를 보내면 extra_data에 {PID, title, price, category_info} 삽입됨
             //   UI의 "문의 서비스" 블록 = extra_data가 있는 메시지의 카드 표시
             //   같은 대화방에서 다른 gig으로 새 문의 시 extra_data 달린 새 메시지가 들어옴
-            const latestCustomerWithExtra = [...sortedMsgs].reverse().find(m => !m.is_mine && m.extra_data && (m.extra_data.PID || m.extra_data.title));
+            const latestCustomerWithExtra = boundary;  // 위에서 계산한 boundary 메시지 = 현재 스코프의 gig 결정 메시지
             if (latestCustomerWithExtra?.extra_data) {
               const ex = latestCustomerWithExtra.extra_data;
               serviceName = ex.title || serviceName;
