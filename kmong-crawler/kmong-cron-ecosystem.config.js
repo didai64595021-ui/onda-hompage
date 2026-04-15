@@ -19,7 +19,7 @@ function loadEnv(envPath) {
   return result;
 }
 
-const envVars = loadEnv(path.join(__dirname, '..', '.env'));
+const envVars = loadEnv(path.join(__dirname, '.env'));
 
 const COMMON_ENV = {
   NODE_ENV: 'production',

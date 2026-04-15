@@ -43,97 +43,74 @@ async function crawlGigStatus() {
     browser = result.browser;
     const page = result.page;
 
-    // 내 서비스 페이지 이동
-    console.log('[이동] 내 서비스 목록...');
-    await page.goto(MY_GIGS_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(3000);
-
-    console.log(`[페이지] URL: ${page.url()}`);
-
+    // 내 서비스 페이지 — 모든 탭 순회 (SELLING/WAITING/REJECT/STOP)
+    // 2026-04-15: 셀렉터 교체 — 편집하기 버튼 → article ancestor 단위 카드 추출
+    const STATUS_TABS = [
+      { type: 'SELLING', label: '판매중' },
+      { type: 'WAITING', label: '임시저장' },
+      { type: 'REJECT',  label: '비승인' },
+      { type: 'STOP',    label: '판매중지' },
+    ];
     const gigs = [];
+    for (const tab of STATUS_TABS) {
+      for (let pgNo = 1; pgNo <= 5; pgNo++) {
+        const url = `${MY_GIGS_URL}?statusType=${tab.type}&page=${pgNo}`;
+        console.log(`[이동] ${url}`);
+        await page.evaluate((u) => { window.location.href = u; }, url).catch(async () => {
+          await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+        });
+        await page.waitForLoadState('domcontentloaded', { timeout: 30000 }).catch(() => {});
+        await page.waitForTimeout(4000);
+        if (!page.url().includes('/my-gigs?')) { console.log(`  ${tab.type} page ${pgNo}: 리다이렉트`); break; }
+        for (let i = 0; i < 5; i++) { await page.evaluate(() => window.scrollBy(0, 1500)); await page.waitForTimeout(500); }
 
-    // 방법 1: 테이블/카드 구조에서 서비스 목록 파싱
-    // 크몽 my-gigs 페이지는 서비스 카드 또는 리스트로 표시
-    const fullText = await page.locator('main, #app, #__next, body').first().innerText();
-
-    // 서비스별 블록 분리 시도 - 패턴: 상태 텍스트 + 서비스 제목
-    // 카드/리스트에서 서비스를 추출
-    const cards = page.locator('[class*="gig"], [class*="service"], [class*="card"], table tbody tr');
-    const cardCount = await cards.count();
-
-    if (cardCount > 0) {
-      console.log(`[추출] 서비스 카드/행: ${cardCount}개`);
-
-      for (let i = 0; i < cardCount; i++) {
-        try {
-          const card = cards.nth(i);
-          const text = await card.innerText();
-          if (!text || text.length < 5) continue;
-
-          const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-
-          // 서비스명: 가장 긴 줄 (제목일 가능성이 높음)
-          let gigTitle = '';
-          let maxLen = 0;
-          for (const line of lines) {
-            if (line.length > maxLen && line.length > 5 && !line.match(/^\d+$/) && !line.includes('수정') && !line.includes('삭제')) {
-              maxLen = line.length;
-              gigTitle = line;
+        // 편집하기 버튼 기준 카드 단위 추출
+        const items = await page.evaluate((statusLabel) => {
+          const editBtns = [...document.querySelectorAll('button')].filter(b => (b.innerText || '').trim() === '편집하기');
+          const out = [];
+          for (const eb of editBtns) {
+            // article ancestor 또는 단계적 상승
+            let card = eb.closest('article');
+            if (!card) {
+              let cur = eb;
+              for (let i = 0; i < 6; i++) { cur = cur.parentElement; if (!cur) break; if ((cur.innerText || '').match(/#\d{6,}/)) { card = cur; break; } }
             }
-          }
-
-          // 상태 추출
-          let status = 'unknown';
-          const statusKeywords = ['판매중', '판매 중', '승인전', '승인 전', '심사중', '심사 중', '비승인', '반려', '수정중', '수정 중', '판매중지', '판매 중지', '임시저장', '비활성'];
-          for (const line of lines) {
-            for (const kw of statusKeywords) {
-              if (line.includes(kw)) {
-                status = normalizeGigStatus(line);
-                break;
-              }
-            }
-            if (status !== 'unknown') break;
-          }
-
-          if (gigTitle) {
-            const productId = matchProductId(gigTitle);
-            gigs.push({
-              product_id: productId || 'unknown',
-              gig_title: gigTitle.substring(0, 200),
-              status,
+            if (!card) continue;
+            const text = (card.innerText || '').trim();
+            const idMatch = text.match(/#(\d{6,})/);
+            const titleLine = text.split('\n').find(l => l.trim().length > 5 && !/^(편집|상태|분류|판매중|임시|비승인|판매 중지|#)/.test(l.trim()));
+            const prices = [...text.matchAll(/([\d,]+)\s*원/g)].map(m => parseInt(m[1].replace(/,/g, ''), 10)).filter(n => n >= 1000 && n < 100000000);
+            out.push({
+              draftId: idMatch ? idMatch[1] : null,
+              title: titleLine ? titleLine.trim().slice(0, 200) : '(제목 없음)',
+              status: statusLabel,
+              prices,
+              priceMin: prices.length ? Math.min(...prices) : null,
+              priceMax: prices.length ? Math.max(...prices) : null,
             });
-            console.log(`[서비스] ${gigTitle.substring(0, 50)} → ${productId || 'N/A'} | 상태: ${status}`);
           }
-        } catch {
-          // 개별 카드 파싱 실패 무시
+          return out;
+        }, tab.label);
+
+        if (items.length === 0) { console.log(`  ${tab.type} page ${pgNo}: 0건 → 종료`); break; }
+        console.log(`  ${tab.type} page ${pgNo}: ${items.length}건`);
+        for (const it of items) {
+          if (!it.draftId) continue;
+          const productId = matchProductId(it.title) || 'unknown';
+          gigs.push({
+            product_id: productId,
+            gig_title: it.title,
+            status: it.status,
+          });
         }
       }
     }
+    // 중복 제거 (draftId 기준)
+    const seen = new Set();
+    const unique = gigs.filter(g => { const k = g.draft_id || g.gig_title; if (seen.has(k)) return false; seen.add(k); return true; });
+    gigs.length = 0; gigs.push(...unique);
 
-    // 카드에서 못 찾으면 전체 텍스트 파싱
-    if (gigs.length === 0) {
-      console.log('[폴백] 전체 텍스트에서 서비스 추출 시도...');
-      const lines = fullText.split('\n').map(l => l.trim()).filter(l => l.length > 10);
-
-      for (const line of lines) {
-        // 서비스 제목 + 상태 패턴
-        const statusMatch = line.match(/(판매중|판매 중|승인전|승인 전|심사중|비승인|수정중|판매중지)/);
-        if (statusMatch) {
-          const status = normalizeGigStatus(statusMatch[1]);
-          const title = line.replace(statusMatch[0], '').trim();
-          if (title.length > 5) {
-            const productId = matchProductId(title);
-            gigs.push({
-              product_id: productId || 'unknown',
-              gig_title: title.substring(0, 200),
-              status,
-            });
-          }
-        }
-      }
-    }
-
-    console.log(`[추출] 총 ${gigs.length}건 서비스 상태 수집`);
+    console.log(`[추출] 총 ${gigs.length}건 서비스 상태 수집 (중복 제거 후)`);
 
     // Supabase 저장
     if (gigs.length > 0) {
