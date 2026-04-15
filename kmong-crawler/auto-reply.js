@@ -138,11 +138,13 @@ async function autoReply() {
       ].filter(Boolean).join('\n');
 
       const replyMarkup = {
-        inline_keyboard: [[
-          { text: '✅ 발송', callback_data: `kreply_send_${inquiry.id}` },
-          { text: '✏️ 수정', callback_data: `kreply_edit_${inquiry.id}` },
-          { text: '⏭️ 건너뜀', callback_data: `kreply_skip_${inquiry.id}` },
-        ]],
+        inline_keyboard: [
+          [{ text: '✅ 발송', callback_data: `kreply_send_${inquiry.id}` }],
+          [
+            { text: '✏️ 수정', callback_data: `kreply_edit_${inquiry.id}` },
+            { text: '⏭️ 건너뜀', callback_data: `kreply_skip_${inquiry.id}` },
+          ],
+        ],
       };
       await sendCard(card, replyMarkup);
       generatedCount++;
