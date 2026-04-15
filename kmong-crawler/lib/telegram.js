@@ -44,7 +44,7 @@ function notify(message) {
       }
     );
 
-    req.on('error', (e) => console.error('[텔레그램]', e.message));
+    req.on('error', (e) => console.error('[텔레그램 notify]', e.code || '', e.message || '(no message)'));
     req.write(data);
     req.end();
   } catch (err) {
@@ -98,9 +98,9 @@ function sendCard(message, replyMarkup, chatId = '-5018738099') {
           try { const j = JSON.parse(body); resolve(j); } catch { resolve({ ok: false, body }); }
         });
       });
-      req.on('error', (e) => { console.error('[텔레그램 카드]', e.message); resolve({ ok: false, error: e.message }); });
+      req.on('error', (e) => { console.error('[텔레그램 카드 req.error]', e.code || '', e.message || '(no message)', e.stack?.split('\n')[0] || ''); resolve({ ok: false, error: `${e.code || ''} ${e.message || ''}` }); });
       req.write(data); req.end();
-    } catch (err) { console.error('[텔레그램 카드]', err.message); resolve({ ok: false, error: err.message }); }
+    } catch (err) { console.error('[텔레그램 카드 outer]', err.code || '', err.message || '(no message)', err.stack?.split('\n')[0] || ''); resolve({ ok: false, error: `${err.code || ''} ${err.message || ''}` }); }
   });
 }
 
