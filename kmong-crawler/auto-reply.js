@@ -109,15 +109,11 @@ async function autoReply() {
       const quality = calculateReplyQuality(analysis, replyText);
       console.log(`  rule 품질점수: ${quality.score}/100 (${quality.reasons.join(', ')})`);
 
-      // 3-2. Claude 에스컬레이션 조건:
-      //   (a) follow_up 모드 — 후속 문의는 맥락 필요
-      //   (b) 품질점수 < 70 — rule 매칭 부실
-      //   (c) 복합 니즈 키워드 — 간단 매칭으로 커버 어려움
-      //   (d) product-map 매핑 실패 (신규 등록된 gig) — 자동 Claude 모드
+      // 3-2. Claude가 항상 답변 생성 (rule-based는 Claude 실패 시 fallback만)
+      //   이유: 모든 문의는 고객 메시지를 맥락 정확히 읽어야 답변이 틀리지 않음 — rule 키워드 매칭은 의도 왜곡 위험
       const isUnmappedProduct = !productCategory || /^\d+$/.test(String(inquiry.product_id || ''));
-      const hasComplexIntent = /이전|이사|옮기|이전하고싶|견적이|기간이|리뉴얼|개편|옮겨|바꾸고/.test(inquiry.message_content || '');
-      const needsClaude = isFollowUp || quality.score < 70 || hasComplexIntent || isUnmappedProduct;
-      if (isUnmappedProduct) console.log(`  ℹ️ 미매핑 product_id → Claude 자동 처리 (service_title 기반)`);
+      if (isUnmappedProduct) console.log(`  ℹ️ 미매핑 product_id — service_title 기반 처리`);
+      const needsClaude = true;
       if (needsClaude) {
         // 메타 JSON에서 서비스 제목 가져오기
         let meta = {};
@@ -130,6 +126,12 @@ async function autoReply() {
         ).join('\n\n');
 
         const sys = `당신은 ONDA 마케팅의 크몽 판매 담당자입니다. 고객이 우리 크몽 서비스 페이지에서 문의를 보낸 상황입니다. 목표는 문의를 계약으로 전환하는 것.
+
+★ 필수 절차 (답변 쓰기 전) ★
+1. 고객 문의 내용을 끝까지 정확히 읽는다
+2. 고객이 실제 말한 의도를 파악한다 (서비스 페이지 제목과 다를 수 있음 — 실제 메시지 우선)
+3. 직전 대화 맥락(있으면)과 연결한다
+4. 그런 다음 답변 작성 — 맥락과 어긋나면 신뢰 즉시 추락
 
 답변 규칙:
 - 한국어, 3~6문장. 이모지 금지(":)"는 허용). 긴 번호 리스트 피하기
