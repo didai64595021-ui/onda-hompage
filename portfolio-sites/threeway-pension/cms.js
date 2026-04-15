@@ -584,23 +584,58 @@
       if (counter) counter.textContent = (idx + 1) + ' / ' + count;
     }
 
+    // ── 상위 <a> 링크 navigation 차단 ──
+    // 주의: stopImmediatePropagation을 캡처에서 호출하면 같은 버튼의 click 핸들러까지 막힘.
+    //      → preventDefault만 캡처에서 호출(=a navigate 차단), stopPropagation은 버블링 단계에서.
+    gallery.addEventListener('click', function(e) {
+      if (e.target && e.target.closest('.cms-gallery-arrow, .cms-gallery-dot, .cms-gallery-prev, .cms-gallery-next, .cms-gallery-dots')) {
+        e.preventDefault(); // a tag navigation 차단
+      }
+    }, true);
+    // pointerdown/mousedown도 캡처 — 일부 브라우저에서 mousedown 단계에서 navigation 발동 방지
+    ['pointerdown', 'mousedown'].forEach(function(evt) {
+      gallery.addEventListener(evt, function(e) {
+        if (e.target && e.target.closest('.cms-gallery-arrow, .cms-gallery-dot, .cms-gallery-prev, .cms-gallery-next, .cms-gallery-dots')) {
+          e.preventDefault();
+        }
+      }, true);
+    });
+
     // 화살표 이벤트
     var prevBtn = gallery.querySelector('.cms-gallery-prev');
     var nextBtn = gallery.querySelector('.cms-gallery-next');
-    if (prevBtn) prevBtn.addEventListener('click', function(e) { e.stopPropagation(); goTo(current - 1); resetAuto(); });
-    if (nextBtn) nextBtn.addEventListener('click', function(e) { e.stopPropagation(); goTo(current + 1); resetAuto(); });
+    if (prevBtn) prevBtn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); goTo(current - 1); resetAuto(); });
+    if (nextBtn) nextBtn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); goTo(current + 1); resetAuto(); });
 
     // 도트 이벤트
     dots.forEach(function(dot, i) {
-      dot.addEventListener('click', function(e) { e.stopPropagation(); goTo(i); resetAuto(); });
+      dot.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); goTo(i); resetAuto(); });
     });
 
-    // 터치 스와이프
+    // 터치 스와이프 — 스와이프 임계값 넘으면 a navigate 차단
     var touchStartX = 0;
-    gallery.addEventListener('touchstart', function(e) { touchStartX = e.touches[0].clientX; }, { passive: true });
+    var touchStartY = 0;
+    var touchMoved = false;
+    gallery.addEventListener('touchstart', function(e) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchMoved = false;
+    }, { passive: true });
+    gallery.addEventListener('touchmove', function(e) {
+      var dx = Math.abs(e.touches[0].clientX - touchStartX);
+      var dy = Math.abs(e.touches[0].clientY - touchStartY);
+      if (dx > 10 && dx > dy) touchMoved = true;
+    }, { passive: true });
     gallery.addEventListener('touchend', function(e) {
       var diff = touchStartX - e.changedTouches[0].clientX;
-      if (Math.abs(diff) > 50) { goTo(diff > 0 ? current + 1 : current - 1); resetAuto(); }
+      if (Math.abs(diff) > 50) {
+        goTo(diff > 0 ? current + 1 : current - 1);
+        resetAuto();
+        // 스와이프 후 click 이벤트가 a로 가지 않도록 한 번만 차단
+        var blocker = function(ev) { ev.preventDefault(); ev.stopPropagation(); gallery.removeEventListener('click', blocker, true); };
+        gallery.addEventListener('click', blocker, true);
+        setTimeout(function() { gallery.removeEventListener('click', blocker, true); }, 500);
+      }
     }, { passive: true });
 
     // 스크롤 기반 동기화 (비히어로)
