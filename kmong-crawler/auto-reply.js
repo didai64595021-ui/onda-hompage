@@ -234,13 +234,13 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
         const urls = extractUrls(urlSources.join('\n'));
         let urlBlock = '';
         if (urls.length > 0) {
-          console.log(`  🔗 URL ${urls.length}개 발견: ${urls.join(', ')} — 내용 파악 중...`);
-          const summaries = [];
-          for (const u of urls) {
-            const s = await summarizeUrl(u).catch(e => ({ ok: false, url: u, error: e.message }));
-            if (s.ok) console.log(`    ✓ ${u} (${s.source}, body=${s.bodyLen || 0}자)`);
-            else console.log(`    ✗ ${u}: ${s.error}`);
-            summaries.push(s);
+          console.log(`  🔗 URL ${urls.length}개 발견: ${urls.join(', ')} — 내용 파악 중 (병렬)...`);
+          const summaries = await Promise.all(urls.map(u =>
+            summarizeUrl(u).catch(e => ({ ok: false, url: u, error: e.message }))
+          ));
+          for (const s of summaries) {
+            if (s.ok) console.log(`    ✓ ${s.url || ''} (${s.source}, body=${s.bodyLen || 0}자)`);
+            else console.log(`    ✗ ${s.url || ''}: ${s.error}`);
           }
           urlBlock = formatForPrompt(summaries);
         }
@@ -265,8 +265,8 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
           const name = String(a.file_name || a.preview_url || a.local_path || '');
           return /\.(png|jpe?g|gif|webp)$/i.test(name);
         }).slice(0, 5);
-        const imageBlocks = [];
-        for (const att of imageAttachments) {
+        // 이미지 fetch 병렬화 — preview_url 다운로드는 직렬일 필요 없음
+        const imageResults = await Promise.all(imageAttachments.map(async (att) => {
           let r;
           if (att.local_path && fs.existsSync(att.local_path)) {
             r = readLocalAsBase64(att.local_path, att.file_name);
@@ -277,6 +277,10 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
           } else {
             r = { ok: false, error: 'local_path/preview_url 모두 없음' };
           }
+          return { att, r };
+        }));
+        const imageBlocks = [];
+        for (const { att, r } of imageResults) {
           if (r.ok) {
             imageBlocks.push({
               type: 'image',
