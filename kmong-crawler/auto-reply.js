@@ -10,6 +10,7 @@
  * v1: 관리자가 텔레그램에서 보고 크몽에 직접 복붙
  */
 
+const https = require('https');
 const { supabase } = require('./lib/supabase');
 const { notify, sendCard } = require('./lib/telegram');
 const { analyzeInquiry, selectBestTemplate, renderTemplate, getServiceStats, calculateReplyQuality, getRecentApprovedReplies, getSimilarApprovedReplies } = require('./lib/reply-generator');
@@ -19,6 +20,34 @@ const { formatGigDetailForPrompt } = require('./lib/gig-detail');
 
 // HTML 이스케이프
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+// 이미지 URL → {base64, media_type} (Claude Vision용)
+function fetchImageAsBase64(url, maxBytes = 4 * 1024 * 1024) {
+  return new Promise((resolve) => {
+    https.get(url, (res) => {
+      if (res.statusCode !== 200) {
+        resolve({ ok: false, error: `HTTP ${res.statusCode}` });
+        return;
+      }
+      const ct = res.headers['content-type'] || '';
+      const chunks = []; let total = 0;
+      res.on('data', (c) => {
+        total += c.length;
+        if (total > maxBytes) { res.destroy(); resolve({ ok: false, error: `too large (>${maxBytes})` }); return; }
+        chunks.push(c);
+      });
+      res.on('end', () => {
+        const buf = Buffer.concat(chunks);
+        // URL 확장자로 폴백 추정
+        const ext = (url.match(/\.(png|jpe?g|gif|webp)(\?|$)/i) || [])[1]?.toLowerCase();
+        const media_type = ct.startsWith('image/') ? ct.split(';')[0] :
+          (ext === 'jpg' ? 'image/jpeg' : ext ? `image/${ext}` : 'image/png');
+        resolve({ ok: true, base64: buf.toString('base64'), media_type, bytes: buf.length });
+      });
+      res.on('error', (e) => resolve({ ok: false, error: e.message }));
+    }).on('error', (e) => resolve({ ok: false, error: e.message }));
+  });
+}
 
 async function autoReply() {
   const startTime = Date.now();
@@ -189,14 +218,45 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
           fewShot ? `\n최근 합격 답변 톤 참고:\n${fewShot}` : null,
         ].filter(Boolean).join('\n');
 
-        const userMsg = `${taskContext}\n\n[지금 답변해야 할 고객 메시지]\n${inquiry.message_content || '(내용 없음)'}\n\n위 고객 메시지에 대한 답변을 작성해주세요. 직전 대화 히스토리가 있으면 반드시 연결되게 답변하고, 설명이나 주석 없이 답변 본문만 출력하세요.`;
+        // 고객 첨부 이미지 수집 (Vision)
+        const rawAttachments = Array.isArray(meta.attachments) ? meta.attachments : [];
+        const imageAttachments = rawAttachments.filter(a =>
+          a.preview_url && /\.(png|jpe?g|gif|webp)(\?|$)/i.test(a.preview_url)
+        ).slice(0, 5);  // 안전상 최대 5장
+        const imageBlocks = [];
+        for (const att of imageAttachments) {
+          const r = await fetchImageAsBase64(att.preview_url);
+          if (r.ok) {
+            imageBlocks.push({
+              type: 'image',
+              source: { type: 'base64', media_type: r.media_type, data: r.base64 },
+              _meta: { file_name: att.file_name, bytes: r.bytes },
+            });
+            console.log(`  📎 이미지 로드: ${att.file_name} (${r.media_type}, ${r.bytes} bytes)`);
+          } else {
+            console.log(`  ⚠️ 이미지 로드 실패: ${att.file_name} — ${r.error}`);
+          }
+        }
+        const attachNote = imageBlocks.length > 0
+          ? `\n\n[고객 첨부 이미지 ${imageBlocks.length}장]\n아래 이미지는 이번 문의에 고객이 첨부한 파일입니다 (${imageBlocks.map(b => b._meta.file_name).join(', ')}). 답변 작성 전 반드시 이미지 내용을 정확히 관찰하고, 거기에 담긴 정보(레이아웃/구조표/화면/참고자료 등)를 답변에 구체적으로 반영하세요. "첨부 잘 받았습니다"로 끝내지 말고, 이미지에서 파악한 핵심을 2~3가지 짚어주고 다음 스텝으로 연결하세요.`
+          : '';
+
+        const userMsg = `${taskContext}\n\n[지금 답변해야 할 고객 메시지]\n${inquiry.message_content || '(내용 없음)'}${attachNote}\n\n위 고객 메시지에 대한 답변을 작성해주세요. 직전 대화 히스토리가 있으면 반드시 연결되게 답변하고, 설명이나 주석 없이 답변 본문만 출력하세요.`;
 
         // regen 모드: 사용자가 "맥락에 안 맞는다"고 판단한 상황 → temperature 올리고 명시적 instruction 추가
         const claudeTemp = regenId ? 0.7 : 0.4;
         const regenHint = regenId ? '\n\n⚠️ 직전 답변이 맥락에 맞지 않았습니다. 고객 메시지를 다시 정확히 읽고 새롭게 작성하되, 이전 답변과 구조·어조·강조점이 다르도록 해주세요.' : '';
         const finalUserMsg = userMsg + regenHint;
-        console.log(`  🤖 Claude 호출 (${regenId ? 'regen' : (isFollowUp ? 'follow_up' : 'first/low-score')}) — model=sonnet, temp=${claudeTemp}`);
-        const c = await askClaude({ system: sys, messages: [{ role: 'user', content: finalUserMsg }], model: 'sonnet', max_tokens: 600, temperature: claudeTemp });
+
+        // content 구성: 이미지 블록(있으면) + 텍스트 블록
+        //   _meta 필드는 Anthropic API에 보내기 전 제거
+        const contentArr = [
+          ...imageBlocks.map(b => ({ type: b.type, source: b.source })),
+          { type: 'text', text: finalUserMsg },
+        ];
+
+        console.log(`  🤖 Claude 호출 (${regenId ? 'regen' : (isFollowUp ? 'follow_up' : 'first/low-score')}) — model=sonnet, temp=${claudeTemp}, images=${imageBlocks.length}`);
+        const c = await askClaude({ system: sys, messages: [{ role: 'user', content: contentArr }], model: 'sonnet', max_tokens: 600, temperature: claudeTemp });
         if (c.ok && c.text && c.text.length >= 40) {
           replyText = c.text.trim();
           replySource = 'claude';
@@ -241,6 +301,10 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
       const gigUrl = meta.gig_url || getGigUrlById(inquiry.product_id);
       const serviceTitle = meta.service_title || '';
       const conversationUrl = inquiry.conversation_url || 'https://kmong.com/inboxes';
+      const cardAttachments = Array.isArray(meta.attachments) ? meta.attachments : [];
+      const attachLine = cardAttachments.length > 0
+        ? `🖼️ 첨부 ${cardAttachments.length}개: ${cardAttachments.map(a => esc(a.file_name || '파일')).join(', ')}`
+        : null;
       const card = [
         `💬 <b>신규 문의 #${inquiry.id}</b>  (${qualityLabel})`,
         ``,
@@ -249,6 +313,7 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
         ``,
         serviceTitle ? `🔗 <b>문의 서비스</b>: ${esc(serviceTitle)}` : `🔗 <b>서비스</b>: ${esc(analysis.serviceType)}`,
         statsText ? `📊 거래통계: ${esc(statsText)}` : null,
+        attachLine,
         gigUrl ? `📎 서비스 페이지: ${gigUrl}` : null,
         `💬 대화방: ${conversationUrl}`,
         ``,

@@ -194,6 +194,33 @@ async function crawlInbox() {
           // messageContent = 가장 최근 고객 메시지 (답변 대상) — 현재 gig 스코프 내에서 찾음
           const latestCustomer = [...scopedMsgs].reverse().find(m => !m.is_mine);
           var latestMessageId = latestCustomer?.MID || null;
+          // 첨부파일 수집: 스코프 내 고객 메시지들의 files (우리(assistant) 발송 전까지의 최근 묶음만)
+          // → 고객이 여러 메시지에 걸쳐 이미지 보낸 경우까지 포함하되, 우리 답변 후 새 첨부는 별개로 취급
+          var attachments = [];
+          if (latestCustomer) {
+            // 최신 고객 메시지부터 역순으로, 우리 메시지를 만나기 전까지만 수집
+            const customerBlock = [];
+            for (let i = scopedMsgs.length - 1; i >= 0; i--) {
+              const m = scopedMsgs[i];
+              if (m.is_mine) break;
+              if (!m.is_mine) customerBlock.unshift(m);
+            }
+            for (const m of customerBlock) {
+              for (const f of (m.files || [])) {
+                if (f.preview_url) {
+                  attachments.push({
+                    file_name: f.file_name || null,
+                    preview_url: f.preview_url,
+                    FID: f.FID || null,
+                    MID: m.MID,
+                  });
+                }
+              }
+            }
+            if (attachments.length > 0) {
+              console.log(`  → 첨부파일 ${attachments.length}개: ${attachments.map(a => a.file_name).join(', ')}`);
+            }
+          }
           if (latestCustomer) {
             messageContent = latestCustomer.message;
             // ★ 크몽 API 실제 구조: 고객이 gig에 연결된 문의를 보내면 extra_data에 {PID, title, price, category_info} 삽입됨
@@ -246,6 +273,7 @@ async function crawlInbox() {
         conversation_thread: conversationThread || [],
         gig_detail: gigDetail || null,
         latest_message_id: latestMessageId,  // 중복 판정 기준 (메시지 텍스트보다 정확)
+        attachments: attachments || [],      // 고객이 첨부한 파일 (이미지 우선)
       };
 
       inquiries.push({
