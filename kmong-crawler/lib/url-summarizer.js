@@ -82,6 +82,42 @@ function decodeEntities(s) {
     .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ');
 }
 
+// 기술 스택 감지 — 고객 사이트가 빌더인지 순수 HTML인지 파악
+//  이유: "기존 구조 유지 디자인 개선" 요청이 왔을 때 빌더(워드프레스/카페24 등)면
+//        우리 코딩 HTML 방식과 호환성 이슈가 있으니 답변이 달라져야 함
+function detectTech(html) {
+  if (!html) return { platforms: [], builder: null, signals: [] };
+  const signals = [];
+  const platforms = [];
+  const push = (name) => { if (!platforms.includes(name)) platforms.push(name); };
+
+  // generator meta
+  const genMatches = [...html.matchAll(/<meta[^>]+name=["']generator["'][^>]+content=["']([^"']+)["']/gi)];
+  for (const g of genMatches) signals.push(`generator: ${g[1]}`);
+
+  if (/\/wp-content\/|\/wp-json\/|<meta[^>]+content=["']WordPress/i.test(html)) push('WordPress');
+  if (/elementor|Elementor/.test(html)) push('Elementor');
+  if (/kadence/i.test(html)) push('Kadence');
+  if (/\/cafe24|ga\.cafe24\.com|skin-custom|EC\/domain/i.test(html)) push('Cafe24');
+  if (/imweb|static\.imweb\.me|cdn\.imweb/i.test(html)) push('아임웹');
+  if (/modoo\.at|naver-modoo/i.test(html)) push('모두(Naver)');
+  if (/wix\.com|parastorage\.com|wixstatic/i.test(html)) push('Wix');
+  if (/squarespace/i.test(html)) push('Squarespace');
+  if (/webflow\.com|website-files\.com/i.test(html)) push('Webflow');
+  if (/cdn\.shopify\.com|myshopify\.com/i.test(html)) push('Shopify');
+  if (/framer\.com|framer-motion/i.test(html)) push('Framer');
+  if (/_next\/static|__NEXT_DATA__/.test(html)) push('Next.js');
+  if (/gatsby-/i.test(html)) push('Gatsby');
+  if (/godo\.co\.kr|gd_admin/i.test(html)) push('고도몰');
+
+  // 빌더 vs 순수 HTML 판정
+  const builderSet = ['WordPress', 'Cafe24', '아임웹', '모두(Naver)', 'Wix', 'Squarespace', 'Webflow', 'Shopify', 'Framer', '고도몰'];
+  const builder = platforms.find(p => builderSet.includes(p)) || null;
+  const isPureHtml = platforms.length === 0;
+
+  return { platforms, builder, isPureHtml, signals };
+}
+
 function parseHtml(html) {
   if (!html) return null;
   const grabMeta = (nameRe) => {
@@ -125,6 +161,7 @@ function parseHtml(html) {
     headings,
     bodyText: bodyText.slice(0, 2000),
     bodyLen: bodyText.length,
+    tech: detectTech(html),
   };
 }
 
@@ -181,6 +218,14 @@ function formatForPrompt(summaries) {
     if (s.title) lines.push(`  title: ${s.title}`);
     if (s.siteName && s.siteName !== s.title) lines.push(`  site: ${s.siteName}`);
     if (s.description) lines.push(`  description: ${s.description.slice(0, 300)}`);
+    if (s.tech) {
+      if (s.tech.platforms?.length) {
+        lines.push(`  tech stack: ${s.tech.platforms.join(' + ')}${s.tech.builder ? ` (빌더: ${s.tech.builder})` : ''}`);
+      } else if (s.tech.isPureHtml) {
+        lines.push(`  tech stack: 순수 HTML/CSS (빌더 흔적 없음)`);
+      }
+      if (s.tech.signals?.length) lines.push(`  tech signals: ${s.tech.signals.slice(0, 3).join(' | ')}`);
+    }
     if (s.headings?.length) lines.push(`  headings: ${s.headings.slice(0, 6).join(' | ')}`);
     if (s.bodyText) lines.push(`  body: ${s.bodyText.slice(0, 900)}`);
   }

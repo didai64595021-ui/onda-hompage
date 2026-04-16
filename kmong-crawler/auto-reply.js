@@ -309,8 +309,8 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
           { type: 'text', text: finalUserMsg },
         ];
 
-        console.log(`  🤖 Claude 호출 (${regenId ? 'regen' : (isFollowUp ? 'follow_up' : 'first/low-score')}) — model=sonnet, temp=${claudeTemp}, images=${imageBlocks.length}`);
-        const c = await askClaude({ system: sys, messages: [{ role: 'user', content: contentArr }], model: 'sonnet', max_tokens: 600, temperature: claudeTemp });
+        console.log(`  🤖 Claude 호출 (${regenId ? 'regen' : (isFollowUp ? 'follow_up' : 'first/low-score')}) — model=opus, temp=${claudeTemp}, images=${imageBlocks.length}`);
+        const c = await askClaude({ system: sys, messages: [{ role: 'user', content: contentArr }], model: 'opus', max_tokens: 600, temperature: claudeTemp });
         if (c.ok && c.text && c.text.length >= 40) {
           replyText = c.text.trim();
           replySource = 'claude';
