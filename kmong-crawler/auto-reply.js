@@ -19,6 +19,7 @@ const { analyzeInquiry, selectBestTemplate, renderTemplate, getServiceStats, cal
 const { getCategoryById, getGigUrlById } = require('./lib/product-map');
 const { askClaude } = require('./lib/claude-max');
 const { formatGigDetailForPrompt } = require('./lib/gig-detail');
+const { extractUrls, summarizeUrl, formatForPrompt } = require('./lib/url-summarizer');
 
 // HTML 이스케이프
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -223,6 +224,27 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
         // 실시간 gig 상세 (crawl-inbox가 매번 fetch 해서 notes.gig_detail에 저장)
         const gigDetailBlock = meta.gig_detail ? formatGigDetailForPrompt(meta.gig_detail) : '';
 
+        // 메시지 + 대화스레드에서 URL 추출 → 내용 파악 (SSR/SPA 둘 다)
+        //  이유: 고객이 "저희 홈페이지 https://... 참고해주세요" 식으로 링크를 보냄
+        //        → 해당 사이트 내용을 읽고 업종/브랜드/페이지 구조를 답변에 반영해야 함
+        const urlSources = [inquiry.message_content || ''];
+        for (const m of thread) {
+          if (m.role === 'user' && m.content) urlSources.push(m.content);
+        }
+        const urls = extractUrls(urlSources.join('\n'));
+        let urlBlock = '';
+        if (urls.length > 0) {
+          console.log(`  🔗 URL ${urls.length}개 발견: ${urls.join(', ')} — 내용 파악 중...`);
+          const summaries = [];
+          for (const u of urls) {
+            const s = await summarizeUrl(u).catch(e => ({ ok: false, url: u, error: e.message }));
+            if (s.ok) console.log(`    ✓ ${u} (${s.source}, body=${s.bodyLen || 0}자)`);
+            else console.log(`    ✗ ${u}: ${s.error}`);
+            summaries.push(s);
+          }
+          urlBlock = formatForPrompt(summaries);
+        }
+
         const taskContext = [
           `문의 모드: ${isFollowUp ? '후속 문의 (인사 생략)' : '첫 문의'}`,
           `고객이 본 서비스 페이지 제목: ${serviceTitle}`,
@@ -231,6 +253,7 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
             : `매핑 카테고리: ${analysis.serviceType}`,
           statsText ? `거래 통계: ${statsText}` : null,
           gigDetailBlock ? `\n${gigDetailBlock}` : null,
+          urlBlock ? `\n${urlBlock}` : null,
           historyBlock || null,
           fewShot ? `\n최근 합격 답변 톤 참고:\n${fewShot}` : null,
         ].filter(Boolean).join('\n');
