@@ -11,6 +11,8 @@
  */
 
 const https = require('https');
+const fs = require('fs');
+const path = require('path');
 const { supabase } = require('./lib/supabase');
 const { notify, sendCard } = require('./lib/telegram');
 const { analyzeInquiry, selectBestTemplate, renderTemplate, getServiceStats, calculateReplyQuality, getRecentApprovedReplies, getSimilarApprovedReplies } = require('./lib/reply-generator');
@@ -21,7 +23,22 @@ const { formatGigDetailForPrompt } = require('./lib/gig-detail');
 // HTML 이스케이프
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-// 이미지 URL → {base64, media_type} (Claude Vision용)
+// 로컬 파일 → {base64, media_type} (크몽 원본 첨부 로드)
+function readLocalAsBase64(localPath, fileName) {
+  try {
+    const stat = fs.statSync(localPath);
+    const buf = fs.readFileSync(localPath);
+    const ext = (fileName || localPath).toLowerCase().match(/\.(png|jpe?g|gif|webp)$/);
+    const media_type = ext
+      ? (ext[1] === 'jpg' ? 'image/jpeg' : `image/${ext[1]}`)
+      : 'image/png';
+    return { ok: true, base64: buf.toString('base64'), media_type, bytes: stat.size };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}
+
+// 이미지 URL → {base64, media_type} (폴백: local_path 없을 때만 썸네일 사용)
 function fetchImageAsBase64(url, maxBytes = 4 * 1024 * 1024) {
   return new Promise((resolve) => {
     https.get(url, (res) => {
@@ -219,20 +236,30 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
         ].filter(Boolean).join('\n');
 
         // 고객 첨부 이미지 수집 (Vision)
+        //  로딩 우선순위: local_path(크몽 원본 다운로드) → preview_url(160x120 썸네일 폴백)
         const rawAttachments = Array.isArray(meta.attachments) ? meta.attachments : [];
-        const imageAttachments = rawAttachments.filter(a =>
-          a.preview_url && /\.(png|jpe?g|gif|webp)(\?|$)/i.test(a.preview_url)
-        ).slice(0, 5);  // 안전상 최대 5장
+        const imageAttachments = rawAttachments.filter(a => {
+          const name = String(a.file_name || a.preview_url || a.local_path || '');
+          return /\.(png|jpe?g|gif|webp)$/i.test(name);
+        }).slice(0, 5);
         const imageBlocks = [];
         for (const att of imageAttachments) {
-          const r = await fetchImageAsBase64(att.preview_url);
+          let r;
+          if (att.local_path && fs.existsSync(att.local_path)) {
+            r = readLocalAsBase64(att.local_path, att.file_name);
+            if (r.ok) console.log(`  📎 이미지 로드(원본): ${att.file_name} (${r.media_type}, ${r.bytes} bytes)`);
+          } else if (att.preview_url) {
+            r = await fetchImageAsBase64(att.preview_url);
+            if (r.ok) console.log(`  📎 이미지 로드(썸네일): ${att.file_name} (${r.media_type}, ${r.bytes} bytes) — 원본 없음`);
+          } else {
+            r = { ok: false, error: 'local_path/preview_url 모두 없음' };
+          }
           if (r.ok) {
             imageBlocks.push({
               type: 'image',
               source: { type: 'base64', media_type: r.media_type, data: r.base64 },
               _meta: { file_name: att.file_name, bytes: r.bytes },
             });
-            console.log(`  📎 이미지 로드: ${att.file_name} (${r.media_type}, ${r.bytes} bytes)`);
           } else {
             console.log(`  ⚠️ 이미지 로드 실패: ${att.file_name} — ${r.error}`);
           }

@@ -13,6 +13,7 @@ const { login } = require('./lib/login');
 const { supabase } = require('./lib/supabase');
 const { matchProductId } = require('./lib/product-map');
 const { notify } = require('./lib/telegram');
+const { downloadAttachments } = require('./lib/attachment-fetcher');
 
 /**
  * 시간 텍스트를 파싱해서 24시간 이내인지 확인
@@ -205,20 +206,18 @@ async function crawlInbox() {
               if (m.is_mine) break;
               if (!m.is_mine) customerBlock.unshift(m);
             }
+            const rawFiles = [];
             for (const m of customerBlock) {
               for (const f of (m.files || [])) {
-                if (f.preview_url) {
-                  attachments.push({
-                    file_name: f.file_name || null,
-                    preview_url: f.preview_url,
-                    FID: f.FID || null,
-                    MID: m.MID,
-                  });
+                if (f.download_url || f.preview_url) {
+                  rawFiles.push({ ...f, MID: m.MID });
                 }
               }
             }
-            if (attachments.length > 0) {
-              console.log(`  → 첨부파일 ${attachments.length}개: ${attachments.map(a => a.file_name).join(', ')}`);
+            if (rawFiles.length > 0) {
+              console.log(`  → 첨부파일 ${rawFiles.length}개 발견 → 원본 다운로드 시도...`);
+              attachments = await downloadAttachments(page, rawFiles, inboxGroupId);
+              console.log(`  → 첨부 로컬 저장 완료: ${attachments.length}/${rawFiles.length}`);
             }
           }
           if (latestCustomer) {
