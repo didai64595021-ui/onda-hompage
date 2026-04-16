@@ -66,9 +66,10 @@ const MODEL_ALIAS = {
   haiku:  'claude-haiku-4-5',
 };
 
-// 폴백 체인 — 답변봇은 opus 4.6 고정(사용자 지시). 다른 별칭은 기존 체인 유지.
+// 폴백 체인 — opus는 4.6 기본, 429(rate limit)일 때만 Sonnet 4.6으로 임시 다운그레이드 (사용자 지시)
+//  ※ sonnet-4-5/haiku 같은 추가 단계는 제거 — 품질 유지 위해 sonnet-4-6까지만
 const FALLBACK_CHAIN = {
-  opus:   ['claude-opus-4-6'],
+  opus:   ['claude-opus-4-6', 'claude-sonnet-4-6'],
   sonnet: ['claude-sonnet-4-6', 'claude-sonnet-4-5', 'claude-haiku-4-5'],
   haiku:  ['claude-haiku-4-5'],
 };
