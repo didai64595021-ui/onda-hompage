@@ -102,7 +102,7 @@ async function main() {
     `<pre>${esc(replyText.slice(0, 2000))}</pre>`,
     ``,
     `🛠 <b>이번 세션 변경사항</b>`,
-    `• 답변봇 모델 opus 4.6 고정 + 429 시 sonnet-4-6 폴백 (사용자 지시 반영)`,
+    `• 답변봇 모델 opus 4.7 고정 + 429 시 sonnet-4-6 폴백 (사용자 지시 반영)`,
     `• URL 분석에 기술스택 감지 추가 (WordPress/Cafe24/아임웹/Wix/Framer 등 12종)`,
     `• Opus 쿼터 소진 시간대는 답변 품질 저하 리스크 있음 — 모니터링 필요`,
   ].join('\n');

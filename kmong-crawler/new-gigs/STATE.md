@@ -1,6 +1,6 @@
 # 크몽 신규 상품 6개 등록 프로젝트 — 작업 상태
 
-> 시작: 2026-04-08 KST | 담당: Claude (Opus 4.6 / 1M)
+> 시작: 2026-04-08 KST | 담당: Claude (Opus 4.7 / 1M)
 > 본 작업은 onda-hompage WORK_STATE.md와 별도. 기존 no-homepage 등 운영 중인 5개 광고 종에 영향 없음.
 
 ## 사용자 지시 요약

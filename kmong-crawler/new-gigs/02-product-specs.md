@@ -1,6 +1,6 @@
 # Step 2 — 크몽 신규 6개 상품 기획서 (인덱스)
 
-> 작성일: 2026-04-08 KST | 작성: Claude (Opus 4.6 / 1M)
+> 작성일: 2026-04-08 KST | 작성: Claude (Opus 4.7 / 1M)
 > 근거: `01-market-research-1-macro.md`, `01-market-research-2-aibot.md`
 > 등록 단위: `02-product-specs/0X-*.md` (6개 분리 파일)
 

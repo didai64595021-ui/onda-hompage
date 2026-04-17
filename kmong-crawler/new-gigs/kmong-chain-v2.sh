@@ -101,4 +101,4 @@ log "CHAIN-V2 COMPLETE"
 cd "$WORKDIR/../.." && git add kmong-crawler/new-gigs/fill-pricing-v2.js kmong-crawler/new-gigs/verify-thumbnails-v3.js kmong-crawler/new-gigs/kmong-chain-v2.sh kmong-crawler/new-gigs/*-report.json 2>/dev/null
 cd "$WORKDIR/../.." && git commit -m "chore(kmong): 체인 v2 실행 완료 ($RUN_TS) — Phase 2 전멸 수정 + 썸네일 재검증 + 잔여 정리
 
-Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/null || true
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>" 2>/dev/null || true

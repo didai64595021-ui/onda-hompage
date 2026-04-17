@@ -346,6 +346,6 @@ ROI 계산: 매출은 3월말 패턴 (8일간 5건 ₩1,050K) 기준 추정 → 
 
 ---
 
-**보고서 생성**: Claude (Opus 4.6 / 1M context) + Playwright 직접 실측
+**보고서 생성**: Claude (Opus 4.7 / 1M context) + Playwright 직접 실측
 **파일**: `/home/onda/projects/onda-hompage/kmong-crawler/STRATEGY_REPORT_2026-04-07.md`
 **URL**: `https://kmong-strategy-internal.pages.dev/`

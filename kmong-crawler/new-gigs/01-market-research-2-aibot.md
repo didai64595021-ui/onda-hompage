@@ -1,6 +1,6 @@
 # 크몽 두 번째 업종 후보 조사 (RAG 사내문서 챗봇 선정)
 
-> 조사일: 2026-04-08 KST | 조사: Claude (Opus 4.6 / 1M) — general-purpose subagent
+> 조사일: 2026-04-08 KST | 조사: Claude (Opus 4.7 / 1M) — general-purpose subagent
 
 ## 1. 후보 영역 비교 (7개)
 

@@ -12,7 +12,7 @@
  * 정책:
  *  - 임시저장까지만, 실 등록은 사용자 직접 (feedback_kmong_human_submit.md)
  *  - 본문: 기술 나열 X, 고객 페인포인트/니치/수치 중심 (feedback_kmong_copy_niche.md)
- *  - AI 모델 1개월내 최신 (Claude Opus 4.6 / Sonnet 4.6 / Haiku 4.5)
+ *  - AI 모델 1개월내 최신 (Claude Opus 4.7 / Sonnet 4.6 / Haiku 4.5)
  *  - 금지어: 네이버/상위/보장/진입 → 포털/최적화/관리/도달 (reference_kmong_banned_keywords.md)
  */
 

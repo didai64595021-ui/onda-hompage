@@ -14,7 +14,7 @@
 - 잡담/이미 답변됨/흐름 방해 → HEARTBEAT_OK
 - 참여하되 지배하지 마라
 
-## 코딩은 Claude Opus 4.6에 위임
+## 코딩은 Claude Opus 4.7에 위임
 - coding-agent 스킬 사용. 직접 코딩 X.
 - exec는 조회용만 (ls, cat, git status)
 

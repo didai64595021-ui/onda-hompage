@@ -1,6 +1,6 @@
 # 크몽 자동화/매크로 카테고리 시장조사 (업종 1)
 
-> 조사일: 2026-04-08 KST | 조사: Claude (Opus 4.6 / 1M) — general-purpose subagent
+> 조사일: 2026-04-08 KST | 조사: Claude (Opus 4.7 / 1M) — general-purpose subagent
 
 ## 1. 카테고리 지형
 - 크몽 내 자동화 관련 트리: **IT·프로그래밍 → PC·웹 프로그램 → 업무 자동화·매크로**

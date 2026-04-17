@@ -145,4 +145,4 @@ log "CHAIN COMPLETE"
 cd "$WORKDIR/.." && git add new-gigs/*-report.json new-gigs/kmong-resume-chain.sh new-gigs/cleanup-duplicates.js new-gigs/verify-thumbnails-v2.js new-gigs/final-qa-report.js 2>/dev/null
 cd "$WORKDIR/../.." && git commit -m "chore(kmong): 자율 체인 실행 완료 ($RUN_TS) — 가격/썸네일 검증 + 중복 정리 + QA
 
-Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/null || true
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>" 2>/dev/null || true

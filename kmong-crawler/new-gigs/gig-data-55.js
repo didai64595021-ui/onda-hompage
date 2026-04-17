@@ -7,7 +7,7 @@
  *
  * 정책:
  *  - 시장조사 기반 니치 카피, 기술 나열 X (feedback_kmong_copy_niche.md)
- *  - AI 모델 1달내 최신: Claude Opus 4.6, Sonnet 4.6, Haiku 4.5, GPT-5
+ *  - AI 모델 1달내 최신: Claude Opus 4.7, Sonnet 4.6, Haiku 4.5, GPT-5
  *  - 임시저장까지만, 실 등록은 사용자 직접 (feedback_kmong_human_submit.md)
  *
  * 카테고리 매핑:
