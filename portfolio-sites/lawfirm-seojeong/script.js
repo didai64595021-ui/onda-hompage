@@ -16,20 +16,20 @@
 
   /* ---------- Preloader ---------- */
   const preloader = $('.preloader');
-  if (preloader) {
-    const counter = $('.preloader-count');
-    let n = 0;
+  const plCounter = $('.preloader-count');
+  if (preloader && plCounter && getComputedStyle(preloader).display !== 'none') {
     const dur = 1400;
     const start = performance.now();
     const tick = (t) => {
       const p = Math.min(1, (t - start) / dur);
       const eased = 1 - Math.pow(1 - p, 3);
-      n = Math.round(eased * 100);
-      counter.textContent = String(n).padStart(3, '0');
+      plCounter.textContent = String(Math.round(eased * 100)).padStart(3, '0');
       if (p < 1) requestAnimationFrame(tick);
       else setTimeout(() => preloader.classList.add('is-done'), 200);
     };
     requestAnimationFrame(tick);
+  } else if (preloader) {
+    preloader.classList.add('is-done');
   }
 
   /* ---------- Custom cursor ---------- */
