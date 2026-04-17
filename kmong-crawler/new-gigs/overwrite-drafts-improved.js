@@ -41,15 +41,28 @@ async function overwriteDraft(page, plan, imgPath) {
   const cur = page.url();
   if (!cur.includes('/edit/')) throw new Error(`URL 리다이렉트: ${cur.slice(0, 60)}`);
 
-  // [2/5] 제목 수정
-  console.log(`  [2/5] 제목 수정: "${plan.new_title}"`);
-  const titleInput = page.locator('input[placeholder*="제목"], input[name*="title"], [id*="TITLE"] input').first();
-  await titleInput.waitFor({ state: 'visible', timeout: 10000 });
-  await titleInput.click();
-  await page.keyboard.press('Control+A');
-  await page.keyboard.press('Delete');
-  await titleInput.fill(plan.new_title);
-  await sleep(500);
+  // [2/5] 제목 수정 — edit 페이지는 Step2만 노출되어 제목 input 없음 → Step1 탭 시도
+  console.log(`  [2/5] 제목 수정 시도: "${plan.new_title}"`);
+  let titleEdited = false;
+  try {
+    // Step1 탭 버튼 찾기 (텍스트 "기본정보"/"제목"/"1" 등)
+    const step1Tab = page.locator('button:has-text("기본정보"), button:has-text("Step 1"), button:has-text("서비스 정보")').first();
+    if (await step1Tab.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await step1Tab.click();
+      await sleep(1500);
+      const titleInput = page.locator('input[placeholder*="제목"]').first();
+      if (await titleInput.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await titleInput.click();
+        await page.keyboard.press('Control+A');
+        await page.keyboard.press('Delete');
+        await titleInput.fill(plan.new_title);
+        await sleep(500);
+        titleEdited = true;
+        console.log('    ✓ Step1 탭 진입 후 제목 수정');
+      }
+    }
+  } catch (e) { console.log('    ⚠ Step1 탭 시도 실패:', e.message.slice(0, 80)); }
+  if (!titleEdited) console.log('    ⏭ 제목 수정 스킵 (사용자 수동 교체 필요)');
 
   // [3/5] 메인 이미지 교체
   console.log(`  [3/5] 메인 이미지 업로드: ${path.basename(imgPath)}`);
@@ -63,6 +76,20 @@ async function overwriteDraft(page, plan, imgPath) {
   const fileInput = page.locator('input[type="file"]').first();
   await fileInput.setInputFiles(imgPath);
   await sleep(3000);
+
+  // 이미지 업로드 후 SweetAlert2 성공 모달 닫기 (본문 클릭 방해 제거)
+  for (let i = 0; i < 5; i++) {
+    const closed = await closeModals(page).catch(() => false);
+    const swalOpen = await page.locator('.swal2-container').count();
+    if (swalOpen === 0) break;
+    // swal2 확인 버튼 직접 클릭
+    try {
+      await page.locator('.swal2-confirm, .swal2-popup button').first().click({ timeout: 2000 });
+    } catch {}
+    // 또는 Escape
+    try { await page.keyboard.press('Escape'); } catch {}
+    await sleep(800);
+  }
 
   // [4/5] TipTap 본문 교체 (#DESCRIPTION)
   console.log(`  [4/5] 본문 교체 (${(plan.new_description || '').length}자)`);
@@ -88,12 +115,19 @@ async function overwriteDraft(page, plan, imgPath) {
   await sleep(4000);
   const finalUrl = page.url();
 
-  return { ok: true, final_url: finalUrl, draft_id: finalUrl.match(/\/edit\/(\d+)/)?.[1] || plan.draft_id };
+  return { ok: true, final_url: finalUrl, draft_id: finalUrl.match(/\/edit\/(\d+)/)?.[1] || plan.draft_id, title_edited: titleEdited };
 }
 
 (async () => {
   if (!fs.existsSync(PLAN_PATH)) { console.error(`plan 파일 없음: ${PLAN_PATH}`); process.exit(1); }
-  const { plans } = JSON.parse(fs.readFileSync(PLAN_PATH, 'utf-8'));
+  let { plans } = JSON.parse(fs.readFileSync(PLAN_PATH, 'utf-8'));
+  // 재시도 모드 — --retry=slug1,slug2 로 실패만 돌림
+  const retryArg = process.argv.find(a => a.startsWith('--retry='));
+  if (retryArg) {
+    const slugs = retryArg.replace('--retry=', '').split(',').filter(Boolean);
+    plans = plans.filter(p => slugs.includes(p.slug));
+    console.log(`▶ 재시도 모드 — ${plans.length}개만 실행: ${slugs.join(', ')}`);
+  }
   console.log(`▶ ${plans.length}개 draft 제목·이미지·본문 교체 시작`);
   tg(`🔄 Phase 8D-3 시작 — ${plans.length}개 draft 제목·이미지·본문 교체`);
 
