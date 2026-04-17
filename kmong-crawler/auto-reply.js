@@ -31,6 +31,7 @@ const { getConvertedInquiryPool } = require('./lib/converted-examples');
 const { deepAnalyzeUrl, formatDeepAnalysisForPrompt } = require('./lib/url-deep-analyzer');
 const { analyzeAttachmentImages, formatVisionAnalysesForPrompt } = require('./lib/image-vision-analyzer');
 const { findPlaybook, formatPlaybookForPrompt } = require('./lib/sales-playbook');
+const { getPlaybookForContext, formatPlaybookForPrompt: formatPerfPlaybook } = require('./lib/performance-playbook');
 
 // HTML 이스케이프
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -323,6 +324,20 @@ async function autoReply() {
           console.log(`  📚 업종 playbook 매칭: ${playbook.key}`);
         }
 
+        // [Phase 7] 실적 기반 전환 후킹 playbook 주입 (CTR/CVR/ROI 데이터)
+        let perfBlock = '';
+        try {
+          const perf = getPlaybookForContext({ intent, serviceTitle, productId: inquiry.product_id });
+          if (perf) {
+            perfBlock = formatPerfPlaybook(perf);
+            const ctrTop = perf.ctrLeaders[0]?.ctr;
+            const roiTop = perf.roiLeaders[0]?.roi;
+            console.log(`  📈 실적 playbook 주입: CTR 1위 ${ctrTop}% / ROI 1위 ${roiTop}%${perf.isSelfInTop ? ' · 본 서비스 상위권' : ''}`);
+          }
+        } catch (e) {
+          console.log(`  ⚠️ 실적 playbook 로드 실패: ${e.message}`);
+        }
+
         // 포트폴리오 요청이거나 고객이 업종 명시한 경우 → 실존 포트폴리오 주입 (할루시네이션 방지)
         let portfolioBlock = '';
         const needsPortfolio = intent && (
@@ -422,6 +437,16 @@ async function autoReply() {
 - 패키지 가격/일정은 반드시 [크몽 서비스 스펙] 블록의 값만 사용 (추측 금지)
 - 거래 통계가 있으면 "비슷한 구성은 평균 N만원" 식으로 근거 제시
 
+★ 전환 후킹 공식 (실적 기반 playbook 참고 시 적용) ★
+답변에 아래 공식을 자연스럽게 녹여 CTR→문의전환→결제전환 모든 단계 효율화:
+1. [후킹 공식] 타겟 호명 + pain point 직격 + 시간 보증
+   - 예: "사장님" "깨짐/촌스러움/없음" "24시간/당일/3일"
+2. [범위 명시] "디자인부터 SEO까지", "원스톱", "기획 + 제작 + 이전"
+3. [결제 유도] 구체 견적 숫자 + 포트폴리오 링크 + 수정 무제한 보장
+4. [신뢰 요소] "이미 ○○ 업종 ○건 진행", "평균 ○만원에 마무리됨"
+   ※ 단, 내부 수치(ROI/ROAS)를 직접 인용하지 말 것
+5. [긴급도 매칭] 고객 urgency=high 면 "오늘 착수 가능" / "1시간 내 견적" 스피드 강조
+
 경쟁 플랫폼/외부 언급:
 - 아임웹/카페24/워드프레스/윅스 → "우리가 대신 해드립니다 + 월 호스팅비 0원 + 디자인 자유도 100%"로 전환
 - 고객에게 외부 서비스 추천 금지 (우리로 끌어오기)
@@ -440,6 +465,7 @@ async function autoReply() {
           intentBlock || null,  // 최상단 — 모든 판단의 기준
           profileBlock ? `\n${profileBlock}` : null,  // 3회 이상 문의 고객 프로필
           playbookBlock ? `\n${playbookBlock}` : null,  // 업종별 sales playbook
+          perfBlock ? `\n${perfBlock}` : null,  // 실적 기반 전환 후킹 playbook
           summaryBlock ? `\n${summaryBlock}` : null,  // 장기 대화 요약 (6+ 메시지)
           quoteBlock ? `\n${quoteBlock}` : null,  // 자동 견적 계산 (가격/스펙 의도)
           portfolioBlock ? `\n${portfolioBlock}` : null,  // 포트폴리오 요청 시에만 주입

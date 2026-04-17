@@ -126,6 +126,15 @@ module.exports = {
       watch: false,
       env: { ...COMMON_ENV },
     },
+    {
+      name: 'kmong-funnel-analyze',
+      script: './analyze-conversion-funnel.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '0 11 * * *',  // 매일 오전 11시 (광고 데이터 업데이트 후)
+      autorestart: false,
+      watch: false,
+      env: { ...COMMON_ENV },
+    },
     // === Phase 3: AI 콘텐츠 생성 + A/B 테스트 ===
     {
       name: 'kmong-content-gen',
