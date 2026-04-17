@@ -20,8 +20,9 @@ const { getCategoryById, getGigUrlById } = require('./lib/product-map');
 const { askClaude } = require('./lib/claude-max');
 const { formatGigDetailForPrompt } = require('./lib/gig-detail');
 const { extractUrls, summarizeUrl, formatForPrompt } = require('./lib/url-summarizer');
-const { extractIntent, formatIntentForPrompt } = require('./lib/intent-extractor');
+const { extractIntent, formatIntentForPrompt, computeLeadHeat } = require('./lib/intent-extractor');
 const { verifyReply } = require('./lib/reply-verifier');
+const { findRelevantPortfolios, formatPortfoliosForPrompt } = require('./lib/portfolio-refs');
 
 // HTML 이스케이프
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -164,6 +165,12 @@ async function autoReply() {
       //   이유: 모든 문의는 고객 메시지를 맥락 정확히 읽어야 답변이 틀리지 않음 — rule 키워드 매칭은 의도 왜곡 위험
       const isUnmappedProduct = !productCategory || /^\d+$/.test(String(inquiry.product_id || ''));
       if (isUnmappedProduct) console.log(`  ℹ️ 미매핑 product_id — service_title 기반 처리`);
+
+      // 텔레그램 카드 빌드에서 참조할 수 있도록 scope 상위에 선언
+      let intent = null;
+      let leadHeat = { score: 0, tier: 'cold', label: '❄️ cold' };
+      let verifyResult = null;  // 마지막 self-check 결과
+
       const needsClaude = true;
       if (needsClaude) {
         // 메타 JSON에서 서비스 제목 가져오기
@@ -212,13 +219,30 @@ async function autoReply() {
           urlSummaries,
         });
         let intentBlock = '';
-        let intent = null;
         if (intentR.ok && intentR.intent) {
           intent = intentR.intent;
           intentBlock = formatIntentForPrompt(intent);
-          console.log(`  🎯 의도 추출 (${((Date.now() - intentStart) / 1000).toFixed(1)}s, ${intentR.model || 'haiku'}): primary=${intent.primary_intent}, 명시질문 ${intent.explicit_questions.length}개, 커버포인트 ${intent.must_address.length}개 (신뢰도 ${intent.confidence})`);
+          leadHeat = computeLeadHeat(intent, {
+            threadLength: thread.length,
+            messageLength: (inquiry.message_content || '').length,
+          });
+          console.log(`  🎯 의도 추출 (${((Date.now() - intentStart) / 1000).toFixed(1)}s, ${intentR.model || 'haiku'}): primary=${intent.primary_intent}, 감정=${intent.sentiment}, 긴급=${intent.urgency}, 명시질문 ${intent.explicit_questions.length}개, 커버포인트 ${intent.must_address.length}개 (신뢰도 ${intent.confidence})`);
+          console.log(`  🌡️ 리드 히트: ${leadHeat.label} (${leadHeat.score}/100)${intent.requires_human ? '  ⚠️ 사람 응대 필요' : ''}`);
         } else {
           console.log(`  ⚠️ 의도 추출 실패 → 메인 프롬프트만으로 진행: ${intentR.error || 'unknown'}`);
+        }
+
+        // 포트폴리오 요청이거나 고객이 업종 명시한 경우 → 실존 포트폴리오 주입 (할루시네이션 방지)
+        let portfolioBlock = '';
+        const needsPortfolio = intent && (
+          intent.primary_intent === 'portfolio_request' ||
+          /포트폴리오|사례|레퍼런스|실적|견본/.test(inquiry.message_content || '')
+        );
+        if (needsPortfolio) {
+          const industryHint = [inquiry.message_content || '', ...(intent?.customer_facts || [])].join(' ');
+          const refs = findRelevantPortfolios(industryHint, 3);
+          portfolioBlock = formatPortfoliosForPrompt(refs);
+          console.log(`  📁 포트폴리오 레퍼런스 주입: ${refs.map(r => r.industry).join(', ')}`);
         }
 
         // [4단계] 대화 히스토리 블록 구성
@@ -272,6 +296,7 @@ async function autoReply() {
 
         const taskContext = [
           intentBlock || null,  // 최상단 — 모든 판단의 기준
+          portfolioBlock ? `\n${portfolioBlock}` : null,  // 포트폴리오 요청 시에만 주입
           `문의 모드: ${isFollowUp ? '후속 문의 (인사 생략)' : '첫 문의'}`,
           `고객이 본 서비스 페이지 제목: ${serviceTitle}`,
           isUnmappedProduct
@@ -351,6 +376,7 @@ async function autoReply() {
         //   Claude 메인이 요구사항 일부를 빠뜨려서 동문서답 나오는 케이스 방어
         if (replySource === 'claude' && intent && intent.confidence !== 'low') {
           const verify = await verifyReply({ intent, replyText, customerMessage: inquiry.message_content || '' });
+          verifyResult = verify;
           if (verify.ok) {
             console.log(`  🔍 self-check (${verify.model}): verdict=${verify.verdict}, coverage=${(verify.coverage_ratio * 100).toFixed(0)}%, missing=${verify.missing.length}, off-topic=${verify.off_topic.length}`);
             if (verify.missing.length) console.log(`     missing: ${verify.missing.slice(0, 3).join(' / ')}`);
@@ -371,7 +397,10 @@ async function autoReply() {
                 console.log(`  ✓ self-repair 성공 (${before.length}자 → ${replyText.length}자)`);
                 // 2차 검증 (로깅만, 더 이상 재생성은 안 함)
                 const v2 = await verifyReply({ intent, replyText, customerMessage: inquiry.message_content || '' });
-                if (v2.ok) console.log(`  🔍 self-check #2: coverage=${(v2.coverage_ratio * 100).toFixed(0)}% (verdict=${v2.verdict})`);
+                if (v2.ok) {
+                  verifyResult = v2;
+                  console.log(`  🔍 self-check #2: coverage=${(v2.coverage_ratio * 100).toFixed(0)}% (verdict=${v2.verdict})`);
+                }
               } else {
                 console.log(`  ⚠️ self-repair 실패 → 1차 답변 유지: ${c2.error || '짧음'}`);
               }
@@ -382,7 +411,15 @@ async function autoReply() {
         }
       }
 
-      const needsManual = quality.score < 60 && replySource === 'rule';
+      // needs_review 트리거 조건 (하나라도 해당):
+      //   1) 룰베이스 폴백 + 저품질 (Claude 실패 케이스)
+      //   2) intent.requires_human (컴플레인/환불/감정악화)
+      //   3) self-check verdict=fail (자동 repair 후에도 커버율 미달)
+      //   4) intent.confidence=low (의도 파악 자체가 어려운 모호 문의)
+      const needsManual = (quality.score < 60 && replySource === 'rule') ||
+        (intent && intent.requires_human === true) ||
+        (verifyResult && verifyResult.ok && verifyResult.verdict === 'fail') ||
+        (intent && intent.confidence === 'low' && (inquiry.message_content || '').length > 30);
 
       // 4. Supabase 업데이트
       const { error: updateErr } = await supabase
@@ -420,8 +457,25 @@ async function autoReply() {
       const attachLine = cardAttachments.length > 0
         ? `🖼️ 첨부 ${cardAttachments.length}개: ${cardAttachments.map(a => esc(a.file_name || '파일')).join(', ')}`
         : null;
+
+      // 의도/히트/검증 요약 라인 (Claude 경로만)
+      const intentLine = intent ? (
+        `🎯 의도: <code>${esc(intent.primary_intent)}</code> · 감정 <code>${esc(intent.sentiment)}</code> · 긴급 <code>${esc(intent.urgency)}</code> · 신뢰도 <code>${esc(intent.confidence)}</code>`
+      ) : null;
+      const heatLine = intent ? `${leadHeat.label} · <b>${leadHeat.score}/100</b>` : null;
+      const verifyLine = verifyResult && verifyResult.ok ? (
+        `🔍 커버율 ${(verifyResult.coverage_ratio * 100).toFixed(0)}% (${verifyResult.verdict}${verifyResult.missing?.length ? ` · 누락 ${verifyResult.missing.length}개` : ''})`
+      ) : null;
+      const humanBanner = intent && intent.requires_human
+        ? `🚨 <b>사람 응대 필요</b> — 컴플레인·감정·법적 이슈 감지됨. 자동발송 전 관리자 검수 권장.`
+        : null;
+
       const card = [
         `💬 <b>신규 문의 #${inquiry.id}</b>  (${qualityLabel})`,
+        humanBanner,
+        heatLine,
+        intentLine,
+        verifyLine,
         ``,
         `📝 <b>고객 문의</b>:`,
         esc((inquiry.message_content || '(내용 없음)').slice(0, 500)),
