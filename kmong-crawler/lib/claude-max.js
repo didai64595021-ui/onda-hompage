@@ -85,10 +85,11 @@ const MODEL_ALIAS = {
   haiku:  'claude-haiku-4-5',
 };
 
-// 폴백 체인 — opus는 4.7 기본, 429(rate limit)일 때만 Sonnet 4.6으로 임시 다운그레이드 (사용자 지시)
-//  ※ sonnet-4-5/haiku 같은 추가 단계는 제거 — 품질 유지 위해 sonnet-4-6까지만
+// 폴백 체인 — 상위 모델이 429(rate limit) 또는 400(파라미터 거부) 나면 하위 모델로 순차 시도
+//  크몽 답변봇은 "답변 없음(rule fallback)" 보다 "Haiku 답변" 이 훨씬 낫기에 haiku까지 포함
+//  ※ 고품질 답변을 원할 때만 model='opus' 전달, 기본 sonnet은 이미 충분함
 const FALLBACK_CHAIN = {
-  opus:   ['claude-opus-4-7', 'claude-sonnet-4-6'],
+  opus:   ['claude-opus-4-7', 'claude-sonnet-4-6', 'claude-haiku-4-5'],
   sonnet: ['claude-sonnet-4-6', 'claude-haiku-4-5'],
   haiku:  ['claude-haiku-4-5'],
 };

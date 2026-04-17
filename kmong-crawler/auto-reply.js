@@ -20,6 +20,8 @@ const { getCategoryById, getGigUrlById } = require('./lib/product-map');
 const { askClaude } = require('./lib/claude-max');
 const { formatGigDetailForPrompt } = require('./lib/gig-detail');
 const { extractUrls, summarizeUrl, formatForPrompt } = require('./lib/url-summarizer');
+const { extractIntent, formatIntentForPrompt } = require('./lib/intent-extractor');
+const { verifyReply } = require('./lib/reply-verifier');
 
 // HTML 이스케이프
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -168,71 +170,16 @@ async function autoReply() {
         let meta = {};
         try { meta = inquiry.notes ? JSON.parse(inquiry.notes) : {}; } catch {}
         const serviceTitle = meta.service_title || analysis.serviceType || '홈페이지 제작';
-
-        // few-shot: 최근 sent 답변 2개만 스타일 참고
-        const fewShot = approvedExamples.slice(0, 2).map((e, i) =>
-          `[예시${i + 1}] 고객: ${String(e.message_content || '').slice(0, 120)}\n   답변: ${String(e.auto_reply_text || '').slice(0, 400)}`
-        ).join('\n\n');
-
-        const sys = `당신은 ONDA 마케팅의 크몽 판매 담당자입니다. 고객이 우리 크몽 서비스 페이지에서 문의를 보낸 상황입니다. 목표는 문의를 계약으로 전환하는 것.
-
-★ 필수 절차 (답변 쓰기 전) ★
-1. 고객 문의 내용을 끝까지 정확히 읽는다
-2. 고객이 실제 말한 의도를 파악한다 (서비스 페이지 제목과 다를 수 있음 — 실제 메시지 우선)
-3. 직전 대화 맥락(있으면)과 연결한다
-4. 그런 다음 답변 작성 — 맥락과 어긋나면 신뢰 즉시 추락
-
-답변 규칙:
-- 한국어, 3~6문장. 이모지 금지(":)"는 허용). 긴 번호 리스트 피하기
-- 첫 문의만 "안녕하세요!" 인사, 후속 문의는 바로 본론
-- 고객 실제 의도(메시지 내용)를 서비스 페이지 제목보다 우선 판독
-- 외부 플랫폼이나 경쟁사를 추천하지 말 것 — 우리 서비스로 끌어오기
-- 아임웹/카페24/워드프레스 등 경쟁 플랫폼 언급 시 "우리가 대신 해드립니다" 로 받아치기
-- 항상 다음 스텝 제시: 견적 요청 / 참고자료 / 상담 예약 등 CTA 포함
-
-ONDA 강점 (필요시 자연스럽게 녹이기):
-- 코딩 방식 제작 → 호스팅 무료, 디자인 자유도 100%
-- 관리자 CMS 제공 → 고객이 직접 수정 가능
-- 반응형 (PC·모바일·태블릿), 7일 무상 수정, 도메인 연결 대행
-- 구체 가격은 반드시 [크몽 서비스 스펙] 블록의 패키지 price 값 사용
-- 아임웹/카페24 이전도 가능 (기존 콘텐츠 유지 + 디자인 개선 + 월 호스팅비 0원)
-
-문의 유형별 톤:
-- 견적/가격 질문 → 구성 3단계 가격 + 옵션 비용 제시
-- 기간 질문 → "3~7일 내" + 작업 단계 요약
-- 기능 추가 → 가능 여부 + 옵션 가격
-- 타 플랫폼 이전 → "우리가 대신 이전 + 디자인 개선 + 월 비용 0원" 어필
-- 막연한 문의 → 업종/용도/참고 사이트 3개 질문으로 되물어서 견적 안내 유도
-
-★ 짧은 반문/되물음 특별 규칙 ★
-고객이 "네?", "ㅎㅇ", "?", "무슨 말씀이세요", "이해가 안 가요" 같은 짧은 반문을 했을 때:
-- 직전 우리 답변(assistant role)을 반드시 먼저 확인
-- "어떤 부분이 궁금하신가요?" 같은 열린 질문 금지 — 우리가 보낸 내용 중 어느 부분이 모호했을지 직접 추론해서 구체적으로 재설명
-- 예시: 직전에 "3단계 패키지 12/20/35만원" 안내했는데 고객이 "네?" → "혹시 어떤 패키지가 적당한지 궁금하신 건가요? 아니면 가격 구성이 이해 안 되셨나요? 타이어공장 규모면 STANDARD 12만원(메인 1P + CMS)이 가장 많이 선택하세요. 참고할 자사 홈페이지 링크나 희망하는 페이지 수만 알려주시면 바로 안내드리겠습니다."
-- 즉 재설명 + 2~3개 선택지 + 다음 스텝 제시 구조`;
-
-        // 대화 맥락: notes에 저장된 thread에서 현재 메시지를 제외한 이전 히스토리
         const thread = Array.isArray(meta.conversation_thread) ? meta.conversation_thread : [];
-        let historyBlock = '';
-        if (thread.length > 1) {
-          const history = thread.slice(-10, -1);  // 직전 최대 9개 (현재 메시지 제외)
-          historyBlock = '\n[직전 대화 히스토리 (오래된 → 최신)]\n' + history.map((m, i) =>
-            `${i + 1}. ${m.role === 'assistant' ? '우리' : '고객'}: ${m.content.slice(0, 200)}`
-          ).join('\n');
-        }
 
-        // 실시간 gig 상세 (crawl-inbox가 매번 fetch 해서 notes.gig_detail에 저장)
-        const gigDetailBlock = meta.gig_detail ? formatGigDetailForPrompt(meta.gig_detail) : '';
-
-        // 메시지 + 대화스레드에서 URL 추출 → 내용 파악 (SSR/SPA 둘 다)
-        //  이유: 고객이 "저희 홈페이지 https://... 참고해주세요" 식으로 링크를 보냄
-        //        → 해당 사이트 내용을 읽고 업종/브랜드/페이지 구조를 답변에 반영해야 함
+        // [1단계] URL 추출 + 요약 (intent extractor와 Claude 메인 둘 다 사용)
         const urlSources = [inquiry.message_content || ''];
         for (const m of thread) {
           if (m.role === 'user' && m.content) urlSources.push(m.content);
         }
         const urls = extractUrls(urlSources.join('\n'));
         let urlBlock = '';
+        let urlSummaries = [];
         if (urls.length > 0) {
           console.log(`  🔗 URL ${urls.length}개 발견: ${urls.join(', ')} — 내용 파악 중 (병렬)...`);
           const summaries = await Promise.all(urls.map(u =>
@@ -243,9 +190,88 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
             else console.log(`    ✗ ${s.url || ''}: ${s.error}`);
           }
           urlBlock = formatForPrompt(summaries);
+          urlSummaries = summaries.filter(s => s.ok).map(s => ({
+            url: s.url, title: s.title || '', body: (s.body || '').slice(0, 400),
+          }));
         }
 
+        // [2단계] 첨부 이미지 수 (intent extractor에는 개수만, 메인 Claude는 Vision으로 내용 분석)
+        const rawAttachmentsForCount = Array.isArray(meta.attachments) ? meta.attachments : [];
+        const imageCountForIntent = rawAttachmentsForCount.filter(a => {
+          const name = String(a.file_name || a.preview_url || a.local_path || '');
+          return /\.(png|jpe?g|gif|webp)$/i.test(name);
+        }).length;
+
+        // [3단계] 의도 추출 (Haiku) — 구조화된 "반드시 답할 질문/사실" 추출
+        const intentStart = Date.now();
+        const intentR = await extractIntent({
+          messageContent: inquiry.message_content || '',
+          thread,
+          gigTitle: serviceTitle,
+          attachmentCount: imageCountForIntent,
+          urlSummaries,
+        });
+        let intentBlock = '';
+        let intent = null;
+        if (intentR.ok && intentR.intent) {
+          intent = intentR.intent;
+          intentBlock = formatIntentForPrompt(intent);
+          console.log(`  🎯 의도 추출 (${((Date.now() - intentStart) / 1000).toFixed(1)}s, ${intentR.model || 'haiku'}): primary=${intent.primary_intent}, 명시질문 ${intent.explicit_questions.length}개, 커버포인트 ${intent.must_address.length}개 (신뢰도 ${intent.confidence})`);
+        } else {
+          console.log(`  ⚠️ 의도 추출 실패 → 메인 프롬프트만으로 진행: ${intentR.error || 'unknown'}`);
+        }
+
+        // [4단계] 대화 히스토리 블록 구성
+        let historyBlock = '';
+        if (thread.length > 1) {
+          const history = thread.slice(-10, -1);  // 현재 메시지 제외 직전 최대 9개
+          historyBlock = '\n[직전 대화 히스토리 (오래된 → 최신)]\n' + history.map((m, i) =>
+            `${i + 1}. ${m.role === 'assistant' ? '우리' : '고객'}: ${m.content.slice(0, 200)}`
+          ).join('\n');
+        }
+
+        // 실시간 gig 상세
+        const gigDetailBlock = meta.gig_detail ? formatGigDetailForPrompt(meta.gig_detail) : '';
+
+        // few-shot: 최근 sent 답변 2개 (톤만 참고 — 내용 복사 금지 규칙은 system에 명시)
+        const fewShot = approvedExamples.slice(0, 2).map((e, i) =>
+          `[예시${i + 1}] 고객: ${String(e.message_content || '').slice(0, 120)}\n   답변: ${String(e.auto_reply_text || '').slice(0, 400)}`
+        ).join('\n\n');
+
+        const sys = `당신은 ONDA 마케팅의 크몽 판매 담당자입니다. 목표는 문의를 계약으로 전환하는 것.
+
+★ 절대 원칙 ★
+1. "고객 의도 분석 결과" 블록의 명시 질문과 커버포인트를 모두 답변에 반영한다 — 하나라도 빠지면 실패
+2. "고객 제공 사실"에 있는 업종/규모/참고 사이트는 반드시 그대로 인용한다 ("30명 규모 미용실이시고..." 처럼)
+3. 서비스 페이지 제목보다 고객이 실제 메시지에서 말한 내용이 우선
+4. 직전 대화 히스토리가 있으면 이미 안내한 내용은 반복하지 말고 다음 단계로 진전
+5. 예시(few-shot) 답변은 톤만 참고 — 내용/사실/숫자를 그대로 복사하지 말 것
+
+답변 형식:
+- 한국어, 3~7문장. 이모지 금지(":)"는 허용). 번호 리스트는 고객이 질문 3개 이상일 때만
+- 첫 문의만 "안녕하세요!" 인사, 후속 문의는 바로 본론
+- 반드시 다음 스텝 CTA 포함 (참고자료 요청 / 견적 확정 / 상담 일정 등)
+
+구체 정보 출처:
+- 패키지 가격/일정은 반드시 [크몽 서비스 스펙] 블록의 값만 사용 (추측 금지)
+- 거래 통계가 있으면 "비슷한 구성은 평균 N만원" 식으로 근거 제시
+
+경쟁 플랫폼/외부 언급:
+- 아임웹/카페24/워드프레스/윅스 → "우리가 대신 해드립니다 + 월 호스팅비 0원 + 디자인 자유도 100%"로 전환
+- 고객에게 외부 서비스 추천 금지 (우리로 끌어오기)
+
+★ 짧은 반문 특별 규칙 (is_short_reply=true 일 때) ★
+"네?", "ㅎㅇ", "?", "무슨 말씀이세요" 같은 1~5자 반문이면:
+- "어떤 부분이 궁금하신가요?" 같은 열린 질문 금지
+- 직전 우리 답변에서 모호했을 지점을 직접 추론 → 재설명 + 2~3개 선택지 + 다음 스텝 구조
+
+★ 막연한 문의 (primary_intent=other, confidence=low) ★
+고객이 구체 정보 없이 "홈페이지 만들 수 있나요?" 수준이면:
+- 업종/용도/참고 사이트 3개 질문으로 되묻기
+- 되묻기만 하지 말고 "말씀해주시면 24시간 내 견적안내드립니다" 다음 스텝 제시`;
+
         const taskContext = [
+          intentBlock || null,  // 최상단 — 모든 판단의 기준
           `문의 모드: ${isFollowUp ? '후속 문의 (인사 생략)' : '첫 문의'}`,
           `고객이 본 서비스 페이지 제목: ${serviceTitle}`,
           isUnmappedProduct
@@ -255,7 +281,7 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
           gigDetailBlock ? `\n${gigDetailBlock}` : null,
           urlBlock ? `\n${urlBlock}` : null,
           historyBlock || null,
-          fewShot ? `\n최근 합격 답변 톤 참고:\n${fewShot}` : null,
+          fewShot ? `\n최근 합격 답변 톤 참고 (톤만 참고, 내용 복사 금지):\n${fewShot}` : null,
         ].filter(Boolean).join('\n');
 
         // 고객 첨부 이미지 수집 (Vision)
@@ -318,6 +344,41 @@ ONDA 강점 (필요시 자연스럽게 녹이기):
           console.log(`  ✓ Claude 답변 생성 (${replyText.length}자, tokens in=${c.usage?.input_tokens} out=${c.usage?.output_tokens})`);
         } else {
           console.log(`  ⚠️ Claude 실패 → rule-based 유지: ${c.error || '응답 너무 짧음'}`);
+        }
+
+        // [5단계] 자기검증 — 답변이 intent.must_address / explicit_questions 를 커버했는지 체크
+        //   커버율 70% 미만이면 missing 포인트 강조하며 1회 자동 재생성
+        //   Claude 메인이 요구사항 일부를 빠뜨려서 동문서답 나오는 케이스 방어
+        if (replySource === 'claude' && intent && intent.confidence !== 'low') {
+          const verify = await verifyReply({ intent, replyText, customerMessage: inquiry.message_content || '' });
+          if (verify.ok) {
+            console.log(`  🔍 self-check (${verify.model}): verdict=${verify.verdict}, coverage=${(verify.coverage_ratio * 100).toFixed(0)}%, missing=${verify.missing.length}, off-topic=${verify.off_topic.length}`);
+            if (verify.missing.length) console.log(`     missing: ${verify.missing.slice(0, 3).join(' / ')}`);
+
+            if (verify.verdict === 'fail' && !regenId) {
+              // 자동 1회 재생성 — missing 포인트를 user 메시지에 명시
+              const repairHint = `\n\n⚠️ 직전 초안이 다음 포인트를 빠뜨렸습니다 — 반드시 반영해서 다시 쓰세요:\n${verify.missing.map((m, i) => `${i + 1}. ${m}`).join('\n')}\n이미 잘 답한 부분(${verify.covered.slice(0, 3).join(' / ')})은 유지하되, 빠진 포인트를 자연스럽게 녹이세요.`;
+              const repairContent = [
+                ...imageBlocks.map(b => ({ type: b.type, source: b.source })),
+                { type: 'text', text: finalUserMsg + repairHint },
+              ];
+              console.log(`  🔁 self-repair 호출 — 누락 ${verify.missing.length}개 반영 재생성`);
+              const c2 = await askClaude({ system: sys, messages: [{ role: 'user', content: repairContent }], model: 'opus', max_tokens: 700, temperature: claudeTemp });
+              if (c2.ok && c2.text && c2.text.length >= 40) {
+                const before = replyText;
+                replyText = c2.text.trim();
+                claudeModel = c2.model;
+                console.log(`  ✓ self-repair 성공 (${before.length}자 → ${replyText.length}자)`);
+                // 2차 검증 (로깅만, 더 이상 재생성은 안 함)
+                const v2 = await verifyReply({ intent, replyText, customerMessage: inquiry.message_content || '' });
+                if (v2.ok) console.log(`  🔍 self-check #2: coverage=${(v2.coverage_ratio * 100).toFixed(0)}% (verdict=${v2.verdict})`);
+              } else {
+                console.log(`  ⚠️ self-repair 실패 → 1차 답변 유지: ${c2.error || '짧음'}`);
+              }
+            }
+          } else {
+            console.log(`  ⚠️ self-check 실패 (스킵): ${verify.error}`);
+          }
         }
       }
 
