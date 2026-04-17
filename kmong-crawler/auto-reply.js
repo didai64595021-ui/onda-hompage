@@ -25,6 +25,7 @@ const { verifyReply } = require('./lib/reply-verifier');
 const { findRelevantPortfolios, formatPortfoliosForPrompt } = require('./lib/portfolio-refs');
 const { summarizeConversation, formatSummaryForPrompt, THRESHOLD: SUMMARIZE_THRESHOLD } = require('./lib/conversation-summarizer');
 const { calculateQuote } = require('./lib/quote-calculator');
+const { getCustomerProfile, formatProfileForPrompt } = require('./lib/customer-profile');
 
 // HTML 이스케이프
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -247,6 +248,19 @@ async function autoReply() {
           console.log(`  📁 포트폴리오 레퍼런스 주입: ${refs.map(r => r.industry).join(', ')}`);
         }
 
+        // 고객 프로필 (priorCount ≥ 2 일 때만 — 3회째 이상 문의)
+        let profileBlock = '';
+        if ((priorCount || 0) >= 2) {
+          const profStart = Date.now();
+          const pR = await getCustomerProfile(inquiry.customer_name, { minPrior: 1 });
+          if (pR.ok && pR.profile) {
+            profileBlock = formatProfileForPrompt(pR.profile);
+            console.log(`  👤 고객 프로필 (${((Date.now() - profStart) / 1000).toFixed(1)}s${pR.cached ? ' cached' : `, ${pR.model}`}): 가격민감=${pR.profile.price_sensitivity}, 결정속도=${pR.profile.decision_speed}, 톤=${pR.profile.relationship_tone}`);
+          } else if (pR.error) {
+            console.log(`  ⚠️ 고객 프로필 실패: ${pR.error.slice(0, 100)}`);
+          }
+        }
+
         // 가격/견적 의도면 자동 견적 계산 → Claude 프롬프트에 숫자 명시 (hallucination 방지)
         let quoteBlock = '';
         const needsQuote = intent && (
@@ -336,6 +350,7 @@ async function autoReply() {
 
         const taskContext = [
           intentBlock || null,  // 최상단 — 모든 판단의 기준
+          profileBlock ? `\n${profileBlock}` : null,  // 3회 이상 문의 고객 프로필
           summaryBlock ? `\n${summaryBlock}` : null,  // 장기 대화 요약 (6+ 메시지)
           quoteBlock ? `\n${quoteBlock}` : null,  // 자동 견적 계산 (가격/스펙 의도)
           portfolioBlock ? `\n${portfolioBlock}` : null,  // 포트폴리오 요청 시에만 주입
