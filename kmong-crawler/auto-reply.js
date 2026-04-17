@@ -431,28 +431,46 @@ async function autoReply() {
             console.log(`  🔍 self-check (${verify.model}): verdict=${verify.verdict}, coverage=${(verify.coverage_ratio * 100).toFixed(0)}%, missing=${verify.missing.length}, off-topic=${verify.off_topic.length}`);
             if (verify.missing.length) console.log(`     missing: ${verify.missing.slice(0, 3).join(' / ')}`);
 
-            if (verify.verdict === 'fail' && !regenId) {
-              // 자동 1회 재생성 — missing 포인트를 user 메시지에 명시
-              const repairHint = `\n\n⚠️ 직전 초안이 다음 포인트를 빠뜨렸습니다 — 반드시 반영해서 다시 쓰세요:\n${verify.missing.map((m, i) => `${i + 1}. ${m}`).join('\n')}\n이미 잘 답한 부분(${verify.covered.slice(0, 3).join(' / ')})은 유지하되, 빠진 포인트를 자연스럽게 녹이세요.`;
-              const repairContent = [
+            // variant 2-pass 조건: (verdict=fail 자동복구) OR (heat ≥ 70 핫 리드, 품질 극대화)
+            //   단, regen 모드는 이미 수동 트리거라 중복 금지
+            const shouldSelfRepair = verify.verdict === 'fail' && !regenId;
+            const shouldVariant = !regenId && leadHeat && leadHeat.score >= 70 && verify.coverage_ratio < 0.95;
+
+            if (shouldSelfRepair || shouldVariant) {
+              // 바리언트 각도 선택 — heat 높고 missing 있으면 missing 중심, 아니면 다른 프레임
+              const altAngleHint = shouldSelfRepair
+                ? `\n\n⚠️ 직전 초안이 다음 포인트를 빠뜨렸습니다 — 반드시 반영해서 다시 쓰세요:\n${verify.missing.map((m, i) => `${i + 1}. ${m}`).join('\n')}\n이미 잘 답한 부분(${verify.covered.slice(0, 3).join(' / ')})은 유지하되, 빠진 포인트를 자연스럽게 녹이세요.`
+                : `\n\n🎯 [바리언트 생성] 동일 질문에 대해 직전 초안과 다른 각도로 작성하세요. 초안이 "스펙/숫자 중심"이면 "관계·업종 특화 사례·불안 해소" 중심으로, 초안이 "관계 중심"이면 "구체 숫자·구성·타임라인" 중심으로 프레임을 바꾸세요. 명시 질문은 둘 다 다 커버하되 강조점만 다르게.`;
+              const altTemp = shouldSelfRepair ? claudeTemp : Math.min(0.8, Math.max(0.2, claudeTemp + 0.3));
+              const altContent = [
                 ...imageBlocks.map(b => ({ type: b.type, source: b.source })),
-                { type: 'text', text: finalUserMsg + repairHint },
+                { type: 'text', text: finalUserMsg + altAngleHint },
               ];
-              console.log(`  🔁 self-repair 호출 — 누락 ${verify.missing.length}개 반영 재생성`);
-              const c2 = await askClaude({ system: sys, messages: [{ role: 'user', content: repairContent }], model: 'opus', max_tokens: 700, temperature: claudeTemp });
+              console.log(`  🔁 ${shouldSelfRepair ? 'self-repair' : 'variant 2-pass'} 호출 (temp=${altTemp})`);
+              const c2 = await askClaude({ system: sys, messages: [{ role: 'user', content: altContent }], model: 'opus', max_tokens: 700, temperature: altTemp });
+
               if (c2.ok && c2.text && c2.text.length >= 40) {
-                const before = replyText;
-                replyText = c2.text.trim();
-                claudeModel = c2.model;
-                console.log(`  ✓ self-repair 성공 (${before.length}자 → ${replyText.length}자)`);
-                // 2차 검증 (로깅만, 더 이상 재생성은 안 함)
-                const v2 = await verifyReply({ intent, replyText, customerMessage: inquiry.message_content || '' });
+                const altText = c2.text.trim();
+                // 바리언트 검증
+                const v2 = await verifyReply({ intent, replyText: altText, customerMessage: inquiry.message_content || '' });
                 if (v2.ok) {
-                  verifyResult = v2;
-                  console.log(`  🔍 self-check #2: coverage=${(v2.coverage_ratio * 100).toFixed(0)}% (verdict=${v2.verdict})`);
+                  const origScore = verify.coverage_ratio || 0;
+                  const altScore = v2.coverage_ratio || 0;
+                  const origOffTopic = verify.off_topic?.length || 0;
+                  const altOffTopic = v2.off_topic?.length || 0;
+                  // 승자 선정: (1) 커버율 우선, (2) 동률이면 off_topic 적은 쪽
+                  const altWins = altScore > origScore || (altScore === origScore && altOffTopic < origOffTopic);
+                  console.log(`  🏆 바리언트 비교: 초안 coverage=${(origScore * 100).toFixed(0)}% (off=${origOffTopic}) vs 대안 coverage=${(altScore * 100).toFixed(0)}% (off=${altOffTopic}) → ${altWins ? '대안 채택' : '초안 유지'}`);
+                  if (altWins) {
+                    replyText = altText;
+                    claudeModel = c2.model;
+                    verifyResult = v2;
+                  }
+                } else {
+                  console.log(`  ⚠️ 바리언트 검증 실패 — 초안 유지: ${v2.error}`);
                 }
               } else {
-                console.log(`  ⚠️ self-repair 실패 → 1차 답변 유지: ${c2.error || '짧음'}`);
+                console.log(`  ⚠️ 바리언트 생성 실패 → 초안 유지: ${c2.error || '짧음'}`);
               }
             }
           } else {
