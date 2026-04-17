@@ -29,6 +29,7 @@ const { getCustomerProfile, formatProfileForPrompt } = require('./lib/customer-p
 const { findSemanticSimilar } = require('./lib/semantic-similar');
 const { deepAnalyzeUrl, formatDeepAnalysisForPrompt } = require('./lib/url-deep-analyzer');
 const { analyzeAttachmentImages, formatVisionAnalysesForPrompt } = require('./lib/image-vision-analyzer');
+const { findPlaybook, formatPlaybookForPrompt } = require('./lib/sales-playbook');
 
 // HTML 이스케이프
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -278,6 +279,15 @@ async function autoReply() {
           if (blocks.length) deepUrlBlock = blocks.join('\n\n');
         }
 
+        // [Phase 6H] 업종 sales playbook 매칭 — 메시지/facts에서 업종 키워드 감지
+        let playbookBlock = '';
+        const playbookContext = [inquiry.message_content || '', ...(intent?.customer_facts || []), serviceTitle || ''].join(' ');
+        const playbook = findPlaybook(playbookContext);
+        if (playbook) {
+          playbookBlock = formatPlaybookForPrompt(playbook);
+          console.log(`  📚 업종 playbook 매칭: ${playbook.key}`);
+        }
+
         // 포트폴리오 요청이거나 고객이 업종 명시한 경우 → 실존 포트폴리오 주입 (할루시네이션 방지)
         let portfolioBlock = '';
         const needsPortfolio = intent && (
@@ -394,6 +404,7 @@ async function autoReply() {
         const taskContext = [
           intentBlock || null,  // 최상단 — 모든 판단의 기준
           profileBlock ? `\n${profileBlock}` : null,  // 3회 이상 문의 고객 프로필
+          playbookBlock ? `\n${playbookBlock}` : null,  // 업종별 sales playbook
           summaryBlock ? `\n${summaryBlock}` : null,  // 장기 대화 요약 (6+ 메시지)
           quoteBlock ? `\n${quoteBlock}` : null,  // 자동 견적 계산 (가격/스펙 의도)
           portfolioBlock ? `\n${portfolioBlock}` : null,  // 포트폴리오 요청 시에만 주입
