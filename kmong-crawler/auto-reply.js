@@ -26,6 +26,7 @@ const { findRelevantPortfolios, formatPortfoliosForPrompt } = require('./lib/por
 const { summarizeConversation, formatSummaryForPrompt, THRESHOLD: SUMMARIZE_THRESHOLD } = require('./lib/conversation-summarizer');
 const { calculateQuote } = require('./lib/quote-calculator');
 const { getCustomerProfile, formatProfileForPrompt } = require('./lib/customer-profile');
+const { findSemanticSimilar } = require('./lib/semantic-similar');
 
 // HTML 이스케이프
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -130,16 +131,30 @@ async function autoReply() {
         }
       }
 
-      // 2-2. 학습 — 현재 질문과 유사한 과거 sent 답변 (키워드 매칭 + 같은 product 보너스)
+      // 2-2. 학습 — 현재 질문과 유사한 과거 sent 답변
+      //   (1순위) Haiku 시맨틱 유사도 랭킹 — 의미·상황 일치도로 top-K 선택
+      //   (2순위 폴백) 키워드 overlap + 같은 product 보너스
+      //   (3순위 폴백) 같은 product 최근 답변으로 톤만 참고
       let approvedExamples = [];
-      const similar = await getSimilarApprovedReplies(inquiry.message_content, inquiry.product_id, 3);
-      if (similar.length > 0) {
-        approvedExamples = similar;
-        console.log(`  학습참고: 유사 답변 ${similar.length}건 (score=${similar.map(s => s.score).join(',')})`);
-      } else if (inquiry.product_id) {
-        // 유사 답변 없으면 같은 서비스 최근 답변으로 톤 학습
-        const learn = await getRecentApprovedReplies(inquiry.product_id, 3);
-        if (learn.ok) approvedExamples = learn.examples;
+      const semStart = Date.now();
+      const semR = await findSemanticSimilar({
+        currentMessage: inquiry.message_content || '',
+        productId: inquiry.product_id,
+        topK: 3,
+        poolSize: 25,
+      });
+      if (semR.ok && semR.examples && semR.examples.length > 0) {
+        approvedExamples = semR.examples;
+        console.log(`  학습참고(시맨틱 ${((Date.now() - semStart) / 1000).toFixed(1)}s, ${semR.model || 'haiku'}): ${approvedExamples.length}건 — ${semR.reasoning?.slice(0, 80) || '의미 기반 매칭'}`);
+      } else {
+        const similar = await getSimilarApprovedReplies(inquiry.message_content, inquiry.product_id, 3);
+        if (similar.length > 0) {
+          approvedExamples = similar;
+          console.log(`  학습참고(키워드 폴백): ${similar.length}건 (score=${similar.map(s => s.score).join(',')})`);
+        } else if (inquiry.product_id) {
+          const learn = await getRecentApprovedReplies(inquiry.product_id, 3);
+          if (learn.ok) approvedExamples = learn.examples;
+        }
       }
 
       // 3. Rule-based 답변 먼저 생성 (fallback + 품질 평가용)
