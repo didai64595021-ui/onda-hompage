@@ -27,6 +27,7 @@ const { summarizeConversation, formatSummaryForPrompt, THRESHOLD: SUMMARIZE_THRE
 const { calculateQuote } = require('./lib/quote-calculator');
 const { getCustomerProfile, formatProfileForPrompt } = require('./lib/customer-profile');
 const { findSemanticSimilar } = require('./lib/semantic-similar');
+const { deepAnalyzeUrl, formatDeepAnalysisForPrompt } = require('./lib/url-deep-analyzer');
 
 // HTML 이스케이프
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -216,8 +217,12 @@ async function autoReply() {
           }
           urlBlock = formatForPrompt(summaries);
           urlSummaries = summaries.filter(s => s.ok).map(s => ({
-            url: s.url, title: s.title || '', body: (s.body || '').slice(0, 400),
+            url: s.url, title: s.title || '', body: (s.bodyText || '').slice(0, 400),
           }));
+
+          // 심층 분석은 Phase 6F — heat 계산 후 (아래에서) 호출
+          // 여기선 원본 summaries 보관해 뒤에서 body 전체를 쓸 수 있게 함
+          var _urlSummariesRaw = summaries.filter(s => s.ok);
         }
 
         // [2단계] 첨부 이미지 수 (intent extractor에는 개수만, 메인 Claude는 Vision으로 내용 분석)
@@ -248,6 +253,28 @@ async function autoReply() {
           console.log(`  🌡️ 리드 히트: ${leadHeat.label} (${leadHeat.score}/100)${intent.requires_human ? '  ⚠️ 사람 응대 필요' : ''}`);
         } else {
           console.log(`  ⚠️ 의도 추출 실패 → 메인 프롬프트만으로 진행: ${intentR.error || 'unknown'}`);
+        }
+
+        // [Phase 6F] heat ≥ 60 & URL 심층 분석 (Opus 4.7) — 고가치 리드만 깊게 판독
+        let deepUrlBlock = '';
+        if (leadHeat.score >= 60 && typeof _urlSummariesRaw !== 'undefined' && _urlSummariesRaw.length > 0) {
+          const deepStart = Date.now();
+          const deepResults = await Promise.all(_urlSummariesRaw.slice(0, 2).map(s =>
+            deepAnalyzeUrl({ url: s.url, title: s.title, body: s.bodyText || '', maxBody: 6000 })
+              .catch(e => ({ ok: false, error: e.message, url: s.url }))
+          ));
+          const blocks = [];
+          for (let i = 0; i < deepResults.length; i++) {
+            const r = deepResults[i];
+            const src = _urlSummariesRaw[i];
+            if (r.ok && r.analysis) {
+              blocks.push(formatDeepAnalysisForPrompt(src.url, r.analysis));
+              console.log(`  🔬 URL 심층 분석 (${((Date.now() - deepStart) / 1000).toFixed(1)}s, ${r.model}): ${src.url} — 업종=${r.analysis.industry}, 약점 ${r.analysis.current_weaknesses.length}개`);
+            } else {
+              console.log(`  ⚠️ URL 심층 분석 실패: ${src.url} — ${r.error?.slice(0, 80)}`);
+            }
+          }
+          if (blocks.length) deepUrlBlock = blocks.join('\n\n');
         }
 
         // 포트폴리오 요청이거나 고객이 업종 명시한 경우 → 실존 포트폴리오 주입 (할루시네이션 방지)
@@ -376,7 +403,7 @@ async function autoReply() {
             : `매핑 카테고리: ${analysis.serviceType}`,
           statsText ? `거래 통계: ${statsText}` : null,
           gigDetailBlock ? `\n${gigDetailBlock}` : null,
-          urlBlock ? `\n${urlBlock}` : null,
+          deepUrlBlock ? `\n${deepUrlBlock}` : (urlBlock ? `\n${urlBlock}` : null),
           historyBlock || null,
           fewShot ? `\n최근 합격 답변 톤 참고 (톤만 참고, 내용 복사 금지):\n${fewShot}` : null,
         ].filter(Boolean).join('\n');
