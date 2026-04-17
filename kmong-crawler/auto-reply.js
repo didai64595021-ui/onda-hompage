@@ -24,6 +24,7 @@ const { extractIntent, formatIntentForPrompt, computeLeadHeat } = require('./lib
 const { verifyReply } = require('./lib/reply-verifier');
 const { findRelevantPortfolios, formatPortfoliosForPrompt } = require('./lib/portfolio-refs');
 const { summarizeConversation, formatSummaryForPrompt, THRESHOLD: SUMMARIZE_THRESHOLD } = require('./lib/conversation-summarizer');
+const { calculateQuote } = require('./lib/quote-calculator');
 
 // HTML 이스케이프
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -246,6 +247,21 @@ async function autoReply() {
           console.log(`  📁 포트폴리오 레퍼런스 주입: ${refs.map(r => r.industry).join(', ')}`);
         }
 
+        // 가격/견적 의도면 자동 견적 계산 → Claude 프롬프트에 숫자 명시 (hallucination 방지)
+        let quoteBlock = '';
+        const needsQuote = intent && (
+          ['price', 'spec_confirm', 'feature_ask'].includes(intent.primary_intent) ||
+          /견적|가격|비용|얼마|패키지/.test(inquiry.message_content || '')
+        );
+        if (needsQuote) {
+          const calcInput = [inquiry.message_content || '', ...(intent?.customer_facts || []), ...(intent?.explicit_questions || [])].join(' ');
+          const q = calculateQuote(calcInput);
+          if (q && q.total > 0) {
+            quoteBlock = q.breakdown;
+            console.log(`  💰 견적 자동 계산: ${q.package ? q.package.name : '패키지미정'} + 옵션 ${q.options.length}개 = 총 ${(q.total / 10000).toFixed(0)}만원`);
+          }
+        }
+
         // [4단계] 대화 히스토리 블록 구성
         //   thread 길이 ≥6 → 이전 메시지는 구조화 요약, 최신 2개만 원문 (토큰 절약 + 집중도↑)
         //   < 6 → 전부 원문 (요약 오버헤드 불필요)
@@ -321,6 +337,7 @@ async function autoReply() {
         const taskContext = [
           intentBlock || null,  // 최상단 — 모든 판단의 기준
           summaryBlock ? `\n${summaryBlock}` : null,  // 장기 대화 요약 (6+ 메시지)
+          quoteBlock ? `\n${quoteBlock}` : null,  // 자동 견적 계산 (가격/스펙 의도)
           portfolioBlock ? `\n${portfolioBlock}` : null,  // 포트폴리오 요청 시에만 주입
           `문의 모드: ${isFollowUp ? '후속 문의 (인사 생략)' : '첫 문의'}`,
           `고객이 본 서비스 페이지 제목: ${serviceTitle}`,
@@ -373,8 +390,16 @@ async function autoReply() {
 
         const userMsg = `${taskContext}\n\n[지금 답변해야 할 고객 메시지]\n${inquiry.message_content || '(내용 없음)'}${attachNote}\n\n위 고객 메시지에 대한 답변을 작성해주세요. 직전 대화 히스토리가 있으면 반드시 연결되게 답변하고, 설명이나 주석 없이 답변 본문만 출력하세요.`;
 
-        // regen 모드: 사용자가 "맥락에 안 맞는다"고 판단한 상황 → temperature 올리고 명시적 instruction 추가
-        const claudeTemp = regenId ? 0.7 : 0.4;
+        // temperature 자동 결정 (intent 기반 quality dial)
+        //   - 컴플레인/분노/사람필요 → 0.2 (보수·정확성)
+        //   - 막연한 문의/저신뢰 → 0.6 (탐색적으로 질문 도출)
+        //   - 재생성 모드 → 0.7 (다른 각도)
+        //   - 기본 → 0.4
+        let claudeTemp = 0.4;
+        if (regenId) claudeTemp = 0.7;
+        else if (intent && (intent.sentiment === 'angry' || intent.sentiment === 'frustrated' || intent.requires_human)) claudeTemp = 0.2;
+        else if (intent && (intent.confidence === 'low' || intent.primary_intent === 'other')) claudeTemp = 0.6;
+
         const regenHint = regenId ? '\n\n⚠️ 직전 답변이 맥락에 맞지 않았습니다. 고객 메시지를 다시 정확히 읽고 새롭게 작성하되, 이전 답변과 구조·어조·강조점이 다르도록 해주세요.' : '';
         const finalUserMsg = userMsg + regenHint;
 
