@@ -27,6 +27,7 @@ const { summarizeConversation, formatSummaryForPrompt, THRESHOLD: SUMMARIZE_THRE
 const { calculateQuote } = require('./lib/quote-calculator');
 const { getCustomerProfile, formatProfileForPrompt } = require('./lib/customer-profile');
 const { findSemanticSimilar } = require('./lib/semantic-similar');
+const { getConvertedInquiryPool } = require('./lib/converted-examples');
 const { deepAnalyzeUrl, formatDeepAnalysisForPrompt } = require('./lib/url-deep-analyzer');
 const { analyzeAttachmentImages, formatVisionAnalysesForPrompt } = require('./lib/image-vision-analyzer');
 const { findPlaybook, formatPlaybookForPrompt } = require('./lib/sales-playbook');
@@ -135,28 +136,62 @@ async function autoReply() {
       }
 
       // 2-2. 학습 — 현재 질문과 유사한 과거 sent 답변
-      //   (1순위) Haiku 시맨틱 유사도 랭킹 — 의미·상황 일치도로 top-K 선택
-      //   (2순위 폴백) 키워드 overlap + 같은 product 보너스
-      //   (3순위 폴백) 같은 product 최근 답변으로 톤만 참고
+      //   (1순위) 전환 완료 고객 풀에서 시맨틱 랭킹 — 실제 계약으로 이어진 패턴 우선
+      //   (2순위) 전체 sent 풀에서 시맨틱 랭킹
+      //   (3순위 폴백) 키워드 overlap + 같은 product 보너스
+      //   (4순위 폴백) 같은 product 최근 답변으로 톤만 참고
       let approvedExamples = [];
+      let exampleSourceLabel = '';
       const semStart = Date.now();
-      const semR = await findSemanticSimilar({
-        currentMessage: inquiry.message_content || '',
-        productId: inquiry.product_id,
-        topK: 3,
-        poolSize: 25,
-      });
-      if (semR.ok && semR.examples && semR.examples.length > 0) {
-        approvedExamples = semR.examples;
-        console.log(`  학습참고(시맨틱 ${((Date.now() - semStart) / 1000).toFixed(1)}s, ${semR.model || 'haiku'}): ${approvedExamples.length}건 — ${semR.reasoning?.slice(0, 80) || '의미 기반 매칭'}`);
-      } else {
+
+      // 1) 전환 답변 풀 먼저 시도 (품질·근거 우선)
+      try {
+        const convPool = await getConvertedInquiryPool(inquiry.product_id, 20);
+        if (convPool.length >= 3) {
+          const convR = await findSemanticSimilar({
+            currentMessage: inquiry.message_content || '',
+            productId: inquiry.product_id,
+            topK: 3,
+            customPool: convPool,
+          });
+          if (convR.ok && convR.examples && convR.examples.length > 0) {
+            approvedExamples = convR.examples;
+            exampleSourceLabel = `전환 답변 (${convPool.length}풀)`;
+            console.log(`  학습참고(전환답변 ${((Date.now() - semStart) / 1000).toFixed(1)}s, ${convR.model || 'haiku'}): ${approvedExamples.length}건 / ${convR.reasoning?.slice(0, 70) || ''}`);
+          }
+        }
+      } catch (e) {
+        console.log(`  ⚠️ 전환답변 풀 조회 예외: ${e.message}`);
+      }
+
+      // 2) 전환 풀 부족 → 일반 시맨틱 검색
+      if (approvedExamples.length === 0) {
+        const semR = await findSemanticSimilar({
+          currentMessage: inquiry.message_content || '',
+          productId: inquiry.product_id,
+          topK: 3,
+          poolSize: 25,
+        });
+        if (semR.ok && semR.examples && semR.examples.length > 0) {
+          approvedExamples = semR.examples;
+          exampleSourceLabel = '시맨틱 전체풀';
+          console.log(`  학습참고(시맨틱 ${((Date.now() - semStart) / 1000).toFixed(1)}s, ${semR.model || 'haiku'}): ${approvedExamples.length}건`);
+        }
+      }
+
+      // 3~4) 폴백
+      if (approvedExamples.length === 0) {
         const similar = await getSimilarApprovedReplies(inquiry.message_content, inquiry.product_id, 3);
         if (similar.length > 0) {
           approvedExamples = similar;
-          console.log(`  학습참고(키워드 폴백): ${similar.length}건 (score=${similar.map(s => s.score).join(',')})`);
+          exampleSourceLabel = '키워드 폴백';
+          console.log(`  학습참고(키워드 폴백): ${similar.length}건`);
         } else if (inquiry.product_id) {
           const learn = await getRecentApprovedReplies(inquiry.product_id, 3);
-          if (learn.ok) approvedExamples = learn.examples;
+          if (learn.ok) {
+            approvedExamples = learn.examples;
+            exampleSourceLabel = '동일상품 최근답변';
+          }
         }
       }
 
@@ -417,7 +452,7 @@ async function autoReply() {
           gigDetailBlock ? `\n${gigDetailBlock}` : null,
           deepUrlBlock ? `\n${deepUrlBlock}` : (urlBlock ? `\n${urlBlock}` : null),
           historyBlock || null,
-          fewShot ? `\n최근 합격 답변 톤 참고 (톤만 참고, 내용 복사 금지):\n${fewShot}` : null,
+          fewShot ? `\n최근 합격 답변 톤 참고 [${exampleSourceLabel || '일반'}] (톤만 참고, 내용 복사 금지):\n${fewShot}` : null,
         ].filter(Boolean).join('\n');
 
         // 고객 첨부 이미지 수집 (Vision)
