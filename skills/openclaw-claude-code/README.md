@@ -118,7 +118,7 @@ claude-code-skill session-start gemini-dev -d ~/project \
 
 # With full options
 claude-code-skill session-start advanced -d ~/project \
-  --model claude-opus-4-5 \
+  --model claude-opus-4-7 \
   --permission-mode plan \
   --allowed-tools "Bash,Read,Edit,Write" \
   --max-budget 2.00 \
@@ -127,7 +127,7 @@ claude-code-skill session-start advanced -d ~/project \
 
 | Option | Description |
 |--------|-------------|
-| `-m, --model <model>` | Model to use (e.g., `claude-opus-4-5`, `gemini-2.0-flash`) |
+| `-m, --model <model>` | Model to use (e.g., `claude-opus-4-7`, `gemini-2.0-flash`) |
 | `-b, --base-url <url>` | Custom API endpoint for proxy/alternative backends |
 
 ### Permission Modes

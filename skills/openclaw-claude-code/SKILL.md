@@ -106,7 +106,7 @@ claude-code-skill session-start advanced -d ~/project \
   --allowed-tools "Bash,Read,Edit,Write" \
   --disallowed-tools "Task" \
   --max-budget 5.00 \
-  --model claude-opus-4-5 \
+  --model claude-opus-4-7 \
   --append-system-prompt "Always write tests" \
   --add-dir "/tmp,/var/log"
 ```

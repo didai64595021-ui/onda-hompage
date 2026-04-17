@@ -132,7 +132,7 @@ def _solve_with_anthropic(img_b64, prompt):
                 "anthropic-version": "2023-06-01",
             },
             json={
-                "model": "claude-sonnet-4-20250514",
+                "model": "claude-sonnet-4-6",
                 "max_tokens": 100,
                 "messages": [{
                     "role": "user",
