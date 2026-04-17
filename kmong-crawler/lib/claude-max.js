@@ -42,12 +42,31 @@ function postJson(hostname, path, headers, body) {
   });
 }
 
+// 일부 최신 모델(opus-4-7 이상)은 temperature 파라미터를 지원하지 않음 — 400 에러 반환
+//   2026-04-17 실측: opus-4-7이 'temperature is deprecated' 400 던짐 → 답변 전부 룰 폴백
+//   전략: 모델별로 temperature 포함 여부를 결정하고, 400 발생 시 자동으로 제거해 재시도
+const NO_TEMPERATURE_MODELS = /^(claude-opus-4-7|claude-haiku-4-7|claude-sonnet-4-7)/;
+
 async function callClaude({ accessToken, model, system, messages, max_tokens = 1024, temperature = 0.3 }) {
-  return postJson('api.anthropic.com', '/v1/messages', {
+  const body = { model, max_tokens, system, messages };
+  if (!NO_TEMPERATURE_MODELS.test(model)) body.temperature = temperature;
+
+  const r = await postJson('api.anthropic.com', '/v1/messages', {
     'anthropic-version': '2023-06-01',
     'anthropic-beta': 'oauth-2025-04-20',
     authorization: `Bearer ${accessToken}`,
-  }, { model, max_tokens, temperature, system, messages });
+  }, body);
+
+  // 자기치유: 400 + temperature deprecated 에러면 temperature 제거하고 1회 재시도
+  if (r.status === 400 && body.temperature != null && /temperature.*deprecated/i.test(String(r.body))) {
+    delete body.temperature;
+    return postJson('api.anthropic.com', '/v1/messages', {
+      'anthropic-version': '2023-06-01',
+      'anthropic-beta': 'oauth-2025-04-20',
+      authorization: `Bearer ${accessToken}`,
+    }, body);
+  }
+  return r;
 }
 
 /**
@@ -100,7 +119,8 @@ async function askClaude({ system, messages, model = 'sonnet', max_tokens = 1024
       } catch (e) { return { ok: false, error: `응답 파싱 실패: ${e.message}` }; }
     }
     lastStatus = r.status; lastBody = r.body;
-    if (r.status !== 429) break;  // 429가 아닌 에러는 모델 바꿔도 안 해결되니 중단
+    // 429(rate limit) + 400(파라미터 거부/검증 실패)는 다음 모델로 재시도 — 그 외는 중단
+    if (r.status !== 429 && r.status !== 400) break;
   }
   return { ok: false, error: `HTTP ${lastStatus}: ${String(lastBody).slice(0, 300)}`, status: lastStatus };
 }
