@@ -23,6 +23,7 @@ const { extractUrls, summarizeUrl, formatForPrompt } = require('./lib/url-summar
 const { extractIntent, formatIntentForPrompt, computeLeadHeat } = require('./lib/intent-extractor');
 const { verifyReply } = require('./lib/reply-verifier');
 const { findRelevantPortfolios, formatPortfoliosForPrompt } = require('./lib/portfolio-refs');
+const { summarizeConversation, formatSummaryForPrompt, THRESHOLD: SUMMARIZE_THRESHOLD } = require('./lib/conversation-summarizer');
 
 // HTML 이스케이프
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -246,9 +247,32 @@ async function autoReply() {
         }
 
         // [4단계] 대화 히스토리 블록 구성
+        //   thread 길이 ≥6 → 이전 메시지는 구조화 요약, 최신 2개만 원문 (토큰 절약 + 집중도↑)
+        //   < 6 → 전부 원문 (요약 오버헤드 불필요)
         let historyBlock = '';
-        if (thread.length > 1) {
-          const history = thread.slice(-10, -1);  // 현재 메시지 제외 직전 최대 9개
+        let summaryBlock = '';
+        if (thread.length >= SUMMARIZE_THRESHOLD) {
+          const sumStart = Date.now();
+          const sumR = await summarizeConversation({ thread, gigTitle: serviceTitle });
+          if (sumR.ok && sumR.shouldUse) {
+            summaryBlock = formatSummaryForPrompt(sumR.summary, sumR.summarized);
+            const recent2 = thread.slice(-3, -1);  // 현재 제외 직전 2개만 원문
+            historyBlock = recent2.length > 0
+              ? '\n[직전 원문 (최신 2개)]\n' + recent2.map((m, i) =>
+                  `${i + 1}. ${m.role === 'assistant' ? '우리' : '고객'}: ${m.content.slice(0, 240)}`
+                ).join('\n')
+              : '';
+            console.log(`  📝 대화 요약 (${((Date.now() - sumStart) / 1000).toFixed(1)}s, ${sumR.model}): stage=${sumR.summary.funnel_stage}, 커밋먼트 ${sumR.summary.our_commitments.length}개, 주의 ${sumR.summary.red_flags.length}개`);
+          } else {
+            // 요약 실패 → 원문으로 폴백
+            const history = thread.slice(-10, -1);
+            historyBlock = '\n[직전 대화 히스토리 (오래된 → 최신)]\n' + history.map((m, i) =>
+              `${i + 1}. ${m.role === 'assistant' ? '우리' : '고객'}: ${m.content.slice(0, 200)}`
+            ).join('\n');
+            if (sumR.error) console.log(`  ⚠️ 대화 요약 실패 → 원문 사용: ${sumR.error.slice(0, 100)}`);
+          }
+        } else if (thread.length > 1) {
+          const history = thread.slice(-10, -1);
           historyBlock = '\n[직전 대화 히스토리 (오래된 → 최신)]\n' + history.map((m, i) =>
             `${i + 1}. ${m.role === 'assistant' ? '우리' : '고객'}: ${m.content.slice(0, 200)}`
           ).join('\n');
@@ -296,6 +320,7 @@ async function autoReply() {
 
         const taskContext = [
           intentBlock || null,  // 최상단 — 모든 판단의 기준
+          summaryBlock ? `\n${summaryBlock}` : null,  // 장기 대화 요약 (6+ 메시지)
           portfolioBlock ? `\n${portfolioBlock}` : null,  // 포트폴리오 요청 시에만 주입
           `문의 모드: ${isFollowUp ? '후속 문의 (인사 생략)' : '첫 문의'}`,
           `고객이 본 서비스 페이지 제목: ${serviceTitle}`,
