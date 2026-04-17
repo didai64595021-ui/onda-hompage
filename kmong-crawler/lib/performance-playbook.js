@@ -52,9 +52,18 @@ function getPlaybookForContext({ intent, serviceTitle = '', productId = '' }) {
   // 같은 product_id 가 상위권이면 우선 강조 (본인 상품 성과)
   const isSelfInTop = [ctrLeaders, cvrLeaders, roiLeaders].flat().some(l => l.product_id === productId);
 
+  // [Phase 8A] 신규 지표 — 추세·소재변경·패키지·시간대
+  const selfRow = productId ? insights.rows?.find(r => r.product_id === productId) : null;
+  const selfTrend = selfRow?.trend;
+  const pkgPref = selfRow?.package_preference;
+  const creativeWins = (insights.creative_impact?.wins || []).slice(0, 3);
+  const topRising = (insights.trends?.rising || []).slice(0, 2);
+  const hoursTop = (insights.hour_performance || []).slice(0, 3);
+
   return {
     ctrLeaders, cvrLeaders, orderLeaders, roiLeaders, revenueLeaders,
     isSelfInTop,
+    selfTrend, pkgPref, creativeWins, topRising, hoursTop,
     generated_at: insights.generated_at,
   };
 }
@@ -102,6 +111,32 @@ function formatPlaybookForPrompt(pb) {
 
   if (pb.isSelfInTop) {
     lines.push(`\n✨ 현재 문의 서비스가 상위권에 있음 — "이미 결제 실적 있는 상품"이라는 신뢰 포인트 자연스럽게 노출 (단, 구체 숫자 과장 금지)`);
+  }
+
+  // [Phase 8A] 추세·소재·패키지·시간대 인사이트
+  if (pb.selfTrend && pb.selfTrend.ctr_change_pct != null) {
+    const dir = pb.selfTrend.ctr_change_pct >= 0 ? '🔺 상승' : '🔻 하락';
+    lines.push(`\n• 본 서비스 14일 추세: ${dir} ${pb.selfTrend.ctr_change_pct}% (${pb.selfTrend.prev_ctr}% → ${pb.selfTrend.recent_ctr}%)`);
+    if (pb.selfTrend.ctr_change_pct < -10) lines.push(`    → 최근 유입 둔화 감지 — 답변에서 답변 속도/전문성 더 강조 필요`);
+  }
+  if (pb.pkgPref && Object.keys(pb.pkgPref).length) {
+    const sorted = Object.entries(pb.pkgPref).sort((a, b) => b[1] - a[1]);
+    const topPkg = sorted[0];
+    lines.push(`\n• 본 서비스 결제 패키지 선호: ${sorted.map(([k, v]) => `${k} ${(v * 100).toFixed(0)}%`).join(' / ')}`);
+    lines.push(`    → 견적 안내 시 ${topPkg[0]} 패키지를 "가장 많이 선택하세요" 문구로 자연 유도`);
+  }
+  if (pb.creativeWins.length) {
+    lines.push(`\n• 최근 소재 변경 성공 사례 — 어떤 변경이 CTR을 올렸나:`);
+    pb.creativeWins.forEach(c => lines.push(`    - "${(c.title || '').slice(0, 35)}" ${c.type} 변경 → CTR ${c.before_ctr}% → ${c.after_ctr}% (+${c.impact_pct}%)`));
+  }
+  if (pb.topRising.length) {
+    lines.push(`\n• 최근 상승세 서비스:`);
+    pb.topRising.forEach(r => lines.push(`    - "${(r.title || '').slice(0, 35)}" +${r.trend.ctr_change_pct}%`));
+  }
+  if (pb.hoursTop.length) {
+    const top = pb.hoursTop.map(h => `${h.hour}시(${h.inquiries})`).join(' · ');
+    lines.push(`\n• 문의 집중 시간대: ${top}`);
+    lines.push(`    → 답변은 해당 시간대에 맞춰 즉각 반응이 가장 효율적`);
   }
 
   lines.push(`\n⚠️ 답변 작성 지침:
