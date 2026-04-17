@@ -117,6 +117,15 @@ module.exports = {
       watch: false,
       env: { ...COMMON_ENV },
     },
+    {
+      name: 'kmong-followup-nudge',
+      script: './followup-nudge.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '0 10 * * *',  // 매일 오전 10시 (영업시간 내 1회)
+      autorestart: false,
+      watch: false,
+      env: { ...COMMON_ENV },
+    },
     // === Phase 3: AI 콘텐츠 생성 + A/B 테스트 ===
     {
       name: 'kmong-content-gen',
