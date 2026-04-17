@@ -28,6 +28,7 @@ const { calculateQuote } = require('./lib/quote-calculator');
 const { getCustomerProfile, formatProfileForPrompt } = require('./lib/customer-profile');
 const { findSemanticSimilar } = require('./lib/semantic-similar');
 const { deepAnalyzeUrl, formatDeepAnalysisForPrompt } = require('./lib/url-deep-analyzer');
+const { analyzeAttachmentImages, formatVisionAnalysesForPrompt } = require('./lib/image-vision-analyzer');
 
 // HTML 이스케이프
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -441,11 +442,29 @@ async function autoReply() {
             console.log(`  ⚠️ 이미지 로드 실패: ${att.file_name} — ${r.error}`);
           }
         }
+        // [Phase 6G] heat ≥ 60 && 첨부 이미지 존재 → Opus Vision 사전 심층 분석
+        //   분석 결과 텍스트를 프롬프트에 주입하고, 이미지 원본도 여전히 Claude에 넘겨 교차 참조
+        let visionBlock = '';
+        if (leadHeat.score >= 60 && imageBlocks.length > 0) {
+          const visionStart = Date.now();
+          const visionR = await analyzeAttachmentImages({
+            imageBlocks,
+            customerMessage: inquiry.message_content || '',
+          });
+          if (visionR.ok) {
+            visionBlock = formatVisionAnalysesForPrompt(visionR.analyses);
+            const okCount = visionR.analyses.filter(a => a.ok).length;
+            if (okCount > 0) {
+              console.log(`  🖼️ Vision 심층 분석 (${((Date.now() - visionStart) / 1000).toFixed(1)}s): ${okCount}/${imageBlocks.length}장 분석 완료`);
+            }
+          }
+        }
+
         const attachNote = imageBlocks.length > 0
-          ? `\n\n[고객 첨부 이미지 ${imageBlocks.length}장]\n아래 이미지는 이번 문의에 고객이 첨부한 파일입니다 (${imageBlocks.map(b => b._meta.file_name).join(', ')}). 답변 작성 전 반드시 이미지 내용을 정확히 관찰하고, 거기에 담긴 정보(레이아웃/구조표/화면/참고자료 등)를 답변에 구체적으로 반영하세요. "첨부 잘 받았습니다"로 끝내지 말고, 이미지에서 파악한 핵심을 2~3가지 짚어주고 다음 스텝으로 연결하세요.`
+          ? `\n\n[고객 첨부 이미지 ${imageBlocks.length}장]\n아래 이미지는 이번 문의에 고객이 첨부한 파일입니다 (${imageBlocks.map(b => b._meta.file_name).join(', ')}). ${visionBlock ? '위에 Vision 사전 분석 결과가 있으니 그걸 우선 참고하되' : '답변 작성 전 반드시 이미지 내용을 정확히 관찰하고'}, 거기에 담긴 정보(레이아웃/구조표/화면/참고자료 등)를 답변에 구체적으로 반영하세요. "첨부 잘 받았습니다"로 끝내지 말고, 이미지에서 파악한 핵심을 2~3가지 짚어주고 다음 스텝으로 연결하세요.`
           : '';
 
-        const userMsg = `${taskContext}\n\n[지금 답변해야 할 고객 메시지]\n${inquiry.message_content || '(내용 없음)'}${attachNote}\n\n위 고객 메시지에 대한 답변을 작성해주세요. 직전 대화 히스토리가 있으면 반드시 연결되게 답변하고, 설명이나 주석 없이 답변 본문만 출력하세요.`;
+        const userMsg = `${taskContext}${visionBlock ? '\n\n' + visionBlock : ''}\n\n[지금 답변해야 할 고객 메시지]\n${inquiry.message_content || '(내용 없음)'}${attachNote}\n\n위 고객 메시지에 대한 답변을 작성해주세요. 직전 대화 히스토리가 있으면 반드시 연결되게 답변하고, 설명이나 주석 없이 답변 본문만 출력하세요.`;
 
         // temperature 자동 결정 (intent 기반 quality dial)
         //   - 컴플레인/분노/사람필요 → 0.2 (보수·정확성)
