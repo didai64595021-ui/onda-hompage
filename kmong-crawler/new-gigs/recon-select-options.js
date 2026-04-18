@@ -20,8 +20,13 @@ async function main() {
   const { browser, page } = await login({ slowMo: 60 });
   try {
     const url = `https://kmong.com/my-gigs/edit/${draftId}?rootCategoryId=6&subCategoryId=${subCategoryId}`;
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await sleep(6000);
+    console.log(`[recon-opts] warm-up /my-gigs/new`);
+    await page.goto('https://kmong.com/my-gigs/new', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await sleep(5000);
+    console.log(`[recon-opts] SPA nav → ${url}`);
+    await page.evaluate((u) => { window.location.href = u; }, url);
+    await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
+    await sleep(4000);
 
     // 1) discoverSelects (label 매핑) — create-gig.js 와 동일 로직
     const selects = await page.evaluate(() => {

@@ -27,9 +27,13 @@ async function main() {
   const { browser, page } = await login({ slowMo: 80 });
   try {
     const url = `https://kmong.com/my-gigs/edit/${draftId}?rootCategoryId=6&subCategoryId=${subCategoryId}`;
-    console.log(`[recon] goto ${url}`);
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await sleep(6000);
+    console.log(`[recon] warm-up /my-gigs/new`);
+    await page.goto('https://kmong.com/my-gigs/new', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await sleep(5000);
+    console.log(`[recon] SPA nav → ${url}`);
+    await page.evaluate((u) => { window.location.href = u; }, url);
+    await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
+    await sleep(4000);
 
     // Step1 페이지에서 시작 — Step1 폼 dump 후 "다음" 클릭하고 Step2 dump
     const out = { draftId, subCategoryId, at: new Date().toISOString(), step1: {}, step2: {} };
