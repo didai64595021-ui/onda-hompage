@@ -3,6 +3,7 @@
  */
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 const path = require('path');
+const fs = require('fs');
 const { login } = require('../lib/login');
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
@@ -24,7 +25,15 @@ async function collect(page) {
       const id = m ? m[1] : '';
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
       const title = lines.find(l => l.length > 8 && l.length < 80 && !/^#|판매중|승인|편집|임시|^\d+$/.test(l)) || '';
-      out.push({ id, title, preview: text.slice(0, 120) });
+      // 버튼의 click handler 에서 href 추출 시도
+      let href = '';
+      if (eb.closest('a')) href = eb.closest('a').href;
+      else {
+        const a = card.querySelector('a[href*="/my-gigs/edit/"]');
+        if (a) href = a.href;
+      }
+      const params = href ? Object.fromEntries(new URLSearchParams((href.split('?')[1]) || '').entries()) : {};
+      out.push({ id, title, preview: text.slice(0, 120), href, rootCategoryId: params.rootCategoryId || '', subCategoryId: params.subCategoryId || '', thirdCategoryId: params.thirdCategoryId || '' });
     }
     return out;
   });
@@ -44,10 +53,9 @@ async function collect(page) {
       all.push(...items);
     }
     console.log(`\n=== WAITING drafts: ${all.length}개 ===`);
-    all.forEach(it => console.log(`  #${it.id.padEnd(8)} ${it.title}`));
-    console.log('\n=== 아임웹/N01 관련 ===');
-    const imweb = all.filter(it => it.title.includes('아임웹') || it.preview.includes('아임웹'));
-    imweb.forEach(it => console.log(`  #${it.id.padEnd(8)} ${it.title}`));
+    all.forEach(it => console.log(`  #${it.id.padEnd(8)} sub=${String(it.subCategoryId).padEnd(5)} third=${String(it.thirdCategoryId).padEnd(8)} ${it.title}`));
+    fs.writeFileSync(path.join(__dirname, 'list-waiting-drafts.json'), JSON.stringify(all, null, 2));
+    console.log(`\n결과 저장: list-waiting-drafts.json`);
   } finally {
     await browser.close().catch(() => {});
   }
