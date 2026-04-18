@@ -47,7 +47,7 @@ function postJson(hostname, path, headers, body) {
 //   전략: 모델별로 temperature 포함 여부를 결정하고, 400 발생 시 자동으로 제거해 재시도
 const NO_TEMPERATURE_MODELS = /^(claude-opus-4-7|claude-haiku-4-7|claude-sonnet-4-7)/;
 
-async function callClaude({ accessToken, model, system, messages, max_tokens = 1024, temperature = 0.3 }) {
+async function callClaude({ accessToken, model, system, messages, max_tokens = 16384, temperature = 0.3 }) {
   const body = { model, max_tokens, system, messages };
   if (!NO_TEMPERATURE_MODELS.test(model)) body.temperature = temperature;
 
@@ -79,22 +79,21 @@ async function callClaude({ accessToken, model, system, messages, max_tokens = 1
  * @param {number} [opts.temperature]
  * @returns {Promise<{ok: boolean, text?: string, usage?: object, error?: string, account?: string}>}
  */
+// 2026-04-19: 전체 opus-4-7 통일 (사용자 지시 "모두 4.7 opus max토큰")
 const MODEL_ALIAS = {
-  sonnet: 'claude-sonnet-4-6',
+  sonnet: 'claude-opus-4-7',
   opus:   'claude-opus-4-7',
-  haiku:  'claude-haiku-4-5',
+  haiku:  'claude-opus-4-7',
 };
 
-// 폴백 체인 — 상위 모델이 429(rate limit) 또는 400(파라미터 거부) 나면 하위 모델로 순차 시도
-//  크몽 답변봇은 "답변 없음(rule fallback)" 보다 "Haiku 답변" 이 훨씬 낫기에 haiku까지 포함
-//  ※ 고품질 답변을 원할 때만 model='opus' 전달, 기본 sonnet은 이미 충분함
+// 폴백 체인 — opus-4-7 단일. 429는 callClaude 내부 재시도로 처리.
 const FALLBACK_CHAIN = {
-  opus:   ['claude-opus-4-7', 'claude-sonnet-4-6', 'claude-haiku-4-5'],
-  sonnet: ['claude-sonnet-4-6', 'claude-haiku-4-5'],
-  haiku:  ['claude-haiku-4-5'],
+  opus:   ['claude-opus-4-7'],
+  sonnet: ['claude-opus-4-7'],
+  haiku:  ['claude-opus-4-7'],
 };
 
-async function askClaude({ system, messages, model = 'sonnet', max_tokens = 1024, temperature = 0.3, retryOn429 = true }) {
+async function askClaude({ system, messages, model = 'opus', max_tokens = 16384, temperature = 0.3, retryOn429 = true }) {
   // ondadaad@gmail.com 계정 통일 — account2만 사용
   const chain = FALLBACK_CHAIN[model] || [MODEL_ALIAS[model] || model];
 
