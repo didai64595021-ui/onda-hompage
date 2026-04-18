@@ -1528,20 +1528,21 @@ body > footer.footer {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 22px 22px 20px;
+  padding: 22px;
   background: var(--ink-2);
-  border: 1px solid var(--line);
-  border-radius: 14px;
+  border: 1px solid var(--line-2);
+  border-radius: 16px;
   text-decoration: none;
   color: var(--fg);
-  min-height: 200px;
-  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+  min-height: 280px;
+  transition: transform 0.3s cubic-bezier(.19,1,.22,1), border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
   overflow: hidden;
 }
 .tile:hover {
-  transform: translateY(-3px);
-  border-color: var(--line-2);
+  transform: translateY(-4px);
+  border-color: var(--fg-dim);
   background: var(--ink-3);
+  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5);
 }
 .tile-tag {
   font-family: var(--mono);
@@ -1603,6 +1604,118 @@ body > footer.footer {
   width: 2px;
   background: var(--ig-grad);
 }
+
+/* Tile v3 — 버튼형 카드: 아이콘 + CTA 명확 */
+.tile-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: -4px;
+}
+.tile-icon-box {
+  width: 52px;
+  height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line-2);
+  color: var(--fg-dim);
+  flex-shrink: 0;
+  transition: all 0.3s cubic-bezier(.19,1,.22,1);
+}
+.tile-ic {
+  width: 26px;
+  height: 26px;
+  display: block;
+}
+.tile--naver .tile-icon-box {
+  background: rgba(31, 219, 123, 0.08);
+  border-color: rgba(31, 219, 123, 0.3);
+  color: var(--naver);
+}
+.tile--ig .tile-icon-box {
+  background: rgba(255, 61, 127, 0.08);
+  border-color: rgba(255, 61, 127, 0.3);
+  color: var(--ig-magenta);
+}
+.tile--info .tile-icon-box {
+  background: rgba(255, 180, 92, 0.08);
+  border-color: rgba(255, 180, 92, 0.3);
+  color: var(--ig-gold);
+}
+.tile:hover .tile-icon-box {
+  transform: scale(1.08) rotate(-3deg);
+  border-color: var(--fg);
+}
+.tile--feature .tile-icon-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+}
+.tile--feature .tile-ic {
+  width: 32px;
+  height: 32px;
+}
+
+/* CTA 버튼 — 명확한 클릭 대상 */
+.tile-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 12px 18px;
+  background: var(--fg);
+  color: var(--ink);
+  border-radius: 10px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  text-transform: none;
+  transition: transform 0.3s cubic-bezier(.19,1,.22,1), box-shadow 0.3s ease, background 0.3s ease;
+  align-self: stretch;
+  width: 100%;
+  border: 1px solid transparent;
+}
+.tile-cta .tile-arr {
+  font-family: var(--mono);
+  font-size: 14px;
+  transition: transform 0.3s cubic-bezier(.19,1,.22,1);
+}
+.tile:hover .tile-cta {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px -10px rgba(245, 242, 234, 0.3);
+}
+.tile:hover .tile-cta .tile-arr {
+  transform: translateX(5px);
+}
+.tile--naver .tile-cta {
+  background: var(--naver);
+  color: var(--ink);
+}
+.tile--naver:hover .tile-cta {
+  box-shadow: 0 12px 28px -10px rgba(31, 219, 123, 0.45);
+}
+.tile--ig .tile-cta {
+  background: var(--ig-grad);
+  color: #fff;
+}
+.tile--ig:hover .tile-cta {
+  box-shadow: 0 12px 28px -10px rgba(255, 61, 127, 0.45);
+}
+.tile--info .tile-cta {
+  background: var(--ig-gold);
+  color: var(--ink);
+}
+.tile--info:hover .tile-cta {
+  box-shadow: 0 12px 28px -10px rgba(255, 180, 92, 0.45);
+}
+
+/* 기존 tile-arrow 호환 (남아있는 경우) */
+.tile-arrow { display: none; }
 
 /* Tile info-density — badges/meta/price */
 .tile-badges {
@@ -1703,7 +1816,7 @@ body > footer.footer {
   .panel-lede { font-size: 14px; }
   .tile-grid { grid-template-columns: 1fr; gap: 12px; }
   .tile--feature { grid-column: span 1; }
-  .tile { min-height: 0; padding: 18px; gap: 8px; }
+  .tile { min-height: 0; padding: 18px; gap: 10px; }
   .tile-title { font-size: 16px; }
   .tile--feature .tile-title { font-size: 19px; }
   .tile-desc { font-size: 13px; }
@@ -1712,5 +1825,10 @@ body > footer.footer {
   .tile-meta { font-size: 11px; gap: 4px 6px; padding-top: 8px; }
   .tile-price { font-size: 12.5px; }
   .tile-term { font-size: 10.5px; }
+  .tile-icon-box { width: 44px; height: 44px; border-radius: 12px; }
+  .tile-ic { width: 22px; height: 22px; }
+  .tile--feature .tile-icon-box { width: 52px; height: 52px; }
+  .tile--feature .tile-ic { width: 26px; height: 26px; }
+  .tile-cta { padding: 10px 14px; font-size: 13px; }
 }
 
