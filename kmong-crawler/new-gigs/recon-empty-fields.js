@@ -26,7 +26,8 @@ async function main() {
   console.log(`[recon] draftId=${draftId} subCategoryId=${subCategoryId}`);
   const { browser, page } = await login({ slowMo: 80 });
   try {
-    const url = `https://kmong.com/my-gigs/edit/${draftId}?rootCategoryId=6&subCategoryId=${subCategoryId}`;
+    const thirdCategoryId = process.argv[4] || '';
+    const url = `https://kmong.com/my-gigs/edit/${draftId}?rootCategoryId=6&subCategoryId=${subCategoryId}${thirdCategoryId ? `&thirdCategoryId=${thirdCategoryId}` : ''}`;
     console.log(`[recon] warm-up /my-gigs/new`);
     await page.goto('https://kmong.com/my-gigs/new', { waitUntil: 'domcontentloaded', timeout: 30000 });
     await sleep(5000);
