@@ -33,12 +33,18 @@ function shouldSend(type) {
 
 /**
  * 타입별 알림 전송.
+ * 'report' 타입은 장문이라 sendCard(재시도/HTML fallback) 경로로 송신.
  * @param {string} type - crawl|toggle|inquiry|reply|budget|error|report|session|command
  * @param {string} message
  */
 function notifyTyped(type, message) {
   if (!shouldSend(type)) {
     console.log(`[알림 스킵:${type}] ${String(message).slice(0, 80)}`);
+    return;
+  }
+  // 리포트는 길고 HTML이 많아 sendCard(재시도+fallback)로 보내야 안정적
+  if (type === 'report') {
+    sendCard(message).catch((e) => console.error(`[report send] ${e.message}`));
     return;
   }
   notify(message);
