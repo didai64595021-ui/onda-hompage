@@ -4,24 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>상품 가격표 - 전문 마케팅 서비스</title>
-  <link rel="stylesheet" href="../styles.css?v=20260417-silentscale">
+  <link rel="stylesheet" href="../styles.css?v=20260419-density">
   <style>
+    /* Dark theme aligned — overrides for price-list only */
     .callout-warning {
-      background: #fff8e1;
-      border-left: 4px solid #f9a825;
+      background: rgba(255, 180, 92, 0.06);
+      border-left: 3px solid var(--ig-gold);
       padding: 16px 20px;
       border-radius: 6px;
       margin: 24px 0;
     }
     .callout-warning strong {
       display: block;
-      color: #e65100;
+      color: var(--ig-gold);
       font-size: 15px;
       margin-bottom: 8px;
     }
     .callout-warning p {
       margin: 0 0 10px;
-      color: #555;
+      color: var(--fg-dim);
       font-size: 14px;
       line-height: 1.6;
     }
@@ -32,8 +33,9 @@
       margin-top: 10px;
     }
     .callout-warning .highlight-items span {
-      background: #ffcc02;
-      color: #333;
+      background: rgba(255, 180, 92, 0.14);
+      color: var(--ig-gold);
+      border: 1px solid rgba(255, 180, 92, 0.32);
       padding: 4px 12px;
       border-radius: 20px;
       font-size: 13px;
@@ -45,13 +47,13 @@
     .service-section h2 {
       font-size: 18px;
       font-weight: 700;
-      color: #1a1a1a;
-      border-left: 4px solid #00B050;
+      color: var(--fg);
+      border-left: 3px solid var(--naver);
       padding-left: 12px;
       margin-bottom: 16px;
     }
     .service-section p {
-      color: #555;
+      color: var(--fg-dim);
       font-size: 14px;
       line-height: 1.7;
       margin-bottom: 16px;
@@ -61,22 +63,37 @@
       border-collapse: collapse;
       font-size: 14px;
       margin-bottom: 16px;
+      background: var(--ink-2);
+      border: 1px solid var(--line-2);
+      border-radius: 8px;
+      overflow: hidden;
     }
     .price-table th {
-      background: #00B050;
-      color: #fff;
-      padding: 10px 14px;
+      background: var(--ink-3);
+      color: var(--fg);
+      padding: 12px 14px;
       text-align: left;
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--line-2);
     }
     .price-table td {
-      padding: 10px 14px;
-      border-bottom: 1px solid #e8e8e8;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
       vertical-align: top;
-      color: #333;
+      color: var(--fg-dim);
     }
-    .price-table tr:nth-child(even) td {
-      background: #f8f8f8;
+    .price-table tbody tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .price-table tbody tr:hover td {
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .price-table tbody td:first-child {
+      color: var(--fg);
+      font-weight: 600;
     }
     .price-table td ul {
       margin: 0;
@@ -85,49 +102,71 @@
     .price-table td ul li {
       margin-bottom: 4px;
     }
+    .price-table td strong {
+      color: var(--naver);
+      font-family: var(--mono);
+      font-size: 15px;
+    }
     .service-link {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       margin-top: 8px;
-      padding: 8px 18px;
-      background: #00B050;
-      color: #fff;
-      border-radius: 6px;
+      padding: 10px 20px;
+      background: transparent;
+      color: var(--fg);
+      border: 1px solid var(--line-2);
+      border-radius: 999px;
       text-decoration: none;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
-      transition: background 0.2s;
+      letter-spacing: 0.02em;
+      transition: border-color 0.25s, background 0.25s, color 0.25s;
     }
     .service-link:hover {
-      background: #008f3e;
+      border-color: var(--naver);
+      background: rgba(31, 219, 123, 0.08);
+      color: var(--naver);
     }
     .step-label {
       display: inline-block;
-      background: #00B050;
-      color: #fff;
-      font-size: 12px;
+      background: var(--ink-3);
+      color: var(--ig-gold);
+      border: 1px solid rgba(255, 180, 92, 0.32);
+      font-family: var(--mono);
+      font-size: 11px;
       font-weight: 700;
-      padding: 3px 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 4px 10px;
       border-radius: 4px;
-      margin-bottom: 10px;
+      margin-right: 8px;
     }
     .subsection-title {
       font-size: 16px;
       font-weight: 700;
-      color: #1a1a1a;
+      color: var(--fg);
       margin: 28px 0 12px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
     }
     .table-group-title {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
-      color: #333;
+      color: var(--fg);
       margin: 20px 0 8px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      font-family: var(--mono);
     }
     .badge-discontinued {
       display: inline-block;
-      background: #e0e0e0;
-      color: #888;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--fg-mute);
+      border: 1px solid var(--line);
       font-size: 12px;
-      padding: 2px 8px;
+      padding: 2px 10px;
       border-radius: 4px;
     }
     .page-images {
@@ -139,7 +178,7 @@
     .page-images img {
       width: calc(50% - 8px);
       border-radius: 8px;
-      border: 1px solid #e8e8e8;
+      border: 1px solid var(--line-2);
       object-fit: cover;
     }
     .cta-kakao {
@@ -160,13 +199,13 @@
     }
     .note {
       font-size: 13px;
-      color: #888;
+      color: var(--fg-mute);
       margin-top: 6px;
     }
     @media (max-width: 600px) {
       .page-images img { width: 100%; }
       .price-table { font-size: 13px; }
-      .price-table th, .price-table td { padding: 8px 10px; }
+      .price-table th, .price-table td { padding: 10px 12px; }
     }
   </style>
 </head>
