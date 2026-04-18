@@ -12,6 +12,7 @@ const { supabase } = require('./supabase');
 const { getGigKoreanName } = require('./gig-name');
 const { getBalanceOnDate, getLatestSavedBalance } = require('./bizmoney');
 const { getInquiryStats, getReplySentStats } = require('./inquiry-stats');
+const { getLatestMonthlySpend } = require('./monthly-spend');
 
 const KST_OFFSET_MS = 9 * 3600 * 1000;
 
@@ -55,13 +56,15 @@ async function buildInquirySection(startDate, endDate) {
   const reply = await getReplySentStats(startDate, endDate);
 
   const lines = [`📨 <b>문의</b> (${startDate}${startDate === endDate ? '' : ` ~ ${endDate}`})`];
-  lines.push(`  신규 객수: ${stats.uniqueCustomers}명 (총 메시지 ${stats.messageCount}건)`);
+  // "객수" = 최초문의 기준 신규 고객 (사용자 정의 2026-04-18)
+  lines.push(`  신규 객수: <b>${stats.newCustomers}명</b> (활동 고객 ${stats.uniqueCustomers}명 · 메시지 ${stats.messageCount}건)`);
   lines.push(`  자동답변 생성: ${reply.generated}건 / 발송: ${reply.sent}건`);
   if (stats.customers.length > 0 && startDate === endDate) {
     lines.push(`  고객 상세:`);
     for (const c of stats.customers.slice(0, 10)) {
       const koName = await getGigKoreanName(c.productId);
-      lines.push(`    • ${c.customer} (${c.messageCount}회, ${koName})`);
+      const mark = c.isNew ? '🆕' : '🔁';
+      lines.push(`    ${mark} ${c.customer} (${c.messageCount}회, ${koName})`);
     }
   }
   return lines.join('\n');
@@ -70,7 +73,7 @@ async function buildInquirySection(startDate, endDate) {
 /**
  * CPC 지출 섹션.
  */
-async function buildCpcSection(startDate, endDate) {
+async function buildCpcSection(startDate, endDate, opts = {}) {
   const { data } = await supabase
     .from('kmong_cpc_daily')
     .select('product_id, impressions, clicks, cpc_cost, ctr')
@@ -80,10 +83,21 @@ async function buildCpcSection(startDate, endDate) {
   const rows = data || [];
   const impressions = rows.reduce((s, r) => s + (r.impressions || 0), 0);
   const clicks = rows.reduce((s, r) => s + (r.clicks || 0), 0);
-  const cost = rows.reduce((s, r) => s + (r.cpc_cost || 0), 0);
+  let cost = rows.reduce((s, r) => s + (r.cpc_cost || 0), 0);
   const ctrAvg = impressions > 0 ? ((clicks / impressions) * 100).toFixed(2) : '0.00';
 
-  return `💸 <b>광고(CPC)</b>\n  지출: ${fmtWon(cost)} / 노출 ${impressions.toLocaleString()} · 클릭 ${clicks.toLocaleString()} · CTR ${ctrAvg}%`;
+  const lines = ['💸 <b>광고(CPC)</b>'];
+  lines.push(`  DB 합계 (${startDate}${startDate === endDate ? '' : `~${endDate}`}): ${fmtWon(cost)}`);
+  lines.push(`  노출 ${impressions.toLocaleString()} · 클릭 ${clicks.toLocaleString()} · CTR ${ctrAvg}%`);
+
+  // 월간 범위면 어드민 실측값도 표시 (오차 교차확인)
+  if (opts.showMonthlyReal) {
+    const real = await getLatestMonthlySpend();
+    if (real?.total_ad_cost != null) {
+      lines.push(`  <b>어드민 실측 (이번 달): ${fmtWon(real.total_ad_cost)}</b> ← 정확값`);
+    }
+  }
+  return lines.join('\n');
 }
 
 /**

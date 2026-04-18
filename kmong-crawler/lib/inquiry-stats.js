@@ -241,4 +241,5 @@ module.exports = {
   getWeekStats,
   getMonthStats,
   getReplySentStats,
+  loadFirstInquiryMap,
 };

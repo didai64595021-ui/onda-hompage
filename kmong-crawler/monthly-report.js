@@ -18,8 +18,9 @@ const {
   buildOrderSection,
   buildBottleneckSection,
 } = require('./lib/report-sections');
-const { getMonthStats } = require('./lib/inquiry-stats');
+const { getMonthStats, loadFirstInquiryMap, kstDate } = require('./lib/inquiry-stats');
 const { getBalanceHistory } = require('./lib/bizmoney');
+const { refreshMonthlySpend, getLatestMonthlySpend } = require('./lib/monthly-spend');
 
 const KST_OFFSET_MS = 9 * 3600 * 1000;
 
@@ -71,15 +72,20 @@ async function buildWeeklyBreakdown(year, month, lastDay) {
     { label: `22~${lastDay}일`, from: 22, to: lastDay },
   ];
 
-  const lines = ['📅 <b>주차별 요약</b>'];
+  // 신규 객수 = 각 고객의 최초문의가 해당 주차 범위 내
+  const firstInqMap = await loadFirstInquiryMap();
+
+  const lines = ['📅 <b>주차별 요약</b> (객수 = 신규 고객)'];
   lines.push('  <code>기간       객수  CPC지출    매출      </code>');
   for (const w of weeks) {
     const customers = new Set();
     let cpcCost = 0;
     let revenue = 0;
-    for (const r of monthStats.rows) {
-      const day = parseInt(r.inquiry_date.slice(8, 10), 10);
-      if (day >= w.from && day <= w.to && r.customer_name) customers.add(r.customer_name);
+    for (const [name, firstDate] of firstInqMap.entries()) {
+      const d = kstDate(firstDate);
+      if (!d.startsWith(`${year}-${String(month).padStart(2, '0')}`)) continue;
+      const day = parseInt(d.slice(8, 10), 10);
+      if (day >= w.from && day <= w.to) customers.add(name);
     }
     for (const r of cpcs || []) {
       const day = parseInt(r.date.slice(8, 10), 10);
@@ -106,19 +112,29 @@ async function buildProfitSection(year, month, lastDay) {
     .eq('status', '거래완료');
   const revenue = (ords || []).reduce((s, r) => s + (r.amount || 0), 0);
 
-  const { data: cpcs } = await supabase
-    .from('kmong_cpc_daily')
-    .select('cpc_cost')
-    .gte('date', `${year}-${String(month).padStart(2, '0')}-01`)
-    .lte('date', `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`);
-  const adCost = (cpcs || []).reduce((s, r) => s + (r.cpc_cost || 0), 0);
+  // 월간 광고비는 어드민 실측 (monthly-spend) 우선, fallback DB 합계
+  const real = await getLatestMonthlySpend();
+  let adCost;
+  let source;
+  if (real?.total_ad_cost != null) {
+    adCost = real.total_ad_cost;
+    source = `어드민 실측 (${real.date})`;
+  } else {
+    const { data: cpcs } = await supabase
+      .from('kmong_cpc_daily')
+      .select('cpc_cost')
+      .gte('date', `${year}-${String(month).padStart(2, '0')}-01`)
+      .lte('date', `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`);
+    adCost = (cpcs || []).reduce((s, r) => s + (r.cpc_cost || 0), 0);
+    source = 'DB 일자별 합계';
+  }
 
   const profit = revenue - adCost;
   const roi = adCost > 0 ? ((profit / adCost) * 100).toFixed(1) : 'N/A';
   return [
     '📊 <b>월간 수익</b>',
     `  매출 (거래완료): ${fmtWon(revenue)}`,
-    `  광고비 (CPC): ${fmtWon(adCost)}`,
+    `  광고비 (CPC): ${fmtWon(adCost)} <i>[${source}]</i>`,
     `  순이익: ${fmtWon(profit)}${adCost > 0 ? ` (ROI ${roi}%)` : ''}`,
   ].join('\n');
 }
@@ -163,6 +179,14 @@ async function run() {
   const month = now.getUTCMonth() + 1;
   const { start, end, lastDay } = monthRange(year, month);
   console.log(`=== 월간 리포트 (${start} ~ ${end}) ===`);
+
+  // 리포트 시작 시 어드민 실측값 갱신 (실패해도 계속 진행)
+  try {
+    const r = await refreshMonthlySpend();
+    console.log(`[월간 실측] ${r.totalCost.toLocaleString()}원 갱신`);
+  } catch (err) {
+    console.error('[월간 실측] 갱신 실패:', err.message);
+  }
 
   const sections = await Promise.all([
     buildBizmoneyMonth(year, month, lastDay),

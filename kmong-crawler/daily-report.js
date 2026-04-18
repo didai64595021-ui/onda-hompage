@@ -12,6 +12,7 @@
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 const { refreshBizmoney } = require('./lib/bizmoney');
+const { refreshMonthlySpend } = require('./lib/monthly-spend');
 const { notifyTyped } = require('./lib/notify-filter');
 const {
   buildBizmoneySection,
@@ -45,6 +46,14 @@ async function run() {
   } catch (err) {
     bizmoneyNote = `\n⚠️ 비즈머니 크롤 실패: ${err.message}`;
     console.error('[비즈머니] 실패:', err.message);
+  }
+
+  // 1-b) 월간 광고 지출 실크롤 (이번 달 총액 갱신 → 리포트에 반영)
+  try {
+    const r = await refreshMonthlySpend();
+    console.log(`[월간 지출] ${r.totalCost.toLocaleString()}원 갱신`);
+  } catch (err) {
+    console.error('[월간 지출] 실패:', err.message);
   }
 
   // 2) 섹션 조립
