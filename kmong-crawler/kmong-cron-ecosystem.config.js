@@ -193,6 +193,35 @@ module.exports = {
       watch: false,
       env: { ...COMMON_ENV },
     },
+    // === Phase 8: 리포트 (일/주/월) — 2026-04-18 신설 ===
+    {
+      name: 'kmong-daily-report',
+      script: './daily-report.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '0 8 * * *',  // 매일 08:00 KST — 전날 요약
+      autorestart: false,
+      watch: false,
+      env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
+    },
+    {
+      name: 'kmong-weekly-report',
+      script: './weekly-report.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '0 8 * * 0',  // 매주 일요일 08:00 KST — 지난 7일
+      autorestart: false,
+      watch: false,
+      env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
+    },
+    {
+      name: 'kmong-monthly-report',
+      script: './monthly-report.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      // 28~31일 08:00에 매일 시도, 스크립트 내 isLastDayOfMonth() 체크로 실제 말일만 발송
+      cron_restart: '0 8 28-31 * *',
+      autorestart: false,
+      watch: false,
+      env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
+    },
     // === Phase 5: 텔레그램 봇 (상시 구동) ===
     {
       name: 'kmong-telegram-bot',
