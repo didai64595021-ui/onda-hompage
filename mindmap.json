@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "name": "onda-hompage",
+  "label": "온다 홈페이지 + 크몽봇",
+  "type": "monorepo",
+  "icon": "🏠",
+  "color": "#8b5cf6",
+  "modules": [
+    {
+      "id": "homepage",
+      "label": "홈페이지 사이트",
+      "type": "ui",
+      "path": "site",
+      "icon": "🌐",
+      "url": "https://onda.life",
+      "children": []
+    },
+    {
+      "id": "kmong-bot",
+      "label": "크몽봇 시스템",
+      "type": "bot",
+      "path": "kmong-crawler",
+      "icon": "🤖",
+      "children": [
+        {
+          "id": "kmong-crawl",
+          "label": "크롤러 6종",
+          "type": "crawler",
+          "children": [
+            { "id": "kmong-crawl-cpc", "label": "CPC 크롤", "pm2": "kmong-crawl-cpc" },
+            { "id": "kmong-crawl-inbox", "label": "Inbox 크롤", "pm2": "kmong-crawl-inbox" },
+            { "id": "kmong-crawl-orders", "label": "주문 크롤", "pm2": "kmong-crawl-orders" },
+            { "id": "kmong-crawl-profits", "label": "수익금 크롤", "pm2": "kmong-crawl-profits" },
+            { "id": "kmong-crawl-gig-status", "label": "Gig 상태 크롤", "pm2": "kmong-crawl-gig-status" },
+            { "id": "kmong-discovery", "label": "Discovery 데몬", "pm2": "kmong-discovery-daemon" }
+          ]
+        },
+        {
+          "id": "kmong-comm",
+          "label": "고객응대",
+          "type": "worker",
+          "children": [
+            { "id": "kmong-auto-reply", "label": "자동 응답", "pm2": "kmong-auto-reply" },
+            { "id": "kmong-send-reply", "label": "응답 발송", "pm2": "kmong-send-reply" },
+            { "id": "kmong-followup-nudge", "label": "팔로업 넛지", "pm2": "kmong-followup-nudge" },
+            { "id": "kmong-telegram-bot", "label": "텔레그램 봇", "pm2": "kmong-telegram-bot" },
+            { "id": "kmong-command-processor", "label": "명령 처리기", "pm2": "kmong-command-processor" }
+          ]
+        },
+        {
+          "id": "kmong-ad",
+          "label": "광고 운영",
+          "type": "worker",
+          "children": [
+            { "id": "kmong-ad-scheduler", "label": "광고 스케줄러", "pm2": "kmong-ad-scheduler" },
+            { "id": "kmong-budget-monitor", "label": "예산 모니터", "pm2": "kmong-budget-monitor" }
+          ]
+        },
+        {
+          "id": "kmong-content",
+          "label": "콘텐츠 생성/평가",
+          "type": "worker",
+          "children": [
+            { "id": "kmong-content-gen", "label": "콘텐츠 생성", "pm2": "kmong-content-gen" },
+            { "id": "kmong-ab-eval", "label": "A/B 평가", "pm2": "kmong-ab-eval" },
+            { "id": "kmong-learning-loop", "label": "러닝 루프", "pm2": "kmong-learning-loop" },
+            { "id": "kmong-create-top5", "label": "Top5 생성", "pm2": "kmong-create-top5" }
+          ]
+        },
+        {
+          "id": "kmong-reports",
+          "label": "리포트 3종 (NEW)",
+          "type": "cron",
+          "icon": "📊",
+          "children": [
+            { "id": "kmong-daily-report", "label": "일간 리포트", "pm2": "kmong-daily-report", "schedule": "0 8 * * *" },
+            { "id": "kmong-weekly-report", "label": "주간 리포트", "pm2": "kmong-weekly-report", "schedule": "0 8 * * 0" },
+            { "id": "kmong-monthly-report", "label": "월간 리포트", "pm2": "kmong-monthly-report", "schedule": "0 8 L * *" }
+          ]
+        },
+        {
+          "id": "kmong-lib",
+          "label": "공통 라이브러리",
+          "type": "lib",
+          "path": "kmong-crawler/lib",
+          "children": [
+            { "id": "kmong-lib-gig-name", "label": "gig-name.js" },
+            { "id": "kmong-lib-inquiry-stats", "label": "inquiry-stats.js" },
+            { "id": "kmong-lib-bizmoney", "label": "bizmoney.js" },
+            { "id": "kmong-lib-notify-filter", "label": "notify-filter.js" },
+            { "id": "kmong-lib-monthly-spend", "label": "monthly-spend.js" },
+            { "id": "kmong-lib-report-sections", "label": "report-sections.js" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "telegram-relay",
+      "label": "텔레그램 릴레이",
+      "type": "api",
+      "path": "workers",
+      "icon": "📡",
+      "pm2": "telegram-relay"
+    }
+  ]
+}
