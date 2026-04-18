@@ -68,22 +68,44 @@ async function discoverSelects(page) {
         ctrl = ctrl.parentElement;
         if (ctrl && (String(ctrl.className || '').includes('-control') || String(ctrl.className || '').includes('css-b62m3t-container'))) break;
       }
-      // nearest preceding label/p
+      // label 탐지: LABEL 태그 우선 → P 태그 fallback
+      // 이유: react-select는 placeholder 텍스트를 <p> 로 렌더 (예: "가구·인테리어", "JavaScript")
+      //       → 기존 로직이 placeholder 를 label 로 오인
+      //       → LABEL 태그는 실제 필드명이므로 이걸 우선 탐색
       let label = '';
+
+      // Pass 1: LABEL 태그만 탐색 (실제 필드 라벨)
       let cur = el;
       for (let i = 0; i < 12 && cur; i++) {
         cur = cur.parentElement;
         if (!cur) break;
-        // p 태그 (kmong이 label 대신 사용)
-        const ps = [...cur.querySelectorAll(':scope > p, :scope > div > p, :scope > label')];
-        for (const p of ps) {
-          const t = (p.innerText || '').trim().replace(/\*\s*$/, '').trim();
+        const lbls = [...cur.querySelectorAll(':scope > label, :scope > div > label')];
+        for (const l of lbls) {
+          const t = (l.innerText || '').trim().replace(/\*\s*$/, '').trim();
           if (t && t.length < 40 && t !== '편집' && t !== '변경하기') {
             label = t;
             break;
           }
         }
         if (label) break;
+      }
+
+      // Pass 2: P 태그 fallback (LABEL 없을 때만)
+      if (!label) {
+        cur = el;
+        for (let i = 0; i < 12 && cur; i++) {
+          cur = cur.parentElement;
+          if (!cur) break;
+          const ps = [...cur.querySelectorAll(':scope > p, :scope > div > p')];
+          for (const p of ps) {
+            const t = (p.innerText || '').trim().replace(/\*\s*$/, '').trim();
+            if (t && t.length < 40 && t !== '편집' && t !== '변경하기') {
+              label = t;
+              break;
+            }
+          }
+          if (label) break;
+        }
       }
       out.push({ inputId: el.id, label });
     });
