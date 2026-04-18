@@ -13,6 +13,7 @@ const { getGigKoreanName } = require('./gig-name');
 const { getBalanceOnDate, getLatestSavedBalance } = require('./bizmoney');
 const { getInquiryStats, getReplySentStats } = require('./inquiry-stats');
 const { getLatestMonthlySpend } = require('./monthly-spend');
+const { getProfitStats, getLatestProfitsSummary } = require('./profits');
 
 const KST_OFFSET_MS = 9 * 3600 * 1000;
 
@@ -101,21 +102,38 @@ async function buildCpcSection(startDate, endDate, opts = {}) {
 }
 
 /**
- * 주문·매출 섹션.
+ * 주문 섹션 — 주문 접수 건수만 표시 (금액은 수익금 섹션으로 분리, 사용자 정의 2026-04-18).
+ * 소스: kmong_profits_transactions (profits_history 페이지 기반, 단일 truth).
  */
 async function buildOrderSection(startDate, endDate) {
-  const { data } = await supabase
-    .from('kmong_orders')
-    .select('status, amount')
-    .gte('order_date', startDate)
-    .lte('order_date', endDate);
+  const stats = await getProfitStats(startDate, endDate);
+  return [
+    '🛒 <b>주문 접수</b>',
+    `  전체 ${stats.ordersTotal}건 (완료 ${stats.ordersCompleted} · 진행중 ${stats.ordersInProgress} · 취소 ${stats.ordersCancelled})`,
+  ].join('\n');
+}
 
-  const rows = data || [];
-  const completed = rows.filter((r) => r.status === '거래완료');
-  const revenue = completed.reduce((s, r) => s + (r.amount || 0), 0);
-  const cancelled = rows.filter((r) => r.status === '취소').length;
+/**
+ * 수익금 섹션 — "내 돈" 기준.
+ * profits_history 페이지의 profit_amount = 크몽 수수료(~20%) 이미 제외된 값.
+ * 광고비는 별도 항목 (차감 안 됨). 순이익 계산은 monthly-report에서 별도.
+ */
+async function buildProfitsSection(startDate, endDate, opts = {}) {
+  const stats = await getProfitStats(startDate, endDate);
+  const lines = ['💵 <b>수익금</b> <i>(크몽 수수료 제외 · 광고비는 별도)</i>'];
+  lines.push(`  완료 확정: ${fmtWon(stats.profitCompleted)} (실거래 ${fmtWon(stats.actualCompleted)})`);
+  if (stats.profitInProgress > 0) {
+    lines.push(`  진행중 (미확정): ${fmtWon(stats.profitInProgress)}`);
+  }
 
-  return `🛒 <b>주문</b>\n  전체 ${rows.length}건 / 거래완료 ${completed.length}건 / 취소 ${cancelled}건\n  매출(거래완료 기준): ${fmtWon(revenue)}`;
+  // 월간/월말 리포트에서만 누적 잔액 표시
+  if (opts.showBalance) {
+    const summary = await getLatestProfitsSummary();
+    if (summary) {
+      lines.push(`  <i>출금가능 ${fmtWon(summary.available_profit)} / 예상 ${fmtWon(summary.expected_profit)} / 출금완료 ${fmtWon(summary.withdrawn_profit)}</i>`);
+    }
+  }
+  return lines.join('\n');
 }
 
 /**
@@ -260,6 +278,7 @@ module.exports = {
   buildInquirySection,
   buildCpcSection,
   buildOrderSection,
+  buildProfitsSection,
   buildGigStatusSection,
   buildBottleneckSection,
   buildCronSection,

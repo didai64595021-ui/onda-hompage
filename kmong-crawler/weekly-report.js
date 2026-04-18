@@ -15,6 +15,7 @@ const {
   buildInquirySection,
   buildCpcSection,
   buildOrderSection,
+  buildProfitsSection,
   buildBottleneckSection,
 } = require('./lib/report-sections');
 const { getWeekStats } = require('./lib/inquiry-stats');
@@ -122,6 +123,7 @@ async function run() {
     buildInquirySection(startDate, endDate),
     buildCpcSection(startDate, endDate),
     buildOrderSection(startDate, endDate),
+    buildProfitsSection(startDate, endDate),
     buildBottleneckSection(startDate, endDate),
     buildDailyTrend(startDate, endDate),
   ]);

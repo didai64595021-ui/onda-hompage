@@ -21,6 +21,7 @@ const {
 const { getMonthStats, loadFirstInquiryMap, kstDate } = require('./lib/inquiry-stats');
 const { getBalanceHistory } = require('./lib/bizmoney');
 const { refreshMonthlySpend, getLatestMonthlySpend } = require('./lib/monthly-spend');
+const { getProfitStats } = require('./lib/profits');
 
 const KST_OFFSET_MS = 9 * 3600 * 1000;
 
@@ -101,16 +102,16 @@ async function buildWeeklyBreakdown(year, month, lastDay) {
 }
 
 /**
- * 월간 순이익 = 거래완료 매출 - CPC 지출.
+ * 월간 손익 = 수익금(크몽 수수료 제외) - 광고비.
+ * 수익금: profits_history 페이지의 profit_amount 합계 (완료 거래만).
+ * 광고비: click-up 어드민 "이번 달" 실측값.
  */
 async function buildProfitSection(year, month, lastDay) {
-  const { data: ords } = await supabase
-    .from('kmong_orders')
-    .select('amount, status')
-    .gte('order_date', `${year}-${String(month).padStart(2, '0')}-01`)
-    .lte('order_date', `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`)
-    .eq('status', '거래완료');
-  const revenue = (ords || []).reduce((s, r) => s + (r.amount || 0), 0);
+  const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+  const endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+
+  const profits = await getProfitStats(startDate, endDate);
+  const revenue = profits.profitCompleted; // 수수료 이미 제외된 "내 돈"
 
   // 월간 광고비는 어드민 실측 (monthly-spend) 우선, fallback DB 합계
   const real = await getLatestMonthlySpend();
@@ -123,8 +124,8 @@ async function buildProfitSection(year, month, lastDay) {
     const { data: cpcs } = await supabase
       .from('kmong_cpc_daily')
       .select('cpc_cost')
-      .gte('date', `${year}-${String(month).padStart(2, '0')}-01`)
-      .lte('date', `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`);
+      .gte('date', startDate)
+      .lte('date', endDate);
     adCost = (cpcs || []).reduce((s, r) => s + (r.cpc_cost || 0), 0);
     source = 'DB 일자별 합계';
   }
@@ -132,8 +133,8 @@ async function buildProfitSection(year, month, lastDay) {
   const profit = revenue - adCost;
   const roi = adCost > 0 ? ((profit / adCost) * 100).toFixed(1) : 'N/A';
   return [
-    '📊 <b>월간 수익</b>',
-    `  매출 (거래완료): ${fmtWon(revenue)}`,
+    '📊 <b>월간 손익</b>',
+    `  수익금 (수수료 제외): ${fmtWon(revenue)} <i>[실거래 ${fmtWon(profits.actualCompleted)} · 완료 ${profits.ordersCompleted}건]</i>`,
     `  광고비 (CPC): ${fmtWon(adCost)} <i>[${source}]</i>`,
     `  순이익: ${fmtWon(profit)}${adCost > 0 ? ` (ROI ${roi}%)` : ''}`,
   ].join('\n');
