@@ -12,7 +12,7 @@
 
 const { login, saveErrorScreenshot } = require('./lib/login');
 const { supabase } = require('./lib/supabase');
-const { notify } = require('./lib/telegram');
+const { notifyTyped } = require('./lib/notify-filter');
 const { closeModals } = require('./lib/modal-handler');
 
 const INBOX_URL = 'https://kmong.com/inboxes';
@@ -126,7 +126,7 @@ async function sendReply() {
           .is('sent_at', null);
 
         sentCount++;
-        notify(`크몽 답변 발송 완료: ${inquiry.customer_name} (#${inquiry.id})`);
+        notifyTyped('reply', `✉️ 답변 발송 완료: ${inquiry.customer_name} (#${inquiry.id})`);
 
       } catch (innerErr) {
         console.error(`  [에러] ${innerErr.message}`);
@@ -137,13 +137,13 @@ async function sendReply() {
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
     const msg = `크몽 답변 발송: ${sentCount}/${approved.length}건 완료 (${elapsed}초)`;
     console.log(`\n=== ${msg} ===`);
-    if (sentCount > 0) notify(msg);
+    if (sentCount > 0) notifyTyped('reply', msg);
 
     await browser.close();
 
   } catch (err) {
     console.error(`[에러] ${err.message}`);
-    notify(`크몽 답변 발송 실패: ${err.message}`);
+    notifyTyped('error', `크몽 답변 발송 실패: ${err.message}`);
     if (browser) await browser.close();
     process.exit(1);
   }

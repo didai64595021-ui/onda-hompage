@@ -13,7 +13,8 @@ const { toggleAd } = require('./toggle-ad');
 const { changeCreative } = require('./change-creative');
 const { editGig } = require('./edit-gig');
 const { addPortfolio } = require('./manage-portfolio');
-const { notify } = require('./lib/telegram');
+const { notifyTyped } = require('./lib/notify-filter');
+const notify = (m) => notifyTyped('command', m); // 이 파일의 알림은 대시보드 명령 결과
 
 const TOGGLE_TIMEOUT_MS = 30000; // toggleAd 30초 타임아웃
 const STUCK_THRESHOLD_MS = 5 * 60 * 1000; // processing 5분 이상 = stuck
@@ -225,7 +226,7 @@ async function processCommands() {
 
   } catch (err) {
     console.error(`[에러] ${err.message}`);
-    notify(`명령 처리기 실패: ${err.message}`);
+    notifyTyped('error', `명령 처리기 실패: ${err.message}`);
     process.exit(1);
   }
 }

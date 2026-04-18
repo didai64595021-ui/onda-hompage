@@ -14,7 +14,8 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const { supabase } = require('./lib/supabase');
-const { notify, sendCard } = require('./lib/telegram');
+const { sendCard } = require('./lib/telegram');
+const { notifyTyped } = require('./lib/notify-filter');
 const { analyzeInquiry, selectBestTemplate, renderTemplate, getServiceStats, calculateReplyQuality, getRecentApprovedReplies, getSimilarApprovedReplies } = require('./lib/reply-generator');
 const { getCategoryById, getGigUrlById } = require('./lib/product-map');
 const { askClaude } = require('./lib/claude-max');
@@ -725,11 +726,11 @@ async function autoReply() {
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
     const msg = `크몽 자동답변: ${generatedCount}건 생성 완료 (${elapsed}초)`;
     console.log(`\n=== ${msg} ===`);
-    if (generatedCount > 0) notify(msg);
+    if (generatedCount > 0) notifyTyped('reply', msg);
 
   } catch (err) {
     console.error(`[에러] ${err.message}`);
-    notify(`크몽 자동답변 실패: ${err.message}`);
+    notifyTyped('error', `크몽 자동답변 실패: ${err.message}`);
     process.exit(1);
   }
 }
