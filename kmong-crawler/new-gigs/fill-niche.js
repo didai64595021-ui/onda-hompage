@@ -98,6 +98,66 @@ async function main() {
     const gRes = await fillSubGallery(page, paths);
     log.steps.push({ name: 'fillSubGallery', ok: gRes.ok, count: gRes.count });
 
+    // 6b) DESCRIPTION_PREPARATION 재시도 (timing 이슈 보강)
+    console.log('[6b] DESCRIPTION_PREPARATION 재시도');
+    const prepLen = await page.evaluate(() => {
+      const el = document.querySelector('#DESCRIPTION_PREPARATION .ProseMirror');
+      return el ? (el.innerText || '').trim().length : -1;
+    });
+    console.log(`   현재 PREP 길이=${prepLen}`);
+    if (prepLen === 0 && product.preparation) {
+      await page.evaluate((text) => {
+        const el = document.querySelector('#DESCRIPTION_PREPARATION .ProseMirror');
+        if (!el) return;
+        el.focus();
+        // ProseMirror 에 텍스트 주입
+        document.execCommand('insertText', false, text);
+      }, product.preparation);
+      await sleep(1500);
+      const prepLen2 = await page.evaluate(() => {
+        const el = document.querySelector('#DESCRIPTION_PREPARATION .ProseMirror');
+        return el ? (el.innerText || '').trim().length : -1;
+      });
+      console.log(`   재시도 후 길이=${prepLen2}`);
+      log.steps.push({ name: 'preparation-retry', before: prepLen, after: prepLen2 });
+    }
+
+    // 6c) 판매 핵심 정보 — 페이지 수 fill
+    if (extra.pageCount && extra.pageCount.length >= 3) {
+      console.log('[6c] 페이지 수 fill');
+      const pageRes = await page.evaluate((counts) => {
+        // label 이 "페이지 수" 인 input 찾기 (visible + empty)
+        const inputs = [...document.querySelectorAll('input[type="text"], input[type="number"]')];
+        const pageInputs = inputs.filter(el => {
+          const r = el.getBoundingClientRect();
+          if (r.width === 0 || r.height === 0) return false;
+          let cur = el;
+          for (let i = 0; i < 8 && cur; i++) {
+            cur = cur.parentElement;
+            if (!cur) break;
+            const lbl = cur.querySelector('label, p');
+            if (lbl && ((lbl.innerText || '').trim().includes('페이지 수'))) return true;
+          }
+          return false;
+        });
+        if (pageInputs.length < 3) return { ok: false, found: pageInputs.length };
+        const results = [];
+        for (let i = 0; i < 3; i++) {
+          const el = pageInputs[i];
+          el.focus();
+          const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+          setter.call(el, String(counts[i]));
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+          results.push({ i, value: el.value });
+        }
+        return { ok: true, found: pageInputs.length, results };
+      }, extra.pageCount);
+      console.log(`   ${JSON.stringify(pageRes)}`);
+      log.steps.push({ name: 'pageCount', ...pageRes });
+      await sleep(1000);
+    }
+
     console.log('[7] blur/dispatch');
     await page.evaluate(() => {
       if (document.activeElement && document.activeElement.blur) document.activeElement.blur();

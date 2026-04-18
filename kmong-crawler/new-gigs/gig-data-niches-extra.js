@@ -57,6 +57,7 @@ const EXTRA = {
     subCategoryId: '639',  // 아임웹 = rootCategoryId=6, subCategoryId=639, thirdCategoryId=63901
     thirdCategoryId: '63901',
     revision: COMMON_REVISION,
+    pageCount: [5, 15, 30],  // STD/DLX/PRM 페이지 수 (판매핵심정보 섹션)
     // 갤러리 3장 — Before/After, 구독료 비교, ROI 타임라인
     gallery: ['niche-N01-gallery-1.png', 'niche-N01-gallery-2.png', 'niche-N01-gallery-3.png'],
     // 아임웹 카테고리 전용 select 필드 (recon-select-options-764200.json 실측)
@@ -75,6 +76,7 @@ const EXTRA = {
     subCategoryId: '601',
     thirdCategoryId: '60113',
     revision: COMMON_REVISION,
+    pageCount: [5, 15, 30],
     gallery: COMMON_GALLERY,
     extraSelects: [
       { label: '업종', value: '서비스업' },
@@ -88,6 +90,7 @@ const EXTRA = {
     subCategoryId: '660',
     thirdCategoryId: '66001',
     revision: COMMON_REVISION,
+    pageCount: [5, 15, 30],
     gallery: COMMON_GALLERY,
     extraSelects: [
       { label: '업종', value: '서비스업' },
@@ -100,6 +103,7 @@ const EXTRA = {
     subCategoryId: '601',
     thirdCategoryId: '60113',
     revision: COMMON_REVISION,
+    pageCount: [5, 15, 30],
     gallery: COMMON_GALLERY,
     extraSelects: [
       { label: '업종', value: '서비스업' },
@@ -113,6 +117,7 @@ const EXTRA = {
     subCategoryId: '601',
     thirdCategoryId: '60113',
     revision: COMMON_REVISION,
+    pageCount: [5, 15, 30],
     gallery: COMMON_GALLERY,
     extraSelects: [
       { label: '업종', value: '서비스업' },
@@ -126,6 +131,7 @@ const EXTRA = {
     subCategoryId: '601',
     thirdCategoryId: '60113',
     revision: COMMON_REVISION,
+    pageCount: [5, 15, 30],
     gallery: COMMON_GALLERY,
     extraSelects: [
       { label: '업종', value: '서비스업' },
@@ -139,6 +145,7 @@ const EXTRA = {
     subCategoryId: '634',
     thirdCategoryId: '',
     revision: COMMON_REVISION,
+    pageCount: [5, 15, 30],
     gallery: COMMON_GALLERY,
     extraSelects: [
       { label: '업종', value: '서비스업' },
