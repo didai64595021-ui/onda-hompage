@@ -33,10 +33,41 @@ function kstDayEnd(yyyyMmDd) {
 }
 
 /**
+ * 각 customer_name의 DB 전체 최초 inquiry_date 조회 (캐시).
+ * "객수 = 최초문의 기준"을 위해 필요.
+ */
+let _firstInquiryCache = { map: null, fetchedAt: 0 };
+const FIRST_INQ_TTL_MS = 5 * 60 * 1000;
+
+async function loadFirstInquiryMap() {
+  const now = Date.now();
+  if (_firstInquiryCache.map && now - _firstInquiryCache.fetchedAt < FIRST_INQ_TTL_MS) {
+    return _firstInquiryCache.map;
+  }
+  const { data, error } = await supabase
+    .from('kmong_inquiries')
+    .select('customer_name, inquiry_date')
+    .order('inquiry_date', { ascending: true });
+  const map = new Map();
+  if (error) {
+    console.error(`[inquiry-stats] 최초문의 캐시 실패: ${error.message}`);
+  } else {
+    for (const r of data || []) {
+      if (!r.customer_name) continue;
+      if (!map.has(r.customer_name)) map.set(r.customer_name, r.inquiry_date);
+    }
+  }
+  _firstInquiryCache = { map, fetchedAt: now };
+  return map;
+}
+
+/**
  * 특정 날짜 범위의 문의 집계.
+ * 중요: "uniqueCustomers"는 기간 내 메시지 보낸 고유 고객 (기존고객 포함)
+ *       "newCustomers" (객수)는 **최초문의가 기간 내**인 고객 (신규만) — 사용자 정의
  * @param {string} startDate YYYY-MM-DD (KST)
  * @param {string} endDate   YYYY-MM-DD (KST, 포함)
- * @returns {Promise<{messageCount, uniqueCustomers, customers, byStatus, byProduct, rows}>}
+ * @returns {Promise<{messageCount, uniqueCustomers, newCustomers, customers, byStatus, byProduct, rows}>}
  */
 async function getInquiryStats(startDate, endDate) {
   const { data, error } = await supabase
@@ -51,6 +82,7 @@ async function getInquiryStats(startDate, endDate) {
     return {
       messageCount: 0,
       uniqueCustomers: 0,
+      newCustomers: 0,
       customers: [],
       byStatus: {},
       byProduct: {},
@@ -72,7 +104,17 @@ async function getInquiryStats(startDate, endDate) {
     byProduct[pid] = (byProduct[pid] || 0) + 1;
   }
 
-  // 고객별 상세 (첫 메시지 기준)
+  // 신규 고객 판정 — DB 전체에서 최초문의가 이 기간 안인 사람만
+  const firstInqMap = await loadFirstInquiryMap();
+  const newCustomerSet = new Set();
+  for (const cust of custSet) {
+    const firstDate = firstInqMap.get(cust);
+    if (!firstDate) continue;
+    const firstKst = kstDate(firstDate);
+    if (firstKst >= startDate && firstKst <= endDate) newCustomerSet.add(cust);
+  }
+
+  // 고객별 상세 (첫 메시지 + 신규여부)
   const custMap = new Map();
   for (const r of rows) {
     if (!r.customer_name) continue;
@@ -83,6 +125,7 @@ async function getInquiryStats(startDate, endDate) {
         firstInquiry: r.inquiry_date,
         messageCount: 0,
         firstMessage: (r.message_content || '').slice(0, 60),
+        isNew: newCustomerSet.has(r.customer_name),
       });
     }
     custMap.get(r.customer_name).messageCount++;
@@ -91,6 +134,7 @@ async function getInquiryStats(startDate, endDate) {
   return {
     messageCount: rows.length,
     uniqueCustomers: custSet.size,
+    newCustomers: newCustomerSet.size,
     customers: Array.from(custMap.values()),
     byStatus,
     byProduct,
