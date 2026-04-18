@@ -81,9 +81,21 @@ const EXTRA = {
     extraSelects: [
       { label: '업종', value: '서비스업' },
       { label: '카테고리', value: '포트폴리오 홈페이지' },
+      { label: '개발 언어', value: 'JavaScript' },
+      { label: '프런트엔드', value: 'React' },
+      { label: '백엔드', value: 'Node.js' },
+      { label: '데이터베이스', value: 'MySQL' },
+      { label: '클라우드', value: 'AWS' },
+      { label: '기타·소프트웨어', value: 'Git' },
+      { label: '기능 추가', value: '1개', nth: 0 },
+      { label: '기능 추가', value: '3개', nth: 1 },
+      { label: '기능 추가', value: '5개', nth: 2 },
     ],
   },
 
+  // 홈페이지 신규 제작 카테고리 공통 개발스택 defaults
+  // (카테고리 601 '홈페이지 신규 제작' gig 들은 개발 언어·프런트·백엔드·DB·클라우드·기타 select 필요)
+  //
   // N04 — 노션 홈페이지 → 진짜 홈페이지 전환
   'N04': {
     draftId: '764212',
@@ -108,6 +120,15 @@ const EXTRA = {
     extraSelects: [
       { label: '업종', value: '서비스업' },
       { label: '카테고리', value: '기업 홈페이지' },
+      { label: '개발 언어', value: 'JavaScript' },
+      { label: '프런트엔드', value: 'React' },
+      { label: '백엔드', value: 'Node.js' },
+      { label: '데이터베이스', value: 'MySQL' },
+      { label: '클라우드', value: 'AWS' },
+      { label: '기타·소프트웨어', value: 'Git' },
+      { label: '기능 추가', value: '1개', nth: 0 },
+      { label: '기능 추가', value: '3개', nth: 1 },
+      { label: '기능 추가', value: '5개', nth: 2 },
     ],
   },
 
@@ -122,6 +143,15 @@ const EXTRA = {
     extraSelects: [
       { label: '업종', value: '서비스업' },
       { label: '카테고리', value: '기업 홈페이지' },
+      { label: '개발 언어', value: 'JavaScript' },
+      { label: '프런트엔드', value: 'React' },
+      { label: '백엔드', value: 'Node.js' },
+      { label: '데이터베이스', value: 'MySQL' },
+      { label: '클라우드', value: 'AWS' },
+      { label: '기타·소프트웨어', value: 'Git' },
+      { label: '기능 추가', value: '1개', nth: 0 },
+      { label: '기능 추가', value: '3개', nth: 1 },
+      { label: '기능 추가', value: '5개', nth: 2 },
     ],
   },
 
@@ -136,6 +166,15 @@ const EXTRA = {
     extraSelects: [
       { label: '업종', value: '서비스업' },
       { label: '카테고리', value: '다국어 홈페이지' },
+      { label: '개발 언어', value: 'JavaScript' },
+      { label: '프런트엔드', value: 'React' },
+      { label: '백엔드', value: 'Node.js' },
+      { label: '데이터베이스', value: 'MySQL' },
+      { label: '클라우드', value: 'AWS' },
+      { label: '기타·소프트웨어', value: 'Git' },
+      { label: '기능 추가', value: '1개', nth: 0 },
+      { label: '기능 추가', value: '3개', nth: 1 },
+      { label: '기능 추가', value: '5개', nth: 2 },
     ],
   },
 

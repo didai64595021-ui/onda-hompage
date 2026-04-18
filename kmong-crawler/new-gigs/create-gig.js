@@ -938,7 +938,7 @@ Modes:
 
 // require('./create-gig') 시 자동 실행 차단 — CLI 직접 호출일 때만 IIFE 동작
 if (require.main !== module) {
-  module.exports = { createGig, updateDraft, fillStep1, fillStep2, fillRevision, fillSubGallery, fillExtraSelects };
+  module.exports = { createGig, updateDraft, fillStep1, fillStep2, fillRevision, fillSubGallery, fillExtraSelects, fillSelectByLabel, fillReactSelect, discoverSelects, fillTipTap };
   return;
 }
 
