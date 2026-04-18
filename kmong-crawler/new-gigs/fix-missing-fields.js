@@ -35,24 +35,40 @@ async function checkPrep(page) {
   });
 }
 
-// select 현재 값 조회 (label + selected)
+// select 현재 값 조회 (label + selected) — LABEL 우선 → P fallback
 async function discoverWithValue(page) {
   return await page.evaluate(() => {
     const out = [];
     document.querySelectorAll('input[id^="react-select-"]').forEach(el => {
       if (!el.id.endsWith('-input')) return;
+      // Pass 1: LABEL 태그 우선
       let label = '';
       let cur = el;
       for (let i = 0; i < 12 && cur; i++) {
         cur = cur.parentElement;
         if (!cur) break;
-        const ps = [...cur.querySelectorAll(':scope > p, :scope > div > p, :scope > label')];
-        for (const p of ps) {
-          const t = (p.innerText || '').trim().replace(/\*\s*$/, '').trim();
+        const lbls = [...cur.querySelectorAll(':scope > label, :scope > div > label')];
+        for (const l of lbls) {
+          const t = (l.innerText || '').trim().replace(/\*\s*$/, '').trim();
           if (t && t.length < 40 && t !== '편집' && t !== '변경하기') { label = t; break; }
         }
         if (label) break;
       }
+      // Pass 2: P fallback
+      if (!label) {
+        cur = el;
+        for (let i = 0; i < 12 && cur; i++) {
+          cur = cur.parentElement;
+          if (!cur) break;
+          const ps = [...cur.querySelectorAll(':scope > p, :scope > div > p')];
+          for (const p of ps) {
+            const t = (p.innerText || '').trim().replace(/\*\s*$/, '').trim();
+            if (t && t.length < 40 && t !== '편집' && t !== '변경하기') { label = t; break; }
+          }
+          if (label) break;
+        }
+      }
+      // 현재 선택값
       let ctrl = el;
       for (let i = 0; i < 10 && ctrl; i++) {
         ctrl = ctrl.parentElement;
