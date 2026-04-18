@@ -14,7 +14,8 @@ const path = require('path');
 const { supabase } = require('./lib/supabase');
 const { toggleAd } = require('./toggle-ad');
 const { PRODUCT_MAP } = require('./lib/product-map');
-const { notify } = require('./lib/telegram');
+const { notifyTyped } = require('./lib/notify-filter');
+const notify = (m) => notifyTyped('budget', m); // 이 파일의 모든 notify 호출은 예산 관련
 
 function getMonthStart() {
   const now = new Date();
@@ -339,7 +340,7 @@ async function main() {
 
   } catch (err) {
     console.error(`[에러] ${err.message}`);
-    notify(`예산 모니터 실패: ${err.message}`);
+    notifyTyped('error', `예산 모니터 실패: ${err.message}`);
     process.exit(1);
   }
 }

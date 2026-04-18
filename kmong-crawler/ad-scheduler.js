@@ -14,7 +14,7 @@ const path = require('path');
 const { supabase } = require('./lib/supabase');
 const { toggleAd } = require('./toggle-ad');
 const { PRODUCT_MAP } = require('./lib/product-map');
-const { notify } = require('./lib/telegram');
+const { notifyTyped } = require('./lib/notify-filter');
 
 function getKST() {
   const now = new Date();
@@ -151,7 +151,7 @@ async function autoOptimize() {
 
   if (optimized > 0) {
     console.log(`[자동최적화] ${optimized}개 시간대 ON 전환`);
-    notify(`📊 광고 자동최적화: ${optimized}개 시간대 ON 전환 (CTR 기준)`);
+    notifyTyped('toggle', `📊 광고 자동최적화: ${optimized}개 시간대 ON 전환 (CTR 기준)`);
   }
 }
 
@@ -188,7 +188,7 @@ async function main() {
         }
       } catch {}
       if (shouldAlert) {
-        notify(`⛔ 스케줄러: 예산 ${budgetPct}% 소진 → 전체 광고 OFF`);
+        notifyTyped('budget', `⛔ 스케줄러: 예산 ${budgetPct}% 소진 → 전체 광고 OFF`);
         fs.writeFileSync(alertFlagFile, JSON.stringify({ sentAt: new Date().toISOString() }));
       }
       // 예산 초과 시 광고 OFF는 6시간마다만 실행 (매 30분 실행은 리소스 낭비)
@@ -306,7 +306,7 @@ async function main() {
       let msg = `스케줄러 ${dayNames[kst.day]} ${kst.hour}시:`;
       if (onList.length > 0) msg += ` ON[${onList.join(',')}]`;
       if (offList.length > 0) msg += ` OFF[${offList.join(',')}]`;
-      notify(msg);
+      notifyTyped('toggle', msg);
     }
 
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
@@ -314,7 +314,7 @@ async function main() {
 
   } catch (err) {
     console.error(`[에러] ${err.message}`);
-    notify(`스케줄러 실패: ${err.message}`);
+    notifyTyped('error', `스케줄러 실패: ${err.message}`);
     process.exit(1);
   }
 }

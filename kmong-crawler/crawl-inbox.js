@@ -12,7 +12,7 @@
 const { login } = require('./lib/login');
 const { supabase } = require('./lib/supabase');
 const { matchProductId } = require('./lib/product-map');
-const { notify } = require('./lib/telegram');
+const { notifyTyped } = require('./lib/notify-filter');
 const { downloadAttachments } = require('./lib/attachment-fetcher');
 
 /**
@@ -349,7 +349,8 @@ async function crawlInbox() {
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
     const msg = `크몽 크롤: 문의 ${insertedCount}건 수집 (${elapsed}초)`;
     console.log(`\n=== ${msg} ===`);
-    if (insertedCount > 0) notify(msg);  // 0건이면 알림 스킵 (불필요한 알림 방지)
+    // 신규 문의 감지된 경우에만 'inquiry' 타입으로 통과 (사용자 요구: 문의 도착 알림 유지)
+    if (insertedCount > 0) notifyTyped('inquiry', `📨 신규 문의 ${insertedCount}건 도착`);
 
     await browser.close();
 
@@ -373,7 +374,7 @@ async function crawlInbox() {
 
   } catch (err) {
     console.error(`[에러] ${err.message}`);
-    notify(`크몽 문의 크롤 실패: ${err.message}`);
+    notifyTyped('error', `크몽 문의 크롤 실패: ${err.message}`);
     if (browser) await browser.close();
     process.exit(1);
   }
