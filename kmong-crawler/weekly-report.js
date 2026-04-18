@@ -12,11 +12,13 @@ const { getGigKoreanName } = require('./lib/gig-name');
 const { notifyTyped } = require('./lib/notify-filter');
 const {
   fmtWon,
+  buildBizmoneySection,
   buildInquirySection,
   buildCpcSection,
   buildOrderSection,
   buildProfitsSection,
   buildBottleneckSection,
+  buildDashboardFooter,
 } = require('./lib/report-sections');
 const { getWeekStats } = require('./lib/inquiry-stats');
 const { getBalanceHistory } = require('./lib/bizmoney');
@@ -92,34 +94,13 @@ async function buildDailyTrend(startDate, endDate) {
   return lines.join('\n');
 }
 
-/**
- * 비즈머니 주간 변동.
- */
-async function buildBizmoneyWeek(startDate, endDate) {
-  const hist = await getBalanceHistory(10);
-  const inRange = hist.filter((h) => h.date >= startDate && h.date <= endDate);
-  const lines = ['💰 <b>비즈머니 주간 변동</b>'];
-  if (inRange.length === 0) {
-    lines.push('  (이번 주 기록 없음)');
-    return lines.join('\n');
-  }
-  const first = inRange[0];
-  const last = inRange[inRange.length - 1];
-  lines.push(`  주초 (${first.date}): ${fmtWon(first.bizmoney_balance)}`);
-  lines.push(`  주말 (${last.date}): ${fmtWon(last.bizmoney_balance)}`);
-  const diff = (last.bizmoney_balance || 0) - (first.bizmoney_balance || 0);
-  const arrow = diff < 0 ? '▼' : diff > 0 ? '▲' : '━';
-  lines.push(`  변동: ${arrow} ${fmtWon(Math.abs(diff))}`);
-  return lines.join('\n');
-}
-
 async function run() {
   const startTime = Date.now();
   const { startDate, endDate } = getLastWeekRange();
   console.log(`=== 주간 리포트 (${startDate} ~ ${endDate}) ===`);
 
   const sections = await Promise.all([
-    buildBizmoneyWeek(startDate, endDate),
+    buildBizmoneySection(),
     buildInquirySection(startDate, endDate),
     buildCpcSection(startDate, endDate),
     buildOrderSection(startDate, endDate),
@@ -132,7 +113,7 @@ async function run() {
   const body = sections.join('\n\n');
   const footer = `\n<i>생성: ${new Date(Date.now() + KST_OFFSET_MS).toISOString().slice(0, 16).replace('T', ' ')} KST · ${((Date.now() - startTime) / 1000).toFixed(1)}초</i>`;
 
-  const message = `${header}\n\n${body}${footer}`;
+  const message = `${header}\n\n${body}\n${buildDashboardFooter()}${footer}`;
   notifyTyped('report', message);
   console.log('=== 주간 리포트 송신 완료 ===');
   console.log(message);

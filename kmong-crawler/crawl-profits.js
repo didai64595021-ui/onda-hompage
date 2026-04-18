@@ -7,9 +7,11 @@
  * - Supabase: kmong_profits_monthly, kmong_profits_transactions, kmong_profits_summary
  */
 
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { login } = require('./lib/login');
 const { supabase } = require('./lib/supabase');
-const { notify } = require('./lib/telegram');
+const { notifyTyped } = require('./lib/notify-filter');
+const notify = (m) => notifyTyped('reply', m); // profits 크롤 결과는 reply 타입으로 (상세 데이터 수집은 리포트가 사용)
 
 /**
  * 금액 텍스트에서 숫자 추출 ("172,326원" → 172326)
@@ -141,27 +143,38 @@ async function crawlProfits() {
     }
 
     // 거래 내역 추출
-    console.log('[DOM] 거래 내역 추출...');
+    // 페이지 구조: [status]\n수익금\n[profit_amount]\n#[주문번호]\n주문 접수일 : ...\n실 거래 금액 : ...
+    // → status/profit은 #주문번호 바로 이전, order_date/actual은 바로 다음
+    console.log('[DOM] 거래 내역 추출 (#번호 기준 앞뒤 분리 파싱)...');
     const transactions = await page.evaluate(() => {
       const text = document.body.innerText;
       const results = [];
-
-      // 주문번호 패턴으로 블록 분할
       const blocks = text.split(/(#\d{5,})/);
+
+      const cardHeaderRe = /(진행중|작업중|완료|거래완료|취소)\s*\n\s*수익금\s*\n\s*([\d,]+)\s*원\s*$/;
+
       for (let i = 1; i < blocks.length; i += 2) {
-        const orderNum = blocks[i]; // "#7199199"
-        const content = blocks[i + 1] || '';
+        const orderNum = blocks[i];
+        const prevBlock = blocks[i - 1] || '';
+        const nextBlock = blocks[i + 1] || '';
 
-        // 수익금 추출
-        const profitMatch = content.match(/수익금[:\s]*([\d,]+)\s*원/);
-        const profitAmount = profitMatch ? parseInt(profitMatch[1].replace(/,/g, ''), 10) : 0;
+        // status/profit: 이전 블록의 끝부분 (카드 헤더 형태)
+        const tail = prevBlock.slice(-500);
+        const headerMatches = [...tail.matchAll(/(진행중|작업중|완료|거래완료|취소)\s*\n\s*수익금\s*\n\s*([\d,]+)\s*원/g)];
+        let status = '진행중';
+        let profitAmount = 0;
+        if (headerMatches.length > 0) {
+          const last = headerMatches[headerMatches.length - 1];
+          const st = last[1];
+          status = /완료|거래완료/.test(st) ? '완료' : (st === '취소' ? '취소' : '진행중');
+          profitAmount = parseInt(last[2].replace(/,/g, ''), 10);
+        }
 
-        // 실 거래 금액
-        const actualMatch = content.match(/실\s*거래\s*금액[:\s]*([\d,]+)\s*원/);
+        // 주문 접수일 + 실 거래 금액: 다음 블록 앞쪽
+        const actualMatch = nextBlock.match(/실\s*거래\s*금액\s*[:：]?\s*([\d,]+)\s*원/);
         const actualAmount = actualMatch ? parseInt(actualMatch[1].replace(/,/g, ''), 10) : 0;
 
-        // 주문 접수일
-        const dateMatch = content.match(/주문\s*접수일[:\s]*(\d{2}\.\d{2}\.\d{2}\s*\d{1,2}:\d{2})/);
+        const dateMatch = nextBlock.match(/주문\s*접수일\s*[:：]?\s*(\d{2}\.\d{2}\.\d{2}\s*\d{1,2}:\d{2})/);
         let orderDate = null;
         if (dateMatch) {
           const m = dateMatch[1].match(/(\d{2})\.(\d{2})\.(\d{2})\s*(\d{1,2}):(\d{2})/);
@@ -171,12 +184,6 @@ async function crawlProfits() {
             orderDate = d.toISOString();
           }
         }
-
-        // 상태 추출
-        let status = '진행중';
-        if (content.includes('거래완료') || content.includes('완료')) status = '완료';
-        else if (content.includes('취소')) status = '취소';
-        else if (content.includes('진행중') || content.includes('작업중')) status = '진행중';
 
         if (orderNum) {
           results.push({
@@ -208,12 +215,21 @@ async function crawlProfits() {
           const blocks = text.split(/(#\d{5,})/);
           for (let i = 1; i < blocks.length; i += 2) {
             const orderNum = blocks[i];
-            const content = blocks[i + 1] || '';
-            const profitMatch = content.match(/수익금[:\s]*([\d,]+)\s*원/);
-            const profitAmount = profitMatch ? parseInt(profitMatch[1].replace(/,/g, ''), 10) : 0;
-            const actualMatch = content.match(/실\s*거래\s*금액[:\s]*([\d,]+)\s*원/);
+            const prevBlock = blocks[i - 1] || '';
+            const nextBlock = blocks[i + 1] || '';
+            const tail = prevBlock.slice(-500);
+            const headerMatches = [...tail.matchAll(/(진행중|작업중|완료|거래완료|취소)\s*\n\s*수익금\s*\n\s*([\d,]+)\s*원/g)];
+            let status = '진행중';
+            let profitAmount = 0;
+            if (headerMatches.length > 0) {
+              const last = headerMatches[headerMatches.length - 1];
+              const st = last[1];
+              status = /완료|거래완료/.test(st) ? '완료' : (st === '취소' ? '취소' : '진행중');
+              profitAmount = parseInt(last[2].replace(/,/g, ''), 10);
+            }
+            const actualMatch = nextBlock.match(/실\s*거래\s*금액\s*[:：]?\s*([\d,]+)\s*원/);
             const actualAmount = actualMatch ? parseInt(actualMatch[1].replace(/,/g, ''), 10) : 0;
-            const dateMatch = content.match(/주문\s*접수일[:\s]*(\d{2}\.\d{2}\.\d{2}\s*\d{1,2}:\d{2})/);
+            const dateMatch = nextBlock.match(/주문\s*접수일\s*[:：]?\s*(\d{2}\.\d{2}\.\d{2}\s*\d{1,2}:\d{2})/);
             let orderDate = null;
             if (dateMatch) {
               const m = dateMatch[1].match(/(\d{2})\.(\d{2})\.(\d{2})\s*(\d{1,2}):(\d{2})/);
@@ -223,9 +239,6 @@ async function crawlProfits() {
                 orderDate = d.toISOString();
               }
             }
-            let status = '진행중';
-            if (content.includes('거래완료') || content.includes('완료')) status = '완료';
-            else if (content.includes('취소')) status = '취소';
             results.push({ order_number: orderNum, order_date: orderDate, actual_amount: actualAmount, profit_amount: profitAmount, status });
           }
           return results;

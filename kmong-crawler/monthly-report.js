@@ -13,10 +13,13 @@ const { supabase } = require('./lib/supabase');
 const { notifyTyped } = require('./lib/notify-filter');
 const {
   fmtWon,
+  buildBizmoneySection,
   buildInquirySection,
   buildCpcSection,
   buildOrderSection,
+  buildProfitsSection,
   buildBottleneckSection,
+  buildDashboardFooter,
 } = require('./lib/report-sections');
 const { getMonthStats, loadFirstInquiryMap, kstDate } = require('./lib/inquiry-stats');
 const { getBalanceHistory } = require('./lib/bizmoney');
@@ -140,31 +143,6 @@ async function buildProfitSection(year, month, lastDay) {
   ].join('\n');
 }
 
-/**
- * 비즈머니 월간 변동.
- */
-async function buildBizmoneyMonth(year, month, lastDay) {
-  const hist = await getBalanceHistory(45);
-  const inRange = hist.filter((h) => {
-    const y = parseInt(h.date.slice(0, 4), 10);
-    const m = parseInt(h.date.slice(5, 7), 10);
-    return y === year && m === month;
-  });
-  const lines = ['💰 <b>비즈머니 월간 변동</b>'];
-  if (inRange.length === 0) {
-    lines.push('  (이번 달 기록 없음)');
-    return lines.join('\n');
-  }
-  const first = inRange[0];
-  const last = inRange[inRange.length - 1];
-  lines.push(`  월초 (${first.date}): ${fmtWon(first.bizmoney_balance)}`);
-  lines.push(`  월말 (${last.date}): ${fmtWon(last.bizmoney_balance)}`);
-  const diff = (last.bizmoney_balance || 0) - (first.bizmoney_balance || 0);
-  const arrow = diff < 0 ? '▼' : diff > 0 ? '▲' : '━';
-  lines.push(`  변동: ${arrow} ${fmtWon(Math.abs(diff))}`);
-  return lines.join('\n');
-}
-
 async function run() {
   const opts = process.argv.slice(2);
   const force = opts.includes('--force');
@@ -190,11 +168,12 @@ async function run() {
   }
 
   const sections = await Promise.all([
-    buildBizmoneyMonth(year, month, lastDay),
+    buildBizmoneySection(),
     buildProfitSection(year, month, lastDay),
     buildInquirySection(start, end),
-    buildCpcSection(start, end),
+    buildCpcSection(start, end, { showMonthlyReal: true }),
     buildOrderSection(start, end),
+    buildProfitsSection(start, end, { showBalance: true }),
     buildBottleneckSection(start, end),
     buildWeeklyBreakdown(year, month, lastDay),
   ]);
@@ -203,7 +182,7 @@ async function run() {
   const body = sections.join('\n\n');
   const footer = `\n<i>생성: ${new Date(Date.now() + KST_OFFSET_MS).toISOString().slice(0, 16).replace('T', ' ')} KST · ${((Date.now() - startTime) / 1000).toFixed(1)}초</i>`;
 
-  const message = `${header}\n\n${body}${footer}`;
+  const message = `${header}\n\n${body}\n${buildDashboardFooter()}${footer}`;
   notifyTyped('report', message);
   console.log('=== 월간 리포트 송신 완료 ===');
   console.log(message);

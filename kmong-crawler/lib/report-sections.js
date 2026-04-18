@@ -23,30 +23,30 @@ function fmtWon(n) {
   return n < 0 ? `-${abs}원` : `${abs}원`;
 }
 
+/**
+ * 리포트 하단 공통 footer — 대시보드 UI 링크.
+ * URL은 onda-web Cloudflare tunnel. 변경 시 이 한 곳만 수정.
+ */
+const DASHBOARD_URL = 'https://deluxe-opponents-debut-meters.trycloudflare.com';
+
+function buildDashboardFooter() {
+  return `\n🔗 <b>전체 데이터 대시보드</b>\n  <a href="${DASHBOARD_URL}">${DASHBOARD_URL}</a>`;
+}
+
 function fmtKstRange(dateStr) {
   return { start: `${dateStr}T00:00:00+09:00`, end: `${dateStr}T23:59:59.999+09:00` };
 }
 
 /**
- * 비즈머니 섹션.
- * @param {string} targetDate — 리포트 대상 날짜 (YYYY-MM-DD, KST)
+ * 비즈머니 섹션 — 현재 잔액만 표시 (충전 필요 시점 판단용, 2026-04-18 사용자 정의).
+ * 변동 추이는 생략.
  */
-async function buildBizmoneySection(targetDate) {
+async function buildBizmoneySection() {
   const current = await getLatestSavedBalance();
-  const prev = await getBalanceOnDate(targetDate);
-
-  const lines = ['💰 <b>비즈머니</b>'];
-  if (current?.bizmoney_balance != null) {
-    lines.push(`  현재: ${fmtWon(current.bizmoney_balance)} (${current.date})`);
-  } else {
-    lines.push(`  현재: (데이터 없음)`);
+  if (current?.bizmoney_balance == null) {
+    return '💰 <b>비즈머니</b>: (데이터 없음)';
   }
-  if (prev?.bizmoney_balance != null && current?.bizmoney_balance != null) {
-    const diff = current.bizmoney_balance - prev.bizmoney_balance;
-    const arrow = diff < 0 ? '▼' : diff > 0 ? '▲' : '━';
-    lines.push(`  ${targetDate} 대비: ${arrow} ${fmtWon(Math.abs(diff))}`);
-  }
-  return lines.join('\n');
+  return `💰 <b>비즈머니</b>: ${fmtWon(current.bizmoney_balance)} <i>(${current.date} 기준)</i>`;
 }
 
 /**
@@ -274,6 +274,8 @@ async function buildCronSection(dateStr) {
 module.exports = {
   fmtWon,
   fmtKstRange,
+  DASHBOARD_URL,
+  buildDashboardFooter,
   buildBizmoneySection,
   buildInquirySection,
   buildCpcSection,

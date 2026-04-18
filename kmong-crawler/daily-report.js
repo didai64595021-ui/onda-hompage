@@ -23,6 +23,7 @@ const {
   buildGigStatusSection,
   buildBottleneckSection,
   buildCronSection,
+  buildDashboardFooter,
 } = require('./lib/report-sections');
 
 const KST_OFFSET_MS = 9 * 3600 * 1000;
@@ -59,7 +60,7 @@ async function run() {
 
   // 2) 섹션 조립
   const sections = await Promise.all([
-    buildBizmoneySection(targetDate),
+    buildBizmoneySection(),
     buildInquirySection(targetDate, targetDate),
     buildCpcSection(targetDate, targetDate),
     buildOrderSection(targetDate, targetDate),
@@ -73,7 +74,7 @@ async function run() {
   const body = sections.join('\n\n');
   const footer = `\n<i>생성: ${new Date(Date.now() + KST_OFFSET_MS).toISOString().slice(0, 16).replace('T', ' ')} KST · ${((Date.now() - startTime) / 1000).toFixed(1)}초</i>`;
 
-  const message = `${header}\n\n${body}${bizmoneyNote}${footer}`;
+  const message = `${header}\n\n${body}${bizmoneyNote}\n${buildDashboardFooter()}${footer}`;
 
   // 3) 송신
   notifyTyped('report', message);
