@@ -1263,19 +1263,19 @@ body > footer.footer {
    스크롤 깊이 ~70% 감소
    ===================================================== */
 
-/* Compact Hero — 높이 절반, 한 화면에 수렴 */
+/* Compact Hero — 상품설명서용 초압축. 한 화면에 탭+카드 2~3줄 수렴 */
 .hero.hero--compact {
-  padding: clamp(80px, 12vh, 140px) 0 clamp(40px, 6vh, 64px);
+  padding: clamp(28px, 5vh, 48px) 0 clamp(18px, 3vh, 28px);
   border-bottom: 1px solid var(--line);
 }
 .hero.hero--compact .wrap { max-width: var(--container); padding: 0 var(--gutter); }
 .hero-compact-title {
   font-family: var(--sans);
   font-weight: 800;
-  font-size: clamp(40px, 7vw, 96px);
-  letter-spacing: -0.045em;
-  line-height: 1.02;
-  margin: 16px 0 20px;
+  font-size: clamp(22px, 3vw, 36px);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin: 10px 0 10px;
   color: var(--fg);
 }
 .hero-compact-title em {
@@ -1288,19 +1288,19 @@ body > footer.footer {
   -webkit-text-fill-color: transparent;
 }
 .hero-compact-lede {
-  max-width: 640px;
-  font-size: clamp(15px, 1.2vw, 18px);
+  max-width: 680px;
+  font-size: clamp(13px, 1vw, 15px);
   color: var(--fg-dim);
-  line-height: 1.65;
-  margin: 0 0 22px;
+  line-height: 1.6;
+  margin: 0 0 12px;
 }
 .hero.hero--compact .hero-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 22px;
+  gap: 6px 16px;
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
+  font-size: 10px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--fg-mute);
 }
@@ -1342,10 +1342,11 @@ body > footer.footer {
   padding: 0;
 }
 .tab {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 18px 22px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 22px;
   cursor: pointer;
   user-select: none;
   border-right: 1px solid var(--line);
@@ -1353,11 +1354,35 @@ body > footer.footer {
   position: relative;
 }
 .tab:last-child { border-right: none; }
+.tab-icon {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  color: var(--fg-dim);
+  flex-shrink: 0;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+.tab-icon svg { width: 20px; height: 20px; }
+.tab--naver .tab-icon { color: var(--naver); border-color: rgba(31, 219, 123, 0.25); background: rgba(31, 219, 123, 0.05); }
+.tab--ig .tab-icon { color: var(--ig-magenta); border-color: rgba(255, 61, 127, 0.3); background: rgba(255, 61, 127, 0.05); }
+.tab--info .tab-icon { color: var(--ig-gold); border-color: rgba(255, 180, 92, 0.3); background: rgba(255, 180, 92, 0.05); }
+.tab-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
 .tab-num {
   font-family: var(--mono);
   font-size: 10px;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   color: var(--fg-mute);
+  text-transform: uppercase;
 }
 .tab-name {
   font-size: 17px;
@@ -1369,6 +1394,18 @@ body > footer.footer {
   font-size: 12px;
   color: var(--fg-mute);
   letter-spacing: -0.005em;
+}
+.tab-count {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--fg-mute);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 .tab:hover { background: rgba(255, 255, 255, 0.02); }
 .tab:hover .tab-name { color: var(--fg); }
@@ -1388,6 +1425,12 @@ body > footer.footer {
 #tab-ig:checked ~ .tabbar-wrap .tab[for="tab-ig"] .tab-num,
 #tab-info:checked ~ .tabbar-wrap .tab[for="tab-info"] .tab-num {
   color: var(--fg);
+}
+#tab-naver:checked ~ .tabbar-wrap .tab[for="tab-naver"] .tab-count,
+#tab-ig:checked ~ .tabbar-wrap .tab[for="tab-ig"] .tab-count,
+#tab-info:checked ~ .tabbar-wrap .tab[for="tab-info"] .tab-count {
+  color: var(--fg);
+  border-color: var(--fg-dim);
 }
 #tab-naver:checked ~ .tabbar-wrap .tab[for="tab-naver"]::after,
 #tab-ig:checked ~ .tabbar-wrap .tab[for="tab-ig"]::after,
@@ -1648,10 +1691,13 @@ body > footer.footer {
   .hero.hero--compact { padding: 64px 0 40px; }
   .hero-compact-title { font-size: 40px; }
   .tabbar { grid-template-columns: repeat(3, 1fr); }
-  .tab { padding: 12px 10px; }
-  .tab-name { font-size: 13px; }
+  .tab { grid-template-columns: auto 1fr; padding: 10px 8px; gap: 8px; }
+  .tab-icon { width: 28px; height: 28px; border-radius: 7px; }
+  .tab-icon svg { width: 16px; height: 16px; }
+  .tab-name { font-size: 12px; }
   .tab-sub { display: none; }
   .tab-num { font-size: 9px; }
+  .tab-count { display: none; }
   .panel { padding: 32px 0 56px; }
   .panel-title { font-size: 28px; }
   .panel-lede { font-size: 14px; }
