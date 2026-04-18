@@ -33,7 +33,7 @@ const fs = require('fs');
 const path = require('path');
 const { login } = require('../lib/login');
 const { closeModals } = require('../lib/modal-handler');
-const { PRODUCTS } = require('./gig-data');
+const { PRODUCTS } = require(process.env.GIG_DATA || './gig-data');
 const { EXTRA } = require('./gig-data-extra');
 
 const SCREENSHOT_DIR = path.join(__dirname, 'screenshots');
