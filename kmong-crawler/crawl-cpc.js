@@ -12,7 +12,7 @@ const { supabase } = require('./lib/supabase');
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { matchProductId } = require('./lib/product-map');
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
-const { notify } = require('./lib/telegram');
+const { notifyTyped } = require('./lib/notify-filter');
 
 const CLICK_UP_URL = 'https://kmong.com/seller/click-up';
 
@@ -192,14 +192,14 @@ async function crawlCpc() {
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
     const msg = `크몽 크롤: CPC ${uniqueRecords.length}건 수집 (${elapsed}초)`;
     console.log(`\n=== ${msg} ===`);
-    notify(msg);
+    notifyTyped('crawl', msg);
 
     await browser.close();
     return uniqueRecords;
 
   } catch (err) {
     console.error(`[에러] ${err.message}`);
-    notify(`크몽 CPC 크롤 실패: ${err.message}`);
+    notifyTyped('error', `크몽 CPC 크롤 실패: ${err.message}`);
     if (browser) await browser.close();
     process.exit(1);
   }

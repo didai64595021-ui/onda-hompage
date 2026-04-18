@@ -13,7 +13,7 @@ const { supabase } = require('./lib/supabase');
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { matchProductId } = require('./lib/product-map');
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
-const { notify } = require('./lib/telegram');
+const { notifyTyped } = require('./lib/notify-filter');
 
 const MY_GIGS_URL = 'https://kmong.com/my-gigs';
 
@@ -132,7 +132,7 @@ async function crawlGigStatus() {
     const warnings = gigs.filter(g => ['비승인', '승인전'].includes(g.status));
     if (warnings.length > 0) {
       const warnMsg = warnings.map(g => `⚠️ ${g.gig_title.substring(0, 30)}: ${g.status}`).join('\n');
-      notify(`🚨 크몽 서비스 심사 경고!\n${warnMsg}`);
+      notifyTyped('error', `🚨 크몽 서비스 심사 경고!\n${warnMsg}`);
     }
 
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
@@ -142,14 +142,14 @@ async function crawlGigStatus() {
 
     const msg = `크몽 크롤: 서비스 상태 ${gigs.length}건 (${summaryText}) (${elapsed}초)`;
     console.log(`\n=== ${msg} ===`);
-    notify(msg);
+    notifyTyped('crawl', msg);
 
     await browser.close();
     return gigs;
 
   } catch (err) {
     console.error(`[에러] ${err.message}`);
-    notify(`크몽 서비스 상태 크롤 실패: ${err.message}`);
+    notifyTyped('error', `크몽 서비스 상태 크롤 실패: ${err.message}`);
     if (browser) await browser.close();
     process.exit(1);
   }

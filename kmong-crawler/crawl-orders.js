@@ -9,7 +9,7 @@
 const { login, saveErrorScreenshot } = require('./lib/login');
 const { supabase } = require('./lib/supabase');
 const { matchProductId } = require('./lib/product-map');
-const { notify } = require('./lib/telegram');
+const { notifyTyped } = require('./lib/notify-filter');
 const path = require('path');
 
 const ORDER_LIST_URL = 'https://kmong.com/seller/order-list';
@@ -269,14 +269,14 @@ async function crawlOrders() {
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
     const msg = `크몽 크롤: 주문 ${orders.length}건 수집 (${elapsed}초)`;
     console.log(`\n=== ${msg} ===`);
-    notify(msg);
+    notifyTyped('crawl', msg);
 
     await browser.close();
     return orders;
 
   } catch (err) {
     console.error(`[에러] ${err.message}`);
-    notify(`크몽 주문 크롤 실패: ${err.message}`);
+    notifyTyped('error', `크몽 주문 크롤 실패: ${err.message}`);
     if (browser) await browser.close();
     process.exit(1);
   }
