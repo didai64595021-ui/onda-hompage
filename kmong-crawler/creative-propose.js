@@ -12,6 +12,7 @@
 
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { supabase } = require('./lib/supabase');
+const adminDb = require('./lib/supabase-admin');
 const { notifyTyped } = require('./lib/notify-filter');
 const { loadServiceMetrics } = require('./lib/ad-bot-metrics');
 const { proposeCreativeChange } = require('./lib/creative-judge');
@@ -47,7 +48,7 @@ async function main() {
 
   // 메트릭 snapshot 저장
   const mt = metrics.find(m => m.product_id === p.product_id);
-  const { data, error } = await supabase.from('kmong_creative_queue').insert([{
+  const row = {
     product_id: p.product_id,
     element_type: p.element_type,
     priority: p.priority || 50,
@@ -61,13 +62,24 @@ async function main() {
       inquiries_30d: mt.inquiries_30d, orders_30d: mt.orders_30d, revenue_30d: mt.revenue_30d,
       cost_30d: mt.cost_30d, roi_30d: mt.roi_30d, roas_30d: mt.roas_30d,
     } : null,
-  }]).select('id').single();
+  };
 
-  if (error) {
-    console.error('[insert 실패]', error.message);
-    notifyTyped('error', `소재 큐 insert 실패: ${error.message}`);
-    process.exit(1);
+  // PostgREST 우선 → schema cache 미반영 시 Management API fallback
+  let insertedId = null;
+  const pgrst = await supabase.from('kmong_creative_queue').insert([row]).select('id').single();
+  if (pgrst.error) {
+    console.log('[PostgREST insert 실패 → admin API fallback]', pgrst.error.message);
+    const admin = await adminDb.insertRow('kmong_creative_queue', row);
+    if (!admin.ok) {
+      console.error('[admin insert 실패]', admin.error);
+      notifyTyped('error', `소재 큐 insert 실패: ${admin.error}`);
+      process.exit(1);
+    }
+    insertedId = admin.row?.id;
+  } else {
+    insertedId = pgrst.data?.id;
   }
+  const data = { id: insertedId };
 
   const elapsed = ((Date.now() - start) / 1000).toFixed(1);
   const msg = [
