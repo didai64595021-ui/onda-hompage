@@ -7,6 +7,44 @@
  */
 const fs = require('fs');
 const https = require('https');
+const { spawn } = require('child_process');
+
+// Claude CLI spawn (Opus 4.7 — Max 한도) 폴백: OAuth API 429 회피용
+// 단, content가 array(multipart with images)면 CLI는 text만 지원 → 폴백 X
+function callClaudeViaCLI({ system, messages, model, max_tokens, timeoutMs = 180000 }) {
+  return new Promise((resolve) => {
+    // multipart image 포함 여부 체크
+    const hasMultipart = messages.some(m => Array.isArray(m.content) && m.content.some(p => p && p.type !== 'text'));
+    if (hasMultipart) return resolve({ status: 0, body: 'CLI 폴백 불가: multipart content(이미지)', cliSkipped: true });
+
+    const prompt = messages.map(m => {
+      const txt = typeof m.content === 'string' ? m.content : (Array.isArray(m.content) ? m.content.filter(p => p?.type === 'text').map(p => p.text).join('\n') : '');
+      return `[${m.role}]\n${txt}`;
+    }).join('\n\n');
+
+    const env = { ...process.env };
+    delete env.ANTHROPIC_API_KEY;  // OAuth Max 한도 사용 유도
+    const args = ['-p', '--model', model || 'opus', '--output-format', 'json', '--no-session-persistence'];
+    if (system) args.push('--append-system-prompt', system);
+
+    const proc = spawn('claude', args, { stdio: ['pipe', 'pipe', 'pipe'], env });
+    let stdout = '', stderr = '';
+    const t = setTimeout(() => proc.kill('SIGKILL'), timeoutMs);
+    proc.stdout.on('data', d => stdout += d);
+    proc.stderr.on('data', d => stderr += d);
+    proc.on('close', code => {
+      clearTimeout(t);
+      if (code !== 0) return resolve({ status: 500, body: stderr.slice(0, 300) || 'CLI exit ' + code });
+      try {
+        const env = JSON.parse(stdout);
+        if (env.is_error) return resolve({ status: 500, body: env.result?.slice(0, 300) || 'is_error' });
+        // OAuth API body 형식 흉내: { content: [{type:'text', text: ...}] }
+        return resolve({ status: 200, body: JSON.stringify({ content: [{ type: 'text', text: env.result }], usage: env.usage }), cliSource: true });
+      } catch (e) { return resolve({ status: 500, body: 'parse fail: ' + e.message }); }
+    });
+    proc.stdin.write(prompt); proc.stdin.end();
+  });
+}
 
 const CRED_PRIMARY = '/home/onda/.claude/.credentials-account2.json';
 const CRED_FALLBACK = '/home/onda/.claude/.credentials-account1.json';
@@ -134,6 +172,17 @@ async function askClaude({ system, messages, model = 'opus', max_tokens = 16384,
         const text = (j.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('\n');
         return { ok: true, text, usage: j.usage, account: credSource, model: m };
       } catch (e) { return { ok: false, error: `응답 파싱 실패: ${e.message}` }; }
+    }
+    // ★ 429 지속 → Claude CLI 폴백 (OAuth Max 한도 다른 버킷)
+    if (r.status === 429) {
+      const cliR = await callClaudeViaCLI({ system, messages, model: m, max_tokens });
+      if (cliR.status === 200) {
+        try {
+          const j = JSON.parse(cliR.body);
+          const text = (j.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('\n');
+          return { ok: true, text, usage: j.usage, account: 'cli-oauth', model: m };
+        } catch (e) { /* fallthrough */ }
+      }
     }
     lastStatus = r.status; lastBody = r.body;
     if (r.status !== 429 && r.status !== 400) break;
