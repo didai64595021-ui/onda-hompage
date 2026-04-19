@@ -67,6 +67,56 @@ async function setDesiredCpcInModal(page, newCpc) {
   await page.waitForTimeout(500);
 }
 
+async function setDailyBudgetInModal(page, newBudget) {
+  // 1) "일 예산" 섹션의 "설정하지 않음" 체크가 켜져 있으면 해제
+  const unsetUnchecked = await page.evaluate(() => {
+    const dialog = document.querySelector('div[role="dialog"]');
+    if (!dialog) return false;
+    const h5s = dialog.querySelectorAll('h5');
+    for (const h of h5s) {
+      if ((h.innerText || '').trim() !== '일 예산') continue;
+      let box = h.parentElement;
+      for (let i = 0; i < 4 && box; i++) {
+        const spans = box.querySelectorAll('span');
+        for (const s of spans) {
+          if ((s.innerText || '').trim() === '설정하지 않음') {
+            const cb = s.closest('label')?.querySelector('input[type="checkbox"]');
+            if (cb && cb.checked) { cb.click(); return true; }
+            return false;
+          }
+        }
+        box = box.parentElement;
+      }
+    }
+    return false;
+  });
+  if (unsetUnchecked) await page.waitForTimeout(500);
+
+  // 2) 일 예산 input 찾아서 값 입력
+  const handle = await page.evaluateHandle(() => {
+    const dialog = document.querySelector('div[role="dialog"]');
+    if (!dialog) return null;
+    const h5s = dialog.querySelectorAll('h5');
+    for (const h of h5s) {
+      if ((h.innerText || '').trim() !== '일 예산') continue;
+      let box = h.parentElement;
+      for (let i = 0; i < 4 && box; i++) {
+        const inp = box.querySelector('input[placeholder*="1,000원"], input[type="text"]:not([disabled])');
+        if (inp) return inp;
+        box = box.parentElement;
+      }
+    }
+    return null;
+  });
+  const el = handle.asElement();
+  if (!el) throw new Error('일 예산 input 없음');
+  await el.click();
+  await page.keyboard.press('Control+A');
+  await page.keyboard.press('Delete');
+  await page.keyboard.type(String(newBudget));
+  await page.waitForTimeout(400);
+}
+
 async function clickSubmit(page) {
   const btn = page.locator('div[role="dialog"] button:has(span:text("수정하기")), div[role="dialog"] button:has-text("수정하기")').first();
   if (!(await btn.isVisible({ timeout: 2000 }).catch(() => false))) {
@@ -186,8 +236,13 @@ async function applyServiceAction(page, serviceName, action, opts = { dryRun: fa
       await setDesiredCpcInModal(page, action.suggested_desired_cpc);
     }
 
+    if (action.suggested_daily_budget != null && action.suggested_daily_budget > 0) {
+      try { await setDailyBudgetInModal(page, action.suggested_daily_budget); }
+      catch (e) { console.log('  [일예산 설정 실패]', e.message); }
+    }
+
     const closedOk = await clickSubmit(page);
-    return { ok: true, beforeCpc, afterCpc: action.suggested_desired_cpc, kwResults, submitted: closedOk };
+    return { ok: true, beforeCpc, afterCpc: action.suggested_desired_cpc, afterBudget: action.suggested_daily_budget, kwResults, submitted: closedOk };
   } catch (e) {
     await closeDialog(page).catch(() => {});
     return { ok: false, error: e.message, beforeCpc };

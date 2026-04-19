@@ -18,6 +18,7 @@ const { supabase } = require('./lib/supabase');
 const { notifyTyped } = require('./lib/notify-filter');
 const { loadServiceMetrics, loadActiveBudget } = require('./lib/ad-bot-metrics');
 const { judgeAdjustments } = require('./lib/ad-bot-judge');
+const { ruleBasedJudge } = require('./lib/ad-bot-rule-fallback');
 const { applyServiceAction } = require('./lib/ad-bot-apply');
 const { login } = require('./lib/login');
 
@@ -26,6 +27,7 @@ function parseArgs() {
   return {
     apply: args.includes('--apply'),
     service: args.indexOf('--service') >= 0 ? args[args.indexOf('--service') + 1] : null,
+    ruleOnly: args.includes('--rule') || args.includes('--rule-only'),
     dryRun: !args.includes('--apply'),
   };
 }
@@ -61,15 +63,22 @@ async function main() {
   const budget = budgetRows[0] || { budget_type: 'daily', budget_amount: 5000, priority: 'roi', min_cpc: 500, max_cpc: 5000 };
   console.log(`[예산] ${JSON.stringify(budget)}`);
 
-  // 3) Opus 4.7 판단
-  const r = await judgeAdjustments(metrics, budget);
-  if (!r.ok) {
-    console.error('[판단 실패]', r.error);
-    notifyTyped('error', `광고 봇 판단 실패: ${r.error}`);
-    process.exit(1);
+  // 3) 판단 — Opus 4.7 우선, 실패/--rule-only 시 룰베이스 폴백
+  let j, judgeSource = 'opus-4-7';
+  if (args.ruleOnly) {
+    j = ruleBasedJudge(metrics, budget);
+    judgeSource = 'rule-based';
+  } else {
+    const r = await judgeAdjustments(metrics, budget);
+    if (r.ok) {
+      j = r.judgment;
+    } else {
+      console.log('[Opus 실패 → 룰베이스 폴백]', r.error?.slice(0, 80));
+      j = ruleBasedJudge(metrics, budget);
+      judgeSource = 'rule-based (opus-fallback)';
+    }
   }
-  const j = r.judgment;
-  console.log(`[판단] ${j.actions.length}개 제안 / 전체 노트: ${j.overall_note}`);
+  console.log(`[판단:${judgeSource}] ${j.actions.length}개 제안 / ${j.overall_note}`);
 
   // 4) DB 로그 (pending)
   const logged = [];
@@ -118,6 +127,7 @@ async function main() {
       if (!serviceName) { console.log(`[스킵] ${a.product_id} 서비스명 없음`); continue; }
       const res = await applyServiceAction(page, serviceName, {
         suggested_desired_cpc: a.suggested_desired_cpc,
+        suggested_daily_budget: a.suggested_daily_budget,
         keywords_to_enable: a.keywords_to_enable,
         keywords_to_disable: a.keywords_to_disable,
       });
