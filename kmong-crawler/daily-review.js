@@ -95,16 +95,19 @@ async function main() {
   }
 
   // 심의 로그 저장
-  await supabase.from('kmong_ad_bot_actions').insert([{
-    product_id: 'ALL',
-    action_type: 'daily_review',
-    action_date: new Date().toISOString().slice(0, 10),
-    before_state: { observations: r.analyst.observations, anomalies: r.analyst.anomalies },
-    after_state: { decisions, executions },
-    reasoning: r.critic.summary,
-    applied: executions.some(e => e.executed),
-    suggested_by: 'claude-opus-4-7 (2-stage)',
-  }]).catch(e => console.log('[log 실패]', e.message));
+  try {
+    const { error } = await supabase.from('kmong_ad_bot_actions').insert([{
+      product_id: 'ALL',
+      action_type: 'daily_review',
+      action_date: new Date().toISOString().slice(0, 10),
+      before_state: { observations: r.analyst.observations, anomalies: r.analyst.anomalies },
+      after_state: { decisions, executions },
+      reasoning: r.critic.summary,
+      applied: executions.some(e => e.executed),
+      suggested_by: 'claude-opus-4-7 (2-stage)',
+    }]);
+    if (error) console.log('[log 실패]', error.message);
+  } catch (e) { console.log('[log 실패]', e.message); }
 
   const elapsed = ((Date.now() - start) / 1000).toFixed(1);
   const lines = [
