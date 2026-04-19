@@ -67,6 +67,13 @@ const SYSTEM = `당신은 크몽(kmong) CPC 광고 최적화 전문가입니다.
 - 또는 roi_30d ≥ 200% AND cost_30d ≥ 30000 (투자 수익 확정)
 건의 형식: {"product_id":"X", "current_weekly_budget":100000, "suggested_weekly_budget":150000, "reason":"ROAS 350% · 주문 8건"}
 
+## ★ 객단가(avg_order_value_30d) 기반 전략
+메트릭에 avg_order_value_30d (주문당 매출) / cost_per_order_30d (주문당 광고비) / net_profit_30d 있음:
+- avg_order_value < cost_per_order × 2 → 객단가 대비 광고비 비효율. CPC 하향 + 롱테일 키워드로 저가 진입점 확보
+- avg_order_value ≥ 300,000원 (프리미엄) → 추천가 p75 근처까지 CPC 상향 허용 (고의도 키워드)
+- avg_order_value 낮고(10만 이하) orders_30d ≥ 3 → 롱테일 다량 전환 서비스, 예산 증액 건의 검토
+- net_profit_30d < 0 AND cost_30d > 30000 → 적자 누적. 즉시 CPC -20% + 키워드 축소
+
 ## 출력 — JSON 한 덩어리만, 다른 텍스트 금지
 {
   "budget_suggestions": [
