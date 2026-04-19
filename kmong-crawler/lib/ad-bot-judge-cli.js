@@ -4,9 +4,32 @@
  * 출력: lib/ad-bot-judge.js와 동일한 JSON 구조 (가드레일 포함)
  */
 
-const { execFile } = require('child_process');
-const { promisify } = require('util');
-const execFileAsync = promisify(execFile);
+const { spawn } = require('child_process');
+
+function runClaudeCli(prompt, systemPrompt, timeoutMs = 120000) {
+  return new Promise((resolve) => {
+    // OAuth만 쓰도록 ANTHROPIC_API_KEY는 env에서 제거 (revoke된 키 401 방지)
+    const cleanEnv = { ...process.env };
+    delete cleanEnv.ANTHROPIC_API_KEY;
+    const proc = spawn('claude', [
+      '-p',
+      '--model', 'opus',
+      '--output-format', 'json',
+      '--append-system-prompt', systemPrompt,
+      '--no-session-persistence',
+    ], { stdio: ['pipe', 'pipe', 'pipe'], env: cleanEnv });
+    let stdout = '', stderr = '';
+    const killTimer = setTimeout(() => { proc.kill('SIGKILL'); }, timeoutMs);
+    proc.stdout.on('data', (d) => { stdout += d; });
+    proc.stderr.on('data', (d) => { stderr += d; });
+    proc.on('close', (code) => {
+      clearTimeout(killTimer);
+      resolve({ code, stdout, stderr });
+    });
+    proc.stdin.write(prompt);
+    proc.stdin.end();
+  });
+}
 
 const SYSTEM = `당신은 크몽(kmong) CPC 광고 최적화 전문가입니다.
 서비스별 성과 + 예산 + 추천 키워드 풀을 보고,
@@ -76,17 +99,11 @@ ${JSON.stringify(metrics, null, 2)}
 위를 바탕으로 JSON 한 덩어리로 리턴하세요.`;
 
   try {
-    const { stdout } = await execFileAsync('claude', [
-      '-p', userMsg,
-      '--model', 'opus',
-      '--output-format', 'json',
-      '--append-system-prompt', SYSTEM,
-      '--no-session-persistence',
-    ], { maxBuffer: 10 * 1024 * 1024, timeout: 120000, cwd: __dirname });
-
+    const r = await runClaudeCli(userMsg, SYSTEM);
+    if (r.code !== 0) return { ok: false, error: `CLI exit ${r.code}: ${r.stderr.slice(0,300) || r.stdout.slice(0,300)}` };
     let envelope;
-    try { envelope = JSON.parse(stdout); } catch (e) {
-      return { ok: false, error: `CLI envelope 파싱 실패: ${e.message}`, raw: stdout.slice(0, 500) };
+    try { envelope = JSON.parse(r.stdout); } catch (e) {
+      return { ok: false, error: `CLI envelope 파싱 실패: ${e.message}`, raw: r.stdout.slice(0, 500) };
     }
     if (envelope.is_error) return { ok: false, error: `CLI 에러: ${envelope.result || envelope.api_error_status}` };
 
