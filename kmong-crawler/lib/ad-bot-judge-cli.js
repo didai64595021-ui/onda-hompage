@@ -67,12 +67,28 @@ const SYSTEM = `당신은 크몽(kmong) CPC 광고 최적화 전문가입니다.
 - 또는 roi_30d ≥ 200% AND cost_30d ≥ 30000 (투자 수익 확정)
 건의 형식: {"product_id":"X", "current_weekly_budget":100000, "suggested_weekly_budget":150000, "reason":"ROAS 350% · 주문 8건"}
 
-## ★ 객단가(avg_order_value_30d) 기반 전략
-메트릭에 avg_order_value_30d (주문당 매출) / cost_per_order_30d (주문당 광고비) / net_profit_30d 있음:
-- avg_order_value < cost_per_order × 2 → 객단가 대비 광고비 비효율. CPC 하향 + 롱테일 키워드로 저가 진입점 확보
-- avg_order_value ≥ 300,000원 (프리미엄) → 추천가 p75 근처까지 CPC 상향 허용 (고의도 키워드)
-- avg_order_value 낮고(10만 이하) orders_30d ≥ 3 → 롱테일 다량 전환 서비스, 예산 증액 건의 검토
-- net_profit_30d < 0 AND cost_30d > 30000 → 적자 누적. 즉시 CPC -20% + 키워드 축소
+## ★ 객단가 + 볼륨 전략 4분면
+메트릭: avg_order_value_30d, cost_per_order_30d, net_profit_30d, suggested_cpc_stats(p25/median/p75)
+
+### 4분면 판정
+1. **프리미엄 고효율** (avg_order_value ≥ 300,000 AND roas_30d ≥ 200%)
+   → 추천가 p75 근처까지 CPC 상향 허용, 고의도 키워드 enable, 예산 증액 건의
+
+2. **롱테일 전환형** (avg_order_value ≤ 100,000 AND orders_30d ≥ 3)
+   → **세분화 전략**: 추천가 p25 이하 저가 키워드만 enable, p75 이상 고가 브로드 disable
+   → CPC는 추천가 p25 수준 유지 (과다 투자 X), 예산 증액 건의 OK
+
+3. **볼륨 과잉 비효율** (net_profit_30d < 0 AND cost_30d ≥ 30000 AND orders_30d < 2)
+   → **볼륨 스탑**: CPC 즉시 -20%, 추천가 p75+ 고가 키워드 disable, 남은 키워드도 p25 이하만 유지
+   → 광고 유지(데이터 계속 수집) but 노출량 최소화
+   → 다음 주기에도 개선 없으면 daily-review가 pause_product 판단
+
+4. **학습 부족** (노출<500 or 클릭<10) → Phase 1 규칙 (±40% 상향)
+
+### 키워드 세분화 공통 룰 (객단가 기준)
+- avg_order_value 낮은 서비스: keywords_to_disable에 추천가 p75 이상 키워드 우선
+- avg_order_value 높은 서비스: keywords_to_enable에 고의도 프리미엄 키워드 우선
+- net_profit 음수 지속: 5개 이내 enable 중에서도 추천가 median 초과는 제외
 
 ## 출력 — JSON 한 덩어리만, 다른 텍스트 금지
 {
