@@ -56,21 +56,25 @@ async function extractChangeModal(page) {
     const dialog = document.querySelector('div[role="dialog"]');
     if (!dialog) return { error: 'no-dialog' };
 
-    // 추천 키워드 컨테이너 (AI가 추천한 검색 키워드)
+    // 추천 키워드 row: label[has checkbox] 부모 div 구조
+    // 실측 (modal-change.html): 각 row = <div class="mt-2 flex ..."><label>...<p>keyword<span>HOT</span></p>...</label><p>금액원</p></div>
     const suggestions = [];
-    const rows = dialog.querySelectorAll('form [class*="emzx5nl"] > div, form [class*="emzx5nl"] > label, form label:has(input[data-testid="checkbox"])');
+    const labels = dialog.querySelectorAll('label:has(input[data-testid="checkbox"])');
     const seen = new Set();
-    for (const row of rows) {
-      const keywordEl = row.querySelector('label p, p');
-      const priceEl = row.querySelector('p.text-gray-600, p[class*="text-gray"]');
-      const checkbox = row.querySelector('input[data-testid="checkbox"], input[type="checkbox"]');
-      if (!keywordEl || !priceEl) continue;
-      const rawKw = (keywordEl.textContent || '').replace(/HOT/g, '').trim();
+    for (const label of labels) {
+      const row = label.parentElement;
+      if (!row) continue;
+      const kwEl = label.querySelector('p');
+      const priceEl = Array.from(row.children).find(c => c.tagName === 'P');
+      if (!kwEl || !priceEl) continue;
+      const rawKw = (kwEl.textContent || '').replace(/HOT/gi, '').trim();
       const priceText = (priceEl.textContent || '').trim();
+      if (!/원/.test(priceText)) continue;
       const price = parseInt(priceText.replace(/[^0-9]/g, ''), 10);
-      if (!rawKw || isNaN(price) || price === 0) continue;
+      if (!rawKw || isNaN(price) || price <= 0) continue;
       if (seen.has(rawKw)) continue;
       seen.add(rawKw);
+      const checkbox = label.querySelector('input[data-testid="checkbox"]');
       suggestions.push({
         keyword: rawKw,
         suggested_cpc: price,

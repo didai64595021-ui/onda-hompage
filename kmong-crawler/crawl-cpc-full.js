@@ -38,7 +38,13 @@ function parseArgs() {
   const args = process.argv.slice(2);
   const backfillIdx = args.indexOf('--backfill');
   const backfill = backfillIdx >= 0 ? parseInt(args[backfillIdx + 1] || '40', 10) : 0;
-  return { backfill };
+  const limit = args.indexOf('--limit') >= 0 ? parseInt(args[args.indexOf('--limit') + 1] || '1', 10) : 0;
+  return { backfill, limit };
+}
+
+function log(...args) {
+  console.log(...args);
+  if (process.stdout.write) process.stdout.write('');
 }
 
 async function applyYesterdayFilter(page) {
@@ -193,13 +199,18 @@ async function main() {
     browser = r.browser;
     const page = r.page;
 
+    console.log('[이동] 클릭업 페이지...'); process.stdout.write('');
     await page.goto(CLICK_UP_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    console.log('[이동] 완료, title=', await page.title());
     await page.waitForTimeout(3000);
+    console.log('[필터] 어제 적용 시도...');
     await applyYesterdayFilter(page);
+    console.log('[필터] 완료');
 
     const allRows = await listOnServices(page);
     const onRows = allRows.filter(r => r.on);
     console.log(`[리스트] 전체 ${allRows.length}행 / 광고 ON ${onRows.length}행`);
+    if (onRows.length === 0) console.log('[경고] ON 서비스 0개 — 전체 행 상태:', JSON.stringify(allRows.slice(0, 5)));
 
     for (const s of onRows) {
       const productId = matchProductId(s.serviceName);
