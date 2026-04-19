@@ -48,6 +48,16 @@ async function main() {
   const metrics = await loadServiceMetrics(30);
   if (!metrics.length) { console.log('[중단] 메트릭 없음'); return; }
 
+  // ★ 자동 트리거 조건: 모든 서비스가 Phase 2 (표본 충분)여야 A/B 의미 있음
+  // 학습 중인 서비스가 있으면 skip (입찰가 학습 우선)
+  const learning = metrics.filter(m => m.impressions_30d < 500 || m.clicks_30d < 10);
+  if (learning.length > 0) {
+    const names = learning.map(m => `${m.product_id}(노출${m.impressions_30d}/클릭${m.clicks_30d})`).join(', ');
+    const msg = `📋 A/B 자동 SKIP — ${learning.length}개 서비스 아직 학습 중\n  ${names}\n  모두 Phase 2 (노출500+ 클릭10+) 도달 시 자동 시작`;
+    console.log(msg); notifyTyped('report', msg); return;
+  }
+  console.log('[자동 트리거] 전 서비스 Phase 2 도달 → A/B 진행');
+
   const r = await proposeExperiment(metrics, active);
   if (!r.ok) {
     console.error('[실패]', r.error);
