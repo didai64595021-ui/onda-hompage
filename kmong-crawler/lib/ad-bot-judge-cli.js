@@ -42,12 +42,23 @@ const SYSTEM = `당신은 크몽(kmong) CPC 광고 최적화 전문가입니다.
 - **주 예산 대비 소진율은 week_cost / budget_amount로만 계산**. 절대 cost_30d를 주 기준으로 쓰지 말 것.
 - week_cost가 0이라는 건 이번 주 광고가 거의 안 돌았거나 노출만 있고 클릭 없었다는 의미
 
-## 원칙
-- CPC 변경은 하루 ±20% 이내 (점진)
-- 주 예산 관리 (볼륨 조절): week_cost + 남은 일수 × 현재 일평균 지출이 budget_amount 넘을 예상이면 CPC 낮춰 볼륨 억제. week_cost가 낮고 여유면 CPC 올려 클릭 확보
-- ROI/CVR/CTR은 모두 "_30d" 값 기준으로 평가 (표본 크기 충분)
-- 키워드 타겟: gig_title 의도와 직결되는 키워드 enable, 무관한 것 disable (각 5개 이내)
-- 변경 없어도 모든 서비스 포함 (suggested=current + reasoning='유지')
+## 2단계 모드 — 서비스별 자동 판정
+**Phase 1 (학습 모드)**: impressions_30d < 500 OR clicks_30d < 10
+  → 광고가 거의 안 돌고 있음 = 입찰가 부족. **일 ±40%까지 상향 허용** (빠른 학습)
+  → suggested_cpc 목표: suggested_cpc_stats.p25 ~ median 수준 (시장 추천가 하위 25~50%)
+  → 볼륨 확보가 최우선, 예산 초과 우려는 무시
+
+**Phase 2 (최적화 모드)**: impressions_30d ≥ 500 AND clicks_30d ≥ 10
+  → 데이터 충분 = 정밀 최적화. **일 ±20% 이내 점진**
+  → ROI/CVR/CTR 성과 기반 개별 조정
+  → 주 예산 초과 예상 시 CPC 낮춰 볼륨 억제
+
+각 서비스의 current phase를 actions[].phase로 표기 ("learning" | "optimizing").
+
+## 공통 원칙
+- ROI/CVR/CTR은 모두 "_30d" 값 기준 (표본 충분)
+- 키워드 타겟: gig_title 의도와 직결 enable, 무관 disable (각 5개 이내)
+- 변경 없어도 모든 서비스 포함
 
 ## ★ 예산 증액 건의 — "물 들어오면 노 저어야지"
 아래 조건 만족 시 JSON의 budget_suggestions 배열에 추가 (사용자 승인 후 적용, 봇이 자동 변경 X):
@@ -77,7 +88,7 @@ const SYSTEM = `당신은 크몽(kmong) CPC 광고 최적화 전문가입니다.
   "overall_note": "한 줄 요약"
 }`;
 
-function applyGuardrails(parsed, budget, maxChangePct = 20) {
+function applyGuardrails(parsed, budget, metricsByPid = {}) {
   if (!Array.isArray(parsed.actions)) return parsed;
   for (const a of parsed.actions) {
     const cur = a.current_desired_cpc || 0;
@@ -85,6 +96,11 @@ function applyGuardrails(parsed, budget, maxChangePct = 20) {
     let clipped = sug;
     if (budget.min_cpc != null) clipped = Math.max(clipped, budget.min_cpc);
     if (budget.max_cpc != null) clipped = Math.min(clipped, budget.max_cpc);
+    // Phase 1 (learning, 표본 부족) → ±40%, Phase 2 (optimizing) → ±20%
+    const mt = metricsByPid[a.product_id];
+    const learning = mt && (mt.impressions_30d < 500 || mt.clicks_30d < 10);
+    const maxChangePct = learning ? 40 : 20;
+    a.phase = a.phase || (learning ? 'learning' : 'optimizing');
     if (cur > 0) {
       const upper = cur * (1 + maxChangePct / 100);
       const lower = cur * (1 - maxChangePct / 100);
@@ -134,7 +150,8 @@ ${JSON.stringify(metrics, null, 2)}
       return { ok: false, error: `판단 JSON 파싱 실패: ${e.message}`, raw: text.slice(0, 500) };
     }
 
-    const judged = applyGuardrails(parsed, budget);
+    const metricsByPid = Object.fromEntries(metrics.map(m => [m.product_id, m]));
+    const judged = applyGuardrails(parsed, budget, metricsByPid);
     return {
       ok: true,
       judgment: judged,
