@@ -53,6 +53,13 @@ async function sendReply() {
     for (const inquiry of approved) {
       console.log(`\n[발송] #${inquiry.id} — ${inquiry.customer_name}`);
 
+      // DRYRUN 테스트 문의는 실제 발송 차단
+      if (String(inquiry.customer_name || '').startsWith('DRYRUN_TEST_')) {
+        console.log(`  [DRYRUN 차단] 테스트 문의는 실제 발송 X`);
+        await supabase.from('kmong_inquiries').update({ auto_reply_status: 'dryrun_acknowledged' }).eq('id', inquiry.id);
+        continue;
+      }
+
       try {
         // 3. 메시지함 이동 (모달 닫기 필수 — pointer events intercept 방지)
         await page.goto(INBOX_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
