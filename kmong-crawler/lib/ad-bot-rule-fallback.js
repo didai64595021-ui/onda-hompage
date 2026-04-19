@@ -36,7 +36,9 @@ function keywordMatchesCore(keyword, coreTerms) {
 function ruleBasedJudge(metrics, budget) {
   const cpcMultiplier = 1.1;
   const weeklyBudget = budget.budget_type === 'weekly' ? budget.budget_amount : budget.budget_amount * 7;
-  const dailyBudgetPerSvc = Math.round((weeklyBudget * 0.8 / 7) / Math.max(1, metrics.length) / 100) * 100;
+  // 크몽 일예산 최소 10,000원 제약: 주100k/5svc = 14,286원/일 → 서비스당 2,857원은 불가
+  // → 일예산은 건드리지 않음 (현재 '설정 안 함' 유지). 주 예산은 CPC+키워드 조정으로 간접 관리.
+  const dailyBudgetPerSvc = null;
 
   const actions = metrics.map(m => {
     const cur = m.desired_cpc || 1000;
@@ -70,13 +72,13 @@ function ruleBasedJudge(metrics, budget) {
       keywords_to_disable: disable,
       priority: 3,
       confidence: 'rule-based',
-      reasoning: `룰베이스: CPC +10% 점진, 일예산 ${dailyBudgetPerSvc}원 (주 ${weeklyBudget}×0.8/7/${metrics.length}), 타겟 외 ${disable.length}개 off, 타겟 ${enable.length}개 on`,
+      reasoning: `룰베이스: CPC +10% 점진, 일예산 미설정(크몽 최소 1만원 제약 + 주 ${weeklyBudget}원 분산 불가), 타겟 외 ${disable.length}개 off, 타겟 ${enable.length}개 on`,
     };
   });
 
   return {
     actions,
-    overall_note: `룰베이스 조정 (Opus 한도 우회): 일 ${dailyBudgetPerSvc}원/서비스 · 주 ${weeklyBudget}원 예산, +10% 점진 클릭 확보`,
+    overall_note: `룰베이스: CPC +10% 점진 · 주 ${weeklyBudget}원 예산 · 일예산은 크몽 최소 10k 제약으로 무설정 · 클릭 볼륨 확보 목표`,
   };
 }
 

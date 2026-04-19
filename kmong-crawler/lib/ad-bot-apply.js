@@ -42,29 +42,31 @@ async function readDesiredCpcInModal(page) {
 }
 
 async function setDesiredCpcInModal(page, newCpc) {
-  const handle = await page.evaluateHandle(() => {
+  // React controlled input — native value setter + input/change 이벤트로 state commit
+  const ok = await page.evaluate((val) => {
     const dialog = document.querySelector('div[role="dialog"]');
-    if (!dialog) return null;
+    if (!dialog) return { ok: false, reason: 'no dialog' };
     const headings = dialog.querySelectorAll('h5');
     for (const h of headings) {
-      if ((h.innerText || '').trim() === '희망 클릭 비용') {
-        let sib = h.parentElement;
-        for (let i = 0; i < 4 && sib; i++) {
-          const inp = sib.querySelector('input[type="text"], input[type="number"], input[placeholder]');
-          if (inp) return inp;
-          sib = sib.parentElement;
+      if ((h.innerText || '').trim() !== '희망 클릭 비용') continue;
+      let sib = h.parentElement;
+      for (let i = 0; i < 4 && sib; i++) {
+        const inp = sib.querySelector('input[placeholder*="10원"], input[type="text"]:not([disabled])');
+        if (inp) {
+          const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+          setter.call(inp, String(val));
+          inp.dispatchEvent(new Event('input', { bubbles: true }));
+          inp.dispatchEvent(new Event('change', { bubbles: true }));
+          inp.dispatchEvent(new Event('blur', { bubbles: true }));
+          return { ok: true, placeholder: inp.placeholder, value: inp.value };
         }
+        sib = sib.parentElement;
       }
     }
-    return null;
-  });
-  const el = handle.asElement();
-  if (!el) throw new Error('희망 CPC input 찾기 실패');
-  await el.click();
-  await page.keyboard.press('Control+A');
-  await page.keyboard.press('Delete');
-  await page.keyboard.type(String(newCpc));
-  await page.waitForTimeout(500);
+    return { ok: false, reason: 'CPC input 못 찾음' };
+  }, newCpc);
+  if (!ok.ok) throw new Error(`희망 CPC 설정 실패: ${ok.reason}`);
+  await page.waitForTimeout(600);
 }
 
 async function setDailyBudgetInModal(page, newBudget) {
