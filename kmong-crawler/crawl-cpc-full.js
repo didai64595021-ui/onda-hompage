@@ -21,12 +21,19 @@ const {
   parseNum,
   extractKeywordTable,
   extractChangeModal,
-  setParentDate,
   closeDialog,
   getBackfillDates,
 } = require('./lib/ad-extract');
 
 const CLICK_UP_URL = 'https://kmong.com/seller/click-up';
+const urlForDate = (d) => `${CLICK_UP_URL}?startedDate=${d}&endedDate=${d}&filter=custom`;
+
+async function gotoDate(page, date) {
+  await page.goto(urlForDate(date), { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForTimeout(3000);
+  try { const b = page.locator('button:has-text("확인")').first(); if (await b.isVisible({ timeout: 1500 }).catch(()=>false)) await b.click(); } catch {}
+  await page.waitForTimeout(800);
+}
 
 function getYesterday() {
   const d = new Date();
@@ -45,19 +52,6 @@ function parseArgs() {
 function log(...args) {
   console.log(...args);
   if (process.stdout.write) process.stdout.write('');
-}
-
-async function applyYesterdayFilter(page) {
-  try {
-    const btn = page.locator('button:has-text("확인")').first();
-    if (await btn.isVisible({ timeout: 2000 }).catch(() => false)) await btn.click();
-    await page.waitForTimeout(600);
-  } catch {}
-  const yLink = page.locator('a.rounded-full:has-text("어제")').first();
-  if (await yLink.isVisible({ timeout: 5000 }).catch(() => false)) {
-    await yLink.click();
-    await page.waitForTimeout(2000);
-  }
 }
 
 async function listOnServices(page) {
@@ -199,29 +193,25 @@ async function main() {
     browser = r.browser;
     const page = r.page;
 
-    console.log('[이동] 클릭업 페이지...'); process.stdout.write('');
-    await page.goto(CLICK_UP_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    console.log('[이동] 완료, title=', await page.title());
-    await page.waitForTimeout(3000);
-    console.log('[필터] 어제 적용 시도...');
-    await applyYesterdayFilter(page);
-    console.log('[필터] 완료');
+    // === Phase 1: 어제 기준 리스트 + 변경 모달 + 설정 스냅샷 ===
+    console.log('\n[Phase 1] 어제 기준 리스트 + 변경 모달 수집');
+    await gotoDate(page, yesterday);
 
     const allRows = await listOnServices(page);
     const onRows = allRows.filter(r => r.on);
     console.log(`[리스트] 전체 ${allRows.length}행 / 광고 ON ${onRows.length}행`);
-    if (onRows.length === 0) console.log('[경고] ON 서비스 0개 — 전체 행 상태:', JSON.stringify(allRows.slice(0, 5)));
+    if (onRows.length === 0) console.log('[경고] ON 서비스 0개 — 전체 상태:', JSON.stringify(allRows.slice(0, 5)));
 
+    const mappedServices = [];
     for (const s of onRows) {
       const productId = matchProductId(s.serviceName);
       if (!productId) { console.log(`[스킵] 매핑 실패: ${s.serviceName}`); continue; }
+      mappedServices.push({ ...s, productId });
       console.log(`\n━━━ [${productId}] ${s.serviceName.substring(0, 40)} ━━━`);
 
-      // 1) 리스트 집계 (어제 기준)
       const listMetrics = await readListRowMetrics(page, s.rowIndex);
       await saveCpcDailyAggregate(productId, yesterday, listMetrics, true, s.serviceName);
 
-      // 2) 변경 모달 → 추천가 + 현재 설정
       try {
         await openChangeModal(page, s.rowIndex);
         const cfg = await extractChangeModal(page);
@@ -229,33 +219,44 @@ async function main() {
         const savedSug = await saveBidSuggestions(productId, cfg.suggestions, captured);
         summary.suggestions += savedSug;
         await saveAdConfig(productId, yesterday, cfg, listMetrics, s.adStatus);
-        console.log(`  [변경] 추천가 ${cfg.suggestions.length}개 저장 / 희망 ${cfg.desired_cpc}원 / 일예산 ${cfg.daily_budget || '무제한'}`);
+        console.log(`  [변경] 추천가 ${cfg.suggestions.length}개 / 희망 ${cfg.desired_cpc}원 / 일예산 ${cfg.daily_budget || '무제한'}`);
         await closeDialog(page);
       } catch (e) {
         console.log(`  [변경-에러] ${e.message}`);
         summary.errors.push({ productId, stage: 'change', msg: e.message });
         await closeDialog(page).catch(() => {});
       }
+      summary.services += 1;
+    }
 
-      // 3) 상세 모달 — 날짜 루프
-      for (const date of dates) {
+    // === Phase 2: 날짜별 상세 모달 루프 (URL 쿼리) ===
+    console.log(`\n[Phase 2] 상세 모달 날짜 루프 (${dates.length}일 × ${mappedServices.length}서비스 = ${dates.length * mappedServices.length}회)`);
+    for (let di = 0; di < dates.length; di++) {
+      const date = dates[di];
+      if (di > 0 || dates.length !== 1 || date !== yesterday) {
+        await gotoDate(page, date);
+      }
+      console.log(`\n━━ [${di + 1}/${dates.length}] ${date} ━━`);
+      const rowsNow = await listOnServices(page);
+      const byName = new Map(rowsNow.map(r => [r.serviceName, r.rowIndex]));
+
+      for (const s of mappedServices) {
+        const rowIdx = byName.has(s.serviceName) ? byName.get(s.serviceName) : s.rowIndex;
         try {
-          if (backfill > 0) await setParentDate(page, date);
-          await openDetailModal(page, s.rowIndex);
+          await openDetailModal(page, rowIdx);
           const kwRows = await extractKeywordTable(page);
-          const saved = await saveKeywordRows(productId, date, kwRows);
+          const saved = await saveKeywordRows(s.productId, date, kwRows);
           summary.keywordRows += saved;
           const nonZero = kwRows.filter(r => r.impressions > 0 || r.clicks > 0).length;
-          console.log(`  [상세 ${date}] 키워드 ${kwRows.length}개 (성과있음 ${nonZero}개)`);
+          console.log(`  [${s.productId}] 키워드 ${kwRows.length} (성과 ${nonZero})`);
           await closeDialog(page);
-          await page.waitForTimeout(500);
+          await page.waitForTimeout(300);
         } catch (e) {
-          console.log(`  [상세-에러 ${date}] ${e.message}`);
-          summary.errors.push({ productId, stage: `detail:${date}`, msg: e.message });
+          console.log(`  [상세-에러 ${s.productId} ${date}] ${e.message}`);
+          summary.errors.push({ productId: s.productId, stage: `detail:${date}`, msg: e.message });
           await closeDialog(page).catch(() => {});
         }
       }
-      summary.services += 1;
     }
 
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
