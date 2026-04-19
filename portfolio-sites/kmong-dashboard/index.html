@@ -1396,6 +1396,28 @@ async function loadCpcTab() {
   const totalRevCpc = completedOrders.reduce((s, o) => s + (o.amount || 0), 0);
   const roas = totalCost > 0 ? (totalRevCpc / totalCost * 100) : 0;
 
+  // Phase 분류 (봇 학습/최적화 동일 룰: 30일 노출<500 OR 클릭<10 = 학습)
+  let phaseLearning = 0, phaseOptimizing = 0;
+  for (const pid of Object.keys(byProduct)) {
+    const d = byProduct[pid];
+    if (d.impressions < 500 || d.clicks < 10) phaseLearning++; else phaseOptimizing++;
+  }
+
+  // 주간 예산 소진 (월요일 기준)
+  const now = new Date();
+  const day = now.getDay();
+  const offset = day === 0 ? 6 : day - 1;
+  const weekStart = new Date(now); weekStart.setDate(now.getDate() - offset);
+  const weekStartStr = weekStart.toISOString().slice(0, 10);
+  const [{ data: budgetRow }, { data: weekCostRows }] = await Promise.all([
+    sb.from('kmong_ad_budget').select('*').eq('active', true).limit(1).maybeSingle(),
+    sb.from('kmong_cpc_daily').select('cpc_cost').gte('date', weekStartStr),
+  ]);
+  const weekCost = (weekCostRows || []).reduce((s, r) => s + (r.cpc_cost || 0), 0);
+  const budgetAmount = budgetRow?.budget_amount || 100000;
+  const budgetType = budgetRow?.budget_type || 'weekly';
+  const budgetPct = budgetAmount > 0 ? Math.min(100, weekCost / budgetAmount * 100) : 0;
+
   document.getElementById('cpcKpi').innerHTML = [
     { label: '총 클릭수', value: fmt(totalClicks) },
     { label: '총 노출수', value: fmt(totalImpressions) },
@@ -1405,7 +1427,9 @@ async function loadCpcTab() {
     { label: '총 매출', value: fmtMoney(totalRevCpc) },
     { label: 'ROAS', value: fmtPct(roas) },
     { label: '총 CPC 비용', value: fmtMoney(totalCost) },
-  ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join('');
+    { label: '학습/최적화', value: `🎯 ${phaseLearning} / ${phaseOptimizing}` },
+    { label: `주 예산 소진 (${budgetType})`, value: `${fmtMoney(weekCost)} / ${fmtMoney(budgetAmount)}`, extra: `<div style="margin-top:6px;height:6px;background:#2a2d3a;border-radius:3px;overflow:hidden"><div style="height:100%;width:${budgetPct.toFixed(1)}%;background:${budgetPct > 90 ? 'var(--danger)' : budgetPct > 60 ? 'var(--warning)' : 'var(--success)'}"></div></div><div style="font-size:10px;color:var(--text-3);margin-top:2px">${budgetPct.toFixed(1)}% 소진</div>` },
+  ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div>${k.extra || ''}</div>`).join('');
 
   // 일별 차트 (매출 포함)
   const byDate = {};
