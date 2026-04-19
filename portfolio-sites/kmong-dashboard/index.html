@@ -1391,7 +1391,7 @@ async function loadCpcTab() {
   const totalImpressions = rows.reduce((s, r) => s + (r.impressions || 0), 0);
   const avgCtr = totalImpressions > 0 ? (totalClicks / totalImpressions * 100) : 0;
   const totalCost = rows.reduce((s, r) => s + (r.cpc_cost || 0), 0);
-  const inquiryRate = totalClicks > 0 ? (totalInquiries / totalClicks * 100) : 0;
+  const inquiryRate = totalClicks > 0 ? Math.min(100, totalInquiries / totalClicks * 100) : 0;
   const payRate = totalClicks > 0 ? (totalOrders / totalClicks * 100) : 0;
   const totalRevCpc = completedOrders.reduce((s, o) => s + (o.amount || 0), 0);
   const roas = totalCost > 0 ? (totalRevCpc / totalCost * 100) : 0;
@@ -1465,7 +1465,7 @@ async function loadCpcTab() {
     const d = byProduct[pid];
     const ctr = d.impressions > 0 ? (d.clicks / d.impressions * 100) : 0;
     const inqCount = inqByProduct[pid] || 0;
-    const inqRate = d.clicks > 0 ? (inqCount / d.clicks * 100) : 0;
+    const inqRate = d.clicks > 0 ? Math.min(100, inqCount / d.clicks * 100) : 0;
     const ordCount = ordByProduct[pid] || 0;
     const ordRate = inqCount > 0 ? (ordCount / inqCount * 100) : 0;
     const rev = revByProduct[pid] || 0;
