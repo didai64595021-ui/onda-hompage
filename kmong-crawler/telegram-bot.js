@@ -504,6 +504,28 @@ function buildReplyCard(inquiry, qualityLabel = '재검토') {
   return { text, reply_markup };
 }
 
+// 피드백 로그 헬퍼 (Claude few-shot 학습 재료)
+async function logReplyFeedback(inquiryId, action, { originalReply, editedReply, adminId, inquirySnapshot, skipReason, regenReason } = {}) {
+  try {
+    await supabase.from('kmong_reply_feedback').insert([{
+      inquiry_id: inquiryId, action,
+      original_reply: originalReply || null,
+      edited_reply: editedReply || null,
+      skip_reason: skipReason || null,
+      regen_reason: regenReason || null,
+      admin_id: adminId ? String(adminId) : null,
+      inquiry_snapshot: inquirySnapshot || null,
+    }]);
+  } catch (e) { console.error('[feedback log 실패]', e.message); }
+}
+
+async function fetchInquirySnapshot(inquiryId) {
+  try {
+    const { data } = await supabase.from('kmong_inquiries').select('auto_reply_text, ai_suggested_reply, message, intent, lead_heat, priority, product_id').eq('id', inquiryId).single();
+    return data;
+  } catch { return null; }
+}
+
 bot.on('callback_query', async (query) => {
   const data = query.data || '';
   if (!data.startsWith('kreply_')) return;  // 다른 봇 callback 패스
@@ -513,23 +535,27 @@ bot.on('callback_query', async (query) => {
   if (!m) { bot.answerCallbackQuery(query.id, { text: '잘못된 명령' }); return; }
   const action = m[1];
   const inquiryId = parseInt(m[2], 10);
+  const adminId = query.from?.id;
 
   try {
     if (action === 'send') {
-      // 1) status='approved' 업데이트
+      const snap = await fetchInquirySnapshot(inquiryId);
       const { error } = await supabase.from('kmong_inquiries').update({ auto_reply_status: 'approved' }).eq('id', inquiryId);
       if (error) { bot.answerCallbackQuery(query.id, { text: `DB 오류: ${error.message.slice(0, 50)}` }); return; }
-      // 2) send-reply.js 즉시 spawn (cron 30분 대기 X)
+      await logReplyFeedback(inquiryId, 'send', { originalReply: snap?.auto_reply_text, adminId, inquirySnapshot: snap });
       const proc = spawn('node', [path.join(__dirname, 'send-reply.js')], { cwd: __dirname, detached: true, stdio: 'ignore' });
       proc.unref();
-      // 3) 키보드 잠그기 + 메시지 갱신
       bot.editMessageReplyMarkup({ inline_keyboard: [[{ text: `✅ 발송 승인 (${new Date().toLocaleTimeString('ko-KR')}) — 즉시 발송 중`, callback_data: 'noop' }]] }, { chat_id: chatId, message_id: messageId }).catch(() => {});
       bot.answerCallbackQuery(query.id, { text: '발송 승인 + 즉시 발송 트리거' });
     } else if (action === 'skip') {
+      const snap = await fetchInquirySnapshot(inquiryId);
       await supabase.from('kmong_inquiries').update({ auto_reply_status: 'skipped' }).eq('id', inquiryId);
+      await logReplyFeedback(inquiryId, 'skip', { originalReply: snap?.auto_reply_text, adminId, inquirySnapshot: snap });
       bot.editMessageReplyMarkup({ inline_keyboard: [[{ text: '⏭️ 건너뜀', callback_data: 'noop' }]] }, { chat_id: chatId, message_id: messageId }).catch(() => {});
       bot.answerCallbackQuery(query.id, { text: '건너뜀 처리' });
     } else if (action === 'regen') {
+      const snap = await fetchInquirySnapshot(inquiryId);
+      await logReplyFeedback(inquiryId, 'regen', { originalReply: snap?.auto_reply_text, adminId, inquirySnapshot: snap });
       bot.answerCallbackQuery(query.id, { text: '🔄 재생성 중...' }).catch(() => {});
       bot.editMessageReplyMarkup({ inline_keyboard: [[{ text: `🔄 재생성 중 (${new Date().toLocaleTimeString('ko-KR')})`, callback_data: 'noop' }]] }, { chat_id: chatId, message_id: messageId }).catch(() => {});
       // auto-reply.js를 단일 inquiry ID 재생성 모드로 spawn
@@ -543,14 +569,15 @@ bot.on('callback_query', async (query) => {
       });
       proc.unref();
     } else if (action === 'edit') {
-      // answerCallbackQuery는 실패해도 진행 (ETIMEDOUT 있어도 수정 플로우는 열어야 함)
       bot.answerCallbackQuery(query.id, { text: '수정 모드' }).catch((e) => console.error('[answerCB 실패]', e.code || '', e.message?.slice(0, 80)));
+      const preSnap = await fetchInquirySnapshot(inquiryId);
       const promptMsg = await bot.sendMessage(chatId, `✏️ 문의 #${inquiryId} 답변 수정.\n새 답변을 이 메시지에 reply 해주세요. (취소하려면 무시)`, { reply_markup: { force_reply: true, selective: false } });
       bot.onReplyToMessage(chatId, promptMsg.message_id, async (replyMsg) => {
         const newReply = (replyMsg.text || '').trim();
         if (!newReply) { bot.sendMessage(chatId, '⚠️ 빈 메시지 — 수정 취소'); return; }
         const { error } = await supabase.from('kmong_inquiries').update({ auto_reply_text: newReply, auto_reply_status: 'generated' }).eq('id', inquiryId);
         if (error) { bot.sendMessage(chatId, `❌ DB 오류: ${error.message}`); return; }
+        await logReplyFeedback(inquiryId, 'edit', { originalReply: preSnap?.auto_reply_text, editedReply: newReply, adminId, inquirySnapshot: preSnap });
         const inq = await refetchInquiry(inquiryId);
         if (inq) {
           const card = buildReplyCard(inq, '✏️ 수정 반영');

@@ -376,12 +376,29 @@ async function getSimilarApprovedReplies(currentMessage, productId, limit = 3) {
   const keywords = (currentMessage || '').match(/[가-힣a-zA-Z]{2,}/g) || [];
   if (keywords.length === 0) return [];
 
-  // 너무 흔한 단어 제거
   const stopwords = new Set(['안녕하세요', '문의', '감사합니다', '드려요', '있나요', '어떻게', '가능', '궁금', '합니다', '드립니다', '드려', '해주세요']);
   const sigKeywords = keywords.filter(k => !stopwords.has(k) && k.length >= 2).slice(0, 6);
   if (sigKeywords.length === 0) return [];
 
-  // sent 상태의 답변 + 키워드 중 하나라도 포함된 것
+  // 품질 필터: reply_history에서 effectiveness_score ≥ 70 + customer_replied=TRUE 인 inquiry_id만 통과
+  // (성공한 답변만 few-shot 재료로 씀 — 낮은 점수/무반응은 제외)
+  const { data: highQualityIds } = await supabase
+    .from('kmong_reply_history')
+    .select('inquiry_id')
+    .gte('effectiveness_score', 70)
+    .eq('customer_replied', true)
+    .order('effectiveness_score', { ascending: false })
+    .limit(200);
+  const allowedIds = new Set((highQualityIds || []).map(r => r.inquiry_id));
+  // 관리자가 send 그대로 보낸 inquiry도 통과 (피드백 로그 기반)
+  const { data: sendFeedback } = await supabase
+    .from('kmong_reply_feedback')
+    .select('inquiry_id')
+    .eq('action', 'send')
+    .order('created_at', { ascending: false })
+    .limit(300);
+  for (const f of (sendFeedback || [])) if (f.inquiry_id) allowedIds.add(f.inquiry_id);
+
   const orFilter = sigKeywords.map(k => `message_content.ilike.%${k}%`).join(',');
   const { data } = await supabase
     .from('kmong_inquiries')
@@ -390,16 +407,21 @@ async function getSimilarApprovedReplies(currentMessage, productId, limit = 3) {
     .not('auto_reply_text', 'is', null)
     .or(orFilter)
     .order('inquiry_date', { ascending: false })
-    .limit(limit * 4);
+    .limit(limit * 8);
 
-  // 점수: 매칭 키워드 수 + 같은 product_id 보너스
+  // 점수: 품질 필터 통과 + 매칭 키워드 + 같은 product 보너스
   const scored = (data || []).map(r => {
     const matchCount = sigKeywords.filter(k => String(r.message_content || '').includes(k)).length;
     const sameProduct = r.product_id === productId ? 2 : 0;
-    return { ...r, score: matchCount + sameProduct };
+    const qualityBoost = allowedIds.has(r.id) ? 3 : 0;
+    return { ...r, score: matchCount + sameProduct + qualityBoost, quality_verified: allowedIds.has(r.id) };
   }).filter(r => r.score >= 1);
 
-  return scored.sort((a, b) => b.score - a.score).slice(0, limit);
+  // 품질 필터 통과한 것 우선, 없으면 키워드 매칭만 (cold-start)
+  const verified = scored.filter(r => r.quality_verified).sort((a, b) => b.score - a.score);
+  if (verified.length >= limit) return verified.slice(0, limit);
+  const rest = scored.filter(r => !r.quality_verified).sort((a, b) => b.score - a.score);
+  return [...verified, ...rest].slice(0, limit);
 }
 
 module.exports = {
