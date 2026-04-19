@@ -166,6 +166,11 @@ async function main() {
     `  예산 ${budget.budget_amount.toLocaleString()}원/${budget.budget_type} · 우선순위 ${budget.priority}`,
     `  제안 ${j.actions.length}건 / 변경 ${j.actions.filter(a => a.current_desired_cpc !== a.suggested_desired_cpc).length}건${args.apply ? ` / 적용 성공 ${appliedCount}` : ''}`,
     '',
+    ...(j.budget_suggestions?.length ? [
+      '💰 <b>예산 증액 건의</b> (물들어오면 노젓기 — 사용자 승인 필요)',
+      ...j.budget_suggestions.slice(0, 5).map(b => `  • ${b.product_id}: ${b.current_weekly_budget?.toLocaleString()}→${b.suggested_weekly_budget?.toLocaleString()}원/주 — ${b.reason}`),
+      '',
+    ] : []),
     '📋 <b>주요 조정</b> (점진 ±20% 가드, 주 예산 기준)',
     ...j.actions.slice(0, 8).map(a => {
       const kwEn = (a.keywords_to_enable || []).length ? ` +kw:${a.keywords_to_enable.slice(0,3).join(',')}` : '';
