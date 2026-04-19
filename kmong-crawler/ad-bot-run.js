@@ -18,7 +18,7 @@ const { supabase } = require('./lib/supabase');
 const { notifyTyped } = require('./lib/notify-filter');
 const { loadServiceMetrics, loadActiveBudget } = require('./lib/ad-bot-metrics');
 const { judgeAdjustments } = require('./lib/ad-bot-judge');
-const { applyDesiredCpc } = require('./lib/ad-bot-apply');
+const { applyServiceAction } = require('./lib/ad-bot-apply');
 const { login } = require('./lib/login');
 
 function parseArgs() {
@@ -76,10 +76,18 @@ async function main() {
   for (const a of j.actions) {
     const id = await logAction({
       product_id: a.product_id,
-      action_type: 'adjust_desired_cpc',
+      action_type: 'adjust_cpc_and_keywords',
       action_date: actionDate,
       before_state: { desired_cpc: a.current_desired_cpc },
-      after_state: { desired_cpc: a.suggested_desired_cpc, reasoning: a.reasoning, priority: a.priority, confidence: a.confidence, guardrail_applied: !!a.guardrail_applied },
+      after_state: {
+        desired_cpc: a.suggested_desired_cpc,
+        keywords_to_enable: a.keywords_to_enable || [],
+        keywords_to_disable: a.keywords_to_disable || [],
+        reasoning: a.reasoning,
+        priority: a.priority,
+        confidence: a.confidence,
+        guardrail_applied: !!a.guardrail_applied,
+      },
       reasoning: a.reasoning,
       metrics_snapshot: metrics.find(m => m.product_id === a.product_id),
       budget_input: budget.budget_amount,
@@ -97,16 +105,24 @@ async function main() {
     try { const b = page.locator('button:has-text("확인")').first(); if (await b.isVisible({ timeout: 1500 }).catch(()=>false)) await b.click(); } catch {}
     await page.waitForTimeout(800);
 
-    const changes = logged.filter(a => a.current_desired_cpc !== a.suggested_desired_cpc);
+    const changes = logged.filter(a =>
+      a.current_desired_cpc !== a.suggested_desired_cpc ||
+      (a.keywords_to_enable || []).length > 0 ||
+      (a.keywords_to_disable || []).length > 0
+    );
     console.log(`[적용] 변경 대상 ${changes.length}개`);
     for (const a of changes) {
       const mt = metrics.find(m => m.product_id === a.product_id);
       if (!mt) continue;
-      const { data: gigRow } = await supabase.from('kmong_gig_status').select('gig_title').eq('product_id', a.product_id).order('crawled_at', { ascending: false }).limit(1).single();
-      const serviceName = gigRow?.gig_title;
-      if (!serviceName) { console.log(`[스킵] ${a.product_id} 서비스명 못 찾음`); continue; }
-      const res = await applyDesiredCpc(page, serviceName, a.suggested_desired_cpc);
-      console.log(`  [${a.product_id}] ${a.current_desired_cpc} → ${a.suggested_desired_cpc}원: ${res.ok ? 'OK' : 'FAIL'} ${res.error || ''}`);
+      const serviceName = mt.gig_title;
+      if (!serviceName) { console.log(`[스킵] ${a.product_id} 서비스명 없음`); continue; }
+      const res = await applyServiceAction(page, serviceName, {
+        suggested_desired_cpc: a.suggested_desired_cpc,
+        keywords_to_enable: a.keywords_to_enable,
+        keywords_to_disable: a.keywords_to_disable,
+      });
+      const kwSummary = res.kwResults ? ` / 키워드 ${res.kwResults.filter(r => r.ok && r.toggled).length}토글` : '';
+      console.log(`  [${a.product_id}] ${a.current_desired_cpc} → ${a.suggested_desired_cpc}원${kwSummary}: ${res.ok ? 'OK' : 'FAIL'} ${res.error || ''}`);
       await updateActionApplied(a.logId, res);
       if (res.ok) appliedCount += 1;
       await page.waitForTimeout(1500);
@@ -120,8 +136,12 @@ async function main() {
     `  예산 ${budget.budget_amount.toLocaleString()}원/${budget.budget_type} · 우선순위 ${budget.priority}`,
     `  제안 ${j.actions.length}건 / 변경 ${j.actions.filter(a => a.current_desired_cpc !== a.suggested_desired_cpc).length}건${args.apply ? ` / 적용 성공 ${appliedCount}` : ''}`,
     '',
-    '📋 <b>주요 조정</b>',
-    ...j.actions.slice(0, 6).map(a => `  • ${a.product_id}: ${a.current_desired_cpc} → ${a.suggested_desired_cpc}원 (${a.change_pct >= 0 ? '+' : ''}${a.change_pct}%) — ${a.reasoning}`),
+    '📋 <b>주요 조정</b> (점진 ±20% 가드, 주 예산 기준)',
+    ...j.actions.slice(0, 8).map(a => {
+      const kwEn = (a.keywords_to_enable || []).length ? ` +kw:${a.keywords_to_enable.slice(0,3).join(',')}` : '';
+      const kwDis = (a.keywords_to_disable || []).length ? ` -kw:${a.keywords_to_disable.slice(0,3).join(',')}` : '';
+      return `  • ${a.product_id}: ${a.current_desired_cpc}→${a.suggested_desired_cpc}원(${a.change_pct >= 0 ? '+' : ''}${a.change_pct}%)${kwEn}${kwDis}\n    ${a.reasoning}`;
+    }),
     '',
     `💬 ${j.overall_note}`,
     `<i>생성: ${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC · ${((Date.now() - startTime) / 1000).toFixed(1)}초</i>`,

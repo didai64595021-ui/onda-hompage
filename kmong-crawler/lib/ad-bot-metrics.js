@@ -13,17 +13,28 @@ function daysAgo(n) {
   return d.toISOString().slice(0, 10);
 }
 
+function weekStartISO() {
+  const d = new Date();
+  const day = d.getDay(); // 0=Sun
+  const offset = day === 0 ? 6 : day - 1; // 월요일 시작
+  d.setDate(d.getDate() - offset);
+  return d.toISOString().slice(0, 10);
+}
+
 async function loadServiceMetrics(days = 30) {
   const start = daysAgo(days);
   const end = daysAgo(0);
+  const weekStart = weekStartISO();
 
-  const [cpcRes, kwRes, cfgRes, sugRes, inqRes, ordRes] = await Promise.all([
+  const [cpcRes, weekCpcRes, kwRes, cfgRes, sugRes, inqRes, ordRes, gigRes] = await Promise.all([
     supabase.from('kmong_cpc_daily').select('product_id,date,impressions,clicks,cpc_cost').gte('date', start).lte('date', end),
+    supabase.from('kmong_cpc_daily').select('product_id,date,cpc_cost').gte('date', weekStart).lte('date', end),
     supabase.from('kmong_ad_keyword_daily').select('product_id,keyword,impressions,clicks,total_cost').gte('date', start).lte('date', end),
     supabase.from('kmong_ad_config_daily').select('product_id,desired_cpc,daily_budget').order('date', { ascending: false }).limit(200),
     supabase.from('kmong_ad_bid_suggestion').select('product_id,keyword,suggested_cpc,captured_at').order('captured_at', { ascending: false }).limit(1000),
     supabase.from('kmong_inquiries').select('product_id,created_at').gte('created_at', start),
     supabase.from('kmong_profits_transactions').select('product_id,profit_amount,status,transaction_date').gte('transaction_date', start).lte('transaction_date', end),
+    supabase.from('kmong_gig_status').select('product_id,gig_title,status,crawled_at').order('crawled_at', { ascending: false }).limit(200),
   ]);
 
   // 서비스별 집계
@@ -31,15 +42,33 @@ async function loadServiceMetrics(days = 30) {
   const ensure = (pid) => {
     if (!svc[pid]) svc[pid] = {
       product_id: pid,
+      gig_title: null,
       days,
       impressions: 0, clicks: 0, cost: 0,
+      week_cost: 0, week_start: weekStart,
       inquiries: 0, orders: 0, revenue: 0,
       desired_cpc: null, daily_budget: null,
       keywords_top: [], keywords_bottom: [],
       suggested_cpc_stats: null,
+      suggested_keywords: [],
     };
     return svc[pid];
   };
+
+  // 서비스명 (가장 최근 스냅샷)
+  const seenGig = new Set();
+  for (const g of (gigRes.data || [])) {
+    if (seenGig.has(g.product_id)) continue;
+    seenGig.add(g.product_id);
+    const s = ensure(g.product_id);
+    s.gig_title = g.gig_title;
+  }
+
+  // 주간 누적 지출
+  for (const r of (weekCpcRes.data || [])) {
+    const s = ensure(r.product_id);
+    s.week_cost += r.cpc_cost || 0;
+  }
 
   for (const r of (cpcRes.data || [])) {
     const s = ensure(r.product_id);
@@ -94,16 +123,16 @@ async function loadServiceMetrics(days = 30) {
     s.keywords_bottom = [...list].filter(k => k.impressions >= 10 && k.clicks === 0).sort((a, b) => b.impressions - a.impressions).slice(0, 5).map(k => ({ keyword: k.keyword, impressions: k.impressions }));
   }
 
-  // 추천가 분포 (서비스별 최신 스냅샷)
+  // 추천가 분포 (서비스별 최신 스냅샷) + 추천 키워드 전체 목록 (타겟 적합성 판단용)
   const sugByPid = {};
   for (const r of (sugRes.data || [])) {
-    const k = `${r.product_id}|${r.keyword}`;
     if (!sugByPid[r.product_id]) sugByPid[r.product_id] = {};
     if (!sugByPid[r.product_id][r.keyword]) sugByPid[r.product_id][r.keyword] = r.suggested_cpc;
   }
   for (const [pid, kwMap] of Object.entries(sugByPid)) {
     const s = ensure(pid);
-    const prices = Object.values(kwMap).filter(Boolean).sort((a, b) => a - b);
+    const entries = Object.entries(kwMap).filter(([, v]) => v != null);
+    const prices = entries.map(([, v]) => v).sort((a, b) => a - b);
     if (!prices.length) continue;
     s.suggested_cpc_stats = {
       count: prices.length,
@@ -113,6 +142,7 @@ async function loadServiceMetrics(days = 30) {
       p25: prices[Math.floor(prices.length * 0.25)],
       p75: prices[Math.floor(prices.length * 0.75)],
     };
+    s.suggested_keywords = entries.map(([keyword, suggested_cpc]) => ({ keyword, suggested_cpc })).sort((a, b) => b.suggested_cpc - a.suggested_cpc);
   }
 
   // 파생 지표 계산
