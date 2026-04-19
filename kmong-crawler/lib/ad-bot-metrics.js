@@ -1,0 +1,138 @@
+/**
+ * 광고 봇 — 서비스별 메트릭 수집
+ * 출력: 지난 30일 ROI / CVR / CTR / 비용 / 매출 / 문의/주문 / 추천가 분포 / 현재 희망 CPC
+ * 판단 모듈이 이 결과를 그대로 Opus 4.7에 주입
+ */
+
+require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+const { supabase } = require('./supabase');
+
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.toISOString().slice(0, 10);
+}
+
+async function loadServiceMetrics(days = 30) {
+  const start = daysAgo(days);
+  const end = daysAgo(0);
+
+  const [cpcRes, kwRes, cfgRes, sugRes, inqRes, ordRes] = await Promise.all([
+    supabase.from('kmong_cpc_daily').select('product_id,date,impressions,clicks,cpc_cost').gte('date', start).lte('date', end),
+    supabase.from('kmong_ad_keyword_daily').select('product_id,keyword,impressions,clicks,total_cost').gte('date', start).lte('date', end),
+    supabase.from('kmong_ad_config_daily').select('product_id,desired_cpc,daily_budget').order('date', { ascending: false }).limit(200),
+    supabase.from('kmong_ad_bid_suggestion').select('product_id,keyword,suggested_cpc,captured_at').order('captured_at', { ascending: false }).limit(1000),
+    supabase.from('kmong_inquiries').select('product_id,created_at').gte('created_at', start),
+    supabase.from('kmong_profits_transactions').select('product_id,profit_amount,status,transaction_date').gte('transaction_date', start).lte('transaction_date', end),
+  ]);
+
+  // 서비스별 집계
+  const svc = {};
+  const ensure = (pid) => {
+    if (!svc[pid]) svc[pid] = {
+      product_id: pid,
+      days,
+      impressions: 0, clicks: 0, cost: 0,
+      inquiries: 0, orders: 0, revenue: 0,
+      desired_cpc: null, daily_budget: null,
+      keywords_top: [], keywords_bottom: [],
+      suggested_cpc_stats: null,
+    };
+    return svc[pid];
+  };
+
+  for (const r of (cpcRes.data || [])) {
+    const s = ensure(r.product_id);
+    s.impressions += r.impressions || 0;
+    s.clicks += r.clicks || 0;
+    s.cost += r.cpc_cost || 0;
+  }
+
+  // 현재 설정 (최신 1건)
+  const latestCfg = {};
+  for (const c of (cfgRes.data || [])) if (!latestCfg[c.product_id]) latestCfg[c.product_id] = c;
+  for (const [pid, c] of Object.entries(latestCfg)) {
+    const s = ensure(pid);
+    s.desired_cpc = c.desired_cpc;
+    s.daily_budget = c.daily_budget;
+  }
+
+  // 문의
+  for (const i of (inqRes.data || [])) {
+    if (!i.product_id) continue;
+    const s = ensure(i.product_id);
+    s.inquiries += 1;
+  }
+
+  // 주문/매출
+  for (const o of (ordRes.data || [])) {
+    if (!o.product_id) continue;
+    const s = ensure(o.product_id);
+    if (o.status === '완료' || o.status === 'completed') {
+      s.orders += 1;
+      s.revenue += o.profit_amount || 0;
+    }
+  }
+
+  // 키워드별 성과 집계 → TOP3 클릭 + BOTTOM3 노출많은데 클릭0
+  const kwAgg = {};
+  for (const r of (kwRes.data || [])) {
+    const k = `${r.product_id}|${r.keyword}`;
+    if (!kwAgg[k]) kwAgg[k] = { product_id: r.product_id, keyword: r.keyword, impressions: 0, clicks: 0, cost: 0 };
+    kwAgg[k].impressions += r.impressions || 0;
+    kwAgg[k].clicks += r.clicks || 0;
+    kwAgg[k].cost += r.total_cost || 0;
+  }
+  const byPid = {};
+  for (const k of Object.values(kwAgg)) {
+    if (!byPid[k.product_id]) byPid[k.product_id] = [];
+    byPid[k.product_id].push(k);
+  }
+  for (const [pid, list] of Object.entries(byPid)) {
+    const s = ensure(pid);
+    s.keywords_top = [...list].filter(k => k.clicks > 0).sort((a, b) => b.clicks - a.clicks).slice(0, 5).map(k => ({ keyword: k.keyword, impressions: k.impressions, clicks: k.clicks, cost: k.cost, ctr: k.impressions > 0 ? +(k.clicks / k.impressions * 100).toFixed(2) : 0 }));
+    s.keywords_bottom = [...list].filter(k => k.impressions >= 10 && k.clicks === 0).sort((a, b) => b.impressions - a.impressions).slice(0, 5).map(k => ({ keyword: k.keyword, impressions: k.impressions }));
+  }
+
+  // 추천가 분포 (서비스별 최신 스냅샷)
+  const sugByPid = {};
+  for (const r of (sugRes.data || [])) {
+    const k = `${r.product_id}|${r.keyword}`;
+    if (!sugByPid[r.product_id]) sugByPid[r.product_id] = {};
+    if (!sugByPid[r.product_id][r.keyword]) sugByPid[r.product_id][r.keyword] = r.suggested_cpc;
+  }
+  for (const [pid, kwMap] of Object.entries(sugByPid)) {
+    const s = ensure(pid);
+    const prices = Object.values(kwMap).filter(Boolean).sort((a, b) => a - b);
+    if (!prices.length) continue;
+    s.suggested_cpc_stats = {
+      count: prices.length,
+      min: prices[0],
+      max: prices[prices.length - 1],
+      median: prices[Math.floor(prices.length / 2)],
+      p25: prices[Math.floor(prices.length * 0.25)],
+      p75: prices[Math.floor(prices.length * 0.75)],
+    };
+  }
+
+  // 파생 지표 계산
+  for (const s of Object.values(svc)) {
+    s.ctr = s.impressions > 0 ? +(s.clicks / s.impressions * 100).toFixed(2) : 0;
+    s.cvr_inquiry = s.clicks > 0 ? +(s.inquiries / s.clicks * 100).toFixed(2) : 0;
+    s.cvr_order = s.inquiries > 0 ? +(s.orders / s.inquiries * 100).toFixed(2) : 0;
+    s.cpa = s.orders > 0 ? Math.round(s.cost / s.orders) : null;
+    s.roi = s.cost > 0 ? +(((s.revenue - s.cost) / s.cost) * 100).toFixed(1) : null;
+    s.roas = s.cost > 0 ? +((s.revenue / s.cost) * 100).toFixed(1) : null;
+  }
+
+  return Object.values(svc).filter(s => s.desired_cpc != null);
+}
+
+async function loadActiveBudget(productId = null) {
+  let q = supabase.from('kmong_ad_budget').select('*').eq('active', true);
+  if (productId) q = q.or(`product_id.eq.${productId},product_id.is.null`);
+  const { data } = await q;
+  return data || [];
+}
+
+module.exports = { loadServiceMetrics, loadActiveBudget };

@@ -1,0 +1,137 @@
+#!/usr/bin/env node
+/**
+ * 크몽 광고 최적화 봇 오케스트레이터
+ * - 일 1회 실행 (cron)
+ * - Phase 1: 메트릭 수집 (지난 30일)
+ * - Phase 2: Claude Opus 4.7 판단 → 서비스별 희망 CPC 제안
+ * - Phase 3: kmong_ad_bot_actions 로그 (pending)
+ * - Phase 4: --apply 옵션 시 Playwright로 실제 적용 → log status = applied
+ *
+ * 사용법:
+ *   node ad-bot-run.js                 # dry-run (제안만, DB 로그만)
+ *   node ad-bot-run.js --apply         # 실제 크몽 UI에 적용
+ *   node ad-bot-run.js --service ID    # 특정 서비스만
+ */
+
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
+const { supabase } = require('./lib/supabase');
+const { notifyTyped } = require('./lib/notify-filter');
+const { loadServiceMetrics, loadActiveBudget } = require('./lib/ad-bot-metrics');
+const { judgeAdjustments } = require('./lib/ad-bot-judge');
+const { applyDesiredCpc } = require('./lib/ad-bot-apply');
+const { login } = require('./lib/login');
+
+function parseArgs() {
+  const args = process.argv.slice(2);
+  return {
+    apply: args.includes('--apply'),
+    service: args.indexOf('--service') >= 0 ? args[args.indexOf('--service') + 1] : null,
+    dryRun: !args.includes('--apply'),
+  };
+}
+
+async function logAction(row) {
+  const { data, error } = await supabase.from('kmong_ad_bot_actions').insert([row]).select('id').single();
+  if (error) console.log('[WARN] bot_actions insert 실패:', error.message);
+  return data?.id;
+}
+
+async function updateActionApplied(id, result) {
+  if (!id) return;
+  const { error } = await supabase.from('kmong_ad_bot_actions')
+    .update({ applied: result.ok, applied_at: new Date().toISOString(), after_state: result })
+    .eq('id', id);
+  if (error) console.log('[WARN] bot_actions update 실패:', error.message);
+}
+
+async function main() {
+  const startTime = Date.now();
+  const args = parseArgs();
+  console.log(`=== 크몽 광고 봇 ${args.apply ? '(적용 모드)' : '(dry-run)'} ===`);
+  const actionDate = new Date().toISOString().slice(0, 10);
+
+  // 1) 메트릭 수집
+  let metrics = await loadServiceMetrics(30);
+  if (args.service) metrics = metrics.filter(m => m.product_id === args.service);
+  console.log(`[메트릭] 서비스 ${metrics.length}개 로드`);
+  if (!metrics.length) { console.log('[중단] 분석할 서비스 없음'); return; }
+
+  // 2) 예산 로드
+  const budgetRows = await loadActiveBudget();
+  const budget = budgetRows[0] || { budget_type: 'daily', budget_amount: 5000, priority: 'roi', min_cpc: 500, max_cpc: 5000 };
+  console.log(`[예산] ${JSON.stringify(budget)}`);
+
+  // 3) Opus 4.7 판단
+  const r = await judgeAdjustments(metrics, budget);
+  if (!r.ok) {
+    console.error('[판단 실패]', r.error);
+    notifyTyped('error', `광고 봇 판단 실패: ${r.error}`);
+    process.exit(1);
+  }
+  const j = r.judgment;
+  console.log(`[판단] ${j.actions.length}개 제안 / 전체 노트: ${j.overall_note}`);
+
+  // 4) DB 로그 (pending)
+  const logged = [];
+  for (const a of j.actions) {
+    const id = await logAction({
+      product_id: a.product_id,
+      action_type: 'adjust_desired_cpc',
+      action_date: actionDate,
+      before_state: { desired_cpc: a.current_desired_cpc },
+      after_state: { desired_cpc: a.suggested_desired_cpc, reasoning: a.reasoning, priority: a.priority, confidence: a.confidence, guardrail_applied: !!a.guardrail_applied },
+      reasoning: a.reasoning,
+      metrics_snapshot: metrics.find(m => m.product_id === a.product_id),
+      budget_input: budget.budget_amount,
+      applied: false,
+    });
+    logged.push({ ...a, logId: id });
+  }
+
+  // 5) 실제 적용 (--apply 시)
+  let appliedCount = 0;
+  if (args.apply) {
+    const { browser, page } = await login({ slowMo: 150 });
+    await page.goto('https://kmong.com/seller/click-up', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(3000);
+    try { const b = page.locator('button:has-text("확인")').first(); if (await b.isVisible({ timeout: 1500 }).catch(()=>false)) await b.click(); } catch {}
+    await page.waitForTimeout(800);
+
+    const changes = logged.filter(a => a.current_desired_cpc !== a.suggested_desired_cpc);
+    console.log(`[적용] 변경 대상 ${changes.length}개`);
+    for (const a of changes) {
+      const mt = metrics.find(m => m.product_id === a.product_id);
+      if (!mt) continue;
+      const { data: gigRow } = await supabase.from('kmong_gig_status').select('gig_title').eq('product_id', a.product_id).order('crawled_at', { ascending: false }).limit(1).single();
+      const serviceName = gigRow?.gig_title;
+      if (!serviceName) { console.log(`[스킵] ${a.product_id} 서비스명 못 찾음`); continue; }
+      const res = await applyDesiredCpc(page, serviceName, a.suggested_desired_cpc);
+      console.log(`  [${a.product_id}] ${a.current_desired_cpc} → ${a.suggested_desired_cpc}원: ${res.ok ? 'OK' : 'FAIL'} ${res.error || ''}`);
+      await updateActionApplied(a.logId, res);
+      if (res.ok) appliedCount += 1;
+      await page.waitForTimeout(1500);
+    }
+    await browser.close();
+  }
+
+  // 6) 텔레그램 요약
+  const lines = [
+    `🤖 <b>크몽 광고 봇 ${args.apply ? '적용' : 'dry-run'}</b>`,
+    `  예산 ${budget.budget_amount.toLocaleString()}원/${budget.budget_type} · 우선순위 ${budget.priority}`,
+    `  제안 ${j.actions.length}건 / 변경 ${j.actions.filter(a => a.current_desired_cpc !== a.suggested_desired_cpc).length}건${args.apply ? ` / 적용 성공 ${appliedCount}` : ''}`,
+    '',
+    '📋 <b>주요 조정</b>',
+    ...j.actions.slice(0, 6).map(a => `  • ${a.product_id}: ${a.current_desired_cpc} → ${a.suggested_desired_cpc}원 (${a.change_pct >= 0 ? '+' : ''}${a.change_pct}%) — ${a.reasoning}`),
+    '',
+    `💬 ${j.overall_note}`,
+    `<i>생성: ${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC · ${((Date.now() - startTime) / 1000).toFixed(1)}초</i>`,
+  ];
+  notifyTyped('report', lines.join('\n'));
+  console.log(lines.join('\n'));
+}
+
+main().catch(err => {
+  console.error('[치명적 에러]', err);
+  notifyTyped('error', `광고 봇 크래시: ${err.message}`);
+  process.exit(1);
+});
