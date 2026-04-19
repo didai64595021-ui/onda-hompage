@@ -17,6 +17,7 @@ const { supabase } = require('./lib/supabase');
 const { sendCard } = require('./lib/telegram');
 const { notifyTyped } = require('./lib/notify-filter');
 const { analyzeInquiry, selectBestTemplate, renderTemplate, getServiceStats, calculateReplyQuality, getRecentApprovedReplies, getSimilarApprovedReplies } = require('./lib/reply-generator');
+const { loadActiveProfile } = require('./lib/style-profile');
 const { getCategoryById, getGigUrlById } = require('./lib/product-map');
 const { askClaude } = require('./lib/claude-max');
 const { formatGigDetailForPrompt } = require('./lib/gig-detail');
@@ -420,7 +421,11 @@ async function autoReply() {
           `[예시${i + 1}] 고객: ${String(e.message_content || '').slice(0, 120)}\n   답변: ${String(e.auto_reply_text || '').slice(0, 400)}`
         ).join('\n\n');
 
-        const sys = `당신은 ONDA 마케팅의 크몽 판매 담당자입니다. 목표는 문의를 계약으로 전환하는 것.
+        // 말투 프로필 주입 (누적 과거 답변에서 Opus가 추출한 셀러 스타일)
+        const styleProfile = await loadActiveProfile().catch(() => null);
+        const styleBlock = styleProfile ? `\n\n★ 셀러 고유 말투 (반드시 따를 것) ★\n${styleProfile.description}\n특징:\n${Object.entries(styleProfile.characteristics || {}).map(([k,v]) => `- ${k}: ${Array.isArray(v)?v.join(', '):v}`).join('\n')}\n\n` : '';
+
+        const sys = `당신은 ONDA 마케팅의 크몽 판매 담당자입니다. 목표는 문의를 계약으로 전환하는 것.${styleBlock}
 
 ★ 절대 원칙 ★
 1. "고객 의도 분석 결과" 블록의 명시 질문과 커버포인트를 모두 답변에 반영한다 — 하나라도 빠지면 실패

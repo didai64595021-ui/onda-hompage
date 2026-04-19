@@ -419,9 +419,42 @@ async function getSimilarApprovedReplies(currentMessage, productId, limit = 3) {
 
   // 품질 필터 통과한 것 우선, 없으면 키워드 매칭만 (cold-start)
   const verified = scored.filter(r => r.quality_verified).sort((a, b) => b.score - a.score);
-  if (verified.length >= limit) return verified.slice(0, limit);
-  const rest = scored.filter(r => !r.quality_verified).sort((a, b) => b.score - a.score);
-  return [...verified, ...rest].slice(0, limit);
+  const primary = verified.length >= limit
+    ? verified.slice(0, limit)
+    : [...verified, ...scored.filter(r => !r.quality_verified).sort((a, b) => b.score - a.score)].slice(0, limit);
+
+  // historical_replies (과거 셀러 실제 답변)에서도 보강 — 항상 1개는 섞음 (말투 학습 재료)
+  try {
+    const orFilterHist = sigKeywords.map(k => `customer_message.ilike.%${k}%`).join(',');
+    const { data: histData } = await supabase
+      .from('kmong_historical_replies')
+      .select('customer_message, seller_reply, product_id, sent_at')
+      .or(orFilterHist)
+      .order('sent_at', { ascending: false })
+      .limit(30);
+    if (histData?.length) {
+      const histScored = histData.map(r => {
+        const matchCount = sigKeywords.filter(k => String(r.customer_message || '').includes(k)).length;
+        const sameProduct = r.product_id === productId ? 2 : 0;
+        return {
+          id: `hist-${r.sent_at}`,
+          product_id: r.product_id,
+          message_content: r.customer_message,
+          auto_reply_text: r.seller_reply,
+          inquiry_date: r.sent_at,
+          score: matchCount + sameProduct,
+          historical: true,
+        };
+      }).filter(r => r.score >= 1).sort((a, b) => b.score - a.score);
+      if (histScored.length && primary.length > 0) {
+        primary[primary.length - 1] = histScored[0];  // 마지막 1개를 historical로 치환
+      } else if (histScored.length && !primary.length) {
+        return histScored.slice(0, limit);
+      }
+    }
+  } catch (e) { /* historical 조회 실패는 무시 */ }
+
+  return primary;
 }
 
 module.exports = {

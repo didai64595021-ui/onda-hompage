@@ -65,7 +65,8 @@ async function main() {
       for (const g of groups) {
         if (totalGroups >= limit) break;
         totalGroups++;
-        const groupId = g.id || g.INBOX_GROUP_ID;
+        // 중요: 'id'가 아니라 'inbox_group_id'가 진짜 ID (2026-04-20 실측)
+        const groupId = g.inbox_group_id || g.INBOX_GROUP_ID || g.id;
         if (!groupId) continue;
 
         const messages = await fetchMessages(page, groupId);
@@ -124,7 +125,9 @@ async function main() {
         }
       }
       pageNum++;
-      if (!pageData?.next_page_url && !pageData?.has_more && groups.length < 20) break;
+      // 크몽 API 페이지네이션: next_page_link 있으면 계속, last_page 도달 시 중단
+      if (!pageData?.next_page_link) break;
+      if (pageData?.last_page && pageNum > pageData.last_page) break;
     }
   } finally { await browser.close(); }
 
