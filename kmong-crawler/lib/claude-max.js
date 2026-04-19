@@ -47,24 +47,32 @@ function postJson(hostname, path, headers, body) {
 //   전략: 모델별로 temperature 포함 여부를 결정하고, 400 발생 시 자동으로 제거해 재시도
 const NO_TEMPERATURE_MODELS = /^(claude-opus-4-7|claude-haiku-4-7|claude-sonnet-4-7)/;
 
-async function callClaude({ accessToken, model, system, messages, max_tokens = 16384, temperature = 0.3 }) {
-  const body = { model, max_tokens, system, messages };
-  if (!NO_TEMPERATURE_MODELS.test(model)) body.temperature = temperature;
-
-  const r = await postJson('api.anthropic.com', '/v1/messages', {
+// 2026-04-19 v2: Max OAuth가 api.anthropic.com 직접 호출 시 즉시 429 반환 문제 확인
+//   Max 구독은 Claude Code 세션용 — 외부 스크립트는 ANTHROPIC_API_KEY 필수
+//   API key가 env에 있으면 우선 사용, 없으면 OAuth 폴백
+function buildHeaders(accessToken, useApiKey) {
+  if (useApiKey) {
+    return {
+      'anthropic-version': '2023-06-01',
+      'x-api-key': accessToken,
+    };
+  }
+  return {
     'anthropic-version': '2023-06-01',
     'anthropic-beta': 'oauth-2025-04-20',
     authorization: `Bearer ${accessToken}`,
-  }, body);
+  };
+}
 
-  // 자기치유: 400 + temperature deprecated 에러면 temperature 제거하고 1회 재시도
+async function callClaude({ accessToken, useApiKey, model, system, messages, max_tokens = 16384, temperature = 0.3 }) {
+  const body = { model, max_tokens, system, messages };
+  if (!NO_TEMPERATURE_MODELS.test(model)) body.temperature = temperature;
+
+  const r = await postJson('api.anthropic.com', '/v1/messages', buildHeaders(accessToken, useApiKey), body);
+
   if (r.status === 400 && body.temperature != null && /temperature.*deprecated/i.test(String(r.body))) {
     delete body.temperature;
-    return postJson('api.anthropic.com', '/v1/messages', {
-      'anthropic-version': '2023-06-01',
-      'anthropic-beta': 'oauth-2025-04-20',
-      authorization: `Bearer ${accessToken}`,
-    }, body);
+    return postJson('api.anthropic.com', '/v1/messages', buildHeaders(accessToken, useApiKey), body);
   }
   return r;
 }
@@ -94,35 +102,43 @@ const FALLBACK_CHAIN = {
 };
 
 async function askClaude({ system, messages, model = 'opus', max_tokens = 16384, temperature = 0.3, retryOn429 = true }) {
-  // ondadaad@gmail.com 계정 통일 — account2만 사용
   const chain = FALLBACK_CHAIN[model] || [MODEL_ALIAS[model] || model];
 
-  const token = readToken(CRED_PRIMARY);
-  if (!token) return { ok: false, error: 'account2 토큰 없음 (unified-token-guard.sh 실행 확인)' };
-  if (tokenExpired(CRED_PRIMARY)) return { ok: false, error: 'account2 토큰 만료 (1분 내 cron 갱신)' };
+  // API key가 env에 있으면 우선 사용 (Max OAuth는 Claude Code 세션용으로 외부 호출 시 즉시 429)
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const useApiKey = !!apiKey;
+  let credential;
+  let credSource;
+  if (useApiKey) {
+    credential = apiKey;
+    credSource = 'api-key';
+  } else {
+    credential = readToken(CRED_PRIMARY);
+    if (!credential) return { ok: false, error: 'ANTHROPIC_API_KEY 없고 account2 OAuth 토큰도 없음' };
+    if (tokenExpired(CRED_PRIMARY)) return { ok: false, error: 'account2 토큰 만료 — API key 권장 (Max OAuth는 외부 API 호출 불가)' };
+    credSource = 'oauth-account2';
+  }
 
   let lastStatus = null, lastBody = null;
-  // 429 백오프 스케줄 (초): 첫 호출 실패 시 순차 대기. 체인의 각 모델마다 적용.
   const backoffs = retryOn429 ? [8, 20, 45] : [];
   for (const m of chain) {
-    let r = await callClaude({ accessToken: token, model: m, system, messages, max_tokens, temperature });
+    let r = await callClaude({ accessToken: credential, useApiKey, model: m, system, messages, max_tokens, temperature });
     for (const wait of backoffs) {
       if (r.status !== 429) break;
       await new Promise((res) => setTimeout(res, wait * 1000));
-      r = await callClaude({ accessToken: token, model: m, system, messages, max_tokens, temperature });
+      r = await callClaude({ accessToken: credential, useApiKey, model: m, system, messages, max_tokens, temperature });
     }
     if (r.status === 200) {
       try {
         const j = JSON.parse(r.body);
         const text = (j.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('\n');
-        return { ok: true, text, usage: j.usage, account: 'account2', model: m };
+        return { ok: true, text, usage: j.usage, account: credSource, model: m };
       } catch (e) { return { ok: false, error: `응답 파싱 실패: ${e.message}` }; }
     }
     lastStatus = r.status; lastBody = r.body;
-    // 429(rate limit) + 400(파라미터 거부/검증 실패)는 다음 모델로 재시도 — 그 외는 중단
     if (r.status !== 429 && r.status !== 400) break;
   }
-  return { ok: false, error: `HTTP ${lastStatus}: ${String(lastBody).slice(0, 300)}`, status: lastStatus };
+  return { ok: false, error: `HTTP ${lastStatus} (${credSource}): ${String(lastBody).slice(0, 300)}`, status: lastStatus };
 }
 
 module.exports = { askClaude, readToken, tokenExpired };
