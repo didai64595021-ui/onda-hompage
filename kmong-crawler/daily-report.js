@@ -25,6 +25,11 @@ const {
   buildCronSection,
   buildDashboardFooter,
 } = require('./lib/report-sections');
+const {
+  buildCpc3TierSection,
+  buildKeywordTopBottom,
+  buildBidGapSection,
+} = require('./lib/report-ad-insight');
 
 const KST_OFFSET_MS = 9 * 3600 * 1000;
 
@@ -63,6 +68,9 @@ async function run() {
     buildBizmoneySection(),
     buildInquirySection(targetDate, targetDate),
     buildCpcSection(targetDate, targetDate),
+    buildCpc3TierSection(targetDate),
+    buildKeywordTopBottom(targetDate),
+    buildBidGapSection(),
     buildOrderSection(targetDate, targetDate),
     buildProfitsSection(targetDate, targetDate),
     buildGigStatusSection(),
