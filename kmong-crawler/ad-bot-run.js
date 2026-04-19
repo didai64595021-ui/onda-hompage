@@ -18,6 +18,7 @@ const { supabase } = require('./lib/supabase');
 const { notifyTyped } = require('./lib/notify-filter');
 const { loadServiceMetrics, loadActiveBudget } = require('./lib/ad-bot-metrics');
 const { judgeAdjustments } = require('./lib/ad-bot-judge');
+const { judgeAdjustmentsCli } = require('./lib/ad-bot-judge-cli');
 const { ruleBasedJudge } = require('./lib/ad-bot-rule-fallback');
 const { applyServiceAction } = require('./lib/ad-bot-apply');
 const { matchProductId } = require('./lib/product-map');
@@ -64,19 +65,26 @@ async function main() {
   const budget = budgetRows[0] || { budget_type: 'daily', budget_amount: 5000, priority: 'roi', min_cpc: 500, max_cpc: 5000 };
   console.log(`[예산] ${JSON.stringify(budget)}`);
 
-  // 3) 판단 — Opus 4.7 우선, 실패/--rule-only 시 룰베이스 폴백
-  let j, judgeSource = 'opus-4-7';
+  // 3) 판단 체인: Claude CLI(Opus) → 외부 API(Opus) → 룰베이스
+  //    --rule-only 는 룰만
+  let j, judgeSource = 'opus-4-7 (cli)';
   if (args.ruleOnly) {
     j = ruleBasedJudge(metrics, budget);
     judgeSource = 'rule-based';
   } else {
-    const r = await judgeAdjustments(metrics, budget);
-    if (r.ok) {
-      j = r.judgment;
+    const cliR = await judgeAdjustmentsCli(metrics, budget);
+    if (cliR.ok) {
+      j = cliR.judgment;
+      console.log(`[Opus CLI] ${cliR.duration_ms}ms · cost $${cliR.cost_usd?.toFixed(4)} · Max 한도 차감`);
     } else {
-      console.log('[Opus 실패 → 룰베이스 폴백]', r.error?.slice(0, 80));
-      j = ruleBasedJudge(metrics, budget);
-      judgeSource = 'rule-based (opus-fallback)';
+      console.log('[Opus CLI 실패 → 외부 API 시도]', cliR.error?.slice(0, 80));
+      const apiR = await judgeAdjustments(metrics, budget);
+      if (apiR.ok) { j = apiR.judgment; judgeSource = 'opus-4-7 (api)'; }
+      else {
+        console.log('[외부 API도 실패 → 룰베이스 폴백]', apiR.error?.slice(0, 80));
+        j = ruleBasedJudge(metrics, budget);
+        judgeSource = 'rule-based (opus-fallback)';
+      }
     }
   }
   console.log(`[판단:${judgeSource}] ${j.actions.length}개 제안 / ${j.overall_note}`);
