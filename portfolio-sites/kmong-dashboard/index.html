@@ -1472,7 +1472,8 @@ async function loadCpcTab() {
     const cpa = ordCount > 0 ? Math.round(d.cost / ordCount) : 0;
     const roi = d.cost > 0 ? ((rev - d.cost) / d.cost * 100) : 0;
     const roasVal = d.cost > 0 ? (rev / d.cost * 100) : 0;
-    return `<tr><td>${productName(pid)}</td><td>${fmt(d.impressions)}</td><td>${fmt(d.clicks)}</td><td>${fmtPct(ctr)}</td><td>${inqCount}</td><td>${fmtPct(inqRate)}</td><td>${ordCount}</td><td>${fmtPct(ordRate)}</td><td style="color:var(--success)">${fmtMoney(rev)}</td><td>${ordCount > 0 ? fmtMoney(cpa) : '-'}</td><td style="color:${roi >= 0 ? 'var(--success)' : 'var(--danger)'}">${d.cost > 0 ? fmtPct(roi) : '-'}</td><td>${d.cost > 0 ? fmtPct(roasVal) : '-'}</td><td>${fmtMoney(d.cost)}</td><td>${changeCounts[pid] || 0}회</td></tr>`;
+    return `<tr class="cpc-row" data-pid="${pid}" onclick="toggleCpcRow('${pid}')" style="cursor:pointer"><td>▸ ${productName(pid)}</td><td>${fmt(d.impressions)}</td><td>${fmt(d.clicks)}</td><td>${fmtPct(ctr)}</td><td>${inqCount}</td><td>${fmtPct(inqRate)}</td><td>${ordCount}</td><td>${fmtPct(ordRate)}</td><td style="color:var(--success)">${fmtMoney(rev)}</td><td>${ordCount > 0 ? fmtMoney(cpa) : '-'}</td><td style="color:${roi >= 0 ? 'var(--success)' : 'var(--danger)'}">${d.cost > 0 ? fmtPct(roi) : '-'}</td><td>${d.cost > 0 ? fmtPct(roasVal) : '-'}</td><td>${fmtMoney(d.cost)}</td><td>${changeCounts[pid] || 0}회</td></tr>
+    <tr class="cpc-expand" id="expand-${pid}" hidden><td colspan="14" style="background:#151825;padding:16px"><div id="expand-body-${pid}" style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px"><div style="color:var(--text-3);padding:20px;text-align:center">로딩 중...</div></div></td></tr>`;
   }).join('') : '<tr><td colspan="14"><div class="empty-state"><p>데이터가 없습니다</p></div></td></tr>';
 
   // CPC 비용 차트
@@ -1523,6 +1524,76 @@ async function loadCpcTab() {
   document.querySelector('#tableCreative tbody').innerHTML = (changes && changes.length) ? changes.slice(0, 20).map(c =>
     `<tr><td>${fmtDate(c.change_date)}</td><td>${productName(c.product_id)}</td><td>${c.change_type}</td><td>${c.old_value || '-'}</td><td>${c.new_value || '-'}</td></tr>`
   ).join('') : '<tr><td colspan="5"><div class="empty-state"><p>데이터가 없습니다</p></div></td></tr>';
+}
+
+/* === CPC Row Expand: 키워드별 성과 + 추천가 갭 === */
+const cpcExpandLoaded = new Set();
+
+async function toggleCpcRow(pid) {
+  const row = document.getElementById('expand-' + pid);
+  if (!row) return;
+  const wasHidden = row.hidden;
+  row.hidden = !wasHidden;
+  const triggerRow = document.querySelector(`tr.cpc-row[data-pid="${pid}"] td:first-child`);
+  if (triggerRow) triggerRow.innerHTML = triggerRow.innerHTML.replace(/^[▸▾]/, wasHidden ? '▾' : '▸');
+  if (wasHidden && !cpcExpandLoaded.has(pid)) {
+    cpcExpandLoaded.add(pid);
+    await loadCpcKeywordExpand(pid);
+  }
+}
+
+async function loadCpcKeywordExpand(pid) {
+  const body = document.getElementById('expand-body-' + pid);
+  if (!body) return;
+  const dateFrom = getDateFrom();
+  const [{ data: kwData }, { data: bidData }, { data: cfgData }] = await Promise.all([
+    (() => { let q = sb.from('kmong_ad_keyword_daily').select('date,keyword,impressions,clicks,avg_cpc,total_cost').eq('product_id', pid).order('date', { ascending: false }); if (dateFrom) q = q.gte('date', dateFrom); return q; })(),
+    sb.from('kmong_ad_bid_suggestion').select('keyword,suggested_cpc,captured_at').eq('product_id', pid).order('captured_at', { ascending: false }).limit(200),
+    sb.from('kmong_ad_config_daily').select('date,desired_cpc,daily_budget,ad_status').eq('product_id', pid).order('date', { ascending: false }).limit(1),
+  ]);
+
+  // 키워드별 집계 (날짜 범위 내)
+  const byKw = {};
+  for (const r of (kwData || [])) {
+    const k = r.keyword;
+    if (!byKw[k]) byKw[k] = { keyword: k, impressions: 0, clicks: 0, total_cost: 0 };
+    byKw[k].impressions += r.impressions || 0;
+    byKw[k].clicks += r.clicks || 0;
+    byKw[k].total_cost += r.total_cost || 0;
+  }
+  const kwList = Object.values(byKw).sort((a, b) => b.total_cost - a.total_cost || b.impressions - a.impressions);
+
+  // 최신 추천가 dedupe (captured_at 최신 기준)
+  const sugMap = {};
+  for (const s of (bidData || [])) if (!sugMap[s.keyword]) sugMap[s.keyword] = s.suggested_cpc;
+  const cfg = (cfgData || [])[0] || {};
+  const desired = cfg.desired_cpc || 0;
+
+  // 좌측: 키워드 성과 테이블
+  const kwTable = `<div><div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>키워드별 성과 (${kwList.length}개)</div>
+    <div style="max-height:280px;overflow-y:auto"><table style="width:100%;font-size:12px"><thead><tr style="position:sticky;top:0;background:#1a1d28"><th style="text-align:left;padding:6px">키워드</th><th style="text-align:right;padding:6px">노출</th><th style="text-align:right;padding:6px">클릭</th><th style="text-align:right;padding:6px">CTR</th><th style="text-align:right;padding:6px">비용</th><th style="text-align:right;padding:6px">추천가</th></tr></thead><tbody>
+      ${kwList.length ? kwList.slice(0, 30).map(k => { const ctr = k.impressions > 0 ? (k.clicks / k.impressions * 100).toFixed(2) + '%' : '-'; const sug = sugMap[k.keyword]; return `<tr><td style="padding:6px">${k.keyword}</td><td style="text-align:right;padding:6px">${fmt(k.impressions)}</td><td style="text-align:right;padding:6px">${fmt(k.clicks)}</td><td style="text-align:right;padding:6px">${ctr}</td><td style="text-align:right;padding:6px">${fmtMoney(k.total_cost)}</td><td style="text-align:right;padding:6px;color:${sug ? 'var(--text-2)' : 'var(--text-3)'}">${sug ? fmtMoney(sug) : '-'}</td></tr>`; }).join('') : '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-3)">수집된 키워드 없음</td></tr>'}
+    </tbody></table></div></div>`;
+
+  // 우측: 추천가 vs 희망가 갭 TOP 12
+  const gaps = Object.entries(sugMap).map(([kw, sug]) => ({ keyword: kw, suggested: sug, desired, gap: sug - desired })).sort((a, b) => b.suggested - a.suggested).slice(0, 12);
+  const gapChart = `<div><div class="chart-title" style="margin-bottom:8px"><span class="dot"></span>추천가 vs 희망가 (현재 희망 ${fmtMoney(desired)})</div><div style="height:280px"><canvas id="chartGap-${pid}"></canvas></div></div>`;
+
+  body.innerHTML = kwTable + gapChart;
+
+  if (gaps.length) {
+    makeChart(`chartGap-${pid}`, {
+      type: 'bar',
+      data: {
+        labels: gaps.map(g => g.keyword.length > 10 ? g.keyword.slice(0, 10) + '…' : g.keyword),
+        datasets: [
+          { label: '추천가', data: gaps.map(g => g.suggested), backgroundColor: 'rgba(13,153,255,0.7)' },
+          { label: '내 희망가', data: gaps.map(() => desired), backgroundColor: 'rgba(251,191,36,0.7)' },
+        ]
+      },
+      options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } }, scales: { x: { grid: { color: '#1e2130' } }, y: { grid: { display: false } } } }
+    });
+  }
 }
 
 async function loadFunnelTab() {
