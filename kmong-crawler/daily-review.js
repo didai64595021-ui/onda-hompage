@@ -54,6 +54,14 @@ async function applyDecision(decision) {
 
   if (action === 'pause_product') {
     if (!target) return { executed: false, log: { ...log, skipped: 'no_target' } };
+    // 안전장치: 주문 1건이라도 있으면 pause 거부 (세분화 재조정으로 downgrade)
+    const { data: mt } = await supabase.from('kmong_cpc_daily').select('date').eq('product_id', target).limit(1);
+    // 실제 orders_30d 재조회
+    const { data: ordRows } = await supabase.from('kmong_profits_transactions').select('id').eq('product_id', target).gte('transaction_date', new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10));
+    const orderCount = (ordRows || []).length;
+    if (orderCount >= 1) {
+      return { executed: false, log: { ...log, skipped: `orders_30d=${orderCount} — pause 거부, re_run_ad_bot로 downgrade` } };
+    }
     spawn('node', ['toggle-ad.js', target, 'off'], {
       cwd: __dirname, detached: true, stdio: 'ignore', env: process.env,
     }).unref();

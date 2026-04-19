@@ -81,7 +81,11 @@ const SYSTEM = `당신은 크몽(kmong) CPC 광고 최적화 전문가입니다.
 3. **볼륨 과잉 비효율** (net_profit_30d < 0 AND cost_30d ≥ 30000 AND orders_30d < 2)
    → **볼륨 스탑**: CPC 즉시 -20%, 추천가 p75+ 고가 키워드 disable, 남은 키워드도 p25 이하만 유지
    → 광고 유지(데이터 계속 수집) but 노출량 최소화
-   → 다음 주기에도 개선 없으면 daily-review가 pause_product 판단
+
+### ★ 주문 있는 서비스 보호 (pause_product 금지)
+- orders_30d ≥ 1 인 서비스는 **절대 pause_product 제안 금지**
+- 적자 누적이어도 **세분화 극한**(p25 이하 키워드 3개 이내만 enable) 유지
+- 완전 OFF 판단은 orders_30d = 0 AND cost_30d ≥ 50000 AND 2주 연속 음수 ROI 에만 daily-review가 고려
 
 4. **학습 부족** (노출<500 or 클릭<10) → Phase 1 규칙 (±40% 상향)
 
