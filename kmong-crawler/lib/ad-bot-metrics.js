@@ -43,10 +43,11 @@ async function loadServiceMetrics(days = 30) {
     if (!svc[pid]) svc[pid] = {
       product_id: pid,
       gig_title: null,
-      days,
-      impressions: 0, clicks: 0, cost: 0,
-      week_cost: 0, week_start: weekStart,
-      inquiries: 0, orders: 0, revenue: 0,
+      period_days: days,
+      week_start: weekStart,
+      impressions_30d: 0, clicks_30d: 0, cost_30d: 0,
+      week_cost: 0,
+      inquiries_30d: 0, orders_30d: 0, revenue_30d: 0,
       desired_cpc: null, daily_budget: null,
       keywords_top: [], keywords_bottom: [],
       suggested_cpc_stats: null,
@@ -72,9 +73,9 @@ async function loadServiceMetrics(days = 30) {
 
   for (const r of (cpcRes.data || [])) {
     const s = ensure(r.product_id);
-    s.impressions += r.impressions || 0;
-    s.clicks += r.clicks || 0;
-    s.cost += r.cpc_cost || 0;
+    s.impressions_30d += r.impressions || 0;
+    s.clicks_30d += r.clicks || 0;
+    s.cost_30d += r.cpc_cost || 0;
   }
 
   // 현재 설정 (최신 1건)
@@ -90,7 +91,7 @@ async function loadServiceMetrics(days = 30) {
   for (const i of (inqRes.data || [])) {
     if (!i.product_id) continue;
     const s = ensure(i.product_id);
-    s.inquiries += 1;
+    s.inquiries_30d += 1;
   }
 
   // 주문/매출
@@ -98,8 +99,8 @@ async function loadServiceMetrics(days = 30) {
     if (!o.product_id) continue;
     const s = ensure(o.product_id);
     if (o.status === '완료' || o.status === 'completed') {
-      s.orders += 1;
-      s.revenue += o.profit_amount || 0;
+      s.orders_30d += 1;
+      s.revenue_30d += o.profit_amount || 0;
     }
   }
 
@@ -145,14 +146,14 @@ async function loadServiceMetrics(days = 30) {
     s.suggested_keywords = entries.map(([keyword, suggested_cpc]) => ({ keyword, suggested_cpc })).sort((a, b) => b.suggested_cpc - a.suggested_cpc);
   }
 
-  // 파생 지표 계산
+  // 파생 지표 계산 (모두 30일 기준 명시)
   for (const s of Object.values(svc)) {
-    s.ctr = s.impressions > 0 ? +(s.clicks / s.impressions * 100).toFixed(2) : 0;
-    s.cvr_inquiry = s.clicks > 0 ? +(s.inquiries / s.clicks * 100).toFixed(2) : 0;
-    s.cvr_order = s.inquiries > 0 ? +(s.orders / s.inquiries * 100).toFixed(2) : 0;
-    s.cpa = s.orders > 0 ? Math.round(s.cost / s.orders) : null;
-    s.roi = s.cost > 0 ? +(((s.revenue - s.cost) / s.cost) * 100).toFixed(1) : null;
-    s.roas = s.cost > 0 ? +((s.revenue / s.cost) * 100).toFixed(1) : null;
+    s.ctr_30d = s.impressions_30d > 0 ? +(s.clicks_30d / s.impressions_30d * 100).toFixed(2) : 0;
+    s.cvr_inquiry_30d = s.clicks_30d > 0 ? +(s.inquiries_30d / s.clicks_30d * 100).toFixed(2) : 0;
+    s.cvr_order_30d = s.inquiries_30d > 0 ? +(s.orders_30d / s.inquiries_30d * 100).toFixed(2) : 0;
+    s.cpa_30d = s.orders_30d > 0 ? Math.round(s.cost_30d / s.orders_30d) : null;
+    s.roi_30d = s.cost_30d > 0 ? +(((s.revenue_30d - s.cost_30d) / s.cost_30d) * 100).toFixed(1) : null;
+    s.roas_30d = s.cost_30d > 0 ? +((s.revenue_30d / s.cost_30d) * 100).toFixed(1) : null;
   }
 
   return Object.values(svc).filter(s => s.desired_cpc != null);
