@@ -1,18 +1,11 @@
 /**
  * 크몽 봇 알림 정책 모듈
- * 기존 lib/telegram.js의 notify()를 감싸 타입별 필터링 수행.
- *
- * 정책 (2026-04-18 사용자 확정):
- *   - crawl (크롤 완료/결과 카운트), toggle (광고 ON/OFF 개별): 텔레그램 X, 콘솔만
- *   - inquiry (문의 도착), reply (자동답변 생성/발송), budget (예산 초과),
- *     error (에러), report (일/주/월 리포트): 통과
- *
- * 기존 각 스크립트의 notify() 호출을 notifyTyped(type, message)로 교체.
+ * 2026-04-19 사용자 지시: "보고는 항상 다 해야한다" — SUPPRESSED 제거, 전부 통과.
  */
 
 const { notify, sendCard } = require('./telegram');
 
-const SUPPRESSED_TYPES = new Set(['crawl', 'toggle']);
+const SUPPRESSED_TYPES = new Set();  // 전부 통과
 
 const PASS_TYPES = new Set([
   'inquiry',

@@ -118,8 +118,9 @@ async function main() {
     reports.push(`🏁 exp ${exp.id} — ${j.winner.toUpperCase()} 승 (${j.confidence})\n  ${j.reasoning}\n  → ${actionTaken}`);
   }
 
-  if (reports.length) notifyTyped('report', `🧪 <b>A/B 실험 모니터</b>\n\n${reports.join('\n\n')}\n\n<i>${((Date.now()-start)/1000).toFixed(1)}초</i>`);
-  else console.log('[완료] 판정 대상 없음');
+  const hdr = `🧪 <b>A/B 실험 모니터</b> · measuring ${experiments.length}개`;
+  const body = reports.length ? reports.join('\n\n') : `  판정 대상 없음 (전부 측정 기간 진행 중)\n  ${experiments.map(e => `exp ${e.id}: 경과 ${((now - new Date(e.measurement_start_at))/86400000).toFixed(1)}/${e.measurement_days}일`).join('\n  ')}`;
+  notifyTyped('report', `${hdr}\n\n${body}\n\n<i>${((Date.now()-start)/1000).toFixed(1)}초</i>`);
 }
 
 main().catch(e => { console.error(e); notifyTyped('error', `A/B 모니터 크래시: ${e.message}`); process.exit(1); });
