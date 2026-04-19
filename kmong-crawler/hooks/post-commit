@@ -1,0 +1,28 @@
+#!/bin/bash
+# post-commit — mindmap snapshot + 크몽 해결로그 자동 수집
+set -e
+
+# 1) 기존 mindmap post-commit 유지
+bash "/home/onda/projects/onda-mindmap/scripts/post-commit-hook.sh" "$@" 2>/dev/null || true
+
+# 2) 크몽 해결로그 하네스
+PROJECT_DIR="/home/onda/projects/onda-hompage"
+HASH=$(git -C "$PROJECT_DIR" rev-parse --short HEAD 2>/dev/null)
+SUBJECT=$(git -C "$PROJECT_DIR" log -1 --pretty=%s 2>/dev/null)
+
+# subject에 kmong 또는 크몽 포함되고 fix/feat/refactor/debug/chore로 시작하면 기록
+match=0
+if echo "$SUBJECT" | grep -qiE '^(fix|feat|refactor|debug|chore)[\(:]'; then
+  if echo "$SUBJECT" | grep -qiE 'kmong|크몽'; then
+    match=1
+  fi
+fi
+
+if [ "$match" = "1" ]; then
+  LOG="$PROJECT_DIR/kmong-crawler/KMONG_FIXES.jsonl"
+  mkdir -p "$(dirname "$LOG")"
+  TS=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+  TS_LOCAL=$(date '+%Y-%m-%d %H:%M:%S')
+  SAFE=$(printf '%s' "$SUBJECT" | sed 's/\\/\\\\/g; s/"/\\"/g')
+  echo "{\"ts\":\"$TS\",\"ts_local\":\"$TS_LOCAL\",\"hash\":\"$HASH\",\"subject\":\"$SAFE\"}" >> "$LOG"
+fi
