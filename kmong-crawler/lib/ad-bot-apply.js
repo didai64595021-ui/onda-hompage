@@ -130,6 +130,15 @@ async function clickSubmit(page) {
   return stillOpen === 0;
 }
 
+async function dismissSweetAlert(page) {
+  for (let i = 0; i < 3; i++) {
+    const confirm = page.locator('.swal2-container .swal2-confirm, .swal2-container button:has-text("확인"), .swal2-container button:has-text("OK")').first();
+    if (!(await confirm.isVisible({ timeout: 800 }).catch(() => false))) return;
+    await confirm.click().catch(() => {});
+    await page.waitForTimeout(600);
+  }
+}
+
 async function applyDesiredCpc(page, serviceName, newCpc, opts = { dryRun: false }) {
   const opened = await openServiceChangeModal(page, serviceName);
   if (!opened) return { ok: false, error: `서비스 행 못 찾음: ${serviceName}` };
@@ -216,6 +225,7 @@ async function toggleKeywordCheckboxes(page, actions) {
  * action = { suggested_desired_cpc, keywords_to_enable, keywords_to_disable }
  */
 async function applyServiceAction(page, serviceName, action, opts = { dryRun: false }) {
+  await dismissSweetAlert(page);
   const opened = await openServiceChangeModal(page, serviceName);
   if (!opened) return { ok: false, error: `서비스 행 못 찾음: ${serviceName}` };
 
@@ -244,6 +254,7 @@ async function applyServiceAction(page, serviceName, action, opts = { dryRun: fa
     }
 
     const closedOk = await clickSubmit(page);
+    await dismissSweetAlert(page);
     return { ok: true, beforeCpc, afterCpc: action.suggested_desired_cpc, afterBudget: action.suggested_daily_budget, kwResults, submitted: closedOk };
   } catch (e) {
     await closeDialog(page).catch(() => {});

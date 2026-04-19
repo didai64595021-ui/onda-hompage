@@ -20,6 +20,7 @@ const { loadServiceMetrics, loadActiveBudget } = require('./lib/ad-bot-metrics')
 const { judgeAdjustments } = require('./lib/ad-bot-judge');
 const { ruleBasedJudge } = require('./lib/ad-bot-rule-fallback');
 const { applyServiceAction } = require('./lib/ad-bot-apply');
+const { matchProductId } = require('./lib/product-map');
 const { login } = require('./lib/login');
 
 function parseArgs() {
@@ -114,6 +115,19 @@ async function main() {
     try { const b = page.locator('button:has-text("확인")').first(); if (await b.isVisible({ timeout: 1500 }).catch(()=>false)) await b.click(); } catch {}
     await page.waitForTimeout(800);
 
+    // 실제 크몽 리스트에서 현재 서비스명 → product_id 매핑 (DB gig_title은 잘못 매핑돼 있을 수 있음)
+    const liveList = await page.evaluate(() => {
+      const rows = document.querySelectorAll('table tbody tr');
+      return Array.from(rows).map((r, i) => ({ rowIndex: i, serviceName: r.querySelector('img')?.getAttribute('alt') || '' }));
+    });
+    const pidToServiceName = {};
+    for (const r of liveList) {
+      if (!r.serviceName) continue;
+      const pid = matchProductId(r.serviceName);
+      if (pid && !pidToServiceName[pid]) pidToServiceName[pid] = r.serviceName;
+    }
+    console.log(`[라이브 매핑] ${Object.keys(pidToServiceName).length}개 product_id → serviceName`);
+
     const changes = logged.filter(a =>
       a.current_desired_cpc !== a.suggested_desired_cpc ||
       (a.keywords_to_enable || []).length > 0 ||
@@ -121,10 +135,8 @@ async function main() {
     );
     console.log(`[적용] 변경 대상 ${changes.length}개`);
     for (const a of changes) {
-      const mt = metrics.find(m => m.product_id === a.product_id);
-      if (!mt) continue;
-      const serviceName = mt.gig_title;
-      if (!serviceName) { console.log(`[스킵] ${a.product_id} 서비스명 없음`); continue; }
+      const serviceName = pidToServiceName[a.product_id];
+      if (!serviceName) { console.log(`[스킵] ${a.product_id} 라이브 리스트에 없음`); continue; }
       const res = await applyServiceAction(page, serviceName, {
         suggested_desired_cpc: a.suggested_desired_cpc,
         suggested_daily_budget: a.suggested_daily_budget,
