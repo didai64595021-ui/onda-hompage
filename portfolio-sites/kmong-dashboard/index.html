@@ -1396,6 +1396,15 @@ async function loadCpcTab() {
   const totalRevCpc = completedOrders.reduce((s, o) => s + (o.amount || 0), 0);
   const roas = totalCost > 0 ? (totalRevCpc / totalCost * 100) : 0;
 
+  // 상품별 집계
+  const byProduct = {};
+  rows.forEach(r => {
+    if (!byProduct[r.product_id]) byProduct[r.product_id] = { impressions: 0, clicks: 0, cost: 0 };
+    byProduct[r.product_id].impressions += r.impressions || 0;
+    byProduct[r.product_id].clicks += r.clicks || 0;
+    byProduct[r.product_id].cost += r.cpc_cost || 0;
+  });
+
   // Phase 분류 (봇 학습/최적화 동일 룰: 30일 노출<500 OR 클릭<10 = 학습)
   let phaseLearning = 0, phaseOptimizing = 0;
   for (const pid of Object.keys(byProduct)) {
@@ -1467,15 +1476,6 @@ async function loadCpcTab() {
       },
       plugins: { legend: { position: 'top' } }
     }
-  });
-
-  // 상품별 집계
-  const byProduct = {};
-  rows.forEach(r => {
-    if (!byProduct[r.product_id]) byProduct[r.product_id] = { impressions: 0, clicks: 0, cost: 0 };
-    byProduct[r.product_id].impressions += r.impressions || 0;
-    byProduct[r.product_id].clicks += r.clicks || 0;
-    byProduct[r.product_id].cost += r.cpc_cost || 0;
   });
 
   // 소재변경 횟수
