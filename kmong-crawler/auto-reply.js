@@ -83,6 +83,75 @@ function fetchImageAsBase64(url, maxBytes = 4 * 1024 * 1024) {
   });
 }
 
+// 학습 참고 수집 — 4-tier fallback. Phase A에서 병렬 실행되도록 함수화.
+//   (1) 전환 답변 풀 시맨틱 (2) 전체 sent 시맨틱 (3) 키워드 overlap (4) 동일 상품 최근답변
+async function fetchLearningExamples(inquiry) {
+  const semStart = Date.now();
+  const detail = { examples: [], sourceLabel: '', elapsedMs: 0, log: '' };
+
+  // 1) 전환 답변 풀 먼저 시도
+  try {
+    const convPool = await getConvertedInquiryPool(inquiry.product_id, 20);
+    if (convPool.length >= 3) {
+      const convR = await findSemanticSimilar({
+        currentMessage: inquiry.message_content || '',
+        productId: inquiry.product_id,
+        topK: 3,
+        customPool: convPool,
+      });
+      if (convR.ok && convR.examples && convR.examples.length > 0) {
+        detail.examples = convR.examples;
+        detail.sourceLabel = `전환 답변 (${convPool.length}풀)`;
+        detail.elapsedMs = Date.now() - semStart;
+        detail.log = `학습참고(전환답변 ${(detail.elapsedMs / 1000).toFixed(1)}s, ${convR.model || 'haiku'}): ${detail.examples.length}건 / ${convR.reasoning?.slice(0, 70) || ''}`;
+        return detail;
+      }
+    }
+  } catch (e) {
+    detail.log = `⚠️ 전환답변 풀 조회 예외: ${e.message}`;
+  }
+
+  // 2) 일반 시맨틱 검색
+  const semR = await findSemanticSimilar({
+    currentMessage: inquiry.message_content || '',
+    productId: inquiry.product_id,
+    topK: 3,
+    poolSize: 25,
+  });
+  if (semR.ok && semR.examples && semR.examples.length > 0) {
+    detail.examples = semR.examples;
+    detail.sourceLabel = '시맨틱 전체풀';
+    detail.elapsedMs = Date.now() - semStart;
+    detail.log = `학습참고(시맨틱 ${(detail.elapsedMs / 1000).toFixed(1)}s, ${semR.model || 'haiku'}): ${detail.examples.length}건`;
+    return detail;
+  }
+
+  // 3) 키워드 폴백
+  const similar = await getSimilarApprovedReplies(inquiry.message_content, inquiry.product_id, 3);
+  if (similar.length > 0) {
+    detail.examples = similar;
+    detail.sourceLabel = '키워드 폴백';
+    detail.elapsedMs = Date.now() - semStart;
+    detail.log = `학습참고(키워드 폴백): ${similar.length}건`;
+    return detail;
+  }
+
+  // 4) 동일 상품 최근답변
+  if (inquiry.product_id) {
+    const learn = await getRecentApprovedReplies(inquiry.product_id, 3);
+    if (learn.ok) {
+      detail.examples = learn.examples;
+      detail.sourceLabel = '동일상품 최근답변';
+      detail.elapsedMs = Date.now() - semStart;
+      detail.log = `학습참고(동일상품 최근답변): ${learn.examples.length}건`;
+      return detail;
+    }
+  }
+
+  detail.elapsedMs = Date.now() - semStart;
+  return detail;
+}
+
 async function autoReply() {
   const startTime = Date.now();
 
@@ -140,65 +209,10 @@ async function autoReply() {
         }
       }
 
-      // 2-2. 학습 — 현재 질문과 유사한 과거 sent 답변
-      //   (1순위) 전환 완료 고객 풀에서 시맨틱 랭킹 — 실제 계약으로 이어진 패턴 우선
-      //   (2순위) 전체 sent 풀에서 시맨틱 랭킹
-      //   (3순위 폴백) 키워드 overlap + 같은 product 보너스
-      //   (4순위 폴백) 같은 product 최근 답변으로 톤만 참고
+      // 2-2. 학습 로직 — Phase A에 병렬 편입됨 (이 위치에선 초기화만, 실제 호출은 needsClaude 블록)
+      //   (1~2순위) 시맨틱 검색 (findSemanticSimilar, Opus 4.7 — ~80s) / (3~4순위 폴백) 키워드·동일상품
       let approvedExamples = [];
       let exampleSourceLabel = '';
-      const semStart = Date.now();
-
-      // 1) 전환 답변 풀 먼저 시도 (품질·근거 우선)
-      try {
-        const convPool = await getConvertedInquiryPool(inquiry.product_id, 20);
-        if (convPool.length >= 3) {
-          const convR = await findSemanticSimilar({
-            currentMessage: inquiry.message_content || '',
-            productId: inquiry.product_id,
-            topK: 3,
-            customPool: convPool,
-          });
-          if (convR.ok && convR.examples && convR.examples.length > 0) {
-            approvedExamples = convR.examples;
-            exampleSourceLabel = `전환 답변 (${convPool.length}풀)`;
-            console.log(`  학습참고(전환답변 ${((Date.now() - semStart) / 1000).toFixed(1)}s, ${convR.model || 'haiku'}): ${approvedExamples.length}건 / ${convR.reasoning?.slice(0, 70) || ''}`);
-          }
-        }
-      } catch (e) {
-        console.log(`  ⚠️ 전환답변 풀 조회 예외: ${e.message}`);
-      }
-
-      // 2) 전환 풀 부족 → 일반 시맨틱 검색
-      if (approvedExamples.length === 0) {
-        const semR = await findSemanticSimilar({
-          currentMessage: inquiry.message_content || '',
-          productId: inquiry.product_id,
-          topK: 3,
-          poolSize: 25,
-        });
-        if (semR.ok && semR.examples && semR.examples.length > 0) {
-          approvedExamples = semR.examples;
-          exampleSourceLabel = '시맨틱 전체풀';
-          console.log(`  학습참고(시맨틱 ${((Date.now() - semStart) / 1000).toFixed(1)}s, ${semR.model || 'haiku'}): ${approvedExamples.length}건`);
-        }
-      }
-
-      // 3~4) 폴백
-      if (approvedExamples.length === 0) {
-        const similar = await getSimilarApprovedReplies(inquiry.message_content, inquiry.product_id, 3);
-        if (similar.length > 0) {
-          approvedExamples = similar;
-          exampleSourceLabel = '키워드 폴백';
-          console.log(`  학습참고(키워드 폴백): ${similar.length}건`);
-        } else if (inquiry.product_id) {
-          const learn = await getRecentApprovedReplies(inquiry.product_id, 3);
-          if (learn.ok) {
-            approvedExamples = learn.examples;
-            exampleSourceLabel = '동일상품 최근답변';
-          }
-        }
-      }
 
       // 3. Rule-based 답변 먼저 생성 (fallback + 품질 평가용)
       const isWebInquiry = /홈페이지|랜딩|워드프레스|반응형|HTML|SEO|유지보수|카페24|아임웹/.test(analysis.serviceType || '');
@@ -274,11 +288,11 @@ async function autoReply() {
           return /\.(png|jpe?g|gif|webp)$/i.test(name);
         }).length;
 
-        // [3단계] Phase A 병렬 — 대화 상태 분류 + 의도 추출 + 고객 프로필 + 대화 요약
-        //   이전: 4개 Opus 호출이 순차 (80s × 4 = 320s+) → 5분 cron 안에 못 끝남
-        //   현재: 독립 호출 병렬 (max ≈ 90s) + 대화 상태 분기로 minimal_ack 케이스는 메인 호출 스킵
+        // [3단계] Phase A 병렬 — 대화 상태 + 의도 + 프로필 + 대화 요약 + 학습참고
+        //   이전: 5개 Opus 호출이 순차 (80s × 5 = 400s+)
+        //   현재: 독립 호출 병렬 (max ≈ 90~115s) + minimal_ack 케이스는 메인 호출 스킵
         const phaseStart = Date.now();
-        const [stateR, intentR, profileR, summaryR] = await Promise.all([
+        const [stateR, intentR, profileR, summaryR, learningDetail] = await Promise.all([
           classifyConversationState({
             messageContent: inquiry.message_content || '',
             thread,
@@ -297,9 +311,17 @@ async function autoReply() {
           (thread.length >= SUMMARIZE_THRESHOLD)
             ? summarizeConversation({ thread, gigTitle: serviceTitle }).catch(e => ({ ok: false, error: e.message }))
             : Promise.resolve(null),
+          fetchLearningExamples(inquiry).catch(e => ({ examples: [], sourceLabel: '', elapsedMs: 0, log: `⚠️ 학습참고 실패: ${e.message}` })),
         ]);
         const phaseElapsed = ((Date.now() - phaseStart) / 1000).toFixed(1);
-        console.log(`  ⚡ Phase A 병렬 (${phaseElapsed}s): classifier + intent + profile${profileR ? '' : '(skip)'} + summarize${summaryR ? '' : '(skip)'}`);
+        console.log(`  ⚡ Phase A 병렬 (${phaseElapsed}s): classifier + intent + profile${profileR ? '' : '(skip)'} + summarize${summaryR ? '' : '(skip)'} + learning`);
+
+        // 학습 참고 결과 주입 (Phase A에서 병렬 수행 — 80s 별도 직렬 제거됨)
+        if (learningDetail && learningDetail.examples && learningDetail.examples.length > 0) {
+          approvedExamples = learningDetail.examples;
+          exampleSourceLabel = learningDetail.sourceLabel;
+        }
+        if (learningDetail && learningDetail.log) console.log(`  📚 ${learningDetail.log}`);
 
         // 대화 상태 분석 결과
         const state = stateR.ok ? stateR.state : defaultState('classifier_fail');
@@ -462,6 +484,13 @@ async function autoReply() {
         // 말투 프로필 주입 (누적 과거 답변에서 Opus가 추출한 셀러 스타일)
         const styleProfile = await loadActiveProfile().catch(() => null);
         const styleBlock = styleProfile ? `\n\n★ 셀러 고유 말투 (반드시 따를 것) ★\n${styleProfile.description}\n특징:\n${Object.entries(styleProfile.characteristics || {}).map(([k,v]) => `- ${k}: ${Array.isArray(v)?v.join(', '):v}`).join('\n')}\n\n` : '';
+        if (styleProfile) {
+          const corrections = styleProfile.characteristics?.user_corrections?.length || 0;
+          const forbidden = styleProfile.characteristics?.forbidden_patterns?.length || 0;
+          console.log(`  🎨 스타일 프로필 주입: ${styleBlock.length}자 (샘플 ${styleProfile.sample_count}건, 교정 ${corrections}건, 금지 ${forbidden}건)`);
+        } else {
+          console.log(`  ⚠️ 스타일 프로필 없음 — 기본 프롬프트로 진행`);
+        }
 
         const sys = `당신은 ONDA 마케팅의 크몽 판매 담당자입니다. 목표는 문의를 계약으로 전환하는 것.${styleBlock}
 
