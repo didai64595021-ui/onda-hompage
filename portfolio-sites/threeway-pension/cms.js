@@ -236,14 +236,10 @@
   }
 
   var DYNAMIC_GROUPS = [
-    {
-      arrayKey: 'room-previews',
-      legacyPrefix: 'room-preview',
-      legacyMax: 30,
-      fields: ['img', 'name', 'desc'],
-      containerId: 'roomPreviewList',
-      render: buildRoomPreviewCard
-    },
+    // 'room-previews' 그룹은 제거됨 (2026-04-20)
+    //   index.html의 3개 객실 미리보기는 [data-cms-room-card="{id}"] 패턴으로 대체되어
+    //   rooms.html의 7개 객실 데이터(room-gallery/room-meta/room-price)와 직접 동기화됨.
+    //   한 번의 수정이 index + rooms 전페이지 반영.
     {
       arrayKey: 'fac-scroll-cards',
       legacyPrefix: 'fac-scroll',
