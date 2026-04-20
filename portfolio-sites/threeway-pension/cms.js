@@ -357,6 +357,9 @@
     // Render room detail galleries from CMS
     renderRoomGalleries(data);
 
+    // Sync 상단 "전체 객실 안내" 카드 ← 하단 상세(갤러리/메타/가격) 데이터
+    renderRoomCards(data);
+
     document.querySelectorAll('[data-cms]').forEach(el => {
       const key = el.dataset.cms;
       if (!key || !(key in data)) return;
@@ -819,6 +822,89 @@
           nextBtn.setAttribute('aria-label', '다음');
           nextBtn.innerHTML = '&#8250;';
           slider.appendChild(nextBtn);
+        }
+      }
+    });
+  }
+
+  /**
+   * 상단 "전체 객실 안내" 카드 자동 동기화.
+   *   - [data-cms-room-card="sonamu"] 카드 → CMS의 room-gallery-sonamu 첫 장 + room-meta-소나무 + room-price-소나무-low
+   *   - 하단 상세에서 사진/메타/가격 수정 시 상단 카드가 자동 반영됨.
+   *   - 카드별 override CMS 키가 있으면 그게 우선 (room-card-{id}-img / -tag / -title / -sub)
+   */
+  function renderRoomCards(data) {
+    // id 영문 → CMS key 한글 + 카드 제목 매핑 (하드코딩되어 있던 값과 동일)
+    var ROOM_MAP = {
+      sonamu: { kor: '소나무', title: '소나무방' },
+      danpung: { kor: '단풍나무', title: '단풍나무' },
+      tulip: { kor: '튤립', title: '튤립방' },
+      suite1: { kor: '스위트1', title: '스위트1번' },
+      suite2: { kor: '스위트2', title: '스위트2번' },
+      disney: { kor: '디즈니', title: '스위트3번(디즈니룸)' },
+      mint: { kor: '민트', title: '민트' },
+    };
+
+    function stripEmoji(s) {
+      // 이모지 + 앞 공백 제거 (span 텍스트에서 아이콘만 떼어냄)
+      return (s || '').replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}]/gu, '').trim();
+    }
+    function metaSpansText(metaHtml) {
+      if (!metaHtml) return [];
+      var div = document.createElement('div');
+      div.innerHTML = metaHtml;
+      return Array.prototype.map.call(div.querySelectorAll('span'), function (s) {
+        return stripEmoji(s.textContent);
+      });
+    }
+
+    document.querySelectorAll('[data-cms-room-card]').forEach(function (card) {
+      var id = card.dataset.cmsRoomCard;
+      var info = ROOM_MAP[id];
+      if (!info) return;
+      var kor = info.kor;
+
+      // ── 이미지: override 우선, 없으면 room-gallery-{id} 첫 장
+      var imgEl = card.querySelector('[data-cms-room-card-img]');
+      var overrideImg = data['room-card-' + id + '-img'];
+      var gallery = data['room-gallery-' + id];
+      var nextImg = overrideImg
+        || (Array.isArray(gallery) && gallery.length ? gallery[0] : null);
+      if (imgEl && nextImg && imgEl.src.indexOf(nextImg) === -1) {
+        imgEl.src = nextImg;
+      }
+
+      // ── 메타 spans 추출 (공통 재사용)
+      var spans = metaSpansText(data['room-meta-' + kor]);
+
+      // ── 태그: "{평수} · {인원}"  (override: room-card-{id}-tag)
+      var tagEl = card.querySelector('[data-cms-room-card-tag]');
+      var overrideTag = data['room-card-' + id + '-tag'];
+      if (tagEl) {
+        if (overrideTag) tagEl.textContent = overrideTag;
+        else if (spans.length >= 2) tagEl.textContent = spans[0] + ' · ' + spans[1];
+      }
+
+      // ── 제목: override 있으면 그대로, 없으면 매핑 기본값
+      var titleEl = card.querySelector('[data-cms-room-card-title]');
+      var overrideTitle = data['room-card-' + id + '-title'];
+      if (titleEl) {
+        titleEl.textContent = overrideTitle || info.title;
+      }
+
+      // ── 부제: override 있으면 그대로. 없으면 {3번째 span} · 비수기 {price-low}~
+      var subEl = card.querySelector('[data-cms-room-card-sub]');
+      var overrideSub = data['room-card-' + id + '-sub'];
+      if (subEl) {
+        if (overrideSub) {
+          subEl.textContent = overrideSub;
+        } else {
+          var feature = spans.length >= 3 ? spans[2] : '';
+          var low = data['room-price-' + kor + '-low'];
+          var parts = [];
+          if (feature) parts.push(feature);
+          if (low) parts.push('비수기 ' + low + '~');
+          if (parts.length) subEl.textContent = parts.join(' · ');
         }
       }
     });
