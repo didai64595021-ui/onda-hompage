@@ -104,7 +104,7 @@ function safeJsonParse(text) {
 function formatDeepAnalysisForPrompt(url, analysis) {
   if (!analysis) return '';
   const lines = [];
-  lines.push(`[고객 참고사이트 심층 분석: ${url}]`);
+  lines.push(`[고객이 공유한 참고사이트 심층 분석: ${url} — 고객 제공 자료. 우리 작업물 아님. "저희가 작업한 곳" 주장 금지]`);
   if (analysis.industry) lines.push(`• 업종: ${analysis.industry}`);
   if (analysis.brand_tone) lines.push(`• 브랜드 톤: ${analysis.brand_tone}`);
   if (analysis.target_audience) lines.push(`• 타겟: ${analysis.target_audience}`);

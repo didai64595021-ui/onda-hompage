@@ -212,7 +212,8 @@ async function summarizeUrl(url, { allowPlaywrightFallback = true } = {}) {
 function formatForPrompt(summaries) {
   const ok = summaries.filter(s => s && s.ok);
   if (ok.length === 0) return '';
-  const lines = ['[고객 메시지 내 URL 분석]'];
+  // ⚠️ 이 URL들은 고객이 공유한 것 — 우리 작업물이 아님. "저희 포트폴리오" 주장 금지.
+  const lines = ['[고객이 공유한 URL 분석 — 고객 제공 참고자료. 우리 작업물 아님. "저희가 작업한 곳" 주장 절대 금지]'];
   for (const s of ok) {
     lines.push(`\n▼ ${s.url} (source=${s.source})`);
     if (s.title) lines.push(`  title: ${s.title}`);
