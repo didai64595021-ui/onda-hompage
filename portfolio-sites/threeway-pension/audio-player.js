@@ -16,16 +16,18 @@
   let saveTimer = null;
 
   function loadState() {
+    // 기본값: muted=false (음악 on). 사용자가 명시적으로 mute 누르기 전까진 재생 의도.
+    // 브라우저 autoplay 정책상 처음엔 muted로 시작해야 playVideo 성공 → 첫 user interaction에 자동 unmute.
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return { muted: true, time: 0 };
+      if (!raw) return { muted: false, time: 0 };
       const p = JSON.parse(raw);
       return {
-        muted: p.muted !== false,
+        muted: p.muted === true,
         time: typeof p.time === 'number' && p.time > 0 ? p.time : 0,
       };
     } catch {
-      return { muted: true, time: 0 };
+      return { muted: false, time: 0 };
     }
   }
 
@@ -40,7 +42,7 @@
       .tw-bgm-btn {
         position: fixed;
         bottom: 20px;
-        right: 20px;
+        left: 20px;
         width: 52px;
         height: 52px;
         border-radius: 50%;
@@ -59,7 +61,7 @@
       .tw-bgm-btn:hover { transform: scale(1.08); background: rgba(44, 62, 45, 1); }
       .tw-bgm-btn .label {
         position: absolute;
-        right: 60px;
+        left: 60px;
         background: rgba(44, 62, 45, 0.92);
         color: #fff;
         padding: 6px 12px;
@@ -80,7 +82,7 @@
         pointer-events: none;
       }
       @media (max-width: 640px) {
-        .tw-bgm-btn { bottom: 16px; right: 16px; width: 46px; height: 46px; font-size: 18px; }
+        .tw-bgm-btn { bottom: 16px; left: 16px; width: 46px; height: 46px; font-size: 18px; }
         .tw-bgm-btn .label { display: none; }
       }
     `;
@@ -136,7 +138,7 @@
         modestbranding: 1,
         rel: 0,
         playsinline: 1,
-        mute: 1, // 자동재생 정책상 muted 시작 필수
+        mute: 1, // 자동재생 정책상 muted 시작 필수 — 재생 의도는 state.muted가 담당
         start: Math.floor(state.time),
       },
       events: {
@@ -145,8 +147,9 @@
             e.target.setVolume(VOLUME);
             e.target.playVideo();
             if (!state.muted) {
-              // 사용자가 이미 한 번 켰다면 unmute 시도 (이전 세션 interaction 이력 필요)
-              e.target.unMute();
+              // 재생 의도가 on — unmute 즉시 시도. autoplay policy로 실패 시 첫 user interaction으로 복구
+              try { e.target.unMute(); } catch {}
+              armAutoUnmute();
             }
             updateButton(state.muted);
             startPositionSaver();
@@ -167,25 +170,43 @@
     });
   }
 
+  // 첫 user interaction 한 번만 감지해서 unmute (autoplay 정책 우회)
+  //  passive 리스너 + once:true로 성능/메모리 안전. 작동 후 자동 제거.
+  function armAutoUnmute() {
+    const kick = function () {
+      try {
+        if (player && typeof player.unMute === 'function') {
+          player.unMute();
+          player.setVolume(VOLUME);
+          player.playVideo();
+        }
+      } catch {}
+    };
+    const opts = { once: true, passive: true, capture: true };
+    ['pointerdown', 'touchstart', 'keydown', 'scroll'].forEach(function (evt) {
+      window.addEventListener(evt, kick, opts);
+    });
+  }
+
+  // 의도(state.muted) 기반 토글 — 브라우저가 iframe을 mute 강제해도 UI 일관성 유지
   function toggleMute() {
-    if (!player || typeof player.isMuted !== 'function') {
-      saveState({ muted: false });
-      return;
-    }
+    const cur = loadState();
+    const nextMuted = !cur.muted;
     try {
-      if (player.isMuted()) {
-        player.unMute();
-        player.setVolume(VOLUME);
-        saveState({ muted: false });
-        updateButton(false);
-      } else {
-        player.mute();
-        saveState({ muted: true });
-        updateButton(true);
+      if (player && typeof player.mute === 'function') {
+        if (nextMuted) {
+          player.mute();
+        } else {
+          player.unMute();
+          player.setVolume(VOLUME);
+          player.playVideo();
+        }
       }
     } catch (err) {
       console.warn('[tw-bgm] toggle err', err);
     }
+    saveState({ muted: nextMuted });
+    updateButton(nextMuted);
   }
 
   function startPositionSaver() {
