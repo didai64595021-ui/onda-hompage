@@ -715,12 +715,13 @@
   // 드래그앤드랍 이미지 업로드 헬퍼
   // ============================================
   const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+  // 크기 제한 없음 — 업로드 시 자동 압축(800px/0.6 JPEG)으로 최종 저장용량 관리됨
+  const MAX_FILE_SIZE = Number.POSITIVE_INFINITY;
 
   function createDropZone(key, input, previewContainer) {
     const dropZone = document.createElement('div');
     dropZone.className = 'cms-drop-zone';
-    dropZone.innerHTML = '<div class="drop-icon">📁</div><p>이미지를 드래그하여 놓으세요</p><p class="drop-hint">또는 클릭하여 파일 선택 (jpg, png, webp / 최대 5MB)</p>';
+    dropZone.innerHTML = '<div class="drop-icon">📁</div><p>이미지를 드래그하여 놓으세요</p><p class="drop-hint">또는 클릭하여 파일 선택 (jpg, png, webp · 크기 제한 없음, 자동 압축)</p>';
 
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
@@ -898,10 +899,7 @@
       showToast('⚠️ 지원하지 않는 형식입니다. jpg, png, webp만 가능합니다.');
       return;
     }
-    if (file.size > MAX_FILE_SIZE) {
-      showToast('⚠️ 파일이 너무 큽니다. 최대 5MB까지 가능합니다.');
-      return;
-    }
+    // 크기 제한 없음 (자동 압축 처리)
 
     showToast('🔄 이미지 최적화 중...');
     const compressed = await compressImage(file, 800, 0.6);
@@ -2097,7 +2095,7 @@
 
       // 드래그앤드롭 존 (파일 선택도 겸용)
       var dropZone = document.createElement('label');
-      dropZone.innerHTML = '📁 <b>파일 선택</b> 또는 여기로 <b>드래그 앤 드롭</b><br><span style="font-size:.78rem;color:#999;font-weight:400;">여러 장 한 번에 업로드 가능 · jpg/png/webp · 각 5MB 이하</span>';
+      dropZone.innerHTML = '📁 <b>파일 선택</b> 또는 여기로 <b>드래그 앤 드롭</b><br><span style="font-size:.78rem;color:#999;font-weight:400;">여러 장 한 번에 업로드 가능 · jpg/png/webp · 크기 제한 없음, 자동 압축</span>';
       dropZone.style.cssText = 'flex:2;min-width:260px;padding:14px 18px;border:2px dashed #7BA17F;border-radius:10px;background:rgba(123,161,127,.05);color:#4a7050;cursor:pointer;font-weight:600;font-size:.9rem;text-align:center;transition:all .15s ease;line-height:1.4;';
       var fileInput = document.createElement('input');
       fileInput.type = 'file';
@@ -2129,15 +2127,8 @@
         });
         if (list.length === 0) return;
 
-        // 크기 검증
-        var valid = [];
-        for (var i = 0; i < list.length; i++) {
-          if (list[i].size > MAX_FILE_SIZE) {
-            showToast('⚠️ "' + list[i].name + '" 파일이 5MB를 초과합니다 (스킵)');
-          } else {
-            valid.push(list[i]);
-          }
-        }
+        // 크기 제한 없음 — 전부 통과 (자동 압축됨)
+        var valid = list.slice();
         if (valid.length === 0) return;
 
         showToast('🔄 ' + valid.length + '장 이미지 최적화 중...');
