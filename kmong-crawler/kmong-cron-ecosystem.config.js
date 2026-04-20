@@ -103,7 +103,7 @@ module.exports = {
       name: 'kmong-auto-reply',
       script: './auto-reply.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '1-59/5 * * * *',  // 5분마다 (+1분, inbox 직후) — 빠른 응답
+      cron_restart: '1-59/15 * * * *',  // 15분마다 (Opus 순차호출 5회로 5분→과도 kill, 2026-04-20 완화)
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },

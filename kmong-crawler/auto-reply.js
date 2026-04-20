@@ -34,6 +34,8 @@ const { deepAnalyzeUrl, formatDeepAnalysisForPrompt } = require('./lib/url-deep-
 const { analyzeAttachmentImages, formatVisionAnalysesForPrompt } = require('./lib/image-vision-analyzer');
 const { findPlaybook, formatPlaybookForPrompt } = require('./lib/sales-playbook');
 const { getPlaybookForContext, formatPlaybookForPrompt: formatPerfPlaybook } = require('./lib/performance-playbook');
+const { classifyConversationState, formatStateForPrompt, defaultState } = require('./lib/conversation-state');
+const { selectMinimalAck } = require('./lib/minimal-ack-templates');
 
 // HTML 이스케이프
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -272,15 +274,38 @@ async function autoReply() {
           return /\.(png|jpe?g|gif|webp)$/i.test(name);
         }).length;
 
-        // [3단계] 의도 추출 (Haiku) — 구조화된 "반드시 답할 질문/사실" 추출
-        const intentStart = Date.now();
-        const intentR = await extractIntent({
-          messageContent: inquiry.message_content || '',
-          thread,
-          gigTitle: serviceTitle,
-          attachmentCount: imageCountForIntent,
-          urlSummaries,
-        });
+        // [3단계] Phase A 병렬 — 대화 상태 분류 + 의도 추출 + 고객 프로필 + 대화 요약
+        //   이전: 4개 Opus 호출이 순차 (80s × 4 = 320s+) → 5분 cron 안에 못 끝남
+        //   현재: 독립 호출 병렬 (max ≈ 90s) + 대화 상태 분기로 minimal_ack 케이스는 메인 호출 스킵
+        const phaseStart = Date.now();
+        const [stateR, intentR, profileR, summaryR] = await Promise.all([
+          classifyConversationState({
+            messageContent: inquiry.message_content || '',
+            thread,
+            gigTitle: serviceTitle,
+          }),
+          extractIntent({
+            messageContent: inquiry.message_content || '',
+            thread,
+            gigTitle: serviceTitle,
+            attachmentCount: imageCountForIntent,
+            urlSummaries,
+          }),
+          ((priorCount || 0) >= 2)
+            ? getCustomerProfile(inquiry.customer_name, { minPrior: 1 }).catch(e => ({ ok: false, error: e.message }))
+            : Promise.resolve(null),
+          (thread.length >= SUMMARIZE_THRESHOLD)
+            ? summarizeConversation({ thread, gigTitle: serviceTitle }).catch(e => ({ ok: false, error: e.message }))
+            : Promise.resolve(null),
+        ]);
+        const phaseElapsed = ((Date.now() - phaseStart) / 1000).toFixed(1);
+        console.log(`  ⚡ Phase A 병렬 (${phaseElapsed}s): classifier + intent + profile${profileR ? '' : '(skip)'} + summarize${summaryR ? '' : '(skip)'}`);
+
+        // 대화 상태 분석 결과
+        const state = stateR.ok ? stateR.state : defaultState('classifier_fail');
+        console.log(`  🗣️ 대화 상태 (${stateR.model || 'default'}): mode=${state.response_mode}, ball=${state.ball_in_court}, stage=${state.stage}${state.our_last_promise ? ` · 직전 약속="${state.our_last_promise.slice(0, 60)}"` : ''}`);
+
+        // 의도 결과 처리 (기존 로직)
         let intentBlock = '';
         if (intentR.ok && intentR.intent) {
           intent = intentR.intent;
@@ -289,10 +314,33 @@ async function autoReply() {
             threadLength: thread.length,
             messageLength: (inquiry.message_content || '').length,
           });
-          console.log(`  🎯 의도 추출 (${((Date.now() - intentStart) / 1000).toFixed(1)}s, ${intentR.model || 'haiku'}): primary=${intent.primary_intent}, 감정=${intent.sentiment}, 긴급=${intent.urgency}, 명시질문 ${intent.explicit_questions.length}개, 커버포인트 ${intent.must_address.length}개 (신뢰도 ${intent.confidence})`);
+          console.log(`  🎯 의도 (${intentR.model || 'haiku'}): primary=${intent.primary_intent}, 감정=${intent.sentiment}, 긴급=${intent.urgency}, 명시질문 ${intent.explicit_questions.length}개, 커버포인트 ${intent.must_address.length}개 (신뢰도 ${intent.confidence})`);
           console.log(`  🌡️ 리드 히트: ${leadHeat.label} (${leadHeat.score}/100)${intent.requires_human ? '  ⚠️ 사람 응대 필요' : ''}`);
         } else {
           console.log(`  ⚠️ 의도 추출 실패 → 메인 프롬프트만으로 진행: ${intentR.error || 'unknown'}`);
+        }
+
+        // [분기] 대화 상태에 따라 메인 Opus 호출 스킵
+        //   minimal_ack: 고객이 대기 모드 — 고정 템플릿으로 짧게 응답
+        //   human_needed: 컴플레인/환불/법적 — 자동 답변 금지, rule 초안만 두고 사람 검수
+        let skipMainClaude = false;
+        let skipReason = null;
+        let minimalAckMeta = null;
+        if (state.response_mode === 'minimal_ack' && state.should_reply !== false) {
+          const ack = selectMinimalAck({ messageContent: inquiry.message_content || '', state });
+          replyText = ack.text;
+          replySource = 'minimal_ack';
+          claudeModel = 'template';
+          skipMainClaude = true;
+          skipReason = `minimal_ack/${ack.scenario}`;
+          minimalAckMeta = ack;
+          console.log(`  💬 minimal_ack — 고정 템플릿 (scenario=${ack.scenario}, idx=${ack.template_index})`);
+          console.log(`     이유: ${state.reasoning?.slice(0, 120) || '-'}`);
+        } else if (state.response_mode === 'human_needed' || state.should_reply === false) {
+          skipMainClaude = true;
+          skipReason = 'human_needed';
+          console.log(`  🚨 human_needed — 자동 답변 Opus 스킵 (rule 초안만 사람 검수용)`);
+          console.log(`     이유: ${state.reasoning?.slice(0, 120) || '-'}`);
         }
 
         // [Phase 6F] heat ≥ 60 & URL 심층 분석 (Opus 4.7) — 고가치 리드만 깊게 판독
@@ -353,17 +401,13 @@ async function autoReply() {
           console.log(`  📁 포트폴리오 레퍼런스 주입: ${refs.map(r => r.industry).join(', ')}`);
         }
 
-        // 고객 프로필 (priorCount ≥ 2 일 때만 — 3회째 이상 문의)
+        // 고객 프로필 블록 — Phase A에서 병렬 수행된 결과(profileR) 처리만
         let profileBlock = '';
-        if ((priorCount || 0) >= 2) {
-          const profStart = Date.now();
-          const pR = await getCustomerProfile(inquiry.customer_name, { minPrior: 1 });
-          if (pR.ok && pR.profile) {
-            profileBlock = formatProfileForPrompt(pR.profile);
-            console.log(`  👤 고객 프로필 (${((Date.now() - profStart) / 1000).toFixed(1)}s${pR.cached ? ' cached' : `, ${pR.model}`}): 가격민감=${pR.profile.price_sensitivity}, 결정속도=${pR.profile.decision_speed}, 톤=${pR.profile.relationship_tone}`);
-          } else if (pR.error) {
-            console.log(`  ⚠️ 고객 프로필 실패: ${pR.error.slice(0, 100)}`);
-          }
+        if (profileR && profileR.ok && profileR.profile) {
+          profileBlock = formatProfileForPrompt(profileR.profile);
+          console.log(`  👤 고객 프로필${profileR.cached ? ' (cached)' : `, ${profileR.model}`}: 가격민감=${profileR.profile.price_sensitivity}, 결정속도=${profileR.profile.decision_speed}, 톤=${profileR.profile.relationship_tone}`);
+        } else if (profileR && !profileR.ok && profileR.error) {
+          console.log(`  ⚠️ 고객 프로필 실패: ${profileR.error.slice(0, 100)}`);
         }
 
         // 가격/견적 의도면 자동 견적 계산 → Claude 프롬프트에 숫자 명시 (hallucination 방지)
@@ -381,32 +425,26 @@ async function autoReply() {
           }
         }
 
-        // [4단계] 대화 히스토리 블록 구성
-        //   thread 길이 ≥6 → 이전 메시지는 구조화 요약, 최신 2개만 원문 (토큰 절약 + 집중도↑)
-        //   < 6 → 전부 원문 (요약 오버헤드 불필요)
+        // [4단계] 대화 히스토리 블록 구성 — Phase A에서 병렬 수행된 summaryR 처리
+        //   thread 길이 ≥6 → 요약 + 최신 2개만 원문 / < 6 → 전부 원문
         let historyBlock = '';
         let summaryBlock = '';
-        if (thread.length >= SUMMARIZE_THRESHOLD) {
-          const sumStart = Date.now();
-          const sumR = await summarizeConversation({ thread, gigTitle: serviceTitle });
-          if (sumR.ok && sumR.shouldUse) {
-            summaryBlock = formatSummaryForPrompt(sumR.summary, sumR.summarized);
-            const recent2 = thread.slice(-3, -1);  // 현재 제외 직전 2개만 원문
-            historyBlock = recent2.length > 0
-              ? '\n[직전 원문 (최신 2개)]\n' + recent2.map((m, i) =>
-                  `${i + 1}. ${m.role === 'assistant' ? '우리' : '고객'}: ${m.content.slice(0, 240)}`
-                ).join('\n')
-              : '';
-            console.log(`  📝 대화 요약 (${((Date.now() - sumStart) / 1000).toFixed(1)}s, ${sumR.model}): stage=${sumR.summary.funnel_stage}, 커밋먼트 ${sumR.summary.our_commitments.length}개, 주의 ${sumR.summary.red_flags.length}개`);
-          } else {
-            // 요약 실패 → 원문으로 폴백
-            const history = thread.slice(-10, -1);
-            historyBlock = '\n[직전 대화 히스토리 (오래된 → 최신)]\n' + history.map((m, i) =>
-              `${i + 1}. ${m.role === 'assistant' ? '우리' : '고객'}: ${m.content.slice(0, 200)}`
-            ).join('\n');
-            if (sumR.error) console.log(`  ⚠️ 대화 요약 실패 → 원문 사용: ${sumR.error.slice(0, 100)}`);
-          }
-        } else if (thread.length > 1) {
+        if (summaryR && summaryR.ok && summaryR.shouldUse) {
+          summaryBlock = formatSummaryForPrompt(summaryR.summary, summaryR.summarized);
+          const recent2 = thread.slice(-3, -1);
+          historyBlock = recent2.length > 0
+            ? '\n[직전 원문 (최신 2개)]\n' + recent2.map((m, i) =>
+                `${i + 1}. ${m.role === 'assistant' ? '우리' : '고객'}: ${m.content.slice(0, 240)}`
+              ).join('\n')
+            : '';
+          console.log(`  📝 대화 요약 (${summaryR.model}): stage=${summaryR.summary.funnel_stage}, 커밋먼트 ${summaryR.summary.our_commitments.length}개, 주의 ${summaryR.summary.red_flags.length}개`);
+        } else if (summaryR && !summaryR.ok) {
+          const history = thread.slice(-10, -1);
+          historyBlock = '\n[직전 대화 히스토리 (오래된 → 최신)]\n' + history.map((m, i) =>
+            `${i + 1}. ${m.role === 'assistant' ? '우리' : '고객'}: ${m.content.slice(0, 200)}`
+          ).join('\n');
+          if (summaryR.error) console.log(`  ⚠️ 대화 요약 실패 → 원문 사용: ${summaryR.error.slice(0, 100)}`);
+        } else if (thread.length > 1 && thread.length < SUMMARIZE_THRESHOLD) {
           const history = thread.slice(-10, -1);
           historyBlock = '\n[직전 대화 히스토리 (오래된 → 최신)]\n' + history.map((m, i) =>
             `${i + 1}. ${m.role === 'assistant' ? '우리' : '고객'}: ${m.content.slice(0, 200)}`
@@ -564,21 +602,25 @@ async function autoReply() {
           { type: 'text', text: finalUserMsg },
         ];
 
-        console.log(`  🤖 Claude 호출 (${regenId ? 'regen' : (isFollowUp ? 'follow_up' : 'first/low-score')}) — model=opus, temp=${claudeTemp}, images=${imageBlocks.length}`);
-        const c = await askClaude({ system: sys, messages: [{ role: 'user', content: contentArr }], model: 'opus', max_tokens: 600, temperature: claudeTemp });
-        if (c.ok && c.text && c.text.length >= 40) {
-          replyText = c.text.trim();
-          replySource = 'claude';
-          claudeModel = c.model;
-          console.log(`  ✓ Claude 답변 생성 (${replyText.length}자, tokens in=${c.usage?.input_tokens} out=${c.usage?.output_tokens})`);
+        if (skipMainClaude) {
+          console.log(`  ⏭️  메인 Opus 호출 스킵 (${skipReason}) — replyText 기확정`);
         } else {
-          console.log(`  ⚠️ Claude 실패 → rule-based 유지: ${c.error || '응답 너무 짧음'}`);
+          console.log(`  🤖 Claude 호출 (${regenId ? 'regen' : (isFollowUp ? 'follow_up' : 'first/low-score')}) — model=opus, temp=${claudeTemp}, images=${imageBlocks.length}`);
+          const c = await askClaude({ system: sys, messages: [{ role: 'user', content: contentArr }], model: 'opus', max_tokens: 600, temperature: claudeTemp });
+          if (c.ok && c.text && c.text.length >= 40) {
+            replyText = c.text.trim();
+            replySource = 'claude';
+            claudeModel = c.model;
+            console.log(`  ✓ Claude 답변 생성 (${replyText.length}자, tokens in=${c.usage?.input_tokens} out=${c.usage?.output_tokens})`);
+          } else {
+            console.log(`  ⚠️ Claude 실패 → rule-based 유지: ${c.error || '응답 너무 짧음'}`);
+          }
         }
 
         // [5단계] 자기검증 — 답변이 intent.must_address / explicit_questions 를 커버했는지 체크
         //   커버율 70% 미만이면 missing 포인트 강조하며 1회 자동 재생성
         //   Claude 메인이 요구사항 일부를 빠뜨려서 동문서답 나오는 케이스 방어
-        if (replySource === 'claude' && intent && intent.confidence !== 'low') {
+        if (!skipMainClaude && replySource === 'claude' && intent && intent.confidence !== 'low') {
           const verify = await verifyReply({ intent, replyText, customerMessage: inquiry.message_content || '' });
           verifyResult = verify;
           if (verify.ok) {
