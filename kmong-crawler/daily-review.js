@@ -43,13 +43,36 @@ async function applyDecision(decision) {
 
   if (action === 'raise_budget' || action === 'lower_budget') {
     if (!value || value <= 0) return { executed: false, log: { ...log, skipped: 'invalid_value' } };
-    const { data: row } = await supabase.from('kmong_ad_budget').select('*').eq('active', true).limit(1).maybeSingle();
-    if (!row) return { executed: false, log: { ...log, skipped: 'no_budget_row' } };
+
+    // target 해석: ALL/null → 전체 예산 행 (product_id IS NULL) / 그 외 → 상품 단위 행
+    const isGlobal = !target || target === 'ALL' || target === 'all';
+    let query = supabase.from('kmong_ad_budget').select('*').eq('active', true);
+    query = isGlobal ? query.is('product_id', null) : query.eq('product_id', target);
+    const { data: row } = await query.limit(1).maybeSingle();
+
+    // 상품 단위 행이 없으면 weekly 기본값으로 신규 삽입(생성)
+    if (!row && !isGlobal) {
+      const newRow = {
+        product_id: target, budget_type: 'weekly', budget_amount: value,
+        priority: 'roi', active: true, updated_at: new Date().toISOString(),
+      };
+      const { error: insErr } = await supabase.from('kmong_ad_budget').insert([newRow]);
+      return { executed: !insErr, log: { ...log, scope: 'per_product', inserted: true, new: value, error: insErr?.message } };
+    }
+    if (!row) return { executed: false, log: { ...log, skipped: 'no_budget_row', scope: isGlobal ? 'global' : 'per_product' } };
+
+    // ±50% 가드: 기존 대비 변경율이 크면 자동 실행 거부 (사람 확인 필수)
+    const prev = row.budget_amount || 0;
+    const pct = prev > 0 ? Math.abs(value - prev) / prev * 100 : 0;
+    if (prev > 0 && pct > 50) {
+      return { executed: false, log: { ...log, skipped: `change_too_large_${pct.toFixed(1)}pct`, prev, new: value, scope: isGlobal ? 'global' : 'per_product', budget_type: row.budget_type, rowId: row.id } };
+    }
+
     const { error } = await supabase.from('kmong_ad_budget').update({
       budget_amount: value,
       updated_at: new Date().toISOString(),
     }).eq('id', row.id);
-    return { executed: !error, log: { ...log, prev: row.budget_amount, new: value, error: error?.message } };
+    return { executed: !error, log: { ...log, prev, new: value, scope: isGlobal ? 'global' : 'per_product', budget_type: row.budget_type, rowId: row.id, change_pct: +pct.toFixed(1), error: error?.message } };
   }
 
   if (action === 'pause_product') {
