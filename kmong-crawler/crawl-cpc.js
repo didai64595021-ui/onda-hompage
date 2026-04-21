@@ -17,9 +17,11 @@ const { notifyTyped } = require('./lib/notify-filter');
 const CLICK_UP_URL = 'https://kmong.com/seller/click-up';
 
 function getYesterday() {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  return d.toISOString().split('T')[0]; // YYYY-MM-DD
+  // KST 기준 어제 — toISOString()이 UTC라 서버 TZ/UTC 섞이면 KST 어제-2 행을 덮어쓰는 오염 발생 (2026-04-20 오염 사고)
+  const KST_OFFSET_MS = 9 * 3600 * 1000;
+  const kstNow = new Date(Date.now() + KST_OFFSET_MS);
+  const kstYesterday = new Date(kstNow.getTime() - 24 * 3600 * 1000);
+  return kstYesterday.toISOString().split('T')[0]; // YYYY-MM-DD
 }
 
 /**
@@ -152,6 +154,7 @@ async function crawlCpc() {
         cpc_cost: totalCost,
         title_text: serviceName.trim(),
         ad_enabled: adEnabled,
+        crawled_at: new Date().toISOString(),
       };
       records.push(record);
       console.log(`[매핑] ${serviceName.substring(0, 30)} → ${productId} | 노출:${impressions} 클릭:${clicks} 비용:${totalCost}원 | 광고:${adEnabled ? 'ON' : 'OFF'}`);

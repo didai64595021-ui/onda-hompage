@@ -48,10 +48,11 @@ module.exports = {
       name: 'kmong-crawl-cpc',
       script: './crawl-cpc.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '0 */2 * * *',  // 2시간마다 (정시)
+      // 01:30 KST부터 2시간마다 — 자정 직후 크몽 서버 데이터 미확정 시점 회피 + 08:00 리포트 전 07:30 캡처 보장
+      cron_restart: '30 1-23/2 * * *',
       autorestart: false,
       watch: false,
-      env: { ...COMMON_ENV },
+      env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
     },
     {
       name: 'kmong-crawl-inbox',

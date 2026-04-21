@@ -36,9 +36,11 @@ async function gotoDate(page, date) {
 }
 
 function getYesterday() {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  return d.toISOString().split('T')[0];
+  // KST 기준 어제 — UTC와 9h 오차로 어제-2 행 오염 방지 (2026-04-20 오염 사고 대응)
+  const KST_OFFSET_MS = 9 * 3600 * 1000;
+  const kstNow = new Date(Date.now() + KST_OFFSET_MS);
+  const kstYesterday = new Date(kstNow.getTime() - 24 * 3600 * 1000);
+  return kstYesterday.toISOString().split('T')[0];
 }
 
 function parseArgs() {
@@ -172,6 +174,7 @@ async function saveCpcDailyAggregate(productId, date, listMetrics, adEnabled, se
       cpc_cost: totalCost,
       title_text: serviceName?.trim(),
       ad_enabled: adEnabled,
+      crawled_at: new Date().toISOString(),
     }], { onConflict: 'product_id,date' });
   if (error) console.log(`[WARN] cpc_daily upsert 실패: ${error.message}`);
 }
