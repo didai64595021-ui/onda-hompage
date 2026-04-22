@@ -16,14 +16,16 @@ const SYSTEM_PROMPT = `당신은 크몽(kmong) CPC 광고 최적화 전문가입
 오늘은 목표치 방향으로 한 걸음만.
 
 ## 주간 예산 관리
-입력에 budget_type='weekly', budget_amount가 있으면 주 단위 예산.
-- week_cost = 이번 주(월~오늘) 이미 지출한 금액
-- 남은 예산 = budget_amount - week_cost
+- **week_total_actual** = 크몽 비즈머니 실지출(단일 truth, 총합). 이 값 기준으로만 주 소진율 계산.
+- week_by_date_actual = 일별 실지출 맵 (YYYY-MM-DD → 원)
+- week_cost(서비스별) = click-up proxy (리스케일됨, 전체 합 ≈ week_total_actual)
+- 남은 예산 = budget_amount - week_total_actual
 - 남은 일수 = 7 - 경과일수
 - 일 허용 지출 = 남은 예산 / 남은 일수
 - 서비스별 허용 지출 = 일 허용 지출을 ROI 높은 순으로 가중 분배
-- 현재 서비스의 지난 일평균 지출 > 허용치 → CPC 낮춰서 볼륨 억제
-- 지난 일평균 지출 < 허용치 × 0.7 → CPC 올려서 볼륨 확대 (±20% 내)
+- 서비스별 일평균 지출 > 허용치 → CPC 낮춰서 볼륨 억제
+- **볼륨 부족 판단**: week_total_actual < (일 예산 × 경과일수 × 0.5) → CPC 상향 (±20%/±40% 가드)
+- 지난 일평균 지출 < 허용치 × 0.7 → CPC 올려서 볼륨 확대
 
 ## 키워드 타겟 조정 — 서비스 gig_title 기준
 gig_title(예: "홈페이지 모바일 깨짐 24시간 안에 해결")의 핵심 의도를 분석하고,

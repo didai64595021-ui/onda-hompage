@@ -6,6 +6,7 @@
 
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 const { supabase } = require('./supabase');
+const { getWeekSpent } = require('./bizmoney');
 
 function daysAgo(n) {
   const d = new Date();
@@ -65,11 +66,33 @@ async function loadServiceMetrics(days = 30) {
     s.gig_title = g.gig_title;
   }
 
-  // 주간 누적 지출
+  // 주간 누적 지출 (서비스별) — 기존처럼 kmong_cpc_daily 기반 proxy
   for (const r of (weekCpcRes.data || [])) {
     const s = ensure(r.product_id);
     s.week_cost += r.cpc_cost || 0;
   }
+
+  // === 주간 실지출 ground-truth 보정 ===
+  // kmong_bizmoney_daily_spend.spent 합계가 크몽이 자체 집계한 실지출(= 단일 truth).
+  // click-up 크롤의 서비스별 week_cost 합 ≠ 비즈머니 실지출 이면 비즈머니 값 기준으로
+  // 서비스별 비율 리스케일. product-map 오매칭/UTC 버그 오염이 있어도 총합은 정확해짐.
+  const weekTruth = await getWeekSpent();
+  const proxySum = Object.values(svc).reduce((a, s) => a + (s.week_cost || 0), 0);
+  if (weekTruth && weekTruth.total > 0 && proxySum > 0 && Math.abs(weekTruth.total - proxySum) / Math.max(weekTruth.total, 1) > 0.1) {
+    const scale = weekTruth.total / proxySum;
+    for (const s of Object.values(svc)) s.week_cost = Math.round((s.week_cost || 0) * scale);
+  }
+  // proxy가 0인데 실지출은 있음 → 균등 배분 (서비스 active 중에서만 나중에 judge가 조정)
+  if (proxySum === 0 && weekTruth && weekTruth.total > 0) {
+    const activeSvcs = Object.values(svc);
+    if (activeSvcs.length > 0) {
+      const per = Math.round(weekTruth.total / activeSvcs.length);
+      for (const s of activeSvcs) s.week_cost = per;
+    }
+  }
+  // 전체 주간 실지출 요약값 — judge prompt에서 참조 가능
+  const weekTotalActual = weekTruth?.total || 0;
+  const weekByDateActual = weekTruth?.byDate || {};
 
   for (const r of (cpcRes.data || [])) {
     const s = ensure(r.product_id);
@@ -156,7 +179,14 @@ async function loadServiceMetrics(days = 30) {
     s.roas_30d = s.cost_30d > 0 ? +((s.revenue_30d / s.cost_30d) * 100).toFixed(1) : null;
   }
 
-  return Object.values(svc).filter(s => s.desired_cpc != null);
+  const results = Object.values(svc).filter(s => s.desired_cpc != null);
+  // ground-truth 요약을 각 서비스에 붙여 judge가 전체 주간 실지출 + 일자별 분포 참조 가능
+  for (const s of results) {
+    s.week_total_actual = weekTotalActual;
+    s.week_by_date_actual = weekByDateActual;
+    s.week_start_actual = weekTruth?.weekStart;
+  }
+  return results;
 }
 
 async function loadActiveBudget(productId = null) {

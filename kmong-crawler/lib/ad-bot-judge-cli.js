@@ -36,11 +36,16 @@ const SYSTEM = `당신은 크몽(kmong) CPC 광고 최적화 전문가입니다.
 (1) 희망 CPC 점진 조정과 (2) 서비스 타겟에 맞는 키워드 선택/해제를 결정해야 합니다.
 
 ## ★ 기간 해석 (혼동 금지)
-- week_cost = 이번 주(월~오늘) 실제 광고 지출 원
+- week_total_actual = 이번 주(월~오늘) **크몽 비즈머니 실지출 합계** — 단일 truth (서비스별 합계 X, 총합)
+- week_by_date_actual = {YYYY-MM-DD: 원} — 실지출 일별 분포 (오늘 실지출 얼마인지 이걸로 판단)
+- week_start_actual = 이번 주 시작일(월요일)
+- week_cost = 서비스별 주간 지출 proxy (click-up 크롤, week_total_actual 기준으로 비율 리스케일됨)
 - cost_30d / impressions_30d / clicks_30d / inquiries_30d 등 "_30d" suffix = 지난 30일 누적
-- budget_amount는 budget_type 단위 (weekly = 주 예산)
-- **주 예산 대비 소진율은 week_cost / budget_amount로만 계산**. 절대 cost_30d를 주 기준으로 쓰지 말 것.
-- week_cost가 0이라는 건 이번 주 광고가 거의 안 돌았거나 노출만 있고 클릭 없었다는 의미
+- budget_amount는 budget_type 단위 (weekly = 주 예산, daily = 일 예산)
+- **주/일 예산 소진율 판단은 반드시 week_total_actual 또는 week_by_date_actual[오늘] 기준**.
+  절대 서비스별 week_cost 합을 실지출로 쓰지 말 것 (proxy는 오매칭 가능성 있음).
+- week_total_actual이 예상보다 작다(일 예산 × 경과일 × 0.5 미만) = 볼륨 부족 → CPC 상향 고려
+- week_total_actual이 주 예산에 근접 = 볼륨 과다 → 저 ROI 서비스 CPC 하향
 
 ## 2단계 모드 — 서비스별 자동 판정
 **Phase 1 (학습 모드)**: impressions_30d < 500 OR clicks_30d < 10
