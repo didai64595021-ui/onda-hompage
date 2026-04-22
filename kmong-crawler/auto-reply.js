@@ -154,17 +154,33 @@ async function fetchLearningExamples(inquiry) {
 
 async function autoReply() {
   const startTime = Date.now();
+  // claim-rollback 을 catch 에서 접근 가능하게 외부 let 선언
+  const claimedInFlight = new Set();
 
   try {
     // regen 모드: 특정 inquiry ID 하나만 재생성 (status 무관)
     const regenId = process.env.INQUIRY_ID ? parseInt(process.env.INQUIRY_ID, 10) : null;
     console.log(`=== 크몽 자동 답변 생성 시작 ===${regenId ? ` (🔄 regen #${regenId})` : ''}`);
 
-    // 1. 문의 조회 — regen이면 단건, 아니면 pending 전체
-    const query = supabase.from('kmong_inquiries').select('*');
-    const { data: newInquiries, error: fetchErr } = regenId
-      ? await query.eq('id', regenId).limit(1)
-      : await query.eq('status', 'new').eq('auto_reply_status', 'pending').order('inquiry_date', { ascending: false }).limit(10);
+    // 1. 문의 조회 — regen이면 단건, 아니면 pending + 고아 processing (15분 넘은 것) 전체
+    //    processing 장기 고착 방지: 15분 초과 processing row는 다시 후보로 잡고 claim update에서 재확보 시도.
+    const CLAIM_STALE_MIN = 15;
+    const staleCutoff = new Date(Date.now() - CLAIM_STALE_MIN * 60 * 1000).toISOString();
+    let newInquiries, fetchErr;
+    if (regenId) {
+      const r = await supabase.from('kmong_inquiries').select('*').eq('id', regenId).limit(1);
+      newInquiries = r.data; fetchErr = r.error;
+    } else {
+      const r1 = await supabase.from('kmong_inquiries').select('*')
+        .eq('status', 'new').eq('auto_reply_status', 'pending')
+        .order('inquiry_date', { ascending: false }).limit(10);
+      const r2 = await supabase.from('kmong_inquiries').select('*')
+        .eq('status', 'new').eq('auto_reply_status', 'processing').lt('claimed_at', staleCutoff)
+        .order('inquiry_date', { ascending: false }).limit(5);
+      fetchErr = r1.error || r2.error;
+      newInquiries = [...(r1.data || []), ...(r2.data || [])];
+      if ((r2.data || []).length) console.log(`[경고] stale processing ${r2.data.length}건 재처리 후보 포함 (claimed_at < ${staleCutoff})`);
+    }
 
     if (fetchErr) {
       throw new Error(`문의 조회 실패: ${fetchErr.message}`);
@@ -178,8 +194,47 @@ async function autoReply() {
     console.log(`[조회] 미처리 문의 ${newInquiries.length}건`);
 
     let generatedCount = 0;
+    // claim 후 미완료(success update 도달 전) id 추적. throw 시 최상위 catch에서 pending 복구.
+    // (함수 상단에서 선언됨)
 
     for (const inquiry of newInquiries) {
+      // === atomic claim ===
+      // crawl-inbox.js 가 신규 감지 시 즉시 spawn + PM2 cron(15분) 이 동시에 같은 pending row
+      // 를 잡아 중복 생성하는 race 방지. 먼저 pending→processing 로 단일 update.
+      // 다른 프로세스가 이미 잡았다면 rowcount=0 → skip. regen 모드는 status 무관하게 진행.
+      if (!regenId) {
+        // pending → processing 원샷. 성공 시 claimed_at 기록.
+        const nowIso = new Date().toISOString();
+        const { data: claimed, error: claimErr } = await supabase
+          .from('kmong_inquiries')
+          .update({ auto_reply_status: 'processing', claimed_at: nowIso })
+          .eq('id', inquiry.id)
+          .eq('auto_reply_status', 'pending')
+          .select('id');
+        let tookClaim = claimed && claimed.length > 0;
+        // 실패 & 해당 row 가 stale processing 이면 재점유 시도
+        if (!tookClaim && inquiry.auto_reply_status === 'processing') {
+          const { data: reclaimed } = await supabase
+            .from('kmong_inquiries')
+            .update({ claimed_at: nowIso })
+            .eq('id', inquiry.id)
+            .eq('auto_reply_status', 'processing')
+            .lt('claimed_at', staleCutoff)
+            .select('id');
+          tookClaim = reclaimed && reclaimed.length > 0;
+          if (tookClaim) console.log(`  [재점유 #${inquiry.id}] stale processing 회복`);
+        }
+        if (claimErr) {
+          console.log(`  [claim 실패 #${inquiry.id}] ${claimErr.message} — 스킵`);
+          continue;
+        }
+        if (!tookClaim) {
+          console.log(`  [claim 충돌 #${inquiry.id}] 다른 프로세스가 이미 처리 중 — 스킵`);
+          continue;
+        }
+        claimedInFlight.add(inquiry.id);
+      }
+
       console.log(`\n[처리] #${inquiry.id} — ${inquiry.customer_name}`);
 
       // 2-0. 기존 고객의 후속 문의인지 판단 (같은 customer_name의 과거 inquiry 카운트)
@@ -805,6 +860,7 @@ async function autoReply() {
       };
       await sendCard(card, replyMarkup);
       generatedCount++;
+      claimedInFlight.delete(inquiry.id);
       console.log(`  [완료] 답변 생성 + 텔레그램 발송 (품질: ${quality.score}점)`);
     }
 
@@ -815,6 +871,18 @@ async function autoReply() {
 
   } catch (err) {
     console.error(`[에러] ${err.message}`);
+    // 미완료 claim 롤백 — 'processing'으로 걸려있는 row들을 'pending'으로 되돌려 다음 cron 재시도 가능하게.
+    try {
+      if (claimedInFlight.size) {
+        const ids = Array.from(claimedInFlight);
+        const { error: rbErr } = await supabase
+          .from('kmong_inquiries')
+          .update({ auto_reply_status: 'pending', claimed_at: null })
+          .in('id', ids)
+          .eq('auto_reply_status', 'processing');
+        if (!rbErr) console.log(`[롤백] 미완료 claim ${ids.length}건 pending 복구: ${ids.join(',')}`);
+      }
+    } catch (rbCatch) { console.error('[롤백 실패]', rbCatch.message); }
     notifyTyped('error', `크몽 자동답변 실패: ${err.message}`);
     process.exit(1);
   }
