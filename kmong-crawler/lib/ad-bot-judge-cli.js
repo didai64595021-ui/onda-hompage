@@ -35,6 +35,13 @@ const SYSTEM = `당신은 크몽(kmong) CPC 광고 최적화 전문가입니다.
 서비스별 성과 + 예산 + 추천 키워드 풀을 보고,
 (1) 희망 CPC 점진 조정과 (2) 서비스 타겟에 맞는 키워드 선택/해제를 결정해야 합니다.
 
+## ★ budget.priority 의미 (가장 먼저 확인)
+- priority='volume' (현재 기본): 볼륨 확보가 최우선. CPC 하향 금지 (최대 -5%), pause 금지, cut 금지.
+  Phase 3/4 조건을 만족해도 Phase 2까지만 수행. 예산 초과 우려 있어도 볼륨 확보 진행.
+- priority='ctr': CTR 최적화 초점. 저CTR 키워드 disable 활성.
+- priority='cvr': CVR 최적화 초점. 저전환 키워드 disable + 고전환 키워드 CPC 상향.
+- priority='roi': ROAS/ROI 세밀 조정. Phase 4 활성, pause 제안 가능 (본 봇은 제안만, 실제 pause는 daily-review).
+
 ## ★ 기간 해석 (혼동 금지)
 - week_total_actual = 이번 주(월~오늘) **크몽 비즈머니 실지출 합계** — 단일 truth (서비스별 합계 X, 총합)
 - week_by_date_actual = {YYYY-MM-DD: 원} — 실지출 일별 분포 (오늘 실지출 얼마인지 이걸로 판단)
@@ -47,18 +54,45 @@ const SYSTEM = `당신은 크몽(kmong) CPC 광고 최적화 전문가입니다.
 - week_total_actual이 예상보다 작다(일 예산 × 경과일 × 0.5 미만) = 볼륨 부족 → CPC 상향 고려
 - week_total_actual이 주 예산에 근접 = 볼륨 과다 → 저 ROI 서비스 CPC 하향
 
-## 2단계 모드 — 서비스별 자동 판정
-**Phase 1 (학습 모드)**: impressions_30d < 500 OR clicks_30d < 10
-  → 광고가 거의 안 돌고 있음 = 입찰가 부족. **일 ±40%까지 상향 허용** (빠른 학습)
-  → suggested_cpc 목표: suggested_cpc_stats.p25 ~ median 수준 (시장 추천가 하위 25~50%)
-  → 볼륨 확보가 최우선, 예산 초과 우려는 무시
+## 4단계 전략 (볼륨 → CTR → CVR → ROI) — 서비스별 자동 판정
+**budget.priority = 'volume' 인 동안에는 Phase 1~2 초점. Phase 3~4는 priority='roi' 전환 시 활성.**
 
-**Phase 2 (최적화 모드)**: impressions_30d ≥ 500 AND clicks_30d ≥ 10
-  → 데이터 충분 = 정밀 최적화. **일 ±20% 이내 점진**
-  → ROI/CVR/CTR 성과 기반 개별 조정
-  → 주 예산 초과 예상 시 CPC 낮춰 볼륨 억제
+### Phase 1 — 볼륨 확보 (현재 주 단계, priority=volume 기본)
+조건: impressions_30d < 500 OR clicks_30d < 10 OR (주 예산 소진율 0.5 미만 AND 경과일 3일+)
+행동:
+  - 일 최대 +40%까지 상향 허용 (Phase1 가드)
+  - suggested_cpc 목표: suggested_cpc_stats.p25 ~ median
+  - 노출 적은 서비스는 고의도 키워드 enable, pause/cut 금지
+  - 예산 초과 우려 무시. volume 확보가 최우선
+  - actions[].phase = "volume"
 
-각 서비스의 current phase를 actions[].phase로 표기 ("learning" | "optimizing").
+### Phase 2 — CTR 최적화
+조건: impressions_30d ≥ 500 AND clicks_30d ≥ 10 AND CTR_30d < 2.0%
+행동:
+  - CPC 변경 ±15% 이내 (소폭)
+  - keywords_bottom(노출 10+ 클릭 0) 에 해당하는 키워드 disable
+  - CTR 높은 키워드 유지, suggested_cpc_stats.median 이하 우량 키워드 enable
+  - CPC 하향은 최소화 (볼륨 손실 방지), 상향은 시장 추천가 median까지
+  - actions[].phase = "ctr"
+
+### Phase 3 — CVR 최적화
+조건: CTR_30d ≥ 2.0% AND clicks_30d ≥ 30 AND cvr_inquiry_30d < 5%
+행동:
+  - 문의 전환 많은 키워드 CPC 상향 (해당 키워드 대비 +15%)
+  - 클릭만 많고 문의 없는 키워드 disable 우선
+  - CPC ±15% 범위
+  - actions[].phase = "cvr"
+
+### Phase 4 — ROI 최적화 (priority='roi' 전환 후 활성)
+조건: cvr_inquiry_30d ≥ 5% OR cvr_order_30d ≥ 3% (전환 품질 충분)
+행동:
+  - ROAS/ROI 기반 ±20% 세밀 조정
+  - 음수 ROI 2주 지속 서비스는 daily-review가 pause 고려 (본 봇은 제안만)
+  - actions[].phase = "roi"
+
+### 자동 단계 전환
+각 서비스마다 위 조건 독립 평가. 팀 전체 단계는 overall_note에 언급.
+priority='volume' 이면 Phase 3~4 기준을 만족해도 Phase 2까지만 수행 (CPC 하향 금지).
 
 ## 공통 원칙
 - ROI/CVR/CTR은 모두 "_30d" 값 기준 (표본 충분)
@@ -128,14 +162,22 @@ function applyGuardrails(parsed, budget, metricsByPid = {}) {
     let clipped = sug;
     if (budget.min_cpc != null) clipped = Math.max(clipped, budget.min_cpc);
     if (budget.max_cpc != null) clipped = Math.min(clipped, budget.max_cpc);
-    // Phase 1 (learning, 표본 부족) → ±40%, Phase 2 (optimizing) → ±20%
+    // Phase 가드: volume(±40%) > ctr/cvr(±15%) > roi(±20%). 기본은 서비스 지표로 추정
     const mt = metricsByPid[a.product_id];
-    const learning = mt && (mt.impressions_30d < 500 || mt.clicks_30d < 10);
-    const maxChangePct = learning ? 40 : 20;
-    a.phase = a.phase || (learning ? 'learning' : 'optimizing');
+    const volumePhase = mt && (mt.impressions_30d < 500 || mt.clicks_30d < 10);
+    const budgetVolumePriority = (budget?.priority === 'volume');
+    const declaredPhase = (a.phase || '').toString().toLowerCase();
+    const effectivePhase = declaredPhase || (volumePhase ? 'volume' : 'ctr');
+    let maxChangePct = 20;
+    if (effectivePhase === 'volume') maxChangePct = 40;
+    else if (effectivePhase === 'ctr' || effectivePhase === 'cvr') maxChangePct = 15;
+    // priority='volume' 이면 아래로 내리는 것은 5% 이내로 제한 (볼륨 손실 방지)
+    a.phase = effectivePhase;
     if (cur > 0) {
       const upper = cur * (1 + maxChangePct / 100);
-      const lower = cur * (1 - maxChangePct / 100);
+      // priority='volume' 이면 하향을 ±5%로 더 빡세게 제한. 아니면 phase별 가드 동일.
+      const downPct = budgetVolumePriority ? 5 : maxChangePct;
+      const lower = cur * (1 - downPct / 100);
       clipped = Math.max(lower, Math.min(upper, clipped));
     }
     clipped = Math.round(clipped / 10) * 10;

@@ -10,10 +10,19 @@ const SYSTEM_PROMPT = `당신은 크몽(kmong) CPC 광고 최적화 전문가입
 셀러의 서비스별 성과 + 예산 + 추천 키워드 풀을 보고,
 (1) 희망 CPC 점진 조정과 (2) 서비스 타겟에 맞는 키워드 선택/해제를 결정해야 합니다.
 
-## 핵심 원칙 — 점진 상승
+## 4단계 전략 (볼륨 → CTR → CVR → ROI)
+서비스별로 자동 판정:
+- Phase "volume": impressions_30d<500 OR clicks_30d<10 OR 주소진율<0.5 → **±40%** 상향 허용, pause/cut 금지
+- Phase "ctr": 노출≥500 AND 클릭≥10 AND CTR<2% → **±15%**, 저CTR 키워드 disable
+- Phase "cvr": CTR≥2% AND 클릭≥30 AND cvr_inquiry<5% → **±15%**, 고전환 키워드 CPC 상향
+- Phase "roi": cvr_inquiry≥5% OR cvr_order≥3% → **±20%**, ROAS 기반 세밀
+
+budget.priority='volume' 이면 Phase 3/4 조건 만족해도 Phase 2까지만 수행. 하향은 최대 -5%.
+각 action에 phase 문자열 포함.
+
+## 핵심 원칙 — 점진 상승 (Phase별 가드 위)
 한 번에 CPC를 크게 올리면 입찰 경쟁에서 노출 볼륨이 폭증해 예산을 순식간에 소진합니다.
-**CPC 변경은 하루 ±20% 이내**. 그 이상 조정이 필요해도 여러 날 나눠서.
-오늘은 목표치 방향으로 한 걸음만.
+Phase 가드 범위 내에서만 이동.
 
 ## 주간 예산 관리
 - **week_total_actual** = 크몽 비즈머니 실지출(단일 truth, 총합). 이 값 기준으로만 주 소진율 계산.
@@ -89,17 +98,22 @@ async function judgeAdjustments(metrics, budget) {
 
   if (!Array.isArray(parsed.actions)) return { ok: false, error: 'actions 배열 없음', raw: parsed };
 
-  // 가드레일: min/max clip + 변화율 ±20% 이내로 강제 (프롬프트와 이중 안전장치)
-  const maxChangePct = 20;
+  // 가드레일: phase별 가드 적용 (프롬프트와 이중 안전장치)
+  const phaseGuard = { volume: 40, ctr: 15, cvr: 15, roi: 20 };
+  const budgetVolumePriority = (budget?.priority === 'volume');
   for (const a of parsed.actions) {
     const cur = a.current_desired_cpc || 0;
     const sug = a.suggested_desired_cpc || cur;
     let clipped = sug;
     if (budget.min_cpc != null) clipped = Math.max(clipped, budget.min_cpc);
     if (budget.max_cpc != null) clipped = Math.min(clipped, budget.max_cpc);
+    const phase = (a.phase || '').toLowerCase();
+    const maxChangePct = phaseGuard[phase] || 20;
     if (cur > 0) {
       const upper = cur * (1 + maxChangePct / 100);
-      const lower = cur * (1 - maxChangePct / 100);
+      // priority=volume 이면 하향은 ±5%로 제한
+      const downPct = budgetVolumePriority ? 5 : maxChangePct;
+      const lower = cur * (1 - downPct / 100);
       clipped = Math.max(lower, Math.min(upper, clipped));
     }
     clipped = Math.round(clipped / 10) * 10;

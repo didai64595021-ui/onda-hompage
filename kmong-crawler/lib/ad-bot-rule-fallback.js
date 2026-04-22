@@ -34,7 +34,9 @@ function keywordMatchesCore(keyword, coreTerms) {
 }
 
 function ruleBasedJudge(metrics, budget) {
-  const cpcMultiplier = 1.1;
+  // priority='volume' 또는 미지정이면 Phase1 가드 +40% 상한에 맞춰 공격적으로, 아니면 +10%
+  const volumePriority = (budget?.priority === 'volume');
+  const cpcMultiplier = volumePriority ? 1.4 : 1.1;
   const weeklyBudget = budget.budget_type === 'weekly' ? budget.budget_amount : budget.budget_amount * 7;
   // 크몽 일예산 최소 10,000원 제약: 주100k/5svc = 14,286원/일 → 서비스당 2,857원은 불가
   // → 일예산은 건드리지 않음 (현재 '설정 안 함' 유지). 주 예산은 CPC+키워드 조정으로 간접 관리.
@@ -60,9 +62,13 @@ function ruleBasedJudge(metrics, budget) {
     }
 
     const change_pct = cur > 0 ? +(((suggested - cur) / cur) * 100).toFixed(1) : 0;
+    const phase = (m.impressions_30d < 500 || m.clicks_30d < 10) ? 'volume' :
+                  (m.ctr_30d < 2.0) ? 'ctr' :
+                  (m.cvr_inquiry_30d < 5) ? 'cvr' : 'roi';
     return {
       product_id: m.product_id,
       gig_title: m.gig_title,
+      phase,
       current_desired_cpc: cur,
       suggested_desired_cpc: suggested,
       change_pct,
@@ -72,13 +78,13 @@ function ruleBasedJudge(metrics, budget) {
       keywords_to_disable: disable,
       priority: 3,
       confidence: 'rule-based',
-      reasoning: `룰베이스: CPC +10% 점진, 일예산 미설정(크몽 최소 1만원 제약 + 주 ${weeklyBudget}원 분산 불가), 타겟 외 ${disable.length}개 off, 타겟 ${enable.length}개 on`,
+      reasoning: `룰베이스(phase=${phase}): CPC ×${cpcMultiplier} (${volumePriority ? 'volume 모드' : 'roi 모드'}), 타겟 외 ${disable.length}개 off, 타겟 ${enable.length}개 on`,
     };
   });
 
   return {
     actions,
-    overall_note: `룰베이스: CPC +10% 점진 · 주 ${weeklyBudget}원 예산 · 일예산은 크몽 최소 10k 제약으로 무설정 · 클릭 볼륨 확보 목표`,
+    overall_note: `룰베이스 ${volumePriority ? '(volume priority)' : '(roi priority)'}: CPC ×${cpcMultiplier} · 주 ${weeklyBudget}원 예산 · 일예산 무설정`,
   };
 }
 
