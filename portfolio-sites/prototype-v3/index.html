@@ -1,0 +1,2554 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ONDA Studio — Creating brands that resonate</title>
+<meta name="description" content="온다 스튜디오. 브랜드 전략, 디자인, 디지털 경험. 서울 기반 크리에이티브 디자인 스튜디오.">
+<meta property="og:title" content="ONDA Studio">
+<meta property="og:description" content="Creating brands that resonate.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<style>
+/* ============================================
+   RESET & VARIABLES
+   ============================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --cream: #F0EBE3;
+  --charcoal: #1A1816;
+  --rust: #C84B31;
+  --sage: #7D8471;
+  --gold: #B8860B;
+  --text: #2D2926;
+  --text-light: #7A756F;
+  --white: #FAF8F5;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'DM Sans', 'Pretendard', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out-cubic: cubic-bezier(0.65, 0, 0.35, 1);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--cream);
+  color: var(--text);
+  overflow-x: hidden;
+  cursor: none;
+  word-break: keep-all;
+  line-height: 1.6;
+}
+
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: none; border: none; background: none; }
+
+/* ============================================
+   PRELOADER
+   ============================================ */
+.preloader {
+  position: fixed;
+  inset: 0;
+  background: var(--cream);
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s ease;
+}
+
+.preloader.done {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.preloader-text {
+  font-family: var(--font-display);
+  font-size: clamp(80px, 15vw, 200px);
+  color: var(--text);
+  display: flex;
+  overflow: hidden;
+}
+
+.preloader-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(100%);
+  transition: opacity 0.5s var(--ease-out-expo), transform 0.7s var(--ease-out-expo);
+}
+
+.preloader-letter.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.preloader-letter.morph {
+  animation: morphO 1s var(--ease-out-expo) forwards;
+}
+
+@keyframes morphO {
+  0% { transform: scale(1); }
+  100% { transform: scale(30); opacity: 0; }
+}
+
+/* ============================================
+   SCROLL PROGRESS (BREATHING)
+   ============================================ */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: var(--rust);
+  z-index: 10000;
+  transition: background-color 0.6s ease;
+  animation: breathe 2s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; }
+}
+
+/* ============================================
+   CUSTOM CURSOR
+   ============================================ */
+.cursor-dot {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  background: var(--text);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: background-color 0.4s ease, transform 0.1s ease;
+}
+
+.cursor-ring {
+  position: fixed;
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid var(--text);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s var(--ease-out-expo), height 0.4s var(--ease-out-expo),
+              background-color 0.4s ease, border-color 0.4s ease;
+}
+
+.cursor-ring.hovering {
+  width: 80px;
+  height: 80px;
+  background: rgba(200, 75, 49, 0.15);
+  border-color: var(--rust);
+}
+
+.cursor-ring.cta-hover {
+  width: 80px;
+  height: 80px;
+  background: var(--rust);
+  border-color: var(--rust);
+}
+
+/* Dark section cursor inversion */
+body.cursor-light .cursor-dot { background: var(--cream); }
+body.cursor-light .cursor-ring { border-color: var(--cream); }
+body.cursor-light .cursor-ring.hovering {
+  background: rgba(184, 134, 11, 0.2);
+  border-color: var(--gold);
+}
+
+/* ============================================
+   HEADER (scroll-driven)
+   ============================================ */
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 24px 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 9000;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.5s ease, transform 0.5s ease, color 0.5s ease;
+  pointer-events: none;
+  mix-blend-mode: difference;
+}
+
+.site-header.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.header-logo {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--white);
+  letter-spacing: 0.05em;
+}
+
+.header-nav {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+
+.header-nav a {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--white);
+  position: relative;
+  padding-bottom: 4px;
+}
+
+.header-nav a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--rust);
+  transition: width 0.4s var(--ease-out-expo);
+}
+
+.header-nav a:hover::after { width: 100%; }
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  background: var(--cream);
+}
+
+.hero-left {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: clamp(32px, 6vw, 80px);
+  padding-right: 48px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-label {
+  font-family: var(--font-body);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5em;
+  color: var(--sage);
+  margin-bottom: 24px;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 7vw, 96px);
+  line-height: 1.05;
+  color: var(--text);
+  margin-bottom: 40px;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.hero-title .accent { color: var(--rust); }
+
+.hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.hero-line {
+  width: 60px;
+  height: 1px;
+  background: var(--text);
+}
+
+.hero-meta-text {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--text-light);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hero-right {
+  width: 50%;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-image-wrapper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.hero-image {
+  width: 100%;
+  height: 120%;
+  object-fit: cover;
+  will-change: transform;
+  opacity: 0;
+  transform: scale(1.1);
+  transition: opacity 1s ease, transform 1.5s var(--ease-out-expo);
+}
+
+.hero-image.revealed {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Grain overlay */
+.hero-right::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: scrollBounce 2s ease-in-out infinite;
+  opacity: 0;
+}
+
+@keyframes scrollBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(8px); }
+}
+
+/* ============================================
+   MANIFESTO — THE WOW MOMENT
+   ============================================ */
+.manifesto {
+  min-height: 100vh;
+  position: relative;
+  background: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 120px 0;
+}
+
+.manifesto-bg {
+  position: absolute;
+  font-family: var(--font-display);
+  font-size: clamp(200px, 30vw, 400px);
+  color: var(--text);
+  opacity: 0.02;
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+
+.manifesto-words {
+  position: relative;
+  width: 100%;
+  height: 70vh;
+  min-height: 500px;
+}
+
+.manifesto-word {
+  position: absolute;
+  font-family: var(--font-display);
+  line-height: 1.1;
+  opacity: 0;
+  will-change: transform, opacity;
+  transition: none;
+}
+
+.manifesto-word[data-word="우리는"] {
+  top: 15%;
+  left: 8%;
+  font-size: clamp(32px, 4vw, 48px);
+  color: var(--text);
+}
+
+.manifesto-word[data-word="보이지"] {
+  top: 30%;
+  left: 25%;
+  font-size: clamp(42px, 5.5vw, 64px);
+  color: var(--rust);
+  transform: rotate(-2deg);
+}
+
+.manifesto-word[data-word="않는 것을"] {
+  top: 35%;
+  right: 15%;
+  font-size: clamp(42px, 5.5vw, 64px);
+  color: var(--rust);
+  transform: rotate(2deg);
+}
+
+.manifesto-word[data-word="보이게"] {
+  top: 55%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: clamp(72px, 10vw, 120px);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.manifesto-word[data-word="만듭니다"] {
+  top: 78%;
+  right: 8%;
+  font-size: clamp(32px, 4vw, 48px);
+  color: var(--sage);
+}
+
+/* ============================================
+   WORK SECTION
+   ============================================ */
+.work {
+  position: relative;
+  padding-top: 160px;
+  background: var(--cream);
+}
+
+.work-header {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(24px, 4vw, 80px);
+  margin-bottom: 120px;
+}
+
+.work-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--text-light);
+  margin-bottom: 16px;
+}
+
+.work-heading {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 5vw, 72px);
+  line-height: 1.1;
+}
+
+/* --- Project 01: Staggered Overlap --- */
+.project-01 {
+  max-width: 1280px;
+  margin: 0 auto 160px;
+  padding: 0 clamp(24px, 4vw, 80px);
+  position: relative;
+}
+
+.project-01 .project-number {
+  font-family: var(--font-mono);
+  font-size: clamp(100px, 12vw, 160px);
+  color: var(--text);
+  opacity: 0.04;
+  line-height: 1;
+  margin-bottom: -40px;
+  position: relative;
+  z-index: 1;
+}
+
+.project-01 .project-image-wrap {
+  width: 60%;
+  position: relative;
+  overflow: hidden;
+  clip-path: inset(100% 0 0 0);
+  transition: clip-path 1s var(--ease-out-expo);
+}
+
+.project-01 .project-image-wrap.revealed {
+  clip-path: inset(0 0 0 0);
+}
+
+.project-01 .project-image-wrap img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  transition: transform 0.6s var(--ease-out-quart);
+}
+
+.project-01:hover .project-image-wrap img {
+  transform: scale(1.02);
+}
+
+.project-01 .project-info {
+  background: var(--cream);
+  padding: 32px;
+  position: relative;
+  margin-top: -40px;
+  margin-left: auto;
+  width: 50%;
+  z-index: 2;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease 0.3s, transform 0.6s var(--ease-out-expo) 0.3s;
+}
+
+.project-01 .project-image-wrap.revealed ~ .project-info {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.project-01:hover .project-info {
+  transform: translateY(-8px);
+}
+
+.project-info h3 {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3vw, 36px);
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.project-info .project-sub {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-light);
+  margin-bottom: 12px;
+}
+
+.project-info .project-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sage);
+}
+
+.project-underline {
+  width: 0;
+  height: 2px;
+  background: var(--rust);
+  margin-top: 12px;
+  transition: width 0.5s var(--ease-out-expo);
+}
+
+.project-01:hover .project-underline { width: 60px; }
+
+/* --- Project 02: Right-heavy horizontal --- */
+.project-02 {
+  max-width: 100%;
+  margin-bottom: 160px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  min-height: 70vh;
+}
+
+.project-02 .project-text {
+  width: 45%;
+  padding-left: clamp(24px, 6vw, 80px);
+  padding-right: 48px;
+  position: relative;
+  z-index: 2;
+}
+
+.project-02 .project-number {
+  font-family: var(--font-mono);
+  font-size: clamp(120px, 14vw, 200px);
+  color: var(--text);
+  opacity: 0.04;
+  line-height: 1;
+  position: absolute;
+  bottom: -20px;
+  left: clamp(24px, 6vw, 80px);
+}
+
+.project-02 .project-text h3 {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 48px);
+  margin-bottom: 4px;
+  line-height: 1.1;
+}
+
+.project-02 .project-text .project-sub {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-light);
+  margin-bottom: 16px;
+}
+
+.project-02 .project-connector {
+  width: 0;
+  height: 1px;
+  background: var(--text);
+  opacity: 0.15;
+  margin: 24px 0;
+  transition: width 0.8s var(--ease-out-expo) 0.5s;
+}
+
+.project-02 .project-connector.revealed { width: 80px; }
+
+.project-02 .project-stat {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+.project-02 .project-stat strong {
+  font-size: 18px;
+  color: var(--rust);
+  font-weight: 500;
+}
+
+.project-02 .project-image-wrap {
+  width: 55%;
+  height: 70vh;
+  overflow: hidden;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 1.2s var(--ease-out-expo);
+}
+
+.project-02 .project-image-wrap.revealed {
+  clip-path: inset(0 0 0 0);
+}
+
+.project-02 .project-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --- Project 03: Full-bleed --- */
+.project-03 {
+  position: relative;
+  width: 100vw;
+  height: 70vh;
+  margin-bottom: 0;
+  overflow: hidden;
+}
+
+.project-03 .project-image-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.project-03 .project-image-wrap img {
+  width: 100%;
+  height: 120%;
+  object-fit: cover;
+  will-change: transform;
+  transform: scale(1);
+  transition: transform 0.1s linear;
+}
+
+.project-03 .project-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 48px clamp(24px, 4vw, 80px);
+  background: linear-gradient(to top, rgba(26,24,22,0.85) 0%, transparent 100%);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.project-03 .project-overlay .project-number {
+  font-family: var(--font-mono);
+  font-size: clamp(60px, 8vw, 96px);
+  color: var(--white);
+  opacity: 0.2;
+  line-height: 1;
+}
+
+.project-03 .project-overlay-text {
+  text-align: right;
+}
+
+.project-03 .project-overlay-text h3 {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.5vw, 42px);
+  color: var(--white);
+  margin-bottom: 4px;
+}
+
+.project-03 .project-overlay-text .project-sub {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 8px;
+}
+
+.project-03 .project-overlay-text .project-stat {
+  font-family: var(--font-mono);
+  font-size: clamp(48px, 6vw, 96px);
+  color: var(--rust);
+  line-height: 1;
+  font-weight: 500;
+}
+
+/* --- Project 04: Dark section begins + bleed transition --- */
+.dark-bleed {
+  position: relative;
+}
+
+.dark-bleed::before {
+  content: '';
+  position: absolute;
+  top: -200px;
+  left: 0;
+  right: 0;
+  height: 300px;
+  background: linear-gradient(to bottom, transparent, var(--charcoal));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.project-04 {
+  background: var(--charcoal);
+  padding: 160px 0 120px;
+  display: flex;
+  align-items: center;
+  max-width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.project-04-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(24px, 4vw, 80px);
+  display: flex;
+  align-items: center;
+  gap: clamp(32px, 5vw, 80px);
+  width: 100%;
+}
+
+.project-04 .project-image-wrap {
+  width: 35%;
+  overflow: hidden;
+  flex-shrink: 0;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 1s var(--ease-out-expo);
+}
+
+.project-04 .project-image-wrap.revealed {
+  clip-path: inset(0 0 0 0);
+}
+
+.project-04 .project-image-wrap img {
+  width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+}
+
+.project-04 .project-text {
+  flex: 1;
+  position: relative;
+}
+
+.project-04 .project-text h3 {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 48px);
+  color: var(--white);
+  margin-bottom: 4px;
+}
+
+.project-04 .project-text .project-sub {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 12px;
+}
+
+.project-04 .project-text .project-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sage);
+  margin-bottom: 24px;
+}
+
+.project-04 .project-stat-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.project-04 .project-stat-row .stat-value {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  color: var(--gold);
+}
+
+.project-04 .project-stat-row .stat-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+}
+
+.project-04 .project-number {
+  font-family: var(--font-mono);
+  font-size: clamp(120px, 14vw, 200px);
+  color: var(--white);
+  opacity: 0.04;
+  line-height: 1;
+  position: absolute;
+  bottom: -60px;
+  right: 0;
+}
+
+/* ============================================
+   ABOUT — Dark continuation
+   ============================================ */
+.about {
+  background: var(--charcoal);
+  padding: 120px 0 160px;
+  position: relative;
+  overflow: hidden;
+}
+
+.about-bg {
+  position: absolute;
+  font-family: var(--font-display);
+  font-size: clamp(200px, 25vw, 400px);
+  color: var(--white);
+  opacity: 0.03;
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+  bottom: 5%;
+  right: -5%;
+  will-change: transform;
+}
+
+.about-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(24px, 4vw, 80px);
+}
+
+.about-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  margin-bottom: 80px;
+}
+
+.about-number {
+  font-family: var(--font-display);
+  font-size: clamp(120px, 15vw, 200px);
+  color: var(--rust);
+  line-height: 0.85;
+  flex-shrink: 0;
+}
+
+.about-statement {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.5vw, 48px);
+  color: var(--white);
+  line-height: 1.2;
+  padding-top: 24px;
+}
+
+.about-counters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
+}
+
+.counter-item {
+  text-align: center;
+}
+
+.counter-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 8px;
+}
+
+.counter-value {
+  font-family: var(--font-mono);
+  font-size: clamp(36px, 5vw, 56px);
+  color: var(--white);
+  font-weight: 300;
+  line-height: 1;
+}
+
+.counter-value .counter-suffix {
+  font-size: 0.5em;
+  color: var(--rust);
+}
+
+.counter-desc {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 8px;
+}
+
+/* breathing pulse after counting */
+.counter-value.breathing {
+  animation: statBreathe 2s ease-in-out infinite;
+}
+
+@keyframes statBreathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+/* ============================================
+   PHILOSOPHY — Dark overlapping text
+   ============================================ */
+.philosophy {
+  background: var(--charcoal);
+  padding: 120px 0 160px;
+  position: relative;
+}
+
+.philosophy-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(24px, 4vw, 80px);
+}
+
+.philosophy-text {
+  position: relative;
+  margin-bottom: 80px;
+}
+
+.philosophy-line1 {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.5vw, 40px);
+  color: var(--white);
+  position: relative;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.philosophy-line2 {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 6vw, 72px);
+  color: var(--rust);
+  position: relative;
+  margin-left: clamp(30px, 5vw, 60px);
+  margin-top: -10px;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.philosophy-pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(24px, 3vw, 48px);
+  margin-top: 64px;
+}
+
+.pillar {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.pillar-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+
+.pillar-subtitle {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--sage);
+  margin-bottom: 16px;
+}
+
+.pillar-desc {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.7;
+}
+
+/* ============================================
+   CONTACT CTA — Light returns
+   ============================================ */
+.contact {
+  background: var(--cream);
+  padding: 160px 0;
+  text-align: center;
+  position: relative;
+}
+
+.contact-heading {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 5vw, 56px);
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 48px;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.magnetic-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--rust);
+  color: var(--white);
+  padding: 20px 48px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 0;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s var(--ease-out-expo);
+}
+
+.magnetic-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--charcoal);
+  transform: translateY(100%);
+  transition: transform 0.4s var(--ease-out-expo);
+}
+
+.magnetic-btn:hover::before {
+  transform: translateY(0);
+}
+
+.magnetic-btn span {
+  position: relative;
+  z-index: 1;
+}
+
+.contact-email {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-light);
+  margin-top: 24px;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* ============================================
+   MARQUEE
+   ============================================ */
+.marquee-section {
+  background: var(--rust);
+  padding: 24px 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 20s linear infinite;
+}
+
+.marquee-content {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+  padding-right: 0;
+}
+
+.marquee-item {
+  font-family: var(--font-body);
+  font-size: clamp(14px, 2vw, 18px);
+  font-weight: 500;
+  color: var(--white);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 0 24px;
+}
+
+.marquee-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--white);
+  border-radius: 50%;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+@keyframes marqueeScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.footer {
+  background: var(--charcoal);
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 80px clamp(24px, 4vw, 80px) 40px;
+  overflow: hidden;
+}
+
+.footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--rust);
+}
+
+.footer-mega {
+  position: absolute;
+  bottom: -5%;
+  left: -2%;
+  font-family: var(--font-display);
+  font-size: clamp(300px, 35vw, 500px);
+  color: var(--cream);
+  opacity: 0.03;
+  line-height: 0.8;
+  user-select: none;
+  pointer-events: none;
+}
+
+.footer-top {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.footer-col h4 {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 24px;
+}
+
+.footer-col a,
+.footer-col p {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 12px;
+  transition: color 0.3s ease;
+}
+
+.footer-col a:hover { color: var(--rust); }
+
+.footer-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+
+.footer-clock {
+  font-family: var(--font-mono);
+  font-size: clamp(40px, 6vw, 80px);
+  color: var(--white);
+  font-weight: 300;
+  letter-spacing: 0.1em;
+}
+
+.footer-clock-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: rgba(255,255,255,0.3);
+  text-align: center;
+  margin-top: 8px;
+}
+
+.footer-bottom {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+.footer-bottom p {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
+}
+
+/* ============================================
+   REVEAL ANIMATIONS
+   ============================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .preloader { display: none; }
+  .reveal, .manifesto-word, .hero-label, .hero-title, .hero-meta,
+  .scroll-indicator, .hero-image, .philosophy-line1, .philosophy-line2,
+  .pillar, .contact-heading, .contact-email {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .project-01 .project-image-wrap,
+  .project-02 .project-image-wrap,
+  .project-04 .project-image-wrap {
+    clip-path: inset(0 0 0 0) !important;
+  }
+  .project-01 .project-info { opacity: 1 !important; transform: none !important; }
+  body { cursor: auto; }
+  .cursor-dot, .cursor-ring { display: none; }
+}
+
+/* ============================================
+   RESPONSIVE — TABLET
+   ============================================ */
+@media (max-width: 1024px) {
+  .site-header { padding: 20px 32px; }
+  .header-nav { gap: 24px; }
+
+  .hero-left { padding-left: 32px; padding-right: 24px; }
+
+  .project-01 .project-info { width: 65%; }
+
+  .project-02 { flex-direction: column; min-height: auto; }
+  .project-02 .project-text { width: 100%; padding: 0 32px; margin-bottom: 32px; }
+  .project-02 .project-image-wrap { width: 100%; height: 50vh; }
+  .project-02 .project-number { position: relative; bottom: auto; left: auto; margin-top: 16px; padding-left: 32px; }
+
+  .project-04-inner { flex-direction: column; }
+  .project-04 .project-image-wrap { width: 60%; }
+
+  .about-counters { gap: 32px; }
+  .philosophy-pillars { gap: 32px; }
+
+  .footer-top { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ============================================
+   RESPONSIVE — MOBILE
+   ============================================ */
+@media (max-width: 768px) {
+  body { cursor: auto; }
+  .cursor-dot, .cursor-ring { display: none; }
+
+  .site-header { padding: 16px 20px; }
+  .header-nav { display: none; }
+
+  .hero {
+    flex-direction: column;
+    min-height: auto;
+  }
+  .hero-left {
+    width: 100%;
+    padding: 120px 20px 40px;
+    order: 2;
+  }
+  .hero-right {
+    width: 100%;
+    height: 50vh;
+    order: 1;
+  }
+  .scroll-indicator { display: none; }
+
+  .manifesto-words {
+    height: auto;
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 0 20px;
+  }
+  .manifesto-word {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+  .manifesto-word[data-word="않는 것을"] { align-self: flex-end; }
+  .manifesto-word[data-word="보이게"] { align-self: center; }
+  .manifesto-word[data-word="만듭니다"] { align-self: flex-end; }
+  .manifesto { padding: 80px 0; min-height: auto; }
+
+  .work { padding-top: 80px; }
+  .work-header { margin-bottom: 64px; }
+
+  .project-01 { margin-bottom: 80px; }
+  .project-01 .project-image-wrap { width: 100%; }
+  .project-01 .project-info { width: 90%; margin-top: -24px; }
+
+  .project-02 { margin-bottom: 80px; }
+  .project-02 .project-text { padding: 0 20px; }
+  .project-02 .project-number { padding-left: 20px; font-size: 80px !important; }
+  .project-02 .project-image-wrap { height: 40vh; }
+
+  .project-03 { height: 50vh; }
+
+  .project-04 { padding: 80px 0 64px; }
+  .project-04 .project-image-wrap { width: 80%; }
+  .project-04 .project-number { font-size: 80px !important; bottom: -30px; }
+
+  .about { padding: 64px 0 80px; }
+  .about-top { flex-direction: column; gap: 16px; }
+  .about-number { font-size: 80px !important; }
+  .about-counters { grid-template-columns: 1fr; gap: 40px; }
+
+  .philosophy { padding: 64px 0 80px; }
+  .philosophy-pillars { grid-template-columns: 1fr; gap: 40px; }
+  .philosophy-line2 { margin-left: 0; }
+
+  .contact { padding: 80px 20px; }
+
+  .footer {
+    min-height: auto;
+    padding: 48px 20px 32px;
+  }
+  .footer-top {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .footer-clock { font-size: 40px; }
+  .footer-mega { font-size: 200px; }
+
+  .dark-bleed::before { top: -120px; height: 180px; }
+}
+
+/* ============================================
+   MOBILE NAV OVERLAY
+   ============================================ */
+.mobile-menu-btn {
+  display: none;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  z-index: 9002;
+}
+
+.mobile-menu-btn span {
+  display: block;
+  width: 24px;
+  height: 1.5px;
+  background: var(--white);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.mobile-menu-btn.open span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+.mobile-menu-btn.open span:nth-child(2) { opacity: 0; }
+.mobile-menu-btn.open span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+.mobile-nav-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--charcoal);
+  z-index: 9001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.mobile-nav-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobile-nav-overlay nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+.mobile-nav-overlay nav a {
+  font-family: var(--font-display);
+  font-size: 32px;
+  color: var(--white);
+  transition: color 0.3s ease;
+}
+
+.mobile-nav-overlay nav a:hover { color: var(--rust); }
+
+@media (max-width: 768px) {
+  .mobile-menu-btn { display: flex; }
+}
+
+.project-01, .project-02, .project-03, .project-04 { cursor: none; }
+
+/* CONTACT MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.modal.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(26,24,22,0.85);
+}
+
+.modal-content {
+  position: relative;
+  background: var(--cream);
+  padding: clamp(32px, 5vw, 60px);
+  border-radius: 8px;
+  width: min(520px, 90vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: translateY(20px);
+  transition: transform 0.4s var(--ease-out-expo);
+}
+
+.modal.active .modal-content {
+  transform: translateY(0);
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 28px;
+  color: var(--text);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.3s ease;
+  cursor: none;
+}
+
+.modal-close:hover { background: rgba(45,41,38,0.08); }
+
+.modal-content h2 {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3vw, 32px);
+  color: var(--text);
+  margin-bottom: 32px;
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-content input,
+.modal-content textarea {
+  font-family: var(--font-body);
+  font-size: 15px;
+  padding: 14px 16px;
+  border: 1px solid rgba(45,41,38,0.15);
+  border-radius: 4px;
+  background: var(--white);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.3s ease;
+  cursor: none;
+}
+
+.modal-content input:focus,
+.modal-content textarea:focus {
+  border-color: var(--rust);
+}
+
+.modal-content textarea { resize: vertical; }
+
+.modal-content button[type="submit"] {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 16px 32px;
+  background: var(--charcoal);
+  color: var(--cream);
+  border-radius: 4px;
+  transition: background 0.3s ease, transform 0.2s ease;
+  cursor: none;
+  margin-top: 8px;
+}
+
+.modal-content button[type="submit"]:hover {
+  background: var(--rust);
+}
+
+.form-success {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.form-success h3 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.form-success p {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text-light);
+}
+</style>
+</head>
+<body>
+
+<!-- Preloader -->
+<div class="preloader" id="preloader">
+  <div class="preloader-text">
+    <span class="preloader-letter" data-index="0">O</span>
+    <span class="preloader-letter" data-index="1">N</span>
+    <span class="preloader-letter" data-index="2">D</span>
+    <span class="preloader-letter" data-index="3">A</span>
+  </div>
+</div>
+
+<!-- Scroll Progress -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- Custom Cursor -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Header -->
+<header class="site-header" id="siteHeader">
+  <a href="#" class="header-logo">ONDA</a>
+  <ul class="header-nav">
+    <li><a href="#work">Work</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="메뉴 열기">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- Mobile Nav -->
+<div class="mobile-nav-overlay" id="mobileNav">
+  <nav>
+    <a href="#work" class="mobile-nav-link">Work</a>
+    <a href="#about" class="mobile-nav-link">About</a>
+    <a href="#philosophy" class="mobile-nav-link">Philosophy</a>
+    <a href="#contact" class="mobile-nav-link">Contact</a>
+  </nav>
+</div>
+
+<!-- ========== HERO ========== -->
+<section class="hero" id="hero">
+  <div class="hero-left">
+    <p class="hero-label">Creating</p>
+    <h1 class="hero-title">brands <span class="accent">that</span> resonate.</h1>
+    <div class="hero-meta">
+      <div class="hero-line"></div>
+      <div class="hero-meta-text">
+        <span>ONDA STUDIO</span>
+        <span>Seoul / 2026</span>
+      </div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-image-wrapper">
+      <img class="hero-image" id="heroImage"
+           src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&q=80"
+           alt="Design studio" fetchpriority="high">
+    </div>
+  </div>
+  <div class="scroll-indicator" id="scrollIndicator">
+    <span>↓</span>
+    <span>SCROLL</span>
+  </div>
+</section>
+
+<!-- ========== MANIFESTO ========== -->
+<section class="manifesto" id="manifesto">
+  <div class="manifesto-bg" id="manifestoBg">VISION</div>
+  <div class="manifesto-words" id="manifestoWords">
+    <div class="manifesto-word" data-word="우리는" data-delay="0">우리는</div>
+    <div class="manifesto-word" data-word="보이지" data-delay="0.15">보이지</div>
+    <div class="manifesto-word" data-word="않는 것을" data-delay="0.3">않는 것을</div>
+    <div class="manifesto-word" data-word="보이게" data-delay="0.5">보이게</div>
+    <div class="manifesto-word" data-word="만듭니다" data-delay="0.7">만듭니다</div>
+  </div>
+</section>
+
+<!-- ========== WORK ========== -->
+<section class="work" id="work">
+  <div class="work-header">
+    <p class="work-label reveal">Selected Work</p>
+    <h2 class="work-heading reveal reveal-delay-1">Featured Projects</h2>
+  </div>
+
+  <!-- Project 01: Staggered overlap -->
+  <article class="project-01" onclick="location.href='project-aurora.html'" style="cursor:pointer">
+    <div class="project-number">01</div>
+    <div class="project-image-wrap" data-reveal="clip-bottom">
+      <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?w=1000&q=80"
+           alt="AURORA 브랜드 리디자인" loading="lazy">
+    </div>
+    <div class="project-info">
+      <h3>AURORA</h3>
+      <p class="project-sub">브랜드 리디자인</p>
+      <span class="project-tag">Brand / 2025</span>
+      <div class="project-underline"></div>
+    </div>
+  </article>
+
+  <!-- Project 02: Right-heavy horizontal -->
+  <article class="project-02" onclick="location.href='project-nexus.html'" style="cursor:pointer">
+    <div class="project-text">
+      <h3>NEXUS</h3>
+      <p class="project-sub">모바일 앱</p>
+      <span class="project-tag" style="font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--sage);">App / 2025</span>
+      <div class="project-connector" data-reveal="connector"></div>
+      <div class="project-stat">사용자 <strong>32만+</strong> 다운로드</div>
+    </div>
+    <div class="project-image-wrap" data-reveal="clip-right">
+      <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=1000&q=80"
+           alt="NEXUS 모바일 앱" loading="lazy">
+    </div>
+    <div class="project-number">02</div>
+  </article>
+
+  <!-- Project 03: Full-bleed -->
+  <article class="project-03" id="project03" onclick="location.href='project-pulse.html'" style="cursor:pointer">
+    <div class="project-image-wrap">
+      <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1600&q=80"
+           alt="PULSE 이커머스" loading="lazy" id="project03Img">
+    </div>
+    <div class="project-overlay">
+      <div class="project-number">03</div>
+      <div class="project-overlay-text">
+        <h3>PULSE</h3>
+        <p class="project-sub">이커머스 플랫폼</p>
+        <div class="project-stat">340%</div>
+      </div>
+    </div>
+  </article>
+
+  <!-- Dark bleed transition -->
+  <div class="dark-bleed">
+    <!-- Project 04: Dark begins -->
+    <article class="project-04" onclick="location.href='project-terra.html'" style="cursor:pointer">
+      <div class="project-04-inner">
+        <div class="project-image-wrap" data-reveal="clip-top">
+          <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80"
+               alt="TERRA 대시보드" loading="lazy">
+        </div>
+        <div class="project-text">
+          <h3>TERRA</h3>
+          <p class="project-sub">실시간 데이터 대시보드</p>
+          <p class="project-tag">Dashboard / 2026</p>
+          <div class="project-stat-row">
+            <span class="stat-value">0.01%</span>
+            <span class="stat-label">불량률</span>
+          </div>
+          <div class="project-number">04</div>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ========== ABOUT ========== -->
+<section class="about" id="about">
+  <div class="about-bg" id="aboutBg">STUDIO</div>
+  <div class="about-inner">
+    <div class="about-top reveal">
+      <div class="about-number">12</div>
+      <p class="about-statement">Years of building<br>digital excellence</p>
+    </div>
+    <div class="about-counters">
+      <div class="counter-item reveal reveal-delay-1">
+        <p class="counter-label">Completed Projects</p>
+        <div class="counter-value" data-target="140">0<span class="counter-suffix">+</span></div>
+        <p class="counter-desc">프로젝트 수행</p>
+      </div>
+      <div class="counter-item reveal reveal-delay-2">
+        <p class="counter-label">Client Retention</p>
+        <div class="counter-value" data-target="98">0<span class="counter-suffix">%</span></div>
+        <p class="counter-desc">클라이언트 재계약률</p>
+      </div>
+      <div class="counter-item reveal reveal-delay-3">
+        <p class="counter-label">Cities</p>
+        <div class="counter-value" data-target="3">0<span class="counter-suffix"></span></div>
+        <p class="counter-desc">서울 · 도쿄 · 싱가포르</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PHILOSOPHY ========== -->
+<section class="philosophy" id="philosophy">
+  <div class="philosophy-inner">
+    <div class="philosophy-text">
+      <p class="philosophy-line1" data-reveal="fade-up">We don't just design.</p>
+      <p class="philosophy-line2" data-reveal="fade-up-delay">We solve.</p>
+    </div>
+    <div class="philosophy-pillars">
+      <div class="pillar" data-reveal="fade-up">
+        <h3 class="pillar-title">전략</h3>
+        <p class="pillar-subtitle">Strategy</p>
+        <p class="pillar-desc">비즈니스 목표와 사용자 인사이트를 연결하는 전략적 프레임워크를 설계합니다.</p>
+      </div>
+      <div class="pillar" data-reveal="fade-up">
+        <h3 class="pillar-title">디자인</h3>
+        <p class="pillar-subtitle">Design</p>
+        <p class="pillar-desc">기능과 미학이 만나는 접점에서 직관적이고 아름다운 경험을 만듭니다.</p>
+      </div>
+      <div class="pillar" data-reveal="fade-up">
+        <h3 class="pillar-title">기술</h3>
+        <p class="pillar-subtitle">Technology</p>
+        <p class="pillar-desc">최신 기술 스택으로 확장 가능하고 퍼포먼스가 보장되는 솔루션을 구축합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CONTACT CTA ========== -->
+<section class="contact" id="contact">
+  <h2 class="contact-heading" data-reveal="fade-up">다음 프로젝트를<br>이야기해볼까요?</h2>
+  <button class="magnetic-btn" id="magneticBtn" data-magnetic onclick="openContactModal()">
+    <span>대화 시작하기 →</span>
+  </button>
+  <p class="contact-email" data-reveal="fade-up">hello@ondastudio.kr</p>
+</section>
+
+<!-- ========== MARQUEE ========== -->
+<section class="marquee-section">
+  <div class="marquee-track" id="marqueeTrack">
+    <div class="marquee-content">
+      <span class="marquee-item">ONDA STUDIO</span><span class="marquee-dot"></span>
+      <span class="marquee-item">SEOUL</span><span class="marquee-dot"></span>
+      <span class="marquee-item">TOKYO</span><span class="marquee-dot"></span>
+      <span class="marquee-item">BRAND</span><span class="marquee-dot"></span>
+      <span class="marquee-item">DIGITAL</span><span class="marquee-dot"></span>
+      <span class="marquee-item">EXPERIENCE</span><span class="marquee-dot"></span>
+    </div>
+    <div class="marquee-content" aria-hidden="true">
+      <span class="marquee-item">ONDA STUDIO</span><span class="marquee-dot"></span>
+      <span class="marquee-item">SEOUL</span><span class="marquee-dot"></span>
+      <span class="marquee-item">TOKYO</span><span class="marquee-dot"></span>
+      <span class="marquee-item">BRAND</span><span class="marquee-dot"></span>
+      <span class="marquee-item">DIGITAL</span><span class="marquee-dot"></span>
+      <span class="marquee-item">EXPERIENCE</span><span class="marquee-dot"></span>
+    </div>
+  </div>
+</section>
+
+<!-- Contact Modal -->
+<div class="modal" id="contactModal">
+  <div class="modal-backdrop" id="modalBackdrop"></div>
+  <div class="modal-content">
+    <button class="modal-close" id="modalClose" aria-label="닫기">&times;</button>
+    <h2>프로젝트 문의</h2>
+    <form id="contactForm">
+      <input name="company" placeholder="회사명" required>
+      <input name="name" placeholder="담당자명" required>
+      <input name="phone" placeholder="연락처" required>
+      <input name="email" type="email" placeholder="이메일">
+      <textarea name="message" placeholder="프로젝트 내용" rows="4"></textarea>
+      <button type="submit">문의하기 →</button>
+    </form>
+  </div>
+</div>
+
+<!-- ========== FOOTER ========== -->
+<footer class="footer" id="footer">
+  <div class="footer-mega">ONDA</div>
+  <div class="footer-top">
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="mailto:hello@ondastudio.kr">hello@ondastudio.kr</a>
+      <p>+82 2 555 1234</p>
+      <p>서울시 강남구 테헤란로 123</p>
+    </div>
+    <div class="footer-col">
+      <h4>Follow</h4>
+      <a href="#">Instagram</a>
+      <a href="#">Behance</a>
+      <a href="#">LinkedIn</a>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+      <p>KR Business License 123-45-67890</p>
+    </div>
+  </div>
+  <div class="footer-center">
+    <div>
+      <div class="footer-clock" id="footerClock">00:00:00</div>
+      <p class="footer-clock-label">Seoul, KST</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2026 ONDA Studio. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+/* ============================================
+   PRELOADER
+   ============================================ */
+(function() {
+  const preloader = document.getElementById('preloader');
+  const letters = document.querySelectorAll('.preloader-letter');
+  let safetyTimeout;
+
+  function startPreloader() {
+    letters.forEach((letter, i) => {
+      setTimeout(() => {
+        letter.classList.add('visible');
+      }, 200 + i * 200);
+    });
+
+    setTimeout(() => {
+      letters[0].classList.add('morph');
+      setTimeout(() => {
+        preloader.classList.add('done');
+        document.body.style.overflow = '';
+        initHeroReveal();
+        setTimeout(() => preloader.remove(), 600);
+      }, 600);
+    }, 1200);
+  }
+
+  // Safety net: remove preloader after 2s no matter what
+  safetyTimeout = setTimeout(() => {
+    preloader.classList.add('done');
+    document.body.style.overflow = '';
+    initHeroReveal();
+    setTimeout(() => preloader.remove(), 600);
+  }, 2000);
+
+  document.body.style.overflow = 'hidden';
+
+  if (document.readyState === 'complete') {
+    startPreloader();
+  } else {
+    window.addEventListener('load', startPreloader);
+  }
+})();
+
+/* ============================================
+   HERO REVEAL
+   ============================================ */
+function initHeroReveal() {
+  const heroLabel = document.querySelector('.hero-label');
+  const heroTitle = document.querySelector('.hero-title');
+  const heroMeta = document.querySelector('.hero-meta');
+  const heroImage = document.getElementById('heroImage');
+  const scrollIndicator = document.getElementById('scrollIndicator');
+
+  setTimeout(() => {
+    heroLabel.style.transition = 'opacity 0.6s var(--ease-out-expo), transform 0.6s var(--ease-out-expo)';
+    heroLabel.style.opacity = '1';
+    heroLabel.style.transform = 'translateY(0)';
+  }, 100);
+
+  setTimeout(() => {
+    heroTitle.style.transition = 'opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo)';
+    heroTitle.style.opacity = '1';
+    heroTitle.style.transform = 'translateY(0)';
+  }, 300);
+
+  setTimeout(() => {
+    heroMeta.style.transition = 'opacity 0.6s var(--ease-out-expo), transform 0.6s var(--ease-out-expo)';
+    heroMeta.style.opacity = '1';
+    heroMeta.style.transform = 'translateY(0)';
+  }, 500);
+
+  setTimeout(() => {
+    heroImage.classList.add('revealed');
+  }, 400);
+
+  setTimeout(() => {
+    scrollIndicator.style.transition = 'opacity 0.6s ease';
+    scrollIndicator.style.opacity = '1';
+  }, 1000);
+}
+
+/* ============================================
+   CUSTOM CURSOR
+   ============================================ */
+(function() {
+  const dot = document.getElementById('cursorDot');
+  const ring = document.getElementById('cursorRing');
+  if (!dot || !ring) return;
+
+  let mouseX = 0, mouseY = 0;
+  let ringX = 0, ringY = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    dot.style.left = mouseX + 'px';
+    dot.style.top = mouseY + 'px';
+  });
+
+  function animateRing() {
+    ringX += (mouseX - ringX) * 0.12;
+    ringY += (mouseY - ringY) * 0.12;
+    ring.style.left = ringX + 'px';
+    ring.style.top = ringY + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  // Hover states
+  document.querySelectorAll('a, button, [data-magnetic]').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      if (el.hasAttribute('data-magnetic')) {
+        ring.classList.add('cta-hover');
+      } else {
+        ring.classList.add('hovering');
+      }
+    });
+    el.addEventListener('mouseleave', () => {
+      ring.classList.remove('hovering', 'cta-hover');
+    });
+  });
+})();
+
+/* ============================================
+   CURSOR SECTION AWARENESS
+   ============================================ */
+(function() {
+  const darkSections = document.querySelectorAll('.project-04, .about, .philosophy, .footer');
+
+  function checkCursorSection() {
+    const scrollY = window.scrollY + window.innerHeight * 0.5;
+    let inDark = false;
+
+    darkSections.forEach(section => {
+      const top = section.offsetTop;
+      const bottom = top + section.offsetHeight;
+      if (scrollY >= top && scrollY <= bottom) {
+        inDark = true;
+      }
+    });
+
+    document.body.classList.toggle('cursor-light', inDark);
+  }
+
+  window.addEventListener('scroll', checkCursorSection, { passive: true });
+  checkCursorSection();
+})();
+
+/* ============================================
+   SCROLL PROGRESS BAR (breathing + color)
+   ============================================ */
+(function() {
+  const bar = document.getElementById('scrollProgress');
+  const darkSections = document.querySelectorAll('.project-04, .about, .philosophy, .footer');
+
+  function updateProgress() {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = (scrollTop / docHeight) * 100;
+    bar.style.width = pct + '%';
+
+    // Color based on section
+    const scrollMid = scrollTop + window.innerHeight * 0.1;
+    let inDark = false;
+    darkSections.forEach(section => {
+      const top = section.offsetTop;
+      const bottom = top + section.offsetHeight;
+      if (scrollMid >= top && scrollMid <= bottom) inDark = true;
+    });
+    bar.style.backgroundColor = inDark ? '#B8860B' : '#C84B31';
+  }
+
+  window.addEventListener('scroll', updateProgress, { passive: true });
+})();
+
+/* ============================================
+   HEADER — scroll-driven visibility
+   ============================================ */
+(function() {
+  const header = document.getElementById('siteHeader');
+  const hero = document.getElementById('hero');
+
+  function updateHeader() {
+    const heroBottom = hero.offsetTop + hero.offsetHeight;
+    if (window.scrollY > heroBottom - 100) {
+      header.classList.add('visible');
+    } else {
+      header.classList.remove('visible');
+    }
+  }
+
+  window.addEventListener('scroll', updateHeader, { passive: true });
+})();
+
+/* ============================================
+   MANIFESTO — Scroll-driven word scatter
+   ============================================ */
+(function() {
+  const section = document.getElementById('manifesto');
+  const words = document.querySelectorAll('.manifesto-word');
+  const isMobile = window.innerWidth <= 768;
+
+  if (isMobile) {
+    // On mobile, simple reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          words.forEach((w, i) => {
+            setTimeout(() => {
+              w.style.opacity = '1';
+              w.style.transform = 'none';
+            }, i * 150);
+          });
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.3 });
+    observer.observe(section);
+
+    // Safety net
+    setTimeout(() => {
+      words.forEach(w => { w.style.opacity = '1'; w.style.transform = 'none'; });
+    }, 2000);
+    return;
+  }
+
+  function updateManifesto() {
+    const rect = section.getBoundingClientRect();
+    const sectionHeight = section.offsetHeight;
+    const viewportHeight = window.innerHeight;
+
+    // Progress: 0 when section top enters viewport, 1 when section is centered
+    const progress = Math.max(0, Math.min(1,
+      1 - (rect.top / (viewportHeight * 0.6))
+    ));
+
+    words.forEach((word, i) => {
+      const delay = parseFloat(word.dataset.delay) || 0;
+      const wordProgress = Math.max(0, Math.min(1, (progress - delay) / (1 - delay)));
+
+      // Ease
+      const eased = 1 - Math.pow(1 - wordProgress, 3);
+
+      const wordName = word.dataset.word;
+      let startX = 0, startY = 0, startRotate = 0;
+
+      if (wordName === '우리는') { startX = -80; startY = 40; }
+      else if (wordName === '보이지') { startX = -40; startY = 60; startRotate = -4; }
+      else if (wordName === '않는 것을') { startX = 60; startY = 50; startRotate = 4; }
+      else if (wordName === '보이게') { startX = 0; startY = 80; }
+      else if (wordName === '만듭니다') { startX = 80; startY = 40; }
+
+      const x = startX * (1 - eased);
+      const y = startY * (1 - eased);
+      const rotate = startRotate * (1 - eased);
+
+      word.style.opacity = eased;
+      word.style.transform = `translate(${x}px, ${y}px) rotate(${rotate}deg)` +
+        (wordName === '보이게' ? ` translateX(-50%)` : '');
+    });
+  }
+
+  window.addEventListener('scroll', updateManifesto, { passive: true });
+  updateManifesto();
+
+  // Safety net
+  setTimeout(() => {
+    words.forEach(w => {
+      if (parseFloat(w.style.opacity || 0) < 0.5) {
+        w.style.opacity = '1';
+        const wn = w.dataset.word;
+        w.style.transform = wn === '보이게' ? 'translateX(-50%)' : 'none';
+      }
+    });
+  }, 2000);
+})();
+
+/* ============================================
+   PARALLAX SYSTEM
+   ============================================ */
+(function() {
+  const heroImage = document.getElementById('heroImage');
+  const manifestoBg = document.getElementById('manifestoBg');
+  const aboutBg = document.getElementById('aboutBg');
+  const project03Img = document.getElementById('project03Img');
+  const footerMega = document.querySelector('.footer-mega');
+
+  function updateParallax() {
+    const scrollY = window.scrollY;
+
+    // Hero image: 0.7x
+    if (heroImage) {
+      const heroTop = heroImage.closest('.hero').offsetTop;
+      const offset = (scrollY - heroTop) * 0.3;
+      heroImage.style.transform = `translateY(${offset}px) scale(1)`;
+    }
+
+    // Manifesto bg: 0.3x
+    if (manifestoBg) {
+      const section = manifestoBg.closest('.manifesto');
+      const rect = section.getBoundingClientRect();
+      const offset = rect.top * 0.3;
+      manifestoBg.style.transform = `translate(-50%, calc(-50% + ${offset}px))`;
+    }
+
+    // About bg
+    if (aboutBg) {
+      const section = aboutBg.closest('.about');
+      const rect = section.getBoundingClientRect();
+      const offset = rect.top * 0.2;
+      aboutBg.style.transform = `translateY(${offset}px)`;
+    }
+
+    // Project 03 image zoom
+    if (project03Img) {
+      const section = document.getElementById('project03');
+      const rect = section.getBoundingClientRect();
+      const viewH = window.innerHeight;
+      const progress = Math.max(0, Math.min(1, 1 - rect.top / viewH));
+      const scale = 1 + progress * 0.08;
+      const yOffset = rect.top * 0.3;
+      project03Img.style.transform = `translateY(${yOffset}px) scale(${scale})`;
+    }
+  }
+
+  window.addEventListener('scroll', updateParallax, { passive: true });
+  updateParallax();
+})();
+
+/* ============================================
+   SCROLL REVEAL (IntersectionObserver)
+   ============================================ */
+(function() {
+  const reveals = document.querySelectorAll('.reveal');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  reveals.forEach(el => observer.observe(el));
+
+  // Safety net
+  setTimeout(() => {
+    reveals.forEach(el => el.classList.add('visible'));
+  }, 2000);
+})();
+
+/* ============================================
+   IMAGE CLIP-PATH REVEALS
+   ============================================ */
+(function() {
+  const clipEls = document.querySelectorAll('[data-reveal="clip-bottom"], [data-reveal="clip-right"], [data-reveal="clip-top"]');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  clipEls.forEach(el => observer.observe(el));
+
+  // Connectors
+  const connectors = document.querySelectorAll('[data-reveal="connector"]');
+  const connObs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        connObs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  connectors.forEach(el => connObs.observe(el));
+
+  // Safety net
+  setTimeout(() => {
+    clipEls.forEach(el => el.classList.add('revealed'));
+    connectors.forEach(el => el.classList.add('revealed'));
+  }, 2000);
+})();
+
+/* ============================================
+   PHILOSOPHY REVEALS
+   ============================================ */
+(function() {
+  const fadeUps = document.querySelectorAll('[data-reveal="fade-up"], [data-reveal="fade-up-delay"]');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const isDelay = entry.target.dataset.reveal === 'fade-up-delay';
+        const delay = isDelay ? 300 : 0;
+        setTimeout(() => {
+          entry.target.style.transition = 'opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo)';
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }, delay);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  fadeUps.forEach(el => observer.observe(el));
+
+  // Pillars with stagger
+  const pillars = document.querySelectorAll('.pillar');
+  const pillarObs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        pillars.forEach((p, i) => {
+          setTimeout(() => {
+            p.style.transition = 'opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo)';
+            p.style.opacity = '1';
+            p.style.transform = 'translateY(0)';
+          }, i * 150);
+        });
+        pillarObs.disconnect();
+      }
+    });
+  }, { threshold: 0.2 });
+  if (pillars[0]) pillarObs.observe(pillars[0]);
+
+  // Safety net
+  setTimeout(() => {
+    fadeUps.forEach(el => { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; });
+    pillars.forEach(p => { p.style.opacity = '1'; p.style.transform = 'translateY(0)'; });
+  }, 2000);
+})();
+
+/* ============================================
+   COUNTERS — Count up + breathing
+   ============================================ */
+(function() {
+  const counters = document.querySelectorAll('.counter-value[data-target]');
+  let counted = false;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !counted) {
+        counted = true;
+        counters.forEach(counter => {
+          const target = parseInt(counter.dataset.target);
+          const suffix = counter.querySelector('.counter-suffix');
+          const suffixText = suffix ? suffix.textContent : '';
+          const duration = 2000;
+          const startTime = performance.now();
+
+          function update(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease out quart
+            const eased = 1 - Math.pow(1 - progress, 4);
+            const current = Math.round(eased * target);
+
+            counter.textContent = current;
+            if (suffix) {
+              const newSuffix = document.createElement('span');
+              newSuffix.className = 'counter-suffix';
+              newSuffix.textContent = suffixText;
+              counter.appendChild(newSuffix);
+            }
+
+            if (progress < 1) {
+              requestAnimationFrame(update);
+            } else {
+              // Start breathing
+              setTimeout(() => counter.classList.add('breathing'), 300);
+            }
+          }
+          requestAnimationFrame(update);
+        });
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.5 });
+
+  counters.forEach(c => observer.observe(c));
+})();
+
+/* ============================================
+   CONTACT REVEAL
+   ============================================ */
+(function() {
+  const heading = document.querySelector('.contact-heading');
+  const email = document.querySelector('.contact-email');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        heading.style.transition = 'opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo)';
+        heading.style.opacity = '1';
+        heading.style.transform = 'translateY(0)';
+        setTimeout(() => {
+          email.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+          email.style.opacity = '1';
+          email.style.transform = 'translateY(0)';
+        }, 300);
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.3 });
+
+  observer.observe(heading);
+
+  // Safety net
+  setTimeout(() => {
+    heading.style.opacity = '1'; heading.style.transform = 'translateY(0)';
+    email.style.opacity = '1'; email.style.transform = 'translateY(0)';
+  }, 2000);
+})();
+
+/* ============================================
+   MAGNETIC BUTTON
+   ============================================ */
+(function() {
+  const btn = document.getElementById('magneticBtn');
+  if (!btn) return;
+
+  btn.addEventListener('mousemove', (e) => {
+    const rect = btn.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+  });
+
+  btn.addEventListener('mouseleave', () => {
+    btn.style.transform = 'translate(0, 0)';
+  });
+})();
+
+/* ============================================
+   MARQUEE — Speed responds to scroll
+   ============================================ */
+(function() {
+  const track = document.getElementById('marqueeTrack');
+  if (!track) return;
+
+  let lastScrollY = window.scrollY;
+  let scrollVelocity = 0;
+
+  function onScroll() {
+    const currentScrollY = window.scrollY;
+    scrollVelocity = Math.abs(currentScrollY - lastScrollY);
+    lastScrollY = currentScrollY;
+  }
+
+  function updateMarquee() {
+    // Map velocity to duration: fast scroll = faster marquee
+    const speed = Math.max(5, 20 - scrollVelocity * 0.3);
+    track.style.animationDuration = speed + 's';
+    scrollVelocity *= 0.92; // decay
+    requestAnimationFrame(updateMarquee);
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  requestAnimationFrame(updateMarquee);
+})();
+
+/* ============================================
+   FOOTER CLOCK
+   ============================================ */
+(function() {
+  const clock = document.getElementById('footerClock');
+  if (!clock) return;
+
+  function updateClock() {
+    const now = new Date();
+    // KST = UTC+9
+    const kst = new Date(now.getTime() + (9 * 60 - now.getTimezoneOffset()) * 60000);
+    const h = String(kst.getUTCHours()).padStart(2, '0');
+    const m = String(kst.getUTCMinutes()).padStart(2, '0');
+    const s = String(kst.getUTCSeconds()).padStart(2, '0');
+    clock.textContent = h + ':' + m + ':' + s;
+  }
+
+  updateClock();
+  setInterval(updateClock, 1000);
+})();
+
+/* ============================================
+   MOBILE MENU
+   ============================================ */
+(function() {
+  const btn = document.getElementById('mobileMenuBtn');
+  const overlay = document.getElementById('mobileNav');
+  if (!btn || !overlay) return;
+
+  const links = overlay.querySelectorAll('a');
+
+  btn.addEventListener('click', () => {
+    const isOpen = overlay.classList.contains('open');
+    overlay.classList.toggle('open');
+    btn.classList.toggle('open');
+    document.body.style.overflow = isOpen ? '' : 'hidden';
+    btn.setAttribute('aria-label', isOpen ? '메뉴 열기' : '메뉴 닫기');
+  });
+
+  links.forEach(link => {
+    link.addEventListener('click', () => {
+      overlay.classList.remove('open');
+      btn.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+})();
+
+/* ============================================
+   SMOOTH SCROLL for anchor links
+   ============================================ */
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', (e) => {
+    const target = document.querySelector(anchor.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+});
+
+/* PROJECT CARD LINKS */
+document.querySelector('.project-01')?.addEventListener('click', () => location.href='project-aurora.html');
+document.querySelector('.project-02')?.addEventListener('click', () => location.href='project-nexus.html');
+document.querySelector('.project-03')?.addEventListener('click', () => location.href='project-pulse.html');
+document.querySelector('.project-04')?.addEventListener('click', () => location.href='project-terra.html');
+
+/* CONTACT MODAL */
+function openContactModal() {
+  const modal = document.getElementById('contactModal');
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeContactModal() {
+  const modal = document.getElementById('contactModal');
+  modal.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('modalBackdrop')?.addEventListener('click', closeContactModal);
+document.getElementById('modalClose')?.addEventListener('click', closeContactModal);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeContactModal();
+});
+
+document.getElementById('contactForm')?.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const content = form.closest('.modal-content');
+  content.innerHTML = '<div class="form-success"><h3>감사합니다</h3><p>빠른 시일 내에 연락드리겠습니다.</p></div>';
+  setTimeout(closeContactModal, 2500);
+});
+</script>
+</body>
+</html>

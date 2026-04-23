@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>리뷰 최신성의 중요성 — ONDA</title>
+  <meta name="description" content="소비자 3명 중 1명은 2주 이내 리뷰만 신뢰합니다. 리뷰 최신성이 왜 중요한지, 데이터로 확인하세요.">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #FAFBFC;
+      color: #0F172A;
+      line-height: 1.7;
+      word-break: keep-all;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    img, svg { max-width: 100%; height: auto; }
+    a { text-decoration: none; color: inherit; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    .num { font-family: 'Inter', sans-serif; }
+
+    /* ===== UTILITY ===== */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .section-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 600; color: #4F46E5;
+      text-transform: uppercase; letter-spacing: 1.5px;
+      margin-bottom: 16px;
+    }
+    .section-label::before {
+      content: ''; width: 24px; height: 2px; background: #4F46E5; border-radius: 1px;
+    }
+    .section-label-light { color: #A5B4FC; }
+    .section-label-light::before { background: #A5B4FC; }
+    .section-title {
+      font-size: clamp(28px, 4vw, 44px); font-weight: 800;
+      line-height: 1.25; color: #0F172A; margin-bottom: 16px;
+    }
+    .section-subtitle {
+      font-size: clamp(15px, 1.8vw, 18px); color: #64748B;
+      line-height: 1.7; max-width: 560px;
+    }
+    .pill-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 16px 36px; border-radius: 999px;
+      font-size: 16px; font-weight: 700;
+      transition: all .3s cubic-bezier(.4,0,.2,1);
+    }
+    .pill-btn-primary {
+      background: #4F46E5; color: #fff;
+      box-shadow: 0 4px 24px rgba(79,70,229,.3);
+    }
+    .pill-btn-primary:hover {
+      background: #4338CA; transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(79,70,229,.4);
+    }
+    .pill-btn-white {
+      background: #fff; color: #0F172A;
+      box-shadow: 0 4px 24px rgba(0,0,0,.15);
+    }
+    .pill-btn-white:hover {
+      background: #F8FAFC; transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0,0,0,.2);
+    }
+
+    /* ===== REVEAL ANIMATIONS ===== */
+    .reveal {
+      opacity: 0; transform: translateY(40px);
+      transition: opacity .7s cubic-bezier(.4,0,.2,1), transform .7s cubic-bezier(.4,0,.2,1);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: .1s; }
+    .reveal-delay-2 { transition-delay: .2s; }
+    .reveal-delay-3 { transition-delay: .3s; }
+    .reveal-delay-4 { transition-delay: .4s; }
+    .reveal-delay-5 { transition-delay: .5s; }
+
+    /* ===== NAVIGATION ===== */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(250,251,252,.85); backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0,0,0,.04);
+      transition: all .3s ease;
+    }
+    .nav.scrolled {
+      background: rgba(250,251,252,.95);
+      box-shadow: 0 1px 12px rgba(0,0,0,.06);
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 72px; transition: height .3s ease;
+    }
+    .nav.scrolled .nav-inner { height: 56px; }
+    .nav-logo {
+      font-size: 22px; font-weight: 900; color: #4F46E5;
+      letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: #0F172A; }
+    .nav-back {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 600; color: #64748B;
+      padding: 8px 20px; border-radius: 999px;
+      background: #F1F5F9;
+      transition: all .3s ease;
+    }
+    .nav-back:hover {
+      background: #E2E8F0; color: #4F46E5;
+    }
+    .nav-back svg {
+      width: 16px; height: 16px;
+      transition: transform .3s ease;
+    }
+    .nav-back:hover svg { transform: translateX(-3px); }
+
+    /* ===== HERO ===== */
+    .hero {
+      padding: 160px 0 120px; position: relative;
+      overflow: hidden; min-height: 80vh;
+      display: flex; align-items: center;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -200px; right: -200px;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(79,70,229,.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: ''; position: absolute; bottom: -150px; left: -150px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(16,185,129,.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-content { text-align: center; position: relative; z-index: 1; }
+    .hero-counter-wrap {
+      margin-bottom: 32px;
+    }
+    .hero-counter {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(80px, 15vw, 160px);
+      font-weight: 900;
+      line-height: 1;
+      background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #4F46E5 100%);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradient-shift 4s ease-in-out infinite;
+      position: relative;
+      display: inline-block;
+    }
+    @keyframes gradient-shift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .hero-counter::after {
+      content: '';
+      position: absolute;
+      bottom: -8px; left: 50%; transform: translateX(-50%);
+      width: 80%; height: 4px;
+      background: linear-gradient(90deg, transparent, #4F46E5, transparent);
+      border-radius: 2px;
+    }
+    .hero-subtitle {
+      font-size: clamp(18px, 2.5vw, 28px); font-weight: 700;
+      color: #0F172A; line-height: 1.4;
+      margin-bottom: 24px; max-width: 640px; margin-left: auto; margin-right: auto;
+    }
+    .hero-subtitle em {
+      font-style: normal; color: #4F46E5;
+      position: relative;
+    }
+    .hero-subtitle em::after {
+      content: ''; position: absolute; bottom: 0; left: 0;
+      width: 100%; height: 6px;
+      background: rgba(79,70,229,.12); border-radius: 3px; z-index: -1;
+    }
+    .hero-source-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 20px; border-radius: 999px;
+      background: #EEF2FF; color: #4F46E5;
+      font-size: 13px; font-weight: 600;
+      margin-bottom: 36px;
+    }
+    .hero-source-badge .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #10B981; animation: pulse-dot 2s infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; } 50% { opacity: .4; }
+    }
+    .hero-desc {
+      font-size: 16px; color: #64748B; line-height: 1.8;
+      max-width: 520px; margin: 0 auto 40px;
+    }
+    .hero-back-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 32px; border-radius: 999px;
+      background: #fff; color: #4F46E5; font-weight: 700; font-size: 15px;
+      border: 2px solid #E0E7FF;
+      transition: all .3s ease;
+    }
+    .hero-back-btn:hover {
+      border-color: #4F46E5; background: #EEF2FF;
+      transform: translateY(-2px);
+    }
+    .hero-back-btn svg { width: 18px; height: 18px; }
+
+    /* Decorative floating shapes */
+    .hero-shape {
+      position: absolute; border-radius: 50%;
+      pointer-events: none; opacity: 0.6;
+    }
+    .hero-shape-1 {
+      width: 60px; height: 60px;
+      background: rgba(79,70,229,.08);
+      top: 20%; left: 8%;
+      animation: float-shape 8s ease-in-out infinite;
+    }
+    .hero-shape-2 {
+      width: 40px; height: 40px;
+      background: rgba(16,185,129,.08);
+      top: 30%; right: 12%;
+      animation: float-shape 6s ease-in-out infinite reverse;
+    }
+    .hero-shape-3 {
+      width: 80px; height: 80px;
+      background: rgba(124,58,237,.06);
+      bottom: 20%; left: 15%;
+      animation: float-shape 10s ease-in-out infinite;
+    }
+    .hero-shape-4 {
+      width: 30px; height: 30px;
+      background: rgba(79,70,229,.1);
+      bottom: 30%; right: 8%;
+      animation: float-shape 7s ease-in-out infinite reverse;
+    }
+    @keyframes float-shape {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-20px) scale(1.1); }
+    }
+
+    /* ===== WAVE DIVIDER ===== */
+    .wave-divider {
+      width: 100%; overflow: hidden; line-height: 0;
+      margin-top: -1px;
+    }
+    .wave-divider svg { width: 100%; height: auto; display: block; }
+    .wave-divider-reverse { transform: rotate(180deg); margin-bottom: -1px; margin-top: 0; }
+
+    /* ===== SECTION 1: TREND CHART ===== */
+    .trend-section {
+      padding: 100px 0; background: #fff;
+      position: relative;
+    }
+    .trend-header { text-align: center; margin-bottom: 64px; }
+    .trend-header .section-subtitle { margin: 0 auto; }
+    .trend-chart-wrap {
+      max-width: 800px; margin: 0 auto 48px;
+      background: #FAFBFC; border-radius: 20px;
+      padding: 40px 40px 32px;
+      border: 1px solid #E2E8F0;
+      position: relative;
+    }
+    .chart-title {
+      font-size: 14px; font-weight: 600; color: #64748B;
+      margin-bottom: 24px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .chart-title .legend-line {
+      width: 24px; height: 3px; background: #4F46E5; border-radius: 2px;
+    }
+    .chart-container {
+      width: 100%; position: relative;
+    }
+    .chart-svg {
+      width: 100%; height: auto; overflow: visible;
+    }
+
+    /* Animated path drawing */
+    .chart-line-path {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      transition: stroke-dashoffset 2s cubic-bezier(.4,0,.2,1);
+    }
+    .chart-line-path.animated {
+      stroke-dashoffset: 0;
+    }
+    .chart-area-path {
+      opacity: 0;
+      transition: opacity 1.5s ease .5s;
+    }
+    .chart-area-path.animated {
+      opacity: 1;
+    }
+    .chart-dot {
+      opacity: 0; transform-origin: center;
+      transition: opacity .4s ease, transform .4s ease;
+    }
+    .chart-dot.animated {
+      opacity: 1;
+    }
+    .chart-dot:nth-child(1).animated { transition-delay: .8s; }
+    .chart-dot:nth-child(2).animated { transition-delay: 1.2s; }
+    .chart-dot:nth-child(3).animated { transition-delay: 1.6s; }
+    .chart-dot:nth-child(4).animated { transition-delay: 2.0s; }
+    .chart-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px; fill: #94A3B8; font-weight: 500;
+    }
+    .chart-value-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px; fill: #4F46E5; font-weight: 700;
+    }
+    .chart-grid-line {
+      stroke: #E2E8F0; stroke-width: 1;
+      stroke-dasharray: 4 4;
+    }
+
+    /* Callout stat */
+    .trend-callout {
+      max-width: 800px; margin: 0 auto;
+      display: flex; gap: 24px; align-items: stretch;
+    }
+    .callout-card {
+      flex: 1; background: #fff; border-radius: 20px;
+      padding: 36px; border: 1px solid #E2E8F0;
+      transition: all .4s ease;
+      position: relative; overflow: hidden;
+    }
+    .callout-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: linear-gradient(180deg, #4F46E5, #7C3AED);
+      border-radius: 0 2px 2px 0;
+    }
+    .callout-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,.06);
+    }
+    .callout-card-num {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(36px, 5vw, 56px); font-weight: 900;
+      color: #4F46E5; line-height: 1;
+      margin-bottom: 12px;
+    }
+    .callout-card-desc {
+      font-size: 16px; font-weight: 600; color: #0F172A;
+      margin-bottom: 8px;
+    }
+    .callout-card-sub {
+      font-size: 13px; color: #94A3B8;
+    }
+    .callout-card-icon {
+      position: absolute; top: 20px; right: 20px;
+      width: 44px; height: 44px;
+      background: #EEF2FF; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ===== SECTION 2: KEY INSIGHTS ===== */
+    .insights-section {
+      padding: 100px 0;
+      background: #FAFBFC;
+      position: relative;
+    }
+    .insights-header { text-align: center; margin-bottom: 64px; }
+    .insights-header .section-subtitle { margin: 0 auto; }
+    .insights-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .insight-card {
+      background: #fff; border-radius: 20px;
+      padding: 36px; position: relative;
+      border: 1px solid #E2E8F0;
+      border-left: 4px solid #4F46E5;
+      transition: all .4s cubic-bezier(.4,0,.2,1);
+      overflow: hidden;
+    }
+    .insight-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 48px rgba(0,0,0,.08);
+    }
+    .insight-card::after {
+      content: '';
+      position: absolute; top: 0; right: 0;
+      width: 120px; height: 120px;
+      background: radial-gradient(circle at top right, rgba(79,70,229,.04), transparent 70%);
+      pointer-events: none;
+    }
+    .insight-icon {
+      width: 56px; height: 56px; border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 24px; font-size: 24px;
+    }
+    .insight-icon.indigo { background: #EEF2FF; }
+    .insight-icon.green { background: #ECFDF5; }
+    .insight-icon.amber { background: #FFFBEB; }
+    .insight-card h3 {
+      font-size: 18px; font-weight: 700; color: #0F172A;
+      margin-bottom: 16px; line-height: 1.4;
+    }
+    .insight-card p {
+      font-size: 15px; color: #64748B; line-height: 1.7;
+    }
+    .insight-highlight {
+      display: inline-block; padding: 6px 14px;
+      border-radius: 8px; background: #EEF2FF;
+      color: #4F46E5; font-weight: 700; font-size: 14px;
+      margin-top: 16px;
+      font-family: 'Inter', sans-serif;
+    }
+    .insight-vs {
+      display: flex; align-items: center; gap: 12px;
+      margin: 16px 0;
+      font-size: 13px; font-weight: 600;
+    }
+    .insight-vs-item {
+      padding: 8px 14px; border-radius: 10px;
+      background: #F8FAFC; border: 1px solid #E2E8F0;
+      text-align: center; flex: 1;
+    }
+    .insight-vs-item.lose { border-color: #FECACA; background: #FEF2F2; }
+    .insight-vs-item.win { border-color: #BBF7D0; background: #F0FDF4; }
+    .insight-vs-arrow {
+      font-size: 18px; color: #94A3B8; flex-shrink: 0;
+    }
+
+    /* ===== SECTION 3: ONDA SOLUTION ===== */
+    .solution-section {
+      padding: 100px 0; background: #0F172A;
+      position: relative; overflow: hidden;
+    }
+    .solution-section::before {
+      content: ''; position: absolute;
+      top: -300px; right: -200px;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(79,70,229,.15), transparent 70%);
+      pointer-events: none;
+    }
+    .solution-section::after {
+      content: ''; position: absolute;
+      bottom: -200px; left: -200px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(16,185,129,.1), transparent 70%);
+      pointer-events: none;
+    }
+    .solution-header {
+      text-align: center; margin-bottom: 64px;
+      position: relative; z-index: 1;
+    }
+    .solution-header .section-title { color: #fff; }
+    .solution-header .section-subtitle { color: #94A3B8; margin: 0 auto; }
+    .solution-timeline-wrap {
+      max-width: 900px; margin: 0 auto 56px;
+      position: relative; z-index: 1;
+    }
+    .timeline-svg {
+      width: 100%; height: auto; overflow: visible;
+    }
+    .timeline-line {
+      stroke-dasharray: 2000;
+      stroke-dashoffset: 2000;
+      transition: stroke-dashoffset 2s cubic-bezier(.4,0,.2,1);
+    }
+    .timeline-line.animated {
+      stroke-dashoffset: 0;
+    }
+    .timeline-marker {
+      opacity: 0; transform-origin: center;
+      transition: opacity .4s ease, transform .4s ease;
+    }
+    .timeline-marker.animated { opacity: 1; }
+    .timeline-text {
+      font-family: 'Pretendard', sans-serif;
+      font-size: 12px; fill: #94A3B8; font-weight: 500;
+    }
+    .timeline-week-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px; fill: #E2E8F0; font-weight: 700;
+    }
+    .timeline-icon-text {
+      font-size: 16px;
+    }
+
+    /* Solution cards */
+    .solution-features {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 20px; max-width: 900px; margin: 0 auto 56px;
+      position: relative; z-index: 1;
+    }
+    .solution-feature {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px; padding: 28px;
+      text-align: center;
+      transition: all .3s ease;
+    }
+    .solution-feature:hover {
+      background: rgba(255,255,255,.1);
+      transform: translateY(-4px);
+    }
+    .solution-feature-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px; font-size: 22px;
+      background: rgba(79,70,229,.2);
+    }
+    .solution-feature h4 {
+      font-size: 15px; font-weight: 700; color: #E2E8F0;
+      margin-bottom: 8px;
+    }
+    .solution-feature p {
+      font-size: 13px; color: #94A3B8; line-height: 1.6;
+    }
+    .solution-cta {
+      text-align: center; position: relative; z-index: 1;
+    }
+
+    /* ===== SECTION 4: SOURCES ===== */
+    .sources-section {
+      padding: 80px 0; background: #fff;
+    }
+    .sources-header { margin-bottom: 40px; }
+    .sources-list {
+      list-style: none; max-width: 800px;
+    }
+    .sources-list li {
+      padding: 20px 24px; border-radius: 12px;
+      background: #FAFBFC; border: 1px solid #E2E8F0;
+      margin-bottom: 12px;
+      transition: all .3s ease;
+    }
+    .sources-list li:hover {
+      border-color: #C7D2FE; background: #EEF2FF;
+    }
+    .source-title {
+      font-size: 15px; font-weight: 600; color: #0F172A;
+      margin-bottom: 6px;
+    }
+    .source-link {
+      font-size: 13px; color: #4F46E5; word-break: break-all;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .source-link:hover { text-decoration: underline; }
+    .source-link svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      padding: 40px 0; background: #F8FAFC;
+      border-top: 1px solid #E2E8F0; text-align: center;
+    }
+    .footer-logo {
+      font-size: 18px; font-weight: 900; color: #4F46E5;
+      margin-bottom: 8px;
+    }
+    .footer-copy {
+      font-size: 13px; color: #94A3B8;
+    }
+
+    /* ===== RESPONSIVE: 1024px ===== */
+    @media (max-width: 1024px) {
+      .hero { padding: 140px 0 100px; min-height: 70vh; }
+      .hero-counter { font-size: clamp(72px, 12vw, 120px); }
+      .insights-grid { gap: 20px; }
+      .solution-features { gap: 16px; }
+      .trend-chart-wrap { padding: 32px; }
+    }
+
+    /* ===== RESPONSIVE: 768px ===== */
+    @media (max-width: 768px) {
+      .hero { padding: 120px 0 80px; min-height: auto; }
+      .hero-counter { font-size: clamp(60px, 16vw, 100px); }
+      .hero-subtitle { font-size: 20px; }
+      .hero-shape { display: none; }
+
+      .insights-grid { grid-template-columns: 1fr; }
+
+      .trend-callout { flex-direction: column; }
+
+      .solution-features { grid-template-columns: 1fr; max-width: 400px; }
+      .solution-timeline-wrap { padding: 0 16px; }
+
+      .nav-inner { height: 60px; }
+      .nav.scrolled .nav-inner { height: 52px; }
+
+      .trend-chart-wrap { padding: 24px 20px 20px; }
+    }
+
+    /* ===== RESPONSIVE: 480px ===== */
+    @media (max-width: 480px) {
+      .container { padding: 0 16px; }
+      .hero { padding: 110px 0 60px; }
+      .hero-counter { font-size: 56px; }
+      .hero-subtitle { font-size: 17px; }
+      .hero-desc { font-size: 14px; }
+      .hero-source-badge { font-size: 12px; padding: 6px 14px; }
+
+      .section-title { font-size: 24px; }
+      .section-subtitle { font-size: 14px; }
+
+      .insight-card { padding: 28px; }
+      .insight-vs { flex-direction: column; gap: 8px; }
+      .insight-vs-arrow { transform: rotate(90deg); }
+
+      .callout-card { padding: 28px; }
+      .callout-card-num { font-size: 36px; }
+
+      .pill-btn { padding: 14px 28px; font-size: 14px; }
+
+      .sources-list li { padding: 16px; }
+
+      .trend-chart-wrap { padding: 20px 16px 16px; border-radius: 16px; }
+    }
+
+    /* ===== RESPONSIVE: 375px ===== */
+    @media (max-width: 375px) {
+      .hero-counter { font-size: 48px; }
+      .hero-subtitle { font-size: 16px; }
+      .nav-logo { font-size: 18px; }
+      .nav-back { font-size: 12px; padding: 6px 14px; }
+      .section-title { font-size: 22px; }
+      .insight-card { padding: 24px 20px; }
+      .callout-card-num { font-size: 32px; }
+      .solution-feature { padding: 24px 20px; }
+    }
+
+    /* ===== PRINT ===== */
+    @media print {
+      .nav, .wave-divider { display: none; }
+      .hero { padding-top: 40px; min-height: auto; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVIGATION ===== -->
+  <nav class="nav" id="mainNav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">ONDA</a>
+      <a href="index.html#problem" class="nav-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        돌아가기
+      </a>
+    </div>
+  </nav>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="hero" id="hero">
+    <!-- Decorative shapes -->
+    <div class="hero-shape hero-shape-1"></div>
+    <div class="hero-shape hero-shape-2"></div>
+    <div class="hero-shape hero-shape-3"></div>
+    <div class="hero-shape hero-shape-4"></div>
+
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-source-badge reveal">
+          <span class="dot"></span>
+          BrightLocal LCRS 2025
+        </div>
+
+        <div class="hero-counter-wrap reveal reveal-delay-1">
+          <div class="hero-counter" id="heroCounter" data-target="32">0%</div>
+        </div>
+
+        <h1 class="hero-subtitle reveal reveal-delay-2">
+          소비자 3명 중 1명은<br>
+          <em>2주 이내 리뷰</em>만 신뢰합니다
+        </h1>
+
+        <p class="hero-desc reveal reveal-delay-3">
+          별점이 높아도, 리뷰가 많아도 — 최근 리뷰가 없으면 소비자는 떠납니다.
+          리뷰 최신성이 왜 결정적인지, 데이터로 확인하세요.
+        </p>
+
+        <div class="reveal reveal-delay-4">
+          <a href="index.html#problem" class="hero-back-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            메인으로 돌아가기
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== WAVE DIVIDER ===== -->
+  <div class="wave-divider">
+    <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+      <path d="M0,40 C360,80 720,0 1080,40 C1260,60 1380,50 1440,40 L1440,80 L0,80 Z" fill="#fff"/>
+    </svg>
+  </div>
+
+  <!-- ===== SECTION 1: TREND CHART ===== -->
+  <section class="trend-section" id="trend">
+    <div class="container">
+      <div class="trend-header">
+        <div class="section-label reveal">Trend Data</div>
+        <h2 class="section-title reveal reveal-delay-1">리뷰 최신성 기준의 변화 추이</h2>
+        <p class="section-subtitle reveal reveal-delay-2">
+          BrightLocal 조사 기준, "2주 이내 리뷰만 신뢰한다"는 응답의 연도별 비율 변화
+        </p>
+      </div>
+
+      <!-- SVG Line Chart -->
+      <div class="trend-chart-wrap reveal reveal-delay-3" id="chartWrap">
+        <div class="chart-title">
+          <span class="legend-line"></span>
+          2주 이내 리뷰만 신뢰하는 소비자 비율 (%)
+        </div>
+        <div class="chart-container">
+          <svg class="chart-svg" viewBox="0 0 700 350" preserveAspectRatio="xMidYMid meet">
+            <!-- Grid lines -->
+            <line x1="80" y1="50" x2="660" y2="50" class="chart-grid-line"/>
+            <line x1="80" y1="110" x2="660" y2="110" class="chart-grid-line"/>
+            <line x1="80" y1="170" x2="660" y2="170" class="chart-grid-line"/>
+            <line x1="80" y1="230" x2="660" y2="230" class="chart-grid-line"/>
+            <line x1="80" y1="290" x2="660" y2="290" class="chart-grid-line"/>
+
+            <!-- Y-axis labels -->
+            <text x="70" y="55" class="chart-label" text-anchor="end">30%</text>
+            <text x="70" y="115" class="chart-label" text-anchor="end">25%</text>
+            <text x="70" y="175" class="chart-label" text-anchor="end">20%</text>
+            <text x="70" y="235" class="chart-label" text-anchor="end">15%</text>
+            <text x="70" y="295" class="chart-label" text-anchor="end">10%</text>
+
+            <!-- X-axis labels -->
+            <text x="175" y="325" class="chart-label" text-anchor="middle">2022</text>
+            <text x="337" y="325" class="chart-label" text-anchor="middle">2023</text>
+            <text x="499" y="325" class="chart-label" text-anchor="middle">2024</text>
+            <text x="660" y="325" class="chart-label" text-anchor="middle">2025</text>
+
+            <!-- X-axis line -->
+            <line x1="80" y1="290" x2="660" y2="290" stroke="#CBD5E1" stroke-width="1.5"/>
+            <!-- Y-axis line -->
+            <line x1="80" y1="50" x2="80" y2="290" stroke="#CBD5E1" stroke-width="1.5"/>
+
+            <!-- Area fill gradient -->
+            <defs>
+              <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#4F46E5" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="#4F46E5" stop-opacity="0.02"/>
+              </linearGradient>
+              <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#4F46E5"/>
+                <stop offset="50%" stop-color="#7C3AED"/>
+                <stop offset="100%" stop-color="#4F46E5"/>
+              </linearGradient>
+              <filter id="dotGlow">
+                <feGaussianBlur stdDeviation="3" result="blur"/>
+                <feMerge>
+                  <feMergeNode in="blur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+
+            <!--
+              Data points (Y range: 10% to 30%, mapped to 290..50):
+              2022: 22% → y = 290 - (22-10)/(30-10)*240 = 290 - 144 = 146
+              2023: 25% → y = 290 - (25-10)/(30-10)*240 = 290 - 180 = 110
+              2024: 27% → y = 290 - (27-10)/(30-10)*240 = 290 - 204 = 86
+              2025: 20% → y = 290 - (20-10)/(30-10)*240 = 290 - 120 = 170
+            -->
+
+            <!-- Area fill -->
+            <path class="chart-area-path" id="chartArea"
+              d="M175,146 L337,110 L499,86 L660,170 L660,290 L175,290 Z"
+              fill="url(#areaGradient)"/>
+
+            <!-- Line -->
+            <path class="chart-line-path" id="chartLine"
+              d="M175,146 L337,110 L499,86 L660,170"
+              fill="none" stroke="url(#lineGradient)" stroke-width="3.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+
+            <!-- Data dots -->
+            <g class="chart-dots" id="chartDots">
+              <circle class="chart-dot" cx="175" cy="146" r="7" fill="#fff" stroke="#4F46E5" stroke-width="3" filter="url(#dotGlow)"/>
+              <circle class="chart-dot" cx="337" cy="110" r="7" fill="#fff" stroke="#4F46E5" stroke-width="3" filter="url(#dotGlow)"/>
+              <circle class="chart-dot" cx="499" cy="86" r="7" fill="#fff" stroke="#7C3AED" stroke-width="3" filter="url(#dotGlow)"/>
+              <circle class="chart-dot" cx="660" cy="170" r="7" fill="#fff" stroke="#4F46E5" stroke-width="3" filter="url(#dotGlow)"/>
+            </g>
+
+            <!-- Value labels above dots -->
+            <text x="175" y="132" class="chart-value-label" text-anchor="middle">22%</text>
+            <text x="337" y="96" class="chart-value-label" text-anchor="middle">25%</text>
+            <text x="499" y="72" class="chart-value-label" text-anchor="middle">27%</text>
+            <text x="660" y="156" class="chart-value-label" text-anchor="middle">20%</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Callout stats -->
+      <div class="trend-callout">
+        <div class="callout-card reveal reveal-delay-1">
+          <div class="callout-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20V10M18 20V4M6 20v-4"/>
+            </svg>
+          </div>
+          <div class="callout-card-num" data-count="74" data-suffix="%">0%</div>
+          <div class="callout-card-desc">3개월 이내 리뷰만 신뢰</div>
+          <div class="callout-card-sub">BrightLocal 2024 기준</div>
+        </div>
+        <div class="callout-card reveal reveal-delay-2">
+          <div class="callout-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+            </svg>
+          </div>
+          <div class="callout-card-num" data-count="50" data-suffix="%">0%</div>
+          <div class="callout-card-desc">1개월 이내만 신뢰</div>
+          <div class="callout-card-sub">BrightLocal 2025 기준</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== WAVE DIVIDER ===== -->
+  <div class="wave-divider wave-divider-reverse">
+    <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+      <path d="M0,40 C360,80 720,0 1080,40 C1260,60 1380,50 1440,40 L1440,80 L0,80 Z" fill="#fff"/>
+    </svg>
+  </div>
+
+  <!-- ===== SECTION 2: KEY INSIGHTS ===== -->
+  <section class="insights-section" id="insights">
+    <div class="container">
+      <div class="insights-header">
+        <div class="section-label reveal">Key Insights</div>
+        <h2 class="section-title reveal reveal-delay-1">최신 리뷰가 별점보다 중요합니다</h2>
+        <p class="section-subtitle reveal reveal-delay-2">
+          높은 별점도, 수백 개의 리뷰도 — 최근 활동이 없으면 소비자의 신뢰를 잃습니다
+        </p>
+      </div>
+
+      <div class="insights-grid">
+        <!-- Insight Card 1 -->
+        <div class="insight-card reveal">
+          <div class="insight-icon indigo">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
+          <h3>별점 4.8보다 최신 리뷰가 이긴다</h3>
+
+          <div class="insight-vs">
+            <div class="insight-vs-item lose">
+              <div style="font-size:18px;font-weight:800;color:#DC2626;margin-bottom:2px;">
+                <span class="num">4.8</span>
+              </div>
+              <div style="font-size:11px;color:#94A3B8;">6개월 무리뷰</div>
+            </div>
+            <div class="insight-vs-arrow">&lt;</div>
+            <div class="insight-vs-item win">
+              <div style="font-size:18px;font-weight:800;color:#10B981;margin-bottom:2px;">
+                <span class="num">4.3</span>
+              </div>
+              <div style="font-size:11px;color:#94A3B8;">지난주 리뷰</div>
+            </div>
+          </div>
+
+          <p>소비자는 오래된 높은 별점보다, 최근에 달린 현실적인 리뷰를 더 신뢰합니다. 리뷰 공급이 끊기면 별점의 가치도 사라집니다.</p>
+          <div class="insight-highlight">최신성 > 별점</div>
+        </div>
+
+        <!-- Insight Card 2 -->
+        <div class="insight-card reveal reveal-delay-1">
+          <div class="insight-icon green">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <h3>리뷰를 읽는 소비자, 97%</h3>
+          <p>
+            구매 결정 전 리뷰를 확인하는 소비자가 97%에 달합니다.
+            리뷰는 이제 선택이 아닌 필수 구매 판단 기준입니다.
+            리뷰가 없는 매장은 소비자에게 "정보 없음"이나 다름없습니다.
+          </p>
+          <div class="insight-highlight">
+            <span class="num">97</span>% 소비자가 리뷰 확인
+          </div>
+        </div>
+
+        <!-- Insight Card 3 -->
+        <div class="insight-card reveal reveal-delay-2">
+          <div class="insight-icon amber">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <h3>1주일 이내 리뷰만 신뢰 18%</h3>
+          <p>
+            전체 소비자의 18%는 1주일 이내 작성된 리뷰만 신뢰합니다.
+            이는 매주 새로운 리뷰가 공급되어야
+            이 소비자층을 놓치지 않는다는 뜻입니다.
+          </p>
+          <div class="insight-highlight">
+            매주 리뷰 공급 = 매출 사수
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== WAVE DIVIDER (to dark) ===== -->
+  <div class="wave-divider">
+    <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+      <path d="M0,20 C240,60 480,0 720,40 C960,80 1200,20 1440,40 L1440,80 L0,80 Z" fill="#0F172A"/>
+    </svg>
+  </div>
+
+  <!-- ===== SECTION 3: ONDA SOLUTION ===== -->
+  <section class="solution-section" id="solution">
+    <div class="container">
+      <div class="solution-header">
+        <div class="section-label section-label-light reveal">ONDA Solution</div>
+        <h2 class="section-title reveal reveal-delay-1">ONDA의 주 단위 리뷰 공급</h2>
+        <p class="section-subtitle reveal reveal-delay-2">
+          매주 꾸준히 신선한 리뷰를 공급하여,
+          소비자가 원하는 "최신 리뷰"를 항상 유지합니다
+        </p>
+      </div>
+
+      <!-- Timeline SVG -->
+      <div class="solution-timeline-wrap reveal reveal-delay-3" id="timelineWrap">
+        <svg class="timeline-svg" viewBox="0 0 860 200" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="timelineGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#4F46E5"/>
+              <stop offset="50%" stop-color="#7C3AED"/>
+              <stop offset="100%" stop-color="#10B981"/>
+            </linearGradient>
+            <filter id="markerGlow">
+              <feGaussianBlur stdDeviation="4" result="blur"/>
+              <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- Main timeline line -->
+          <line class="timeline-line" id="timelineLine"
+            x1="60" y1="100" x2="800" y2="100"
+            stroke="url(#timelineGrad)" stroke-width="3" stroke-linecap="round"/>
+
+          <!-- Week markers -->
+          <!-- Week 1 -->
+          <g class="timeline-marker" style="transition-delay:.6s">
+            <circle cx="152" cy="100" r="18" fill="#4F46E5" filter="url(#markerGlow)" opacity="0.9"/>
+            <circle cx="152" cy="100" r="12" fill="#4F46E5"/>
+            <text x="152" y="105" class="timeline-icon-text" text-anchor="middle" fill="#fff">W1</text>
+            <text x="152" y="140" class="timeline-text" text-anchor="middle">리뷰 3건</text>
+            <text x="152" y="156" class="timeline-text" text-anchor="middle" style="font-size:11px">공급 시작</text>
+          </g>
+
+          <!-- Week 2 -->
+          <g class="timeline-marker" style="transition-delay:1s">
+            <circle cx="337" cy="100" r="18" fill="#6D5CE7" filter="url(#markerGlow)" opacity="0.9"/>
+            <circle cx="337" cy="100" r="12" fill="#6D5CE7"/>
+            <text x="337" y="105" class="timeline-icon-text" text-anchor="middle" fill="#fff">W2</text>
+            <text x="337" y="140" class="timeline-text" text-anchor="middle">리뷰 3건</text>
+            <text x="337" y="156" class="timeline-text" text-anchor="middle" style="font-size:11px">최신성 유지</text>
+          </g>
+
+          <!-- Week 3 -->
+          <g class="timeline-marker" style="transition-delay:1.4s">
+            <circle cx="522" cy="100" r="18" fill="#8B5CF6" filter="url(#markerGlow)" opacity="0.9"/>
+            <circle cx="522" cy="100" r="12" fill="#8B5CF6"/>
+            <text x="522" y="105" class="timeline-icon-text" text-anchor="middle" fill="#fff">W3</text>
+            <text x="522" y="140" class="timeline-text" text-anchor="middle">리뷰 3건</text>
+            <text x="522" y="156" class="timeline-text" text-anchor="middle" style="font-size:11px">신뢰 축적</text>
+          </g>
+
+          <!-- Week 4 -->
+          <g class="timeline-marker" style="transition-delay:1.8s">
+            <circle cx="708" cy="100" r="18" fill="#10B981" filter="url(#markerGlow)" opacity="0.9"/>
+            <circle cx="708" cy="100" r="12" fill="#10B981"/>
+            <text x="708" y="105" class="timeline-icon-text" text-anchor="middle" fill="#fff">W4</text>
+            <text x="708" y="140" class="timeline-text" text-anchor="middle">리뷰 3건</text>
+            <text x="708" y="156" class="timeline-text" text-anchor="middle" style="font-size:11px">순환 완성</text>
+          </g>
+
+          <!-- Monthly total -->
+          <rect x="330" y="20" width="200" height="36" rx="18" fill="rgba(79,70,229,.15)" stroke="rgba(79,70,229,.3)" stroke-width="1"/>
+          <text x="430" y="43" text-anchor="middle" fill="#A5B4FC" style="font-family:'Inter',sans-serif;font-size:13px;font-weight:700;">
+            월 12건 안정 공급
+          </text>
+
+          <!-- Start & End labels -->
+          <text x="60" y="105" class="timeline-week-text" text-anchor="middle" fill="#64748B">시작</text>
+          <text x="800" y="105" class="timeline-week-text" text-anchor="middle" fill="#10B981">반복</text>
+
+          <!-- Arrow at end -->
+          <path d="M790,95 L805,100 L790,105" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <!-- Solution features -->
+      <div class="solution-features">
+        <div class="solution-feature reveal">
+          <div class="solution-feature-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A5B4FC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </div>
+          <h4>주 단위 스케줄링</h4>
+          <p>매주 계획된 일정에 따라 리뷰를 자연스럽게 공급합니다</p>
+        </div>
+        <div class="solution-feature reveal reveal-delay-1">
+          <div class="solution-feature-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A5B4FC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <h4>실제 방문 기반</h4>
+          <p>실제 방문 경험을 바탕으로 한 진정성 있는 리뷰를 작성합니다</p>
+        </div>
+        <div class="solution-feature reveal reveal-delay-2">
+          <div class="solution-feature-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A5B4FC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <h4>최신성 지표 관리</h4>
+          <p>리뷰 최신성 지표를 모니터링하며 최적의 공급량을 조절합니다</p>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="solution-cta reveal">
+        <a href="index.html#contact" class="pill-btn pill-btn-white">
+          리뷰 공급 스케줄 상담
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== WAVE DIVIDER (dark to light) ===== -->
+  <div class="wave-divider" style="background:#0F172A;">
+    <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+      <path d="M0,40 C360,0 720,80 1080,40 C1260,20 1380,30 1440,40 L1440,80 L0,80 Z" fill="#fff"/>
+    </svg>
+  </div>
+
+  <!-- ===== SECTION 4: SOURCES ===== -->
+  <section class="sources-section" id="sources">
+    <div class="container">
+      <div class="sources-header">
+        <div class="section-label reveal">Sources</div>
+        <h2 class="section-title reveal reveal-delay-1" style="font-size:clamp(22px,3vw,32px);">출처 및 참고 자료</h2>
+        <p class="section-subtitle reveal reveal-delay-2">
+          본 페이지의 모든 데이터는 아래 신뢰할 수 있는 출처를 기반으로 합니다
+        </p>
+      </div>
+
+      <ul class="sources-list">
+        <li class="reveal">
+          <div class="source-title">BrightLocal — Local Consumer Review Survey 2024</div>
+          <a href="https://www.brightlocal.com/research/local-consumer-review-survey-2024/" target="_blank" rel="noopener noreferrer" class="source-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+              <polyline points="15 3 21 3 21 9"/>
+              <line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+            brightlocal.com/research/local-consumer-review-survey-2024/
+          </a>
+        </li>
+        <li class="reveal reveal-delay-1">
+          <div class="source-title">BrightLocal — Local Consumer Review Survey 2025</div>
+          <a href="https://www.brightlocal.com/research/local-consumer-review-survey-2025/" target="_blank" rel="noopener noreferrer" class="source-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+              <polyline points="15 3 21 3 21 9"/>
+              <line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+            brightlocal.com/research/local-consumer-review-survey-2025/
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-logo">ONDA</div>
+      <p class="footer-copy">&copy; 2025 ONDA. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script>
+    (function() {
+      'use strict';
+
+      /* ===== STICKY NAV SCROLL EFFECT ===== */
+      var nav = document.getElementById('mainNav');
+      var lastScrollY = 0;
+
+      function handleNavScroll() {
+        var currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
+        if (currentScrollY > 60) {
+          nav.classList.add('scrolled');
+        } else {
+          nav.classList.remove('scrolled');
+        }
+        lastScrollY = currentScrollY;
+      }
+
+      window.addEventListener('scroll', handleNavScroll, { passive: true });
+
+
+      /* ===== COUNTER ANIMATION ===== */
+      function animateCounter(element, target, suffix, duration) {
+        var start = 0;
+        var startTime = null;
+
+        function easeOutExpo(t) {
+          return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+        }
+
+        function step(timestamp) {
+          if (!startTime) startTime = timestamp;
+          var progress = Math.min((timestamp - startTime) / duration, 1);
+          var easedProgress = easeOutExpo(progress);
+          var current = Math.round(easedProgress * target);
+          element.textContent = current + suffix;
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          }
+        }
+
+        requestAnimationFrame(step);
+      }
+
+      /* Hero counter */
+      var heroCounter = document.getElementById('heroCounter');
+      var heroTarget = parseInt(heroCounter.getAttribute('data-target'), 10);
+      var heroAnimated = false;
+
+      function startHeroCounter() {
+        if (heroAnimated) return;
+        heroAnimated = true;
+        animateCounter(heroCounter, heroTarget, '%', 2000);
+      }
+
+      /* Start hero counter when page loads (hero is visible on load) */
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(function() {
+          setTimeout(startHeroCounter, 300);
+        });
+      } else {
+        setTimeout(startHeroCounter, 500);
+      }
+
+
+      /* ===== CALLOUT COUNTER ANIMATION ===== */
+      var calloutNums = document.querySelectorAll('.callout-card-num[data-count]');
+      var calloutAnimated = new Set();
+
+      function animateCalloutIfVisible(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            var el = entry.target;
+            var key = el.getAttribute('data-count');
+            if (calloutAnimated.has(key)) return;
+            calloutAnimated.add(key);
+            var target = parseInt(key, 10);
+            var suffix = el.getAttribute('data-suffix') || '';
+            animateCounter(el, target, suffix, 1800);
+          }
+        });
+      }
+
+      var calloutObserver = new IntersectionObserver(animateCalloutIfVisible, {
+        threshold: 0.5
+      });
+
+      calloutNums.forEach(function(el) {
+        calloutObserver.observe(el);
+      });
+
+
+      /* ===== REVEAL ANIMATIONS (IntersectionObserver) ===== */
+      var revealElements = document.querySelectorAll('.reveal');
+
+      function revealOnScroll(entries, observer) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }
+
+      var revealObserver = new IntersectionObserver(revealOnScroll, {
+        threshold: 0.15,
+        rootMargin: '0px 0px -40px 0px'
+      });
+
+      revealElements.forEach(function(el) {
+        revealObserver.observe(el);
+      });
+
+
+      /* ===== CHART LINE ANIMATION ===== */
+      var chartWrap = document.getElementById('chartWrap');
+      var chartLine = document.getElementById('chartLine');
+      var chartArea = document.getElementById('chartArea');
+      var chartDots = document.querySelectorAll('.chart-dot');
+      var chartAnimated = false;
+
+      function animateChart() {
+        if (chartAnimated) return;
+        chartAnimated = true;
+
+        /* Calculate the actual path length */
+        var pathLength = chartLine.getTotalLength();
+        chartLine.style.strokeDasharray = pathLength;
+        chartLine.style.strokeDashoffset = pathLength;
+
+        /* Trigger animation */
+        requestAnimationFrame(function() {
+          chartLine.classList.add('animated');
+          chartLine.style.strokeDashoffset = '0';
+          chartArea.classList.add('animated');
+          chartDots.forEach(function(dot) {
+            dot.classList.add('animated');
+          });
+        });
+      }
+
+      var chartObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            animateChart();
+            chartObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.3 });
+
+      if (chartWrap) {
+        chartObserver.observe(chartWrap);
+      }
+
+
+      /* ===== TIMELINE ANIMATION ===== */
+      var timelineWrap = document.getElementById('timelineWrap');
+      var timelineLine = document.getElementById('timelineLine');
+      var timelineMarkers = document.querySelectorAll('.timeline-marker');
+      var timelineAnimated = false;
+
+      function animateTimeline() {
+        if (timelineAnimated) return;
+        timelineAnimated = true;
+
+        /* Calculate line length */
+        var x1 = parseFloat(timelineLine.getAttribute('x1'));
+        var x2 = parseFloat(timelineLine.getAttribute('x2'));
+        var lineLength = x2 - x1;
+        timelineLine.style.strokeDasharray = lineLength;
+        timelineLine.style.strokeDashoffset = lineLength;
+
+        requestAnimationFrame(function() {
+          timelineLine.classList.add('animated');
+          timelineLine.style.strokeDashoffset = '0';
+          timelineMarkers.forEach(function(marker) {
+            marker.classList.add('animated');
+          });
+        });
+      }
+
+      var timelineObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            animateTimeline();
+            timelineObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.3 });
+
+      if (timelineWrap) {
+        timelineObserver.observe(timelineWrap);
+      }
+
+
+      /* ===== SMOOTH SCROLL FOR INTERNAL LINKS ===== */
+      document.querySelectorAll('a[href^="#"]').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+          var target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      });
+
+
+      /* ===== PARALLAX SHAPES ===== */
+      var shapes = document.querySelectorAll('.hero-shape');
+      function parallaxShapes() {
+        var scrollY = window.pageYOffset;
+        shapes.forEach(function(shape, i) {
+          var speed = 0.03 + (i * 0.015);
+          var yOffset = scrollY * speed;
+          shape.style.transform = 'translateY(' + (-yOffset) + 'px)';
+        });
+      }
+
+      window.addEventListener('scroll', parallaxShapes, { passive: true });
+
+    })();
+  </script>
+
+</body>
+</html>

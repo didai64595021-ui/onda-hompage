@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CUTLAB | 영상으로 브랜드를 만듭니다</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--black:#000;--white:#fff;--orange:#ff4d00;--gray:#555;--gray-lt:#999;--expo:cubic-bezier(.16,1,.3,1);--smoky:cubic-bezier(.22,.61,.36,1)}
+html{overflow-x:hidden;overscroll-behavior:none;-ms-overflow-style:none;scrollbar-width:none}
+html::-webkit-scrollbar{display:none}
+body{font-family:'Inter',sans-serif;background:var(--black);color:var(--white);overflow-x:hidden;cursor:none;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;font-weight:700}
+a{color:var(--white);text-decoration:none;cursor:none}
+::selection{background:var(--orange);color:var(--black)}
+
+/* Grain */
+.grain{position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.04}
+.grain svg{width:100%;height:100%}
+
+/* Cursor */
+.cursor{position:fixed;top:0;left:0;pointer-events:none;z-index:9998;mix-blend-mode:difference}
+.cursor-cross,.cursor-dot{position:absolute;transition:opacity .3s var(--smoky)}
+.cursor-cross{width:24px;height:24px;top:-12px;left:-12px}
+.cursor-cross::before,.cursor-cross::after{content:'';position:absolute;background:var(--white)}
+.cursor-cross::before{width:24px;height:1px;top:50%;transform:translateY(-50%)}
+.cursor-cross::after{width:1px;height:24px;left:50%;transform:translateX(-50%)}
+.cursor-dot{width:52px;height:52px;top:-26px;left:-26px;border:1px solid rgba(255,255,255,.6);border-radius:50%;opacity:0;transform:scale(.4);transition:opacity .4s var(--smoky),transform .4s var(--smoky)}
+.cursor.is-link .cursor-cross{opacity:0}
+.cursor.is-link .cursor-dot{opacity:1;transform:scale(1)}
+.cursor.is-play .cursor-dot{opacity:1;transform:scale(1.6);border-color:var(--orange)}
+.cursor.is-play .cursor-cross{opacity:0}
+
+/* Loader */
+.loader{position:fixed;inset:0;z-index:10000;background:var(--black);display:flex;align-items:center;justify-content:center;transition:opacity 1s var(--smoky) .2s,visibility 0s 1.2s}
+.loader.done{opacity:0;visibility:hidden;pointer-events:none}
+.loader-text{font-family:'Space Grotesk',sans-serif;font-size:clamp(48px,12vw,160px);font-weight:700;letter-spacing:-.03em;overflow:hidden;display:flex}
+.loader-text span{display:inline-block;transform:translateY(115%);transition:transform .7s var(--expo)}
+.loader-text span.show{transform:translateY(0)}
+
+/* Nav */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:24px clamp(20px,5vw,60px);opacity:0;transform:translateY(-20px);transition:opacity .8s var(--smoky),transform .8s var(--smoky)}
+.nav.visible{opacity:1;transform:translateY(0)}
+.nav-logo{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.nav-links{display:flex;gap:clamp(20px,3vw,40px)}
+.nav-links a{font-size:12px;font-weight:400;color:var(--gray-lt);letter-spacing:.1em;text-transform:uppercase;transition:color .3s var(--smoky)}
+.nav-links a:hover{color:var(--white)}
+
+/* Hero */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;position:relative;padding:0 20px}
+.hero-title{font-size:clamp(56px,20vw,280px);font-weight:700;letter-spacing:-.04em;line-height:.88;position:relative;display:flex;flex-wrap:nowrap;justify-content:center;white-space:nowrap}
+.hero-title .char{display:inline-block;opacity:0;transform:translateY(70px) rotateX(40deg);transition:opacity .6s var(--expo),transform .6s var(--expo);transform-origin:center bottom}
+.hero-title .char.visible{opacity:1;transform:translateY(0) rotateX(0)}
+.hero-line{display:block;width:clamp(200px,60vw,800px);height:1px;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.12) 30%,rgba(255,255,255,.12) 70%,transparent 100%);margin:clamp(8px,1.5vw,20px) auto 0;opacity:0;transition:opacity 1.2s var(--smoky) .6s}
+.hero-line.visible{opacity:1}
+.hero-sub{font-size:clamp(11px,1.1vw,15px);font-weight:300;color:var(--gray-lt);letter-spacing:.2em;text-transform:uppercase;margin-top:clamp(20px,3vw,48px);opacity:0;transform:translateY(20px);transition:opacity 1s var(--smoky) .8s,transform 1s var(--smoky) .8s}
+.hero-sub.visible{opacity:1;transform:translateY(0)}
+.hero-scroll{position:absolute;bottom:clamp(24px,4vw,48px);left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0;transition:opacity 1s var(--smoky) 1.4s}
+.hero-scroll.visible{opacity:1}
+.hero-scroll-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gray)}
+.hero-scroll-line{width:1px;height:32px;background:linear-gradient(to bottom,var(--gray-lt),transparent);animation:scrollPulse 2.4s var(--smoky) infinite}
+@keyframes scrollPulse{0%{transform:scaleY(1);opacity:.6}50%{transform:scaleY(.3);opacity:.15}100%{transform:scaleY(1);opacity:.6}}
+
+/* Reel */
+.reel{padding:clamp(40px,8vw,120px) 0;position:relative;overflow:hidden}
+.reel-container{width:90vw;max-width:1400px;margin:0 auto;aspect-ratio:16/9;background:var(--black);background-image:url('https://images.unsplash.com/photo-1536240478700-b869070f9279?w=1400&q=80');background-size:cover;background-position:center;border:1px solid rgba(255,255,255,.1);border-radius:4px;position:relative;display:flex;align-items:center;justify-content:center;transform:scale(.85);opacity:.6;transition:transform 1.4s var(--expo),opacity 1.2s var(--smoky);overflow:hidden;box-shadow:0 20px 80px rgba(0,0,0,.5)}
+.reel-container::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,.25);z-index:0}
+.reel-play{z-index:1}
+.reel-label{z-index:1}
+.reel-container.scaled{transform:scale(1);opacity:1}
+.reel-play{width:clamp(72px,9vw,130px);height:clamp(72px,9vw,130px);border:1px solid rgba(255,255,255,.5);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:none;transition:background .5s var(--smoky),border-color .5s var(--smoky),transform .2s ease;position:relative;z-index:1}
+.reel-play:hover{background:var(--orange);border-color:var(--orange)}
+.reel-play svg{width:22%;height:22%;fill:var(--white);margin-left:5%;transition:transform .3s var(--smoky)}
+.reel-play:hover svg{transform:scale(1.1)}
+.reel-label{position:absolute;bottom:clamp(16px,3vw,36px);left:50%;transform:translateX(-50%);font-family:'Space Grotesk',sans-serif;font-size:clamp(10px,.9vw,13px);letter-spacing:.25em;text-transform:uppercase;color:var(--gray);z-index:1}
+
+/* Work */
+.work{padding:clamp(60px,10vw,160px) 0}
+.work-header{width:90vw;max-width:1400px;margin:0 auto clamp(24px,3vw,48px)}
+.work-header h2{font-size:clamp(10px,.9vw,12px);letter-spacing:.25em;text-transform:uppercase;color:var(--gray);font-weight:400;font-family:'Inter',sans-serif}
+.work-list{width:90vw;max-width:1400px;margin:0 auto}
+.work-item{display:flex;align-items:center;justify-content:space-between;padding:clamp(16px,2.2vw,32px) clamp(8px,1.5vw,24px);border-top:1px solid rgba(255,255,255,.07);cursor:none;position:relative;transition:background .4s var(--smoky)}
+.work-item:last-of-type{border-bottom:1px solid rgba(255,255,255,.07)}
+.work-item::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,.015);opacity:0;transition:opacity .4s var(--smoky)}
+.work-item:hover::before{opacity:1}
+.work-item-name{font-family:'Space Grotesk',sans-serif;font-size:clamp(22px,3.8vw,60px);font-weight:700;letter-spacing:-.02em;transition:color .4s var(--smoky);position:relative;z-index:1}
+.work-item:hover .work-item-name{color:var(--orange)}
+.work-item-meta{display:flex;align-items:center;gap:clamp(12px,2vw,32px);position:relative;z-index:1}
+.work-item-year{font-size:clamp(10px,.8vw,12px);color:var(--gray);letter-spacing:.05em;font-variant-numeric:tabular-nums}
+.work-item-cat{font-size:clamp(10px,.9vw,12px);letter-spacing:.15em;text-transform:uppercase;color:var(--gray);transition:color .4s var(--smoky)}
+.work-item:hover .work-item-cat{color:var(--gray-lt)}
+.work-expand{max-height:0;overflow:hidden;transition:max-height .7s var(--smoky)}
+.work-expand.open{max-height:700px}
+.work-expand-inner{width:90vw;max-width:1400px;margin:0 auto;padding:clamp(8px,1vw,16px) 0 clamp(16px,2.5vw,36px)}
+.work-thumb{width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,rgba(255,255,255,.02),rgba(255,255,255,.05));background-size:cover;background-position:center;border:1px solid rgba(255,255,255,.05);clip-path:inset(0 50% 0 50%);transition:clip-path .8s var(--expo) .1s;position:relative}
+.work-thumb::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 60%,rgba(0,0,0,.7))}
+.work-expand.open .work-thumb{clip-path:inset(0 0 0 0)}
+
+/* Services */
+.services{padding:clamp(40px,8vw,120px) 0;overflow:hidden}
+.marquee-band{white-space:nowrap;overflow:hidden;padding:clamp(16px,2.5vw,36px) 0;border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:clamp(36px,6vw,96px)}
+.marquee-track{display:inline-flex;animation:mq 24s linear infinite}
+.marquee-track span{font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,5.5vw,84px);font-weight:700;letter-spacing:-.01em;padding:0 clamp(16px,2.5vw,40px);color:rgba(255,255,255,.1);text-transform:uppercase}
+.marquee-track .sep{display:inline-block;width:clamp(5px,.6vw,8px);height:clamp(5px,.6vw,8px);background:var(--orange);border-radius:50%;margin:0 clamp(12px,1.5vw,24px);vertical-align:middle}
+@keyframes mq{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.services-list{width:90vw;max-width:1400px;margin:0 auto}
+.service-row{display:flex;align-items:baseline;gap:clamp(16px,3vw,48px);padding:clamp(18px,2.5vw,36px) 0;border-top:1px solid rgba(255,255,255,.07);cursor:none;transition:color .4s var(--smoky)}
+.service-row:last-child{border-bottom:1px solid rgba(255,255,255,.07)}
+.service-row:hover .service-name{color:var(--orange)}
+.service-row:hover .service-num{color:var(--orange)}
+.service-num{font-family:'Space Grotesk',sans-serif;font-size:clamp(11px,1vw,14px);color:var(--gray);letter-spacing:.05em;min-width:3em;transition:color .4s var(--smoky)}
+.service-name{font-family:'Space Grotesk',sans-serif;font-size:clamp(18px,2.8vw,42px);font-weight:700;letter-spacing:-.02em;transition:color .4s var(--smoky);flex:1}
+.service-desc{font-size:clamp(11px,.95vw,14px);color:var(--gray);max-width:300px;line-height:1.65;font-weight:300}
+
+/* Contact */
+.contact{min-height:80vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(60px,10vw,160px) 20px;position:relative;background:radial-gradient(ellipse at center bottom,rgba(255,77,0,.04) 0%,transparent 60%)}
+.contact h2{font-size:clamp(36px,10vw,160px);font-weight:700;letter-spacing:-.04em;line-height:.92;margin-bottom:clamp(20px,3vw,48px)}
+.contact h2 .orange{color:var(--orange)}
+.contact-links{display:flex;flex-direction:column;gap:14px;align-items:center}
+.contact-link{font-size:clamp(13px,1.3vw,18px);font-weight:300;color:var(--gray-lt);position:relative;padding-bottom:3px;cursor:none;transition:color .3s var(--smoky)}
+.contact-link::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:var(--orange);transition:width .6s var(--expo)}
+.contact-link:hover{color:var(--white)}
+.contact-link:hover::after{width:100%}
+.contact-copy{margin-top:clamp(24px,3vw,48px);font-size:clamp(10px,.8vw,12px);color:var(--gray);letter-spacing:.15em;text-transform:uppercase;line-height:2}
+
+/* Footer */
+footer{padding:clamp(24px,4vw,48px) 20px;text-align:center;border-top:1px solid rgba(255,255,255,.04)}
+footer p{font-size:10px;color:rgba(255,255,255,.2);letter-spacing:.08em;text-transform:uppercase}
+
+/* Reveal */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .8s var(--smoky),transform .8s var(--smoky)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-d1{transition-delay:.1s}
+.reveal-d2{transition-delay:.2s}
+.reveal-d3{transition-delay:.3s}
+
+/* Responsive */
+@media(max-width:768px){
+  .cursor{display:none}
+  body,a,.work-item,.service-row,.reel-play,.contact-link{cursor:auto}
+  .nav{padding:16px 20px}
+  .nav-links{gap:20px}
+  .nav-links a{font-size:11px;padding:8px 4px;min-height:44px;display:flex;align-items:center}
+  .hero-title{font-size:clamp(48px,16vw,120px)}
+  .service-row{flex-direction:column;gap:8px;padding:clamp(20px,3vw,28px) 0}
+  .service-desc{max-width:100%}
+  .work-item{flex-direction:column;align-items:flex-start;gap:8px;padding:clamp(20px,3vw,28px) clamp(8px,2vw,16px);min-height:44px}
+  .work-item-name{font-size:clamp(20px,6vw,36px)}
+  .work-item-meta{gap:12px}
+  .work-item-year,.work-item-cat{font-size:11px}
+  .hero-scroll{bottom:20px}
+  .contact h2{line-height:1;font-size:clamp(32px,12vw,80px)}
+  .contact-link{font-size:14px;padding:10px 0;min-height:44px;display:flex;align-items:center}
+  .reel-container{aspect-ratio:16/9;width:94vw}
+  .marquee-track span{font-size:clamp(24px,7vw,48px)}
+}
+@media(max-width:390px){
+  .hero-title{font-size:clamp(42px,14vw,80px)}
+  .nav-links{gap:14px}
+  .nav-links a{font-size:10px}
+  .work-item-name{font-size:clamp(18px,5.5vw,28px)}
+}
+@media(min-width:769px) and (max-width:1024px){
+  .service-desc{max-width:220px}
+}
+</style>
+</head>
+<body>
+
+<!-- Grain SVG filter overlay -->
+<div class="grain">
+  <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+    <filter id="gn"><feTurbulence type="fractalNoise" baseFrequency=".65" numOctaves="4" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+    <rect width="100%" height="100%" filter="url(#gn)"/>
+  </svg>
+</div>
+
+<!-- Custom cursor -->
+<div class="cursor" id="cursor">
+  <div class="cursor-cross"></div>
+  <div class="cursor-dot"></div>
+</div>
+
+<!-- Page loader -->
+<div class="loader" id="loader">
+  <div class="loader-text" id="loaderText">
+    <span>C</span><span>U</span><span>T</span><span>L</span><span>A</span><span>B</span>
+  </div>
+</div>
+
+<!-- Nav -->
+<nav class="nav" id="nav">
+  <div class="nav-logo">CUTLAB</div>
+  <div class="nav-links">
+    <a href="#work">Work</a>
+    <a href="#services">Services</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- ===== Hero ===== -->
+<section class="hero" id="hero">
+  <h1 class="hero-title" id="heroTitle">
+    <span class="char">C</span><span class="char">U</span><span class="char">T</span><span class="char">L</span><span class="char">A</span><span class="char">B</span>
+  </h1>
+  <div class="hero-line" id="heroLine"></div>
+  <p class="hero-sub" id="heroSub">영상으로 브랜드를 만듭니다</p>
+  <div class="hero-scroll" id="heroScroll">
+    <span class="hero-scroll-label">Scroll</span>
+    <span class="hero-scroll-line"></span>
+  </div>
+</section>
+
+<!-- ===== Reel ===== -->
+<section class="reel">
+  <div class="reel-container" id="reelContainer">
+    <div class="reel-play" id="reelPlay">
+      <svg viewBox="0 0 24 24"><polygon points="8,5 20,12 8,19"/></svg>
+    </div>
+    <span class="reel-label">Showreel 2026</span>
+  </div>
+</section>
+
+<!-- ===== Work ===== -->
+<section class="work" id="work">
+  <div class="work-header reveal"><h2>Selected Work</h2></div>
+  <div class="work-list">
+    <div class="work-item" data-expand="w1">
+      <span class="work-item-name">브랜드 다큐멘터리</span>
+      <div class="work-item-meta"><span class="work-item-year">2026</span><span class="work-item-cat">YouTube</span></div>
+    </div>
+    <div class="work-expand" id="w1"><div class="work-expand-inner"><div class="work-thumb" style="background-image:url('https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=1200&q=80')"></div></div></div>
+
+    <div class="work-item" data-expand="w2">
+      <span class="work-item-name">바이럴 숏폼 시리즈</span>
+      <div class="work-item-meta"><span class="work-item-year">2026</span><span class="work-item-cat">Short-Form</span></div>
+    </div>
+    <div class="work-expand" id="w2"><div class="work-expand-inner"><div class="work-thumb" style="background-image:url('https://images.unsplash.com/photo-1536240478700-b869070f9279?w=1200&q=80')"></div></div></div>
+
+    <div class="work-item" data-expand="w3">
+      <span class="work-item-name">제품 런칭 필름</span>
+      <div class="work-item-meta"><span class="work-item-year">2025</span><span class="work-item-cat">Promo</span></div>
+    </div>
+    <div class="work-expand" id="w3"><div class="work-expand-inner"><div class="work-thumb" style="background-image:url('https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1200&q=80')"></div></div></div>
+
+    <div class="work-item" data-expand="w4">
+      <span class="work-item-name">로고 모션 패키지</span>
+      <div class="work-item-meta"><span class="work-item-year">2025</span><span class="work-item-cat">Motion Graphics</span></div>
+    </div>
+    <div class="work-expand" id="w4"><div class="work-expand-inner"><div class="work-thumb" style="background-image:url('https://images.unsplash.com/photo-1485846234645-a62644f84728?w=1200&q=80')"></div></div></div>
+
+    <div class="work-item" data-expand="w5">
+      <span class="work-item-name">인포그래픽 시리즈</span>
+      <div class="work-item-meta"><span class="work-item-year">2025</span><span class="work-item-cat">Motion Graphics</span></div>
+    </div>
+    <div class="work-expand" id="w5"><div class="work-expand-inner"><div class="work-thumb" style="background-image:url('https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=1200&q=80')"></div></div></div>
+
+    <div class="work-item" data-expand="w6">
+      <span class="work-item-name">캠페인 필름</span>
+      <div class="work-item-meta"><span class="work-item-year">2024</span><span class="work-item-cat">Promo</span></div>
+    </div>
+    <div class="work-expand" id="w6"><div class="work-expand-inner"><div class="work-thumb" style="background-image:url('https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1200&q=80')"></div></div></div>
+
+    <div class="work-item" data-expand="w7">
+      <span class="work-item-name">채널 브랜딩 풀패키지</span>
+      <div class="work-item-meta"><span class="work-item-year">2024</span><span class="work-item-cat">YouTube</span></div>
+    </div>
+    <div class="work-expand" id="w7"><div class="work-expand-inner"><div class="work-thumb" style="background-image:url('https://images.unsplash.com/photo-1485846234645-a62644f84728?w=1200&q=80')"></div></div></div>
+  </div>
+</section>
+
+<!-- ===== Services ===== -->
+<section class="services" id="services">
+  <div class="marquee-band">
+    <div class="marquee-track">
+      <span>YOUTUBE<i class="sep"></i></span><span>SHORTS<i class="sep"></i></span><span>PROMO<i class="sep"></i></span><span>MOTION GRAPHICS<i class="sep"></i></span>
+      <span>YOUTUBE<i class="sep"></i></span><span>SHORTS<i class="sep"></i></span><span>PROMO<i class="sep"></i></span><span>MOTION GRAPHICS<i class="sep"></i></span>
+    </div>
+  </div>
+  <div class="services-list">
+    <div class="service-row reveal">
+      <span class="service-num">01</span>
+      <span class="service-name">유튜브 편집</span>
+      <span class="service-desc">자막, 컷편집, 효과음, 썸네일까지. 조회수를 끌어올리는 편집 전략을 적용합니다.</span>
+    </div>
+    <div class="service-row reveal reveal-d1">
+      <span class="service-num">02</span>
+      <span class="service-name">숏폼 / 릴스</span>
+      <span class="service-desc">세로 9:16, 후킹 구조, 트렌드 반영. 1분 안에 시선을 사로잡는 숏폼을 제작합니다.</span>
+    </div>
+    <div class="service-row reveal reveal-d2">
+      <span class="service-num">03</span>
+      <span class="service-name">프로모션 영상</span>
+      <span class="service-desc">제품 런칭, 브랜드 소개, 행사 영상. 시나리오부터 최종 납품까지 올인원.</span>
+    </div>
+    <div class="service-row reveal reveal-d3">
+      <span class="service-num">04</span>
+      <span class="service-name">모션그래픽</span>
+      <span class="service-desc">인포그래픽, 로고 애니메이션, 타이틀 시퀀스. 움직임으로 메시지를 전달합니다.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Contact ===== -->
+<section class="contact" id="contact">
+  <h2 class="reveal">NEXT<br><span class="orange">PROJECT?</span></h2>
+  <div class="contact-links reveal reveal-d1">
+    <a href="mailto:cutlab@example.com" class="contact-link">cutlab@example.com</a>
+    <a href="https://kmong.com" target="_blank" rel="noopener" class="contact-link">크몽에서 견적 문의</a>
+  </div>
+  <p class="contact-copy reveal reveal-d2">
+    유튜브 편집 / 숏폼 / 프로모션 / 모션그래픽<br>
+    빠른 견적과 함께 최적의 방향을 제안드립니다
+  </p>
+</section>
+
+<!-- Footer -->
+<footer><p>CUTLAB 2026</p></footer>
+
+<!-- ===== Scripts ===== -->
+<script>
+/* Lenis Smooth Scroll */
+(function(){
+  var s=document.createElement('script');
+  s.src='https://unpkg.com/lenis@1.1.18/dist/lenis.min.js';
+  s.onload=function(){
+    var lenis=new Lenis({
+      duration:1.6,
+      easing:function(t){return Math.min(1,1.001-Math.pow(2,-10*t))},
+      touchMultiplier:1.5,
+      wheelMultiplier:.9
+    });
+    function raf(time){lenis.raf(time);requestAnimationFrame(raf)}
+    requestAnimationFrame(raf);
+    window.__lenis=lenis;
+  };
+  document.head.appendChild(s);
+})();
+
+/* Page Loader */
+(function(){
+  var spans=document.querySelectorAll('#loaderText span');
+  var loader=document.getElementById('loader');
+  spans.forEach(function(s,i){
+    setTimeout(function(){s.classList.add('show')},120+i*90);
+  });
+  window.addEventListener('load',function(){
+    setTimeout(function(){
+      loader.classList.add('done');
+      setTimeout(initPage,900);
+    },900);
+  });
+})();
+
+/* Init after loader */
+function initPage(){
+  /* Nav */
+  document.getElementById('nav').classList.add('visible');
+
+  /* Hero letter stagger */
+  var chars=document.querySelectorAll('#heroTitle .char');
+  chars.forEach(function(c,i){
+    setTimeout(function(){c.classList.add('visible')},i*100);
+  });
+  var t=chars.length*100;
+  setTimeout(function(){document.getElementById('heroLine').classList.add('visible')},t+100);
+  setTimeout(function(){document.getElementById('heroSub').classList.add('visible')},t+300);
+  setTimeout(function(){document.getElementById('heroScroll').classList.add('visible')},t+600);
+
+  /* Scroll reveal */
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}
+    });
+  },{threshold:.12,rootMargin:'0px 0px -80px 0px'});
+  document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el)});
+
+  /* Reel scale on scroll */
+  var rc=document.getElementById('reelContainer');
+  var rObs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){rc.classList.add('scaled');rObs.unobserve(rc)}
+    });
+  },{threshold:.25});
+  rObs.observe(rc);
+}
+
+/* Custom Cursor */
+(function(){
+  var cur=document.getElementById('cursor');
+  if(!cur||window.matchMedia('(max-width:768px)').matches)return;
+  var mx=0,my=0,cx=0,cy=0;
+  document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY});
+  (function loop(){
+    cx+=(mx-cx)*.1;cy+=(my-cy)*.1;
+    cur.style.transform='translate3d('+cx+'px,'+cy+'px,0)';
+    requestAnimationFrame(loop);
+  })();
+
+  /* Link hover detection */
+  setTimeout(function(){
+    document.querySelectorAll('a,.work-item,.service-row,.contact-link').forEach(function(el){
+      el.addEventListener('mouseenter',function(){cur.classList.add('is-link')});
+      el.addEventListener('mouseleave',function(){cur.classList.remove('is-link')});
+    });
+    var rp=document.getElementById('reelPlay');
+    if(rp){
+      rp.addEventListener('mouseenter',function(){cur.classList.add('is-play');cur.classList.remove('is-link')});
+      rp.addEventListener('mouseleave',function(){cur.classList.remove('is-play')});
+    }
+  },100);
+
+  /* Magnetic reel play button */
+  var rp=document.getElementById('reelPlay');
+  if(rp){
+    rp.addEventListener('mousemove',function(e){
+      var r=rp.getBoundingClientRect();
+      var dx=e.clientX-(r.left+r.width/2);
+      var dy=e.clientY-(r.top+r.height/2);
+      rp.style.transition='transform .05s linear';
+      rp.style.transform='translate('+dx*.3+'px,'+dy*.3+'px)';
+    });
+    rp.addEventListener('mouseleave',function(){
+      rp.style.transition='transform .6s cubic-bezier(.22,.61,.36,1)';
+      rp.style.transform='translate(0,0)';
+    });
+  }
+})();
+
+/* Work expand (clip-path reveal) */
+(function(){
+  document.querySelectorAll('.work-item[data-expand]').forEach(function(item){
+    item.addEventListener('click',function(){
+      var panel=document.getElementById(item.dataset.expand);
+      if(!panel)return;
+      var open=panel.classList.contains('open');
+      document.querySelectorAll('.work-expand.open').forEach(function(p){p.classList.remove('open')});
+      if(!open){
+        panel.classList.add('open');
+        setTimeout(function(){
+          if(window.__lenis)window.__lenis.scrollTo(panel,{offset:-100,duration:1.2});
+        },100);
+      }
+    });
+  });
+})();
+
+/* Nav hide/show on scroll */
+(function(){
+  var nav=document.getElementById('nav'),lastY=0,tick=false;
+  window.addEventListener('scroll',function(){
+    if(!tick){
+      requestAnimationFrame(function(){
+        var y=window.pageYOffset;
+        if(y>200){
+          if(y>lastY+5){nav.style.opacity='0';nav.style.transform='translateY(-20px)'}
+          else if(y<lastY-5){nav.style.opacity='1';nav.style.transform='translateY(0)'}
+        }else{nav.style.opacity='';nav.style.transform=''}
+        lastY=y;tick=false;
+      });tick=true;
+    }
+  });
+})();
+
+/* Subtle hero parallax on scroll */
+(function(){
+  var ht=document.getElementById('heroTitle');
+  var hs=document.getElementById('heroSub');
+  var hl=document.getElementById('heroLine');
+  var tick=false;
+  window.addEventListener('scroll',function(){
+    if(!tick){
+      requestAnimationFrame(function(){
+        var y=window.pageYOffset;
+        if(y<window.innerHeight){
+          var r=y/window.innerHeight;
+          ht.style.transform='translateY('+y*.15+'px) scale('+(1-r*.05)+')';
+          ht.style.opacity=1-r*.8;
+          hs.style.transform='translateY('+y*.08+'px)';
+          hs.style.opacity=Math.max(0,1-r*1.2);
+          if(hl)hl.style.opacity=Math.max(0,1-r*1.5);
+        }
+        tick=false;
+      });tick=true;
+    }
+  });
+})();
+
+/* Marquee scroll-speed modulation based on scroll velocity */
+(function(){
+  var track=document.querySelector('.marquee-track');
+  if(!track)return;
+  var baseSpeed=24;
+  var lastScroll=0;
+  var velocity=0;
+  window.addEventListener('scroll',function(){
+    velocity=Math.abs(window.pageYOffset-lastScroll);
+    lastScroll=window.pageYOffset;
+  });
+  setInterval(function(){
+    var speed=Math.max(8,baseSpeed-velocity*.3);
+    track.style.animationDuration=speed+'s';
+    velocity*=.9;
+  },100);
+})();
+
+/* Smooth anchor scroll via Lenis */
+(function(){
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener('click',function(e){
+      e.preventDefault();
+      var target=document.querySelector(a.getAttribute('href'));
+      if(target&&window.__lenis){
+        window.__lenis.scrollTo(target,{duration:1.6,offset:-40});
+      }else if(target){
+        target.scrollIntoView({behavior:'smooth'});
+      }
+    });
+  });
+})();
+
+/* Work item hover: text stroke outline effect via CSS variable */
+(function(){
+  document.querySelectorAll('.work-item').forEach(function(item){
+    var name=item.querySelector('.work-item-name');
+    if(!name)return;
+    item.addEventListener('mouseenter',function(){
+      name.style.webkitTextStroke='1px var(--orange)';
+    });
+    item.addEventListener('mouseleave',function(){
+      name.style.webkitTextStroke='';
+    });
+  });
+})();
+
+/* Page visibility: pause animations when hidden */
+(function(){
+  document.addEventListener('visibilitychange',function(){
+    var mt=document.querySelector('.marquee-track');
+    var sl=document.querySelector('.hero-scroll-line');
+    if(document.hidden){
+      if(mt)mt.style.animationPlayState='paused';
+      if(sl)sl.style.animationPlayState='paused';
+    }else{
+      if(mt)mt.style.animationPlayState='running';
+      if(sl)sl.style.animationPlayState='running';
+    }
+  });
+})();
+</script>
+</body>
+</html>

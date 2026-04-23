@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>순위와 매출의 관계 — ONDA</title>
+  <meta name="description" content="상위 3개 업체가 키워드 매출의 67%를 가져갑니다. 87,000개 업체 데이터 기반 순위 역전 전략을 확인하세요.">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #FAFBFC;
+      color: #0F172A;
+      line-height: 1.7;
+      word-break: keep-all;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    img, svg { max-width: 100%; height: auto; }
+    a { text-decoration: none; color: inherit; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    .num { font-family: 'Inter', sans-serif; }
+
+    /* ===== UTILITY ===== */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .section-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 600; color: #4F46E5;
+      text-transform: uppercase; letter-spacing: 1.5px;
+      margin-bottom: 16px;
+    }
+    .section-label::before {
+      content: ''; width: 24px; height: 2px; background: #4F46E5; border-radius: 1px;
+    }
+    .section-title {
+      font-size: clamp(28px, 4vw, 44px); font-weight: 800;
+      line-height: 1.25; color: #0F172A; margin-bottom: 16px;
+    }
+    .section-subtitle {
+      font-size: clamp(15px, 1.8vw, 18px); color: #64748B;
+      line-height: 1.7; max-width: 600px;
+    }
+    .pill-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 16px 36px; border-radius: 999px;
+      font-size: 16px; font-weight: 700;
+      transition: all .3s cubic-bezier(.4,0,.2,1);
+    }
+    .pill-btn-primary {
+      background: #4F46E5; color: #fff;
+      box-shadow: 0 4px 24px rgba(79,70,229,.3);
+    }
+    .pill-btn-primary:hover {
+      background: #4338CA; transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(79,70,229,.4);
+    }
+    .pill-btn-outline {
+      background: #fff; color: #4F46E5;
+      border: 2px solid #E0E7FF;
+    }
+    .pill-btn-outline:hover {
+      border-color: #4F46E5; background: #EEF2FF;
+      transform: translateY(-2px);
+    }
+    .pill-btn-white {
+      background: #fff; color: #4F46E5;
+      box-shadow: 0 4px 24px rgba(0,0,0,.15);
+    }
+    .pill-btn-white:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0,0,0,.2);
+    }
+
+    /* ===== REVEAL ANIMATION ===== */
+    .reveal {
+      opacity: 0; transform: translateY(40px);
+      transition: opacity .7s cubic-bezier(.4,0,.2,1), transform .7s cubic-bezier(.4,0,.2,1);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: .1s; }
+    .reveal-delay-2 { transition-delay: .2s; }
+    .reveal-delay-3 { transition-delay: .3s; }
+    .reveal-delay-4 { transition-delay: .4s; }
+    .reveal-delay-5 { transition-delay: .5s; }
+    .reveal-delay-6 { transition-delay: .6s; }
+
+    /* ===== NAVIGATION ===== */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(250,251,252,.85); backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0,0,0,.04);
+      transition: all .3s ease;
+    }
+    .nav.scrolled {
+      background: rgba(250,251,252,.95);
+      box-shadow: 0 1px 12px rgba(0,0,0,.06);
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 72px; transition: height .3s ease;
+    }
+    .nav.scrolled .nav-inner { height: 56px; }
+    .nav-logo {
+      font-size: 22px; font-weight: 900; color: #4F46E5;
+      letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: #0F172A; }
+    .nav-back {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 600; color: #64748B;
+      padding: 8px 20px; border-radius: 999px;
+      background: #F1F5F9;
+      transition: all .2s;
+    }
+    .nav-back:hover {
+      color: #4F46E5; background: #EEF2FF;
+    }
+    .nav-back svg {
+      width: 16px; height: 16px;
+      transition: transform .2s;
+    }
+    .nav-back:hover svg {
+      transform: translateX(-3px);
+    }
+
+    /* ===== HERO SECTION ===== */
+    .hero {
+      padding: 160px 0 120px;
+      position: relative; overflow: hidden;
+      min-height: 80vh;
+      display: flex; align-items: center;
+      text-align: center;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -300px; left: 50%;
+      transform: translateX(-50%);
+      width: 800px; height: 800px;
+      background: radial-gradient(circle, rgba(79,70,229,.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: ''; position: absolute; bottom: -200px; right: -200px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(16,185,129,.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero .container {
+      display: flex; flex-direction: column; align-items: center;
+      position: relative; z-index: 1;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 20px; border-radius: 999px;
+      background: #EEF2FF; color: #4F46E5;
+      font-size: 13px; font-weight: 600;
+      margin-bottom: 32px;
+    }
+    .hero-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #10B981; animation: pulse-dot 2s infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; } 50% { opacity: .4; }
+    }
+    .hero-counter {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(80px, 15vw, 160px);
+      font-weight: 900;
+      background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 24px;
+      letter-spacing: -4px;
+    }
+    .hero-title {
+      font-size: clamp(20px, 3vw, 32px);
+      font-weight: 700; color: #0F172A;
+      line-height: 1.4; margin-bottom: 20px;
+      max-width: 700px;
+    }
+    .hero-title em {
+      font-style: normal; color: #4F46E5;
+      position: relative;
+    }
+    .hero-title em::after {
+      content: ''; position: absolute; bottom: 2px; left: 0;
+      width: 100%; height: 6px; background: rgba(79,70,229,.12);
+      border-radius: 4px; z-index: -1;
+    }
+    .hero-desc {
+      font-size: 17px; color: #64748B; line-height: 1.8;
+      max-width: 560px; margin-bottom: 40px;
+    }
+    .hero-back-btn {
+      margin-top: 16px;
+    }
+
+    /* ===== WAVE DIVIDER ===== */
+    .wave-divider {
+      width: 100%; overflow: hidden; line-height: 0;
+      margin-top: -1px;
+    }
+    .wave-divider svg { width: 100%; height: auto; display: block; }
+    .wave-divider-reverse { transform: rotate(180deg); margin-bottom: -1px; margin-top: 0; }
+
+    /* ===== PIE CHART SECTION ===== */
+    .pie-section {
+      padding: 100px 0; background: #fff; position: relative;
+    }
+    .pie-section-inner {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 60px; align-items: center;
+    }
+    .pie-chart-wrap {
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .pie-chart-svg {
+      width: 100%; max-width: 420px;
+    }
+    .pie-chart-center {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    .pie-chart-center-num {
+      font-family: 'Inter', sans-serif;
+      font-size: 48px; font-weight: 900;
+      color: #4F46E5; line-height: 1;
+    }
+    .pie-chart-center-label {
+      font-size: 14px; color: #64748B; font-weight: 500;
+      margin-top: 4px;
+    }
+    .pie-labels {
+      margin-top: 32px;
+      display: flex; gap: 32px; justify-content: center;
+    }
+    .pie-label-item {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 14px; font-weight: 600;
+    }
+    .pie-label-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+    }
+    .pie-label-dot.indigo {
+      background: linear-gradient(135deg, #4F46E5, #7C3AED);
+    }
+    .pie-label-dot.gray {
+      background: #E2E8F0;
+    }
+    .pie-info-text {
+      margin-top: 40px; padding: 24px 28px;
+      background: #F8FAFC; border-radius: 16px;
+      border-left: 4px solid #4F46E5;
+      font-size: 15px; color: #475569;
+      line-height: 1.7;
+    }
+
+    /* ===== DATA CARDS SECTION ===== */
+    .data-section {
+      padding: 100px 0; background: #FAFBFC; position: relative;
+    }
+    .data-section-header {
+      text-align: center; margin-bottom: 64px;
+    }
+    .data-section-header .section-subtitle {
+      margin: 0 auto;
+    }
+    .data-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .data-card {
+      background: #fff; border-radius: 20px;
+      padding: 32px; position: relative;
+      border: 1px solid #E2E8F0;
+      overflow: hidden;
+      transition: all .4s cubic-bezier(.4,0,.2,1);
+    }
+    .data-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 48px rgba(0,0,0,.08);
+      border-color: transparent;
+    }
+    .data-card-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px; font-size: 24px;
+    }
+    .data-card-icon.indigo { background: #EEF2FF; color: #4F46E5; }
+    .data-card-icon.green { background: #ECFDF5; color: #10B981; }
+    .data-card-icon.purple { background: #F5F3FF; color: #7C3AED; }
+    .data-card-icon.orange { background: #FFF7ED; color: #F59E0B; }
+    .data-card-icon.pink { background: #FDF2F8; color: #EC4899; }
+    .data-card-icon.teal { background: #F0FDFA; color: #14B8A6; }
+    .data-card-num {
+      font-family: 'Inter', sans-serif;
+      font-size: 40px; font-weight: 900;
+      color: #0F172A; line-height: 1;
+      margin-bottom: 8px;
+    }
+    .data-card-num .unit {
+      font-size: 24px; font-weight: 700;
+      color: #4F46E5;
+    }
+    .data-card-num .unit-small {
+      font-size: 18px; font-weight: 600;
+      color: #64748B;
+    }
+    .data-card-title {
+      font-size: 16px; font-weight: 700;
+      color: #0F172A; margin-bottom: 8px;
+    }
+    .data-card-desc {
+      font-size: 14px; color: #64748B;
+      line-height: 1.6;
+    }
+    .data-card-source {
+      margin-top: 16px; padding-top: 16px;
+      border-top: 1px solid #F1F5F9;
+      font-size: 12px; color: #94A3B8;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .data-card::after {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, transparent, transparent);
+      transition: background .4s;
+    }
+    .data-card:hover::after {
+      background: linear-gradient(90deg, #4F46E5, #10B981);
+    }
+
+    /* ===== DARK ANALYSIS SECTION ===== */
+    .analysis-section {
+      padding: 120px 0; background: #0F172A;
+      position: relative; overflow: hidden;
+    }
+    .analysis-section::before {
+      content: ''; position: absolute; top: -200px; right: -200px;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(79,70,229,.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .analysis-section::after {
+      content: ''; position: absolute; bottom: -200px; left: -200px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(16,185,129,.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .analysis-inner {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 80px; align-items: center;
+      position: relative; z-index: 1;
+    }
+    .analysis-text .section-label { color: #818CF8; }
+    .analysis-text .section-label::before { background: #818CF8; }
+    .analysis-text .section-title { color: #fff; }
+    .analysis-text .section-subtitle { color: #94A3B8; max-width: 480px; }
+    .analysis-features {
+      margin-top: 32px; display: flex; flex-direction: column; gap: 16px;
+    }
+    .analysis-feature {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 20px; border-radius: 12px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.06);
+      transition: all .3s;
+    }
+    .analysis-feature:hover {
+      background: rgba(255,255,255,.08);
+      border-color: rgba(79,70,229,.3);
+    }
+    .analysis-feature-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(79,70,229,.2); color: #818CF8;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .analysis-feature-text {
+      font-size: 15px; color: #CBD5E1; font-weight: 500;
+    }
+    .analysis-cta {
+      margin-top: 40px;
+    }
+
+    /* Diagnostic Report Mockup */
+    .report-mockup {
+      background: #1E293B; border-radius: 20px;
+      padding: 32px; position: relative;
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 24px 64px rgba(0,0,0,.3);
+    }
+    .report-mockup::before {
+      content: ''; position: absolute; inset: -1px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(79,70,229,.3), transparent, rgba(16,185,129,.2));
+      z-index: -1; padding: 1px;
+    }
+    .report-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 28px; padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .report-header-title {
+      font-size: 16px; font-weight: 700; color: #fff;
+    }
+    .report-header-badge {
+      padding: 4px 12px; border-radius: 999px;
+      background: rgba(16,185,129,.15); color: #10B981;
+      font-size: 12px; font-weight: 600;
+    }
+    .report-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+    }
+    .report-row:last-child { border-bottom: none; }
+    .report-row-label {
+      font-size: 14px; color: #94A3B8; font-weight: 500;
+    }
+    .report-row-value {
+      font-family: 'Inter', sans-serif;
+      font-size: 15px; font-weight: 700; color: #fff;
+    }
+    .report-row-value.positive { color: #10B981; }
+    .report-row-value.negative { color: #EF4444; }
+    .report-bar-wrap {
+      margin-top: 24px;
+    }
+    .report-bar-label {
+      display: flex; justify-content: space-between;
+      font-size: 13px; color: #94A3B8; margin-bottom: 8px;
+    }
+    .report-bar {
+      width: 100%; height: 8px; border-radius: 4px;
+      background: rgba(255,255,255,.06); overflow: hidden;
+    }
+    .report-bar-fill {
+      height: 100%; border-radius: 4px;
+      background: linear-gradient(90deg, #4F46E5, #10B981);
+      width: 0; transition: width 1.5s cubic-bezier(.4,0,.2,1);
+    }
+    .report-bar-fill.animated { width: var(--fill-width); }
+    .report-prediction {
+      margin-top: 24px; padding: 20px;
+      background: rgba(79,70,229,.1); border-radius: 14px;
+      border: 1px solid rgba(79,70,229,.2);
+      text-align: center;
+    }
+    .report-prediction-label {
+      font-size: 12px; color: #818CF8; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .report-prediction-value {
+      font-family: 'Inter', sans-serif;
+      font-size: 32px; font-weight: 900; color: #10B981;
+      line-height: 1;
+    }
+    .report-prediction-desc {
+      font-size: 13px; color: #94A3B8; margin-top: 6px;
+    }
+
+    /* ===== SOURCES SECTION ===== */
+    .sources-section {
+      padding: 80px 0; background: #fff;
+    }
+    .sources-section-header {
+      text-align: center; margin-bottom: 40px;
+    }
+    .sources-list {
+      max-width: 600px; margin: 0 auto;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .source-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 24px; border-radius: 14px;
+      background: #F8FAFC; border: 1px solid #E2E8F0;
+      transition: all .3s;
+    }
+    .source-item:hover {
+      background: #EEF2FF; border-color: #C7D2FE;
+    }
+    .source-item-num {
+      width: 32px; height: 32px; border-radius: 10px;
+      background: #4F46E5; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .source-item-text {
+      font-size: 15px; font-weight: 600; color: #334155;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      padding: 40px 0; background: #FAFBFC;
+      border-top: 1px solid #E2E8F0;
+      text-align: center;
+    }
+    .footer-text {
+      font-size: 14px; color: #94A3B8;
+    }
+    .footer-text strong {
+      font-weight: 700; color: #64748B;
+    }
+
+    /* ===== RESPONSIVE ===== */
+
+    /* 1440px */
+    @media (max-width: 1440px) {
+      .container { max-width: 1100px; }
+    }
+
+    /* 1024px */
+    @media (max-width: 1024px) {
+      .pie-section-inner {
+        grid-template-columns: 1fr;
+        gap: 48px;
+      }
+      .pie-chart-wrap { order: -1; }
+      .analysis-inner {
+        grid-template-columns: 1fr;
+        gap: 48px;
+      }
+      .report-mockup { max-width: 520px; margin: 0 auto; }
+      .data-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* 768px */
+    @media (max-width: 768px) {
+      .hero { padding: 130px 0 80px; min-height: 70vh; }
+      .hero-counter { letter-spacing: -2px; }
+      .hero-desc { font-size: 15px; }
+      .data-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+      .data-card { padding: 24px; }
+      .data-card-num { font-size: 32px; }
+      .pie-labels { flex-direction: column; gap: 12px; align-items: flex-start; }
+      .analysis-section { padding: 80px 0; }
+      .analysis-inner { gap: 40px; }
+      .pill-btn { padding: 14px 28px; font-size: 15px; }
+      .nav-inner { height: 60px; }
+      .nav.scrolled .nav-inner { height: 52px; }
+    }
+
+    /* 480px */
+    @media (max-width: 480px) {
+      .hero { padding: 120px 0 60px; min-height: auto; }
+      .hero-title { font-size: 20px; }
+      .hero-desc { font-size: 14px; margin-bottom: 28px; }
+      .hero-badge { font-size: 12px; padding: 6px 14px; }
+      .data-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      .data-card { padding: 20px; }
+      .data-card-num { font-size: 28px; }
+      .data-card-icon { width: 44px; height: 44px; margin-bottom: 14px; }
+      .section-title { font-size: 24px; }
+      .pie-chart-center-num { font-size: 36px; }
+      .pie-info-text { padding: 18px 20px; font-size: 14px; }
+      .report-mockup { padding: 20px; }
+      .report-prediction-value { font-size: 26px; }
+      .analysis-section { padding: 60px 0; }
+      .sources-section { padding: 60px 0; }
+      .source-item { padding: 14px 18px; }
+      .pill-btn { padding: 12px 24px; font-size: 14px; }
+    }
+
+    /* 375px */
+    @media (max-width: 375px) {
+      .container { padding: 0 16px; }
+      .hero { padding: 110px 0 48px; }
+      .hero-counter { font-size: 72px; }
+      .hero-title { font-size: 18px; }
+      .section-title { font-size: 22px; }
+      .data-card-num { font-size: 26px; }
+      .report-mockup { padding: 16px; border-radius: 14px; }
+      .report-prediction-value { font-size: 22px; }
+      .pie-chart-center-num { font-size: 30px; }
+      .nav-back { font-size: 12px; padding: 6px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVIGATION ===== -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">ONDA</a>
+      <a href="index.html#problem" class="nav-back">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5"/>
+          <path d="M12 19l-7-7 7-7"/>
+        </svg>
+        돌아가기
+      </a>
+    </div>
+  </nav>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="hero" id="hero">
+    <div class="container">
+      <div class="hero-badge reveal">
+        <span class="hero-badge-dot"></span>
+        데이터 기반 인사이트
+      </div>
+      <div class="hero-counter reveal reveal-delay-1" id="heroCounter">0%</div>
+      <h1 class="hero-title reveal reveal-delay-2">
+        <em>상위 3개 업체</em>가 키워드 매출의 67%를 가져갑니다
+      </h1>
+      <p class="hero-desc reveal reveal-delay-3">
+        네이버 플레이스 검색에서 순위는 곧 매출입니다.<br>
+        데이터가 증명하는 순위와 매출의 상관관계를 확인하세요.
+      </p>
+      <div class="hero-back-btn reveal reveal-delay-4">
+        <a href="index.html#problem" class="pill-btn pill-btn-outline">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5"/>
+            <path d="M12 19l-7-7 7-7"/>
+          </svg>
+          메인으로 돌아가기
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== WAVE DIVIDER ===== -->
+  <div class="wave-divider">
+    <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,60 C360,120 720,0 1080,60 C1260,90 1380,80 1440,60 L1440,120 L0,120Z" fill="#ffffff"/>
+    </svg>
+  </div>
+
+  <!-- ===== SECTION 1: PIE CHART ===== -->
+  <section class="pie-section" id="pieSection">
+    <div class="container">
+      <div class="pie-section-inner">
+        <!-- Chart Side -->
+        <div class="pie-chart-wrap reveal">
+          <svg class="pie-chart-svg" viewBox="0 0 400 400" id="pieChart">
+            <defs>
+              <linearGradient id="indigoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+              </linearGradient>
+              <filter id="pieShadow">
+                <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="rgba(79,70,229,0.3)" flood-opacity="0.6"/>
+              </filter>
+            </defs>
+            <!-- Background circle -->
+            <circle cx="200" cy="200" r="140" fill="none" stroke="#E2E8F0" stroke-width="50" />
+            <!-- 67% segment (indigo) - will be animated -->
+            <circle cx="200" cy="200" r="140" fill="none"
+              stroke="url(#indigoGrad)" stroke-width="52"
+              stroke-dasharray="0 879.65"
+              stroke-dashoffset="0"
+              stroke-linecap="round"
+              transform="rotate(-90 200 200)"
+              filter="url(#pieShadow)"
+              id="pieSegment67"
+              class="pie-segment" />
+            <!-- Center white circle -->
+            <circle cx="200" cy="200" r="110" fill="#ffffff" />
+          </svg>
+          <div class="pie-chart-center">
+            <div class="pie-chart-center-num num" id="pieCenterNum">0%</div>
+            <div class="pie-chart-center-label">상위 3개 업체</div>
+          </div>
+        </div>
+
+        <!-- Text Side -->
+        <div class="pie-text-content">
+          <div class="section-label reveal">Market Share</div>
+          <h2 class="section-title reveal reveal-delay-1">상위 3개 업체의<br>매출 독점</h2>
+          <p class="section-subtitle reveal reveal-delay-2">
+            네이버 플레이스 키워드 검색 결과에서 상위 3개 업체가
+            전체 매출의 67%를 독점합니다.
+          </p>
+          <div class="pie-labels reveal reveal-delay-3">
+            <div class="pie-label-item">
+              <span class="pie-label-dot indigo"></span>
+              <span>상위 3개 업체 — <strong class="num">67%</strong></span>
+            </div>
+            <div class="pie-label-item">
+              <span class="pie-label-dot gray"></span>
+              <span>나머지 전체 — <strong class="num">33%</strong></span>
+            </div>
+          </div>
+          <div class="pie-info-text reveal reveal-delay-4">
+            4위 이하는 나머지 33%를 수십 개 업체가 나눠 경쟁합니다.
+            순위가 곧 생존이며, <strong>상위 노출</strong>만이 안정적 매출을 보장합니다.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== WAVE DIVIDER ===== -->
+  <div class="wave-divider wave-divider-reverse">
+    <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,60 C360,120 720,0 1080,60 C1260,90 1380,80 1440,60 L1440,120 L0,120Z" fill="#ffffff"/>
+    </svg>
+  </div>
+
+  <!-- ===== SECTION 2: DATA CARDS ===== -->
+  <section class="data-section" id="dataSection">
+    <div class="container">
+      <div class="data-section-header">
+        <div class="section-label reveal">Naver Place Data</div>
+        <h2 class="section-title reveal reveal-delay-1">상위 노출의 실제 효과</h2>
+        <p class="section-subtitle reveal reveal-delay-2">
+          네이버 플레이스 상위 노출 시 실제 데이터로 입증된 효과를 확인하세요.
+        </p>
+      </div>
+
+      <div class="data-grid">
+        <!-- Card 1 -->
+        <div class="data-card reveal reveal-delay-1">
+          <div class="data-card-icon indigo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div class="data-card-num num" data-count="2.5">0<span class="unit">배</span></div>
+          <div class="data-card-title">고객 유입 증가</div>
+          <div class="data-card-desc">플레이스 광고 상위 노출 시 고객 유입이 평균 2.5배 증가합니다.</div>
+          <div class="data-card-source">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            네이버 D-플레이스 리포트
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="data-card reveal reveal-delay-2">
+          <div class="data-card-icon green">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+            </svg>
+          </div>
+          <div class="data-card-num num" data-count="2.5">0<span class="unit">배</span></div>
+          <div class="data-card-title">길찾기 클릭 증가</div>
+          <div class="data-card-desc">길찾기 요청이 2.5배 증가하여 실방문으로 이어집니다.</div>
+          <div class="data-card-source">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            네이버 D-플레이스 리포트
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="data-card reveal reveal-delay-3">
+          <div class="data-card-icon purple">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <div class="data-card-num num" data-count="3.6">0<span class="unit">배</span></div>
+          <div class="data-card-title">저장하기 증가</div>
+          <div class="data-card-desc">저장(찜) 수가 3.6배 증가하여 재방문 의도가 크게 높아집니다.</div>
+          <div class="data-card-source">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            네이버 D-플레이스 리포트
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="data-card reveal reveal-delay-4">
+          <div class="data-card-icon orange">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23"/>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <div class="data-card-num num" data-count="3">0<span class="unit">배</span></div>
+          <div class="data-card-title">음식점 매출 증가</div>
+          <div class="data-card-desc">스마트플레이스 적극 활용 음식점의 평균 매출이 3배 상승합니다.</div>
+          <div class="data-card-source">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            스토어아트매거진
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="data-card reveal reveal-delay-5">
+          <div class="data-card-icon pink">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </div>
+          <div class="data-card-num num" data-count="31">0<span class="unit">배</span></div>
+          <div class="data-card-title">미용실 매출 증가</div>
+          <div class="data-card-desc">스마트플레이스 사용 미용실은 미사용 매장 대비 매출이 31배까지 차이납니다.</div>
+          <div class="data-card-source">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            스토어아트매거진
+          </div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="data-card reveal reveal-delay-6">
+          <div class="data-card-icon teal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
+          <div class="data-card-num num">
+            <span style="font-size:20px;color:#64748B;font-weight:500;">별점 0.1점</span>
+            <span class="unit-small"> 상승 시</span><br>
+            <span data-count="25">0</span><span class="unit">%</span>
+          </div>
+          <div class="data-card-title">전환율 증가</div>
+          <div class="data-card-desc">별점이 0.1점 상승하면 전환율이 최대 25% 증가합니다.</div>
+          <div class="data-card-source">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            Uberall
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== WAVE DIVIDER ===== -->
+  <div class="wave-divider" style="background:#FAFBFC;">
+    <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,40 C240,100 480,0 720,60 C960,120 1200,20 1440,80 L1440,120 L0,120Z" fill="#0F172A"/>
+    </svg>
+  </div>
+
+  <!-- ===== SECTION 3: ONDA 87K ANALYSIS ===== -->
+  <section class="analysis-section" id="analysisSection">
+    <div class="container">
+      <div class="analysis-inner">
+        <!-- Text Side -->
+        <div class="analysis-text">
+          <div class="section-label reveal">ONDA 87K Data</div>
+          <h2 class="section-title reveal reveal-delay-1">
+            87,000개 업체 데이터로<br>순위 역전 전략 설계
+          </h2>
+          <p class="section-subtitle reveal reveal-delay-2">
+            ONDA는 87,000개 업체의 실전 데이터를 분석하여
+            귀사만의 맞춤 순위 역전 전략을 설계합니다.
+          </p>
+          <div class="analysis-features reveal reveal-delay-3">
+            <div class="analysis-feature">
+              <div class="analysis-feature-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+              </div>
+              <span class="analysis-feature-text">현재 순위 vs 경쟁사 비교 분석</span>
+            </div>
+            <div class="analysis-feature">
+              <div class="analysis-feature-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+              </div>
+              <span class="analysis-feature-text">리뷰 수 / 별점 / 응답률 정밀 분석</span>
+            </div>
+            <div class="analysis-feature">
+              <div class="analysis-feature-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                  <polyline points="17 6 23 6 23 12"/>
+                </svg>
+              </div>
+              <span class="analysis-feature-text">순위 상승 예측 및 로드맵 제공</span>
+            </div>
+          </div>
+          <div class="analysis-cta reveal reveal-delay-4">
+            <a href="#" class="pill-btn pill-btn-white">
+              무료 진단 리포트 받기
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Report Mockup Side -->
+        <div class="report-mockup reveal reveal-delay-2" id="reportMockup">
+          <div class="report-header">
+            <div class="report-header-title">무료 진단 리포트</div>
+            <div class="report-header-badge">AI 분석</div>
+          </div>
+
+          <div class="report-row">
+            <span class="report-row-label">현재 플레이스 순위</span>
+            <span class="report-row-value num">12위</span>
+          </div>
+          <div class="report-row">
+            <span class="report-row-label">경쟁사 평균 순위</span>
+            <span class="report-row-value num">5위</span>
+          </div>
+          <div class="report-row">
+            <span class="report-row-label">리뷰 수</span>
+            <span class="report-row-value num negative">48개 (부족)</span>
+          </div>
+          <div class="report-row">
+            <span class="report-row-label">별점</span>
+            <span class="report-row-value num">4.2 / 5.0</span>
+          </div>
+          <div class="report-row">
+            <span class="report-row-label">리뷰 응답률</span>
+            <span class="report-row-value num negative">23%</span>
+          </div>
+
+          <div class="report-bar-wrap">
+            <div class="report-bar-label">
+              <span>경쟁력 지수</span>
+              <span class="num" id="reportBarPercent">0%</span>
+            </div>
+            <div class="report-bar">
+              <div class="report-bar-fill" id="reportBarFill" style="--fill-width:62%"></div>
+            </div>
+          </div>
+
+          <div class="report-prediction">
+            <div class="report-prediction-label">3개월 후 예측 순위</div>
+            <div class="report-prediction-value num" id="predictedRank">—</div>
+            <div class="report-prediction-desc">리뷰 마케팅 실행 시 예상 순위</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== WAVE DIVIDER ===== -->
+  <div class="wave-divider wave-divider-reverse" style="background:#FAFBFC;">
+    <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,40 C240,100 480,0 720,60 C960,120 1200,20 1440,80 L1440,120 L0,120Z" fill="#0F172A"/>
+    </svg>
+  </div>
+
+  <!-- ===== SECTION 4: SOURCES ===== -->
+  <section class="sources-section" id="sourcesSection">
+    <div class="container">
+      <div class="sources-section-header">
+        <div class="section-label reveal">References</div>
+        <h2 class="section-title reveal reveal-delay-1">출처 및 참고 자료</h2>
+        <p class="section-subtitle reveal reveal-delay-2" style="margin:0 auto;">
+          본 페이지의 데이터는 아래 출처를 기반으로 합니다.
+        </p>
+      </div>
+
+      <div class="sources-list">
+        <div class="source-item reveal reveal-delay-1">
+          <div class="source-item-num num">1</div>
+          <div class="source-item-text">스토어아트매거진</div>
+        </div>
+        <div class="source-item reveal reveal-delay-2">
+          <div class="source-item-num num">2</div>
+          <div class="source-item-text">Uberall</div>
+        </div>
+        <div class="source-item reveal reveal-delay-3">
+          <div class="source-item-num num">3</div>
+          <div class="source-item-text">네이버 D-플레이스 리포트</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <p class="footer-text">&copy; 2026 <strong>ONDA</strong>. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script>
+    /* ========================================
+       1. STICKY NAV — scroll detection
+       ======================================== */
+    (function() {
+      var nav = document.getElementById('nav');
+      var lastScrollY = 0;
+
+      function onScroll() {
+        var scrollY = window.pageYOffset || document.documentElement.scrollTop;
+        if (scrollY > 60) {
+          nav.classList.add('scrolled');
+        } else {
+          nav.classList.remove('scrolled');
+        }
+        lastScrollY = scrollY;
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
+
+    /* ========================================
+       2. INTERSECTION OBSERVER — reveal on scroll
+       ======================================== */
+    (function() {
+      var reveals = document.querySelectorAll('.reveal');
+      if (!reveals.length) return;
+
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.15,
+        rootMargin: '0px 0px -40px 0px'
+      });
+
+      reveals.forEach(function(el) {
+        observer.observe(el);
+      });
+    })();
+
+    /* ========================================
+       3. HERO COUNTER ANIMATION — counts to 67%
+       ======================================== */
+    (function() {
+      var counterEl = document.getElementById('heroCounter');
+      var hasAnimated = false;
+
+      function animateCounter(target, duration) {
+        if (hasAnimated) return;
+        hasAnimated = true;
+
+        var start = 0;
+        var startTime = null;
+
+        function easeOutCubic(t) {
+          return 1 - Math.pow(1 - t, 3);
+        }
+
+        function step(timestamp) {
+          if (!startTime) startTime = timestamp;
+          var progress = Math.min((timestamp - startTime) / duration, 1);
+          var eased = easeOutCubic(progress);
+          var current = Math.round(eased * target);
+          counterEl.textContent = current + '%';
+
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          }
+        }
+
+        requestAnimationFrame(step);
+      }
+
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            animateCounter(67, 2000);
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.3 });
+
+      observer.observe(counterEl);
+    })();
+
+    /* ========================================
+       4. PIE CHART ANIMATION — draws 67% segment
+       ======================================== */
+    (function() {
+      var pieSegment = document.getElementById('pieSegment67');
+      var pieCenterNum = document.getElementById('pieCenterNum');
+      var circumference = 2 * Math.PI * 140; // ~879.65
+      var targetPercent = 67;
+      var targetDash = (targetPercent / 100) * circumference;
+      var hasAnimated = false;
+
+      function animatePie(duration) {
+        if (hasAnimated) return;
+        hasAnimated = true;
+
+        var startTime = null;
+
+        function easeOutCubic(t) {
+          return 1 - Math.pow(1 - t, 3);
+        }
+
+        function step(timestamp) {
+          if (!startTime) startTime = timestamp;
+          var progress = Math.min((timestamp - startTime) / duration, 1);
+          var eased = easeOutCubic(progress);
+
+          var currentDash = eased * targetDash;
+          var remaining = circumference - currentDash;
+          pieSegment.setAttribute('stroke-dasharray', currentDash + ' ' + remaining);
+
+          var currentPercent = Math.round(eased * targetPercent);
+          pieCenterNum.textContent = currentPercent + '%';
+
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          }
+        }
+
+        requestAnimationFrame(step);
+      }
+
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            animatePie(2000);
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.3 });
+
+      observer.observe(document.getElementById('pieChart'));
+    })();
+
+    /* ========================================
+       5. DATA CARD NUMBER ANIMATIONS
+       ======================================== */
+    (function() {
+      var cards = document.querySelectorAll('.data-card-num [data-count]');
+      if (!cards.length) {
+        // Also check parent elements
+        var allNums = document.querySelectorAll('.data-card-num');
+        allNums.forEach(function(numEl) {
+          var countSpan = numEl.querySelector('[data-count]');
+          if (countSpan) cards = document.querySelectorAll('.data-card-num [data-count]');
+        });
+      }
+
+      // Get all elements with data-count attribute
+      var countElements = document.querySelectorAll('[data-count]');
+
+      function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+      }
+
+      function animateNumber(el, target, duration) {
+        var startTime = null;
+        var isFloat = target % 1 !== 0;
+
+        function step(timestamp) {
+          if (!startTime) startTime = timestamp;
+          var progress = Math.min((timestamp - startTime) / duration, 1);
+          var eased = easeOutCubic(progress);
+          var current = eased * target;
+
+          if (isFloat) {
+            el.textContent = current.toFixed(1);
+          } else {
+            el.textContent = Math.round(current);
+          }
+
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            // Set final value
+            if (isFloat) {
+              el.textContent = target.toFixed(1);
+            } else {
+              el.textContent = target;
+            }
+          }
+        }
+
+        requestAnimationFrame(step);
+      }
+
+      countElements.forEach(function(el) {
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              var target = parseFloat(el.getAttribute('data-count'));
+              animateNumber(el, target, 1500);
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.3 });
+
+        observer.observe(el);
+      });
+    })();
+
+    /* ========================================
+       6. REPORT MOCKUP — bar + prediction animation
+       ======================================== */
+    (function() {
+      var reportMockup = document.getElementById('reportMockup');
+      var barFill = document.getElementById('reportBarFill');
+      var barPercent = document.getElementById('reportBarPercent');
+      var predictedRank = document.getElementById('predictedRank');
+      var hasAnimated = false;
+
+      function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+      }
+
+      function animateBar(duration) {
+        var startTime = null;
+        var targetPercent = 62;
+
+        function step(timestamp) {
+          if (!startTime) startTime = timestamp;
+          var progress = Math.min((timestamp - startTime) / duration, 1);
+          var eased = easeOutCubic(progress);
+          var current = Math.round(eased * targetPercent);
+
+          barPercent.textContent = current + '%';
+          barFill.style.width = current + '%';
+
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          }
+        }
+
+        requestAnimationFrame(step);
+      }
+
+      function animatePrediction() {
+        var ranks = [12, 10, 8, 7, 5, 4, 3];
+        var delay = 0;
+        ranks.forEach(function(rank, i) {
+          setTimeout(function() {
+            predictedRank.textContent = rank + '위';
+            if (rank <= 5) {
+              predictedRank.style.color = '#10B981';
+            }
+          }, delay);
+          delay += 150 + (i * 50);
+        });
+      }
+
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting && !hasAnimated) {
+            hasAnimated = true;
+            setTimeout(function() {
+              animateBar(1500);
+            }, 400);
+            setTimeout(function() {
+              animatePrediction();
+            }, 800);
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.2 });
+
+      observer.observe(reportMockup);
+    })();
+
+    /* ========================================
+       7. STAGGER CARD REVEAL ANIMATIONS
+       ======================================== */
+    (function() {
+      var dataCards = document.querySelectorAll('.data-card');
+
+      dataCards.forEach(function(card, index) {
+        card.style.transitionDelay = (index * 0.1) + 's';
+      });
+    })();
+
+    /* ========================================
+       8. SMOOTH SCROLL FOR ANCHOR LINKS
+       ======================================== */
+    (function() {
+      document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+        anchor.addEventListener('click', function(e) {
+          var targetId = this.getAttribute('href');
+          if (targetId === '#') return;
+          var target = document.querySelector(targetId);
+          if (target) {
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      });
+    })();
+
+    /* ========================================
+       9. PARALLAX SUBTLE EFFECT ON HERO
+       ======================================== */
+    (function() {
+      var hero = document.querySelector('.hero');
+      var counter = document.querySelector('.hero-counter');
+
+      function onScroll() {
+        var scrollY = window.pageYOffset;
+        var heroRect = hero.getBoundingClientRect();
+        if (heroRect.bottom < 0) return;
+
+        var offset = scrollY * 0.15;
+        counter.style.transform = 'translateY(' + offset + 'px)';
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+    })();
+  </script>
+
+</body>
+</html>

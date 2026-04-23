@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>세대안내 — 한강 르셀</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23C8A97D'/%3E%3Crect x='8' y='10' width='7' height='16' rx='1' fill='%23fff'/%3E%3Crect x='17' y='6' width='7' height='20' rx='1' fill='%23fff'/%3E%3Crect x='10' y='13' width='3' height='3' fill='%23C8A97D'/%3E%3Crect x='10' y='18' width='3' height='3' fill='%23C8A97D'/%3E%3Crect x='19' y='9' width='3' height='3' fill='%23C8A97D'/%3E%3Crect x='19' y='14' width='3' height='3' fill='%23C8A97D'/%3E%3Crect x='19' y='19' width='3' height='3' fill='%23C8A97D'/%3E%3C/svg%3E">
+<meta name="description" content="한강 르셀 세대안내. 59A, 84A, 115P 세 가지 타입의 프리미엄 평면도와 세대 정보를 확인하세요.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+/* =============================================
+   CSS CUSTOM PROPERTIES
+   ============================================= */
+:root {
+  --bg-primary: #0C0C0C;
+  --bg-surface: #161614;
+  --bg-light: #F7F4F0;
+  --accent: #C8A97D;
+  --accent-light: #E2D1B5;
+  --text-primary: #E8E4DF;
+  --text-secondary: #8A8580;
+  --text-dark: #2A2A2A;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Pretendard Variable', -apple-system, sans-serif;
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* =============================================
+   RESET & BASE
+   ============================================= */
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  word-break: keep-all;
+  line-height: 1.7;
+  cursor: none;
+}
+
+img { display: block; max-width: 100%; }
+a { text-decoration: none; color: inherit; }
+button { border: none; background: none; cursor: none; font-family: inherit; }
+
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+@media (min-width: 768px) { .container { padding: 0 48px; } }
+@media (min-width: 1440px) { .container { padding: 0 80px; } }
+
+/* =============================================
+   GRAIN TEXTURE
+   ============================================= */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9990;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px 128px;
+}
+
+/* =============================================
+   SCROLL PROGRESS BAR
+   ============================================= */
+#scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 0%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  z-index: 99998;
+  transition: width 0.1s linear;
+}
+
+/* =============================================
+   CUSTOM CURSOR
+   ============================================= */
+#cursor-dot {
+  position: fixed;
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s var(--ease-expo), opacity 0.3s;
+}
+
+#cursor-ring {
+  position: fixed;
+  width: 36px; height: 36px;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s var(--ease-expo), height 0.4s var(--ease-expo), border-color 0.3s, opacity 0.3s;
+}
+
+#cursor-ring.expanded {
+  width: 64px; height: 64px;
+  border-color: var(--accent-light);
+}
+
+@media (pointer: coarse) {
+  #cursor-dot, #cursor-ring { display: none; }
+  body { cursor: auto; }
+  button { cursor: pointer; }
+}
+
+/* =============================================
+   NAVIGATION
+   ============================================= */
+#nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 24px 0;
+  transition: background 0.4s var(--ease-expo), padding 0.4s var(--ease-expo);
+}
+
+#nav.scrolled {
+  background: rgba(12, 12, 12, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(200, 169, 125, 0.12);
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  position: relative;
+  z-index: 1001;
+}
+
+.nav-links {
+  display: flex;
+  gap: 40px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  transition: color 0.3s;
+  position: relative;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 0; height: 1px;
+  background: var(--accent);
+  transition: width 0.4s var(--ease-expo);
+}
+
+.nav-links a:hover { color: var(--accent); }
+.nav-links a:hover::after { width: 100%; }
+.nav-links a.active { color: var(--accent); }
+.nav-links a.active::after { width: 100%; }
+
+.nav-cta {
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 10px 24px;
+  transition: background 0.3s, color 0.3s;
+}
+
+.nav-cta:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 1001;
+  position: relative;
+  padding: 8px;
+}
+
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 1.5px;
+  background: var(--text-primary);
+  transition: transform 0.4s var(--ease-expo), opacity 0.3s;
+  transform-origin: center;
+}
+
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(4.5px, 4.5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(4.5px, -4.5px); }
+
+/* Mobile Nav Overlay */
+#mobile-nav {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 12, 12, 0.97);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s var(--ease-expo), visibility 0.5s;
+}
+
+#mobile-nav.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.mobile-nav-links {
+  list-style: none;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.mobile-nav-links li {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.5s var(--ease-expo), transform 0.5s var(--ease-expo);
+}
+
+#mobile-nav.open .mobile-nav-links li:nth-child(1) { opacity:1; transform:translateY(0); transition-delay:0.1s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(2) { opacity:1; transform:translateY(0); transition-delay:0.15s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(3) { opacity:1; transform:translateY(0); transition-delay:0.2s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(4) { opacity:1; transform:translateY(0); transition-delay:0.25s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(5) { opacity:1; transform:translateY(0); transition-delay:0.3s; }
+#mobile-nav.open .mobile-nav-links li:nth-child(6) { opacity:1; transform:translateY(0); transition-delay:0.35s; }
+
+.mobile-nav-links a {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 6vw, 48px);
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+  transition: color 0.3s;
+}
+
+.mobile-nav-links a:hover { color: var(--accent); }
+.mobile-nav-links a.active { color: var(--accent); }
+
+@media (max-width: 900px) {
+  .nav-links, .nav-cta { display: none; }
+  .hamburger { display: flex; }
+}
+
+/* =============================================
+   PAGE HERO (Compact 50vh)
+   ============================================= */
+#hero {
+  position: relative;
+  height: 50vh;
+  min-height: 360px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero-bg img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  animation: kenBurns 18s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+@keyframes kenBurns {
+  0%   { transform: scale(1) translate(0, 0); }
+  100% { transform: scale(1.08) translate(-1%, -1%); }
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(12,12,12,0.35) 0%,
+    rgba(12,12,12,0.55) 40%,
+    rgba(12,12,12,0.85) 100%
+  );
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  padding-bottom: clamp(40px, 6vh, 80px);
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 7vw, 72px);
+  line-height: 1.1;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+  opacity: 0;
+  transform: translateY(24px);
+  animation: heroFadeUp 0.8s var(--ease-expo) 0.3s forwards;
+}
+
+.hero-accent-line {
+  width: 48px;
+  height: 2px;
+  background: var(--accent);
+  margin-bottom: 20px;
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: accentLineIn 0.6s var(--ease-expo) 0.7s forwards;
+}
+
+@keyframes accentLineIn {
+  to { opacity: 1; transform: scaleX(1); }
+}
+
+.hero-subtitle {
+  font-size: clamp(14px, 1.6vw, 18px);
+  color: var(--text-secondary);
+  font-weight: 300;
+  line-height: 1.7;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: heroFadeUp 0.8s var(--ease-expo) 0.9s forwards;
+}
+
+@keyframes heroFadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* =============================================
+   SECTION TAG
+   ============================================= */
+.section-tag {
+  font-size: 11px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+/* =============================================
+   FLOOR PLAN TABS SECTION
+   ============================================= */
+.units-section {
+  background: var(--bg-surface);
+  padding: clamp(60px, 10vh, 120px) 0;
+}
+
+.units-header {
+  text-align: center;
+  margin-bottom: clamp(40px, 6vh, 64px);
+}
+
+.units-header .section-tag {
+  margin-bottom: 24px;
+}
+
+/* Tab Bar */
+.tab-bar {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  border-bottom: 1px solid rgba(200, 169, 125, 0.15);
+  margin-bottom: clamp(40px, 6vh, 64px);
+}
+
+.floor-tab {
+  font-family: var(--font-display);
+  font-size: clamp(16px, 2vw, 20px);
+  color: var(--text-secondary);
+  padding: 16px 32px;
+  position: relative;
+  letter-spacing: 0.05em;
+  transition: color 0.3s;
+  cursor: none;
+}
+
+.floor-tab::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transition: transform 0.4s var(--ease-expo);
+}
+
+.floor-tab:hover {
+  color: var(--accent-light);
+}
+
+.floor-tab.active {
+  color: var(--accent);
+}
+
+.floor-tab.active::after {
+  transform: scaleX(1);
+}
+
+@media (max-width: 480px) {
+  .floor-tab {
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+}
+
+/* Floor Panels */
+.floor-panel {
+  display: none;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s var(--ease-expo), transform 0.5s var(--ease-expo);
+}
+
+.floor-panel.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 2-column grid */
+.unit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(32px, 5vw, 64px);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .unit-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+/* Left: Floor plan card */
+.floorplan-card {
+  background: var(--bg-primary);
+  border: 1px solid rgba(200, 169, 125, 0.12);
+  border-radius: 4px;
+  padding: clamp(24px, 3vw, 40px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+  transition: transform 0.15s ease, box-shadow 0.15s;
+  will-change: transform;
+}
+
+.floorplan-card svg {
+  width: 100%;
+  height: 100%;
+  max-width: 400px;
+  max-height: 400px;
+}
+
+/* Right: Specs */
+.unit-specs {
+  padding: clamp(0px, 2vw, 16px) 0;
+}
+
+.unit-type-name {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 6vw, 72px);
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+
+.unit-desc {
+  font-size: clamp(14px, 1.2vw, 16px);
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin-bottom: clamp(24px, 3vw, 40px);
+  max-width: 480px;
+}
+
+/* Specs Table */
+.specs-table {
+  width: 100%;
+  margin-bottom: clamp(24px, 3vw, 40px);
+}
+
+.spec-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(200, 169, 125, 0.1);
+}
+
+.spec-row:last-child {
+  border-bottom: none;
+}
+
+.spec-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.spec-value {
+  font-size: 15px;
+  color: var(--text-primary);
+  text-align: right;
+  font-weight: 400;
+}
+
+.spec-value .counter {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.spec-value .unit-suffix {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-left: 2px;
+}
+
+/* Amenity Icons */
+.amenity-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.amenity-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(200, 169, 125, 0.06);
+  border: 1px solid rgba(200, 169, 125, 0.12);
+  border-radius: 4px;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.amenity-item:hover {
+  background: rgba(200, 169, 125, 0.12);
+  border-color: rgba(200, 169, 125, 0.25);
+}
+
+.amenity-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.amenity-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+}
+
+/* =============================================
+   LIFESTYLE SECTION (Full-width image)
+   ============================================= */
+.lifestyle-section {
+  position: relative;
+  height: 50vh;
+  min-height: 320px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lifestyle-bg {
+  position: absolute;
+  inset: 0;
+}
+
+.lifestyle-bg img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+
+.lifestyle-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(12,12,12,0.4) 0%,
+    rgba(12,12,12,0.6) 50%,
+    rgba(12,12,12,0.4) 100%
+  );
+}
+
+.lifestyle-text {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 5vw, 56px);
+  color: var(--text-primary);
+  text-align: center;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  padding: 0 24px;
+}
+
+.lifestyle-text .accent-word {
+  color: var(--accent);
+}
+
+/* =============================================
+   REVEAL ANIMATIONS
+   ============================================= */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.8s var(--ease-expo), transform 0.8s var(--ease-expo);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =============================================
+   FOOTER
+   ============================================= */
+#footer {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-primary);
+  padding: clamp(60px, 10vh, 120px) 0 40px;
+  border-top: 1px solid rgba(200, 169, 125, 0.08);
+}
+
+.footer-mega {
+  position: absolute;
+  bottom: -20px; left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: clamp(80px, 15vw, 200px);
+  color: rgba(200, 169, 125, 0.03);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: -0.02em;
+}
+
+.footer-inner {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 60px;
+}
+
+@media (max-width: 768px) {
+  .footer-inner {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    margin-bottom: 40px;
+  }
+}
+
+.footer-brand {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--accent);
+  margin-bottom: 12px;
+  letter-spacing: 0.03em;
+}
+
+.footer-tagline {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.footer-col-title {
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.footer-info p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 2;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(200, 169, 125, 0.08);
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.footer-legal {
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  line-height: 1.7;
+}
+
+.footer-copy {
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.4;
+}
+
+#back-to-top {
+  position: fixed;
+  bottom: 32px; right: 32px;
+  width: 48px; height: 48px;
+  border: 1px solid rgba(200,169,125,0.3);
+  background: rgba(12,12,12,0.8);
+  backdrop-filter: blur(8px);
+  color: var(--accent);
+  font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 990;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.4s var(--ease-expo), visibility 0.4s, transform 0.4s var(--ease-expo), border-color 0.3s;
+  cursor: none;
+}
+#back-to-top.visible { opacity: 1; visibility: visible; }
+#back-to-top:hover { border-color: var(--accent); transform: translateY(-4px); }
+
+/* =============================================
+   LIGHTBOX
+   ============================================= */
+#lightbox {
+  position: fixed; inset: 0; z-index: 9995;
+  background: rgba(0,0,0,0.9);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.4s var(--ease-expo), visibility 0.4s;
+  cursor: none;
+}
+#lightbox.open { opacity: 1; visibility: visible; }
+#lightbox img { max-width: 90vw; max-height: 85vh; object-fit: contain; }
+.lightbox-close {
+  position: absolute; top: 24px; right: 24px;
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 28px;
+  cursor: none; z-index: 1;
+  transition: color 0.3s;
+}
+.lightbox-close:hover { color: var(--accent); }
+.lightbox-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 24px; cursor: none;
+  transition: color 0.3s;
+}
+.lightbox-nav:hover { color: var(--accent); }
+.lightbox-prev { left: 24px; }
+.lightbox-next { right: 24px; }
+</style>
+</head>
+<body>
+
+<!-- Scroll Progress -->
+<div id="scroll-progress"></div>
+
+<!-- Custom Cursor -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- Navigation -->
+<nav id="nav">
+  <div class="container">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo magnetic">한강 르셀</a>
+      <ul class="nav-links">
+        <li><a href="overview.html">사업개요</a></li>
+        <li><a href="units.html" class="active">세대안내</a></li>
+        <li><a href="location.html">입지환경</a></li>
+        <li><a href="amenities.html">커뮤니티</a></li>
+        <li><a href="contact.html">관심고객등록</a></li>
+      </ul>
+      <a href="contact.html" class="nav-cta magnetic">상담 예약</a>
+      <button class="hamburger magnetic" id="hamburger" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Nav Overlay -->
+<div id="mobile-nav">
+  <ul class="mobile-nav-links">
+    <li><a href="index.html" onclick="closeMobileNav()">홈</a></li>
+    <li><a href="overview.html" onclick="closeMobileNav()">사업개요</a></li>
+    <li><a href="units.html" class="active" onclick="closeMobileNav()">세대안내</a></li>
+    <li><a href="location.html" onclick="closeMobileNav()">입지환경</a></li>
+    <li><a href="amenities.html" onclick="closeMobileNav()">커뮤니티</a></li>
+    <li><a href="contact.html" onclick="closeMobileNav()">관심고객등록</a></li>
+  </ul>
+</div>
+
+<!-- Hero Section (compact 50vh) -->
+<section id="hero">
+  <div class="hero-bg">
+    <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&q=80" alt="한강 르셀 세대 인테리어" loading="eager">
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content container">
+    <h1 class="hero-title">세대 안내</h1>
+    <div class="hero-accent-line"></div>
+    <p class="hero-subtitle">세 가지 삶의 방식, 하나의 프리미엄</p>
+  </div>
+</section>
+
+<!-- Floor Plans / Tab Interface Section -->
+<section class="units-section">
+  <div class="container">
+    <div class="units-header reveal">
+      <p class="section-tag">Floor Plans</p>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar reveal">
+      <button class="floor-tab active magnetic" data-tab="59a">59A</button>
+      <button class="floor-tab magnetic" data-tab="84a">84A</button>
+      <button class="floor-tab magnetic" data-tab="115p">115P</button>
+    </div>
+
+    <!-- Panel: 59A -->
+    <div class="floor-panel active" id="panel-59a">
+      <div class="unit-grid">
+        <div class="floorplan-card tilt-card">
+          <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Outer walls -->
+            <rect x="40" y="40" width="320" height="320" stroke="#C8A97D" stroke-width="2" rx="2"/>
+            <!-- Main divider: living/kitchen vs bedrooms -->
+            <line x1="220" y1="40" x2="220" y2="260" stroke="#C8A97D" stroke-width="1.5"/>
+            <!-- Horizontal corridor -->
+            <line x1="40" y1="260" x2="360" y2="260" stroke="#C8A97D" stroke-width="1.5"/>
+            <!-- Bedroom 1 divider -->
+            <line x1="220" y1="140" x2="360" y2="140" stroke="#C8A97D" stroke-width="1"/>
+            <!-- Bathroom 1 -->
+            <rect x="300" y="260" width="60" height="60" stroke="#C8A97D" stroke-width="1" stroke-dasharray="4 2"/>
+            <!-- Bathroom 2 -->
+            <rect x="220" y="260" width="80" height="60" stroke="#C8A97D" stroke-width="1" stroke-dasharray="4 2"/>
+            <!-- Entrance -->
+            <rect x="40" y="320" width="80" height="40" stroke="#C8A97D" stroke-width="1"/>
+            <!-- Balcony -->
+            <rect x="40" y="20" width="180" height="20" stroke="#C8A97D" stroke-width="1" stroke-dasharray="6 3" opacity="0.5"/>
+            <!-- Dress room -->
+            <rect x="300" y="42" width="58" height="50" stroke="#C8A97D" stroke-width="0.8" opacity="0.6"/>
+            <!-- Door arcs -->
+            <path d="M 120 260 A 30 30 0 0 0 120 230" stroke="#C8A97D" stroke-width="0.8" fill="none" opacity="0.5"/>
+            <path d="M 220 200 A 25 25 0 0 1 245 200" stroke="#C8A97D" stroke-width="0.8" fill="none" opacity="0.5"/>
+            <!-- Room Labels -->
+            <text x="120" y="160" fill="#C8A97D" font-size="13" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.7">거실</text>
+            <text x="120" y="180" fill="#8A8580" font-size="9" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.5">Living</text>
+            <text x="290" y="90" fill="#C8A97D" font-size="11" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.7">안방</text>
+            <text x="290" y="105" fill="#8A8580" font-size="8" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.5">Master</text>
+            <text x="290" y="200" fill="#C8A97D" font-size="11" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.7">침실</text>
+            <text x="290" y="215" fill="#8A8580" font-size="8" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.5">Bedroom</text>
+            <text x="120" y="310" fill="#C8A97D" font-size="10" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.7">주방</text>
+            <text x="120" y="323" fill="#8A8580" font-size="8" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.5">Kitchen</text>
+            <text x="260" y="295" fill="#C8A97D" font-size="9" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.6">욕실1</text>
+            <text x="330" y="295" fill="#C8A97D" font-size="9" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.6">욕실2</text>
+            <text x="330" y="68" fill="#C8A97D" font-size="9" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.6">드레스룸</text>
+            <text x="120" y="32" fill="#8A8580" font-size="8" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.4">발코니</text>
+            <text x="80" y="345" fill="#8A8580" font-size="9" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.5">현관</text>
+            <!-- Compass -->
+            <g transform="translate(355, 375)">
+              <line x1="0" y1="8" x2="0" y2="-8" stroke="#C8A97D" stroke-width="1"/>
+              <polygon points="0,-10 -3,-4 3,-4" fill="#C8A97D" opacity="0.7"/>
+              <text x="0" y="-14" fill="#C8A97D" font-size="7" text-anchor="middle" opacity="0.5">N</text>
+            </g>
+          </svg>
+        </div>
+        <div class="unit-specs">
+          <h2 class="unit-type-name">59A</h2>
+          <p class="unit-desc">효율적 공간 설계로 모든 생활 영역이 유기적으로 연결됩니다. 주방에서도 한강의 풍경을 감상할 수 있는 파노라마 윈도우가 일상에 여유를 더합니다.</p>
+          <div class="specs-table">
+            <div class="spec-row">
+              <span class="spec-label">전용면적</span>
+              <span class="spec-value"><span class="counter" data-target="59">0</span><span class="unit-suffix">&#13217;</span></span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">공급면적</span>
+              <span class="spec-value">84&#13217;</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">방 / 욕실</span>
+              <span class="spec-value">2R / 2B</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">향</span>
+              <span class="spec-value">남향 (한강 정면)</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">특징</span>
+              <span class="spec-value">효율적 공간설계, 한강뷰 주방</span>
+            </div>
+          </div>
+          <div class="amenity-row">
+            <div class="amenity-item">
+              <svg class="amenity-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+              </svg>
+              <span class="amenity-label">발코니</span>
+            </div>
+            <div class="amenity-item">
+              <svg class="amenity-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h5v16H4z"/>
+                <path d="M9 4h2v16H9z"/>
+                <line x1="6" y1="8" x2="6" y2="8.01"/>
+              </svg>
+              <span class="amenity-label">드레스룸</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel: 84A -->
+    <div class="floor-panel" id="panel-84a">
+      <div class="unit-grid">
+        <div class="floorplan-card tilt-card">
+          <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Outer walls -->
+            <rect x="30" y="30" width="340" height="340" stroke="#C8A97D" stroke-width="2" rx="2"/>
+            <!-- Main divider -->
+            <line x1="200" y1="30" x2="200" y2="240" stroke="#C8A97D" stroke-width="1.5"/>
+            <!-- Corridor -->
+            <line x1="30" y1="240" x2="370" y2="240" stroke="#C8A97D" stroke-width="1.5"/>
+            <!-- Bedroom dividers -->
+            <line x1="200" y1="130" x2="370" y2="130" stroke="#C8A97D" stroke-width="1"/>
+            <line x1="290" y1="130" x2="290" y2="240" stroke="#C8A97D" stroke-width="1"/>
+            <!-- Bathrooms -->
+            <rect x="290" y="240" width="80" height="55" stroke="#C8A97D" stroke-width="1" stroke-dasharray="4 2"/>
+            <rect x="200" y="240" width="90" height="55" stroke="#C8A97D" stroke-width="1" stroke-dasharray="4 2"/>
+            <!-- Kitchen separate -->
+            <line x1="30" y1="300" x2="200" y2="300" stroke="#C8A97D" stroke-width="1"/>
+            <!-- Pantry -->
+            <rect x="150" y="300" width="50" height="40" stroke="#C8A97D" stroke-width="0.8" opacity="0.6"/>
+            <!-- Entrance -->
+            <rect x="30" y="330" width="70" height="40" stroke="#C8A97D" stroke-width="1"/>
+            <!-- Laundry -->
+            <rect x="100" y="330" width="50" height="40" stroke="#C8A97D" stroke-width="0.8" stroke-dasharray="3 2" opacity="0.6"/>
+            <!-- Balcony -->
+            <rect x="30" y="10" width="170" height="20" stroke="#C8A97D" stroke-width="1" stroke-dasharray="6 3" opacity="0.5"/>
+            <!-- Dress room -->
+            <rect x="310" y="32" width="58" height="48" stroke="#C8A97D" stroke-width="0.8" opacity="0.6"/>
+            <!-- Door arcs -->
+            <path d="M 100 240 A 30 30 0 0 0 100 210" stroke="#C8A97D" stroke-width="0.8" fill="none" opacity="0.5"/>
+            <path d="M 200 190 A 25 25 0 0 1 225 190" stroke="#C8A97D" stroke-width="0.8" fill="none" opacity="0.5"/>
+            <path d="M 290 190 A 25 25 0 0 1 315 190" stroke="#C8A97D" stroke-width="0.8" fill="none" opacity="0.5"/>
+            <!-- Room Labels -->
+            <text x="110" y="145" fill="#C8A97D" font-size="13" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.7">거실</text>
+            <text x="110" y="162" fill="#8A8580" font-size="9" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.5">Living</text>
+            <text x="285" y="82" fill="#C8A97D" font-size="11" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.7">안방</text>
+            <text x="285" y="97" fill="#8A8580" font-size="8" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.5">Master</text>
+            <text x="245" y="190" fill="#C8A97D" font-size="10" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.7">침실2</text>
+            <text x="330" y="190" fill="#C8A97D" font-size="10" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.7">침실3</text>
+            <text x="100" y="278" fill="#C8A97D" font-size="10" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.7">주방</text>
+            <text x="100" y="291" fill="#8A8580" font-size="8" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.5">Kitchen</text>
+            <text x="245" y="272" fill="#C8A97D" font-size="9" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.6">욕실1</text>
+            <text x="330" y="272" fill="#C8A97D" font-size="9" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.6">욕실2</text>
+            <text x="340" y="58" fill="#C8A97D" font-size="9" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.6">드레스룸</text>
+            <text x="175" y="324" fill="#C8A97D" font-size="9" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.6">팬트리</text>
+            <text x="125" y="355" fill="#8A8580" font-size="8" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.5">세탁실</text>
+            <text x="110" y="22" fill="#8A8580" font-size="8" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.4">발코니</text>
+            <text x="65" y="355" fill="#8A8580" font-size="9" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.5">현관</text>
+            <!-- Compass -->
+            <g transform="translate(360, 380)">
+              <line x1="0" y1="8" x2="0" y2="-8" stroke="#C8A97D" stroke-width="1"/>
+              <polygon points="0,-10 -3,-4 3,-4" fill="#C8A97D" opacity="0.7"/>
+              <text x="0" y="-14" fill="#C8A97D" font-size="7" text-anchor="middle" opacity="0.5">N</text>
+            </g>
+          </svg>
+        </div>
+        <div class="unit-specs">
+          <h2 class="unit-type-name">84A</h2>
+          <p class="unit-desc">넓은 거실과 분리형 주방이 만들어내는 개방감, 독립 세탁실까지 갖춘 실용적인 생활 공간입니다. 가족의 일상과 프라이버시를 모두 존중하는 설계입니다.</p>
+          <div class="specs-table">
+            <div class="spec-row">
+              <span class="spec-label">전용면적</span>
+              <span class="spec-value"><span class="counter" data-target="84">0</span><span class="unit-suffix">&#13217;</span></span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">공급면적</span>
+              <span class="spec-value">112&#13217;</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">방 / 욕실</span>
+              <span class="spec-value">3R / 2B</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">향</span>
+              <span class="spec-value">남동향</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">특징</span>
+              <span class="spec-value">넓은 거실, 분리형 주방, 독립 세탁실</span>
+            </div>
+          </div>
+          <div class="amenity-row">
+            <div class="amenity-item">
+              <svg class="amenity-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+              </svg>
+              <span class="amenity-label">발코니</span>
+            </div>
+            <div class="amenity-item">
+              <svg class="amenity-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h5v16H4z"/>
+                <path d="M9 4h2v16H9z"/>
+                <line x1="6" y1="8" x2="6" y2="8.01"/>
+              </svg>
+              <span class="amenity-label">드레스룸</span>
+            </div>
+            <div class="amenity-item">
+              <svg class="amenity-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="5" y="2" width="14" height="20" rx="1"/>
+                <line x1="8" y1="6" x2="16" y2="6"/>
+                <line x1="8" y1="10" x2="16" y2="10"/>
+                <line x1="8" y1="14" x2="16" y2="14"/>
+              </svg>
+              <span class="amenity-label">팬트리</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel: 115P -->
+    <div class="floor-panel" id="panel-115p">
+      <div class="unit-grid">
+        <div class="floorplan-card tilt-card">
+          <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Outer walls (larger feel) -->
+            <rect x="20" y="20" width="360" height="360" stroke="#C8A97D" stroke-width="2" rx="2"/>
+            <!-- Main living area -->
+            <line x1="200" y1="20" x2="200" y2="220" stroke="#C8A97D" stroke-width="1.5"/>
+            <!-- Corridor -->
+            <line x1="20" y1="220" x2="380" y2="220" stroke="#C8A97D" stroke-width="1.5"/>
+            <!-- Bedroom dividers top right -->
+            <line x1="200" y1="120" x2="380" y2="120" stroke="#C8A97D" stroke-width="1"/>
+            <line x1="290" y1="20" x2="290" y2="120" stroke="#C8A97D" stroke-width="1"/>
+            <!-- Bottom rooms -->
+            <line x1="120" y1="220" x2="120" y2="310" stroke="#C8A97D" stroke-width="1"/>
+            <line x1="200" y1="220" x2="200" y2="380" stroke="#C8A97D" stroke-width="1.5"/>
+            <line x1="300" y1="220" x2="300" y2="380" stroke="#C8A97D" stroke-width="1"/>
+            <!-- Bathrooms -->
+            <rect x="300" y="220" width="80" height="55" stroke="#C8A97D" stroke-width="1" stroke-dasharray="4 2"/>
+            <rect x="200" y="310" width="100" height="50" stroke="#C8A97D" stroke-width="1" stroke-dasharray="4 2"/>
+            <rect x="120" y="310" width="80" height="50" stroke="#C8A97D" stroke-width="1" stroke-dasharray="4 2"/>
+            <!-- Entrance -->
+            <rect x="20" y="340" width="70" height="40" stroke="#C8A97D" stroke-width="1"/>
+            <!-- Pantry -->
+            <rect x="20" y="280" width="50" height="60" stroke="#C8A97D" stroke-width="0.8" opacity="0.6"/>
+            <!-- Dress room -->
+            <rect x="320" y="22" width="58" height="48" stroke="#C8A97D" stroke-width="0.8" opacity="0.6"/>
+            <!-- Alpha room -->
+            <rect x="300" y="310" width="78" height="68" stroke="#C8A97D" stroke-width="0.8" opacity="0.7"/>
+            <!-- Balcony panorama -->
+            <rect x="20" y="2" width="360" height="18" stroke="#C8A97D" stroke-width="1" stroke-dasharray="6 3" opacity="0.5"/>
+            <!-- Door arcs -->
+            <path d="M 80 220 A 30 30 0 0 0 80 190" stroke="#C8A97D" stroke-width="0.8" fill="none" opacity="0.5"/>
+            <path d="M 200 170 A 25 25 0 0 1 225 170" stroke="#C8A97D" stroke-width="0.8" fill="none" opacity="0.5"/>
+            <path d="M 290 70 A 20 20 0 0 1 310 70" stroke="#C8A97D" stroke-width="0.8" fill="none" opacity="0.5"/>
+            <path d="M 300 300 A 20 20 0 0 1 320 300" stroke="#C8A97D" stroke-width="0.8" fill="none" opacity="0.5"/>
+            <!-- Room Labels -->
+            <text x="100" y="130" fill="#C8A97D" font-size="14" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.7">거실</text>
+            <text x="100" y="148" fill="#8A8580" font-size="9" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.5">Living</text>
+            <text x="245" y="72" fill="#C8A97D" font-size="11" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.7">안방</text>
+            <text x="245" y="87" fill="#8A8580" font-size="8" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.5">Master</text>
+            <text x="335" y="72" fill="#C8A97D" font-size="10" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.7">침실2</text>
+            <text x="245" y="175" fill="#C8A97D" font-size="10" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.7">침실3</text>
+            <text x="340" y="175" fill="#C8A97D" font-size="10" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.7">침실4</text>
+            <text x="70" y="260" fill="#C8A97D" font-size="10" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.7">주방</text>
+            <text x="70" y="273" fill="#8A8580" font-size="8" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.5">Kitchen</text>
+            <text x="160" y="260" fill="#C8A97D" font-size="10" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.7">다이닝</text>
+            <text x="340" y="250" fill="#C8A97D" font-size="9" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.6">욕실1</text>
+            <text x="250" y="340" fill="#C8A97D" font-size="9" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.6">욕실2</text>
+            <text x="160" y="340" fill="#C8A97D" font-size="9" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.6">욕실3</text>
+            <text x="350" y="48" fill="#C8A97D" font-size="9" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.6">드레스룸</text>
+            <text x="45" y="315" fill="#C8A97D" font-size="9" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.6">팬트리</text>
+            <text x="340" y="350" fill="#C8A97D" font-size="9" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.7">알파룸</text>
+            <text x="340" y="363" fill="#8A8580" font-size="7" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.4">Alpha</text>
+            <text x="200" y="13" fill="#8A8580" font-size="8" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.4">파노라마 발코니</text>
+            <text x="55" y="365" fill="#8A8580" font-size="9" text-anchor="middle" font-family="Pretendard Variable, sans-serif" opacity="0.5">현관</text>
+            <!-- Compass -->
+            <g transform="translate(370, 390)">
+              <line x1="0" y1="8" x2="0" y2="-8" stroke="#C8A97D" stroke-width="1"/>
+              <polygon points="0,-10 -3,-4 3,-4" fill="#C8A97D" opacity="0.7"/>
+              <text x="0" y="-14" fill="#C8A97D" font-size="7" text-anchor="middle" opacity="0.5">N</text>
+            </g>
+          </svg>
+        </div>
+        <div class="unit-specs">
+          <h2 class="unit-type-name">115P</h2>
+          <p class="unit-desc">펜트하우스급 프리미엄 설계로, 복층 구성이 가능하며 360도 파노라마 조망을 제공합니다. 알파룸과 넓은 팬트리, 3개의 욕실까지 갖춘 최상위 주거 공간입니다.</p>
+          <div class="specs-table">
+            <div class="spec-row">
+              <span class="spec-label">전용면적</span>
+              <span class="spec-value"><span class="counter" data-target="115">0</span><span class="unit-suffix">&#13217;</span></span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">공급면적</span>
+              <span class="spec-value">148&#13217;</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">방 / 욕실</span>
+              <span class="spec-value">4R / 3B</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">향</span>
+              <span class="spec-value">남향 (파노라마)</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">특징</span>
+              <span class="spec-value">펜트하우스급, 복층 가능, 360도 조망</span>
+            </div>
+          </div>
+          <div class="amenity-row">
+            <div class="amenity-item">
+              <svg class="amenity-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+              </svg>
+              <span class="amenity-label">발코니</span>
+            </div>
+            <div class="amenity-item">
+              <svg class="amenity-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h5v16H4z"/>
+                <path d="M9 4h2v16H9z"/>
+                <line x1="6" y1="8" x2="6" y2="8.01"/>
+              </svg>
+              <span class="amenity-label">드레스룸</span>
+            </div>
+            <div class="amenity-item">
+              <svg class="amenity-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="5" y="2" width="14" height="20" rx="1"/>
+                <line x1="8" y1="6" x2="16" y2="6"/>
+                <line x1="8" y1="10" x2="16" y2="10"/>
+                <line x1="8" y1="14" x2="16" y2="14"/>
+              </svg>
+              <span class="amenity-label">팬트리</span>
+            </div>
+            <div class="amenity-item">
+              <svg class="amenity-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="12" cy="12" r="3"/>
+                <line x1="12" y1="3" x2="12" y2="9"/>
+              </svg>
+              <span class="amenity-label">알파룸</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Lifestyle Full-Width Image Section -->
+<section class="lifestyle-section reveal">
+  <div class="lifestyle-bg">
+    <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80" alt="한강 르셀 라이프스타일" loading="lazy">
+  </div>
+  <div class="lifestyle-overlay"></div>
+  <p class="lifestyle-text">모든 세대, <span class="accent-word">한강</span>을 향하다</p>
+</section>
+
+<!-- Footer -->
+<footer id="footer">
+  <div class="footer-mega" aria-hidden="true">한강 르셀</div>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">한강 르셀</div>
+        <p class="footer-tagline">서울의 마지막 한강변<br>프라이빗 레지던스.</p>
+      </div>
+      <div>
+        <p class="footer-col-title">Contact</p>
+        <div class="footer-info"><p>02-1234-5678</p><p>info@hangang-leciel.kr</p><p>월–토 10:00–18:00</p></div>
+      </div>
+      <div>
+        <p class="footer-col-title">Location</p>
+        <div class="footer-info"><p>서울특별시 영등포구</p><p>한강변로 123</p><p>한강 르셀 분양사무소</p></div>
+      </div>
+      <div>
+        <p class="footer-col-title">Navigation</p>
+        <div class="footer-info">
+          <p><a href="overview.html">사업개요</a></p>
+          <p><a href="units.html">세대안내</a></p>
+          <p><a href="location.html">입지환경</a></p>
+          <p><a href="amenities.html">커뮤니티</a></p>
+          <p><a href="contact.html">관심고객등록</a></p>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-legal">본 홈페이지의 이미지, 조감도, 배치도 등은 이해를 돕기 위한 것으로 실제와 다를 수 있습니다. 분양문의: 02-1234-5678</p>
+      <p class="footer-copy">&copy; 2027 한강 르셀. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ──────────────────────────────────────────
+     CUSTOM CURSOR
+  ────────────────────────────────────────── */
+  var dot = document.getElementById('cursor-dot');
+  var ring = document.getElementById('cursor-ring');
+  var mouseX = 0, mouseY = 0;
+  var dotX = 0, dotY = 0;
+  var ringX = 0, ringY = 0;
+
+  document.addEventListener('mousemove', function (e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
+  function cursorLoop() {
+    dotX += (mouseX - dotX) * 0.25;
+    dotY += (mouseY - dotY) * 0.25;
+    ringX += (mouseX - ringX) * 0.12;
+    ringY += (mouseY - ringY) * 0.12;
+
+    dot.style.left = dotX + 'px';
+    dot.style.top = dotY + 'px';
+    ring.style.left = ringX + 'px';
+    ring.style.top = ringY + 'px';
+
+    requestAnimationFrame(cursorLoop);
+  }
+  cursorLoop();
+
+  // Ring expand on interactive elements
+  var interactiveSelector = 'a, button, .floor-tab, .tilt-card, .amenity-item';
+  document.addEventListener('mouseover', function (e) {
+    if (e.target.closest(interactiveSelector)) {
+      ring.classList.add('expanded');
+    }
+  });
+  document.addEventListener('mouseout', function (e) {
+    if (e.target.closest(interactiveSelector)) {
+      ring.classList.remove('expanded');
+    }
+  });
+
+  /* ──────────────────────────────────────────
+     SCROLL PROGRESS
+  ────────────────────────────────────────── */
+  var progressBar = document.getElementById('scroll-progress');
+
+  function updateProgress() {
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (docHeight > 0) {
+      progressBar.style.width = ((scrollTop / docHeight) * 100) + '%';
+    }
+  }
+
+  /* ──────────────────────────────────────────
+     NAV SCROLL BEHAVIOR
+  ────────────────────────────────────────── */
+  var nav = document.getElementById('nav');
+
+  function updateNav() {
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    if (scrollTop > 60) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
+    }
+  }
+
+  /* ──────────────────────────────────────────
+     HAMBURGER MOBILE NAV
+  ────────────────────────────────────────── */
+  var hamburger = document.getElementById('hamburger');
+  var mobileNav = document.getElementById('mobile-nav');
+  var isNavOpen = false;
+
+  hamburger.addEventListener('click', function () {
+    isNavOpen = !isNavOpen;
+    hamburger.classList.toggle('open', isNavOpen);
+    mobileNav.classList.toggle('open', isNavOpen);
+    document.body.style.overflow = isNavOpen ? 'hidden' : '';
+  });
+
+  window.closeMobileNav = function () {
+    isNavOpen = false;
+    hamburger.classList.remove('open');
+    mobileNav.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  /* ──────────────────────────────────────────
+     FLOOR PLAN TAB SWITCHING
+  ────────────────────────────────────────── */
+  document.querySelectorAll('.floor-tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('.floor-tab').forEach(function (t) { t.classList.remove('active'); });
+      document.querySelectorAll('.floor-panel').forEach(function (p) { p.classList.remove('active'); });
+      tab.classList.add('active');
+      var panelId = 'panel-' + tab.dataset.tab;
+      var panel = document.getElementById(panelId);
+      if (panel) {
+        panel.classList.add('active');
+        // Re-run counters in the active panel
+        panel.querySelectorAll('.counter').forEach(function (el) {
+          countedEls.delete(el);
+          el.textContent = '0';
+          animateCounter(el);
+        });
+      }
+    });
+  });
+
+  /* ──────────────────────────────────────────
+     COUNTER ANIMATION
+  ────────────────────────────────────────── */
+  var countedEls = new Set();
+
+  function animateCounter(el) {
+    if (countedEls.has(el)) return;
+    countedEls.add(el);
+    var target = parseInt(el.dataset.target, 10);
+    var duration = 2000;
+    var startTime = null;
+
+    function easeOutExpo(t) {
+      return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+    }
+
+    function step(timestamp) {
+      if (!startTime) startTime = timestamp;
+      var elapsed = timestamp - startTime;
+      var progress = Math.min(elapsed / duration, 1);
+      var eased = easeOutExpo(progress);
+      el.textContent = Math.round(eased * target);
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        el.textContent = target;
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ──────────────────────────────────────────
+     INTERSECTION OBSERVER — REVEAL
+  ────────────────────────────────────────── */
+  var revealObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        var el = entry.target;
+        el.classList.add('visible');
+
+        // Counters inside revealed elements
+        el.querySelectorAll('.counter').forEach(animateCounter);
+
+        revealObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.reveal').forEach(function (el) {
+    revealObserver.observe(el);
+  });
+
+  // Animate counters in the initially active panel
+  var activePanel = document.querySelector('.floor-panel.active');
+  if (activePanel) {
+    activePanel.querySelectorAll('.counter').forEach(animateCounter);
+  }
+
+  /* ──────────────────────────────────────────
+     3D TILT — TILT CARDS
+  ────────────────────────────────────────── */
+  document.querySelectorAll('.tilt-card').forEach(function (card) {
+    card.addEventListener('mousemove', function (e) {
+      var rect = card.getBoundingClientRect();
+      var cx = rect.left + rect.width / 2;
+      var cy = rect.top + rect.height / 2;
+      var dx = (e.clientX - cx) / (rect.width / 2);
+      var dy = (e.clientY - cy) / (rect.height / 2);
+      var rx = -dy * 8;
+      var ry = dx * 8;
+      card.style.transform = 'perspective(800px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) scale(1.02)';
+      card.style.boxShadow = (ry * 2) + 'px ' + (rx * 2) + 'px 32px rgba(0,0,0,0.4)';
+    });
+    card.addEventListener('mouseleave', function () {
+      card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) scale(1)';
+      card.style.boxShadow = '';
+      card.style.transition = 'transform 0.6s cubic-bezier(0.16,1,0.3,1), box-shadow 0.6s';
+    });
+    card.addEventListener('mouseenter', function () {
+      card.style.transition = 'transform 0.15s ease, box-shadow 0.15s';
+    });
+  });
+
+  /* ──────────────────────────────────────────
+     MAGNETIC BUTTONS
+  ────────────────────────────────────────── */
+  var magneticBtns = document.querySelectorAll('.magnetic');
+
+  magneticBtns.forEach(function (btn) {
+    btn.addEventListener('mousemove', function (e) {
+      var rect = btn.getBoundingClientRect();
+      var bx = rect.left + rect.width / 2;
+      var by = rect.top + rect.height / 2;
+      var dx = e.clientX - bx;
+      var dy = e.clientY - by;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+      var radius = 80;
+      if (dist < radius) {
+        var strength = (1 - dist / radius) * 0.4;
+        btn.style.transform = 'translate(' + dx * strength + 'px, ' + dy * strength + 'px)';
+      }
+    });
+    btn.addEventListener('mouseleave', function () {
+      btn.style.transform = 'translate(0, 0)';
+      btn.style.transition = 'transform 0.6s cubic-bezier(0.16,1,0.3,1)';
+    });
+    btn.addEventListener('mouseenter', function () {
+      btn.style.transition = 'transform 0.2s cubic-bezier(0.16,1,0.3,1)';
+    });
+  });
+
+  /* ──────────────────────────────────────────
+     MAIN SCROLL HANDLER
+  ────────────────────────────────────────── */
+  var ticking = false;
+
+  function onScroll() {
+    if (!ticking) {
+      requestAnimationFrame(function () {
+        updateProgress();
+        updateNav();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // Initial call
+  updateProgress();
+  updateNav();
+
+  /* ──────────────────────────────────────────
+     SAFETY NET — Force all reveals visible
+  ────────────────────────────────────────── */
+  setTimeout(function () {
+    document.querySelectorAll('.reveal, [class*="reveal"]').forEach(function (el) {
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+      el.classList.add('visible');
+      el.classList.add('revealed');
+    });
+    document.querySelectorAll('.counter').forEach(function (el) {
+      var target = el.dataset.target;
+      if (target) el.textContent = target;
+    });
+  }, 2000);
+
+  /* ──────────────────────────────────────────
+     BACK TO TOP BUTTON
+  ────────────────────────────────────────── */
+  var backToTop = document.getElementById('back-to-top');
+  window.addEventListener('scroll', function() {
+    if (window.pageYOffset > 500) { backToTop.classList.add('visible'); }
+    else { backToTop.classList.remove('visible'); }
+  }, { passive: true });
+  backToTop.addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  /* ──────────────────────────────────────────
+     LIGHTBOX
+  ────────────────────────────────────────── */
+  var lightboxImages = [];
+  var lightboxIndex = 0;
+  var lightbox = document.getElementById('lightbox');
+  var lightboxImg = document.getElementById('lightbox-img');
+
+  document.querySelectorAll('.floor-visual img, .floor-visual svg, .lifestyle-bg img').forEach(function(img) {
+    if (img.src) {
+      img.style.cursor = 'pointer';
+      img.addEventListener('click', function() { openLightbox(img.src); });
+    }
+  });
+
+  function collectImages() {
+    lightboxImages = [];
+    document.querySelectorAll('.lifestyle-bg img').forEach(function(img) { if (img.src) lightboxImages.push(img.src); });
+  }
+
+  function openLightbox(src) {
+    collectImages();
+    lightboxIndex = lightboxImages.indexOf(src);
+    if (lightboxIndex === -1) { lightboxImages = [src]; lightboxIndex = 0; }
+    lightboxImg.src = src;
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  window.closeLightbox = function() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  window.lightboxNav = function(dir) {
+    if (!lightboxImages.length) return;
+    lightboxIndex = (lightboxIndex + dir + lightboxImages.length) % lightboxImages.length;
+    lightboxImg.src = lightboxImages[lightboxIndex];
+  };
+
+  lightbox.addEventListener('click', function(e) { if (e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', function(e) {
+    if (!lightbox.classList.contains('open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') lightboxNav(-1);
+    if (e.key === 'ArrowRight') lightboxNav(1);
+  });
+
+})();
+</script>
+
+<button id="back-to-top" aria-label="맨 위로">&#8593;</button>
+
+<div id="lightbox">
+  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <button class="lightbox-nav lightbox-prev" onclick="lightboxNav(-1)">&#10094;</button>
+  <img id="lightbox-img" src="" alt="">
+  <button class="lightbox-nav lightbox-next" onclick="lightboxNav(1)">&#10095;</button>
+</div>
+
+</body>
+</html>

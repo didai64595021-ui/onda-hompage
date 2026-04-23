@@ -1,0 +1,2076 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사업개요 — 리버사이드 파크</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23C8A97D'/%3E%3Crect x='8' y='10' width='7' height='16' rx='1' fill='%23fff'/%3E%3Crect x='17' y='6' width='7' height='20' rx='1' fill='%23fff'/%3E%3Crect x='10' y='13' width='3' height='3' fill='%23C8A97D'/%3E%3Crect x='10' y='18' width='3' height='3' fill='%23C8A97D'/%3E%3Crect x='19' y='9' width='3' height='3' fill='%23C8A97D'/%3E%3Crect x='19' y='14' width='3' height='3' fill='%23C8A97D'/%3E%3Crect x='19' y='19' width='3' height='3' fill='%23C8A97D'/%3E%3C/svg%3E">
+<meta name="description" content="리버사이드 파크 사업개요. 268세대, 42층, 3개동. 대지면적 15,230㎡, 연면적 89,450㎡. 2027년 입주 예정.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+/* =============================================
+   CSS CUSTOM PROPERTIES
+   ============================================= */
+:root {
+  --bg: #0C0C0C;
+  --bg-surface: #161614;
+  --bg-light: #F7F4F0;
+  --accent: #C8A97D;
+  --accent-light: #E2D1B5;
+  --text: #E8E4DF;
+  --text-dim: #8A8580;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Pretendard Variable', -apple-system, sans-serif;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --grid: 8px;
+}
+
+/* =============================================
+   RESET & BASE
+   ============================================= */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  word-break: keep-all;
+  line-height: 1.7;
+  cursor: none;
+}
+
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+button { font: inherit; border: none; background: none; cursor: none; }
+
+/* =============================================
+   CUSTOM CURSOR
+   ============================================= */
+.cursor-dot {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10001;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s var(--ease), opacity 0.2s;
+}
+
+.cursor-ring {
+  position: fixed;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  transform: translate(-50%, -50%);
+  transition: transform 0.25s var(--ease), opacity 0.2s, width 0.3s var(--ease), height 0.3s var(--ease), border-color 0.3s;
+  mix-blend-mode: difference;
+}
+
+.cursor-dot.hide, .cursor-ring.hide { opacity: 0; }
+
+.cursor-ring.hover {
+  width: 56px;
+  height: 56px;
+  border-color: rgba(200,169,125,0.5);
+  background: rgba(200,169,125,0.06);
+}
+
+/* =============================================
+   SCROLL PROGRESS
+   ============================================= */
+.scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  z-index: 9999;
+  transform-origin: left;
+  transform: scaleX(0);
+  width: 100%;
+}
+
+/* =============================================
+   GRAIN OVERLAY
+   ============================================= */
+.grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px;
+}
+
+/* ==============================================
+   HEADER
+   ============================================== */
+.header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 900;
+  padding: calc(var(--grid) * 3) calc(var(--grid) * 5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.4s, padding 0.4s var(--ease), backdrop-filter 0.4s;
+}
+.header.solid {
+  background: rgba(12,12,12,0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: calc(var(--grid) * 2) calc(var(--grid) * 5);
+}
+
+.header-logo {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+
+.header-nav { display: flex; gap: calc(var(--grid) * 4); }
+.header-nav a {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  position: relative;
+  transition: color 0.3s;
+}
+.header-nav a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 100%; height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s var(--ease);
+}
+.header-nav a:hover { color: var(--text); }
+.header-nav a:hover::after { transform: scaleX(1); transform-origin: left; }
+.header-nav a.active { color: var(--accent); }
+.header-nav a.active::after { transform: scaleX(1); transform-origin: left; }
+
+/* Hamburger */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  z-index: 1001;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 1.5px;
+  background: var(--text);
+  transition: transform 0.4s var(--ease), opacity 0.3s;
+}
+.hamburger.active span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+.hamburger.active span:nth-child(2) { opacity: 0; }
+.hamburger.active span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+/* Mobile overlay */
+.mobile-nav {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--grid) * 5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s var(--ease), visibility 0.5s;
+}
+.mobile-nav.open { opacity: 1; visibility: visible; }
+.mobile-nav-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 48px;
+  height: 48px;
+  background: none;
+  border: 1px solid rgba(200,169,125,0.2);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.3s, transform 0.3s;
+  z-index: 1001;
+}
+.mobile-nav-close:hover { border-color: var(--accent); transform: rotate(90deg); }
+.mobile-nav-close::before,
+.mobile-nav-close::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 1.5px;
+  background: var(--accent);
+}
+.mobile-nav-close::before { transform: rotate(45deg); }
+.mobile-nav-close::after { transform: rotate(-45deg); }
+.mobile-nav a {
+  font-family: var(--font-body);
+  font-size: clamp(28px, 5vw, 40px);
+  color: var(--text);
+  letter-spacing: 0.06em;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.4s var(--ease), transform 0.5s var(--ease), color 0.3s;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.mobile-nav.open a { opacity: 1; transform: translateY(0); }
+.mobile-nav a:hover { color: var(--accent); }
+
+/* =============================================
+   SCROLL REVEAL
+   ============================================= */
+.reveal {
+  opacity: 0;
+  transform: translateY(48px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-48px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.reveal-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+.reveal-right {
+  opacity: 0;
+  transform: translateX(48px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.reveal-scale.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Stagger children */
+[data-stagger] > .reveal { transition-delay: calc(var(--i, 0) * 0.12s); }
+
+/* =============================================
+   PAGE HERO
+   ============================================= */
+.page-hero {
+  position: relative;
+  height: 60vh;
+  min-height: 400px;
+  max-height: 640px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+.page-hero-bg {
+  position: absolute;
+  inset: 0;
+  background: url('https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1600&q=80') center/cover no-repeat;
+  will-change: transform;
+}
+.page-hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--bg) 0%, rgba(12,12,12,0.65) 35%, rgba(12,12,12,0.4) 100%);
+}
+
+.page-hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.page-hero-sub {
+  font-family: var(--font-display);
+  font-size: clamp(12px, 1.2vw, 14px);
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: calc(var(--grid) * 2);
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.page-hero-title {
+  font-family: var(--font-body);
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: calc(var(--grid) * 2);
+  opacity: 0;
+  transform: translateY(32px);
+}
+
+.page-hero-en {
+  font-family: var(--font-display);
+  font-size: clamp(14px, 1.5vw, 18px);
+  font-weight: 400;
+  letter-spacing: 0.25em;
+  color: var(--text-dim);
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.page-hero-line {
+  width: 1px;
+  height: 48px;
+  background: var(--accent);
+  margin: calc(var(--grid) * 4) auto 0;
+  transform: scaleY(0);
+  transform-origin: top;
+  opacity: 0;
+}
+
+/* =============================================
+   SECTION COMMON
+   ============================================= */
+.section {
+  padding: calc(var(--grid) * 16) calc(var(--grid) * 5);
+  position: relative;
+}
+
+.section-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: calc(var(--grid) * 2);
+}
+
+.section-title {
+  font-family: var(--font-body);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: calc(var(--grid) * 2);
+}
+
+.section-subtitle {
+  font-size: clamp(14px, 1.2vw, 16px);
+  color: var(--text-dim);
+  line-height: 1.8;
+  max-width: 560px;
+}
+
+.section-header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto calc(var(--grid) * 10);
+}
+.section-header .section-subtitle {
+  margin: 0 auto;
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* =============================================
+   PROJECT SUMMARY
+   ============================================= */
+.summary {
+  padding: calc(var(--grid) * 16) calc(var(--grid) * 5);
+  background: var(--bg-surface);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: calc(var(--grid) * 4);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.summary-card {
+  position: relative;
+  padding: calc(var(--grid) * 5) calc(var(--grid) * 4);
+  border: 1px solid rgba(200,169,125,0.1);
+  border-radius: 4px;
+  transition: border-color 0.4s var(--ease), background 0.4s;
+  overflow: hidden;
+}
+.summary-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s var(--ease);
+}
+.summary-card:hover {
+  border-color: rgba(200,169,125,0.25);
+  background: rgba(200,169,125,0.03);
+}
+.summary-card:hover::before {
+  transform: scaleX(1);
+}
+
+.summary-icon {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(200,169,125,0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: calc(var(--grid) * 3);
+  color: var(--accent);
+}
+.summary-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.summary-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: calc(var(--grid) * 1);
+}
+
+.summary-value {
+  font-family: var(--font-body);
+  font-size: clamp(22px, 2.5vw, 28px);
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.summary-value .unit {
+  font-family: var(--font-body);
+  font-size: 0.55em;
+  font-weight: 400;
+  color: var(--text-dim);
+  margin-left: 4px;
+}
+
+/* =============================================
+   SITE LAYOUT / BAECHIDO
+   ============================================= */
+.site-layout {
+  padding: calc(var(--grid) * 20) calc(var(--grid) * 5);
+  position: relative;
+  overflow: hidden;
+}
+
+.site-layout-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.site-layout-map {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/10;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-surface);
+  border: 1px solid rgba(200,169,125,0.1);
+}
+
+.site-layout-map img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.6) contrast(1.1);
+  transition: transform 0.6s var(--ease);
+}
+.site-layout-map:hover img {
+  transform: scale(1.03);
+}
+
+/* Building Markers */
+.building-marker {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  z-index: 5;
+  transition: transform 0.3s var(--ease);
+}
+.building-marker:hover {
+  transform: scale(1.1);
+}
+
+.marker-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 4px rgba(200,169,125,0.25);
+  animation: markerPulse 2s ease-in-out infinite;
+  position: relative;
+}
+.marker-dot::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px solid rgba(200,169,125,0.3);
+  animation: markerRing 2s ease-in-out infinite;
+}
+
+@keyframes markerPulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(200,169,125,0.25); }
+  50% { box-shadow: 0 0 0 8px rgba(200,169,125,0.1); }
+}
+@keyframes markerRing {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0; }
+}
+
+.marker-label {
+  margin-top: calc(var(--grid) * 1);
+  padding: 6px 14px;
+  background: rgba(12,12,12,0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(200,169,125,0.2);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.marker-a { top: 28%; left: 22%; }
+.marker-b { top: 35%; left: 50%; }
+.marker-c { top: 28%; right: 22%; }
+
+.site-layout-legend {
+  display: flex;
+  gap: calc(var(--grid) * 4);
+  justify-content: center;
+  margin-top: calc(var(--grid) * 5);
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--grid) * 1.5);
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* =============================================
+   BUILDING DETAILS
+   ============================================= */
+.buildings {
+  padding: calc(var(--grid) * 16) calc(var(--grid) * 5);
+  background: var(--bg-surface);
+}
+
+.buildings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: calc(var(--grid) * 4);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.building-card {
+  position: relative;
+  border: 1px solid rgba(200,169,125,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg);
+  transition: transform 0.5s var(--ease), border-color 0.4s, box-shadow 0.5s;
+}
+.building-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(200,169,125,0.3);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+}
+
+.building-card-img {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+.building-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s var(--ease);
+}
+.building-card:hover .building-card-img img {
+  transform: scale(1.08);
+}
+.building-card-img::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--bg) 0%, transparent 60%);
+}
+
+.building-card-badge {
+  position: absolute;
+  top: calc(var(--grid) * 2);
+  left: calc(var(--grid) * 2);
+  z-index: 3;
+  padding: 6px 16px;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  border-radius: 2px;
+}
+
+.building-card-body {
+  padding: calc(var(--grid) * 4);
+}
+
+.building-card-name {
+  font-family: var(--font-body);
+  font-size: clamp(22px, 2vw, 28px);
+  font-weight: 600;
+  margin-bottom: calc(var(--grid) * 1);
+}
+
+.building-card-sub {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: calc(var(--grid) * 3);
+  letter-spacing: 0.02em;
+}
+
+.building-card-specs {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--grid) * 1.5);
+  padding-top: calc(var(--grid) * 3);
+  border-top: 1px solid rgba(200,169,125,0.1);
+}
+
+.spec-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+.spec-row-label {
+  color: var(--text-dim);
+}
+.spec-row-value {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.building-card-feature {
+  margin-top: calc(var(--grid) * 3);
+  padding: calc(var(--grid) * 2) calc(var(--grid) * 2.5);
+  background: rgba(200,169,125,0.06);
+  border-radius: 4px;
+  border-left: 2px solid var(--accent);
+}
+.building-card-feature p {
+  font-size: 12px;
+  color: var(--accent-light);
+  line-height: 1.6;
+}
+
+/* =============================================
+   SPECIAL DESIGN
+   ============================================= */
+.special {
+  padding: calc(var(--grid) * 20) calc(var(--grid) * 5);
+  position: relative;
+  overflow: hidden;
+}
+
+.special-bg-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: clamp(80px, 14vw, 220px);
+  font-weight: 700;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200,169,125,0.05);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+.special-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: calc(var(--grid) * 5);
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.special-card {
+  position: relative;
+  padding: calc(var(--grid) * 6) calc(var(--grid) * 5);
+  background: var(--bg-surface);
+  border: 1px solid rgba(200,169,125,0.08);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.4s, background 0.4s;
+}
+.special-card:hover {
+  border-color: rgba(200,169,125,0.2);
+  background: rgba(22,22,20,0.9);
+}
+
+.special-card-icon {
+  width: 56px;
+  height: 56px;
+  border: 1px solid rgba(200,169,125,0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: calc(var(--grid) * 4);
+  color: var(--accent);
+  transition: transform 0.5s var(--ease), border-color 0.4s, background 0.4s;
+}
+.special-card:hover .special-card-icon {
+  transform: scale(1.1) rotate(-3deg);
+  border-color: var(--accent);
+  background: rgba(200,169,125,0.08);
+}
+.special-card-icon svg {
+  width: 26px;
+  height: 26px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.special-card-title {
+  font-family: var(--font-body);
+  font-size: clamp(20px, 2vw, 24px);
+  font-weight: 600;
+  margin-bottom: calc(var(--grid) * 1.5);
+  line-height: 1.3;
+}
+
+.special-card-desc {
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.8;
+}
+
+.special-card-detail {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--grid) * 1);
+  margin-top: calc(var(--grid) * 3);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+.special-card-detail svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+
+.special-card-number {
+  position: absolute;
+  top: calc(var(--grid) * 3);
+  right: calc(var(--grid) * 3);
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 700;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200,169,125,0.08);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* =============================================
+   TIMELINE
+   ============================================= */
+.timeline-section {
+  padding: calc(var(--grid) * 16) 0;
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
+.timeline-header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto calc(var(--grid) * 10);
+  padding: 0 calc(var(--grid) * 5);
+}
+
+.timeline-track {
+  position: relative;
+  padding: calc(var(--grid) * 8) calc(var(--grid) * 5);
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.timeline-track::-webkit-scrollbar { display: none; }
+
+.timeline-inner {
+  display: flex;
+  gap: 0;
+  min-width: max-content;
+  position: relative;
+  padding: 0 calc(var(--grid) * 10);
+}
+
+.timeline-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(200,169,125,0.15);
+  transform: translateY(-50%);
+}
+.timeline-line-fill {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width 1.5s var(--ease);
+}
+
+.timeline-item {
+  position: relative;
+  flex: 0 0 280px;
+  padding: 0 calc(var(--grid) * 3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.timeline-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: var(--bg-surface);
+  position: relative;
+  z-index: 3;
+  transition: background 0.4s, transform 0.4s var(--ease);
+  margin-bottom: calc(var(--grid) * 4);
+}
+.timeline-item.active .timeline-dot {
+  background: var(--accent);
+  transform: scale(1.3);
+}
+.timeline-item.active .timeline-dot::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid rgba(200,169,125,0.3);
+  animation: markerPulse 2s ease-in-out infinite;
+}
+
+.timeline-date {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  margin-bottom: calc(var(--grid) * 1.5);
+  order: -1;
+}
+
+.timeline-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-bottom: calc(var(--grid) * 1);
+}
+
+.timeline-desc {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  max-width: 200px;
+}
+
+.timeline-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: calc(var(--grid) * 2);
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 20px;
+}
+.timeline-status.completed {
+  color: #4ade80;
+  background: rgba(74,222,128,0.08);
+  border: 1px solid rgba(74,222,128,0.2);
+}
+.timeline-status.progress {
+  color: var(--accent);
+  background: rgba(200,169,125,0.08);
+  border: 1px solid rgba(200,169,125,0.2);
+}
+.timeline-status.upcoming {
+  color: var(--text-dim);
+  background: rgba(138,133,128,0.08);
+  border: 1px solid rgba(138,133,128,0.15);
+}
+
+/* =============================================
+   MARQUEE BAND
+   ============================================= */
+.marquee {
+  padding: calc(var(--grid) * 5) 0;
+  overflow: hidden;
+  border-top: 1px solid rgba(200,169,125,0.08);
+  border-bottom: 1px solid rgba(200,169,125,0.08);
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 25s linear infinite;
+}
+
+.marquee-text {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 5vw, 64px);
+  font-weight: 700;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200,169,125,0.15);
+  white-space: nowrap;
+  padding: 0 calc(var(--grid) * 5);
+  letter-spacing: 0.06em;
+  user-select: none;
+}
+.marquee-text .dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin: 0 calc(var(--grid) * 4);
+  vertical-align: middle;
+  opacity: 0.4;
+}
+
+@keyframes marqueeScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* =============================================
+   CTA SECTION
+   ============================================= */
+.cta {
+  padding: calc(var(--grid) * 16) calc(var(--grid) * 5);
+  text-align: center;
+  position: relative;
+}
+
+.cta-inner {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.cta-title {
+  font-family: var(--font-body);
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: calc(var(--grid) * 2);
+}
+.cta-title em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.cta-desc {
+  font-size: clamp(14px, 1.2vw, 16px);
+  color: var(--text-dim);
+  line-height: 1.8;
+  margin-bottom: calc(var(--grid) * 6);
+}
+
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--grid) * 1.5);
+  padding: calc(var(--grid) * 2.5) calc(var(--grid) * 5);
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  transition: background 0.4s var(--ease), color 0.4s, transform 0.3s var(--ease);
+  border-radius: 2px;
+  min-height: 44px;
+}
+.cta-btn:hover {
+  background: var(--accent);
+  color: var(--bg);
+  transform: translateY(-2px);
+}
+.cta-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  transition: transform 0.3s var(--ease);
+}
+.cta-btn:hover svg {
+  transform: translateX(4px);
+}
+
+/* ==============================================
+   FOOTER
+   ============================================== */
+.footer {
+  position: relative;
+  padding: calc(var(--grid) * 16) calc(var(--grid) * 5) calc(var(--grid) * 8);
+  overflow: hidden;
+}
+
+.footer-mega {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 10vw, 160px);
+  overflow-wrap: break-word;
+  word-break: keep-all;
+  max-width: 100%;
+  overflow: hidden;
+  font-weight: 700;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200,169,125,0.1);
+  letter-spacing: 0.05em;
+  line-height: 1;
+  text-align: center;
+  margin-bottom: calc(var(--grid) * 8);
+  user-select: none;
+}
+
+.footer-nav {
+  display: flex;
+  justify-content: center;
+  gap: calc(var(--grid) * 4);
+  margin-bottom: calc(var(--grid) * 6);
+  flex-wrap: wrap;
+}
+.footer-nav a {
+  font-size: 13px;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  transition: color 0.3s;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.footer-nav a:hover { color: var(--accent); }
+
+.footer-divider {
+  width: 48px;
+  height: 1px;
+  background: rgba(200,169,125,0.2);
+  margin: 0 auto calc(var(--grid) * 4);
+}
+
+.footer-info {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.8;
+  margin-bottom: calc(var(--grid) * 2);
+}
+
+.footer-copy {
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+/* =============================================
+   RESPONSIVE — 1024px
+   ============================================= */
+@media (max-width: 1024px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .buildings-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .buildings-grid .building-card:last-child {
+    grid-column: 1 / -1;
+    max-width: 50%;
+    margin: 0 auto;
+  }
+  .special-grid {
+    gap: calc(var(--grid) * 3);
+  }
+}
+
+/* =============================================
+   RESPONSIVE — 768px
+   ============================================= */
+@media (max-width: 768px) {
+  .footer-nav { flex-wrap: nowrap; gap: calc(var(--grid) * 2); }
+  .footer-nav a { font-size: 11px; min-height: 40px; white-space: nowrap; }
+  .header-nav { display: none; }
+  .hamburger { display: flex; }
+  .mobile-nav a { transition-delay: calc(var(--i, 0) * 0.06s); }
+
+  .page-hero {
+    height: 50vh;
+    min-height: 360px;
+  }
+
+  .section {
+    padding: calc(var(--grid) * 12) calc(var(--grid) * 3);
+  }
+
+  .summary {
+    padding: calc(var(--grid) * 12) calc(var(--grid) * 3);
+  }
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: calc(var(--grid) * 2);
+  }
+  .summary-card {
+    padding: calc(var(--grid) * 3) calc(var(--grid) * 3);
+  }
+
+  .site-layout {
+    padding: calc(var(--grid) * 12) calc(var(--grid) * 3);
+  }
+  .site-layout-map {
+    aspect-ratio: 4/3;
+  }
+
+  .buildings {
+    padding: calc(var(--grid) * 12) calc(var(--grid) * 3);
+  }
+  .buildings-grid {
+    grid-template-columns: 1fr;
+    gap: calc(var(--grid) * 3);
+  }
+  .buildings-grid .building-card:last-child {
+    max-width: 100%;
+  }
+
+  .special {
+    padding: calc(var(--grid) * 12) calc(var(--grid) * 3);
+  }
+  .special-grid {
+    grid-template-columns: 1fr;
+    gap: calc(var(--grid) * 3);
+  }
+
+  .timeline-section {
+    padding: calc(var(--grid) * 12) 0;
+  }
+
+  .cta {
+    padding: calc(var(--grid) * 12) calc(var(--grid) * 3);
+  }
+
+  .footer { padding: calc(var(--grid) * 10) calc(var(--grid) * 3) calc(var(--grid) * 6); }
+}
+
+/* =============================================
+   RESPONSIVE — 375px
+   ============================================= */
+@media (max-width: 375px) {
+  .page-hero-title { font-size: 40px; }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .marker-label { font-size: 10px; padding: 4px 10px; }
+
+  .timeline-item {
+    flex: 0 0 220px;
+  }
+
+  .cta-title { font-size: 24px; }
+}
+
+/* =============================================
+   RESPONSIVE — 1440px+
+   ============================================= */
+@media (min-width: 1440px) {
+  .header { padding: calc(var(--grid) * 4) calc(var(--grid) * 10); }
+  .header.solid { padding: calc(var(--grid) * 2.5) calc(var(--grid) * 10); }
+
+  .section {
+    padding: calc(var(--grid) * 24) calc(var(--grid) * 10);
+  }
+  .summary {
+    padding: calc(var(--grid) * 20) calc(var(--grid) * 10);
+  }
+  .site-layout {
+    padding: calc(var(--grid) * 24) calc(var(--grid) * 10);
+  }
+  .buildings {
+    padding: calc(var(--grid) * 20) calc(var(--grid) * 10);
+  }
+  .special {
+    padding: calc(var(--grid) * 24) calc(var(--grid) * 10);
+  }
+  .cta {
+    padding: calc(var(--grid) * 24) calc(var(--grid) * 10);
+  }
+  .footer {
+    padding: calc(var(--grid) * 24) calc(var(--grid) * 10) calc(var(--grid) * 10);
+  }
+}
+
+/* =============================================
+   ACCESSIBILITY
+   ============================================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .marquee-track { animation: none; }
+  .reveal, .reveal-left, .reveal-right, .reveal-scale {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Focus visible for keyboard nav */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+</style>
+</head>
+<body>
+
+<!-- Grain overlay -->
+<div class="grain"></div>
+
+<!-- Custom cursor -->
+<div class="cursor-dot hide"></div>
+<div class="cursor-ring hide"></div>
+
+<!-- Scroll progress -->
+<div class="scroll-progress"></div>
+
+<!-- Header -->
+<header class="header">
+  <a href="index.html" class="header-logo">RIVERSIDE PARK</a>
+  <nav class="header-nav">
+    <a href="overview.html" class="active">사업개요</a>
+    <a href="floorplan.html">평면안내</a>
+    <a href="amenities.html">커뮤니티</a>
+    <a href="location.html">입지환경</a>
+    <a href="contact.html">관심고객</a>
+  </nav>
+  <button class="hamburger" aria-label="메뉴 열기">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- Mobile nav overlay -->
+<nav class="mobile-nav">
+  <button class="mobile-nav-close" aria-label="메뉴 닫기" onclick="document.querySelector('.mobile-nav').classList.remove('open');document.querySelector('.hamburger').classList.remove('active');document.body.style.overflow=''"></button>
+  <a href="overview.html" style="--i:0">사업개요</a>
+  <a href="floorplan.html" style="--i:1">평면안내</a>
+  <a href="amenities.html" style="--i:2">커뮤니티</a>
+  <a href="location.html" style="--i:3">입지환경</a>
+  <a href="contact.html" style="--i:4">관심고객</a>
+</nav>
+
+<!-- =============================================
+     1. PAGE HERO
+     ============================================= -->
+<section class="page-hero">
+  <div class="page-hero-bg" data-parallax></div>
+  <div class="page-hero-content">
+    <p class="page-hero-sub">Project Overview</p>
+    <h1 class="page-hero-title">사업개요</h1>
+    <p class="page-hero-en">OVERVIEW</p>
+    <div class="page-hero-line"></div>
+  </div>
+</section>
+
+<!-- =============================================
+     2. PROJECT SUMMARY
+     ============================================= -->
+<section class="summary">
+  <div class="section-header reveal">
+    <p class="section-eyebrow">Key Facts</p>
+    <h2 class="section-title">프로젝트 핵심 정보</h2>
+    <p class="section-subtitle">리버사이드 파크가 제안하는 프리미엄 주거의 규모와 가치를 확인하세요.</p>
+  </div>
+  <div class="summary-grid" data-stagger>
+    <!-- 위치 -->
+    <div class="summary-card reveal" style="--i:0">
+      <div class="summary-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      </div>
+      <p class="summary-label">위치</p>
+      <p class="summary-value">한강변 중심 입지</p>
+    </div>
+    <!-- 대지면적 -->
+    <div class="summary-card reveal" style="--i:1">
+      <div class="summary-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+      </div>
+      <p class="summary-label">대지면적</p>
+      <p class="summary-value"><span data-countup="15230">0</span><span class="unit">㎡</span></p>
+    </div>
+    <!-- 연면적 -->
+    <div class="summary-card reveal" style="--i:2">
+      <div class="summary-icon">
+        <svg viewBox="0 0 24 24"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-6h6v6"/></svg>
+      </div>
+      <p class="summary-label">연면적</p>
+      <p class="summary-value"><span data-countup="89450">0</span><span class="unit">㎡</span></p>
+    </div>
+    <!-- 건축규모 -->
+    <div class="summary-card reveal" style="--i:3">
+      <div class="summary-icon">
+        <svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 6h2M9 10h2M9 14h2M13 6h2M13 10h2M13 14h2M9 18h6"/></svg>
+      </div>
+      <p class="summary-label">건축규모</p>
+      <p class="summary-value">지하3층~지상<span data-countup="42">0</span>층</p>
+    </div>
+    <!-- 세대수 -->
+    <div class="summary-card reveal" style="--i:4">
+      <div class="summary-icon">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      </div>
+      <p class="summary-label">세대수</p>
+      <p class="summary-value"><span data-countup="268">0</span><span class="unit">세대 / 3개동</span></p>
+    </div>
+    <!-- 입주예정 -->
+    <div class="summary-card reveal" style="--i:5">
+      <div class="summary-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      </div>
+      <p class="summary-label">입주예정</p>
+      <p class="summary-value">2027<span class="unit">년 03월</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================
+     3. SITE LAYOUT / 배치도
+     ============================================= -->
+<section class="site-layout">
+  <div class="site-layout-wrap">
+    <div class="section-header reveal">
+      <p class="section-eyebrow">Site Plan</p>
+      <h2 class="section-title">단지 배치도</h2>
+      <p class="section-subtitle">자연 채광과 조망을 극대화한 남향 중심 배치. 총 3개동이 한강변을 따라 조화롭게 배치됩니다.</p>
+    </div>
+    <div class="site-layout-map reveal-scale">
+      <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200&q=80" alt="리버사이드 파크 단지 배치도" loading="lazy">
+      <div class="building-marker marker-a" role="button" aria-label="A동 위치">
+        <div class="marker-dot"></div>
+        <span class="marker-label">A동 42층</span>
+      </div>
+      <div class="building-marker marker-b" role="button" aria-label="B동 위치">
+        <div class="marker-dot"></div>
+        <span class="marker-label">B동 42층</span>
+      </div>
+      <div class="building-marker marker-c" role="button" aria-label="C동 위치">
+        <div class="marker-dot"></div>
+        <span class="marker-label">C동 42층</span>
+      </div>
+    </div>
+    <div class="site-layout-legend reveal">
+      <div class="legend-item">
+        <div class="legend-dot"></div>
+        <span>주거동 위치</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#4ade80"></div>
+        <span>커뮤니티 시설</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#60a5fa"></div>
+        <span>지하주차장 진입로</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#f472b6"></div>
+        <span>조경 / 산책로</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================
+     4. BUILDING DETAILS
+     ============================================= -->
+<section class="buildings">
+  <div class="section-header reveal">
+    <p class="section-eyebrow">Buildings</p>
+    <h2 class="section-title">동별 안내</h2>
+    <p class="section-subtitle">각 동의 특성에 맞춘 차별화된 설계로, 입주민 모두에게 최적의 주거 환경을 제공합니다.</p>
+  </div>
+  <div class="buildings-grid" data-stagger>
+    <!-- A동 -->
+    <div class="building-card reveal" style="--i:0">
+      <div class="building-card-img">
+        <img src="https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1200&q=80" alt="리버사이드 파크 A동 외관" loading="lazy">
+        <div class="building-card-badge">A동</div>
+      </div>
+      <div class="building-card-body">
+        <h3 class="building-card-name">A동 리버뷰</h3>
+        <p class="building-card-sub">한강 정면 조망의 프리미엄 타워</p>
+        <div class="building-card-specs">
+          <div class="spec-row">
+            <span class="spec-row-label">층수</span>
+            <span class="spec-row-value">지하3층 ~ 지상42층</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-row-label">호실 구성</span>
+            <span class="spec-row-value">101 ~ 104호</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-row-label">세대 수</span>
+            <span class="spec-row-value">92세대</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-row-label">주요 평형</span>
+            <span class="spec-row-value">59 / 84 / 114㎡</span>
+          </div>
+        </div>
+        <div class="building-card-feature">
+          <p>한강 파노라마 조망 특화 설계, 전 세대 남향 배치, 프라이빗 로비 운영</p>
+        </div>
+      </div>
+    </div>
+    <!-- B동 -->
+    <div class="building-card reveal" style="--i:1">
+      <div class="building-card-img">
+        <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80" alt="리버사이드 파크 B동 외관" loading="lazy">
+        <div class="building-card-badge">B동</div>
+      </div>
+      <div class="building-card-body">
+        <h3 class="building-card-name">B동 파크뷰</h3>
+        <p class="building-card-sub">단지 중앙 조경이 펼쳐지는 센트럴 타워</p>
+        <div class="building-card-specs">
+          <div class="spec-row">
+            <span class="spec-row-label">층수</span>
+            <span class="spec-row-value">지하3층 ~ 지상42층</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-row-label">호실 구성</span>
+            <span class="spec-row-value">201 ~ 204호</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-row-label">세대 수</span>
+            <span class="spec-row-value">88세대</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-row-label">주요 평형</span>
+            <span class="spec-row-value">59 / 84 / 102㎡</span>
+          </div>
+        </div>
+        <div class="building-card-feature">
+          <p>단지 중앙 테라스 가든 직접 연결, 커뮤니티 시설 최인접, 이중 보안 시스템</p>
+        </div>
+      </div>
+    </div>
+    <!-- C동 -->
+    <div class="building-card reveal" style="--i:2">
+      <div class="building-card-img">
+        <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80" alt="리버사이드 파크 C동 외관" loading="lazy">
+        <div class="building-card-badge">C동</div>
+      </div>
+      <div class="building-card-body">
+        <h3 class="building-card-name">C동 스카이뷰</h3>
+        <p class="building-card-sub">개방감 극대화 코너 배치 프리미엄 타워</p>
+        <div class="building-card-specs">
+          <div class="spec-row">
+            <span class="spec-row-label">층수</span>
+            <span class="spec-row-value">지하3층 ~ 지상42층</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-row-label">호실 구성</span>
+            <span class="spec-row-value">301 ~ 304호</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-row-label">세대 수</span>
+            <span class="spec-row-value">88세대</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-row-label">주요 평형</span>
+            <span class="spec-row-value">84 / 114 / 137㎡</span>
+          </div>
+        </div>
+        <div class="building-card-feature">
+          <p>양면 개방 코너 유닛 특화, 펜트하우스 6세대 배치, 프라이빗 엘리베이터 운영</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================
+     5. SPECIAL DESIGN / 특화설계
+     ============================================= -->
+<section class="special">
+  <div class="special-bg-text">PREMIUM</div>
+  <div class="section-header reveal">
+    <p class="section-eyebrow">Premium Design</p>
+    <h2 class="section-title">특화설계</h2>
+    <p class="section-subtitle">일상의 모든 순간에 품격을 더하는 리버사이드 파크만의 프리미엄 설계를 소개합니다.</p>
+  </div>
+  <div class="special-grid" data-stagger>
+    <!-- 거실 3m 천장고 -->
+    <div class="special-card reveal" style="--i:0">
+      <div class="special-card-number">01</div>
+      <div class="special-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 22V6l9-4 9 4v16"/><path d="M3 10h18"/><path d="M12 2v20"/><path d="M7 22v-5h4v5"/><path d="M17 22v-3h-4v3"/></svg>
+      </div>
+      <h3 class="special-card-title">거실 3m 천장고</h3>
+      <p class="special-card-desc">일반 아파트 대비 약 20cm 높은 거실 천장고를 적용하여, 개방감 넘치는 프리미엄 주거 공간을 실현합니다. 대형 창호와 결합하여 한강 조망의 가치를 극대화했습니다.</p>
+      <div class="special-card-detail">
+        <span>최고 3,000mm 확보</span>
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </div>
+    <!-- 하이엔드 주방 -->
+    <div class="special-card reveal" style="--i:1">
+      <div class="special-card-number">02</div>
+      <div class="special-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
+      </div>
+      <h3 class="special-card-title">하이엔드 주방</h3>
+      <p class="special-card-desc">독일 명품 빌트인 가전과 천연 대리석 상판, 고급 원목 수납장을 적용한 하이엔드 키친 시스템. 아일랜드 식탁 일체형 설계로 개방형 주방의 품격을 완성합니다.</p>
+      <div class="special-card-detail">
+        <span>프리미엄 빌트인 풀패키지</span>
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </div>
+    <!-- 드레스룸 -->
+    <div class="special-card reveal" style="--i:2">
+      <div class="special-card-number">03</div>
+      <div class="special-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M20.38 3.46L16 2 12 5.5 8 2 3.62 3.46a2 2 0 00-1.34 2.23l.58 3.47a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.47a2 2 0 00-1.34-2.23z"/></svg>
+      </div>
+      <h3 class="special-card-title">워크인 드레스룸</h3>
+      <p class="special-card-desc">안방에 직접 연결되는 대형 워크인 드레스룸을 제공합니다. 시스템 수납과 조명 시스템, 전신 거울까지 갖춘 호텔급 파우더룸 경험을 매일 누리실 수 있습니다.</p>
+      <div class="special-card-detail">
+        <span>시스템 수납 + 파우더존</span>
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </div>
+    <!-- 와이드 발코니 -->
+    <div class="special-card reveal" style="--i:3">
+      <div class="special-card-number">04</div>
+      <div class="special-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <h3 class="special-card-title">와이드 발코니</h3>
+      <p class="special-card-desc">최대 4.5m 폭의 와이드 발코니 설계로 거실의 연장된 생활 공간을 확보합니다. 테라스형 확장이 가능하며, 한강 조망을 온전히 즐길 수 있는 프라이빗 아웃도어를 제공합니다.</p>
+      <div class="special-card-detail">
+        <span>최대 폭 4,500mm</span>
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================
+     6. TIMELINE / 사업일정
+     ============================================= -->
+<section class="timeline-section">
+  <div class="timeline-header reveal">
+    <p class="section-eyebrow">Timeline</p>
+    <h2 class="section-title">사업일정</h2>
+    <p class="section-subtitle">리버사이드 파크의 주요 사업 마일스톤을 확인하세요.</p>
+  </div>
+  <div class="timeline-track" data-timeline>
+    <div class="timeline-inner">
+      <div class="timeline-line"><div class="timeline-line-fill"></div></div>
+      <!-- 착공 -->
+      <div class="timeline-item active" data-timeline-item>
+        <div class="timeline-date">2025.03</div>
+        <div class="timeline-dot"></div>
+        <h3 class="timeline-title">착공</h3>
+        <p class="timeline-desc">본격적인 공사 착수. 지하구조물 및 기초공사 시작.</p>
+        <span class="timeline-status completed">완료</span>
+      </div>
+      <!-- 골조 -->
+      <div class="timeline-item active" data-timeline-item>
+        <div class="timeline-date">2025.12</div>
+        <div class="timeline-dot"></div>
+        <h3 class="timeline-title">골조 완성</h3>
+        <p class="timeline-desc">42층 전 동 골조 공사 완료. 외부 마감 착수.</p>
+        <span class="timeline-status progress">진행중</span>
+      </div>
+      <!-- 마감 -->
+      <div class="timeline-item" data-timeline-item>
+        <div class="timeline-date">2026.08</div>
+        <div class="timeline-dot"></div>
+        <h3 class="timeline-title">내외부 마감</h3>
+        <p class="timeline-desc">프리미엄 마감재 적용. 커뮤니티 시설 조성 완료.</p>
+        <span class="timeline-status upcoming">예정</span>
+      </div>
+      <!-- 입주 -->
+      <div class="timeline-item" data-timeline-item>
+        <div class="timeline-date">2027.03</div>
+        <div class="timeline-dot"></div>
+        <h3 class="timeline-title">입주 시작</h3>
+        <p class="timeline-desc">리버사이드 파크 268세대 입주 개시.</p>
+        <span class="timeline-status upcoming">예정</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================
+     7. MARQUEE BAND
+     ============================================= -->
+<section class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span class="marquee-text">PREMIUM LIVING STARTS HERE <span class="dot"></span> RIVERSIDE PARK <span class="dot"></span> PREMIUM LIVING STARTS HERE <span class="dot"></span> RIVERSIDE PARK <span class="dot"></span></span>
+    <span class="marquee-text">PREMIUM LIVING STARTS HERE <span class="dot"></span> RIVERSIDE PARK <span class="dot"></span> PREMIUM LIVING STARTS HERE <span class="dot"></span> RIVERSIDE PARK <span class="dot"></span></span>
+  </div>
+</section>
+
+<!-- =============================================
+     8. CTA
+     ============================================= -->
+<section class="cta">
+  <div class="cta-inner">
+    <p class="section-eyebrow reveal">Next Step</p>
+    <h2 class="cta-title reveal">당신의 <em>새로운 일상</em>을<br>평면으로 만나보세요</h2>
+    <p class="cta-desc reveal">리버사이드 파크의 다양한 평면 구성을 확인하고, 라이프스타일에 맞는 최적의 공간을 선택하세요.</p>
+    <a href="floorplan.html" class="cta-btn reveal">
+      <span>평면안내 바로가기</span>
+      <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- =============================================
+     9. FOOTER
+     ============================================= -->
+<footer class="footer">
+  <div class="footer-mega reveal">RIVERSIDE PARK</div>
+  <nav class="footer-nav reveal">
+    <a href="overview.html">사업개요</a>
+    <a href="floorplan.html">평면안내</a>
+    <a href="amenities.html">커뮤니티</a>
+    <a href="location.html">입지환경</a>
+    <a href="contact.html">관심고객</a>
+  </nav>
+  <div class="footer-divider reveal"></div>
+  <p class="footer-info reveal">시행사: 리버사이드디벨로프먼트(주) | 시공사: 대한건설 | 설계: 정림건축<br>용적률 299% / 건폐율 30% | 대지면적 15,230㎡ / 건축면적 4,569㎡ / 연면적 89,450㎡</p>
+  <p class="footer-copy reveal">&copy; 2026 리버사이드 파크. All Rights Reserved.</p>
+</footer>
+
+<!-- =============================================
+     JAVASCRIPT
+     ============================================= -->
+<script>
+(function() {
+  'use strict';
+
+  /* =============================================
+     CUSTOM CURSOR (dot 8px + ring 36px)
+     ============================================= */
+  var cursorDot = document.querySelector('.cursor-dot');
+  var cursorRing = document.querySelector('.cursor-ring');
+  var mouseX = 0, mouseY = 0;
+  var ringX = 0, ringY = 0;
+  var cursorVisible = false;
+
+  function updateCursor() {
+    ringX += (mouseX - ringX) * 0.15;
+    ringY += (mouseY - ringY) * 0.15;
+    cursorDot.style.left = mouseX + 'px';
+    cursorDot.style.top = mouseY + 'px';
+    cursorRing.style.left = ringX + 'px';
+    cursorRing.style.top = ringY + 'px';
+    requestAnimationFrame(updateCursor);
+  }
+
+  document.addEventListener('mousemove', function(e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    if (!cursorVisible) {
+      cursorDot.classList.remove('hide');
+      cursorRing.classList.remove('hide');
+      cursorVisible = true;
+    }
+  });
+
+  document.addEventListener('mouseleave', function() {
+    cursorDot.classList.add('hide');
+    cursorRing.classList.add('hide');
+    cursorVisible = false;
+  });
+
+  var hoverTargets = document.querySelectorAll('a, button, .building-marker, .summary-card, .special-card, .cta-btn');
+  hoverTargets.forEach(function(el) {
+    el.addEventListener('mouseenter', function() { cursorRing.classList.add('hover'); });
+    el.addEventListener('mouseleave', function() { cursorRing.classList.remove('hover'); });
+  });
+
+  // Hide cursor on touch devices
+  if ('ontouchstart' in window) {
+    cursorDot.style.display = 'none';
+    cursorRing.style.display = 'none';
+    document.body.style.cursor = 'auto';
+    document.querySelectorAll('a, button').forEach(function(b) { b.style.cursor = 'pointer'; });
+  } else {
+    requestAnimationFrame(updateCursor);
+  }
+
+  /* =============================================
+     HEADER — solid on scroll
+     ============================================= */
+  var header = document.querySelector('.header');
+
+  function onScroll() {
+    var y = window.scrollY || window.pageYOffset;
+
+    // Header
+    if (y > 80) {
+      header.classList.add('solid');
+    } else {
+      header.classList.remove('solid');
+    }
+
+    // Scroll progress
+    var docH = document.documentElement.scrollHeight - window.innerHeight;
+    var progress = docH > 0 ? y / docH : 0;
+    document.querySelector('.scroll-progress').style.transform = 'scaleX(' + progress + ')';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* =============================================
+     MOBILE NAV TOGGLE
+     ============================================= */
+  var hamburger = document.querySelector('.hamburger');
+  var mobileNav = document.querySelector('.mobile-nav');
+
+  hamburger.addEventListener('click', function() {
+    hamburger.classList.toggle('active');
+    mobileNav.classList.toggle('open');
+    document.body.style.overflow = mobileNav.classList.contains('open') ? 'hidden' : '';
+  });
+
+  mobileNav.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() {
+      hamburger.classList.remove('active');
+      mobileNav.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+
+  /* =============================================
+     PAGE HERO ENTRANCE ANIMATION
+     ============================================= */
+  function animatePageHero() {
+    var els = ['.page-hero-sub', '.page-hero-title', '.page-hero-en', '.page-hero-line'];
+    els.forEach(function(sel, i) {
+      var el = document.querySelector(sel);
+      if (!el) return;
+      setTimeout(function() {
+        el.style.transition = 'opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1)';
+        el.style.opacity = '1';
+        el.style.transform = sel === '.page-hero-line' ? 'scaleY(1)' : 'translateY(0)';
+      }, 300 + i * 180);
+    });
+  }
+
+  window.addEventListener('load', function() {
+    animatePageHero();
+  });
+
+  /* =============================================
+     PARALLAX ON HERO IMAGE
+     ============================================= */
+  var heroParallax = document.querySelector('[data-parallax]');
+  if (heroParallax) {
+    var heroSection = heroParallax.closest('.page-hero');
+    window.addEventListener('scroll', function() {
+      var y = window.scrollY || window.pageYOffset;
+      var heroH = heroSection.offsetHeight;
+      if (y < heroH) {
+        heroParallax.style.transform = 'translateY(' + (y * 0.35) + 'px) scale(1.05)';
+      }
+    }, { passive: true });
+  }
+
+  /* =============================================
+     SCROLL REVEAL (IntersectionObserver) with stagger
+     ============================================= */
+  var revealSelectors = '.reveal, .reveal-left, .reveal-right, .reveal-scale';
+  var reveals = document.querySelectorAll(revealSelectors);
+
+  if ('IntersectionObserver' in window) {
+    var observerOptions = { threshold: 0.1, rootMargin: '0px 0px -40px 0px' };
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    reveals.forEach(function(el) { observer.observe(el); });
+  } else {
+    reveals.forEach(function(el) { el.classList.add('visible'); });
+  }
+
+  /* =============================================
+     NUMBER COUNTUP ANIMATION
+     ============================================= */
+  var countUpElements = document.querySelectorAll('[data-countup]');
+
+  function animateCountUp(el) {
+    var target = parseInt(el.getAttribute('data-countup'), 10);
+    var duration = 1800;
+    var startTime = null;
+
+    function step(timestamp) {
+      if (!startTime) startTime = timestamp;
+      var progress = Math.min((timestamp - startTime) / duration, 1);
+      // easeOutCubic
+      var eased = 1 - Math.pow(1 - progress, 3);
+      var current = Math.floor(eased * target);
+      el.textContent = current.toLocaleString('ko-KR');
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        el.textContent = target.toLocaleString('ko-KR');
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  if ('IntersectionObserver' in window) {
+    var countObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          animateCountUp(entry.target);
+          countObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    countUpElements.forEach(function(el) { countObserver.observe(el); });
+  } else {
+    countUpElements.forEach(function(el) {
+      el.textContent = parseInt(el.getAttribute('data-countup'), 10).toLocaleString('ko-KR');
+    });
+  }
+
+  /* =============================================
+     TIMELINE ANIMATION
+     ============================================= */
+  var timelineTrack = document.querySelector('[data-timeline]');
+  var timelineLineFill = document.querySelector('.timeline-line-fill');
+  var timelineItems = document.querySelectorAll('[data-timeline-item]');
+
+  if (timelineTrack && timelineLineFill && 'IntersectionObserver' in window) {
+    var timelineObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          // Count active items to determine fill width
+          var activeCount = document.querySelectorAll('.timeline-item.active').length;
+          var totalCount = timelineItems.length;
+          var fillPercent = totalCount > 1 ? ((activeCount - 0.5) / (totalCount - 1)) * 100 : 0;
+          timelineLineFill.style.width = Math.min(fillPercent, 100) + '%';
+
+          // Stagger reveal each item
+          timelineItems.forEach(function(item, idx) {
+            setTimeout(function() {
+              item.style.opacity = '1';
+              item.style.transform = 'translateY(0)';
+            }, idx * 200);
+          });
+
+          timelineObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2 });
+
+    // Initial hidden state for timeline items
+    timelineItems.forEach(function(item) {
+      item.style.opacity = '0';
+      item.style.transform = 'translateY(24px)';
+      item.style.transition = 'opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1)';
+    });
+
+    timelineObserver.observe(timelineTrack);
+  }
+
+  /* =============================================
+     TIMELINE HORIZONTAL DRAG SCROLL
+     ============================================= */
+  if (timelineTrack) {
+    var isDown = false;
+    var startX = 0;
+    var scrollLeft = 0;
+
+    timelineTrack.addEventListener('mousedown', function(e) {
+      isDown = true;
+      startX = e.pageX - timelineTrack.offsetLeft;
+      scrollLeft = timelineTrack.scrollLeft;
+      timelineTrack.style.cursor = 'grabbing';
+    });
+    timelineTrack.addEventListener('mouseleave', function() {
+      isDown = false;
+      timelineTrack.style.cursor = 'grab';
+    });
+    timelineTrack.addEventListener('mouseup', function() {
+      isDown = false;
+      timelineTrack.style.cursor = 'grab';
+    });
+    timelineTrack.addEventListener('mousemove', function(e) {
+      if (!isDown) return;
+      e.preventDefault();
+      var x = e.pageX - timelineTrack.offsetLeft;
+      var walk = (x - startX) * 1.5;
+      timelineTrack.scrollLeft = scrollLeft - walk;
+    });
+    timelineTrack.style.cursor = 'grab';
+  }
+
+  /* =============================================
+     BUILDING MARKERS — click tooltip
+     ============================================= */
+  var markers = document.querySelectorAll('.building-marker');
+  markers.forEach(function(marker) {
+    marker.addEventListener('click', function() {
+      // Scroll to buildings section
+      var buildingsSection = document.querySelector('.buildings');
+      if (buildingsSection) {
+        buildingsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  /* =============================================
+     SPECIAL CARD ICON ANIMATION ON REVEAL
+     ============================================= */
+  var specialCards = document.querySelectorAll('.special-card');
+  if ('IntersectionObserver' in window) {
+    var iconObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var icon = entry.target.querySelector('.special-card-icon');
+          if (icon) {
+            icon.style.transition = 'transform 0.6s cubic-bezier(0.16,1,0.3,1), border-color 0.4s, background 0.4s';
+            icon.style.transform = 'scale(1.15) rotate(-5deg)';
+            setTimeout(function() {
+              icon.style.transform = 'scale(1) rotate(0deg)';
+            }, 400);
+          }
+          iconObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    specialCards.forEach(function(card) { iconObserver.observe(card); });
+  }
+
+})();
+</script>
+</body>
+</html>
