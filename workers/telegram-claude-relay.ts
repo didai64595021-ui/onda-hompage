@@ -42,8 +42,11 @@ const ALLOWED_TOOLS = [
 const GROUP_WORKSPACE: Record<string, { workspace: string; name: string }> = {
   // v1. 온다 로직모니터
   '-1003804670860': { workspace: '/home/onda/projects/onda-logic-monitor', name: '온다 로직모니터' },
-  // v2. 크몽 모두
-  '-5018738099':    { workspace: '/home/onda/projects/onda-hompage/kmong-crawler', name: '크몽 모두' },
+  // v2. 크몽 모두 — 슈퍼그룹 업그레이드로 chat_id 이전됨 (2026-04-25 확인).
+  // 사용자가 전달한 -5018738099는 구 ID, 실제 현재 ID는 -1003990823637.
+  // 구 ID로 보낼 경우 Telegram이 "chat was upgraded to supergroup" migrate_to_chat_id로 안내.
+  '-1003990823637': { workspace: '/home/onda/projects/onda-hompage/kmong-crawler', name: '크몽 모두' },
+  '-5018738099':    { workspace: '/home/onda/projects/onda-hompage/kmong-crawler', name: '크몽 모두 (구 ID, 호환용)' },
   // v3. 로직모니터 테스트 (dev 디렉토리 실존 여부 체크: 없으면 본서버 공유)
   '-5134820548':    { workspace: '/home/onda/projects/onda-logic-monitor', name: '로직모니터 테스트' },
   // v4. 네이버 톡톡 크롤러 (=coldmail과 동일 채널 id, coldmail 워크스페이스)
