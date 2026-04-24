@@ -64,7 +64,21 @@ suggested_keywords 리스트에서:
   "overall_note": "전체 상황 + 주간 예산 소진 전망 한 줄"
 }
 
-변경 없어도 모든 서비스 포함 (suggested=current, 키워드 빈 배열, reasoning에 유지 사유).`;
+변경 없어도 모든 서비스 포함 (suggested=current, 키워드 빈 배열, reasoning에 유지 사유).
+
+## 시간대 맥락 + 자동학습 (budget.cycle_context가 있을 때만 반영)
+budget.cycle_context = {
+  current_kst_hour: 현재 KST 시간(0-23),
+  current_hour_weight: 이 시간대 CVR 기반 가중치(0=OFF, 0.7=저CVR, 1.0=평시, 1.2=고CVR),
+  high_cvr_hours/low_cvr_hours/off_hours: 시간대 분류,
+  learning_records: 지난 7일 **같은 시간대** CPC 조정 이력 + 그 후 4시간 impressions/clicks/ctr/cost
+}
+**중요 - 요요(zigzag) 방지**:
+- learning_records에서 지난 사이클 change_pct 방향 확인. 바로 반대 방향으로 회전 금지.
+  예: 24시간 전 이 시간대에 +20% 상향 후 비용 폭증/문의 정체면 이번엔 유지 또는 소폭 하향. 하지만 바로 -25%는 금지.
+- 직전 1~2회 변동과 누적 방향이 같은 방향이면 3번째는 완화 (+20 → +10 → 0 패턴 권장).
+- current_hour_weight는 "맥락 힌트"이지 곱셈 계수가 아님. 볼륨 부족이면 저CVR 시간대라도 상향 가능, 대신 더 작은 폭(±5~10%).
+- cycle_context가 없으면 기존 ad-bot-run(일 1회) 모드로 간주하고 이 섹션 무시.`;
 
 function buildUserMessage(metrics, budget) {
   return `## 예산

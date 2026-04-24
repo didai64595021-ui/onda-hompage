@@ -26,6 +26,7 @@ const { applyServiceAction } = require('./lib/ad-bot-apply');
 const { matchProductId } = require('./lib/product-map');
 const { login } = require('./lib/login');
 const { getCurrentHourWeight, getKstHour, isHourOff, loadHourlyWeights } = require('./lib/hourly-weights');
+const { evaluatePreviousCycle, loadRecentLearning } = require('./lib/cpc-learning-feedback');
 
 const GUARD_PCT = 25;
 
@@ -53,8 +54,12 @@ async function logAction(row) {
 
 async function updateActionApplied(id, result) {
   if (!id) return;
+  // after_state의 제안값(desired_cpc, change_pct 등) 보존 + apply_result 별도 저장
+  // (학습 피드백이 after_state.desired_cpc 참조, 덮어쓰면 기록 망가짐)
+  const { data: existing } = await supabase.from('kmong_ad_bot_actions').select('after_state').eq('id', id).single();
+  const mergedAfterState = { ...(existing?.after_state || {}), apply_result: result };
   const { error } = await supabase.from('kmong_ad_bot_actions')
-    .update({ applied: result.ok, applied_at: new Date().toISOString(), after_state: result })
+    .update({ applied: result.ok, applied_at: new Date().toISOString(), after_state: mergedAfterState })
     .eq('id', id);
   if (error) console.log('[WARN] log update 실패:', error.message);
 }
@@ -75,17 +80,35 @@ async function main() {
     return;
   }
 
+  // 0) 자동학습: 직전 사이클 결과 평가
+  const evalResult = await evaluatePreviousCycle();
+  console.log(`[학습 평가] 직전 사이클 ${evalResult.evaluated}건 result_metrics 갱신`);
+
+  // 0-bis) 지난 7일 동일 시간대 학습 기록 로드
+  const learningRecords = await loadRecentLearning(kstHour, 7);
+  console.log(`[학습 로드] 지난 7일 KST ${kstHour}시 조정 기록 ${learningRecords.length}건`);
+
   // 1) 메트릭 (7일)
   const metrics = await loadServiceMetrics(7);
   console.log(`[메트릭] 서비스 ${metrics.length}개`);
   if (!metrics.length) { console.log('[중단] 분석 대상 없음'); return; }
 
-  // 2) 예산
+  // 2) 예산 + cycle_context (Opus에 시간대 맥락 + 학습 기록 주입)
   const budgetRows = await loadActiveBudget();
   const budget = budgetRows[0] || {
     budget_type: 'daily', budget_amount: 16400, priority: 'roi', min_cpc: 500, max_cpc: 5000,
   };
-  console.log(`[예산] ${JSON.stringify(budget)}`);
+  budget.cycle_context = {
+    current_kst_hour: kstHour,
+    current_hour_weight: hourWeight,
+    high_cvr_hours: weightsPayload.high_cvr_hours,
+    low_cvr_hours: weightsPayload.low_cvr_hours,
+    off_hours: weightsPayload.off_hours,
+    guardrail_pct: GUARD_PCT,
+    instruction: '이 시간대 weight와 학습 기록을 참고해 판단할 것. weight는 참고용 맥락이지 곱셈 계수가 아님. 볼륨 부족이면 저가치 시간대라도 상향 가능. 학습 기록에서 지난번 효과를 확인하고 반대 방향 회전(요요) 방지.',
+    learning_records: learningRecords,
+  };
+  console.log(`[예산+맥락] ${JSON.stringify(budget, null, 2).slice(0, 500)}...`);
 
   // 3) 판단 체인
   let j, judgeSource = 'opus-4-7 (cli)';
@@ -106,18 +129,15 @@ async function main() {
   }
   console.log(`[판단:${judgeSource}] ${j.actions.length}건 / ${j.overall_note}`);
 
-  // 4) 가드 + 시간 weight
+  // 4) ±25% 가드만 적용 (weight 곱셈 제거 — Opus가 cycle_context 보고 이미 반영)
   for (const a of j.actions) {
     const cur = a.current_desired_cpc || 0;
     let sug = a.suggested_desired_cpc || cur;
 
-    // 시간 weight 곱셈
-    sug = Math.round(sug * hourWeight);
-
-    // ±25퍼 가드
+    // ±25퍼 가드 (요요 방지 최후 안전장치)
     if (cur > 0) {
-      const upper = Math.round(cur * (1 + GUARD_PCT / 100));
-      const lower = Math.round(cur * (1 - GUARD_PCT / 100));
+      const upper = Math.floor(cur * (1 + GUARD_PCT / 100) / 10) * 10;
+      const lower = Math.ceil(cur * (1 - GUARD_PCT / 100) / 10) * 10;
       sug = Math.max(lower, Math.min(upper, sug));
     }
 
@@ -128,7 +148,7 @@ async function main() {
 
     a.suggested_desired_cpc = sug;
     a.change_pct = cur > 0 ? +(((sug - cur) / cur) * 100).toFixed(1) : 0;
-    a.hour_weight_applied = hourWeight;
+    a.hour_weight_context = hourWeight;
   }
 
   // 5) DB 로그
