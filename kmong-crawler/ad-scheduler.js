@@ -15,6 +15,7 @@ const { supabase } = require('./lib/supabase');
 const { toggleAd } = require('./toggle-ad');
 const { PRODUCT_MAP } = require('./lib/product-map');
 const { notifyTyped } = require('./lib/notify-filter');
+const { isHourOff } = require('./lib/hourly-weights');
 
 function getKST() {
   const now = new Date();
@@ -261,6 +262,16 @@ async function main() {
           console.log(`[전략] ${product.id}: 공격모드 → 피크시간 강제 ON`);
         }
       }
+
+      // 시간대 weight=0 강제 OFF (hourly-cvr-analyzer.js가 결정)
+      // Why: 새벽/저CVR 시간대 예산 낭비 차단. 사용자 결정 (2026-04-24).
+      // strategy attack의 강제 ON보다 우선 — 실데이터로 학습된 OFF가 우선순위 최상
+      try {
+        if (await isHourOff(kst.hour)) {
+          currentAction = 'off';
+          console.log(`[weight] ${product.id}: 저CVR 시간대(${kst.hour}시) 강제 OFF`);
+        }
+      } catch (e) { /* hourly_weights 조회 실패 시 무시 */ }
 
       // 서비스별 이전 상태 조회
       const stateKey = `last_ad_state_${product.id}`;

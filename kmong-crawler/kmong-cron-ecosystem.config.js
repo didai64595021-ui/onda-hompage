@@ -194,6 +194,26 @@ module.exports = {
       watch: false,
       env: { ...COMMON_ENV },
     },
+    // === Phase 7-bis: 4시간 단위 CPC 동적 조정 (2026-04-24 신설) ===
+    {
+      name: 'kmong-adjust-cpc-4h',
+      script: './adjust-cpc-4h.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '0 */4 * * *',  // 00,04,08,12,16,20 KST
+      autorestart: false,
+      watch: false,
+      env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
+    },
+    // === Phase 7-ter: 시간대별 CVR 분석 + weight 갱신 (2026-04-24 신설) ===
+    {
+      name: 'kmong-hourly-cvr-analyzer',
+      script: './hourly-cvr-analyzer.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '0 3 * * *',  // 매일 03:00 KST
+      autorestart: false,
+      watch: false,
+      env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
+    },
     // === Phase 8: 리포트 (일/주/월) — 2026-04-18 신설 ===
     {
       name: 'kmong-daily-report',
