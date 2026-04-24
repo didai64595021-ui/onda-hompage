@@ -68,11 +68,14 @@ function getToday() {
 }
 
 function getWeekStart() {
+  // 토~금 주간 (KST). 토요일 00:00 KST에 reset.
+  // Why: 사용자가 토~금 사이클로 주예산 운용 (2026-04-24 결정)
   const now = new Date();
-  const day = now.getDay(); // 0=일
-  const diff = now.getDate() - day + (day === 0 ? -6 : 1); // 월요일 기준
-  const weekStart = new Date(now);
-  weekStart.setDate(diff);
+  const kst = new Date(now.getTime() + 9 * 3600 * 1000);
+  const day = kst.getUTCDay();
+  const daysFromSat = (day + 1) % 7; // 토=0, 일=1, 월=2, ..., 금=6
+  const weekStart = new Date(kst);
+  weekStart.setUTCDate(kst.getUTCDate() - daysFromSat);
   return weekStart.toISOString().split('T')[0];
 }
 
