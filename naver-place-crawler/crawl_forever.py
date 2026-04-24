@@ -82,6 +82,66 @@ JOBS = [
         "keywords": [f"{r} 인테리어" for r in REGIONS_FULL],
         "output_dir": os.path.join(BASE_DIR, "results_interior"),
     },
+    {
+        "name": "속눈썹_전국",
+        "sheet_tab": "속눈썹_전국",
+        "keywords": [f"{r} 속눈썹" for r in REGIONS_FULL],
+        "output_dir": os.path.join(BASE_DIR, "results_lashes"),
+    },
+    {
+        "name": "왁싱_전국",
+        "sheet_tab": "왁싱_전국",
+        "keywords": [f"{r} 왁싱" for r in REGIONS_FULL],
+        "output_dir": os.path.join(BASE_DIR, "results_waxing"),
+    },
+    {
+        "name": "마사지_전국",
+        "sheet_tab": "마사지_전국",
+        "keywords": [f"{r} 마사지" for r in REGIONS_FULL],
+        "output_dir": os.path.join(BASE_DIR, "results_massage"),
+    },
+    {
+        "name": "에스테틱_전국",
+        "sheet_tab": "에스테틱_전국",
+        "keywords": [f"{r} 에스테틱" for r in REGIONS_FULL],
+        "output_dir": os.path.join(BASE_DIR, "results_esthetic"),
+    },
+    {
+        "name": "반영구_전국",
+        "sheet_tab": "반영구_전국",
+        "keywords": [f"{r} 반영구" for r in REGIONS_FULL],
+        "output_dir": os.path.join(BASE_DIR, "results_semi"),
+    },
+    {
+        "name": "치과_전국",
+        "sheet_tab": "치과_전국",
+        "keywords": [f"{r} 치과" for r in REGIONS_FULL],
+        "output_dir": os.path.join(BASE_DIR, "results_dental"),
+    },
+    {
+        "name": "한의원_전국",
+        "sheet_tab": "한의원_전국",
+        "keywords": [f"{r} 한의원" for r in REGIONS_FULL],
+        "output_dir": os.path.join(BASE_DIR, "results_oriental"),
+    },
+    {
+        "name": "학원_전국",
+        "sheet_tab": "학원_전국",
+        "keywords": [f"{r} 학원" for r in REGIONS_FULL] + [f"{r} 보습학원" for r in REGIONS_FULL],
+        "output_dir": os.path.join(BASE_DIR, "results_academy"),
+    },
+    {
+        "name": "꽃집_전국",
+        "sheet_tab": "꽃집_전국",
+        "keywords": [f"{r} 꽃집" for r in REGIONS_FULL],
+        "output_dir": os.path.join(BASE_DIR, "results_flower"),
+    },
+    {
+        "name": "사진관_전국",
+        "sheet_tab": "사진관_전국",
+        "keywords": [f"{r} 사진관" for r in REGIONS_FULL] + [f"{r} 스튜디오" for r in REGIONS_FULL],
+        "output_dir": os.path.join(BASE_DIR, "results_photo"),
+    },
 ]
 
 # ═══════════════════════════════════════════
