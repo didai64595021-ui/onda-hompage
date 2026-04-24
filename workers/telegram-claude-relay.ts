@@ -13,6 +13,13 @@
 
 import { spawn, execSync } from 'child_process';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import dns from 'dns';
+
+// Telegram API fetch 실패 해결 — IPv6 먼저 시도 시 ETIMEDOUT 반복.
+// DNS 순서 IPv4 우선으로 고정 (Node 22에서도 undici fetch에 전달됨).
+dns.setDefaultResultOrder('ipv4first');
+// undici 별도 패키지 제거 — Node 22 내장이 아님(npm 설치 필요). DNS 순서 + tgApi 재시도
+// 래퍼(아래)로 대체.
 
 // ─── 설정 ───
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
@@ -21,7 +28,7 @@ const MAX_RETRIES = 2;
 const TYPING_INTERVAL_MS = 8000;
 const PROGRESS_REPORT_MS = 30000;
 const SESSION_FILE = '/home/onda/logs/telegram-relay-sessions.json';
-const CLAUDE_TIMEOUT = 300000; // 5분
+const CLAUDE_TIMEOUT = 600000; // 10분 — 복잡한 작업(빌드/크롤) 여유
 
 // 허용 도구 (안전한 범위만)
 const ALLOWED_TOOLS = [
@@ -30,19 +37,38 @@ const ALLOWED_TOOLS = [
 ].join(',');
 
 // ─── 그룹 ↔ 워크스페이스 고정 매핑 ───
-// 키워드 기반이 아닌, 그룹ID별 고정 workspace
+// 사용자 지정 16개 그룹 기준 (2026-04-24 재정비).
+// 동일 chat_id 충돌 금지 — 하나의 그룹은 한 workspace로만.
 const GROUP_WORKSPACE: Record<string, { workspace: string; name: string }> = {
+  // v1. 온다 로직모니터
+  '-1003804670860': { workspace: '/home/onda/projects/onda-logic-monitor', name: '온다 로직모니터' },
+  // v2. 크몽 모두
+  '-5018738099':    { workspace: '/home/onda/projects/onda-hompage/kmong-crawler', name: '크몽 모두' },
+  // v3. 로직모니터 테스트 (dev 디렉토리 실존 여부 체크: 없으면 본서버 공유)
+  '-5134820548':    { workspace: '/home/onda/projects/onda-logic-monitor', name: '로직모니터 테스트' },
+  // v4. 네이버 톡톡 크롤러 (=coldmail과 동일 채널 id, coldmail 워크스페이스)
+  '-1003870419601': { workspace: '/home/onda/projects/onda-coldmail', name: '네이버 톡톡 크롤러' },
+  // v5. 온다커뮤니티포스터
+  '-1003806737505': { workspace: '/home/onda/projects/onda-community-poster', name: '온다커뮤니티포스터' },
+  // v6. 온다트래픽봇
+  '-5254346681':    { workspace: '/home/onda/projects/onda-traffic-bot', name: '온다트래픽봇' },
+  // v7. 온다유튜브자동화 (automation 디렉토리 실존 여부 체크: 없으면 investment로 대체)
+  '-1003855690620': { workspace: '/home/onda/projects/onda-youtube-investment', name: '온다유튜브자동화' },
+  // v8. 온다인스타레포트
+  '-5079107870':    { workspace: '/home/onda/projects/onda-insta-report', name: '온다인스타레포트' },
+  // v9. 온다셀프마케팅
+  '-5055799097':    { workspace: '/home/onda/projects/onda-self-marketing', name: '온다셀프마케팅' },
+  // v11. 온다 UIUX
+  '-5268676231':    { workspace: '/home/onda/projects/onda-hompage', name: '온다 UIUX' },
+  // v13. 온다 네이버 cpc
+  '-5284621346':    { workspace: '/home/onda/projects/onda-ad', name: '온다 네이버 cpc' },
+  // v16. 온다 전체 프로젝트
+  '-1003738825402': { workspace: '/home/onda', name: '온다 전체 프로젝트' },
+
+  // 기존 (사용자 16개 목록 밖이지만 유지)
   '-1003753252286': { workspace: '/home/onda', name: 'ONDA서버(통합)' },
   '-1003753078103': { workspace: '/home/onda/projects/onda-ad', name: '온다AD CPC관리' },
-  '-1003800384738': { workspace: '/home/onda/projects/onda-hompage', name: 'onda-UIUX' },
-  '-1003738825402': { workspace: '/home/onda/projects/onda-hompage', name: '온다마케팅 신규 홈페이지' },
-  '-1003804670860': { workspace: '/home/onda/projects/onda-logic-monitor', name: '로직모니터본서버' },
-  '-5134820548':    { workspace: '/home/onda/projects/onda-logic-monitor-dev', name: '로직모니터테스트' },
-  '-5254346681':    { workspace: '/home/onda/projects/onda-logic-monitor', name: '플레이스 블로그 추적기' },
-  '-1003806737505': { workspace: '/home/onda/projects/onda-coldmail', name: '온다 ui 고객 크롤링' },
-  '-1003855690620': { workspace: '/home/onda/projects/onda-youtube-investment', name: 'onda-youtube-investment' },
-  '-5055799097':    { workspace: '/home/onda/projects/onda-self-marketing', name: '네이버 셀프 마케팅' },
-  '-5079107870':    { workspace: '/home/onda/projects/onda-traffic-bot', name: '트래픽 자동주문봇' },
+  '-1003800384738': { workspace: '/home/onda/projects/onda-hompage', name: 'onda-UIUX (구)' },
 };
 
 // 메시지 내 키워드로 workspace 오버라이드 (명시적 지정 시만)
@@ -54,11 +80,12 @@ const WORKSPACE_OVERRIDES: Record<string, string> = {
   '@seo': '/home/onda/projects/onda-seo-auto',
 };
 
-// 에러 메시지 패턴
+// 에러 메시지 패턴 — Claude CLI 자체 에러 꼬리만 제거.
+// "Error:"로 시작하는 모든 라인 제거(←과공격)는 삭제. 답변에 Error 언급이
+// 있으면 통째 지워져 relay가 empty output으로 fail 처리되던 버그 원인.
 const ERROR_PATTERNS = [
   /⚠️\s*Something went wrong while processing your request\.?[^\n]*(?:\n|$)/g,
   /Please try again, or use \/new to start a fresh session\.?\s*\n?/g,
-  /^\s*Error:.*$/gm,
 ];
 
 let lastUpdateId = 0;
@@ -108,17 +135,28 @@ function log(level: string, msg: string) {
 
 async function tgApi(method: string, body?: Record<string, unknown>): Promise<Record<string, unknown>> {
   const url = `https://api.telegram.org/bot${BOT_TOKEN}/${method}`;
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    return res.json() as Promise<Record<string, unknown>>;
-  } catch (err) {
-    log('ERROR', `tgApi ${method} 실패: ${(err as Error).message}`);
-    return { ok: false };
+  // "fetch failed"(IPv6 타임아웃) 간헐 장애 대응 — 지수백오프 3회 재시도.
+  // getUpdates는 상위 pollUpdates 루프가 5초 후 재호출하지만, sendMessage/sendChatAction은
+  // 단발이라 여기서 재시도 안 하면 사용자 응답이 유실됨.
+  const MAX_TRIES = 3;
+  let lastErr: string = '';
+  for (let attempt = 1; attempt <= MAX_TRIES; attempt++) {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      return res.json() as Promise<Record<string, unknown>>;
+    } catch (err) {
+      lastErr = (err as Error).message;
+      if (attempt < MAX_TRIES) {
+        await new Promise(r => setTimeout(r, 500 * attempt * attempt)); // 500ms, 2s, 4.5s
+      }
+    }
   }
+  log('ERROR', `tgApi ${method} 3회 모두 실패: ${lastErr}`);
+  return { ok: false };
 }
 
 async function sendMessage(chatId: string, text: string, replyTo?: number) {
@@ -244,14 +282,21 @@ function runClaudeOnce(
       args.push('--resume', sessionId);
     }
 
+    // `--allowedTools`가 variadic(<tools...>)이라 뒤따르는 prompt를 tools로 흡수해서
+    // "Input must be provided..." 에러가 발생. 반드시 `--` separator로 막고 positional 인자로.
+    // (이전에 --를 빼보았더니 바로 이 에러 재현됨, 2026-04-24 확인)
     args.push('--', prompt);
 
     log('INFO', `Claude 호출: session=${sessionId || 'new'}, cwd=${workspace}`);
 
+    // stdio: stdin을 ignore로 고정해야 claude가 "no stdin data in 3s" 경고 + 3초 대기를 건너뜀.
+    // 기본 'pipe'면 pipe 열려 있어서 stdin 대기 → 실제론 prompt가 arg로 전달돼 답은 나오지만
+    // timing 꼬임 + stderr 오염으로 relay가 fail 처리했음.
     const proc = spawn('claude', args, {
       cwd: workspace,
       env: { ...process.env, HOME: '/home/onda' },
       timeout: CLAUDE_TIMEOUT,
+      stdio: ['ignore', 'pipe', 'pipe'],
     });
 
     let stdout = '';
@@ -551,8 +596,22 @@ async function main() {
   try { execSync('which claude', { stdio: 'pipe' }); }
   catch { log('ERROR', 'claude CLI 없음'); process.exit(1); }
 
-  const me = await tgApi('getMe');
-  const botInfo = me.result as Record<string, unknown>;
+  // getMe 네트워크 실패 방어 — fetch failed 시 재시도 (지수백오프).
+  // 기존엔 me.result=undefined로 username 접근 시 crash → PM2 autorestart 무한반복 위험.
+  let botInfo: Record<string, unknown> | undefined;
+  for (let i = 0; i < 5; i++) {
+    const me = await tgApi('getMe');
+    if (me.ok && me.result) {
+      botInfo = me.result as Record<string, unknown>;
+      break;
+    }
+    log('WARN', `getMe 시도 ${i + 1}/5 실패, ${(i + 1) * 2}초 후 재시도`);
+    await new Promise(r => setTimeout(r, (i + 1) * 2000));
+  }
+  if (!botInfo) {
+    log('ERROR', 'getMe 5회 모두 실패 — 네트워크 복구 후 재시작 필요');
+    process.exit(1);
+  }
   log('INFO', `텔레그램 릴레이 v2 시작: @${botInfo.username}`);
   log('INFO', `그룹 매핑: ${Object.entries(GROUP_WORKSPACE).map(([id, g]) => `${g.name}(${id})`).join(', ')}`);
   log('INFO', `허용 도구: ${ALLOWED_TOOLS}`);
