@@ -13,6 +13,7 @@
 
 import { spawn, execSync } from 'child_process';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import { randomUUID } from 'crypto';
 import dns from 'dns';
 
 // Telegram API fetch 실패 해결 — IPv6 먼저 시도 시 ETIMEDOUT 반복.
@@ -275,19 +276,23 @@ function resolveWorkspace(chatId: string, text: string): string {
 function runClaudeOnce(
   prompt: string,
   workspace: string,
-  sessionId?: string
-): Promise<{ success: boolean; output: string; raw: string; newSessionId?: string }> {
+  sessionId: string,
+  isFirstCall: boolean
+): Promise<{ success: boolean; output: string; raw: string }> {
   return new Promise((resolve) => {
+    // 세션 유지 — `--session-id <uuid>`로 우리가 직접 관리.
+    //   · 첫 호출: 이 UUID로 새 세션 파일 생성 (~/.claude/projects/<cwd>/<uuid>.jsonl)
+    //   · 이후 호출: 같은 UUID로 --resume → 동일 파일에 누적 → 맥락 이어짐
+    // `--print` 모드에서 stderr에 세션 ID가 나오지 않아 자동 파싱이 실패하던 문제의 근본 해결.
     const args = ['--print', '--allowedTools', ALLOWED_TOOLS];
-
-    // 세션 이어가기
-    if (sessionId) {
+    if (isFirstCall) {
+      args.push('--session-id', sessionId);
+    } else {
       args.push('--resume', sessionId);
     }
 
     // `--allowedTools`가 variadic(<tools...>)이라 뒤따르는 prompt를 tools로 흡수해서
     // "Input must be provided..." 에러가 발생. 반드시 `--` separator로 막고 positional 인자로.
-    // (이전에 --를 빼보았더니 바로 이 에러 재현됨, 2026-04-24 확인)
     args.push('--', prompt);
 
     log('INFO', `Claude 호출: session=${sessionId || 'new'}, cwd=${workspace}`);
@@ -310,19 +315,12 @@ function runClaudeOnce(
 
     proc.on('close', (code: number | null) => {
       const cleaned = cleanClaudeOutput(stdout);
-
-      // stderr에서 세션 ID 추출 (claude CLI가 출력)
-      let newSessionId: string | undefined;
-      const sessionMatch = stderr.match(/session[_\s]?id[:\s]+([a-f0-9-]{36})/i)
-        || stderr.match(/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/);
-      if (sessionMatch) newSessionId = sessionMatch[1];
-
       if (code === 0 && cleaned) {
-        resolve({ success: true, output: cleaned, raw: stdout, newSessionId });
+        resolve({ success: true, output: cleaned, raw: stdout });
       } else if (code === 0 && stdout.trim() && !cleaned) {
-        resolve({ success: false, output: '', raw: stdout, newSessionId });
+        resolve({ success: false, output: '', raw: stdout });
       } else {
-        resolve({ success: false, output: stderr.slice(0, 300), raw: stdout, newSessionId });
+        resolve({ success: false, output: stderr.slice(0, 300), raw: stdout });
       }
     });
 
@@ -336,35 +334,43 @@ function runClaudeOnce(
 async function runClaude(prompt: string, workspace: string, chatId: string): Promise<string> {
   const sessions = loadSessions();
   const key = getSessionKey(chatId, workspace);
-  let sessionId = sessions[key]?.sessionId;
+  let entry = sessions[key];
+  let isFirstCall = false;
+
+  // 최초 호출이면 UUID 생성 + 즉시 저장 (첫 호출 중 프로세스 죽어도 다음 번엔 이어감)
+  if (!entry?.sessionId) {
+    const newId = randomUUID();
+    entry = { sessionId: newId, workspace, lastUsed: Date.now() };
+    sessions[key] = entry;
+    saveSessions(sessions);
+    isFirstCall = true;
+    log('INFO', `세션 신규 생성: ${key} → ${newId}`);
+  }
+
+  const sessionId = entry.sessionId;
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-    log('INFO', `Claude 실행 (시도 ${attempt}/${MAX_RETRIES}): workspace=${workspace}, session=${sessionId || 'new'}`);
+    log('INFO', `Claude 실행 (시도 ${attempt}/${MAX_RETRIES}): workspace=${workspace}, session=${sessionId.slice(0, 8)}..., first=${isFirstCall}`);
 
-    const result = await runClaudeOnce(prompt, workspace, sessionId);
+    const result = await runClaudeOnce(prompt, workspace, sessionId, isFirstCall && attempt === 1);
 
     if (result.success) {
-      // 세션 ID 저장
-      if (result.newSessionId) {
-        sessions[key] = { sessionId: result.newSessionId, workspace, lastUsed: Date.now() };
-        saveSessions(sessions);
-        log('INFO', `세션 저장: ${key} → ${result.newSessionId}`);
-      } else if (sessionId) {
-        sessions[key].lastUsed = Date.now();
-        saveSessions(sessions);
-      }
-      log('INFO', `Claude 완료: ${result.output.length}자`);
+      entry.lastUsed = Date.now();
+      saveSessions(sessions);
+      log('INFO', `Claude 완료: ${result.output.length}자 (session 유지)`);
       return result.output;
     }
 
-    log('WARN', `Claude 시도 ${attempt} 실패: ${result.output.slice(0, 100)}`);
+    log('WARN', `Claude 시도 ${attempt} 실패: ${result.output.slice(0, 150)}`);
 
-    // 세션 문제일 수 있으므로 2번째 시도는 새 세션으로
-    if (attempt === 1 && sessionId) {
-      log('INFO', '기존 세션 폐기, 새 세션으로 재시도...');
-      sessionId = undefined;
-      delete sessions[key];
+    // 세션 파일 손상/resume 실패 시 2번째 시도는 새 세션 생성
+    if (attempt === 1 && !isFirstCall) {
+      log('INFO', '기존 세션 resume 실패 → 새 세션으로 재시도');
+      const newId = randomUUID();
+      entry.sessionId = newId;
+      entry.lastUsed = Date.now();
       saveSessions(sessions);
+      isFirstCall = true;
     }
 
     if (attempt < MAX_RETRIES) {
