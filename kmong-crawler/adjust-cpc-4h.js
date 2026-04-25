@@ -237,6 +237,22 @@ async function main() {
   // 7) 텔레그램 보고
   const nextHour = (kstHour + 4) % 24;
   const weightLabel = hourWeight === 1 ? '평시' : hourWeight > 1 ? `고가치 +${Math.round((hourWeight - 1) * 100)}퍼` : `저가치 -${Math.round((1 - hourWeight) * 100)}퍼`;
+
+  // 적자 의심 서비스 검출 — judge가 metrics 주입한 deficit_risk_input 또는 metrics 직접 조회
+  const deficitAlerts = j.actions.filter(a => {
+    const r = a.deficit_risk_input;
+    return r != null && r >= 0.7;
+  }).map(a => {
+    const m = metrics.find(x => x.product_id === a.product_id);
+    return {
+      pid: a.product_id,
+      cpc: a.current_desired_cpc,
+      aov: a.avg_order_value || m?.avg_order_value,
+      emc: a.expected_margin_per_click || m?.expected_margin_per_click,
+      risk: a.deficit_risk_input,
+    };
+  });
+
   const lines = [
     `4시간 CPC 자동조정 ${args.apply ? '적용' : 'dry-run'} - KST ${kstHour}시 [${weightLabel}]`,
     `판단: ${judgeSource} / 제안 ${j.actions.length}건 / 적용 성공 ${appliedCount}건${applyErrors.length ? ' / 실패 ' + applyErrors.length : ''}`,
@@ -245,11 +261,17 @@ async function main() {
     '주요 조정',
     ...j.actions.slice(0, 8).map(a => {
       const sign = a.change_pct >= 0 ? '+' : '';
-      return `  ${a.product_id}: ${a.current_desired_cpc} -> ${a.suggested_desired_cpc}원 [${sign}${a.change_pct}퍼]`;
+      const guardTag = a.deficit_guard_applied ? ' [적자가드]' : a.low_aov_guard_applied ? ' [저단가가드]' : '';
+      return `  ${a.product_id}: ${a.current_desired_cpc} -> ${a.suggested_desired_cpc}원 [${sign}${a.change_pct}퍼]${guardTag}`;
     }),
     '',
     j.overall_note ? `요약: ${j.overall_note}` : '',
     '',
+    deficitAlerts.length ? '⚠ 적자 의심 (deficit_risk≥0.7)' : '',
+    ...deficitAlerts.slice(0, 5).map(d =>
+      `  ${d.pid}: CPC ${d.cpc}원 / AOV ${d.aov?.toLocaleString() || '?'}원 / 1클릭 기대마진 ${d.emc?.toLocaleString() || '?'}원 / 위험도 ${d.risk}`
+    ),
+    deficitAlerts.length ? '' : '',
     '추가 전략 제안',
     `- 시간대 weight ${hourWeight} 곱셈 적용중 (HIGH ${(weightsPayload.high_cvr_hours || []).join(',')} / OFF ${(weightsPayload.off_hours || []).join(',')})`,
     `- 가드 ±${GUARD_PCT}퍼 1회 변동폭 (점진 안정성 확보)`,
