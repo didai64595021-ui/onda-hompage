@@ -1,6 +1,6 @@
 /**
  * 크몽 비승인 사유 추출 — 두 경로
- *  1) /my-gigs?statusType=REJECT — 비승인 카드 텍스트 + 카드 클릭/모달 사유
+ *  1) /my-gigs?statusType=REJECTED — 비승인 카드 텍스트 + 카드 클릭/모달 사유
  *  2) 헤더 종 알림 드롭다운 — 비승인 알림 텍스트
  *
  * 셀렉터는 크몽 페이지 변경에 약하므로 카드 innerText 전체를 그대로 보존.
@@ -9,14 +9,14 @@
 
 const { matchProductId } = require('./product-map');
 
-const MY_GIGS_REJECT_URL = 'https://kmong.com/my-gigs?statusType=REJECT';
+const MY_GIGS_REJECT_URL = 'https://kmong.com/my-gigs?statusType=REJECTED';
 const NOTIFICATIONS_URL = 'https://kmong.com/notifications';
 
 /**
- * /my-gigs?statusType=REJECT 카드 단위 추출
+ * /my-gigs?statusType=REJECTED 카드 단위 추출
  */
 async function extractFromMyGigs(page) {
-  console.log('[비승인 추출] /my-gigs?statusType=REJECT 진입');
+  console.log('[비승인 추출] /my-gigs?statusType=REJECTED 진입');
   await page.goto(MY_GIGS_REJECT_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForTimeout(3500);
   for (let i = 0; i < 5; i++) { await page.evaluate(() => window.scrollBy(0, 1500)); await page.waitForTimeout(400); }
@@ -82,7 +82,12 @@ async function fetchRejectionDetail(page, draftId) {
  * 셀렉터가 자주 바뀜. 알림 페이지에 직접 가는 게 안정적.
  */
 async function extractFromBell(page) {
-  console.log('[비승인 추출] /notifications 진입');
+  // 2026-04-25: kmong /notifications 는 404. 헤더 종 아이콘 드롭다운만 존재.
+  // 비승인 정보는 어차피 /my-gigs?REJECTED 와 중복이므로 일단 스킵.
+  // 추후 종 드롭다운 트리거 셀렉터가 안정되면 활성화.
+  console.log('[비승인 추출] 종알림 스킵 (/notifications 404)');
+  return [];
+  // legacy:
   try {
     await page.goto(NOTIFICATIONS_URL, { waitUntil: 'domcontentloaded', timeout: 20000 });
     await page.waitForTimeout(3000);
