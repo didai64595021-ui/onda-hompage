@@ -101,6 +101,9 @@ async function crawlGigStatus() {
             product_id: productId,
             gig_title: it.title,
             status: it.status,
+            draft_id: it.draftId,
+            price_min: it.priceMin,
+            price_max: it.priceMax,
           });
         }
       }
