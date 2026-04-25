@@ -40,7 +40,7 @@ const bot = new TelegramBot(BOT_TOKEN, {
   },
   // api.telegram.org 간헐 ETIMEDOUT 대응: request timeout 15초 + IPv4 강제
   request: {
-    timeout: 15000,
+    timeout: 40000,
     family: 4,
     forever: false,
   },
