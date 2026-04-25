@@ -24,7 +24,9 @@ CREATE TABLE IF NOT EXISTS kmong_gig_rejection_log (
   resubmitted     BOOLEAN DEFAULT FALSE,
   resubmitted_at  TIMESTAMPTZ,
   reapproval_status TEXT,              -- 'approved' | 'rejected_again' | 'pending' | null
-  reapproval_checked_at TIMESTAMPTZ
+  reapproval_checked_at TIMESTAMPTZ,
+  cancel_requested BOOLEAN DEFAULT FALSE,  -- 60초 취소 가드: 사용자가 텔레그램/SQL로 마킹 시 자동 적용 skip
+  cancel_requested_at TIMESTAMPTZ
 );
 
 CREATE INDEX IF NOT EXISTS idx_kgrl_product_detected
