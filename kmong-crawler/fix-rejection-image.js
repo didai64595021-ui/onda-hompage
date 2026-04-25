@@ -34,9 +34,11 @@ function notifyPlain(text) {
 
 function parseArgs() {
   const a = process.argv.slice(2);
+  const reuseIdx = a.indexOf('--reuse-image');
   return {
     rejectionId: a.find(x => /^\d+$/.test(x)),
     apply: !a.includes('--dry-run'),
+    reuseImage: reuseIdx >= 0 ? a[reuseIdx + 1] : null,
   };
 }
 
@@ -127,27 +129,37 @@ async function uploadNewMainImage(page, imagePath) {
 }
 
 async function submitForApproval(page) {
-  // 승인규정 체크박스 + 제출하기 + 모달 제출하기 (edit-gig.js 패턴 차용)
+  console.log('[제출] 페이지 맨 아래로 스크롤');
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.waitForTimeout(2000);
+
+  // 승인규정 체크박스
   try {
     const checks = await page.$$('input[type=checkbox]');
+    console.log('[제출] 체크박스', checks.length, '개');
     for (const c of checks) {
       try { if (!(await c.isChecked())) await c.check({ force: true }); } catch {}
     }
-  } catch {}
+  } catch (e) { console.log('[제출] 체크박스 처리 실패:', e.message); }
   await page.waitForTimeout(1000);
 
-  const submitBtn = page.locator('button').filter({ hasText: /^제출하기$/ }).first();
-  if (!(await submitBtn.isVisible({ timeout: 4000 }).catch(() => false))) {
-    throw new Error('제출하기 버튼 미발견');
+  // 제출하기 버튼 — exact match로 locator
+  console.log('[제출] 제출하기 버튼 찾기');
+  const submitBtn = page.getByRole('button', { name: '제출하기', exact: true }).first();
+  await submitBtn.scrollIntoViewIfNeeded({ timeout: 5000 }).catch(() => {});
+  if (!(await submitBtn.isVisible({ timeout: 6000 }).catch(() => false))) {
+    throw new Error('제출하기 버튼 미발견 (페이지 맨 아래)');
   }
   await submitBtn.click({ force: true });
-  await page.waitForTimeout(3000);
+  console.log('[제출] 제출하기 클릭 완료');
+  await page.waitForTimeout(4000);
 
   // 최종 확인 모달 — 다시 "제출하기"
-  const modalSubmit = page.locator('div[role=dialog] button').filter({ hasText: /^제출하기$/ }).first();
-  if (await modalSubmit.isVisible({ timeout: 4000 }).catch(() => false)) {
+  const modalSubmit = page.locator('div[role=dialog]').getByRole('button', { name: '제출하기', exact: true }).first();
+  if (await modalSubmit.isVisible({ timeout: 6000 }).catch(() => false)) {
     await modalSubmit.click({ force: true });
-    await page.waitForTimeout(4000);
+    console.log('[제출] 모달 제출하기 클릭');
+    await page.waitForTimeout(6000);
     return { ok: true, via: 'modal' };
   }
   return { ok: true, via: 'direct' };
@@ -168,25 +180,32 @@ async function main() {
 
   if (!log.draft_id) { console.error('draft_id 없음 — 편집 진입 불가'); process.exit(1); }
 
-  // 2) 이미지 컨셉 프롬프트
-  console.log('[컨셉] Opus 호출');
-  const conceptPrompt = await buildImagePrompt({ gig_title: log.gig_title, reason_text: log.reason_raw });
-  console.log('[컨셉] 길이', conceptPrompt.length);
+  let resized;
+  if (args.reuseImage) {
+    if (!fs.existsSync(args.reuseImage)) { console.error('reuseImage 파일 없음:', args.reuseImage); process.exit(1); }
+    resized = args.reuseImage;
+    console.log('[재사용] 기존 이미지 사용:', resized);
+  } else {
+    // 2) 이미지 컨셉 프롬프트
+    console.log('[컨셉] Opus 호출');
+    const conceptPrompt = await buildImagePrompt({ gig_title: log.gig_title, reason_text: log.reason_raw });
+    console.log('[컨셉] 길이', conceptPrompt.length);
 
-  // 3) OpenAI 이미지 생성
-  const genRes = await generateMainImage({
-    prompt: conceptPrompt,
-    size: '1536x1024',
-    outDir: path.join(__dirname, 'tmp-gen-images'),
-    filenamePrefix: `rej${log.id}`,
-  });
-  if (!genRes.ok) { console.error('이미지 생성 실패:', genRes.error); process.exit(1); }
-  console.log('[생성] OK', genRes.file_path);
+    // 3) OpenAI 이미지 생성
+    const genRes = await generateMainImage({
+      prompt: conceptPrompt,
+      size: '1536x1024',
+      outDir: path.join(__dirname, 'tmp-gen-images'),
+      filenamePrefix: `rej${log.id}`,
+    });
+    if (!genRes.ok) { console.error('이미지 생성 실패:', genRes.error); process.exit(1); }
+    console.log('[생성] OK', genRes.file_path);
 
-  // 4) 652x488 리사이즈
-  const resized = genRes.file_path.replace(/\.png$/, '_652x488.png');
-  await ensureSize652x488(genRes.file_path, resized);
-  console.log('[리사이즈] OK', resized, fs.statSync(resized).size, 'bytes');
+    // 4) 652x488 리사이즈
+    resized = genRes.file_path.replace(/\.png$/, '_652x488.png');
+    await ensureSize652x488(genRes.file_path, resized);
+    console.log('[리사이즈] OK', resized, fs.statSync(resized).size, 'bytes');
+  }
 
   if (!args.apply) {
     console.log('[dry-run] 업로드/제출 스킵. 생성된 이미지:', resized);
