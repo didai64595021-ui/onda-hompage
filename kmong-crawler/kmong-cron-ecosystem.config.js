@@ -214,6 +214,16 @@ module.exports = {
       watch: false,
       env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
     },
+    // === Phase 7-quater: 비승인 자동처리 (2026-04-25 신설) ===
+    {
+      name: 'kmong-check-rejection-daily',
+      script: './check-rejection-daily.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '30 8 * * *',  // 매일 08:30 KST — daily-report(08:00) 이후
+      autorestart: false,
+      watch: false,
+      env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
+    },
     // === Phase 8: 리포트 (일/주/월) — 2026-04-18 신설 ===
     {
       name: 'kmong-daily-report',
