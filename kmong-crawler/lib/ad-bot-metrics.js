@@ -35,7 +35,7 @@ async function loadServiceMetrics(days = 30) {
     supabase.from('kmong_ad_bid_suggestion').select('product_id,keyword,suggested_cpc,captured_at').order('captured_at', { ascending: false }).limit(1000),
     supabase.from('kmong_inquiries').select('product_id,created_at').gte('created_at', start),
     supabase.from('kmong_profits_transactions').select('product_id,profit_amount,status,transaction_date').gte('transaction_date', start).lte('transaction_date', end),
-    supabase.from('kmong_gig_status').select('product_id,gig_title,status,crawled_at').order('crawled_at', { ascending: false }).limit(200),
+    supabase.from('kmong_gig_status').select('product_id,gig_title,status,price_min,price_max,crawled_at').order('crawled_at', { ascending: false }).limit(200),
   ]);
 
   // 서비스별 집계
@@ -53,17 +53,20 @@ async function loadServiceMetrics(days = 30) {
       keywords_top: [], keywords_bottom: [],
       suggested_cpc_stats: null,
       suggested_keywords: [],
+      price_min: null, price_max: null, avg_order_value: null,
     };
     return svc[pid];
   };
 
-  // 서비스명 (가장 최근 스냅샷)
+  // 서비스명 + 단가 (가장 최근 스냅샷)
   const seenGig = new Set();
   for (const g of (gigRes.data || [])) {
     if (seenGig.has(g.product_id)) continue;
     seenGig.add(g.product_id);
     const s = ensure(g.product_id);
     s.gig_title = g.gig_title;
+    if (g.price_min != null) s.price_min = g.price_min;
+    if (g.price_max != null) s.price_max = g.price_max;
   }
 
   // 주간 누적 지출 (서비스별) — 기존처럼 kmong_cpc_daily 기반 proxy
@@ -177,6 +180,22 @@ async function loadServiceMetrics(days = 30) {
     s.cpa_30d = s.orders_30d > 0 ? Math.round(s.cost_30d / s.orders_30d) : null;
     s.roi_30d = s.cost_30d > 0 ? +(((s.revenue_30d - s.cost_30d) / s.cost_30d) * 100).toFixed(1) : null;
     s.roas_30d = s.cost_30d > 0 ? +((s.revenue_30d / s.cost_30d) * 100).toFixed(1) : null;
+    // 단가 기반 손익 — 실측(매출/주문수) 우선, 없으면 price_min fallback
+    s.avg_order_value = s.orders_30d > 0
+      ? Math.round(s.revenue_30d / s.orders_30d)
+      : (s.price_min || null);
+    // 손익분기 CPC 추정: avg_order_value × 가정 마진율(0.4) × cvr_inquiry × inquiry→order(0.3 가정)
+    // = 1클릭당 기대 마진. 이 값이 desired_cpc보다 낮으면 적자 위험.
+    const margin = 0.4, inq2order = 0.3;
+    if (s.avg_order_value && s.cvr_inquiry_30d > 0) {
+      const expectedMarginPerClick = Math.round(
+        s.avg_order_value * margin * (s.cvr_inquiry_30d / 100) * inq2order,
+      );
+      s.expected_margin_per_click = expectedMarginPerClick;
+      s.deficit_risk = (s.desired_cpc != null && expectedMarginPerClick > 0)
+        ? +(s.desired_cpc / expectedMarginPerClick).toFixed(2)  // 1.0 이상이면 적자 위험
+        : null;
+    }
   }
 
   const results = Object.values(svc).filter(s => s.desired_cpc != null);
