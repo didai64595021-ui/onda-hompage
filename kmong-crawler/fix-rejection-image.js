@@ -1,0 +1,243 @@
+#!/usr/bin/env node
+/**
+ * 비승인 이미지 자동 교체 + 재제출
+ *
+ * 흐름:
+ *  1) DB에서 rejection_log 로드 (id 인자)
+ *  2) Opus로 이미지 컨셉 프롬프트 생성 (제목/카테고리 → 깨끗한 일러스트 컨셉, 금지문구 X)
+ *  3) OpenAI gpt-image-1 으로 이미지 생성 (1536x1024)
+ *  4) sharp로 652x488 (크몽 권장) 리사이즈/크롭
+ *  5) Playwright: /my-gigs?REJECTED → 편집하기 → 메인이미지 삭제 → 새이미지 업로드
+ *  6) 승인규정 체크 → 제출하기 → 모달 제출하기
+ *  7) DB 업데이트 (applied/resubmitted) + 텔레그램 보고
+ *
+ * 사용: node fix-rejection-image.js <rejection_id> [--dry-run]
+ */
+
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
+const fs = require('fs');
+const path = require('path');
+const { spawn } = require('child_process');
+const sharp = require('sharp');
+const { supabase } = require('./lib/supabase');
+const { login } = require('./lib/login');
+const { generateMainImage } = require('./lib/openai-image-gen');
+const { askClaude } = require('./lib/claude-max');
+
+function notifyPlain(text) {
+  return new Promise((resolve) => {
+    const child = spawn('node', ['/home/onda/scripts/telegram-sender.js', text], { stdio: 'ignore' });
+    child.on('close', resolve);
+    setTimeout(resolve, 8000);
+  });
+}
+
+function parseArgs() {
+  const a = process.argv.slice(2);
+  return {
+    rejectionId: a.find(x => /^\d+$/.test(x)),
+    apply: !a.includes('--dry-run'),
+  };
+}
+
+async function buildImagePrompt({ gig_title, reason_text }) {
+  // Opus에게 깨끗한 메인 이미지 시각 컨셉을 한국어로 받기 (텍스트 X, 가격 X 등)
+  const r = await askClaude({
+    system: '당신은 크몽 메인 이미지 컨셉 디자이너입니다. 텍스트/숫자/가격/할인 일체 X. 깔끔한 플랫 일러스트 컨셉만 제안.',
+    messages: [{
+      role: 'user',
+      content: `서비스 제목: ${gig_title}
+직전 비승인 사유 (참고용 — 이런 요소는 절대 포함 금지): ${(reason_text || '').slice(0, 600)}
+
+위 서비스의 메인 이미지로 쓸 시각 컨셉을 영문 80~120 단어로 묘사해줘. 모든 텍스트/숫자/통화/할인 표시 금지. 시각적 메타포로만. 결과 텍스트만 출력 (설명 X).`,
+    }],
+    model: 'opus',
+    max_tokens: 800,
+  });
+  if (!r.ok) throw new Error('이미지 컨셉 생성 실패: ' + r.error);
+  return r.text.trim();
+}
+
+async function ensureSize652x488(inputPath, outputPath) {
+  await sharp(inputPath).resize(652, 488, { fit: 'cover', position: 'center' }).png({ compressionLevel: 6 }).toFile(outputPath);
+  return outputPath;
+}
+
+async function clickEditFor(page, draftId) {
+  await page.goto('https://kmong.com/my-gigs?statusType=REJECTED', { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForTimeout(4000);
+  for (let i = 0; i < 4; i++) { await page.evaluate(() => window.scrollBy(0, 1500)); await page.waitForTimeout(400); }
+  const r = await page.evaluate((did) => {
+    const btns = [...document.querySelectorAll('button')].filter(b => (b.innerText||'').trim() === '편집하기');
+    for (const b of btns) {
+      let card = b.closest('article');
+      if (!card) {
+        let cur = b;
+        for (let i = 0; i < 6; i++) { cur = cur.parentElement; if (!cur) break; if ((cur.innerText || '').match(/#\d{6,}/)) { card = cur; break; } }
+      }
+      if (card && (card.innerText || '').includes('#' + did)) { b.click(); return true; }
+    }
+    return false;
+  }, String(draftId));
+  if (!r) throw new Error(`#${draftId} 편집 버튼 미발견`);
+  await page.waitForTimeout(8000);
+}
+
+async function deleteCurrentMainImage(page) {
+  // "메인 이미지" 섹션 안의 "삭제" 버튼 클릭
+  const ok = await page.evaluate(() => {
+    const headers = [...document.querySelectorAll('h3,h4,div,label,span')].filter(el => /^메인\s*이미지/.test((el.innerText||'').trim()));
+    if (!headers.length) return false;
+    const root = headers[0].closest('section,div');
+    if (!root) return false;
+    const dels = [...root.querySelectorAll('button')].filter(b => (b.innerText||'').trim() === '삭제');
+    if (!dels.length) return false;
+    dels[0].click();
+    return true;
+  });
+  if (!ok) console.log('[삭제] 기존 이미지 삭제 버튼 못 찾음 (이미 비어있을 수 있음)');
+  await page.waitForTimeout(2000);
+  // 확인 모달 처리
+  try {
+    const ok2 = await page.locator('button:has-text("확인")').first().isVisible({ timeout: 2000 }).catch(() => false);
+    if (ok2) { await page.locator('button:has-text("확인")').first().click({ force: true }); await page.waitForTimeout(1500); }
+  } catch {}
+}
+
+async function uploadNewMainImage(page, imagePath) {
+  // file input은 보통 hidden — 메인이미지 섹션 내부 input[type=file] 찾아서 setInputFiles
+  const fileInput = await page.evaluateHandle(() => {
+    const headers = [...document.querySelectorAll('h3,h4,div,label,span')].filter(el => /^메인\s*이미지/.test((el.innerText||'').trim()));
+    if (!headers.length) return null;
+    const root = headers[0].closest('section,div');
+    if (!root) return null;
+    return root.querySelector('input[type=file]');
+  });
+  const el = fileInput.asElement();
+  if (!el) {
+    // fallback: 페이지 전역 첫번째 file input
+    const all = await page.$$('input[type=file]');
+    if (!all.length) throw new Error('input[type=file] 못 찾음');
+    await all[0].setInputFiles(imagePath);
+  } else {
+    await el.setInputFiles(imagePath);
+  }
+  console.log('[업로드] setInputFiles 완료 →', imagePath);
+  await page.waitForTimeout(8000);
+}
+
+async function submitForApproval(page) {
+  // 승인규정 체크박스 + 제출하기 + 모달 제출하기 (edit-gig.js 패턴 차용)
+  try {
+    const checks = await page.$$('input[type=checkbox]');
+    for (const c of checks) {
+      try { if (!(await c.isChecked())) await c.check({ force: true }); } catch {}
+    }
+  } catch {}
+  await page.waitForTimeout(1000);
+
+  const submitBtn = page.locator('button').filter({ hasText: /^제출하기$/ }).first();
+  if (!(await submitBtn.isVisible({ timeout: 4000 }).catch(() => false))) {
+    throw new Error('제출하기 버튼 미발견');
+  }
+  await submitBtn.click({ force: true });
+  await page.waitForTimeout(3000);
+
+  // 최종 확인 모달 — 다시 "제출하기"
+  const modalSubmit = page.locator('div[role=dialog] button').filter({ hasText: /^제출하기$/ }).first();
+  if (await modalSubmit.isVisible({ timeout: 4000 }).catch(() => false)) {
+    await modalSubmit.click({ force: true });
+    await page.waitForTimeout(4000);
+    return { ok: true, via: 'modal' };
+  }
+  return { ok: true, via: 'direct' };
+}
+
+async function main() {
+  const args = parseArgs();
+  if (!args.rejectionId) { console.error('사용: node fix-rejection-image.js <rejection_id>'); process.exit(2); }
+
+  const startTime = Date.now();
+  console.log(`=== fix-rejection-image #${args.rejectionId} ${args.apply ? '(자동적용)' : '(dry-run)'} ===`);
+
+  // 1) DB 로드
+  const { data: log, error } = await supabase
+    .from('kmong_gig_rejection_log').select('*').eq('id', args.rejectionId).single();
+  if (error || !log) { console.error('rejection_log 못 찾음:', error?.message); process.exit(1); }
+  console.log(`[로드] #${log.id} ${log.gig_title} draft=${log.draft_id} pid=${log.product_id}`);
+
+  if (!log.draft_id) { console.error('draft_id 없음 — 편집 진입 불가'); process.exit(1); }
+
+  // 2) 이미지 컨셉 프롬프트
+  console.log('[컨셉] Opus 호출');
+  const conceptPrompt = await buildImagePrompt({ gig_title: log.gig_title, reason_text: log.reason_raw });
+  console.log('[컨셉] 길이', conceptPrompt.length);
+
+  // 3) OpenAI 이미지 생성
+  const genRes = await generateMainImage({
+    prompt: conceptPrompt,
+    size: '1536x1024',
+    outDir: path.join(__dirname, 'tmp-gen-images'),
+    filenamePrefix: `rej${log.id}`,
+  });
+  if (!genRes.ok) { console.error('이미지 생성 실패:', genRes.error); process.exit(1); }
+  console.log('[생성] OK', genRes.file_path);
+
+  // 4) 652x488 리사이즈
+  const resized = genRes.file_path.replace(/\.png$/, '_652x488.png');
+  await ensureSize652x488(genRes.file_path, resized);
+  console.log('[리사이즈] OK', resized, fs.statSync(resized).size, 'bytes');
+
+  if (!args.apply) {
+    console.log('[dry-run] 업로드/제출 스킵. 생성된 이미지:', resized);
+    await notifyPlain(`#${log.id} 이미지 생성 완료 (dry-run): ${resized}`);
+    return;
+  }
+
+  // 5~6) Playwright
+  const { browser, page } = await login({ slowMo: 200 });
+  let outcome = { ok: false };
+  try {
+    await clickEditFor(page, log.draft_id);
+    console.log('[진입] 편집 페이지', page.url());
+
+    await deleteCurrentMainImage(page);
+    await uploadNewMainImage(page, resized);
+
+    outcome = await submitForApproval(page);
+    console.log('[제출]', outcome);
+  } catch (e) {
+    console.error('[예외]', e.message);
+    outcome = { ok: false, error: e.message };
+  } finally {
+    await browser.close();
+  }
+
+  // 7) DB 업데이트 + 텔레그램
+  await supabase.from('kmong_gig_rejection_log')
+    .update({
+      applied: outcome.ok,
+      applied_at: new Date().toISOString(),
+      apply_result: { ok: outcome.ok, error: outcome.error, via: outcome.via, image_path: resized },
+      resubmitted: outcome.ok,
+      resubmitted_at: outcome.ok ? new Date().toISOString() : null,
+    })
+    .eq('id', log.id);
+
+  await notifyPlain([
+    `${outcome.ok ? '✅' : '❌'} 비승인 이미지 자동교체 #${log.id}`,
+    `서비스: ${log.gig_title}`,
+    `사유: ${log.reason_summary}`,
+    `이미지: ${path.basename(resized)}`,
+    `결과: ${outcome.ok ? '재제출 완료 (' + outcome.via + ')' : '실패: ' + (outcome.error || '?')}`,
+    `소요: ${((Date.now() - startTime) / 1000).toFixed(1)}초`,
+  ].join('\n'));
+
+  console.log(`[OK] ${((Date.now() - startTime) / 1000).toFixed(1)}초`);
+}
+
+main().catch(async (err) => {
+  console.error('[치명적]', err);
+  await notifyPlain('fix-rejection-image 치명적 실패: ' + err.message);
+  process.exit(1);
+});
