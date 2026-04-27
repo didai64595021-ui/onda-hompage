@@ -93,7 +93,7 @@ function _sendOnce({ chatId, text, replyMarkup, parseMode = 'HTML', timeoutMs = 
  * - 네트워크 실패 시 자동 재시도 3회 (지수 backoff: 1s, 2s, 4s)
  * - HTML 파싱 실패 시 plain text fallback 1회
  */
-async function sendCard(message, replyMarkup, chatId = '-5018738099') {
+async function sendCard(message, replyMarkup, chatId = '-1003990823637') {
   // Telegram sendMessage text 4096자 제한
   let safeText = message;
   const HARD_LIMIT = 4000;

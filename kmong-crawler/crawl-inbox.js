@@ -9,6 +9,7 @@
  * - Supabase kmong_inquiries 테이블에 insert (중복 스킵)
  */
 
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { login } = require('./lib/login');
 const { supabase } = require('./lib/supabase');
 const { matchProductId } = require('./lib/product-map');
