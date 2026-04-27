@@ -8,7 +8,7 @@ const https = require('https');
 function notify(message) {
   try {
     const token = process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = '-5018738099'; // KMONG 그룹
+    const chatId = '-1003990823637'; // KMONG 그룹 (슈퍼그룹 마이그레이션 2026-04-27)
 
     if (!token) {
       console.error('[텔레그램] TELEGRAM_BOT_TOKEN 없음 — 알림 스킵');
