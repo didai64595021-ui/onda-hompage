@@ -12,7 +12,7 @@
  */
 
 import { spawn, execSync, spawnSync } from 'child_process';
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, appendFileSync } from 'fs';
 import { randomUUID } from 'crypto';
 import dns from 'dns';
 
@@ -174,11 +174,13 @@ async function tgApi(method: string, body?: Record<string, unknown>): Promise<Re
 }
 
 // ─── 미디어 다운로드 ───
-async function downloadFile(fileId: string, suffix: string): Promise<string | null> {
+// 2026-04-27: chat_id별 디렉토리 분리 + JSONL 인덱스 추가 (과거 저장된 평면 캐시는 그대로 두고 신규부터 적용)
+type MediaMeta = { chatId?: string | number; messageId?: number; caption?: string; source?: string; from?: string };
+async function downloadFile(fileId: string, suffix: string, meta: MediaMeta = {}): Promise<string | null> {
   try {
-    const meta = await tgApi('getFile', { file_id: fileId });
-    if (!meta.ok) return null;
-    const result = meta.result as Record<string, unknown>;
+    const r = await tgApi('getFile', { file_id: fileId });
+    if (!r.ok) return null;
+    const result = r.result as Record<string, unknown>;
     const filePath = result.file_path as string;
     if (!filePath) return null;
     const url = `https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`;
@@ -186,8 +188,24 @@ async function downloadFile(fileId: string, suffix: string): Promise<string | nu
     if (!res.ok) return null;
     const buf = Buffer.from(await res.arrayBuffer());
     if (!existsSync(MEDIA_DIR)) mkdirSync(MEDIA_DIR, { recursive: true });
-    const outPath = `${MEDIA_DIR}/${fileId}${suffix}`;
+    const chatDir = meta.chatId !== undefined ? `${MEDIA_DIR}/${String(meta.chatId).replace(/[^0-9A-Za-z_-]/g, '_')}` : MEDIA_DIR;
+    if (chatDir !== MEDIA_DIR && !existsSync(chatDir)) mkdirSync(chatDir, { recursive: true });
+    const outPath = `${chatDir}/${fileId}${suffix}`;
     writeFileSync(outPath, buf);
+    try {
+      const indexEntry = JSON.stringify({
+        ts: new Date().toISOString(),
+        chatId: meta.chatId ?? null,
+        messageId: meta.messageId ?? null,
+        from: meta.from ?? null,
+        source: meta.source ?? 'msg',
+        caption: (meta.caption ?? '').slice(0, 500),
+        fileId,
+        path: outPath,
+        size: buf.length,
+      });
+      appendFileSync(`${MEDIA_DIR}/_index.jsonl`, indexEntry + '\n');
+    } catch (e) { /* index 실패는 비치명적 */ }
     return outPath;
   } catch (err) {
     log('WARN', `파일 다운로드 실패 ${fileId}: ${(err as Error).message}`);
@@ -215,6 +233,15 @@ async function extractMessageContent(msg: Record<string, unknown>): Promise<{
   const parts: string[] = [];
   const mediaPaths: string[] = [];
 
+  // 메타 정보 (chat_id별 디렉토리 + 인덱스용)
+  const chat = msg.chat as Record<string, unknown> | undefined;
+  const chatId = chat?.id as string | number | undefined;
+  const messageId = msg.message_id as number | undefined;
+  const fromObj = msg.from as Record<string, unknown> | undefined;
+  const fromUser = fromObj ? (fromObj.username as string || fromObj.first_name as string || String(fromObj.id ?? '?')) : '?';
+  const bodyText0 = (msg.text as string) || (msg.caption as string) || '';
+  const baseMeta = { chatId, messageId, caption: bodyText0, from: fromUser };
+
   // 1. 답장 컨텍스트 (있으면 먼저)
   const replyTo = msg.reply_to_message as Record<string, unknown> | undefined;
   if (replyTo) {
@@ -228,20 +255,19 @@ async function extractMessageContent(msg: Record<string, unknown>): Promise<{
     const rPhoto = replyTo.photo as Array<Record<string, unknown>> | undefined;
     if (rPhoto && rPhoto.length > 0) {
       const largest = rPhoto[rPhoto.length - 1];
-      const p = await downloadFile(largest.file_id as string, '.jpg');
+      const p = await downloadFile(largest.file_id as string, '.jpg', { ...baseMeta, source: 'reply-photo', caption: replyText, from: replyUser });
       if (p) { mediaPaths.push(p); parts.push(`[답장 대상에 첨부된 이미지: ${p}]`); }
     }
   }
 
   // 2. 본문 텍스트 (text 또는 caption)
-  const bodyText = (msg.text as string) || (msg.caption as string) || '';
-  if (bodyText) parts.push(bodyText);
+  if (bodyText0) parts.push(bodyText0);
 
   // 3. 사진
   const photo = msg.photo as Array<Record<string, unknown>> | undefined;
   if (photo && photo.length > 0) {
     const largest = photo[photo.length - 1];
-    const p = await downloadFile(largest.file_id as string, '.jpg');
+    const p = await downloadFile(largest.file_id as string, '.jpg', { ...baseMeta, source: 'photo' });
     if (p) { mediaPaths.push(p); parts.push(`[첨부 이미지: ${p}]`); }
   }
 
@@ -249,7 +275,7 @@ async function extractMessageContent(msg: Record<string, unknown>): Promise<{
   const video = msg.video as Record<string, unknown> | undefined;
   if (video) {
     const ext = ((video.mime_type as string) || '').includes('mp4') ? '.mp4' : '.bin';
-    const vp = await downloadFile(video.file_id as string, ext);
+    const vp = await downloadFile(video.file_id as string, ext, { ...baseMeta, source: 'video' });
     if (vp) {
       mediaPaths.push(vp);
       const frame = extractFirstFrame(vp);
@@ -265,7 +291,7 @@ async function extractMessageContent(msg: Record<string, unknown>): Promise<{
   // 5. 애니메이션(GIF)
   const animation = msg.animation as Record<string, unknown> | undefined;
   if (animation) {
-    const ap = await downloadFile(animation.file_id as string, '.mp4');
+    const ap = await downloadFile(animation.file_id as string, '.mp4', { ...baseMeta, source: 'animation' });
     if (ap) {
       const frame = extractFirstFrame(ap);
       if (frame) { mediaPaths.push(frame); parts.push(`[첨부 GIF (첫 프레임): ${frame}]`); }
@@ -279,7 +305,7 @@ async function extractMessageContent(msg: Record<string, unknown>): Promise<{
     const mime = (document.mime_type as string) || '';
     const name = (document.file_name as string) || 'file';
     const ext = name.match(/\.[^.]+$/)?.[0] || '';
-    const dp = await downloadFile(document.file_id as string, ext || '.bin');
+    const dp = await downloadFile(document.file_id as string, ext || '.bin', { ...baseMeta, source: `document:${name}` });
     if (dp) {
       mediaPaths.push(dp);
       if (mime.startsWith('image/')) parts.push(`[첨부 이미지(문서): ${dp}]`);
@@ -290,12 +316,12 @@ async function extractMessageContent(msg: Record<string, unknown>): Promise<{
   // 7. 음성/오디오
   const voice = msg.voice as Record<string, unknown> | undefined;
   if (voice) {
-    const vp = await downloadFile(voice.file_id as string, '.ogg');
+    const vp = await downloadFile(voice.file_id as string, '.ogg', { ...baseMeta, source: 'voice' });
     if (vp) { mediaPaths.push(vp); parts.push(`[첨부 음성: ${vp}]`); }
   }
   const audio = msg.audio as Record<string, unknown> | undefined;
   if (audio) {
-    const ap = await downloadFile(audio.file_id as string, '.mp3');
+    const ap = await downloadFile(audio.file_id as string, '.mp3', { ...baseMeta, source: 'audio' });
     if (ap) { mediaPaths.push(ap); parts.push(`[첨부 오디오: ${ap}]`); }
   }
 
