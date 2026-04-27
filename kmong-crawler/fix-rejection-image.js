@@ -43,18 +43,27 @@ function parseArgs() {
 }
 
 async function buildImagePrompt({ gig_title, reason_text }) {
-  // Opus에게 깨끗한 메인 이미지 시각 컨셉을 한국어로 받기 (텍스트 X, 가격 X 등)
   const r = await askClaude({
-    system: '당신은 크몽 메인 이미지 컨셉 디자이너입니다. 텍스트/숫자/가격/할인 일체 X. 깔끔한 플랫 일러스트 컨셉만 제안.',
+    system: `당신은 크몽 메인 이미지 컨셉 디자이너입니다.
+핵심 원칙:
+1. 제목의 핵심 메타포가 이미지에 명확히 드러나야 함 (서비스 정체성 = 매출).
+2. 텍스트/숫자/통화기호/할인표시 일체 금지 (크몽 정책).
+3. 깔끔한 플랫 일러스트, 모던 미니멀, 의미 전달 우선.`,
     messages: [{
       role: 'user',
       content: `서비스 제목: ${gig_title}
-직전 비승인 사유 (참고용 — 이런 요소는 절대 포함 금지): ${(reason_text || '').slice(0, 600)}
+직전 비승인 사유 (이런 요소는 절대 포함 금지): ${(reason_text || '').slice(0, 600)}
 
-위 서비스의 메인 이미지로 쓸 시각 컨셉을 영문 80~120 단어로 묘사해줘. 모든 텍스트/숫자/통화/할인 표시 금지. 시각적 메타포로만. 결과 텍스트만 출력 (설명 X).`,
+작업:
+1. 먼저 제목을 분석 — 핵심 키워드 / 시각적 메타포 / 변화의 방향(from→to) 추출
+2. 그 메타포를 강하게 드러내는 영문 시각 컨셉을 80~120 단어로 작성
+3. 제목의 모든 핵심 명사가 시각 요소로 1:1 대응되도록 (예: "이사" → moving boxes/truck, "탈출" → broken chain or open door, "월구독료" → recurring cycle/calendar loop, "자체홈페이지" → standalone house/anchored building)
+4. 텍스트/숫자/통화/브랜드로고 일체 금지
+
+결과: 영문 비주얼 컨셉 텍스트만 출력 (설명·번역·메타정보 X). 첫 줄에 핵심 메타포 한 문장.`,
     }],
     model: 'opus',
-    max_tokens: 800,
+    max_tokens: 1200,
   });
   if (!r.ok) throw new Error('이미지 컨셉 생성 실패: ' + r.error);
   return r.text.trim();
@@ -66,23 +75,31 @@ async function ensureSize652x488(inputPath, outputPath) {
 }
 
 async function clickEditFor(page, draftId) {
-  await page.goto('https://kmong.com/my-gigs?statusType=REJECTED', { waitUntil: 'domcontentloaded', timeout: 30000 });
-  await page.waitForTimeout(4000);
-  for (let i = 0; i < 4; i++) { await page.evaluate(() => window.scrollBy(0, 1500)); await page.waitForTimeout(400); }
-  const r = await page.evaluate((did) => {
-    const btns = [...document.querySelectorAll('button')].filter(b => (b.innerText||'').trim() === '편집하기');
-    for (const b of btns) {
-      let card = b.closest('article');
-      if (!card) {
-        let cur = b;
-        for (let i = 0; i < 6; i++) { cur = cur.parentElement; if (!cur) break; if ((cur.innerText || '').match(/#\d{6,}/)) { card = cur; break; } }
+  // REJECTED 와 WAITING(승인 전) 둘 다 검색 — 재제출 후엔 WAITING 으로 이동
+  const tabs = ['REJECTED', 'WAITING', 'SELLING'];
+  for (const tab of tabs) {
+    await page.goto(`https://kmong.com/my-gigs?statusType=${tab}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(4000);
+    for (let i = 0; i < 5; i++) { await page.evaluate(() => window.scrollBy(0, 1500)); await page.waitForTimeout(400); }
+    const r = await page.evaluate((did) => {
+      const btns = [...document.querySelectorAll('button')].filter(b => (b.innerText||'').trim() === '편집하기');
+      for (const b of btns) {
+        let card = b.closest('article');
+        if (!card) {
+          let cur = b;
+          for (let i = 0; i < 6; i++) { cur = cur.parentElement; if (!cur) break; if ((cur.innerText || '').match(/#\d{6,}/)) { card = cur; break; } }
+        }
+        if (card && (card.innerText || '').includes('#' + did)) { b.click(); return true; }
       }
-      if (card && (card.innerText || '').includes('#' + did)) { b.click(); return true; }
+      return false;
+    }, String(draftId));
+    if (r) {
+      console.log(`[편집진입] ${tab} 탭에서 발견`);
+      await page.waitForTimeout(8000);
+      return;
     }
-    return false;
-  }, String(draftId));
-  if (!r) throw new Error(`#${draftId} 편집 버튼 미발견`);
-  await page.waitForTimeout(8000);
+  }
+  throw new Error(`#${draftId} 편집 버튼 미발견 (REJECTED/WAITING/SELLING 전체 검색)`);
 }
 
 async function deleteCurrentMainImage(page) {

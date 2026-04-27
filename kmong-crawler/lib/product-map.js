@@ -22,6 +22,7 @@ const PRODUCT_MAP = [
   { id: 'portal-map',  primary: ['포털 지도', '무지성 트래픽'],         fallback: ['오르시던가요'],                             category: '포털/지도 트래픽',     gig_url: null },
   { id: 'insta-atoz',  primary: ['A to Z, 대행X', '대행X 실행O'],      fallback: ['A to Z', 'AtoZ'],                           category: '인스타그램 운영 A to Z', gig_url: null },
   { id: 'insta-core',  primary: ['핵심만 쏙쏙', '핵심 운영'],           fallback: ['인스타그램 핵심'],                          category: '인스타그램 핵심 운영', gig_url: null },
+  { id: 'kakao-excel', primary: ['Zapier 대체 카톡', '카톡 자동발송, 노코드'], fallback: ['구글시트', 'Zapier', 'Make', '카톡 자동발송'], category: '카톡 알림봇 + 엑셀 자동연동', gig_url: null },
 ];
 
 /**
