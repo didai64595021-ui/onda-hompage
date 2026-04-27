@@ -97,6 +97,15 @@ let lastUpdateId = 0;
 const messageQueue: Array<Record<string, unknown>> = [];
 let processingQueue = false;
 
+// ─── 동시 실행 제어 ───
+// 같은 sessionKey(chatId+workspace)는 세션 jsonl 충돌 방지를 위해 직렬 유지.
+// 다른 채팅방은 RELAY_MAX_CONCURRENT 슬롯만큼 병렬 처리.
+const MAX_CONCURRENT = Math.max(1, Number(process.env.RELAY_MAX_CONCURRENT) || 2);
+let activeWorkers = 0;
+const perChatBusy: Set<string> = new Set();
+let shouldPoll = true;
+let shuttingDown = false;
+
 // ─── 메시지 배칭 (연속 메시지 합치기) ───
 const BATCH_WAIT_MS = 15000; // 15초 대기
 interface BatchEntry {
@@ -604,20 +613,40 @@ function isImmediateCommand(text: string): boolean {
   return false;
 }
 
-// ─── 배치 처리 큐 (동시 Claude 호출 방지) ───
-const batchProcessQueue: Array<() => Promise<void>> = [];
-let processingBatch = false;
+// ─── 배치 처리 큐 (chatId 직렬 + 글로벌 N슬롯 병렬) ───
+interface BatchTask { chatId: string; fn: () => Promise<void>; }
+const batchProcessQueue: Array<BatchTask> = [];
 
-async function enqueueBatchProcess(fn: () => Promise<void>) {
-  batchProcessQueue.push(fn);
-  if (processingBatch) return;
-  processingBatch = true;
-  while (batchProcessQueue.length > 0) {
-    const task = batchProcessQueue.shift()!;
-    try { await task(); }
-    catch (err) { log('ERROR', `배치큐 에러: ${(err as Error).message}`); }
+function enqueueBatchProcess(chatId: string, fn: () => Promise<void>) {
+  batchProcessQueue.push({ chatId, fn });
+  pumpWorkers();
+}
+
+function pumpWorkers() {
+  while (activeWorkers < MAX_CONCURRENT) {
+    // 같은 chatId가 처리 중이면 건너뛰고 다음 chatId task 픽업 (sessionKey 직렬 락)
+    const idx = batchProcessQueue.findIndex(t => !perChatBusy.has(t.chatId));
+    if (idx < 0) break;
+    const task = batchProcessQueue.splice(idx, 1)[0];
+    activeWorkers++;
+    perChatBusy.add(task.chatId);
+    runWorker(task);
   }
-  processingBatch = false;
+}
+
+async function runWorker(task: BatchTask) {
+  try { await task.fn(); }
+  catch (err) { log('ERROR', `배치큐 에러: ${(err as Error).message}`); }
+  finally {
+    perChatBusy.delete(task.chatId);
+    activeWorkers--;
+    pumpWorkers();
+  }
+}
+
+function isChatBusyOrQueued(chatId: string): boolean {
+  if (perChatBusy.has(chatId)) return true;
+  return batchProcessQueue.some(t => t.chatId === chatId);
 }
 
 // ─── 배칭된 메시지 처리 ───
@@ -631,7 +660,7 @@ function processBatch(chatId: string) {
   const messages = [...batch.messages];
   batchBuffer.delete(chatId);
 
-  enqueueBatchProcess(async () => {
+  enqueueBatchProcess(chatId, async () => {
     // 첫 번째 메시지의 원본 msg 객체를 기반으로 처리
     const firstMsg = messages[0].msg;
     const firstMessageId = messages[0].messageId;
@@ -720,9 +749,16 @@ async function processQueue() {
       batchBuffer.set(chatId, entry);
 
       // "접수" 응답 즉시 전송 (Claude 작업 중이면 대기열 상태 표시)
-      if (processingBatch) {
-        const queueLen = batchProcessQueue.length + 1;
-        sendMessage(chatId, `📋 대기열 ${queueLen}번째 추가됨 (앞 작업 처리 중, 완료 후 순차 진행)`, messageId)
+      if (isChatBusyOrQueued(chatId)) {
+        // 같은 채팅방 직렬 락 — 앞 작업 끝날 때까지 대기
+        const sameChatQueued = batchProcessQueue.filter(t => t.chatId === chatId).length;
+        const order = sameChatQueued + 1;
+        sendMessage(chatId, `📋 같은 채팅방 ${order}번째 (앞 작업 완료 후 진행) · 슬롯 ${activeWorkers}/${MAX_CONCURRENT}`, messageId)
+          .then(() => { entry.notified = true; })
+          .catch(() => {});
+      } else if (activeWorkers >= MAX_CONCURRENT) {
+        // 다른 채팅방이 슬롯 다 점유한 경우
+        sendMessage(chatId, `📋 슬롯 대기 중 (${activeWorkers}/${MAX_CONCURRENT} 사용 중, 곧 처리)`, messageId)
           .then(() => { entry.notified = true; })
           .catch(() => {});
       } else {
@@ -744,7 +780,7 @@ async function processQueue() {
 }
 
 async function pollUpdates() {
-  while (true) {
+  while (shouldPoll) {
     try {
       const result = await tgApi('getUpdates', {
         offset: lastUpdateId + 1,
@@ -811,6 +847,44 @@ async function main() {
 
   await pollUpdates();
 }
+
+// ─── Graceful shutdown ───
+// SIGTERM/SIGINT 수신 시:
+//   1) 새 폴링 중단 (텔레그램 server에 미처리 update 보존 — 재시작 시 다시 받음)
+//   2) batchBuffer flush (대기 중 메시지를 큐로 밀어넣음)
+//   3) 활성 워커 + 큐 모두 비울 때까지 대기
+//   4) process.exit(0)
+// PM2는 kill_timeout 안에 안 죽으면 SIGKILL — 충분히(10분) 늘려야 안전.
+function gracefulShutdown(signal: string) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  shouldPoll = false;
+  log('INFO', `${signal} 수신 — graceful shutdown 시작 (폴링 중단)`);
+
+  // 모든 batch buffer 즉시 flush
+  for (const chatId of Array.from(batchBuffer.keys())) {
+    const entry = batchBuffer.get(chatId);
+    if (entry?.timer) clearTimeout(entry.timer);
+    processBatch(chatId);
+  }
+
+  let ticks = 0;
+  const checkInterval = setInterval(() => {
+    ticks++;
+    const queued = batchProcessQueue.length;
+    if (queued === 0 && activeWorkers === 0) {
+      log('INFO', 'graceful shutdown 완료 — 종료');
+      clearInterval(checkInterval);
+      process.exit(0);
+    } else if (ticks % 6 === 0) {
+      // 30초마다 진행 상황 로그
+      log('INFO', `shutdown 대기: 큐 ${queued}개, 활성 워커 ${activeWorkers}개`);
+    }
+  }, 5000);
+}
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 main().catch((err) => {
   log('ERROR', `치명적 에러: ${err.message}`);
