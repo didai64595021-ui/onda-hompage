@@ -322,6 +322,7 @@ function handleFormSubmit(form) {
   const payload = new FormData();
   payload.append('name', data.name || '');
   payload.append('phone', data.phone || '');
+  payload.append('region', data.region || '');
   payload.append('company', data.company || '');
   payload.append('email', data.email || '');
   payload.append('industry', data.industry || '');
@@ -349,6 +350,7 @@ function handleFormSubmit(form) {
       const body = encodeURIComponent(
         '이름: ' + (data.name || '') + '\n' +
         '연락처: ' + (data.phone || '') + '\n' +
+        '지역: ' + (data.region || '') + '\n' +
         '업체명: ' + (data.company || '') + '\n' +
         '업종: ' + (data.industry || '') + '\n' +
         '문의내용: ' + (data.message || '')
