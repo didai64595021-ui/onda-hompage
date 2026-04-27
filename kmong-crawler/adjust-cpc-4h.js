@@ -93,11 +93,30 @@ async function main() {
   console.log(`[메트릭] 서비스 ${metrics.length}개`);
   if (!metrics.length) { console.log('[중단] 분석 대상 없음'); return; }
 
-  // 2) 예산 + cycle_context (Opus에 시간대 맥락 + 학습 기록 주입)
+  // 2) 예산 + cycle_context (Opus에 시간대 맥락 + 학습 기록 + 일 페이스 주입)
   const budgetRows = await loadActiveBudget();
   const budget = budgetRows[0] || {
     budget_type: 'daily', budget_amount: 16400, priority: 'roi', min_cpc: 500, max_cpc: 5000,
   };
+
+  // === 동적 일 페이스 계산 (남은 예산 / 남은 일수) ===
+  // 메트릭의 첫 서비스에 weekly_total_actual / week_by_date_actual 가 동봉됨 (ad-bot-metrics).
+  const wkSample = metrics[0] || {};
+  const weekTotalActual = wkSample.week_total_actual || 0;
+  const byDateMap = wkSample.week_by_date_actual || {};
+  const todayKey = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' }); // YYYY-MM-DD KST
+  const todaySpent = byDateMap[todayKey] || 0;
+  // 주 시작 (월요일 KST)
+  const kstNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+  const dayIdx = (kstNow.getDay() + 6) % 7; // 월=0 ... 일=6
+  const daysLeftInWeek = 7 - dayIdx; // 오늘 포함
+  const remainingBudget = Math.max(0, (budget.budget_amount || 0) - weekTotalActual);
+  const dailyAllowance = daysLeftInWeek > 0 ? Math.round(remainingBudget / daysLeftInWeek) : 0;
+  // 오늘 잔여
+  const todayRemain = Math.max(0, dailyAllowance - todaySpent);
+  // pace = 오늘 누적 / 오늘 허용. 1.0 이상이면 오늘 한도 초과
+  const todayPace = dailyAllowance > 0 ? +(todaySpent / dailyAllowance).toFixed(2) : null;
+
   budget.cycle_context = {
     current_kst_hour: kstHour,
     current_hour_weight: hourWeight,
@@ -105,7 +124,17 @@ async function main() {
     low_cvr_hours: weightsPayload.low_cvr_hours,
     off_hours: weightsPayload.off_hours,
     guardrail_pct: GUARD_PCT,
-    instruction: '이 시간대 weight와 학습 기록을 참고해 판단할 것. weight는 참고용 맥락이지 곱셈 계수가 아님. 볼륨 부족이면 저가치 시간대라도 상향 가능. 학습 기록에서 지난번 효과를 확인하고 반대 방향 회전(요요) 방지.',
+    daily_pacing: {
+      week_budget: budget.budget_amount,
+      week_spent_actual: weekTotalActual,
+      week_remaining: remainingBudget,
+      days_left_in_week: daysLeftInWeek,        // 오늘 포함
+      daily_allowance: dailyAllowance,          // 오늘 쓸 수 있는 한도
+      today_spent: todaySpent,
+      today_remaining: todayRemain,
+      today_pace: todayPace,                    // ≥1.0 = 오늘 허용 초과
+    },
+    instruction: '★일 페이스 절대 우선★ daily_pacing.today_pace ≥ 1.0 이면 모든 서비스 CPC 동결 또는 -10~-20% 하향. ≥0.7 이면 동결만. <0.5 면 평소대로. 시간대 weight는 보조 신호. 학습 기록에서 요요 회피.',
     learning_records: learningRecords,
   };
   console.log(`[예산+맥락] ${JSON.stringify(budget, null, 2).slice(0, 500)}...`);
@@ -253,16 +282,25 @@ async function main() {
     };
   });
 
+  const dp = budget.cycle_context?.daily_pacing;
+  const paceLine = dp ? `페이스: 주 ${dp.week_spent_actual.toLocaleString()}/${dp.week_budget.toLocaleString()}원 (남은 ${dp.days_left_in_week}일) → 오늘 한도 ${dp.daily_allowance.toLocaleString()}원 / 오늘 누적 ${dp.today_spent.toLocaleString()}원 (pace=${dp.today_pace})` : '';
+
   const lines = [
     `4시간 CPC 자동조정 ${args.apply ? '적용' : 'dry-run'} - KST ${kstHour}시 [${weightLabel}]`,
     `판단: ${judgeSource} / 제안 ${j.actions.length}건 / 적용 성공 ${appliedCount}건${applyErrors.length ? ' / 실패 ' + applyErrors.length : ''}`,
     `예산: ${budget.budget_amount.toLocaleString()}원/${budget.budget_type} (priority=${budget.priority})`,
+    paceLine,
     '',
     '주요 조정',
     ...j.actions.slice(0, 8).map(a => {
       const sign = a.change_pct >= 0 ? '+' : '';
-      const guardTag = a.deficit_guard_applied ? ' [적자가드]' : a.low_aov_guard_applied ? ' [저단가가드]' : '';
-      return `  ${a.product_id}: ${a.current_desired_cpc} -> ${a.suggested_desired_cpc}원 [${sign}${a.change_pct}퍼]${guardTag}`;
+      const tags = [];
+      if (a.pace_force_down) tags.push(`페이스가드-${a.pace_force_down}%`);
+      else if (a.pace_max_up != null) tags.push(`페이스캡+${a.pace_max_up}%`);
+      if (a.deficit_guard_applied) tags.push('적자가드');
+      if (a.low_aov_guard_applied) tags.push('저단가가드');
+      const tagStr = tags.length ? ' [' + tags.join('/') + ']' : '';
+      return `  ${a.product_id}: ${a.current_desired_cpc} -> ${a.suggested_desired_cpc}원 [${sign}${a.change_pct}퍼]${tagStr}`;
     }),
     '',
     j.overall_note ? `요약: ${j.overall_note}` : '',

@@ -82,6 +82,18 @@ suggested_keywords 리스트에서:
 
 변경 없어도 모든 서비스 포함 (suggested=current, 키워드 빈 배열, reasoning에 유지 사유).
 
+## ★일 페이스 가드 (budget.cycle_context.daily_pacing — 절대 우선)
+주 예산을 7일 균등 분배하는 동적 알고리즘입니다.
+- daily_allowance = (week_budget - week_spent_actual) / days_left_in_week (오늘 포함)
+- today_pace = today_spent / daily_allowance
+규칙 (모든 Phase 가드 위에 적용):
+- **today_pace ≥ 1.0** → 오늘 한도 초과. **모든 서비스 -10~-20% 하향**. 상향 절대 금지.
+- **today_pace ≥ 0.7** → 동결 또는 -5%. 상향 금지.
+- **today_pace 0.4~0.7** → 현 수준 유지 또는 ±5% 미세 조정.
+- **today_pace < 0.4** → 평소 Phase 가드대로 운용.
+- **week_remaining ≤ 0** → 무조건 모두 -20% (주 예산 이미 소진).
+- **days_left_in_week ≤ 1 AND today_pace > 0.5** → 보수적 (남은 시간 적음, 폭발 위험).
+
 ## 시간대 맥락 + 자동학습 (budget.cycle_context가 있을 때만 반영)
 budget.cycle_context = {
   current_kst_hour: 현재 KST 시간(0-23),
@@ -134,6 +146,20 @@ async function judgeAdjustments(metrics, budget) {
   // 단가 기반 손익 가드 — metrics에서 product_id별 expected_margin_per_click 조회용
   const metricsByPid = {};
   for (const m of metrics) metricsByPid[m.product_id] = m;
+  // === 일 페이스 하드 가드 — LLM 무시해도 코드 단에서 강제 ===
+  const dp = budget?.cycle_context?.daily_pacing || {};
+  const todayPace = dp.today_pace;
+  const weekRemain = dp.week_remaining;
+  // 페이스 기반 변동폭 캡 (±%)
+  let paceMaxUp = null;   // 상향 최대 폭 (null = 캡 없음)
+  let paceForceDown = 0;  // 강제 하향 폭 (양수)
+  if (weekRemain != null && weekRemain <= 0) { paceMaxUp = 0; paceForceDown = 20; }
+  else if (todayPace != null) {
+    if (todayPace >= 1.0)        { paceMaxUp = 0; paceForceDown = 15; }
+    else if (todayPace >= 0.7)   { paceMaxUp = 0; paceForceDown = 5; }
+    else if (todayPace >= 0.4)   { paceMaxUp = 5; }
+    // <0.4 일 때만 phaseGuard 그대로
+  }
   for (const a of parsed.actions) {
     const cur = a.current_desired_cpc || 0;
     const sug = a.suggested_desired_cpc || cur;
@@ -148,6 +174,22 @@ async function judgeAdjustments(metrics, budget) {
       const downPct = budgetVolumePriority ? 5 : maxChangePct;
       const lower = cur * (1 - downPct / 100);
       clipped = Math.max(lower, Math.min(upper, clipped));
+    }
+
+    // === 일 페이스 하드 가드 ===
+    if (cur > 0 && (paceMaxUp != null || paceForceDown > 0)) {
+      // 강제 하향: 무조건 cur × (1 - paceForceDown%) 이하로
+      if (paceForceDown > 0) {
+        const forceUpper = cur * (1 - paceForceDown / 100);
+        if (clipped > forceUpper) clipped = forceUpper;
+        a.pace_force_down = paceForceDown;
+      }
+      // 상향 캡
+      if (paceMaxUp != null) {
+        const paceUpper = cur * (1 + paceMaxUp / 100);
+        if (clipped > paceUpper) clipped = paceUpper;
+        a.pace_max_up = paceMaxUp;
+      }
     }
 
     // === 단가 기반 손익 하드 가드 (LLM 무시해도 적자 차단) ===
