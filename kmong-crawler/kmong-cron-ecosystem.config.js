@@ -189,7 +189,8 @@ module.exports = {
       name: 'kmong-ad-scheduler',
       script: './ad-scheduler.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '0 3,5 * * *',  // 야간 2회/일 (03:00, 05:00 KST) — 사용자 비활동 시간대, 2026-04-28
+      // 광고 ON 시간대(08~02시)에만 동작 — 02~08시 OFF 정책에 맞춰 4회/일 (2026-04-29)
+      cron_restart: '0 9,13,17,21 * * *',
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },
@@ -199,7 +200,8 @@ module.exports = {
       name: 'kmong-adjust-cpc-4h',
       script: './adjust-cpc-4h.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '0 4 * * *',  // 야간 1회/일 (04:00 KST) — 사용자 비활동 시간대, 2026-04-28
+      // 광고 ON 시간대 4회 (09:05, 13:05, 17:05, 21:05) — ad-scheduler 5분 뒤 (2026-04-29)
+      cron_restart: '5 9,13,17,21 * * *',
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
@@ -249,6 +251,29 @@ module.exports = {
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
       // 28~31일 08:00에 매일 시도, 스크립트 내 isLastDayOfMonth() 체크로 실제 말일만 발송
       cron_restart: '0 8 28-31 * *',
+      autorestart: false,
+      watch: false,
+      env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
+    },
+    // === Phase 9: 야간 광고 OFF / 주간 광고 ON (2026-04-29 신설) ===
+    // 02:00 KST — 모든 광고 OFF (체리피커·탐색 트래픽 회피)
+    {
+      name: 'kmong-ads-night-off',
+      script: './batch-toggle-ads.js',
+      args: '--mode=all-off',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '0 2 * * *',
+      autorestart: false,
+      watch: false,
+      env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
+    },
+    // 08:00 KST — 기본 정책으로 광고 복원 (corp-* ON, responsive-* OFF 유지)
+    {
+      name: 'kmong-ads-day-on',
+      script: './batch-toggle-ads.js',
+      args: '--mode=default',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '0 8 * * *',
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },

@@ -22,10 +22,22 @@ const { notify } = require('./lib/telegram');
 
 const CLICK_UP_URL = 'https://kmong.com/seller/click-up';
 
-const PLAN = {
+// 모드: default = OFF/ON 기본 정책 / all-off = 전체 OFF (체리피커 시간대) / all-on = 전체 ON
+const ALL_PRODUCTS = ['responsive', 'pc-mobile', 'mobile-fix', 'corp-seo', 'corp-renew', 'no-homepage', 'onepage'];
+const DEFAULT_PLAN = {
   off: ['responsive', 'pc-mobile', 'mobile-fix'],
   on:  ['corp-seo', 'corp-renew', 'no-homepage', 'onepage'],
 };
+
+function resolvePlan() {
+  const arg = process.argv.slice(2).find((a) => a.startsWith('--mode='));
+  const mode = arg ? arg.split('=')[1] : (process.env.BATCH_TOGGLE_MODE || 'default');
+  if (mode === 'all-off') return { mode, plan: { off: [...ALL_PRODUCTS], on: [] } };
+  if (mode === 'all-on')  return { mode, plan: { off: [], on: [...ALL_PRODUCTS] } };
+  return { mode: 'default', plan: DEFAULT_PLAN };
+}
+
+const { mode: MODE, plan: PLAN } = resolvePlan();
 
 async function dismissModal(page) {
   for (const selector of [
@@ -69,9 +81,9 @@ async function main() {
   const results = [];
   let browser;
   try {
-    console.log('=== 광고 일괄 토글 시작 ===');
-    console.log('OFF:', PLAN.off.join(', '));
-    console.log('ON:', PLAN.on.join(', '));
+    console.log(`=== 광고 일괄 토글 시작 (mode: ${MODE}) ===`);
+    console.log('OFF:', PLAN.off.join(', ') || '(없음)');
+    console.log('ON:', PLAN.on.join(', ') || '(없음)');
     console.log('---');
 
     const session = await login({ slowMo: 150 });
@@ -166,18 +178,27 @@ async function main() {
 
     // 텔레그램 요약
     const lines = [];
-    lines.push('🎯 *크몽 광고 일괄 토글 결과* (홈페이지 볼륨 전환)');
+    const header = MODE === 'all-off' ? '🌙 *크몽 광고 야간 OFF* (02~08시 체리피커 회피)'
+                 : MODE === 'all-on'  ? '☀️ *크몽 광고 전체 ON*'
+                 : '🎯 *크몽 광고 일괄 토글 결과* (홈페이지 볼륨 전환)';
+    lines.push(header);
     lines.push('');
-    lines.push('*OFF (반응형 3종, 객단가↓)*');
-    for (const pid of PLAN.off) {
-      const r = results.find(x => x.id === pid);
-      lines.push(`  ${r?.success ? '✅' : '❌'} ${pid} ${r?.reason ? `(${r.reason})` : ''}`);
+    if (PLAN.off.length) {
+      const offLabel = MODE === 'all-off' ? `*OFF (전체 ${PLAN.off.length}종)*` : '*OFF (반응형 3종, 객단가↓)*';
+      lines.push(offLabel);
+      for (const pid of PLAN.off) {
+        const r = results.find(x => x.id === pid);
+        lines.push(`  ${r?.success ? '✅' : '❌'} ${pid} ${r?.reason ? `(${r.reason})` : ''}`);
+      }
     }
-    lines.push('');
-    lines.push('*ON (홈페이지 4종, 객단가↑)*');
-    for (const pid of PLAN.on) {
-      const r = results.find(x => x.id === pid);
-      lines.push(`  ${r?.success ? '✅' : '❌'} ${pid} ${r?.reason ? `(${r.reason})` : ''}`);
+    if (PLAN.on.length) {
+      lines.push('');
+      const onLabel = MODE === 'all-on' ? `*ON (전체 ${PLAN.on.length}종)*` : '*ON (홈페이지 4종, 객단가↑)*';
+      lines.push(onLabel);
+      for (const pid of PLAN.on) {
+        const r = results.find(x => x.id === pid);
+        lines.push(`  ${r?.success ? '✅' : '❌'} ${pid} ${r?.reason ? `(${r.reason})` : ''}`);
+      }
     }
     lines.push('');
     lines.push(`주간 한도: 100,000원 / 잔여 약 70,000원 (토~금)`);

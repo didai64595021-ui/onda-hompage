@@ -143,10 +143,38 @@ async function login(opts = {}) {
 
   // === 3단계: 모달 로그인 ===
   try {
-    const headerLoginBtn = page.locator('a:has-text("로그인"), button:has-text("로그인")').first();
-    await headerLoginBtn.click();
-    await page.waitForTimeout(2000);
-    console.log('[로그인] 로그인 모달 오픈');
+    // (a) 로그인 모달이 이미 떠있으면 헤더 클릭 스킵
+    const dialogPwdAlready = page.locator('div[role="dialog"] input[type="password"], [data-testid="modal-base"] input[type="password"]').first();
+    const alreadyOpen = await dialogPwdAlready.isVisible({ timeout: 1000 }).catch(() => false);
+
+    if (!alreadyOpen) {
+      // (b) 헤더 "로그인" 버튼 클릭 — 비-로그인 모달이 가로막으면 강제 제거 후 재시도
+      const headerLoginBtn = page.locator('a:has-text("로그인"), button:has-text("로그인")').first();
+      let clicked = false;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          await headerLoginBtn.click({ timeout: 8000 });
+          clicked = true;
+          break;
+        } catch (e) {
+          if (!/intercepts pointer|Timeout/i.test(e.message)) throw e;
+          console.log(`[로그인] 모달이 헤더 클릭을 가로막음 (attempt ${attempt}/3) — 비-로그인 모달 제거`);
+          // password input이 없는 모달만 제거 (= 로그인 모달은 보존)
+          await page.evaluate(() => {
+            document.querySelectorAll('[data-testid="modal-base"], div[role="dialog"]').forEach((el) => {
+              if (!el.querySelector('input[type="password"]')) el.remove();
+            });
+          }).catch(() => {});
+          await page.keyboard.press('Escape').catch(() => {});
+          await page.waitForTimeout(800);
+        }
+      }
+      if (!clicked) throw new Error('헤더 로그인 버튼 클릭 실패 (비-로그인 모달 반복 가로막음)');
+      await page.waitForTimeout(2000);
+      console.log('[로그인] 로그인 모달 오픈');
+    } else {
+      console.log('[로그인] 로그인 모달 이미 떠있음 — 헤더 클릭 스킵');
+    }
 
     const emailInput = page.locator('div[role="dialog"] input[type="email"], div[role="dialog"] input[name="email"], input[type="email"], input[name="email"]').first();
     await emailInput.waitFor({ state: 'visible', timeout: 15000 });
