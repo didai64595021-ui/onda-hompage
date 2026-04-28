@@ -114,7 +114,7 @@ async function main() {
       console.log(`  - ${matched.padEnd(15)} state=${currentState ? 'ON ' : 'OFF'} | "${svcName.slice(0,40)}" | ${statusText.slice(0,20)}`);
     }
 
-    // OFF 처리
+    // OFF 처리 (검증/재시도 포함)
     for (const pid of PLAN.off) {
       const info = rowMap.get(pid);
       if (!info) {
@@ -132,13 +132,12 @@ async function main() {
         results.push({ id: pid, target: 'off', success: true, reason: 'already off' });
         continue;
       }
-      await toggleClick(page, info.toggleCell);
-      console.log(`[OFF] ${pid} ✅`);
-      results.push({ id: pid, target: 'off', success: true, action: 'toggled' });
-      await page.waitForTimeout(1500);
+      const r = await toggleAndVerify(page, pid, false);
+      results.push({ id: pid, target: 'off', ...r });
+      console.log(`[OFF ${r.success ? '✅' : '❌'}] ${pid}: ${r.reason}`);
     }
 
-    // ON 처리
+    // ON 처리 (검증/재시도 포함)
     for (const pid of PLAN.on) {
       const info = rowMap.get(pid);
       if (!info) {
@@ -156,10 +155,9 @@ async function main() {
         results.push({ id: pid, target: 'on', success: true, reason: 'already on' });
         continue;
       }
-      await toggleClick(page, info.toggleCell);
-      console.log(`[ON]  ${pid} ✅`);
-      results.push({ id: pid, target: 'on', success: true, action: 'toggled' });
-      await page.waitForTimeout(1500);
+      const r = await toggleAndVerify(page, pid, true);
+      results.push({ id: pid, target: 'on', ...r });
+      console.log(`[ON ${r.success ? '✅' : '❌'}]  ${pid}: ${r.reason}`);
     }
 
     await browser.close();
@@ -202,13 +200,13 @@ async function main() {
     }
     lines.push('');
     lines.push(`주간 한도: 100,000원 / 잔여 약 70,000원 (토~금)`);
-    notify(lines.join('\n')).catch(() => {});
+    try { notify(lines.join('\n')); } catch (e) { console.error('[알림 발송 실패]', e.message); }
 
     process.exit(failed.length ? 1 : 0);
   } catch (err) {
     console.error('[에러]', err.message);
     if (browser) await browser.close().catch(() => {});
-    notify(`광고 일괄 토글 실패: ${err.message}`).catch(() => {});
+    try { notify(`광고 일괄 토글 실패: ${err.message}`); } catch {}
     process.exit(1);
   }
 }
@@ -217,14 +215,86 @@ async function toggleClick(page, toggleCell) {
   const target = toggleCell.locator('.react-switch-handle, input[type="checkbox"], input[role="switch"], [class*="toggle"], [class*="switch"], label').first();
   await target.click({ force: true });
   await page.waitForTimeout(2000);
-  // 확인 모달
+  // 확인 모달 (크몽은 SweetAlert2 사용 — OFF: "중단하기", ON: "시작하기")
+  // .swal2-confirm 우선 매칭, 없으면 텍스트 fallback
   try {
-    const confirmBtn = page.locator('button:has-text("확인"), button:has-text("네"), button:has-text("OK")').first();
-    if (await confirmBtn.isVisible({ timeout: 1500 })) {
+    const confirmBtn = page.locator(
+      '.swal2-popup .swal2-confirm, ' +
+      'button:has-text("중단하기"), ' +
+      'button:has-text("시작하기"), ' +
+      'button:has-text("확인"), ' +
+      'button:has-text("네"), ' +
+      'button:has-text("OK")'
+    ).first();
+    if (await confirmBtn.isVisible({ timeout: 2000 })) {
+      const btnText = await confirmBtn.innerText().catch(() => '');
       await confirmBtn.click();
-      await page.waitForTimeout(800);
+      console.log(`  [모달확정] "${btnText}" 클릭`);
+      await page.waitForTimeout(1500);
+    } else {
+      console.log(`  [경고] 확정 모달 못 찾음 — 백엔드 미반영 가능`);
     }
-  } catch {}
+  } catch (e) {
+    console.log(`  [모달처리 에러] ${e.message}`);
+  }
+}
+
+// 행 재탐색 (productId로 매핑)
+async function findCellByPid(page, pid) {
+  const rs = page.locator('table tbody tr');
+  const cnt = await rs.count();
+  for (let i = 0; i < cnt; i++) {
+    const r = rs.nth(i);
+    const cs = r.locator('td');
+    if (await cs.count() < 3) continue;
+    const svc = await cs.nth(1).locator('img').first().getAttribute('alt').catch(() => '') || '';
+    if (matchProductId(svc) === pid) {
+      const statusText = await cs.nth(2).innerText().catch(() => '');
+      return { cell: cs.nth(0), statusText };
+    }
+  }
+  return null;
+}
+
+// 토글 + reload 검증 + 재시도 (최대 3회) — 백엔드 반영 강제 확인
+async function toggleAndVerify(page, pid, targetState) {
+  const MAX = 3;
+  for (let attempt = 1; attempt <= MAX; attempt++) {
+    const found = await findCellByPid(page, pid);
+    if (!found) return { success: false, reason: `row lost on attempt ${attempt}` };
+
+    if (found.statusText.includes('잔액 부족') || found.statusText.includes('중지')) {
+      if (!targetState) return { success: true, reason: 'balance insufficient (effectively off)' };
+      return { success: false, reason: 'balance insufficient (need bizmoney)' };
+    }
+
+    const curState = await readToggleState(found.cell);
+    if (curState === targetState) {
+      return { success: true, reason: attempt === 1 ? 'already in target state' : `verified after ${attempt - 1} retries` };
+    }
+
+    // 토글 클릭
+    await toggleClick(page, found.cell);
+
+    // reload로 백엔드 반영 강제 확인
+    await page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(2500);
+    await dismissModal(page);
+
+    // 검증
+    const after = await findCellByPid(page, pid);
+    if (!after) {
+      console.log(`  [검증실패] ${pid}: reload 후 행 못 찾음 (시도 ${attempt})`);
+      continue;
+    }
+    const verifiedState = await readToggleState(after.cell);
+    console.log(`  [검증 ${attempt}/${MAX}] ${pid}: 실제=${verifiedState ? 'ON' : 'OFF'}, 목표=${targetState ? 'ON' : 'OFF'}`);
+    if (verifiedState === targetState) {
+      return { success: true, reason: `verified ${targetState ? 'ON' : 'OFF'} on attempt ${attempt}` };
+    }
+    if (attempt < MAX) await page.waitForTimeout(2000);
+  }
+  return { success: false, reason: `${MAX} attempts failed — backend not reflecting toggle` };
 }
 
 main();

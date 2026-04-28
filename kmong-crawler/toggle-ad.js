@@ -132,7 +132,7 @@ async function toggleAd(productId, action) {
     }
 
     // 현재 토글 상태 확인
-    const toggleCell = targetRow.locator('td').first();
+    let toggleCell = targetRow.locator('td').first();
     let currentState = false;
 
     try {
@@ -158,30 +158,107 @@ async function toggleAd(productId, action) {
       return { success: true, message: msg };
     }
 
-    // 토글 클릭 (react-switch-handle이 bg를 가리므로 force: true 사용)
-    const clickTarget = toggleCell.locator('.react-switch-handle, input[type="checkbox"], input[role="switch"], [class*="toggle"], [class*="switch"], label').first();
-    await clickTarget.click({ force: true });
-    await page.waitForTimeout(2000);
+    // 토글 클릭 + reload 검증 + 재시도 (백엔드 반영 확인, 2026-04-29 신설)
+    // 배경: 클릭만 하면 시각적으로만 OFF로 보이고 백엔드 미반영 사례 발생 → reload 후 isChecked() 재확인 필수
+    const MAX_RETRIES = 3;
+    let attempt = 0;
+    let verifiedState = currentState;
+    let activeCell = toggleCell;
 
-    // 확인 모달이 뜨면 확인 클릭
-    try {
-      const confirmBtn = page.locator('button:has-text("확인"), button:has-text("네"), button:has-text("OK")').first();
-      if (await confirmBtn.isVisible({ timeout: 2000 })) {
-        await confirmBtn.click();
-        await page.waitForTimeout(1000);
+    const findCellByPid = async () => {
+      const rs = page.locator('table tbody tr');
+      const cnt = await rs.count();
+      for (let i = 0; i < cnt; i++) {
+        const r = rs.nth(i);
+        const cs = r.locator('td');
+        if (await cs.count() < 3) continue;
+        const svc = await cs.nth(1).locator('img').first().getAttribute('alt').catch(() => '') || '';
+        if (matchProductId(svc) === productId) return cs.nth(0);
       }
-    } catch {}
+      return null;
+    };
 
-    const msg = `광고 토글 완료: ${productId} → ${action.toUpperCase()}`;
-    console.log(`[완료] ${msg}`);
-    if (shouldNotifyToggle(productId, action)) {
+    const readState = async (cell) => {
+      try {
+        const inp = cell.locator('input[type="checkbox"], input[role="switch"]').first();
+        if (await inp.count() > 0) return await inp.isChecked();
+        const el = cell.locator('[class*="toggle"], [class*="switch"]').first();
+        if (await el.count() > 0) {
+          const cls = await el.getAttribute('class') || '';
+          return cls.includes('on') || cls.includes('active') || cls.includes('checked');
+        }
+      } catch {}
+      return null;
+    };
+
+    while (attempt < MAX_RETRIES && verifiedState !== targetState) {
+      attempt++;
+
+      // 토글 클릭
+      const clickTarget = activeCell.locator('.react-switch-handle, input[type="checkbox"], input[role="switch"], [class*="toggle"], [class*="switch"], label').first();
+      await clickTarget.click({ force: true });
+      await page.waitForTimeout(2000);
+
+      // 확인 모달 처리 (크몽 SweetAlert2 — OFF: "중단하기", ON: "시작하기")
+      try {
+        const confirmBtn = page.locator(
+          '.swal2-popup .swal2-confirm, ' +
+          'button:has-text("중단하기"), ' +
+          'button:has-text("시작하기"), ' +
+          'button:has-text("확인"), ' +
+          'button:has-text("네"), ' +
+          'button:has-text("OK")'
+        ).first();
+        if (await confirmBtn.isVisible({ timeout: 2000 })) {
+          const btnText = await confirmBtn.innerText().catch(() => '');
+          await confirmBtn.click();
+          console.log(`[모달확정] "${btnText}" 클릭`);
+          await page.waitForTimeout(1500);
+        } else {
+          console.log(`[경고] 확정 모달 못 찾음 — 백엔드 미반영 가능`);
+        }
+      } catch {}
+
+      // 페이지 reload — 백엔드 반영 강제 확인
+      await page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForTimeout(2500);
+      try {
+        await page.evaluate(() => {
+          const m = document.querySelector('.kmong-modal-root');
+          if (m) m.remove();
+        });
+      } catch {}
+
+      // 행 재탐색 + 상태 검증
+      activeCell = await findCellByPid();
+      if (!activeCell) {
+        console.log(`[검증실패] ${productId}: reload 후 행 못 찾음`);
+        break;
+      }
+      const newState = await readState(activeCell);
+      verifiedState = newState !== null ? newState : !targetState;
+      console.log(`[검증 ${attempt}/${MAX_RETRIES}] ${productId}: 실제=${verifiedState ? 'ON' : 'OFF'}, 목표=${action.toUpperCase()}`);
+
+      if (verifiedState === targetState) break;
+      if (attempt < MAX_RETRIES) {
+        console.log(`[재시도] ${productId}: ${attempt}/${MAX_RETRIES} 실패 — 2초 후 재시도`);
+        await page.waitForTimeout(2000);
+      }
+    }
+
+    const success = verifiedState === targetState;
+    const msg = success
+      ? `광고 토글 검증 완료: ${productId} → ${action.toUpperCase()} (${attempt}회 시도)`
+      : `광고 토글 검증 실패: ${productId} 목표=${action.toUpperCase()} 실제=${verifiedState ? 'ON' : 'OFF'} (${attempt}회 재시도)`;
+    console.log(`[${success ? '완료' : '실패'}] ${msg}`);
+    if (shouldNotifyToggle(productId, success ? action : 'fail')) {
       notify(msg);
     } else {
       console.log('[알림 스킵] 30분 내 중복 토글 알림');
     }
 
     await browser.close();
-    return { success: true, message: msg };
+    return { success, message: msg, verifiedState };
 
   } catch (err) {
     const msg = `광고 토글 실패: ${err.message}`;
