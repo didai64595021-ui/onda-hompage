@@ -38,7 +38,7 @@ module.exports = {
       name: 'kmong-refresh-session',
       script: './refresh-session.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '55 1,3,5,7,9,11,13,15,17,19,21,23 * * *',  // 크롤러 5분 전 (홀수시 55분)
+      cron_restart: '55 1,3,5 * * *',  // 야간만 — 크롤러 직전 (01:55, 03:55, 05:55 KST)
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },
@@ -48,8 +48,8 @@ module.exports = {
       name: 'kmong-crawl-cpc',
       script: './crawl-cpc.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      // 01:30 KST부터 2시간마다 — 자정 직후 크몽 서버 데이터 미확정 시점 회피 + 08:00 리포트 전 07:30 캡처 보장
-      cron_restart: '30 1-23/2 * * *',
+      // 야간만 — 02:30, 04:30 KST (사용자 비활동 시간대로 이동, 2026-04-28)
+      cron_restart: '30 2,4 * * *',
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
@@ -58,7 +58,7 @@ module.exports = {
       name: 'kmong-crawl-inbox',
       script: './crawl-inbox.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '*/2 * * * *',  // 2분마다 — 신규 문의 빠른 감지 (옵션 A: 워스트 2-3분)
+      cron_restart: '0 2,4,6 * * *',  // 야간 3회/일 (02,04,06 KST) — 사용자 비활동 시간대 일괄 처리, 2026-04-28
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },
@@ -67,7 +67,7 @@ module.exports = {
       name: 'kmong-crawl-orders',
       script: './crawl-orders.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '4 */2 * * *',  // 2시간마다 (+4분, inbox 다음)
+      cron_restart: '34 2,4 * * *',  // 야간 2회/일 (02:34, 04:34 KST) — inbox 다음, 2026-04-28
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },
@@ -85,7 +85,7 @@ module.exports = {
       name: 'kmong-crawl-gig-status',
       script: './crawl-gig-status.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '6 */2 * * *',  // 2시간마다 (+6분, orders 다음)
+      cron_restart: '36 2,4 * * *',  // 야간 2회/일 (02:36, 04:36 KST) — orders 다음, 2026-04-28
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },
@@ -104,7 +104,7 @@ module.exports = {
       name: 'kmong-auto-reply',
       script: './auto-reply.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '1-59/15 * * * *',  // 15분마다 (Opus 순차호출 5회로 5분→과도 kill, 2026-04-20 완화)
+      cron_restart: '30 2,4,6 * * *',  // 야간 3회/일 (02:30, 04:30, 06:30 KST) — inbox 직후 처리, 2026-04-28
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },
@@ -113,7 +113,7 @@ module.exports = {
       name: 'kmong-send-reply',
       script: './send-reply.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '*/30 * * * *',  // 30분마다
+      cron_restart: '0 3,5 * * *',  // 야간 2회/일 (03:00, 05:00 KST) — auto-reply 직후 발송, 2026-04-28
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },
@@ -170,7 +170,7 @@ module.exports = {
       name: 'kmong-budget-monitor',
       script: './budget-monitor.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '10 */2 * * *',  // 2시간마다 (+10분, CPC 크롤 후)
+      cron_restart: '40 4 * * *',  // 야간 1회/일 (04:40 KST) — CPC 크롤 후, 2026-04-28
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },
@@ -189,7 +189,7 @@ module.exports = {
       name: 'kmong-ad-scheduler',
       script: './ad-scheduler.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '*/30 * * * *',  // 30분마다
+      cron_restart: '0 3,5 * * *',  // 야간 2회/일 (03:00, 05:00 KST) — 사용자 비활동 시간대, 2026-04-28
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },
@@ -199,7 +199,7 @@ module.exports = {
       name: 'kmong-adjust-cpc-4h',
       script: './adjust-cpc-4h.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '0 */4 * * *',  // 00,04,08,12,16,20 KST
+      cron_restart: '0 4 * * *',  // 야간 1회/일 (04:00 KST) — 사용자 비활동 시간대, 2026-04-28
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
