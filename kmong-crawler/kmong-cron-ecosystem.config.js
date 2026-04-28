@@ -58,7 +58,7 @@ module.exports = {
       name: 'kmong-crawl-inbox',
       script: './crawl-inbox.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '0 2,4,6 * * *',  // 야간 3회/일 (02,04,06 KST) — 사용자 비활동 시간대 일괄 처리, 2026-04-28
+      cron_restart: '0 2,4,6,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 * * *',  // 영업시간 매시간(09-23 KST) + 야간 3회(02,04,06 KST) — 신규 문의 알림 지연 해결, 2026-04-29
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },
@@ -104,7 +104,7 @@ module.exports = {
       name: 'kmong-auto-reply',
       script: './auto-reply.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '30 2,4,6 * * *',  // 야간 3회/일 (02:30, 04:30, 06:30 KST) — inbox 직후 처리, 2026-04-28
+      cron_restart: '30 2,4,6,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 * * *',  // inbox 크롤 30분 후 동기 — 영업시간 매시간(09-23 KST) + 야간(02,04,06 KST), 2026-04-29
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },
