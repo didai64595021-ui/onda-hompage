@@ -170,7 +170,7 @@ module.exports = {
       name: 'kmong-budget-monitor',
       script: './budget-monitor.js',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '40 4 * * *',  // 야간 1회/일 (04:40 KST) — CPC 크롤 후, 2026-04-28
+      cron_restart: '40 * * * *',  // 매시간 :40 — 서비스별 일일 한도 ₩15,000 초과 시 즉시 OFF 처리, 2026-04-29
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV },

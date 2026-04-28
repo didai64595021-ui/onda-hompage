@@ -42,6 +42,8 @@ async function getSettings() {
     dailyBudget: parseInt(settings.daily_budget || '0', 10),
     weeklyBudget: parseInt(settings.weekly_budget || '0', 10),
     monthlyBudget: parseInt(settings.monthly_budget || '500000', 10),
+    // 서비스당 일일 한도 (단일 서비스 폭발 방지, 2026-04-29 신설 — corp-seo 4/27 ₩35,940 사건)
+    dailyBudgetPerService: parseInt(settings.daily_budget_per_service || '0', 10),
     alertThreshold: parseFloat(settings.budget_alert_threshold || '0.9'),
     autoStop: settings.auto_stop_on_budget === 'true',
     aiAutoManage: settings.ai_auto_manage === 'true',
@@ -97,6 +99,21 @@ async function getWeeklySpend() {
     .gte('date', weekStart);
   if (error) throw new Error(`주간 CPC 조회 실패: ${error.message}`);
   return (data || []).reduce((sum, row) => sum + (row.cpc_cost || 0), 0);
+}
+
+// 서비스별 오늘 지출 (단일 서비스 폭발 방지용, 2026-04-29 신설)
+async function getServiceDailySpend() {
+  const today = getToday();
+  const { data, error } = await supabase
+    .from('kmong_cpc_daily')
+    .select('product_id, cpc_cost')
+    .eq('date', today);
+  if (error) throw new Error(`서비스별 일간 CPC 조회 실패: ${error.message}`);
+  const spendByService = {};
+  for (const row of (data || [])) {
+    spendByService[row.product_id] = (spendByService[row.product_id] || 0) + (row.cpc_cost || 0);
+  }
+  return spendByService;
 }
 
 async function getServiceSpendAndPerformance() {
@@ -279,6 +296,31 @@ async function main() {
         }
       } else if (dailyRatio >= settings.alertThreshold) {
         notify(`⚠️ 일간 광고비 ${dailyPct}% 도달 (₩${fmt(dailySpend)} / ₩${fmt(settings.dailyBudget)})`);
+      }
+    }
+
+    // === 서비스별 일일 한도 체크 (단일 서비스 폭발 방지, 2026-04-29 신설) ===
+    // 배경: 4/27 corp-seo 단독 ₩35,940 폭발 (전체 51%) → 서비스당 한도 도입
+    if (settings.dailyBudgetPerService > 0) {
+      const serviceDailySpend = await getServiceDailySpend();
+      const offenders = Object.entries(serviceDailySpend)
+        .filter(([, spend]) => spend >= settings.dailyBudgetPerService)
+        .map(([pid, spend]) => ({ pid, spend }));
+      if (offenders.length > 0) {
+        const limitFmt = fmt(settings.dailyBudgetPerService);
+        const lines = offenders.map(o => `  - ${o.pid}: ₩${fmt(o.spend)}`);
+        notify(`🚨 서비스별 일일 한도 ₩${limitFmt} 초과 → 자동 OFF\n${lines.join('\n')}`);
+        for (const { pid } of offenders) {
+          try {
+            const result = await toggleAd(pid, 'off');
+            console.log(`[한도초과 OFF] ${pid}: ${result?.message || 'done'}`);
+          } catch (err) {
+            console.error(`[한도초과 OFF 실패] ${pid}: ${err.message}`);
+          }
+        }
+      } else {
+        const top = Object.entries(serviceDailySpend).sort((a, b) => b[1] - a[1])[0];
+        if (top) console.log(`[정상] 서비스별 한도 ₩${fmt(settings.dailyBudgetPerService)} 내 (최고: ${top[0]} ₩${fmt(top[1])})`);
       }
     }
 
