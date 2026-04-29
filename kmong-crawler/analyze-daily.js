@@ -12,6 +12,7 @@
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { supabase } = require('./lib/supabase');
 const { notify } = require('./lib/telegram');
+const { getLatestSavedBalance, fetchBizmoneyBalance, saveBizmoneyBalance } = require('./lib/bizmoney');
 const {
   analyzeFunnel,
   detectBottleneck,
@@ -54,7 +55,7 @@ async function analyzeDaily() {
     // 3. 이상치 감지
     const anomalies = await detectAnomalies();
 
-    // 4. 비즈머니 예측
+    // 4. 비즈머니 예측 (실제 크롤값 사용 — 2026-04-29 할루시네이션 fix)
     const { data: recentCpc } = await supabase
       .from('kmong_cpc_daily')
       .select('cpc_cost')
@@ -64,10 +65,30 @@ async function analyzeDaily() {
     const totalCost7d = (recentCpc || []).reduce((s, r) => s + (r.cpc_cost || 0), 0);
     const dailyAvgSpend = Math.round(totalCost7d / 7);
 
-    // 비즈머니 잔액은 CPC 페이지에서 가져오기 어려우므로 추정 (수동 입력 또는 크롤링 추가 필요)
-    // 임시: 최근 7일 평균 소진으로만 계산
-    const estimatedBalance = 101300; // TODO: 실제 잔액은 크롤러 or 수동 업데이트
-    const bizMoneyPred = predictBizMoney(estimatedBalance, dailyAvgSpend);
+    // 실제 비즈머니 잔액 — DB 최신 크롤값 우선, 없으면 직접 크롤
+    let actualBalance = null;
+    let balanceDate = null;
+    try {
+      const saved = await getLatestSavedBalance();
+      if (saved && saved.bizmoney_balance != null) {
+        actualBalance = saved.bizmoney_balance;
+        balanceDate = saved.date;
+        console.log(`[비즈머니] DB 최신값: ${actualBalance.toLocaleString()}원 (${balanceDate})`);
+      } else {
+        console.log('[비즈머니] DB에 저장값 없음 — 직접 크롤 시도');
+        const fresh = await fetchBizmoneyBalance();
+        if (fresh && fresh.total != null) {
+          actualBalance = fresh.total;
+          balanceDate = new Date().toISOString().slice(0, 10);
+          await saveBizmoneyBalance(fresh).catch(() => {});
+          console.log(`[비즈머니] 직접 크롤: ${actualBalance.toLocaleString()}원`);
+        }
+      }
+    } catch (e) {
+      console.error('[비즈머니] 조회/크롤 실패:', e.message);
+    }
+
+    const bizMoneyPred = actualBalance != null ? predictBizMoney(actualBalance, dailyAvgSpend) : null;
 
     // 5. 추천 액션
     const recommendations = generateRecommendations(serviceAnalyses);
@@ -110,8 +131,14 @@ async function analyzeDaily() {
       }
     }
 
-    // 비즈머니
-    report += `\n비즈머니 잔액: ${formatNumber(estimatedBalance)}원 (약 ${bizMoneyPred.daysLeft}일 남음)\n`;
+    // 비즈머니 (실측치만 출력, 추정 금지)
+    if (actualBalance != null && bizMoneyPred) {
+      const dateNote = balanceDate ? ` · ${balanceDate} 기준` : '';
+      const daysNote = bizMoneyPred.daysLeft >= 999 ? '소진 추세 없음' : `약 ${bizMoneyPred.daysLeft}일 남음`;
+      report += `\n비즈머니 잔액: ${formatNumber(actualBalance)}원 (${daysNote}${dateNote})\n`;
+    } else {
+      report += `\n비즈머니 잔액: 조회 실패 (수동 확인 필요)\n`;
+    }
 
     // AI 추천
     if (recommendations.length > 0) {
@@ -142,8 +169,8 @@ async function analyzeDaily() {
         total_revenue: yesterday.revenue,
         total_ad_cost: yesterday.adCost,
         roi: yesterday.adCost > 0 ? parseFloat(((yesterday.revenue - yesterday.adCost) / yesterday.adCost * 100).toFixed(2)) : 0,
-        bizmoney_balance: estimatedBalance,
-        bizmoney_days_left: bizMoneyPred.daysLeft,
+        ...(actualBalance != null ? { bizmoney_balance: actualBalance } : {}),
+        ...(bizMoneyPred ? { bizmoney_days_left: bizMoneyPred.daysLeft } : {}),
         bottlenecks,
         recommendations,
         report_sent: true,
