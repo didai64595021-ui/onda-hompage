@@ -559,9 +559,9 @@ robots.txt 체크리스트, 저작권 가이드, 본인 권한 확인 절차, ND
   {
     id: '09',
     cat1: 'IT·프로그래밍',
-    cat2: '앱·스마트폰 개발',
+    cat2: '서비스·MVP 개발',
     image: '01-openai.png',
-    title: '29만원 PWA로 모바일 앱 1주 완성',
+    title: 'PWA 모바일 앱 1주 완성 진입가',
 
     description: `"앱 개발 견적 200~500만원 듣고 포기하셨죠? PWA로 29만원 진입가."
 
@@ -618,9 +618,9 @@ robots.txt 체크리스트, 저작권 가이드, 본인 권한 확인 절차, ND
     features: { tech: '고급', team: '1인', onsite: '상주 불가능' },
 
     packages: [
-      { name: 'STANDARD', title: 'PWA 4화면 1주',        desc: '핵심 4화면, 모바일 최적화, Cloudflare 배포, 30일 디버깅', price: 290000, days: 7,  revisions: 2 },
-      { name: 'DELUXE',   title: '8화면 + 푸시 + 회원',   desc: '8화면, Firebase 푸시알림, 카카오 로그인, 60일 패치',     price: 590000, days: 14, revisions: 3 },
-      { name: 'PREMIUM',  title: 'PWA + 결제 + 관리자',  desc: '결제 연동, 관리자 페이지, 통계 대시보드, 90일 무상 패치', price: 990000, days: 21, revisions: 5 },
+      { name: 'STANDARD', title: 'PWA 4화면 1주',        desc: '핵심 4화면, 모바일 최적화, Cloudflare 배포, 30일 디버깅', price: 99000,  days: 7,  revisions: 2 },
+      { name: 'DELUXE',   title: '8화면 + 푸시 + 회원',   desc: '8화면, Firebase 푸시알림, 카카오 로그인, 60일 패치',     price: 290000, days: 14, revisions: 3 },
+      { name: 'PREMIUM',  title: 'PWA + 결제 + 관리자',  desc: '결제 연동, 관리자 페이지, 통계 대시보드, 90일 무상 패치', price: 590000, days: 21, revisions: 5 },
     ],
   },
 
@@ -630,7 +630,7 @@ robots.txt 체크리스트, 저작권 가이드, 본인 권한 확인 절차, ND
   {
     id: '10',
     cat1: 'IT·프로그래밍',
-    cat2: '앱·스마트폰 개발',
+    cat2: '서비스·MVP 개발',
     image: '02-openai.png',
     title: 'Flutter MVP+백엔드 1개월 풀스택',
 
@@ -698,9 +698,9 @@ Flutter + Supabase 풀스택으로 iOS·Android 한 번에, 백엔드(DB·인증
     features: { tech: '고급', team: '1인', onsite: '상주 불가능' },
 
     packages: [
-      { name: 'STANDARD', title: '5화면 MVP+Supabase',  desc: '5화면 Flutter, Supabase 인증/DB, 푸시알림, 30일 패치',    price: 1500000, days: 30, revisions: 3 },
-      { name: 'DELUXE',   title: '10화면+결제+관리자',  desc: '10화면, 토스/카카오페이, 관리자 웹, 통계, 90일 패치',    price: 2900000, days: 60, revisions: 5 },
-      { name: 'PREMIUM',  title: '풀MVP+1년 운영지원',  desc: '무제한 화면, 다국어, 광고 SDK, Native 옵션, 1년 패치', price: 4900000, days: 90, revisions: '제한없음' },
+      { name: 'STANDARD', title: '5화면 MVP+Supabase',  desc: '5화면 Flutter, Supabase 인증/DB, 푸시알림, 30일 패치',    price: 590000,  days: 30, revisions: 3 },
+      { name: 'DELUXE',   title: '10화면+결제+관리자',  desc: '10화면, 토스/카카오페이, 관리자 웹, 통계, 90일 패치',    price: 1500000, days: 60, revisions: 5 },
+      { name: 'PREMIUM',  title: '풀MVP+1년 운영지원',  desc: '무제한 화면, 다국어, 광고 SDK, Native 옵션, 1년 패치', price: 2900000, days: 90, revisions: '제한없음' },
     ],
   },
 ];
