@@ -34,38 +34,44 @@ const PRODUCTS = [
   {
     id: '01',
     name: '텔레그램·카톡 알림봇',
-    openai: `Korean kmong gig thumbnail, square 1:1. Bold Korean text "24시간 자동감시" top-center in yellow #FFD600 highlighted on dark navy background #0A1929. Subtitle "텔레그램·카톡 알림봇" white. Three Telegram chat notification bubbles cascading in the center showing stock price up arrow, news icon, keyword bell. Bottom-right yellow price badge "5만원부터". Bottom-left small badge "5,000건 작업". Modern flat illustration, high contrast, Korean kmong style commercial thumbnail, NO English text except numbers.`,
-    gemini: `크몽 자동화 매크로 카테고리 정사각형 썸네일. 짙은 네이비(#0A1929) 배경에 큰 한글 카피 "24시간 자동감시" 노란색(#FFD600) 강조. 서브타이틀 "텔레그램·카톡 알림봇" 흰색. 중앙에 텔레그램 알림 말풍선 3개 (시세 상승, 뉴스 아이콘, 키워드 종) 겹쳐 떠오르는 모습. 우측 하단 노란 가격 뱃지 "5만원부터". 좌측 하단 작은 뱃지 "5,000건 작업". 모던 플랫 일러스트, 신뢰감, 야간 자동화 분위기.`,
+    // 2026-04-29 정책 준수: 가격/누적건수 문구 모두 제거, 흰배경 회피
+    openai: `Korean kmong gig thumbnail, square 1:1, dark navy #0A1929 background with subtle grid pattern. Bold Korean text "24시간 자동감시" top-center in yellow #FFD600 with 60px top padding. Subtitle "텔레그램·카톡 알림봇" white below. Center: three Telegram-style chat bubbles cascading vertically — first shows simple stock chart up arrow, second shows news icon, third shows bell icon. ABSOLUTELY NO price text (no 만원, no 부터, no 원 amounts), NO numbers with currency, NO badges with money, NO 1위/BEST/No.1/누적/최저가/100%, NO English text. Modern flat illustration, 50px+ padding all sides.`,
+    gemini: `크몽 자동화 매크로 카테고리 정사각형 썸네일. 짙은 네이비(#0A1929) 배경+잔잔한 격자 무늬. 큰 한글 카피 "24시간 자동감시" 노란색(#FFD600) 상단(상단 60px 여백). 서브타이틀 "텔레그램·카톡 알림봇" 흰색. 중앙에 텔레그램 알림 말풍선 3개(시세 상승 화살표/뉴스 아이콘/키워드 종) 세로 캐스케이드. 가격 문구·금액·뱃지·1위·BEST·누적·100% 같은 검증 불가 문구 절대 금지. 모던 플랫 일러스트. 사방 50px 여백.`,
   },
   {
     id: '02',
     name: '셀러 가격·재고 모니터링',
-    openai: `Korean kmong gig thumbnail 1:1 square. Top text "가격이 바뀌면 5분 안에" big bold black on white background, with green #03C75A underline. Subtitle "스마트스토어·쿠팡 자동 감시" smaller. Left half: smartphone showing red downward arrow notification "경쟁사 가격 ▼1,200원". Right half: laptop screen with product cards list and price tags, some red and some green arrows. Bottom-right green badge "1인 셀러 필수 15만원부터". Modern clean ecommerce illustration, NO English text.`,
-    gemini: `크몽 자동화 카테고리 정사각형 썸네일. 흰 배경 + 큰 검정 한글 "가격이 바뀌면 5분 안에" 상단, 스마트스토어 그린 밑줄. 서브 "스마트스토어·쿠팡 자동 감시". 좌측 절반: 스마트폰 알림 화면 "경쟁사 가격 ▼1,200원" 빨간 하락. 우측 절반: 노트북에 상품 카드 리스트, 가격 태그, 빨간/초록 화살표. 우하단 그린 뱃지 "1인 셀러 필수 15만원부터". 모던 깔끔 이커머스 일러스트.`,
+    // 2026-04-29 정책 준수: 모든 가격/숫자+원 제거, 흰배경 회피
+    openai: `Korean kmong gig thumbnail 1:1 square, soft mint-blue gradient background #E0F2FE to #DBEAFE (no pure white). Top text "가격이 바뀌면 5분 안에" big bold black, with green #03C75A underline accent. Subtitle "스마트스토어·쿠팡 자동 감시" smaller below. Left half: smartphone illustration with abstract notification UI (no specific numbers). Right half: laptop screen with abstract product card silhouettes and red/green trend arrows (no price values). ABSOLUTELY NO price text, NO 원/만원/부터 amounts, NO 1위/BEST/No.1/필수, NO English text. Modern clean ecommerce illustration, 50px+ padding.`,
+    gemini: `크몽 자동화 카테고리 정사각형 썸네일. 민트-블루 그라데이션 배경(#E0F2FE→#DBEAFE), 순백색 절대 금지. 큰 검정 한글 "가격이 바뀌면 5분 안에" 상단, 스마트스토어 그린 밑줄. 서브 "스마트스토어·쿠팡 자동 감시". 좌측: 스마트폰 알림 UI(구체 숫자 X). 우측: 노트북+추상 상품 카드+빨간/초록 화살표(가격 값 없음). 가격·금액·1위·BEST·필수 절대 금지. 사방 50px 여백.`,
   },
   {
     id: '03',
     name: '사내문서 GPT 자동화',
-    openai: `Korean kmong gig thumbnail 1:1 square. Bold Korean text "AI 업무자동화" top-center in purple #7C3AED on white background. Subtitle "엑셀·PDF·문서 → GPT가 3초에" black. Left side: messy stack of Excel, PDF, document icons (gray, disorganized). Center: purple pipeline/conveyor arrows connecting nodes (automation flow). Right side: clean organized report with charts and green checkmark. Bottom-left green #10B981 badge "월 150만원 절약". Bottom-right purple badge "20만원부터". Modern flat business illustration, professional tone, NO English text.`,
-    gemini: `크몽 업무자동화 카테고리 정사각형 썸네일. 화이트 배경 + 상단 보라색(#7C3AED) 그라데이션 띠에 큰 한글 "AI 업무자동화". 서브타이틀 "엑셀·PDF·문서 → GPT가 3초에" 검정. 좌측: 엑셀·PDF·문서 아이콘 지저분하게 쌓임 (Before). 중앙: 보라색 파이프라인 노드 연결선 (Make/n8n 자동화 흐름). 우측: 깔끔한 보고서+차트+초록 체크마크 (After). 좌하단 초록(#10B981) 뱃지 "월 150만원 절약". 우하단 보라 뱃지 "20만원부터". 프로페셔널 비즈니스 플랫 일러스트.`,
+    // 2026-04-29 정책 준수: "절약 금액"·"부터" 제거, 흰배경 회피
+    openai: `Korean kmong gig thumbnail 1:1 square, soft lavender gradient background #EDE9FE to #DDD6FE (no pure white). Bold Korean text "AI 업무자동화" top-center in deep purple #5B21B6 with 60px top padding. Subtitle "엑셀·PDF·문서 → GPT가 3초에" black. Left side: stacked Excel, PDF, document icons (Before — disorganized). Center: purple pipeline arrows connecting flow nodes. Right side: organized report with charts and green checkmark (After). ABSOLUTELY NO price text, NO 절약/할인/부터/만원, NO 1위/BEST/No.1, NO badges with money, NO English text. Professional flat business illustration, 50px+ padding.`,
+    gemini: `크몽 업무자동화 카테고리 정사각형 썸네일. 라벤더 그라데이션 배경(#EDE9FE→#DDD6FE), 순백색 금지. 큰 진보라(#5B21B6) 한글 "AI 업무자동화" 상단(상단 60px 여백). 서브 "엑셀·PDF·문서 → GPT가 3초에" 검정. 좌측: 엑셀·PDF·문서 아이콘 흐트러짐(Before). 중앙: 보라색 파이프라인 노드 연결. 우측: 깔끔 보고서+차트+초록 체크마크(After). 가격·절약 금액·만원·BEST 절대 금지. 사방 50px 여백.`,
   },
   {
     id: '04',
     name: 'PDF 챗봇',
-    openai: `Korean kmong gig thumbnail 1:1 square. Bright mint-white #F0FDF4 background. Top bold Korean text "AI 상담봇" in dark green #059669. Subtitle "PDF 1개로 3일 완성" black. Left: large PDF document icon with arrow pointing right. Center: chatbot conversation UI with 3 speech bubbles — customer question (light blue), AI answer (green), small source citation. Right edge: clock icon with "24h". Bottom-right green badge "5.9만원부터". Bright friendly illustration, approachable small-business style, NO English text.`,
-    gemini: `크몽 AI챗봇 카테고리 정사각형 썸네일. 밝은 민트(#F0FDF4) 배경 + 큰 진한 초록(#059669) 한글 "AI 상담봇" 상단. 서브 "PDF 1개로 3일 완성" 검정. 좌측: 큰 PDF 문서 아이콘에서 화살표. 중앙: 챗봇 대화 UI 말풍선 3개 (고객 질문 하늘색, AI 답변 초록, 출처 표시 작게). 우측: 시계 아이콘 "24h". 우하단 초록 뱃지 "5.9만원부터". 밝고 친근한 소상공인 친화 플랫 일러스트.`,
+    // 2026-04-29 정책 준수: "5.9만원부터" 가격 뱃지 제거
+    openai: `Korean kmong gig thumbnail 1:1 square, mint-green gradient background #D1FAE5 to #A7F3D0 (no pure white). Top bold Korean text "AI 상담봇" in dark green #047857 with 60px top padding. Subtitle "PDF 1장으로 24시간 응답" black. Left: large PDF document icon with rightward arrow. Center: chatbot conversation UI with 3 speech bubbles — customer question (light blue), AI answer (white card), source label small. Right edge: clock icon. ABSOLUTELY NO price text, NO 만원/부터/원 amounts, NO 1위/BEST/100%, NO English text. Friendly approachable illustration, 50px+ padding.`,
+    gemini: `크몽 AI챗봇 카테고리 정사각형 썸네일. 민트-그린 그라데이션 배경(#D1FAE5→#A7F3D0), 순백색 금지. 큰 진녹(#047857) 한글 "AI 상담봇" 상단(상단 60px 여백). 서브 "PDF 1장으로 24시간 응답" 검정. 좌측: 큰 PDF 아이콘+화살표. 중앙: 챗봇 대화 UI 말풍선 3개. 우측: 시계 아이콘. 가격·만원·부터·100% 절대 금지. 친근 소상공인 일러스트. 사방 50px 여백.`,
   },
   {
     id: '05',
     name: 'RAG 사내문서 챗봇',
-    openai: `Korean kmong gig thumbnail 1:1 square. Dark navy #0F172A background. Top bold Korean text "사내문서 AI 챗봇" in white. Subtitle "노션·구글드라이브·PDF 통합 검색" in blue #3B82F6. Center: enterprise dashboard UI mockup showing chat conversation with source citations panel on left and document list sidebar on right. Top: three icons (Notion logo silhouette, Google Drive folder, PDF icon) connected by blue lines to the dashboard. Bottom-left blue gradient badge "B2B 전용". Bottom-right blue badge "29만원부터". Premium corporate illustration, high-end B2B feel, NO English text.`,
-    gemini: `크몽 AI챗봇 카테고리 정사각형 썸네일. 다크네이비(#0F172A) 배경 + 큰 흰 한글 "사내문서 AI 챗봇" 상단. 서브 "노션·구글드라이브·PDF 통합 검색" 파란색(#3B82F6). 중앙: 기업 대시보드 UI (대화창 + 출처 인용 패널 + 문서 사이드바). 상단: 노션·구글드라이브·PDF 아이콘이 파란 연결선으로 대시보드와 연결. 좌하단 파란 뱃지 "B2B 전용". 우하단 뱃지 "29만원부터". 프리미엄 기업 일러스트, 고급 B2B 분위기.`,
+    // 2026-04-29 정책 준수: "29만원부터" 가격 뱃지 제거 (사용자 알림 직접 트리거)
+    openai: `Korean kmong gig thumbnail 1:1 square, dark navy #0F172A background with subtle grid pattern. Top bold Korean text "사내문서 AI 챗봇" in white with 60px top padding. Subtitle "노션·구글드라이브·PDF 통합 검색" in light blue #60A5FA. Center: enterprise dashboard UI mockup with chat conversation panel on left and document sidebar on right. Top: three abstract document/cloud icons connected by blue lines to dashboard. Bottom-left small blue badge with single short word "B2B" only. ABSOLUTELY NO price text, NO 만원/부터/원, NO ENTERPRISE/PRIME/PRO grade labels, NO 1위/BEST/No.1, NO English text other than B2B. Premium corporate illustration, 50px+ padding.`,
+    gemini: `크몽 AI챗봇 카테고리 정사각형 썸네일. 다크네이비(#0F172A) 배경+잔잔한 격자 패턴. 큰 흰 한글 "사내문서 AI 챗봇" 상단(상단 60px 여백). 서브 "노션·구글드라이브·PDF 통합 검색" 라이트블루(#60A5FA). 중앙: 기업 대시보드 UI(대화창+문서 사이드바). 상단: 추상 문서/클라우드 아이콘 3개 파란 연결선. 좌하단 짧은 뱃지 "B2B"만. 가격·만원·부터·ENTERPRISE·PRIME·PRO·1위·BEST 절대 금지. 사방 50px 여백.`,
   },
   {
     id: '06',
     name: '풀스택 카카오 챗봇',
-    openai: `Korean kmong gig thumbnail 1:1 square. Dark gradient background #1E1B4B to #312E81. Top bold Korean text "AI 풀스택 구축" in white. Subtitle "챗봇 + 카카오 + 자동화 올인원" in gold #F59E0B. Center: three connected hub icons in triangle formation — left: AI brain icon (blue glow), center: KakaoTalk yellow speech bubble, right: gear/cog automation icon. Blue connecting lines between them. Bottom: mini dashboard screen mockup. Bottom-right gold premium badge "99만원부터". Top-right small text "ENTERPRISE". Premium corporate illustration, high-end dark luxury feel, NO other English text.`,
-    gemini: `크몽 AI챗봇 카테고리 정사각형 썸네일. 진한 보라→남색 그라데이션(#1E1B4B→#312E81) 배경. 큰 흰 한글 "AI 풀스택 구축" 상단. 서브 "챗봇 + 카카오 + 자동화 올인원" 골드(#F59E0B). 중앙: 3개 허브 아이콘 삼각형 배치 (좌: AI 뇌, 중: 카카오톡 노란 말풍선, 우: 톱니바퀴) 파란 연결선. 하단: 대시보드 스크린 미니어처. 우하단 골드 뱃지 "99만원부터". 우상단 작은 "ENTERPRISE". 프리미엄 엔터프라이즈 일러스트, 고급 다크 분위기.`,
+    // 2026-04-29 정책 준수: "99만원부터" + "ENTERPRISE" 등급표시 모두 제거
+    openai: `Korean kmong gig thumbnail 1:1 square, dark gradient background #1E1B4B to #312E81. Top bold Korean text "AI 풀스택 구축" in white with 60px top padding. Subtitle "챗봇 + 카카오 + 자동화 올인원" in gold #F59E0B. Center: three connected hub icons in triangle — left: AI brain icon (blue glow), center: yellow speech bubble (KakaoTalk style), right: gear automation icon. Blue connecting lines. Bottom: abstract mini dashboard mockup. ABSOLUTELY NO price text, NO 만원/부터/원, NO ENTERPRISE/PRIME/PRO/PREMIUM grade labels, NO 1위/BEST/No.1/100%, NO badges with amounts, NO English text. Premium corporate illustration, dark luxury feel, 50px+ padding.`,
+    gemini: `크몽 AI챗봇 카테고리 정사각형 썸네일. 진한 보라→남색 그라데이션(#1E1B4B→#312E81) 배경. 큰 흰 한글 "AI 풀스택 구축" 상단(상단 60px 여백). 서브 "챗봇 + 카카오 + 자동화 올인원" 골드(#F59E0B). 중앙: 3개 허브 아이콘 삼각형(좌: AI 뇌, 중: 카카오톡 노란 말풍선, 우: 톱니바퀴) 파란 연결선. 하단: 추상 대시보드 미니어처. 가격·만원·부터·ENTERPRISE·PRIME·PRO·1위·BEST 절대 금지. 프리미엄 다크 일러스트. 사방 50px 여백.`,
   },
 ];
 
