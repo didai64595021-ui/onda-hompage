@@ -76,6 +76,16 @@ async function processCut(folder, cut) {
   const outDir = path.join(__dirname, 'thumbnails', folder);
   fs.mkdirSync(outDir, { recursive: true });
 
+  // 이미 완성된 파일 있으면 skip (재실행 시 비용 낭비 방지)
+  const finalPath = path.join(outDir, `${cut.key}.png`);
+  if (fs.existsSync(finalPath)) {
+    const stat = fs.statSync(finalPath);
+    if (stat.size > 100 * 1024) {
+      console.log(`\n[${folder}/${cut.key}] SKIP — 이미 존재 (${(stat.size / 1024).toFixed(0)}KB)`);
+      return { folder, ...cut, ok: true, final: finalPath, size: stat.size, skipped: true };
+    }
+  }
+
   console.log(`\n[${folder}/${cut.key}] ${cut.desc}`);
   const gen = await generateMainImage({
     prompt: cut.prompt,
@@ -88,7 +98,6 @@ async function processCut(folder, cut) {
     return { folder, ...cut, ok: false, error: gen.error };
   }
 
-  const finalPath = path.join(outDir, `${cut.key}.png`);
   const cropX = Math.round((1536 - 1366) / 2);
   await sharp(gen.file_path)
     .extract({ left: cropX, top: 0, width: 1366, height: 1024 })
