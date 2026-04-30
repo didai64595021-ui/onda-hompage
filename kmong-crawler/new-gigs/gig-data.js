@@ -406,9 +406,11 @@ PDF 1장만 주세요. 3일 후, 영업시간 밖에도 손님 질문에 정확�
     features: { tech: '고급', team: '1인', onsite: '상주 불가능' },
 
     packages: [
-      { name: 'STANDARD', title: '핵심 GUI + 자동화 5건',     desc: 'Python GUI, SQLite DB, 매크로 5건, 봇 알림, 1개월 유지보수', price: 800000,  days: 7,  revisions: 3 },
-      { name: 'DELUXE',   title: '풀스택 + 관리자 + 리포트',  desc: 'GUI + 관리자 페이지 + 매크로 10건 + 자동 리포트, 3개월 유지', price: 1500000, days: 14, revisions: 5 },
-      { name: 'PREMIUM',  title: '엔터프라이즈 + 6개월 유지', desc: '무제한 모듈, 다중 사용자, 백업 자동, 화상 교육 2회, 6개월 유지', price: 2500000, days: 21, revisions: '제한없음' },
+      // 2026-04-30 v2 시장조사 반영: 시장 PRM max(정상) ₩900K → 우리 STD ₩800K가 시장 PRM 영역 (1페이지 진입 X)
+      // STD ₩200K로 1페이지 진입가 + DLX/PRM은 시장 PRM 위 풀스택 차별화 폭
+      { name: 'STANDARD', title: '핵심 GUI + 자동화 5건',     desc: 'Python GUI, SQLite DB, 매크로 5건, 봇 알림, 1개월 유지보수', price: 200000,  days: 7,  revisions: 3 },
+      { name: 'DELUXE',   title: '풀스택 + 관리자 + 리포트',  desc: 'GUI + 관리자 페이지 + 매크로 10건 + 자동 리포트, 3개월 유지', price: 600000, days: 14, revisions: 5 },
+      { name: 'PREMIUM',  title: '엔터프라이즈 + 6개월 유지', desc: '무제한 모듈, 다중 사용자, 백업 자동, 화상 교육 2회, 6개월 유지', price: 1200000, days: 21, revisions: '제한없음' },
     ],
   },
 
@@ -561,7 +563,7 @@ robots.txt 체크리스트, 저작권 가이드, 본인 권한 확인 절차, ND
     cat1: 'IT·프로그래밍',
     cat2: '서비스·MVP 개발',
     image: '01-openai.png',
-    title: 'PWA 모바일 앱 1주 완성 진입가',
+    title: 'PWA·하이브리드 앱 1주 완성 진입가',
 
     description: `"앱 개발 견적 200~500만원 듣고 포기하셨죠? PWA로 29만원 진입가."
 
@@ -618,9 +620,10 @@ robots.txt 체크리스트, 저작권 가이드, 본인 권한 확인 절차, ND
     features: { tech: '고급', team: '1인', onsite: '상주 불가능' },
 
     packages: [
+      // 2026-04-30 v2 시장조사 반영: 시장 DLX median ₩500K, PRM median ₩1M — 우리 가치 떨어뜨리지 않게 인상
       { name: 'STANDARD', title: 'PWA 4화면 1주',        desc: '핵심 4화면, 모바일 최적화, Cloudflare 배포, 30일 디버깅', price: 99000,  days: 7,  revisions: 2 },
-      { name: 'DELUXE',   title: '8화면 + 푸시 + 회원',   desc: '8화면, Firebase 푸시알림, 카카오 로그인, 60일 패치',     price: 290000, days: 14, revisions: 3 },
-      { name: 'PREMIUM',  title: 'PWA + 결제 + 관리자',  desc: '결제 연동, 관리자 페이지, 통계 대시보드, 90일 무상 패치', price: 590000, days: 21, revisions: 5 },
+      { name: 'DELUXE',   title: '8화면 + 푸시 + 회원',   desc: '8화면, Firebase 푸시알림, 카카오 로그인, 60일 패치',     price: 390000, days: 14, revisions: 3 },
+      { name: 'PREMIUM',  title: 'PWA + 결제 + 관리자',  desc: '결제 연동, 관리자 페이지, 통계 대시보드, 90일 무상 패치', price: 890000, days: 21, revisions: 5 },
     ],
   },
 
@@ -698,9 +701,10 @@ Flutter + Supabase 풀스택으로 iOS·Android 한 번에, 백엔드(DB·인증
     features: { tech: '고급', team: '1인', onsite: '상주 불가능' },
 
     packages: [
-      { name: 'STANDARD', title: '5화면 MVP+Supabase',  desc: '5화면 Flutter, Supabase 인증/DB, 푸시알림, 30일 패치',    price: 590000,  days: 30, revisions: 3 },
-      { name: 'DELUXE',   title: '10화면+결제+관리자',  desc: '10화면, 토스/카카오페이, 관리자 웹, 통계, 90일 패치',    price: 1500000, days: 60, revisions: 5 },
-      { name: 'PREMIUM',  title: '풀MVP+1년 운영지원',  desc: '무제한 화면, 다국어, 광고 SDK, Native 옵션, 1년 패치', price: 2900000, days: 90, revisions: '제한없음' },
+      // 2026-04-30 v2 시장조사 반영: 시장 PRM max(정상) ₩2M, median ₩1M — STD ₩590K → ₩390K로 1페이지 진입가
+      { name: 'STANDARD', title: '5화면 MVP+Supabase',  desc: '5화면 Flutter, Supabase 인증/DB, 푸시알림, 30일 패치',    price: 390000,  days: 30, revisions: 3 },
+      { name: 'DELUXE',   title: '10화면+결제+관리자',  desc: '10화면, 토스/카카오페이, 관리자 웹, 통계, 90일 패치',    price: 990000,  days: 60, revisions: 5 },
+      { name: 'PREMIUM',  title: '풀MVP+1년 운영지원',  desc: '무제한 화면, 다국어, 광고 SDK, Native 옵션, 1년 패치', price: 1900000, days: 90, revisions: '제한없음' },
     ],
   },
 ];
