@@ -12,7 +12,7 @@
  */
 
 import { spawn, execSync, spawnSync } from 'child_process';
-import { readFileSync, writeFileSync, existsSync, mkdirSync, appendFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, appendFileSync, statSync } from 'fs';
 import { randomUUID } from 'crypto';
 import dns from 'dns';
 
@@ -176,6 +176,47 @@ async function tgApi(method: string, body?: Record<string, unknown>): Promise<Re
 // ─── 미디어 다운로드 ───
 // 2026-04-27: chat_id별 디렉토리 분리 + JSONL 인덱스 추가 (과거 저장된 평면 캐시는 그대로 두고 신규부터 적용)
 type MediaMeta = { chatId?: string | number; messageId?: number; caption?: string; source?: string; from?: string };
+// 이미지 dimension >2000px이면 1920px로 리사이즈 (Claude API 거부 방지).
+// PIL spawnSync — sharp/imagemagick 없이 OS 기본 python3 + Pillow 사용.
+const IMAGE_MAX_DIM = 2000;
+const IMAGE_RESIZE_TO = 1920;
+function resizeImageIfOversized(imagePath: string): void {
+  const py = `
+import sys
+from PIL import Image
+p = sys.argv[1]
+mx = int(sys.argv[2])
+to = int(sys.argv[3])
+try:
+    img = Image.open(p)
+    w, h = img.size
+    if max(w, h) <= mx:
+        print(f"OK:{w}x{h}")
+        sys.exit(0)
+    if w >= h:
+        nw, nh = to, int(round(h * to / w))
+    else:
+        nh, nw = to, int(round(w * to / h))
+    if img.mode in ("RGBA", "P"):
+        img = img.convert("RGB")
+    img.thumbnail((nw, nh), Image.LANCZOS)
+    img.save(p, optimize=True, quality=88)
+    print(f"RESIZED:{w}x{h}->{nw}x{nh}")
+except Exception as e:
+    print(f"ERR:{e}", file=sys.stderr)
+    sys.exit(1)
+`;
+  const r = spawnSync('python3', ['-c', py, imagePath, String(IMAGE_MAX_DIM), String(IMAGE_RESIZE_TO)], {
+    encoding: 'utf8', timeout: 15000,
+  });
+  if (r.status !== 0) {
+    log('WARN', `이미지 리사이즈 실패 ${imagePath}: ${(r.stderr || '').trim().slice(0, 200)}`);
+    return;
+  }
+  const out = (r.stdout || '').trim();
+  if (out.startsWith('RESIZED:')) log('INFO', `이미지 리사이즈 ${out.slice(8)} (${imagePath.split('/').pop()})`);
+}
+
 async function downloadFile(fileId: string, suffix: string, meta: MediaMeta = {}): Promise<string | null> {
   try {
     const r = await tgApi('getFile', { file_id: fileId });
@@ -192,6 +233,9 @@ async function downloadFile(fileId: string, suffix: string, meta: MediaMeta = {}
     if (chatDir !== MEDIA_DIR && !existsSync(chatDir)) mkdirSync(chatDir, { recursive: true });
     const outPath = `${chatDir}/${fileId}${suffix}`;
     writeFileSync(outPath, buf);
+    if (/\.(jpe?g|png|webp|gif|bmp|tiff?)$/i.test(suffix)) {
+      resizeImageIfOversized(outPath);
+    }
     try {
       const indexEntry = JSON.stringify({
         ts: new Date().toISOString(),
@@ -503,6 +547,20 @@ function sessionFileExists(workspace: string, sessionId: string): boolean {
   return existsSync(path);
 }
 
+// 세션 jsonl 크기 임계 초과 여부 — 누적 이미지/대화로 인한 API 거부(2000px 등) 사전 차단.
+// 초과 시 자동 롤오버하여 새 세션으로 이어감.
+const SESSION_JSONL_MAX_BYTES = 10 * 1024 * 1024; // 10MB
+function sessionFileTooLarge(workspace: string, sessionId: string): boolean {
+  const encoded = workspace.replace(/\//g, '-');
+  const path = `/home/onda/.claude/projects/${encoded}/${sessionId}.jsonl`;
+  if (!existsSync(path)) return false;
+  try {
+    return statSync(path).size > SESSION_JSONL_MAX_BYTES;
+  } catch {
+    return false;
+  }
+}
+
 // Claude 실행 (재시도 + 세션 관리 + 자가복구)
 async function runClaude(prompt: string, workspace: string, chatId: string): Promise<string> {
   const sessions = loadSessions();
@@ -521,6 +579,13 @@ async function runClaude(prompt: string, workspace: string, chatId: string): Pro
     log('INFO', `세션 신규: ${key} → ${sessionId}`);
   } else if (!sessionFileExists(workspace, entry.sessionId)) {
     log('INFO', `세션 jsonl 파일 부재 (${entry.sessionId.slice(0,8)}..) → 새 세션으로 자가복구`);
+    sessionId = randomUUID();
+    entry.sessionId = sessionId;
+    entry.lastUsed = Date.now();
+    saveSessions(sessions);
+    isFirstCall = true;
+  } else if (sessionFileTooLarge(workspace, entry.sessionId)) {
+    log('INFO', `세션 jsonl 크기 ${(SESSION_JSONL_MAX_BYTES/1024/1024)|0}MB 초과 (${entry.sessionId.slice(0,8)}..) → 자동 롤오버`);
     sessionId = randomUUID();
     entry.sessionId = sessionId;
     entry.lastUsed = Date.now();
