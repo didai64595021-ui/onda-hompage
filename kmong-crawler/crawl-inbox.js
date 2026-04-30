@@ -335,6 +335,9 @@ async function crawlInbox() {
           customer_name: inquiry.customer_name,
           inquiry_type: inquiry.inquiry_type,
           status: inquiry.status,
+          // auto_reply_status='pending' 누락 시 auto-reply.js의 SELECT 조건 (status='new' AND auto_reply_status='pending')
+          // 에서 NULL이라 못 잡음 → 자동 답변 카드 생성 안 됨 (2026-04-30 fix, inquiry 136/138 백필 사유)
+          auto_reply_status: 'pending',
           message_content: inquiry.message_content,
           conversation_url: inquiry.conversation_url,
           notes: inquiry.notes,
