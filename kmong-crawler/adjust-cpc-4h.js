@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 4시간 단위 CPC 동적 조정 모듈
+ * 6시간 단위 CPC 동적 조정 모듈 (2026-05-02 4h → 6h 전환)
  *
  * 흐름:
  *   1) 현재 KST 시간대 weight 로드 (hourly-weights.js)
@@ -8,10 +8,10 @@
  *   3) 7일 메트릭 + 예산 로드 (기존 ad-bot 인프라 재사용)
  *   4) Opus 4.7 (CLI → API → rule fallback) 판단
  *   5) ±25퍼 가드 + 시간 weight 곱 + min/max CPC 클립
- *   6) DB 로그 + Playwright 자동 적용
+ *   6) DB 로그 + Playwright 자동 적용 (오버볼륨=하향, 언더볼륨=상향)
  *   7) 텔레그램 plain text 보고 + 추가 전략 제안
  *
- * cron: 0 *​/4 * * * (00,04,08,12,16,20 KST)
+ * cron: 0 *​/6 * * * (00,06,12,18 KST)
  * 옵션: --dry-run (적용 안 함), --rule (Opus 우회)
  */
 
@@ -72,11 +72,11 @@ async function main() {
   const hourOff = await isHourOff();
   const weightsPayload = await loadHourlyWeights();
 
-  console.log(`=== adjust-cpc-4h ${args.apply ? '(자동적용)' : '(dry-run)'} | KST ${kstHour}시 weight=${hourWeight} ===`);
+  console.log(`=== adjust-cpc-6h ${args.apply ? '(자동적용)' : '(dry-run)'} | KST ${kstHour}시 weight=${hourWeight} ===`);
 
   if (hourOff) {
     console.log('[스킵] OFF 시간대 → ad-scheduler가 광고 OFF 처리, CPC 조정 불필요');
-    await notifyPlain(`adjust-cpc-4h 스킵 (KST ${kstHour}시 OFF 시간대)`);
+    await notifyPlain(`adjust-cpc-6h 스킵 (KST ${kstHour}시 OFF 시간대)`);
     return;
   }
 
@@ -186,7 +186,7 @@ async function main() {
   for (const a of j.actions) {
     const id = await logAction({
       product_id: a.product_id,
-      action_type: 'adjust_cpc_4h',
+      action_type: 'adjust_cpc_6h',
       action_date: actionDate,
       before_state: { desired_cpc: a.current_desired_cpc, kst_hour: kstHour, hour_weight: hourWeight },
       after_state: {
@@ -264,7 +264,7 @@ async function main() {
   }
 
   // 7) 텔레그램 보고
-  const nextHour = (kstHour + 4) % 24;
+  const nextHour = (kstHour + 6) % 24;
   const weightLabel = hourWeight === 1 ? '평시' : hourWeight > 1 ? `고가치 +${Math.round((hourWeight - 1) * 100)}퍼` : `저가치 -${Math.round((1 - hourWeight) * 100)}퍼`;
 
   // 적자 의심 서비스 검출 — judge가 metrics 주입한 deficit_risk_input 또는 metrics 직접 조회
@@ -286,7 +286,7 @@ async function main() {
   const paceLine = dp ? `페이스: 주 ${dp.week_spent_actual.toLocaleString()}/${dp.week_budget.toLocaleString()}원 (남은 ${dp.days_left_in_week}일) → 오늘 한도 ${dp.daily_allowance.toLocaleString()}원 / 오늘 누적 ${dp.today_spent.toLocaleString()}원 (pace=${dp.today_pace})` : '';
 
   const lines = [
-    `4시간 CPC 자동조정 ${args.apply ? '적용' : 'dry-run'} - KST ${kstHour}시 [${weightLabel}]`,
+    `6시간 CPC 자동조정 ${args.apply ? '적용' : 'dry-run'} - KST ${kstHour}시 [${weightLabel}]`,
     `판단: ${judgeSource} / 제안 ${j.actions.length}건 / 적용 성공 ${appliedCount}건${applyErrors.length ? ' / 실패 ' + applyErrors.length : ''}`,
     `예산: ${budget.budget_amount.toLocaleString()}원/${budget.budget_type} (priority=${budget.priority})`,
     paceLine,
@@ -318,11 +318,11 @@ async function main() {
   ].filter(Boolean);
   await notifyPlain(lines.join('\n'));
 
-  console.log(`\n[OK] adjust-cpc-4h ${((Date.now() - startTime) / 1000).toFixed(1)}초`);
+  console.log(`\n[OK] adjust-cpc-6h ${((Date.now() - startTime) / 1000).toFixed(1)}초`);
 }
 
 main().catch(async (err) => {
   console.error('[치명적]', err);
-  await notifyPlain('adjust-cpc-4h 치명적 실패: ' + err.message);
+  await notifyPlain('adjust-cpc-6h 치명적 실패: ' + err.message);
   process.exit(1);
 });
