@@ -90,7 +90,7 @@ async function updateTestMetrics(testId) {
     .from('kmong_orders')
     .select('amount')
     .eq('product_id', test.product_id)
-    .eq('status', 'completed')
+    .in('status', ['completed', '완료', '거래완료'])
     .lt('order_date', midDate)
     .gte('order_date', new Date(new Date(midDate).getTime() - 14 * 86400000).toISOString().split('T')[0]);
 
@@ -98,7 +98,7 @@ async function updateTestMetrics(testId) {
     .from('kmong_orders')
     .select('amount')
     .eq('product_id', test.product_id)
-    .eq('status', 'completed')
+    .in('status', ['completed', '완료', '거래완료'])
     .gte('order_date', midDate);
 
   const metricsA = {

@@ -255,25 +255,39 @@ module.exports = {
       watch: false,
       env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
     },
-    // === Phase 9: 야간 광고 OFF / 주간 광고 ON (2026-04-29 신설) ===
-    // 02:00 KST — 모든 광고 OFF (체리피커·탐색 트래픽 회피)
+    // === Phase 9: 야간 광고 OFF (2026-05-02 정리 — 10회 → 3회로 축소) ===
+    // 사유: swal2 모달 selector 안정화 + reload 검증 후 timeout 빈도 감소 → 다중 발사 불필요
+    //       3회로 충분한 안전망 (1회 timeout 시 30분 후 재시도 + 3시 최종 백업)
+    // 발사 시각 (총 3회):
+    //   02:00 (메인) / 02:30 (1차 백업) / 03:00 (최종 백업)
     {
       name: 'kmong-ads-night-off',
       script: './batch-toggle-ads.js',
       args: '--mode=all-off',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '0 2 * * *',
+      cron_restart: '0,30 2 * * *',  // 02:00 메인 + 02:30 백업
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
     },
-    // 08:00 KST — 기본 정책으로 광고 복원 (corp-* ON, responsive-* OFF 유지)
+    {
+      name: 'kmong-ads-night-off-backup',
+      script: './batch-toggle-ads.js',
+      args: '--mode=all-off',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '0 3 * * *',  // 03:00 최종 안전망
+      autorestart: false,
+      watch: false,
+      env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
+    },
+    // 10:00 KST — 기본 정책으로 광고 복원 (corp-* ON, responsive-* OFF 유지)
+    // 2026-05-02 변경: 08:00 → 10:00 (사용자 요청: 02-10시 OFF, 그 시간대 실제 문의 X)
     {
       name: 'kmong-ads-day-on',
       script: './batch-toggle-ads.js',
       args: '--mode=default',
       cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
-      cron_restart: '0 8 * * *',
+      cron_restart: '0 10 * * *',
       autorestart: false,
       watch: false,
       env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },

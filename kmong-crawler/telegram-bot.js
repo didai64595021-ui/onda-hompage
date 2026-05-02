@@ -172,63 +172,157 @@ bot.onText(/\/광고상태(?:@\w+)?/, async (msg) => {
 });
 
 // === 명령어: /매출 ===
+// 2026-05-02: 크몽 결제 + 외부 매출(external_revenue) 통합 합산 + 채널별 비중 + 전략 분석
 bot.onText(/\/매출(?:@\w+)?/, async (msg) => {
   if (!isAllowed(msg)) return;
   const chatId = msg.chat.id;
 
   try {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
     const monthStart = today.slice(0, 7) + '-01';
 
-    // 오늘 매출
-    const { data: todayOrders } = await supabase
-      .from('kmong_orders')
-      .select('amount')
-      .gte('order_date', today)
-      .eq('status', 'completed');
-    const todayRev = (todayOrders || []).reduce((s, o) => s + (o.amount || 0), 0);
+    // === 크몽 결제 (kmong_orders) ===
+    const sumOrders = async (gteDate) => {
+      let q = supabase.from('kmong_orders').select('amount').in('status', ['completed', '완료', '거래완료']);
+      if (gteDate) q = q.gte('order_date', gteDate);
+      const { data } = await q;
+      return (data || []).reduce((s, o) => s + (o.amount || 0), 0);
+    };
+    const kmongToday = await sumOrders(today);
+    const kmongMonth = await sumOrders(monthStart);
+    const kmongAll = await sumOrders(null);
 
-    // 이번달 매출
-    const { data: monthOrders } = await supabase
-      .from('kmong_orders')
-      .select('amount')
-      .gte('order_date', monthStart)
-      .eq('status', 'completed');
-    const monthRev = (monthOrders || []).reduce((s, o) => s + (o.amount || 0), 0);
+    // === 외부 매출 (external_revenue) ===
+    const sumExt = async (gteDate) => {
+      let q = supabase.from('external_revenue').select('amount');
+      if (gteDate) q = q.gte('date', gteDate);
+      const { data } = await q;
+      return (data || []).reduce((s, r) => s + (r.amount || 0), 0);
+    };
+    const extToday = await sumExt(today);
+    const extMonth = await sumExt(monthStart);
+    const extAll = await sumExt(null);
 
-    // 전체 매출
-    const { data: allOrders } = await supabase
-      .from('kmong_orders')
-      .select('amount')
-      .eq('status', 'completed');
-    const totalRev = (allOrders || []).reduce((s, o) => s + (o.amount || 0), 0);
+    // === 통합 합산 ===
+    const totalToday = kmongToday + extToday;
+    const totalMonth = kmongMonth + extMonth;
+    const totalAll = kmongAll + extAll;
 
-    // 이번달 광고비
+    // === 광고비 ===
     const { data: monthCpc } = await supabase
       .from('kmong_cpc_daily')
       .select('cpc_cost')
       .gte('date', monthStart);
     const monthCost = (monthCpc || []).reduce((s, r) => s + (r.cpc_cost || 0), 0);
 
-    const profit = monthRev - monthCost;
+    // === 분석 ===
+    const profit = totalMonth - monthCost;
     const roi = monthCost > 0 ? ((profit / monthCost) * 100).toFixed(1) : '-';
+    const extRatio = totalMonth > 0 ? ((extMonth / totalMonth) * 100).toFixed(0) : '-';
+    const kmongRatio = totalMonth > 0 ? ((kmongMonth / totalMonth) * 100).toFixed(0) : '-';
 
     const fmt = n => n.toLocaleString('ko-KR');
+
+    // === 전략 자동 분석 ===
+    const strategy = [];
+    if (monthCost > 0 && profit < 0) {
+      strategy.push('🔴 적자 운영 — 광고비 ↓ 또는 객단가 ↑ 필요');
+    } else if (parseFloat(roi) < 100 && roi !== '-') {
+      strategy.push('🟡 ROI 100% 미만 — 효율 낮은 광고 OFF 권장');
+    } else if (parseFloat(roi) >= 300) {
+      strategy.push('🟢 ROI 300%+ — 광고비 증액 검토 가능');
+    }
+    if (parseInt(extRatio) > 70) {
+      strategy.push(`🔵 외부 매출 비중 ${extRatio}% (대) — 크몽 채널 추가 발굴 필요`);
+    } else if (parseInt(kmongRatio) > 80) {
+      strategy.push(`🔵 크몽 비중 ${kmongRatio}% (대) — 직접거래 채널 확장 검토`);
+    }
+
     const text = [
-      '💰 매출 요약',
+      '💰 매출 통합 요약 (크몽 + 외부)',
       '',
-      `오늘: ₩${fmt(todayRev)}`,
-      `이번달: ₩${fmt(monthRev)}`,
-      `전체 누적: ₩${fmt(totalRev)}`,
+      `📅 오늘 (${today})`,
+      `  크몽: ₩${fmt(kmongToday)} | 외부: ₩${fmt(extToday)} | 합계: ₩${fmt(totalToday)}`,
       '',
-      `이번달 광고비: ₩${fmt(monthCost)}`,
-      `이번달 순이익: ₩${fmt(profit)}`,
-      `ROI: ${roi}%`,
+      `📆 이번달 (${monthStart}~)`,
+      `  크몽: ₩${fmt(kmongMonth)} (${kmongRatio}%)`,
+      `  외부: ₩${fmt(extMonth)} (${extRatio}%)`,
+      `  합계: ₩${fmt(totalMonth)}`,
+      '',
+      `🏆 전체 누적: ₩${fmt(totalAll)} (크몽 ${fmt(kmongAll)} + 외부 ${fmt(extAll)})`,
+      '',
+      `💸 이번달 광고비: ₩${fmt(monthCost)}`,
+      `📈 이번달 순이익: ₩${fmt(profit)}`,
+      `📊 ROI: ${roi}%`,
+      ...(strategy.length ? ['', '🎯 전략 분석', ...strategy.map(s => `  ${s}`)] : []),
     ].join('\n');
 
     bot.sendMessage(chatId, text);
   } catch (err) {
     bot.sendMessage(chatId, `매출 조회 실패: ${err.message}`);
+  }
+});
+
+// === 명령어: /외부매출 [고객명] [금액] ===
+// 텔레그램에서 외부 결제 매출 입력 → external_revenue INSERT
+// 사용: /외부매출 뛰는오아시스 410000  또는  /외부매출 단단한별 60만
+bot.onText(/\/외부매출(?:@\w+)?\s+(\S+)\s+(\S+)/, async (msg, match) => {
+  if (!isAllowed(msg)) return;
+  const chatId = msg.chat.id;
+  const customer = match[1].trim();
+  let amountStr = match[2].trim();
+
+  try {
+    // 금액 파싱: "410000", "41만원", "60만", "1,200,000"
+    let amount = 0;
+    if (/만원?$/.test(amountStr)) {
+      amount = parseInt(amountStr.replace(/만원?/, '').replace(/[^0-9.]/g, ''), 10) * 10000;
+    } else {
+      amount = parseInt(amountStr.replace(/[^0-9]/g, ''), 10);
+    }
+    if (!amount || amount < 1000) {
+      bot.sendMessage(chatId, `금액 인식 실패: "${amountStr}" — 예: /외부매출 뛰는오아시스 410000 또는 41만`);
+      return;
+    }
+
+    const today = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+    const { data, error } = await supabase
+      .from('external_revenue')
+      .insert({
+        date: today,
+        amount,
+        customer_name: customer,
+        channel: 'direct',
+        invoiced: false,
+        note: `텔레그램 /외부매출 입력 (${msg.from?.username || 'user'})`,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      bot.sendMessage(chatId, `등록 실패: ${error.message}`);
+      return;
+    }
+
+    // 등록 후 이번달 합산
+    const monthStart = today.slice(0, 7) + '-01';
+    const { data: extMonth } = await supabase.from('external_revenue').select('amount').gte('date', monthStart);
+    const { data: kmongMonth } = await supabase.from('kmong_orders').select('amount').gte('order_date', monthStart).in('status', ['completed', '완료', '거래완료']);
+    const extSum = (extMonth || []).reduce((s, r) => s + (r.amount || 0), 0);
+    const kmongSum = (kmongMonth || []).reduce((s, r) => s + (r.amount || 0), 0);
+    const fmt = n => n.toLocaleString('ko-KR');
+
+    bot.sendMessage(chatId, [
+      `✅ 외부매출 등록 완료 (id=${data.id})`,
+      `${customer} → ₩${fmt(amount)} (${today})`,
+      '',
+      `📆 이번달 통합:`,
+      `  크몽: ₩${fmt(kmongSum)}`,
+      `  외부: ₩${fmt(extSum)}`,
+      `  합계: ₩${fmt(kmongSum + extSum)}`,
+    ].join('\n'));
+  } catch (err) {
+    bot.sendMessage(chatId, `외부매출 등록 실패: ${err.message}`);
   }
 });
 
@@ -297,7 +391,8 @@ bot.onText(/\/도움말(?:@\w+)?|\/help(?:@\w+)?|\/start(?:@\w+)?/, (msg) => {
     '/광고on <product_id> — 광고 켜기',
     '/광고off <product_id> — 광고 끄기',
     '/광고상태 — 전체 광고 ON/OFF 현황',
-    '/매출 — 오늘/이번달/전체 매출 요약',
+    '/매출 — 크몽+외부 통합 매출 요약 + 전략 분석',
+    '/외부매출 <고객명> <금액> — 외부 결제 등록 (예: /외부매출 단단한별 60만 또는 600000)',
     '/서비스상태 — 서비스 심사 상태',
     '/도움말 — 이 도움말',
     '',

@@ -70,14 +70,14 @@ function getToday() {
 }
 
 function getWeekStart() {
-  // 토~금 주간 (KST). 토요일 00:00 KST에 reset.
-  // Why: 사용자가 토~금 사이클로 주예산 운용 (2026-04-24 결정)
+  // 월~일 주간 (KST). 월요일 00:00 KST에 reset.
+  // Why: 사용자 요청 (2026-05-01) — 토~금 → 월~일 사이클로 변경
   const now = new Date();
   const kst = new Date(now.getTime() + 9 * 3600 * 1000);
-  const day = kst.getUTCDay();
-  const daysFromSat = (day + 1) % 7; // 토=0, 일=1, 월=2, ..., 금=6
+  const day = kst.getUTCDay(); // 0=일, 1=월, ..., 6=토
+  const daysFromMon = day === 0 ? 6 : day - 1; // 월=0, 화=1, ..., 일=6
   const weekStart = new Date(kst);
-  weekStart.setUTCDate(kst.getUTCDate() - daysFromSat);
+  weekStart.setUTCDate(kst.getUTCDate() - daysFromMon);
   return weekStart.toISOString().split('T')[0];
 }
 
@@ -260,6 +260,46 @@ async function stopAllAds() {
   return results;
 }
 
+// 비즈머니 잔액 < 임계치 시 텔레그램 알림 (2026-05-02 신설)
+// 사용자 부재 시 충전 잊으면 광고 ON 거부 → 매출 손실. 자동 조기 경보.
+const BIZMONEY_LOW_THRESHOLD = 100000;     // ₩100K 미만 → 경고
+const BIZMONEY_CRITICAL_THRESHOLD = 50000; // ₩50K 미만 → 긴급
+const BIZMONEY_ALERT_LOG = path.join(__dirname, 'cookies', 'bizmoney-alert-log.json');
+
+async function checkBizmoneyAlert() {
+  try {
+    const { data } = await supabase
+      .from('kmong_daily_analysis')
+      .select('date, bizmoney_balance')
+      .not('bizmoney_balance', 'is', null)
+      .order('date', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!data || data.bizmoney_balance == null) return;
+    const balance = data.bizmoney_balance;
+
+    // 6시간 내 같은 레벨 알림은 스킵 (스팸 방지)
+    let lastLog = {};
+    try { lastLog = JSON.parse(fs.readFileSync(BIZMONEY_ALERT_LOG, 'utf-8')); } catch {}
+    const level = balance < BIZMONEY_CRITICAL_THRESHOLD ? 'critical'
+                : balance < BIZMONEY_LOW_THRESHOLD ? 'low'
+                : 'ok';
+    if (level === 'ok') return;
+    const lastTime = lastLog[level] ? new Date(lastLog[level]).getTime() : 0;
+    if (Date.now() - lastTime < 6 * 60 * 60 * 1000) return;
+
+    const fmt = n => n.toLocaleString('ko-KR');
+    const msg = level === 'critical'
+      ? `🚨 비즈머니 잔액 ₩${fmt(balance)} (긴급) — 광고 ON 거부 임박, 즉시 충전 필요\nhttps://kmong.com/seller/bizmoney`
+      : `⚠️ 비즈머니 잔액 ₩${fmt(balance)} (₩${fmt(BIZMONEY_LOW_THRESHOLD)} 미만) — 충전 권장\nhttps://kmong.com/seller/bizmoney`;
+    notifyTyped('budget', msg);
+    lastLog[level] = new Date().toISOString();
+    try { fs.writeFileSync(BIZMONEY_ALERT_LOG, JSON.stringify(lastLog, null, 2)); } catch {}
+  } catch (e) {
+    console.error('[비즈머니 알림 체크 실패]', e.message);
+  }
+}
+
 async function main() {
   const startTime = Date.now();
 
@@ -268,6 +308,9 @@ async function main() {
 
     const settings = await getSettings();
     const fmt = n => n.toLocaleString('ko-KR');
+
+    // 비즈머니 잔액 조기 경보 (2026-05-02 신설)
+    await checkBizmoneyAlert();
 
     // 일/주/월 지출 조회
     const [dailySpend, weeklySpend, monthlySpend] = await Promise.all([

@@ -27,7 +27,7 @@ async function loadServiceMetrics(days = 30) {
   const end = daysAgo(0);
   const weekStart = weekStartISO();
 
-  const [cpcRes, weekCpcRes, kwRes, cfgRes, sugRes, inqRes, ordRes, gigRes] = await Promise.all([
+  const [cpcRes, weekCpcRes, kwRes, cfgRes, sugRes, inqRes, ordRes, gigRes, extRes] = await Promise.all([
     supabase.from('kmong_cpc_daily').select('product_id,date,impressions,clicks,cpc_cost').gte('date', start).lte('date', end),
     supabase.from('kmong_cpc_daily').select('product_id,date,cpc_cost').gte('date', weekStart).lte('date', end),
     supabase.from('kmong_ad_keyword_daily').select('product_id,keyword,impressions,clicks,total_cost').gte('date', start).lte('date', end),
@@ -36,6 +36,8 @@ async function loadServiceMetrics(days = 30) {
     supabase.from('kmong_inquiries').select('product_id,created_at').gte('created_at', start),
     supabase.from('kmong_profits_transactions').select('product_id,profit_amount,status,transaction_date').gte('transaction_date', start).lte('transaction_date', end),
     supabase.from('kmong_gig_status').select('product_id,gig_title,status,price_min,price_max,crawled_at').order('crawled_at', { ascending: false }).limit(200),
+    // 2026-05-02 외부매출 합산 (사용자 요청: CVR/매출 실제매출로 보정)
+    supabase.from('external_revenue').select('product_id,amount,date,customer_name').gte('date', start).lte('date', end),
   ]);
 
   // 서비스별 집계
@@ -49,6 +51,9 @@ async function loadServiceMetrics(days = 30) {
       impressions_30d: 0, clicks_30d: 0, cost_30d: 0,
       week_cost: 0,
       inquiries_30d: 0, orders_30d: 0, revenue_30d: 0,
+      // 2026-05-02 외부매출 분리 추적 (실제매출 보정 + 채널 가시성)
+      kmong_orders_30d: 0, kmong_revenue_30d: 0,
+      external_orders_30d: 0, external_revenue_30d: 0,
       desired_cpc: null, daily_budget: null,
       keywords_top: [], keywords_bottom: [],
       suggested_cpc_stats: null,
@@ -120,13 +125,36 @@ async function loadServiceMetrics(days = 30) {
     s.inquiries_30d += 1;
   }
 
-  // 주문/매출
+  // 주문/매출 — 크몽 채널 (kmong_profits_transactions)
   for (const o of (ordRes.data || [])) {
     if (!o.product_id) continue;
     const s = ensure(o.product_id);
-    if (o.status === '완료' || o.status === 'completed') {
+    // 2026-05-02: '거래완료' 한글 status 매칭 추가 (DB에 '거래완료' / 'completed' / '작업물발송' 혼재)
+    if (o.status === '완료' || o.status === '거래완료' || o.status === 'completed') {
       s.orders_30d += 1;
-      s.revenue_30d += o.profit_amount || 0;
+      s.kmong_orders_30d += 1;
+      const amt = o.profit_amount || 0;
+      s.revenue_30d += amt;
+      s.kmong_revenue_30d += amt;
+    }
+  }
+
+  // 외부매출 합산 (2026-05-02 — 사용자 요청: 실제매출 보정)
+  // - product_id 매칭된 외부매출은 해당 서비스에 합산 (orders + revenue)
+  // - product_id NULL인 외부매출은 unallocated (서비스별 분석엔 미반영, totalExternalRevenue로 반환)
+  let unallocatedExternalRevenue = 0;
+  let unallocatedExternalOrders = 0;
+  for (const e of (extRes.data || [])) {
+    const amt = e.amount || 0;
+    if (e.product_id) {
+      const s = ensure(e.product_id);
+      s.orders_30d += 1;
+      s.external_orders_30d += 1;
+      s.revenue_30d += amt;
+      s.external_revenue_30d += amt;
+    } else {
+      unallocatedExternalRevenue += amt;
+      unallocatedExternalOrders += 1;
     }
   }
 
@@ -204,6 +232,9 @@ async function loadServiceMetrics(days = 30) {
     s.week_total_actual = weekTotalActual;
     s.week_by_date_actual = weekByDateActual;
     s.week_start_actual = weekTruth?.weekStart;
+    // 2026-05-02: unallocated external revenue 도 각 서비스에 알림 (전체 ROI 계산 시 분배 가능)
+    s.unallocated_external_revenue = unallocatedExternalRevenue;
+    s.unallocated_external_orders = unallocatedExternalOrders;
   }
   return results;
 }

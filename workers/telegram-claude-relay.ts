@@ -482,12 +482,28 @@ function resolveWorkspace(chatId: string, text: string): string {
   return '/home/onda/projects/onda-hompage';
 }
 
+// ─── 한도 초과 시그널 감지 + 자동 폴백 스왑 ───
+// rate_limit / weekly_limit / 5h limit / 429 등 패턴
+const RATE_LIMIT_PATTERNS = /rate[\s_-]?limit|usage[\s_-]?limit|weekly[\s_-]?limit|5[\s_-]?hour[\s_-]?limit|limit[\s_-]?exceeded|maximum[\s_-]?usage|429\b/i;
+
+function triggerFallbackSwap(): Promise<boolean> {
+  return new Promise((resolve) => {
+    const p = spawn('/home/onda/scripts/claude-account/switch.sh', ['trigger-fallback'], {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      timeout: 10000,
+    });
+    p.on('close', (code: number | null) => resolve(code === 0));
+    p.on('error', () => resolve(false));
+  });
+}
+
 // ─── Claude Code CLI 실행 (세션 유지) ───
 function runClaudeOnce(
   prompt: string,
   workspace: string,
   sessionId: string,
-  isFirstCall: boolean
+  isFirstCall: boolean,
+  isFallbackRetry: boolean = false
 ): Promise<{ success: boolean; output: string; raw: string }> {
   return new Promise((resolve) => {
     // 세션 유지 — `--session-id <uuid>`로 우리가 직접 관리.
@@ -523,8 +539,20 @@ function runClaudeOnce(
     proc.stdout.on('data', (data: Buffer) => { stdout += data.toString(); });
     proc.stderr.on('data', (data: Buffer) => { stderr += data.toString(); });
 
-    proc.on('close', (code: number | null) => {
+    proc.on('close', async (code: number | null) => {
       const cleaned = cleanClaudeOutput(stdout);
+      // 한도 초과 시그널 감지 → 폴백 스왑 후 1회 재시도
+      if (code !== 0 && !isFallbackRetry && RATE_LIMIT_PATTERNS.test(stderr + '\n' + stdout)) {
+        log('WARN', `Claude 한도 시그널 감지 → 폴백 스왑 후 재시도 (stderr=${stderr.slice(0, 200)})`);
+        const swapped = await triggerFallbackSwap();
+        if (swapped) {
+          log('INFO', '폴백 스왑 성공 → claude 재호출');
+          const retry = await runClaudeOnce(prompt, workspace, sessionId, isFirstCall, true);
+          resolve(retry);
+          return;
+        }
+        log('ERROR', '폴백 스왑 실패 — 원래 에러 반환');
+      }
       if (code === 0 && cleaned) {
         resolve({ success: true, output: cleaned, raw: stdout });
       } else if (code === 0 && stdout.trim() && !cleaned) {

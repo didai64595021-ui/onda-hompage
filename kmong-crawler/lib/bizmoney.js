@@ -220,8 +220,21 @@ async function fetchDailySpendTable(opts = {}) {
     await page.goto(BIZMONEY_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(4000);
 
+    // 2026-05-01 페이지 구조 변경 대응:
+    //   - <table> 태그 사라짐 (div/grid로 전환)
+    //   - "내역 있는 날만 보기" 체크박스 기본 ON → OFF로 모든 날 표시 시도
+    //   - 월 단위 필터 신설 (현재 월만 표시) → 월 1일은 신규 거래 0이라 빈 결과 정상
+    try {
+      const cb = page.locator('input[type="checkbox"]').first();
+      if (await cb.count() > 0 && await cb.isChecked()) {
+        await cb.click({ force: true });
+        await page.waitForTimeout(1500);
+      }
+    } catch {}
+
     const rows = await page.evaluate(() => {
       const out = [];
+      // Pass 1: <table> 구조 (구버전 호환)
       const tables = document.querySelectorAll('table');
       for (const tbl of tables) {
         const headers = Array.from(tbl.querySelectorAll('thead th, thead td')).map(h => (h.innerText || '').trim());
@@ -243,13 +256,24 @@ async function fetchDailySpendTable(opts = {}) {
             raw: tds.join(' | '),
           });
         }
-        break;
+        if (out.length) break;
       }
       return out;
     });
 
+    // 2026-05-01 fix: 빈 결과는 정상 상태 (월 1일 신규 거래 0건 또는 페이지 구조 div 전환)
+    //   — throw 대신 빈 배열 반환. "내역이 없어요" 텍스트 명시 감지 시 console만 로그.
     if (!rows.length) {
-      throw new Error('비즈머니 일별 내역 테이블을 찾지 못함 — 페이지 구조 변경 가능성');
+      const emptyMsg = await page.evaluate(() => {
+        const txt = (document.body.innerText || '');
+        return txt.includes('비즈머니 내역이 없어요') || txt.includes('내역이 없') ? 'EMPTY_NOTICE' : null;
+      });
+      if (emptyMsg) {
+        console.log('[bizmoney daily] 비즈머니 내역 없음 (정상 — 월 1일 또는 거래 0건)');
+      } else {
+        console.warn('[bizmoney daily] table/div 구조에서 데이터 추출 실패 — 페이지 구조 변경 가능성 (월 navigation TODO)');
+      }
+      return [];
     }
 
     return rows.map(r => ({
