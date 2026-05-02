@@ -13,6 +13,7 @@
 2. `git log -5 --oneline`으로 최근 변경 이력 확인
 3. `git status`로 미커밋 변경사항 확인
 4. 중단된 작업이 있으면 자동으로 이어서 진행
+5. `SESSION_ARCHIVE.md` 존재 시: 사용자가 "이전 대화", "아까 보낸 사진/영상", "그림1·그림2 등" 등 과거 컨텍스트 참조하면 해당 파일에 기록된 jsonl 경로(`/home/onda/.claude/projects/.../<old-uuid>.jsonl`)와 미디어 디렉토리(`/home/onda/logs/relay-media/<chatId>/`)를 Read/Glob 툴로 읽어 컨텍스트 복원 후 응답. 새 세션이라고 모르겠다고 하지 말 것.
 
 ## 크몽(kmong) 작업 진입 시 필독 (하네스)
 사용자가 크몽 관련 지시("크몽", "kmong", "55상품", "gig", "my-gigs" 등)를 하거나

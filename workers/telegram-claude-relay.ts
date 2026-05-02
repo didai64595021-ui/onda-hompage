@@ -556,9 +556,11 @@ function runClaudeOnce(
       if (code === 0 && cleaned) {
         resolve({ success: true, output: cleaned, raw: stdout });
       } else if (code === 0 && stdout.trim() && !cleaned) {
-        resolve({ success: false, output: '', raw: stdout });
+        resolve({ success: false, output: stdout.slice(0, 300), raw: stdout });
       } else {
-        resolve({ success: false, output: stderr.slice(0, 300), raw: stdout });
+        // stderr가 비었을 때 stdout 본문이 실제 에러 메시지인 경우(예: image dimension limit)
+        const errOut = stderr.trim() ? stderr : stdout;
+        resolve({ success: false, output: errOut.slice(0, 300), raw: stdout });
       }
     });
 
@@ -575,9 +577,32 @@ function sessionFileExists(workspace: string, sessionId: string): boolean {
   return existsSync(path);
 }
 
+// 롤오버 시 과거 세션을 SESSION_ARCHIVE.md에 인덱싱 — 새 세션의 Claude가 Read로 과거 사진/영상/대화 접근 가능.
+// 원본 jsonl과 미디어 디렉토리는 디스크에 그대로 보존 (이동·삭제 X).
+function archiveOldSession(workspace: string, oldSessionId: string, chatId: string, reason: string) {
+  try {
+    const encoded = workspace.replace(/\//g, '-');
+    const jsonlPath = `/home/onda/.claude/projects/${encoded}/${oldSessionId}.jsonl`;
+    if (!existsSync(jsonlPath)) return;
+    const mediaDir = `/home/onda/logs/relay-media/${chatId}`;
+    const ts = new Date().toISOString();
+    const archiveMd = `${workspace}/SESSION_ARCHIVE.md`;
+    const header = '# 세션 아카이브 — 이미지/크기 한도로 회전된 과거 대화\n\n새 세션 Claude는 사용자가 과거 사진·영상·대화를 언급하면 아래 jsonl을 Read 도구로 읽어 컨텍스트를 복원할 것.\n\n';
+    const entry = `## ${ts}\n- chatId: \`${chatId}\`\n- 이전 세션: \`${oldSessionId}\`\n- jsonl: \`${jsonlPath}\`\n- 미디어: \`${mediaDir}\`\n- 사유: ${reason.slice(0, 200).replace(/\n/g, ' ')}\n\n`;
+    if (!existsSync(archiveMd)) {
+      writeFileSync(archiveMd, header + entry);
+    } else {
+      appendFileSync(archiveMd, entry);
+    }
+    log('INFO', `세션 아카이브 기록: ${oldSessionId.slice(0,8)} → SESSION_ARCHIVE.md`);
+  } catch (e) {
+    log('WARN', `세션 아카이브 실패: ${(e as Error).message}`);
+  }
+}
+
 // 세션 jsonl 크기 임계 초과 여부 — 누적 이미지/대화로 인한 API 거부(2000px 등) 사전 차단.
-// 초과 시 자동 롤오버하여 새 세션으로 이어감.
-const SESSION_JSONL_MAX_BYTES = 10 * 1024 * 1024; // 10MB
+// 초과 시 자동 롤오버하여 새 세션으로 이어감. 8MB로 보수적 설정 (10MB 임박에서 image limit 먼저 터지는 사례 방지).
+const SESSION_JSONL_MAX_BYTES = 8 * 1024 * 1024; // 8MB
 function sessionFileTooLarge(workspace: string, sessionId: string): boolean {
   const encoded = workspace.replace(/\//g, '-');
   const path = `/home/onda/.claude/projects/${encoded}/${sessionId}.jsonl`;
@@ -614,6 +639,7 @@ async function runClaude(prompt: string, workspace: string, chatId: string): Pro
     isFirstCall = true;
   } else if (sessionFileTooLarge(workspace, entry.sessionId)) {
     log('INFO', `세션 jsonl 크기 ${(SESSION_JSONL_MAX_BYTES/1024/1024)|0}MB 초과 (${entry.sessionId.slice(0,8)}..) → 자동 롤오버`);
+    archiveOldSession(workspace, entry.sessionId, chatId, `size>${(SESSION_JSONL_MAX_BYTES/1024/1024)|0}MB`);
     sessionId = randomUUID();
     entry.sessionId = sessionId;
     entry.lastUsed = Date.now();
@@ -638,10 +664,14 @@ async function runClaude(prompt: string, workspace: string, chatId: string): Pro
     const errMsg = result.output.slice(0, 200);
     log('WARN', `Claude 시도 ${attempt} 실패: ${errMsg}`);
 
-    // "No conversation found" 등 세션 손실 신호 → 새 UUID로 재시도
-    const sessionLost = /No conversation found|session.*not.*found|session id.*invalid/i.test(errMsg);
+    // 세션 손실 / 이미지 한도 / 새 세션 권유 신호 → 새 UUID로 재시도
+    // - "No conversation found" / "session id invalid" : 손실
+    // - "exceeds the dimension limit" / "Start a new session with fewer images" : 누적 이미지 2000px 한도
+    // - "many-image" : 다중 이미지 한도
+    const sessionLost = /No conversation found|session.*not.*found|session id.*invalid|exceeds the dimension limit|Start a new session with fewer images|many-image|too many images/i.test(errMsg);
     if (sessionLost && attempt < MAX_RETRIES) {
-      log('INFO', '세션 손실 감지 → 새 세션 ID로 재시도');
+      log('INFO', `세션 손실/한도 감지 → 새 세션 ID로 재시도 (signal=${errMsg.slice(0,80)})`);
+      archiveOldSession(workspace, entry.sessionId, chatId, errMsg);
       sessionId = randomUUID();
       entry.sessionId = sessionId;
       entry.lastUsed = Date.now();
