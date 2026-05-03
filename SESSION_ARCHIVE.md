@@ -23,3 +23,17 @@
 - 미디어: `/home/onda/logs/relay-media/-5268676231`
 - 사유: An image in the conversation exceeds the dimension limit for many-image requests (2000px). Start a new session with fewer images. 
 
+## 2026-05-03T15:30:53.438Z
+- chatId: `-1003800384738`
+- 이전 세션: `62a255e0-3b75-49c1-b2e9-ea1e67c25fbd`
+- jsonl: `/home/onda/.claude/projects/-home-onda-projects-onda-hompage/62a255e0-3b75-49c1-b2e9-ea1e67c25fbd.jsonl`
+- 미디어: `/home/onda/logs/relay-media/-1003800384738`
+- 사유: size>8MB
+
+## 2026-05-03T15:38:30.645Z
+- chatId: `-1003800384738`
+- 이전 세션: `62a255e0-3b75-49c1-b2e9-ea1e67c25fbd`
+- jsonl: `/home/onda/.claude/projects/-home-onda-projects-onda-hompage/62a255e0-3b75-49c1-b2e9-ea1e67c25fbd.jsonl`
+- 미디어: `/home/onda/logs/relay-media/-1003800384738`
+- 사유: size>8MB
+

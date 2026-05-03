@@ -206,6 +206,17 @@ module.exports = {
       watch: false,
       env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
     },
+    // === Phase 7-bis2: 매 4시간 매출 발생 시 한도 자동 해제 (2026-05-04 신설) ===
+    // 사용자 의도: 오늘 매출 발생 → auto_stop=false (한도 풀림) / 0건 → auto_stop=true (한도 적용)
+    {
+      name: 'kmong-revenue-check-cap',
+      script: './revenue-check-and-cap.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '30 9,13,17,21 * * *',  // adjust-cpc-4h 25분 뒤 (4시간 사이클)
+      autorestart: false,
+      watch: false,
+      env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
+    },
     // === Phase 7-ter: 시간대별 CVR 분석 + weight 갱신 (2026-04-24 신설) ===
     {
       name: 'kmong-hourly-cvr-analyzer',
