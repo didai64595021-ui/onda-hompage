@@ -122,7 +122,9 @@ async function main() {
         results.push({ id: pid, target: 'off', success: false, reason: 'row not found' });
         continue;
       }
-      if (info.statusText.includes('잔액 부족') || info.statusText.includes('중지')) {
+      // 2026-05-03 fix: '노출 중지'(잔액 OK, 토글만 OFF)도 '중지' 포함이라 잘못 skip되던 버그 수정
+      // → '잔액 부족' 정확 매칭만 skip
+      if (info.statusText.includes('잔액 부족')) {
         console.log(`[잔액부족] ${pid}: 토글 스킵 (이미 사실상 OFF)`);
         results.push({ id: pid, target: 'off', success: true, reason: 'balance insufficient (already off)' });
         continue;
@@ -145,7 +147,8 @@ async function main() {
         results.push({ id: pid, target: 'on', success: false, reason: 'row not found' });
         continue;
       }
-      if (info.statusText.includes('잔액 부족') || info.statusText.includes('중지')) {
+      // 2026-05-03 fix: '노출 중지'(잔액 OK)와 '중지 (잔액 부족)' 구분
+      if (info.statusText.includes('잔액 부족')) {
         console.log(`[잔액부족] ${pid}: ON 불가 (비즈머니 충전 필요)`);
         results.push({ id: pid, target: 'on', success: false, reason: 'balance insufficient (need bizmoney)' });
         continue;
@@ -263,7 +266,8 @@ async function toggleAndVerify(page, pid, targetState) {
     const found = await findCellByPid(page, pid);
     if (!found) return { success: false, reason: `row lost on attempt ${attempt}` };
 
-    if (found.statusText.includes('잔액 부족') || found.statusText.includes('중지')) {
+    // 2026-05-03 fix: '잔액 부족' 정확 매칭만 (노출 중지는 토글로 ON 가능)
+    if (found.statusText.includes('잔액 부족')) {
       if (!targetState) return { success: true, reason: 'balance insufficient (effectively off)' };
       return { success: false, reason: 'balance insufficient (need bizmoney)' };
     }
