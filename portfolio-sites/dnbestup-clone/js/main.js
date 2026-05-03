@@ -33,39 +33,6 @@
     onScroll();
   }
 
-  // Reveal on scroll
-  const io = ('IntersectionObserver' in window)
-    ? new IntersectionObserver(
-        (entries) => {
-          entries.forEach((e) => {
-            if (e.isIntersecting) {
-              e.target.classList.add('is-in');
-              io.unobserve(e.target);
-            }
-          });
-        },
-        { rootMargin: '0px 0px -10% 0px', threshold: 0.05 }
-      )
-    : null;
-  if (io) {
-    $$('.cat-card, .product-card, .tip-card, .review-card, .cta-band, .hero-text, .hero-visual')
-      .forEach((el) => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(14px)';
-        el.style.transition = 'opacity .7s var(--ease-out), transform .7s var(--ease-out)';
-        io.observe(el);
-      });
-    const obs = new MutationObserver(() => {});
-    obs.disconnect();
-    document.addEventListener(
-      'transitionend',
-      () => {},
-      { once: true, passive: true }
-    );
-    const styleTag = document.createElement('style');
-    styleTag.textContent = '.is-in{opacity:1 !important;transform:none !important}';
-    document.head.appendChild(styleTag);
-  }
-
-  // Smooth anchor: nothing extra needed (CSS scroll-behavior: smooth)
+  // No JS-driven reveal animation — content is always rendered visible.
+  // CSS handles any subtle entrance effects without hiding content.
 })();
