@@ -17,9 +17,17 @@ const { PRODUCT_MAP } = require('./lib/product-map');
 const { notifyTyped } = require('./lib/notify-filter');
 const notify = (m) => notifyTyped('budget', m); // 이 파일의 모든 notify 호출은 예산 관련
 
-function getMonthStart() {
+// 월 시작 — 기본은 매월 1일. settings.monthly_anchor_date 가 정의되어 있고
+// "현재 월 안의 날짜"이면 그 날짜를 우선 사용 (사용자 사이클 변경 시 1회성 anchor용).
+// 다음 달 1일이 되면 anchor가 과거가 되므로 자동으로 default(매월 1일)로 복귀.
+function getMonthStart(monthlyAnchorDate) {
   const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+  const defaultStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+  if (monthlyAnchorDate && /^\d{4}-\d{2}-\d{2}$/.test(monthlyAnchorDate)) {
+    // anchor가 default(이번 달 1일) 이후면 그걸 사용
+    if (monthlyAnchorDate >= defaultStart) return monthlyAnchorDate;
+  }
+  return defaultStart;
 }
 
 async function getSettings() {
@@ -42,6 +50,7 @@ async function getSettings() {
     dailyBudget: parseInt(settings.daily_budget || '0', 10),
     weeklyBudget: parseInt(settings.weekly_budget || '0', 10),
     monthlyBudget: parseInt(settings.monthly_budget || '500000', 10),
+    monthlyAnchorDate: settings.monthly_anchor_date || null,
     // 서비스당 일일 한도 (단일 서비스 폭발 방지, 2026-04-29 신설 — corp-seo 4/27 ₩35,940 사건)
     dailyBudgetPerService: parseInt(settings.daily_budget_per_service || '0', 10),
     alertThreshold: parseFloat(settings.budget_alert_threshold || '0.9'),
@@ -51,8 +60,8 @@ async function getSettings() {
   };
 }
 
-async function getMonthlySpend() {
-  const monthStart = getMonthStart();
+async function getMonthlySpend(monthlyAnchorDate) {
+  const monthStart = getMonthStart(monthlyAnchorDate);
 
   const { data, error } = await supabase
     .from('kmong_cpc_daily')
@@ -116,8 +125,8 @@ async function getServiceDailySpend() {
   return spendByService;
 }
 
-async function getServiceSpendAndPerformance() {
-  const monthStart = getMonthStart();
+async function getServiceSpendAndPerformance(monthlyAnchorDate) {
+  const monthStart = getMonthStart(monthlyAnchorDate);
   const { data: cpcData, error } = await supabase
     .from('kmong_cpc_daily')
     .select('product_id, cpc_cost, ctr, clicks, impressions')
@@ -161,7 +170,7 @@ async function getServiceSpendAndPerformance() {
 async function distributeBudget(settings, totalSpend) {
   if (!settings.aiAutoManage) return;
 
-  const stats = await getServiceSpendAndPerformance();
+  const stats = await getServiceSpendAndPerformance(settings.monthlyAnchorDate);
   const serviceIds = Object.keys(stats);
   if (serviceIds.length === 0) {
     console.log('[예산분배] 서비스별 데이터 없음 — 분배 스킵');
@@ -312,11 +321,11 @@ async function main() {
     // 비즈머니 잔액 조기 경보 (2026-05-02 신설)
     await checkBizmoneyAlert();
 
-    // 일/주/월 지출 조회
+    // 일/주/월 지출 조회 (monthly_anchor_date 적용 — 사용자 사이클 anchor 1회성 우선)
     const [dailySpend, weeklySpend, monthlySpend] = await Promise.all([
       getDailySpend(),
       getWeeklySpend(),
-      getMonthlySpend(),
+      getMonthlySpend(settings.monthlyAnchorDate),
     ]);
 
     console.log(`[설정] AI 자동관리: ${settings.aiAutoManage ? 'ON' : 'OFF'} | 자동정지: ${settings.autoStop ? 'ON' : 'OFF'}`);
