@@ -46,6 +46,7 @@ async function getSettings() {
 
   return {
     monthlyBudget: parseInt(settings.monthly_budget || '500000', 10),
+    monthlyAnchorDate: settings.monthly_anchor_date || null,
     dailyBudget: parseInt(settings.daily_budget || '0', 10),
     weeklyBudget: parseInt(settings.weekly_budget || '0', 10),
     autoStop: settings.auto_stop_on_budget === 'true',
@@ -56,9 +57,19 @@ async function getSettings() {
   };
 }
 
-async function getMonthlySpend() {
+// 월 시작 — 기본 매월 1일. settings.monthly_anchor_date가 "현재 월 안의 날짜"이면 우선 사용.
+// 다음 달 1일 되면 anchor가 과거가 되어 자동 default로 복귀.
+function getMonthStart(monthlyAnchorDate) {
   const now = new Date();
-  const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+  const defaultStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+  if (monthlyAnchorDate && /^\d{4}-\d{2}-\d{2}$/.test(monthlyAnchorDate) && monthlyAnchorDate >= defaultStart) {
+    return monthlyAnchorDate;
+  }
+  return defaultStart;
+}
+
+async function getMonthlySpend(monthlyAnchorDate) {
+  const monthStart = getMonthStart(monthlyAnchorDate);
 
   const { data, error } = await supabase
     .from('kmong_cpc_daily')
@@ -169,11 +180,12 @@ async function main() {
     // 1. 설정 조회
     const settings = await getSettings();
 
-    // 2. 예산 잔여 확인 — 10% 미만이면 무조건 OFF
-    const totalSpend = await getMonthlySpend();
-    const budgetRatio = totalSpend / settings.monthlyBudget;
+    // 2. 예산 잔여 확인 — 10% 미만이면 무조건 OFF (monthly_anchor_date 적용)
+    const totalSpend = await getMonthlySpend(settings.monthlyAnchorDate);
+    // 0으로 나누기 방어 (monthlyBudget 미설정/리셋 시 budgetRatio=Infinity → 잘못된 OFF 트리거)
+    const budgetRatio = settings.monthlyBudget > 0 ? totalSpend / settings.monthlyBudget : 0;
     const budgetPct = (budgetRatio * 100).toFixed(1);
-    console.log(`[예산] ₩${totalSpend.toLocaleString()} / ₩${settings.monthlyBudget.toLocaleString()} (${budgetPct}%)`);
+    console.log(`[예산] ₩${totalSpend.toLocaleString()} / ₩${settings.monthlyBudget.toLocaleString()} (${budgetPct}%)${settings.monthlyAnchorDate ? ' anchor=' + settings.monthlyAnchorDate : ''}`);
 
     if (budgetRatio >= 0.9) {
       console.log('[예산] 90% 이상 소진 → 전체 광고 OFF');
