@@ -2,47 +2,61 @@ require('dotenv').config({ path: __dirname + '/.env' });
 const { supabase } = require('./lib/supabase');
 
 (async () => {
-  // 0) profits_transactions 스키마 확인 (모든 컬럼 노출)
-  const { data: any1 } = await supabase
-    .from('kmong_profits_transactions')
-    .select('*')
-    .limit(2);
-  console.log('[profits_transactions sample columns]');
-  console.log(any1 && any1[0] ? Object.keys(any1[0]).join(', ') : '(no rows in table)');
-  console.log('---first2rows---');
-  console.log(JSON.stringify(any1, null, 2));
-
-  // 1) profits_transactions 어제자
-  console.log('\n=== profits_transactions 2026-05-01 (created_at) ===');
-  const { data: p1 } = await supabase
-    .from('kmong_profits_transactions')
-    .select('*')
-    .gte('created_at', '2026-05-01T00:00:00+09:00')
-    .lte('created_at', '2026-05-02T00:00:00+09:00');
-  console.log('rows:', p1?.length || 0);
-  if (p1?.length) console.log(JSON.stringify(p1.slice(0, 3), null, 2));
-
-  // 2) profits_transactions 최근 30일
-  console.log('\n=== profits_transactions 최근 30일 (created_at) ===');
-  const { data: p2 } = await supabase
-    .from('kmong_profits_transactions')
-    .select('*')
-    .gte('created_at', '2026-04-01')
-    .order('id', { ascending: false })
-    .limit(50);
-  console.log('rows:', p2?.length || 0);
-  for (const r of (p2 || []).slice(0, 20)) {
-    console.log(`  id=${r.id} created=${r.created_at?.slice(0,16)} status=${r.status} profit=${r.profit_amount} actual=${r.actual_amount} title=${(r.gig_title || '').slice(0,30)}`);
+  // 1) settings 테이블 — 예산 관련 키 모두
+  const { data: settings, error: se } = await supabase
+    .from('kmong_settings')
+    .select('key, value, updated_at')
+    .or('key.ilike.%budget%,key.ilike.%anchor%,key.ilike.%auto_stop%');
+  console.log('=== kmong_settings (budget 관련) ===');
+  console.log('err:', se?.message || 'OK');
+  for (const r of settings || []) {
+    console.log(`  ${r.key} = ${r.value}  (updated ${r.updated_at?.slice(0, 16)})`);
   }
 
-  // 3) 전체 kmong_orders 최근 30일 (계약건 점검용)
-  console.log('\n=== orders 최근 30일 ===');
-  const { data: ord } = await supabase
-    .from('kmong_orders')
-    .select('*')
-    .gte('order_date', '2026-04-01')
-    .order('order_date', { ascending: false });
-  for (const r of (ord || [])) {
-    console.log(`  ${r.order_date?.slice(0,10)} ${r.order_id} ${r.status} ${r.amount?.toLocaleString()}원 buyer=${r.buyer_name} pid=${r.product_id} svc=${(r.service_name || '').slice(0,30)}`);
+  // 2) 최근 7일 광고지출 — 실측
+  const today = new Date();
+  const since = new Date(today.getTime() - 8 * 86400000).toISOString().slice(0, 10);
+  console.log(`\n=== 최근 8일 일별 광고지출 (>=${since}) ===`);
+  const { data: cpc } = await supabase
+    .from('kmong_cpc_daily')
+    .select('date, cpc_cost, product_id')
+    .gte('date', since)
+    .order('date', { ascending: false });
+  const byDate = {};
+  for (const r of cpc || []) {
+    if (!byDate[r.date]) byDate[r.date] = 0;
+    byDate[r.date] += r.cpc_cost || 0;
   }
+  for (const [d, sum] of Object.entries(byDate).sort().reverse()) {
+    console.log(`  ${d}: ${sum.toLocaleString()}원`);
+  }
+
+  // 3) 이번 달 누계 (anchor 적용)
+  const { data: anchorRow } = await supabase
+    .from('kmong_settings')
+    .select('value')
+    .eq('key', 'monthly_anchor_date')
+    .maybeSingle();
+  const anchor = parseInt(anchorRow?.value || '1', 10);
+  console.log(`\n[monthly_anchor_date] = ${anchor}일 기준`);
+  const now = new Date();
+  const cycleStart = new Date(now.getFullYear(), now.getMonth(), anchor);
+  if (now < cycleStart) cycleStart.setMonth(cycleStart.getMonth() - 1);
+  const cycleStartStr = cycleStart.toISOString().slice(0, 10);
+  console.log(`이번 사이클 시작: ${cycleStartStr}`);
+  const { data: cycle } = await supabase
+    .from('kmong_cpc_daily')
+    .select('cpc_cost')
+    .gte('date', cycleStartStr);
+  const monthSum = (cycle || []).reduce((a, r) => a + (r.cpc_cost || 0), 0);
+  console.log(`이번 사이클 광고비 누계: ${monthSum.toLocaleString()}원`);
+
+  // 4) bizmoney 잔액 최근값
+  const { data: biz } = await supabase
+    .from('kmong_bizmoney_history')
+    .select('total, available, crawled_at')
+    .order('crawled_at', { ascending: false })
+    .limit(3);
+  console.log('\n=== bizmoney 최근 ===');
+  for (const r of biz || []) console.log(`  ${r.crawled_at?.slice(0, 16)} total=${r.total?.toLocaleString()} available=${r.available?.toLocaleString()}`);
 })();
