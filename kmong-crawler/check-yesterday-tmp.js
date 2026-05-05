@@ -1,62 +1,86 @@
 require('dotenv').config({ path: __dirname + '/.env' });
 const { supabase } = require('./lib/supabase');
 
-(async () => {
-  // 1) settings 테이블 — 예산 관련 키 모두
-  const { data: settings, error: se } = await supabase
-    .from('kmong_settings')
-    .select('key, value, updated_at')
-    .or('key.ilike.%budget%,key.ilike.%anchor%,key.ilike.%auto_stop%');
-  console.log('=== kmong_settings (budget 관련) ===');
-  console.log('err:', se?.message || 'OK');
-  for (const r of settings || []) {
-    console.log(`  ${r.key} = ${r.value}  (updated ${r.updated_at?.slice(0, 16)})`);
-  }
+const DOW = ['일','월','화','수','목','금','토'];
+function dow(dateStr) {
+  return DOW[new Date(dateStr + 'T00:00:00+09:00').getUTCDay()];
+}
 
-  // 2) 최근 7일 광고지출 — 실측
-  const today = new Date();
-  const since = new Date(today.getTime() - 8 * 86400000).toISOString().slice(0, 10);
-  console.log(`\n=== 최근 8일 일별 광고지출 (>=${since}) ===`);
+(async () => {
+  // 1) 최근 14일 일별 클릭 합계
   const { data: cpc } = await supabase
     .from('kmong_cpc_daily')
-    .select('date, cpc_cost, product_id')
-    .gte('date', since)
+    .select('date, clicks, impressions, cpc_cost, product_id')
+    .gte('date', '2026-04-22')
     .order('date', { ascending: false });
+
   const byDate = {};
   for (const r of cpc || []) {
-    if (!byDate[r.date]) byDate[r.date] = 0;
-    byDate[r.date] += r.cpc_cost || 0;
-  }
-  for (const [d, sum] of Object.entries(byDate).sort().reverse()) {
-    console.log(`  ${d}: ${sum.toLocaleString()}원`);
+    if (!byDate[r.date]) byDate[r.date] = { clicks: 0, impressions: 0, cost: 0 };
+    byDate[r.date].clicks += r.clicks || 0;
+    byDate[r.date].impressions += r.impressions || 0;
+    byDate[r.date].cost += r.cpc_cost || 0;
   }
 
-  // 3) 이번 달 누계 (anchor 적용)
-  const { data: anchorRow } = await supabase
-    .from('kmong_settings')
-    .select('value')
-    .eq('key', 'monthly_anchor_date')
-    .maybeSingle();
-  const anchor = parseInt(anchorRow?.value || '1', 10);
-  console.log(`\n[monthly_anchor_date] = ${anchor}일 기준`);
-  const now = new Date();
-  const cycleStart = new Date(now.getFullYear(), now.getMonth(), anchor);
-  if (now < cycleStart) cycleStart.setMonth(cycleStart.getMonth() - 1);
-  const cycleStartStr = cycleStart.toISOString().slice(0, 10);
-  console.log(`이번 사이클 시작: ${cycleStartStr}`);
-  const { data: cycle } = await supabase
-    .from('kmong_cpc_daily')
-    .select('cpc_cost')
-    .gte('date', cycleStartStr);
-  const monthSum = (cycle || []).reduce((a, r) => a + (r.cpc_cost || 0), 0);
-  console.log(`이번 사이클 광고비 누계: ${monthSum.toLocaleString()}원`);
+  console.log('=== 최근 14일 일별 CPC ===');
+  console.log('날짜       요일 클릭 노출    광고비');
+  for (const [d, v] of Object.entries(byDate).sort().reverse()) {
+    console.log(`  ${d} ${dow(d)}  ${String(v.clicks).padStart(3)}  ${String(v.impressions).padStart(5)}  ${v.cost.toLocaleString().padStart(7)}원`);
+  }
 
-  // 4) bizmoney 잔액 최근값
-  const { data: biz } = await supabase
-    .from('kmong_bizmoney_history')
-    .select('total, available, crawled_at')
-    .order('crawled_at', { ascending: false })
-    .limit(3);
-  console.log('\n=== bizmoney 최근 ===');
-  for (const r of biz || []) console.log(`  ${r.crawled_at?.slice(0, 16)} total=${r.total?.toLocaleString()} available=${r.available?.toLocaleString()}`);
+  // 2) 31 클릭 후보일 찾기
+  const candidates = Object.entries(byDate).filter(([d, v]) => v.clicks >= 25 && v.clicks <= 40);
+  console.log('\n=== 25~40 클릭 후보일 ===');
+  for (const [d, v] of candidates) {
+    console.log(`  ${d} (${dow(d)}) clicks=${v.clicks}`);
+  }
+
+  // 3) 각 후보일 문의 카운트
+  console.log('\n=== 후보일별 문의(kmong_inquiries) ===');
+  for (const [d] of candidates) {
+    const start = `${d}T00:00:00+09:00`;
+    const end = `${d}T23:59:59.999+09:00`;
+    const { data: inqs, count } = await supabase
+      .from('kmong_inquiries')
+      .select('id, kmong_inquiry_id, customer_name, inquiry_date, created_at, deleted_at, auto_reply_status', { count: 'exact' })
+      .gte('inquiry_date', start)
+      .lte('inquiry_date', end)
+      .order('inquiry_date', { ascending: false });
+    console.log(`  ${d} (${dow(d)}): inquiry_date 기준 ${count || 0}건`);
+    for (const i of inqs || []) {
+      console.log(`    - id=${i.id} kmong=${i.kmong_inquiry_id} ${i.customer_name} inq=${i.inquiry_date?.slice(0,16)} created=${i.created_at?.slice(0,16)} status=${i.auto_reply_status} deleted=${i.deleted_at}`);
+    }
+    // created_at 기준으로도 (혹시 inquiry_date 없는 row 대비)
+    const { count: countByCreated } = await supabase
+      .from('kmong_inquiries')
+      .select('id', { count: 'exact', head: true })
+      .gte('created_at', start)
+      .lte('created_at', end);
+    console.log(`    (created_at 기준 ${countByCreated || 0}건)`);
+  }
+
+  // 4) kmong_inquiries 컬럼 확인 (deleted_at이나 audit이 있는지)
+  console.log('\n=== kmong_inquiries 스키마 샘플 ===');
+  const { data: sample } = await supabase
+    .from('kmong_inquiries')
+    .select('*')
+    .order('id', { ascending: false })
+    .limit(1);
+  if (sample?.[0]) console.log('columns:', Object.keys(sample[0]).join(', '));
+
+  // 5) 최근 14일 inquiry_date 분포
+  const { data: allInqs } = await supabase
+    .from('kmong_inquiries')
+    .select('inquiry_date, created_at')
+    .gte('created_at', '2026-04-20T00:00:00+09:00')
+    .order('inquiry_date', { ascending: false });
+  console.log(`\n=== 최근 inquiry 14일 분포 (총 ${allInqs?.length || 0}건) ===`);
+  const inqByDate = {};
+  for (const r of allInqs || []) {
+    const d = (r.inquiry_date || r.created_at).slice(0, 10);
+    inqByDate[d] = (inqByDate[d] || 0) + 1;
+  }
+  for (const [d, c] of Object.entries(inqByDate).sort().reverse()) {
+    console.log(`  ${d} ${dow(d)}: ${c}건`);
+  }
 })();
