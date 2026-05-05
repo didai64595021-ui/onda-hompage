@@ -90,8 +90,18 @@ function getWeekStart() {
   return weekStart.toISOString().split('T')[0];
 }
 
+// 2026-05-06: 일간 실지출 = 비즈머니 일별 사용액 (실시간 크롤 ground-truth)
+//   kmong_cpc_daily는 야간 2회만 수집되어 하루 중 한도 초과 못 잡음 → kmong_bizmoney_daily_spend 우선
 async function getDailySpend() {
   const today = getToday();
+  // 1순위: kmong_bizmoney_daily_spend (매시간 크롤, 실시간 ground-truth)
+  const { data: biz } = await supabase
+    .from('kmong_bizmoney_daily_spend')
+    .select('spent')
+    .eq('date', today)
+    .maybeSingle();
+  if (biz && biz.spent != null) return biz.spent;
+  // Fallback: kmong_cpc_daily (야간 2회만 수집, 미수집 시 0)
   const { data, error } = await supabase
     .from('kmong_cpc_daily')
     .select('cpc_cost')
@@ -102,6 +112,14 @@ async function getDailySpend() {
 
 async function getWeeklySpend() {
   const weekStart = getWeekStart();
+  // 2026-05-06: 비즈머니 ground-truth 우선 (실시간), kmong_cpc_daily fallback
+  const { data: biz } = await supabase
+    .from('kmong_bizmoney_daily_spend')
+    .select('spent')
+    .gte('date', weekStart);
+  if (biz && biz.length) {
+    return biz.reduce((sum, r) => sum + (r.spent || 0), 0);
+  }
   const { data, error } = await supabase
     .from('kmong_cpc_daily')
     .select('cpc_cost')

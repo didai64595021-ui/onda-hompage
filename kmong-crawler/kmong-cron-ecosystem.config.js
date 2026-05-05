@@ -206,6 +206,18 @@ module.exports = {
       watch: false,
       env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
     },
+    // === Phase 7-bis1: 매시간 비즈머니 일별 사용액 크롤 (2026-05-06 신설) ===
+    // 사유: kmong_cpc_daily는 야간 2회만 → 하루 중 한도 초과 자동 OFF 못 함
+    //       비즈머니 페이지 매시간 크롤해서 budget-monitor 실시간 한도 체크 가능
+    {
+      name: 'kmong-crawl-bizmoney-hourly',
+      script: './crawl-bizmoney-daily.js',
+      cwd: '/home/onda/projects/onda-hompage/kmong-crawler',
+      cron_restart: '30 * * * *',  // 매시간 :30 (budget-monitor :40 직전)
+      autorestart: false,
+      watch: false,
+      env: { ...COMMON_ENV, TZ: 'Asia/Seoul' },
+    },
     // === Phase 7-bis2: 매 4시간 매출 발생 시 한도 자동 해제 (2026-05-04 신설) ===
     // 사용자 의도: 오늘 매출 발생 → auto_stop=false (한도 풀림) / 0건 → auto_stop=true (한도 적용)
     {
