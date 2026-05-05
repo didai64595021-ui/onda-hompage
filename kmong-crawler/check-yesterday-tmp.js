@@ -7,80 +7,47 @@ function dow(dateStr) {
 }
 
 (async () => {
-  // 1) 최근 14일 일별 클릭 합계
-  const { data: cpc } = await supabase
-    .from('kmong_cpc_daily')
-    .select('date, clicks, impressions, cpc_cost, product_id')
-    .gte('date', '2026-04-22')
-    .order('date', { ascending: false });
+  // 1) inquiry_type DISTINCT
+  const { data: types } = await supabase
+    .from('kmong_inquiries')
+    .select('inquiry_type')
+    .gte('created_at', '2026-04-01');
+  const typeCount = {};
+  for (const r of types || []) typeCount[r.inquiry_type || '(null)'] = (typeCount[r.inquiry_type || '(null)'] || 0) + 1;
+  console.log('=== inquiry_type 분포 (2026-04-01~) ===');
+  for (const [t, c] of Object.entries(typeCount)) console.log(`  ${t}: ${c}건`);
 
-  const byDate = {};
-  for (const r of cpc || []) {
-    if (!byDate[r.date]) byDate[r.date] = { clicks: 0, impressions: 0, cost: 0 };
-    byDate[r.date].clicks += r.clicks || 0;
-    byDate[r.date].impressions += r.impressions || 0;
-    byDate[r.date].cost += r.cpc_cost || 0;
-  }
-
-  console.log('=== 최근 14일 일별 CPC ===');
-  console.log('날짜       요일 클릭 노출    광고비');
-  for (const [d, v] of Object.entries(byDate).sort().reverse()) {
-    console.log(`  ${d} ${dow(d)}  ${String(v.clicks).padStart(3)}  ${String(v.impressions).padStart(5)}  ${v.cost.toLocaleString().padStart(7)}원`);
-  }
-
-  // 2) 31 클릭 후보일 찾기
-  const candidates = Object.entries(byDate).filter(([d, v]) => v.clicks >= 25 && v.clicks <= 40);
-  console.log('\n=== 25~40 클릭 후보일 ===');
-  for (const [d, v] of candidates) {
-    console.log(`  ${d} (${dow(d)}) clicks=${v.clicks}`);
-  }
-
-  // 3) 각 후보일 문의 카운트
-  console.log('\n=== 후보일별 문의(kmong_inquiries) ===');
-  for (const [d] of candidates) {
-    const start = `${d}T00:00:00+09:00`;
-    const end = `${d}T23:59:59.999+09:00`;
-    const { data: inqs, count } = await supabase
-      .from('kmong_inquiries')
-      .select('id, kmong_inquiry_id, customer_name, inquiry_date, created_at, deleted_at, auto_reply_status', { count: 'exact' })
-      .gte('inquiry_date', start)
-      .lte('inquiry_date', end)
-      .order('inquiry_date', { ascending: false });
-    console.log(`  ${d} (${dow(d)}): inquiry_date 기준 ${count || 0}건`);
-    for (const i of inqs || []) {
-      console.log(`    - id=${i.id} kmong=${i.kmong_inquiry_id} ${i.customer_name} inq=${i.inquiry_date?.slice(0,16)} created=${i.created_at?.slice(0,16)} status=${i.auto_reply_status} deleted=${i.deleted_at}`);
-    }
-    // created_at 기준으로도 (혹시 inquiry_date 없는 row 대비)
-    const { count: countByCreated } = await supabase
-      .from('kmong_inquiries')
-      .select('id', { count: 'exact', head: true })
-      .gte('created_at', start)
-      .lte('created_at', end);
-    console.log(`    (created_at 기준 ${countByCreated || 0}건)`);
-  }
-
-  // 4) kmong_inquiries 컬럼 확인 (deleted_at이나 audit이 있는지)
-  console.log('\n=== kmong_inquiries 스키마 샘플 ===');
-  const { data: sample } = await supabase
+  // 2) 5/3 8건 전체 출력 — 신규/재문의 구분
+  console.log('\n=== 2026-05-03 created_at 기준 전 row ===');
+  const { data: d503 } = await supabase
     .from('kmong_inquiries')
     .select('*')
-    .order('id', { ascending: false })
-    .limit(1);
-  if (sample?.[0]) console.log('columns:', Object.keys(sample[0]).join(', '));
-
-  // 5) 최근 14일 inquiry_date 분포
-  const { data: allInqs } = await supabase
-    .from('kmong_inquiries')
-    .select('inquiry_date, created_at')
-    .gte('created_at', '2026-04-20T00:00:00+09:00')
-    .order('inquiry_date', { ascending: false });
-  console.log(`\n=== 최근 inquiry 14일 분포 (총 ${allInqs?.length || 0}건) ===`);
-  const inqByDate = {};
-  for (const r of allInqs || []) {
-    const d = (r.inquiry_date || r.created_at).slice(0, 10);
-    inqByDate[d] = (inqByDate[d] || 0) + 1;
+    .gte('created_at', '2026-05-03T00:00:00+09:00')
+    .lte('created_at', '2026-05-03T23:59:59.999+09:00')
+    .order('created_at', { ascending: true });
+  for (const r of d503 || []) {
+    console.log(`  id=${r.id} type=${r.inquiry_type} cust=${r.customer_name} pid=${r.product_id} inq=${r.inquiry_date?.slice(0,16)} created=${r.created_at?.slice(0,16)} msg="${(r.message_content||'').slice(0,40)}"`);
   }
-  for (const [d, c] of Object.entries(inqByDate).sort().reverse()) {
+
+  // 3) 신규문의만 카운트 (최근 14일, 요일별)
+  console.log('\n=== 신규문의 일별 (최근 14일) ===');
+  const { data: newInqs } = await supabase
+    .from('kmong_inquiries')
+    .select('inquiry_date, created_at, inquiry_type')
+    .eq('inquiry_type', '신규')
+    .gte('created_at', '2026-04-22T00:00:00+09:00');
+  const byDate = {};
+  for (const r of newInqs || []) {
+    const d = (r.inquiry_date || r.created_at).slice(0, 10);
+    byDate[d] = (byDate[d] || 0) + 1;
+  }
+  for (const [d, c] of Object.entries(byDate).sort().reverse()) {
     console.log(`  ${d} ${dow(d)}: ${c}건`);
   }
+
+  // 4) 만약 inquiry_type 값이 '신규'가 아닌 다른 표기면 모든 type별로
+  console.log('\n=== 5/3 inquiry_type별 실측 ===');
+  const tCount = {};
+  for (const r of d503 || []) tCount[r.inquiry_type || '(null)'] = (tCount[r.inquiry_type || '(null)'] || 0) + 1;
+  for (const [t, c] of Object.entries(tCount)) console.log(`  ${t}: ${c}건`);
 })();

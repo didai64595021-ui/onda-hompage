@@ -65,3 +65,10 @@
 - 미디어: `/home/onda/logs/relay-media/-5268676231`
 - 사유: size>8MB
 
+## 2026-05-05T09:04:12.466Z
+- chatId: `-5268676231`
+- 이전 세션: `9c5f79be-1f49-4b05-badd-0cf44c7aad1b`
+- jsonl: `/home/onda/.claude/projects/-home-onda-projects-onda-hompage/9c5f79be-1f49-4b05-badd-0cf44c7aad1b.jsonl`
+- 미디어: `/home/onda/logs/relay-media/-5268676231`
+- 사유: size>8MB
+
