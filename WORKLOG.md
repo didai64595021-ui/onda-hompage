@@ -11,7 +11,7 @@ Implement the Kmong auto-reply generation flow as an internal ERP workflow: lear
 - [x] Replace automatic-send oriented ERP actions with copy, edit, regenerate, skip, and generation request actions.
 - [x] Log admin edits/copy approvals into `kmong_reply_feedback` for future tone learning.
 - [x] Validate static dashboard and Node scripts.
-- [ ] Commit, push, and verify the live GitHub Pages dashboard.
+- [x] Commit, push, and verify the live GitHub Pages dashboard.
 
 ## Completed
 - Existing bot already has `auto-reply.js`, `style-profile.js`, `reply-generator.js`, Telegram review cards, and Supabase feedback tables.
@@ -22,16 +22,17 @@ Implement the Kmong auto-reply generation flow as an internal ERP workflow: lear
 - Dashboard auto-reply tab now supports AI generation command registration, regenerate, copy, edit, skip, bulk pending generation, and style-profile refresh.
 - Validation passed: `node --check` for changed crawler scripts and `npm run validate`.
 - Local Playwright checks passed for `390`, `768`, and `1440` widths; no page/console errors on the auto-reply tab.
+- Committed and pushed `7b75ae8` (`feat(kmong): add ERP copy-paste reply workflow`).
+- Live GitHub Pages verification passed for the auto-reply ERP tab at desktop and mobile widths.
 
 ## Remaining
-- Commit and push.
-- Verify the live GitHub Pages dashboard after deployment.
+- Monitor first real generation command from the dashboard and confirm the server-side `kmong-command-processor` is running on the deployment host.
 
 ## Last Action
-Local Playwright verified the auto-reply ERP tab and edit modal on the static server at `http://127.0.0.1:4173/portfolio-sites/kmong-dashboard/`.
+Live GitHub Pages verified after push with cache-busting query string.
 
 ## Blockers
 - No current blocker. Direct browser-side AI calls were intentionally avoided because API secrets must stay server-side.
 
 ## Next Action
-Stop local server, review git diff, commit, push, and verify live GitHub Pages.
+Optional next action: trigger one real pending inquiry generation from the ERP and verify the command processor result.
