@@ -21,6 +21,7 @@ const SYSTEM = `당신은 문체 분석 전문가입니다. 셀러의 과거 실
 6. CTA(행동 유도) 형식: 견적요청/상담/전화 중 어떤 걸 선호
 7. 리스크 리버설(환불/보증) 언급 빈도
 8. 금지/주의 패턴: 자주 쓰는 표현 vs 절대 안 쓰는 표현
+9. 관리자 수정 패턴: AI 초안에서 사람이 자주 줄이거나 바꾸는 표현
 
 ## 출력 JSON (다른 텍스트 금지)
 {
@@ -34,7 +35,9 @@ const SYSTEM = `당신은 문체 분석 전문가입니다. 셀러의 과거 실
     "cta_style": "...",
     "risk_reversal": "...",
     "emoji_policy": "...",
-    "forbidden_patterns": ["안 쓰는 표현 1", ...]
+    "copy_paste_style": "크몽 대화창에 바로 붙여넣을 때의 길이/줄바꿈/호흡",
+    "user_corrections": ["관리자가 자주 고친 패턴 1", "..."],
+    "forbidden_patterns": ["안 쓰는 표현 1", "..."]
   }
 }`;
 
@@ -56,7 +59,8 @@ function runClaude(systemPrompt, userMsg, timeoutMs = 180000) {
 }
 
 async function generateStyleProfile(sampleLimit = 50) {
-  // 최근 sent 답변 + historical_replies 합쳐서 샘플링
+  // 최근 사람이 실제로 보낸 답변 + ERP에서 수정/승인된 답변을 합쳐 샘플링한다.
+  // admin-edited/copy-approved 피드백은 최신 말투 신호라서 프롬프트에서 별도 강조한다.
   const { data: hist } = await supabase
     .from('kmong_historical_replies')
     .select('customer_message, seller_reply')
@@ -69,16 +73,44 @@ async function generateStyleProfile(sampleLimit = 50) {
     .not('auto_reply_text', 'is', null)
     .order('inquiry_date', { ascending: false })
     .limit(20);
+  const { data: feedback } = await supabase
+    .from('kmong_reply_feedback')
+    .select('action, original_reply, edited_reply, diff_summary, inquiry_snapshot, created_at')
+    .in('action', ['edit', 'approve', 'send'])
+    .order('created_at', { ascending: false })
+    .limit(40);
 
   const samples = [
-    ...(hist || []).map(r => ({ customer: r.customer_message, seller: r.seller_reply })),
-    ...(sent || []).map(r => ({ customer: r.message_content, seller: r.auto_reply_text })),
+    ...(feedback || []).map(r => ({
+      kind: r.action === 'edit' ? 'admin_edited' : 'admin_approved',
+      customer: r.inquiry_snapshot?.message_content || r.inquiry_snapshot?.message || '',
+      seller: r.edited_reply || r.original_reply,
+      original: r.original_reply,
+      diff: r.diff_summary,
+    })),
+    ...(hist || []).map(r => ({ kind: 'historical_sent', customer: r.customer_message, seller: r.seller_reply })),
+    ...(sent || []).map(r => ({ kind: 'bot_sent', customer: r.message_content, seller: r.auto_reply_text })),
   ].filter(s => s.seller && s.seller.length >= 30);
 
   if (samples.length < 5) return { ok: false, error: `샘플 부족: ${samples.length}개 (최소 5개 필요)` };
 
-  const userMsg = `## 과거 셀러 답변 ${samples.length}건 (customer → seller)
-${samples.slice(0, 80).map((s, i) => `### ${i + 1}\n[customer] ${String(s.customer || '').slice(0, 300)}\n[seller] ${s.seller.slice(0, 500)}`).join('\n\n')}
+  const corrections = samples
+    .filter(s => s.kind === 'admin_edited' && s.original && s.original !== s.seller)
+    .slice(0, 20);
+
+  const userMsg = `## 셀러 답변 샘플 ${samples.length}건 (customer → seller)
+우선순위: admin_edited > admin_approved > historical_sent > bot_sent.
+admin_edited는 사람이 실제 크몽 복붙용으로 고친 결과이므로 말투 판단에서 가장 강하게 반영하세요.
+
+${samples.slice(0, 90).map((s, i) => `### ${i + 1} [${s.kind}]
+[customer] ${String(s.customer || '').slice(0, 300)}
+[seller] ${s.seller.slice(0, 500)}`).join('\n\n')}
+
+${corrections.length ? `## 관리자 수정쌍 ${corrections.length}건 (original → edited)
+${corrections.map((s, i) => `### 수정 ${i + 1}
+[original] ${String(s.original || '').slice(0, 350)}
+[edited] ${String(s.seller || '').slice(0, 350)}
+${s.diff ? `[diff] ${String(s.diff).slice(0, 200)}` : ''}`).join('\n\n')}` : ''}
 
 위 답변들을 종합 분석해 JSON으로 출력.`;
 

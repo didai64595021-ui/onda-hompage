@@ -14,6 +14,8 @@ const { changeCreative } = require('./change-creative');
 const { editGig } = require('./edit-gig');
 const { addPortfolio } = require('./manage-portfolio');
 const { notifyTyped } = require('./lib/notify-filter');
+const { spawn } = require('child_process');
+const path = require('path');
 const notify = (m) => notifyTyped('command', m); // 이 파일의 알림은 대시보드 명령 결과
 
 const TOGGLE_TIMEOUT_MS = 30000; // toggleAd 30초 타임아웃
@@ -69,6 +71,49 @@ async function cleanupStuckCommands() {
  */
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function parsePayload(raw) {
+  if (!raw) return {};
+  try { return JSON.parse(raw); } catch { return {}; }
+}
+
+function runNodeScript(scriptName, { env = {}, timeoutMs = 600000, label = scriptName } = {}) {
+  return new Promise((resolve) => {
+    const scriptPath = path.join(__dirname, scriptName);
+    const child = spawn(process.execPath, [scriptPath], {
+      cwd: __dirname,
+      env: { ...process.env, ...env },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    let stdout = '';
+    let stderr = '';
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      child.kill('SIGTERM');
+      setTimeout(() => child.kill('SIGKILL'), 5000).unref?.();
+    }, timeoutMs);
+
+    child.stdout.on('data', d => { stdout += d.toString(); });
+    child.stderr.on('data', d => { stderr += d.toString(); });
+    child.on('close', (code) => {
+      clearTimeout(timer);
+      const tail = [stdout, stderr].filter(Boolean).join('\n').slice(-1200);
+      if (timedOut) {
+        resolve({ success: false, message: `${label} 타임아웃 (${Math.round(timeoutMs / 1000)}초)\n${tail}` });
+      } else {
+        resolve({
+          success: code === 0,
+          message: `${label} exit=${code}${tail ? `\n${tail}` : ''}`,
+        });
+      }
+    });
+    child.on('error', (err) => {
+      clearTimeout(timer);
+      resolve({ success: false, message: `${label} 실행 실패: ${err.message}` });
+    });
+  });
 }
 
 async function processCommands() {
@@ -196,6 +241,53 @@ async function processCommands() {
             completed_at: new Date().toISOString(),
           }).eq('id', cmd.id);
           notify(`📁 포트폴리오: ${result.message}`);
+        } catch (err) {
+          await supabase.from('kmong_ad_commands').update({
+            status: 'failed', result_message: err.message,
+            completed_at: new Date().toISOString(),
+          }).eq('id', cmd.id);
+        }
+
+      } else if (cmd.action === 'generate_reply' || cmd.action === 'regen_reply') {
+        // 내부 ERP 답장 초안 생성: result_message에 JSON { inquiry_id, reason? }
+        // API 키는 브라우저에 노출하지 않고 서버 쪽 auto-reply.js가 INQUIRY_ID 단건 모드로 처리한다.
+        try {
+          const payload = parsePayload(cmd.result_message);
+          const inquiryId = Number(payload.inquiry_id || payload.inquiryId);
+          if (!Number.isFinite(inquiryId) || inquiryId <= 0) {
+            throw new Error('generate_reply 명령에는 result_message.inquiry_id가 필요합니다');
+          }
+          const result = await runNodeScript('auto-reply.js', {
+            env: { INQUIRY_ID: String(inquiryId) },
+            timeoutMs: 10 * 60 * 1000,
+            label: `auto-reply inquiry #${inquiryId}`,
+          });
+          await supabase.from('kmong_ad_commands').update({
+            status: result.success ? 'done' : 'failed',
+            result_message: result.message,
+            completed_at: new Date().toISOString(),
+          }).eq('id', cmd.id);
+          notify(`${result.success ? '🤖' : '❌'} 답변 ${cmd.action === 'regen_reply' ? '재생성' : '생성'}: 문의 #${inquiryId}\n${result.message.slice(-500)}`);
+        } catch (err) {
+          await supabase.from('kmong_ad_commands').update({
+            status: 'failed', result_message: err.message,
+            completed_at: new Date().toISOString(),
+          }).eq('id', cmd.id);
+        }
+
+      } else if (cmd.action === 'refresh_style_profile') {
+        // 말투 프로필 갱신: result_message는 선택 JSON { sample_limit? }
+        try {
+          const result = await runNodeScript('refresh-style-profile.js', {
+            timeoutMs: 10 * 60 * 1000,
+            label: 'refresh-style-profile',
+          });
+          await supabase.from('kmong_ad_commands').update({
+            status: result.success ? 'done' : 'failed',
+            result_message: result.message,
+            completed_at: new Date().toISOString(),
+          }).eq('id', cmd.id);
+          notify(`${result.success ? '📝' : '❌'} 말투 프로필 갱신\n${result.message.slice(-500)}`);
         } catch (err) {
           await supabase.from('kmong_ad_commands').update({
             status: 'failed', result_message: err.message,

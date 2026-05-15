@@ -28,6 +28,8 @@ const { notifyTyped } = require('./lib/notify-filter');
     `  실적: ${c.numeric_claims || '-'}`,
     `  가격: ${c.price_style || '-'}`,
     `  CTA: ${c.cta_style || '-'}`,
+    `  복붙: ${c.copy_paste_style || '-'}`,
+    `  수정패턴: ${(c.user_corrections || []).slice(0, 3).join(' / ') || '-'}`,
     `  이모지: ${c.emoji_policy || '-'}`,
   ].join('\n');
   console.log(msg);
