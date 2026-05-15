@@ -1266,6 +1266,19 @@ const fmtPct = n => n == null ? '-' : n.toFixed(2) + '%';
 const fmtDate = d => d ? new Date(d).toLocaleDateString('ko-KR') : '-';
 const fmtDateTime = d => d ? new Date(d).toLocaleString('ko-KR') : '-';
 const fmtMoney = n => n == null ? '-' : '₩' + n.toLocaleString('ko-KR');
+const normStatus = s => String(s || '').trim().toLowerCase();
+const isCompletedOrder = o => ['completed', 'complete', 'paid', 'done', '거래완료', '완료'].includes(normStatus(o?.status)) || !!o?.completed_at;
+const isCancelledOrder = o => ['cancelled', 'canceled', 'cancel', '취소', '거래취소', '환불'].includes(normStatus(o?.status));
+const escapeHtml = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const readJson = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+const writeJson = (key, value) => localStorage.setItem(key, JSON.stringify(value));
 const getDateFrom = () => {
   if (dateRangeDays === 0) return null;
   const d = new Date();
@@ -1274,10 +1287,84 @@ const getDateFrom = () => {
 };
 const productName = pid => (products.find(p => p.product_id === pid) || {}).product_name || pid;
 const statusBadge = s => {
-  const m = { pending: ['대기','badge-pending'], quoted: ['견적','badge-quoted'], paid: ['결제','badge-paid'], cancelled: ['취소','badge-cancelled'], in_progress: ['진행','badge-quoted'], completed: ['완료','badge-paid'] };
+  const m = { pending: ['대기','badge-pending'], new: ['신규','badge-pending'], quoted: ['견적','badge-quoted'], paid: ['결제','badge-paid'], cancelled: ['취소','badge-cancelled'], in_progress: ['진행','badge-quoted'], completed: ['완료','badge-paid'], '거래완료': ['거래완료','badge-paid'], '완료': ['완료','badge-paid'], '취소': ['취소','badge-cancelled'], failed: ['실패','badge-cancelled'] };
   const [t, c] = m[s] || [s, ''];
   return `<span class="badge ${c}">${t}</span>`;
 };
+
+const LOCAL_CONTENT_KEY = 'kmong_local_content_generated_v2';
+const LOCAL_INBOX_AI_KEY = 'kmong_local_inbox_ai_v2';
+const DEFAULT_PATTERNS = [
+  { id: 'seed-title-urgency', pattern_type: 'title', category: '홈페이지', pattern_key: 'urgency_keyword', success_count: 3, failure_count: 1, confidence_score: 72, is_active: true },
+  { id: 'seed-title-price', pattern_type: 'title', category: '홈페이지', pattern_key: 'price_anchor', success_count: 2, failure_count: 1, confidence_score: 60, is_active: true },
+  { id: 'seed-title-problem', pattern_type: 'title', category: '홈페이지', pattern_key: 'problem_solution', success_count: 2, failure_count: 1, confidence_score: 65, is_active: true },
+  { id: 'seed-desc-proof', pattern_type: 'description', category: '홈페이지', pattern_key: 'social_proof', success_count: 4, failure_count: 1, confidence_score: 80, is_active: true },
+  { id: 'seed-reply-portfolio', pattern_type: 'reply', category: '전체', pattern_key: 'portfolio_first', success_count: 3, failure_count: 1, confidence_score: 70, is_active: true },
+  { id: 'seed-reply-price', pattern_type: 'reply', category: '전체', pattern_key: 'price_transparency', success_count: 2, failure_count: 1, confidence_score: 62, is_active: true },
+];
+
+const getLocalContents = () => readJson(LOCAL_CONTENT_KEY, []);
+const setLocalContents = rows => writeJson(LOCAL_CONTENT_KEY, rows);
+const getLocalInboxAi = () => readJson(LOCAL_INBOX_AI_KEY, {});
+const setLocalInboxAi = rows => writeJson(LOCAL_INBOX_AI_KEY, rows);
+const getPatternRows = () => DEFAULT_PATTERNS;
+
+function classifyInquiryRecord(inq) {
+  const text = `${inq.message_content || ''} ${inq.notes || ''}`.toLowerCase();
+  const priorityRules = [
+    { keywords: ['급합니다','급해요','오늘','내일','바로','당장'], priority: 'urgent', score: 90 },
+    { keywords: ['결제','주문','구매','진행'], priority: 'high', score: 82 },
+    { keywords: ['견적','가격','비용','얼마'], priority: 'high', score: 76 },
+    { keywords: ['수정','변경','추가','리뉴얼'], priority: 'normal', score: 62 },
+  ];
+  const sentimentRules = [
+    { keywords: ['감사','좋아요','만족','완벽','최고'], sentiment: 'positive' },
+    { keywords: ['불만','화가','실망','별로','나쁘','환불'], sentiment: 'negative' },
+    { keywords: ['급합니다','빨리','걱정','불안'], sentiment: 'anxious' },
+  ];
+  const intentRules = [
+    { keywords: ['가격','비용','견적','얼마'], intent: 'pricing' },
+    { keywords: ['수정','변경','깨짐','오류'], intent: 'modification' },
+    { keywords: ['리뉴얼','개편'], intent: 'renewal' },
+    { keywords: ['유지보수','관리'], intent: 'maintenance' },
+    { keywords: ['반응형','모바일'], intent: 'responsive' },
+    { keywords: ['seo','검색','상위'], intent: 'seo' },
+    { keywords: ['주문','결제','진행'], intent: 'ready_to_buy' },
+  ];
+  const hitPriority = priorityRules.find(rule => rule.keywords.some(kw => text.includes(kw)));
+  const hitSentiment = sentimentRules.find(rule => rule.keywords.some(kw => text.includes(kw)));
+  const hitIntent = intentRules.find(rule => rule.keywords.some(kw => text.includes(kw)));
+  const priority = hitPriority?.priority || 'normal';
+  const sentiment = hitSentiment?.sentiment || 'neutral';
+  const intent = hitIntent?.intent || 'general_inquiry';
+  const confidence = hitPriority ? hitPriority.score : 58;
+  const replyMap = {
+    pricing: '문의 감사합니다. 작업 범위 확인 후 가능한 패키지와 예상 비용을 바로 안내드리겠습니다.',
+    modification: '수정 요청 내용 확인했습니다. 현재 사이트 주소와 원하는 변경 범위를 알려주시면 가능 여부와 일정을 안내드리겠습니다.',
+    renewal: '리뉴얼 문의 감사합니다. 기존 사이트와 개선하고 싶은 방향을 함께 보내주시면 구조와 견적을 정리해드리겠습니다.',
+    maintenance: '유지보수 범위와 월 요청량을 확인한 뒤 가장 맞는 관리 방식으로 안내드리겠습니다.',
+    responsive: '모바일/반응형 이슈는 문제 화면과 URL을 확인하면 원인과 처리 일정을 빠르게 안내드릴 수 있습니다.',
+    seo: 'SEO 문의 감사합니다. 현재 사이트와 목표 키워드를 확인한 뒤 적용 가능한 개선안을 안내드리겠습니다.',
+    ready_to_buy: '진행 의사 확인했습니다. 필요한 자료와 일정부터 정리해서 바로 안내드리겠습니다.',
+    general_inquiry: '문의 감사합니다. 요청 내용을 확인한 뒤 적합한 제작 방향과 다음 단계를 안내드리겠습니다.',
+  };
+  return { priority, sentiment, intent, reply_confidence: confidence, ai_suggested_reply: replyMap[intent] };
+}
+
+function normalizeAbExperiment(row) {
+  const state = row.state || 'drafted';
+  const runningStates = ['approved_to_create', 'created', 'live', 'measuring'];
+  return {
+    id: row.id,
+    product_id: row.variant_a_product_id,
+    test_name: row.variant_b_title || row.hypothesis || `A/B 실험 #${row.id}`,
+    test_type: '상품 복제',
+    variant_a_metrics: row.metrics_a || {},
+    variant_b_metrics: row.metrics_b || {},
+    winner: row.winner ? String(row.winner).toUpperCase() : null,
+    status: state === 'concluded' ? 'completed' : state === 'cancelled' ? 'cancelled' : runningStates.includes(state) ? 'running' : state,
+  };
+}
 
 function showToast(msg, type = 'success') {
   const t = document.getElementById('toast');
@@ -1375,7 +1462,7 @@ async function loadCpcTab() {
   let ordQ = sb.from('kmong_orders').select('*');
   if (dateFrom) ordQ = ordQ.gte('order_date', dateFrom);
   const { data: ordData } = await ordQ;
-  const completedOrders = (ordData || []).filter(o => o.status === 'completed');
+  const completedOrders = (ordData || []).filter(isCompletedOrder);
   const ordByProduct = {};
   const revByProduct = {};
   completedOrders.forEach(o => {
@@ -1624,7 +1711,7 @@ async function loadFunnelTab() {
   const dateFrom = getDateFrom();
 
   // CPC 집계
-  let cpcQ = sb.from('kmong_cpc_daily').select('product_id,impressions,clicks');
+  let cpcQ = sb.from('kmong_cpc_daily').select('product_id,impressions,clicks,cpc_cost');
   if (dateFrom) cpcQ = cpcQ.gte('date', dateFrom);
   const { data: cpcData } = await cpcQ;
   const totalImp = (cpcData || []).reduce((s, r) => s + (r.impressions || 0), 0);
@@ -1637,13 +1724,13 @@ async function loadFunnelTab() {
   const inquiries = inqData || [];
   const totalInq = inquiries.length;
   const quoted = inquiries.filter(i => ['quoted','paid'].includes(i.status)).length;
-  const paid = inquiries.filter(i => i.status === 'paid').length;
+  const paid = inquiries.filter(i => i.status === 'paid' || i.paid_amount > 0).length;
 
   // 주문/매출 데이터
   let ordQ2 = sb.from('kmong_orders').select('*');
   if (dateFrom) ordQ2 = ordQ2.gte('order_date', dateFrom);
   const { data: ordData2 } = await ordQ2;
-  const completedOrders2 = (ordData2 || []).filter(o => o.status === 'completed');
+  const completedOrders2 = (ordData2 || []).filter(isCompletedOrder);
   const totalRevenue = completedOrders2.reduce((s, o) => s + (o.amount || 0), 0);
   const totalPaid = completedOrders2.length;
   const totalAdCost = (cpcData || []).reduce((s, r) => s + (r.cpc_cost || 0), 0);
@@ -1719,8 +1806,8 @@ async function loadFunnelTab() {
     if (!i.product_id) return;
     if (!byProduct[i.product_id]) byProduct[i.product_id] = { inq: 0, quoted: 0, paid: 0 };
     byProduct[i.product_id].inq++;
-    if (['quoted', 'paid'].includes(i.status)) byProduct[i.product_id].quoted++;
-    if (i.status === 'paid') byProduct[i.product_id].paid++;
+    if (['quoted', 'paid'].includes(i.status) || i.quoted_amount > 0 || i.paid_amount > 0) byProduct[i.product_id].quoted++;
+    if (i.status === 'paid' || i.paid_amount > 0) byProduct[i.product_id].paid++;
   });
   // CPC/주문 데이터 상품별 집계
   const ordByProd2 = {};
@@ -1822,7 +1909,7 @@ async function loadInquiryTab() {
 
   const totalInq = inquiries.length;
   const totalOrd = orders.length;
-  const completedOrdInq = orders.filter(o => o.status === 'completed');
+  const completedOrdInq = orders.filter(isCompletedOrder);
   const totalRev = completedOrdInq.reduce((s, r) => s + (r.amount || 0), 0);
   const avgDeal = completedOrdInq.length > 0 ? Math.round(totalRev / completedOrdInq.length) : 0;
   const inqToPayRateInq = totalInq > 0 ? (completedOrdInq.length / totalInq * 100) : 0;
@@ -1948,7 +2035,7 @@ async function loadRoiTab() {
   let ordQ = sb.from('kmong_orders').select('*');
   if (dateFrom) ordQ = ordQ.gte('order_date', dateFrom);
   const { data: ordData } = await ordQ;
-  const orders = (ordData || []).filter(o => o.status === 'completed');
+  const orders = (ordData || []).filter(isCompletedOrder);
   const revByProduct = {};
   const ordCountByProduct = {};
   let totalRevenue = 0;
@@ -2051,15 +2138,8 @@ async function loadRoiTab() {
 
 /* === 탭 5: AI 콘텐츠 관리 === */
 async function loadContentTab() {
-  // 생성 콘텐츠 조회
-  const { data: contentData } = await sb.from('kmong_content_generated')
-    .select('*').order('created_at', { ascending: false }).limit(30);
-  const contents = contentData || [];
-
-  // 패턴 DB 조회
-  const { data: patternData } = await sb.from('kmong_patterns')
-    .select('*').order('confidence_score', { ascending: false }).limit(20);
-  const patterns = patternData || [];
+  const contents = getLocalContents().sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+  const patterns = getPatternRows().sort((a, b) => parseFloat(b.confidence_score || 0) - parseFloat(a.confidence_score || 0));
 
   // 저성과 서비스 조회 (CPC 30일)
   const dateFrom = getDateFrom();
@@ -2069,14 +2149,14 @@ async function loadContentTab() {
   let inqQ2 = sb.from('kmong_inquiries').select('product_id');
   if (dateFrom) inqQ2 = inqQ2.gte('inquiry_date', dateFrom);
   const { data: inqData2 } = await inqQ2;
-  let ordQ2 = sb.from('kmong_orders').select('product_id,amount').eq('status', 'completed');
+  let ordQ2 = sb.from('kmong_orders').select('product_id,amount,status,completed_at');
   if (dateFrom) ordQ2 = ordQ2.gte('order_date', dateFrom);
   const { data: ordData2 } = await ordQ2;
 
   const byP = {};
   (cpcData || []).forEach(r => { if (!r.product_id) return; if (!byP[r.product_id]) byP[r.product_id] = { imp:0,clk:0,cost:0,inq:0,ord:0,rev:0 }; byP[r.product_id].imp += r.impressions||0; byP[r.product_id].clk += r.clicks||0; byP[r.product_id].cost += r.cpc_cost||0; });
   (inqData2 || []).forEach(r => { if (!r.product_id) return; if (!byP[r.product_id]) byP[r.product_id] = { imp:0,clk:0,cost:0,inq:0,ord:0,rev:0 }; byP[r.product_id].inq++; });
-  (ordData2 || []).forEach(r => { if (!r.product_id) return; if (!byP[r.product_id]) byP[r.product_id] = { imp:0,clk:0,cost:0,inq:0,ord:0,rev:0 }; byP[r.product_id].ord++; byP[r.product_id].rev += r.amount||0; });
+  (ordData2 || []).filter(isCompletedOrder).forEach(r => { if (!r.product_id) return; if (!byP[r.product_id]) byP[r.product_id] = { imp:0,clk:0,cost:0,inq:0,ord:0,rev:0 }; byP[r.product_id].ord++; byP[r.product_id].rev += r.amount||0; });
 
   const lowPerf = [];
   for (const [pid, d] of Object.entries(byP)) {
@@ -2121,7 +2201,7 @@ async function loadContentTab() {
   // AI 생성 콘텐츠 테이블
   const statusLabel = s => { const m = { pending:'대기', approved:'승인', applied:'적용', rejected:'거부' }; return `<span class="badge badge-${s}">${m[s]||s}</span>`; };
   document.querySelector('#tableContent tbody').innerHTML = contents.length ? contents.map(c =>
-    `<tr><td>${c.id}</td><td>${productName(c.product_id)}</td><td>${c.content_type}</td><td><div class="content-preview" title="${(c.generated_content||'').replace(/"/g,'&quot;')}">${(c.generated_content||'').slice(0,50)}...</div></td><td>${c.generation_reason||'-'}</td><td>${statusLabel(c.status)}</td><td>${c.status==='pending'?`<button class="btn-sm btn-approve" onclick="approveContent(${c.id})">승인</button> <button class="btn-sm btn-reject" onclick="rejectContent(${c.id})">거부</button>`:c.status==='approved'?`<button class="btn-sm btn-apply" onclick="applyContent(${c.id})">적용</button>`:'-'}</td></tr>`
+    `<tr><td>${c.id}</td><td>${productName(c.product_id)}</td><td>${escapeHtml(c.content_type)}</td><td><div class="content-preview" title="${escapeHtml(c.generated_content||'')}">${escapeHtml((c.generated_content||'').slice(0,50))}...</div></td><td>${escapeHtml(c.generation_reason||'-')}</td><td>${statusLabel(c.status)}</td><td>${c.status==='pending'?`<button class="btn-sm btn-approve" onclick="approveContent(${c.id})">승인</button> <button class="btn-sm btn-reject" onclick="rejectContent(${c.id})">거부</button>`:c.status==='approved'?`<button class="btn-sm btn-apply" onclick="applyContent(${c.id})">적용</button>`:'-'}</td></tr>`
   ).join('') : '<tr><td colspan="7"><div class="empty-state"><p>AI 생성 콘텐츠가 없습니다. 상단 버튼으로 생성하세요.</p></div></td></tr>';
 
   // 패턴 DB 테이블
@@ -2132,17 +2212,16 @@ async function loadContentTab() {
 
 /* === 탭 6: A/B 테스트 === */
 async function loadAbTestTab() {
-  const { data: tests } = await sb.from('kmong_ab_tests')
+  const { data: tests } = await sb.from('kmong_ab_experiments')
     .select('*').order('created_at', { ascending: false }).limit(20);
-  const testList = tests || [];
+  const testList = (tests || []).map(normalizeAbExperiment);
 
   const running = testList.filter(t => t.status === 'running').length;
   const completed = testList.filter(t => t.status === 'completed').length;
   const wins = testList.filter(t => t.winner === 'B').length;
 
   // 패턴 학습 상태
-  const { data: patterns } = await sb.from('kmong_patterns').select('pattern_type,confidence_score,success_count,failure_count,is_active').eq('is_active', true);
-  const activeP = patterns || [];
+  const activeP = getPatternRows().filter(p => p.is_active);
 
   document.getElementById('abtestKpi').innerHTML = [
     { label: '진행 중 테스트', value: running },
@@ -2224,27 +2303,26 @@ async function loadInboxTab() {
   const bySentiment = { positive: 0, neutral: 0, negative: 0, anxious: 0 };
   const byIntent = {};
   let aiSuggested = 0;
+  const savedAi = getLocalInboxAi();
+  const enriched = inquiries.map(inq => ({ ...inq, ...(savedAi[inq.id] || classifyInquiryRecord(inq)) }));
 
-  inquiries.forEach(r => {
+  enriched.forEach(r => {
     if (r.priority) byPriority[r.priority] = (byPriority[r.priority] || 0) + 1;
     if (r.sentiment) bySentiment[r.sentiment] = (bySentiment[r.sentiment] || 0) + 1;
     if (r.ai_suggested_reply) aiSuggested++;
+    if (r.intent) byIntent[r.intent] = (byIntent[r.intent] || 0) + 1;
   });
 
   // 주문 데이터 (결제 전환율/예상 매출 계산용)
   let inboxOrdQ = sb.from('kmong_orders').select('amount,status');
   if (dateFrom) inboxOrdQ = inboxOrdQ.gte('order_date', dateFrom);
   const { data: inboxOrdData } = await inboxOrdQ;
-  const inboxCompleted = (inboxOrdData || []).filter(o => o.status === 'completed');
+  const inboxCompleted = (inboxOrdData || []).filter(isCompletedOrder);
   const inboxPayRate = total > 0 ? (inboxCompleted.length / total * 100) : 0;
   const inboxTotalRev = inboxCompleted.reduce((s, o) => s + (o.amount || 0), 0);
   const inboxAvgOrder = inboxCompleted.length > 0 ? Math.round(inboxTotalRev / inboxCompleted.length) : 0;
   const pendingInq = inquiries.filter(i => i.status === 'pending').length;
   const expectedRev = Math.round(pendingInq * (inboxPayRate / 100) * inboxAvgOrder);
-
-  // 분류 데이터 조회
-  const { data: classData } = await sb.from('kmong_inbox_classification').select('intent').order('created_at', { ascending: false }).limit(100);
-  (classData || []).forEach(c => { if (c.intent) byIntent[c.intent] = (byIntent[c.intent] || 0) + 1; });
 
   // KPI
   document.getElementById('inboxKpi').innerHTML = [
@@ -2298,9 +2376,10 @@ async function loadInboxTab() {
   const priBadge = p => { const m = { urgent:'긴급', high:'높음', normal:'보통', low:'낮음' }; return p ? `<span class="badge badge-${p}">${m[p]||p}</span>` : '-'; };
   const senBadge = s => { const m = { positive:'긍정', neutral:'중립', negative:'부정', anxious:'불안' }; return s ? `<span class="badge badge-${s}">${m[s]||s}</span>` : '-'; };
 
-  document.querySelector('#tableInbox tbody').innerHTML = inquiries.length ? inquiries.slice(0, 30).map(i => {
-    const reply = i.ai_suggested_reply ? `<div class="reply-preview" title="${i.ai_suggested_reply.replace(/"/g,'&quot;')}">${i.ai_suggested_reply.slice(0,40)}...</div>` : '-';
-    return `<tr><td>${fmtDateTime(i.inquiry_date)}</td><td>${i.customer_name||'-'}</td><td>${productName(i.product_id)}</td><td>${priBadge(i.priority)}</td><td>${senBadge(i.sentiment)}</td><td>-</td><td>${reply}</td><td>${i.reply_confidence ? i.reply_confidence+'%' : '-'}</td></tr>`;
+  document.querySelector('#tableInbox tbody').innerHTML = enriched.length ? enriched.slice(0, 30).map(i => {
+    const reply = i.ai_suggested_reply ? `<div class="reply-preview" title="${escapeHtml(i.ai_suggested_reply)}">${escapeHtml(i.ai_suggested_reply.slice(0,40))}...</div>` : '-';
+    const intentMap = { new_order:'신규주문', renewal:'리뉴얼', modification:'수정', pricing:'가격문의', maintenance:'유지보수', ready_to_buy:'구매의향', responsive:'반응형', seo:'SEO', general_inquiry:'일반문의' };
+    return `<tr><td>${fmtDateTime(i.inquiry_date)}</td><td>${escapeHtml(i.customer_name||'-')}</td><td>${productName(i.product_id)}</td><td>${priBadge(i.priority)}</td><td>${senBadge(i.sentiment)}</td><td>${intentMap[i.intent] || i.intent || '-'}</td><td>${reply}</td><td>${i.reply_confidence ? i.reply_confidence+'%' : '-'}</td></tr>`;
   }).join('') : '<tr><td colspan="8"><div class="empty-state"><p>문의 데이터가 없습니다</p></div></td></tr>';
 }
 
@@ -2321,22 +2400,29 @@ async function generateContent() {
   (inqData||[]).forEach(r => { if (!r.product_id || !byP[r.product_id]) return; if (!byP[r.product_id].inq) byP[r.product_id].inq=0; byP[r.product_id].inq++; });
 
   let generated = 0;
+  const contents = getLocalContents();
+  const topPattern = getPatternRows()
+    .filter(p => p.pattern_type === 'title' && p.is_active)
+    .sort((a, b) => parseFloat(b.confidence_score || 0) - parseFloat(a.confidence_score || 0))[0];
   for (const [pid, d] of Object.entries(byP)) {
     const ctr = d.imp > 0 ? (d.clk/d.imp*100) : 0;
     if (ctr < 1.5 && d.imp >= 50) {
-      // 패턴 기반 타이틀 생성
-      const { data: topPattern } = await sb.from('kmong_patterns').select('pattern_key,confidence_score').eq('pattern_type','title').eq('is_active',true).order('confidence_score',{ascending:false}).limit(1);
-      const reason = topPattern && topPattern[0] ? `패턴 "${topPattern[0].pattern_key}" 적용 (신뢰도 ${parseFloat(topPattern[0].confidence_score).toFixed(0)}%)` : 'CTR 개선 필요';
+      if (contents.some(c => c.product_id === pid && c.content_type === 'title' && c.status !== 'rejected')) continue;
+      const reason = topPattern ? `패턴 "${topPattern.pattern_key}" 적용 (신뢰도 ${parseFloat(topPattern.confidence_score).toFixed(0)}%)` : 'CTR 개선 필요';
       const prod = products.find(p=>p.product_id===pid);
       const newTitle = `${prod?.product_name||pid} | 3일 완성 수정무제한`;
-      await sb.from('kmong_content_generated').insert({
+      contents.push({
+        id: Date.now() + generated,
         product_id: pid, content_type: 'title',
         original_content: prod?.product_name, generated_content: newTitle,
-        generation_reason: reason, status: 'pending'
+        generation_reason: reason, status: 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       });
       generated++;
     }
   }
+  setLocalContents(contents);
   if (generated > 0) {
     showToast(`${generated}건 AI 콘텐츠 생성 완료`);
   } else {
@@ -2346,60 +2432,47 @@ async function generateContent() {
 }
 
 async function approveContent(id) {
-  await sb.from('kmong_content_generated').update({ status: 'approved', updated_at: new Date().toISOString() }).eq('id', id);
+  const contents = getLocalContents().map(c => c.id === id ? { ...c, status: 'approved', updated_at: new Date().toISOString() } : c);
+  setLocalContents(contents);
   showToast(`콘텐츠 #${id} 승인 완료`);
   loadContentTab();
 }
 
 async function rejectContent(id) {
-  await sb.from('kmong_content_generated').update({ status: 'rejected', updated_at: new Date().toISOString() }).eq('id', id);
+  const contents = getLocalContents().map(c => c.id === id ? { ...c, status: 'rejected', updated_at: new Date().toISOString() } : c);
+  setLocalContents(contents);
   showToast(`콘텐츠 #${id} 거부 완료`);
   loadContentTab();
 }
 
 async function applyContent(id) {
-  const { data: content } = await sb.from('kmong_content_generated').select('*').eq('id', id).single();
+  const contents = getLocalContents();
+  const content = contents.find(c => c.id === id);
   if (!content) { showToast('콘텐츠 없음', 'error'); return; }
-  await sb.from('kmong_content_generated').update({ status: 'applied', applied_at: new Date().toISOString() }).eq('id', id);
+  const appliedAt = new Date().toISOString();
+  setLocalContents(contents.map(c => c.id === id ? { ...c, status: 'applied', applied_at: appliedAt, updated_at: appliedAt } : c));
   // 소재변경 이력 기록
-  await sb.from('kmong_creative_changes').insert({
+  const { error } = await sb.from('kmong_creative_changes').insert({
     product_id: content.product_id, change_date: new Date().toISOString().split('T')[0],
     change_type: content.content_type, old_value: content.original_content || '(이전)', new_value: (content.generated_content||'').slice(0,200)
   });
-  showToast(`콘텐츠 #${id} 적용 완료`);
+  showToast(error ? `콘텐츠 #${id} 적용 완료 (이력은 로컬 반영)` : `콘텐츠 #${id} 적용 완료`);
   loadContentTab();
 }
 
 async function classifyInbox() {
   showToast('문의 일괄 분류 중...', 'success');
-  const PRIORITY_RULES = [
-    { keywords: ['급합니다','급해요','오늘','내일','바로','당장'], priority: 'urgent', score: 90 },
-    { keywords: ['결제','주문','구매','진행'], priority: 'high', score: 80 },
-    { keywords: ['견적','가격','비용','얼마'], priority: 'high', score: 75 },
-    { keywords: ['수정','변경','추가','리뉴얼'], priority: 'normal', score: 60 },
-    { keywords: ['문의','상담','궁금','질문'], priority: 'normal', score: 50 },
-  ];
-  const SENTIMENT_RULES = [
-    { keywords: ['감사','좋아요','만족','완벽','최고'], sentiment: 'positive' },
-    { keywords: ['불만','화가','실망','별로','나쁘','환불'], sentiment: 'negative' },
-    { keywords: ['급합니다','빨리','걱정','불안'], sentiment: 'anxious' },
-  ];
-
-  const { data: unclassified } = await sb.from('kmong_inquiries')
+  const { data: targets } = await sb.from('kmong_inquiries')
     .select('id, notes, message_content')
-    .or('priority.is.null,sentiment.is.null')
-    .order('inquiry_date', { ascending: false }).limit(30);
+    .order('inquiry_date', { ascending: false }).limit(100);
 
+  const savedAi = getLocalInboxAi();
   let classified = 0;
-  for (const inq of (unclassified || [])) {
-    const text = (inq.message_content || inq.notes || '').toLowerCase();
-    let priority = 'normal', sentiment = 'neutral';
-    for (const rule of PRIORITY_RULES) { if (rule.keywords.some(kw => text.includes(kw))) { priority = rule.priority; break; } }
-    for (const rule of SENTIMENT_RULES) { if (rule.keywords.some(kw => text.includes(kw))) { sentiment = rule.sentiment; break; } }
-
-    await sb.from('kmong_inquiries').update({ priority, sentiment }).eq('id', inq.id);
+  for (const inq of (targets || [])) {
+    savedAi[inq.id] = classifyInquiryRecord(inq);
     classified++;
   }
+  setLocalInboxAi(savedAi);
   showToast(`${classified}건 분류 완료`);
   loadInboxTab();
 }
@@ -2418,11 +2491,12 @@ async function loadSalesTab() {
   }
   const dateFrom = fromInput.value;
   const dateTo = toInput.value;
+  const dateToEnd = dateTo ? `${dateTo}T23:59:59` : dateTo;
 
   // 주문 + 수익금 데이터 병렬 로드
   const [{ data: ordData }, { data: profitData }] = await Promise.all([
-    sb.from('kmong_orders').select('*').gte('order_date', dateFrom).lte('order_date', dateTo).order('order_date', { ascending: false }),
-    sb.from('kmong_profits_transactions').select('*').gte('order_date', dateFrom).lte('order_date', dateTo)
+    sb.from('kmong_orders').select('*').gte('order_date', dateFrom).lte('order_date', dateToEnd).order('order_date', { ascending: false }),
+    sb.from('kmong_profits_transactions').select('*').gte('order_date', dateFrom).lte('order_date', dateToEnd)
   ]);
   const orders = ordData || [];
   const profits = profitData || [];
@@ -2439,26 +2513,27 @@ async function loadSalesTab() {
     const p = profitMap[o.order_id] || {};
     return { ...o, profit_amount: p.profit_amount || 0, actual_amount: p.actual_amount || 0, profit_status: p.status || '' };
   });
+  const completedJoined = joined.filter(isCompletedOrder);
 
   // KPI 계산
-  const totalRevenue = orders.reduce((s, o) => s + (o.amount || 0), 0);
+  const totalRevenue = completedJoined.reduce((s, o) => s + (o.amount || 0), 0);
   const thisMonth = new Date().toISOString().slice(0, 7);
-  const monthOrders = orders.filter(o => (o.order_date || '').startsWith(thisMonth));
+  const monthOrders = completedJoined.filter(o => (o.order_date || '').startsWith(thisMonth));
   const monthRevenue = monthOrders.reduce((s, o) => s + (o.amount || 0), 0);
-  const avgOrderAmount = orders.length > 0 ? Math.round(totalRevenue / orders.length) : 0;
-  const totalProfit = joined.reduce((s, o) => s + (o.profit_amount || 0), 0);
+  const avgOrderAmount = completedJoined.length > 0 ? Math.round(totalRevenue / completedJoined.length) : 0;
+  const totalProfit = completedJoined.reduce((s, o) => s + (o.profit_amount || 0), 0);
 
   document.getElementById('salesKpi').innerHTML = [
     { label: '총매출', value: fmtMoney(totalRevenue), color: 'var(--primary)' },
     { label: '이번달 매출', value: fmtMoney(monthRevenue), color: 'var(--success)' },
     { label: '평균 주문금액', value: fmtMoney(avgOrderAmount), color: 'var(--warning)' },
-    { label: '주문 건수', value: fmt(orders.length) + '건', color: 'var(--danger)' },
+    { label: '주문 건수', value: fmt(completedJoined.length) + '건', color: 'var(--danger)' },
   ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value" style="color:${k.color}">${k.value}</div></div>`).join('');
 
   // 일자별 매출 바 차트
   const dailyMap = {};
-  orders.forEach(o => {
-    const d = o.order_date || 'unknown';
+  completedJoined.forEach(o => {
+    const d = (o.order_date || 'unknown').slice(0, 10);
     dailyMap[d] = (dailyMap[d] || 0) + (o.amount || 0);
   });
   const dailyDates = Object.keys(dailyMap).sort();
@@ -2489,7 +2564,7 @@ async function loadSalesTab() {
 
   // 서비스별 매출 비중 도넛
   const serviceMap = {};
-  orders.forEach(o => {
+  completedJoined.forEach(o => {
     const name = o.service_name || productName(o.product_id);
     serviceMap[name] = (serviceMap[name] || 0) + (o.amount || 0);
   });
@@ -2510,7 +2585,7 @@ async function loadSalesTab() {
 
   // 서비스별 수익금 바 차트
   const profitByService = {};
-  joined.forEach(o => {
+  completedJoined.forEach(o => {
     const name = o.service_name || productName(o.product_id);
     profitByService[name] = (profitByService[name] || 0) + (o.profit_amount || 0);
   });
@@ -2542,7 +2617,7 @@ async function loadSalesTab() {
   } else {
     tbody.innerHTML = joined.map(o => {
       const sName = o.service_name || productName(o.product_id);
-      const sBadge = o.status === '거래완료' ? 'badge-paid' : o.status === '취소' ? 'badge-cancelled' : 'badge-quoted';
+      const sBadge = isCompletedOrder(o) ? 'badge-paid' : isCancelledOrder(o) ? 'badge-cancelled' : 'badge-quoted';
       return `<tr>
         <td>${fmtDate(o.order_date)}</td>
         <td>#${o.order_id || '-'}</td>
@@ -2567,7 +2642,7 @@ async function loadSidebarSummary() {
     sb.from('kmong_profits_monthly').select('*').eq('term', currentTerm).limit(1),
     sb.from('kmong_profits_summary').select('*').order('crawled_at', { ascending: false }).limit(1)
   ]);
-  const revenue = (ordData || []).filter(o => o.status === 'completed').reduce((s, o) => s + (o.amount || 0), 0);
+  const revenue = (ordData || []).filter(isCompletedOrder).reduce((s, o) => s + (o.amount || 0), 0);
   const adCost = (cpcData || []).reduce((s, r) => s + (r.cpc_cost || 0), 0);
   const profit = revenue - adCost;
 
@@ -2706,7 +2781,7 @@ document.querySelectorAll('table').forEach(table => {
 /* === 사이드바 서비스 상태 위젯 === */
 async function loadSidebarGigStatus() {
   const since = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
-  const { data } = await sb.from('kmong_gig_status').select('*').gte('created_at', since).order('created_at', { ascending: false });
+  const { data } = await sb.from('kmong_gig_status').select('*').gte('crawled_at', since).order('crawled_at', { ascending: false });
   const el = document.getElementById('sidebarGigStatus');
   if (!data || data.length === 0) { el.innerHTML = '<li class="gig-status-item" style="color:var(--text-3)">데이터 없음</li>'; return; }
   const seen = {};
@@ -3123,21 +3198,31 @@ async function loadAutoControlPanel() {
 
   // CTR/ROI 데이터 로드 (최근 7일)
   const since7d = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString().split('T')[0];
-  const { data: cpcData } = await sb.from('kmong_cpc_daily').select('product_id, ctr, cost, date, ad_enabled, bid_amount').gte('date', since7d).order('date', { ascending: false });
-  const { data: roiData } = await sb.from('kmong_roi_analysis').select('product_id, roi_pct, revenue, cost').order('period_end', { ascending: false }).limit(50);
+  const [{ data: cpcData }, { data: configData }, { data: orderData }] = await Promise.all([
+    sb.from('kmong_cpc_daily').select('product_id, ctr, cpc_cost, date, ad_enabled').gte('date', since7d).order('date', { ascending: false }),
+    sb.from('kmong_ad_config_daily').select('product_id,desired_cpc,captured_at').order('captured_at', { ascending: false }).limit(200),
+    sb.from('kmong_orders').select('product_id,amount,status,completed_at,order_date').gte('order_date', since7d),
+  ]);
 
   // AI 제어 로그
   const { data: logData } = await sb.from('kmong_ad_commands').select('*').order('created_at', { ascending: false }).limit(10);
 
   // 서비스별 집계
   const svcStats = {};
+  const latestBidByProduct = {};
+  (configData || []).forEach(r => { if (r.product_id && latestBidByProduct[r.product_id] == null) latestBidByProduct[r.product_id] = r.desired_cpc; });
+  const revenueByProduct = {};
+  (orderData || []).filter(isCompletedOrder).forEach(o => {
+    if (!o.product_id) return;
+    revenueByProduct[o.product_id] = (revenueByProduct[o.product_id] || 0) + (o.amount || 0);
+  });
   for (const p of PRODUCT_LIST) {
     const pCpc = (cpcData || []).filter(r => r.product_id === p.id);
-    const pRoi = (roiData || []).find(r => r.product_id === p.id);
-    const latestCpc = pCpc[0] || {};
     const avgCtr = pCpc.length > 0 ? pCpc.reduce((s, r) => s + parseFloat(r.ctr || 0), 0) / pCpc.length : 0;
-    const currentBid = latestCpc.bid_amount || 300;
-    const roi = pRoi?.roi_pct || 0;
+    const currentBid = latestBidByProduct[p.id] || 300;
+    const cost = pCpc.reduce((s, r) => s + (r.cpc_cost || 0), 0);
+    const revenue = revenueByProduct[p.id] || 0;
+    const roi = cost > 0 ? ((revenue - cost) / cost * 100) : 0;
 
     // 자동모드 상태 초기화
     if (!serviceAutoStates[p.id]) serviceAutoStates[p.id] = { auto: true, strategy: 'balanced' };
@@ -3467,7 +3552,7 @@ async function sendReplyCmd(id, productId) {
   // 오늘 날짜를 기본값으로 설정
   const today = new Date().toISOString().split('T')[0];
   const now = new Date().toISOString().slice(0, 16);
-  document.querySelectorAll('input[type="date"]').forEach(i => i.value = today);
+  document.querySelectorAll('input[type="date"]:not(#salesDateFrom):not(#salesDateTo)').forEach(i => i.value = today);
   document.querySelectorAll('input[type="datetime-local"]').forEach(i => i.value = now);
   await refreshData();
   loadSidebarGigStatus();
