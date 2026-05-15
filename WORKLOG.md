@@ -24,15 +24,17 @@ Implement the Kmong auto-reply generation flow as an internal ERP workflow: lear
 - Local Playwright checks passed for `390`, `768`, and `1440` widths; no page/console errors on the auto-reply tab.
 - Committed and pushed `7b75ae8` (`feat(kmong): add ERP copy-paste reply workflow`).
 - Live GitHub Pages verification passed for the auto-reply ERP tab at desktop and mobile widths.
+- SSH-side server files for `auto-reply.js`, `command-processor.js`, `style-profile.js`, and `refresh-style-profile.js` were selectively updated from GitHub without pulling unrelated dirty server work.
+- `kmong-command-processor` was registered in PM2 from `kmong-cron-ecosystem.config.js`; first run completed with no pending commands.
 
 ## Remaining
-- Monitor first real generation command from the dashboard and confirm the server-side `kmong-command-processor` is running on the deployment host.
+- Monitor first real generation command from the dashboard and confirm the generated reply appears back in ERP.
 
 ## Last Action
-Live GitHub Pages verified after push with cache-busting query string.
+SSH-side command processor registered in PM2 and verified with logs showing no pending commands.
 
 ## Blockers
 - No current blocker. Direct browser-side AI calls were intentionally avoided because API secrets must stay server-side.
 
 ## Next Action
-Optional next action: trigger one real pending inquiry generation from the ERP and verify the command processor result.
+Optional next action: trigger one real pending inquiry generation from the ERP and verify the generated reply result.
